@@ -3,12 +3,13 @@ import {
   GlspEditorProvider,
   SocketGlspVscodeServer,
   Writable,
-  configureDefaultCommands
+  configureDefaultCommands,
+  CenterAction
 } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { setupCommunication } from './webview-communication';
 import { createWebViewContent } from '../webview-helper';
-import { ProcessVscodeConnector } from './process-vscode-connector';
+import { DIAGNOSTIC_CLIENT_ID_QUERY_PARAM, DIAGNOSTIC_ELEMENT_ID_QUERY_PARAM, ProcessVscodeConnector } from './process-vscode-connector';
 import { messenger } from '../..';
 
 export default class ProcessEditorProvider extends GlspEditorProvider {
@@ -33,6 +34,40 @@ export default class ProcessEditorProvider extends GlspEditorProvider {
     setupCommunication(this.websocketUrl, this.glspVscodeConnector.messenger, webviewPanel, client?.webviewEndpoint.messageParticipant);
     webviewPanel.webview.options = { enableScripts: true };
     webviewPanel.webview.html = createWebViewContent(this.extensionContext, webviewPanel.webview, 'process-editor');
+  }
+
+  override openCustomDocument(uri: vscode.Uri): vscode.CustomDocument | Thenable<vscode.CustomDocument> {
+    const uriParams = new URLSearchParams(uri.query);
+
+    if (uriParams.has(DIAGNOSTIC_ELEMENT_ID_QUERY_PARAM)) {
+      const targetElementId = uriParams.get(DIAGNOSTIC_ELEMENT_ID_QUERY_PARAM);
+      const targetClientId = uriParams.get(DIAGNOSTIC_CLIENT_ID_QUERY_PARAM);
+
+      if (targetElementId && targetClientId) {
+        const client = this.glspVscodeConnector['clientMap'].get(targetClientId);
+
+        if (client) {
+          client.webviewEndpoint.webviewPanel.reveal();
+          client.webviewEndpoint.sendMessage({ clientId: client.clientId, action: CenterAction.create([targetElementId]) });
+        }
+      }
+
+      // New document was opened from diagnostic tab -> return plain document, because it will be instantly disposed anyways
+    }
+    return { uri, dispose: () => undefined };
+  }
+
+  override resolveCustomEditor(
+    document: vscode.CustomDocument,
+    webviewPanel: vscode.WebviewPanel,
+    token: vscode.CancellationToken
+  ): Promise<void> {
+    const documentUriParams = new URLSearchParams(document.uri.query);
+    if (documentUriParams.has(DIAGNOSTIC_ELEMENT_ID_QUERY_PARAM)) {
+      webviewPanel.dispose();
+      return Promise.resolve();
+    }
+    return super.resolveCustomEditor(document, webviewPanel, token);
   }
 
   static register(context: vscode.ExtensionContext, websocketUrl: URL) {
