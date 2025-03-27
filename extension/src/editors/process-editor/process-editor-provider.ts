@@ -4,6 +4,7 @@ import {
   SocketGlspVscodeServer,
   Writable,
   configureDefaultCommands,
+  SelectAction,
   CenterAction
 } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
@@ -49,6 +50,10 @@ export default class ProcessEditorProvider extends GlspEditorProvider {
         if (client) {
           client.webviewEndpoint.webviewPanel.reveal();
           client.webviewEndpoint.sendMessage({ clientId: client.clientId, action: CenterAction.create([targetElementId]) });
+          client.webviewEndpoint.sendMessage({
+            clientId: client.clientId,
+            action: SelectAction.create({ selectedElementsIDs: [targetElementId], deselectedElementsIDs: true })
+          });
         }
       }
 
