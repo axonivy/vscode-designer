@@ -23,8 +23,16 @@ const severityMap = new Map([
   ['error', vscode.DiagnosticSeverity.Error]
 ]);
 
-export const DIAGNOSTIC_ELEMENT_ID_QUERY_PARAM = 'glspVscodeIntegrationNavigationTargetElementId';
-export const DIAGNOSTIC_CLIENT_ID_QUERY_PARAM = 'glspVscodeIntegrationNavigationClientId';
+export function getNavigationTargetElementId(uri: vscode.Uri): string | undefined {
+  const uriParams = new URLSearchParams(uri.query);
+  return uriParams.get('navTargetElement') ?? undefined;
+}
+
+export function appendNavigationTargetElementId(uri: vscode.Uri, elementId: string): vscode.Uri {
+  const uriParams = new URLSearchParams(uri.query);
+  uriParams.append('navTargetElement', elementId);
+  return uri.with({ query: uriParams.toString() });
+}
 
 export class ProcessVscodeConnector<D extends vscode.CustomDocument = vscode.CustomDocument> extends GlspVscodeConnector {
   private readonly emitter = new vscode.EventEmitter<SelectedElement>();
@@ -32,6 +40,7 @@ export class ProcessVscodeConnector<D extends vscode.CustomDocument = vscode.Cus
   protected readonly onDidChangeActiveGlspEditorEventEmitter = new vscode.EventEmitter<{ client: GlspVscodeClient<D> }>();
   private readonly modelLoading: vscode.StatusBarItem;
   private readonly diagnosticsMap = new Map<string, vscode.DiagnosticCollection>(); // maps clientId to DiagnosticCollections
+  public override readonly clientMap: Map<string, GlspVscodeClient<vscode.CustomDocument>> = new Map();
 
   constructor(options: GlspVscodeConnectorOptions) {
     super(options);
@@ -56,6 +65,7 @@ export class ProcessVscodeConnector<D extends vscode.CustomDocument = vscode.Cus
     const diagnostics = vscode.languages.createDiagnosticCollection();
     client.webviewEndpoint.webviewPanel.onDidDispose(() => {
       diagnostics.dispose();
+      this.diagnosticsMap.delete(client.clientId);
     });
     this.diagnosticsMap.set(client.clientId, diagnostics);
 
@@ -159,17 +169,17 @@ export class ProcessVscodeConnector<D extends vscode.CustomDocument = vscode.Cus
     _origin: MessageOrigin
   ): MessageProcessingResult {
     if (client) {
+      const diagnosticCollection = this.diagnosticsMap.get(client.clientId);
+      diagnosticCollection?.clear();
       const updatedDiagnostics: [vscode.Uri, vscode.Diagnostic[]][] = message.action.markers.map(marker => {
-        const queryParams = new URLSearchParams(client.document.uri.query);
-        queryParams.append(DIAGNOSTIC_ELEMENT_ID_QUERY_PARAM, marker.elementId);
-        queryParams.append(DIAGNOSTIC_CLIENT_ID_QUERY_PARAM, client.clientId);
+        const navUri = appendNavigationTargetElementId(client.document.uri, marker.elementId);
 
         const diagnostic = new vscode.Diagnostic(new vscode.Range(0, 0, 0, 0), marker.description, severityMap.get(marker.kind));
         diagnostic.source = marker.elementId;
 
-        return [client.document.uri.with({ query: queryParams.toString() }), [diagnostic]];
+        return [navUri, [diagnostic]];
       });
-      this.diagnosticsMap.get(client.clientId)?.set(updatedDiagnostics);
+      diagnosticCollection?.set(updatedDiagnostics);
     }
     return { processedMessage: message, messageChanged: false };
   }

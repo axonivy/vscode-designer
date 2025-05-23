@@ -5,21 +5,25 @@ import {
   Writable,
   configureDefaultCommands,
   SelectAction,
-  CenterAction
+  CenterAction,
+  WebviewEndpoint,
+  GLSPDiagramIdentifier,
+  GlspVscodeClient
 } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { setupCommunication } from './webview-communication';
 import { createWebViewContent } from '../webview-helper';
-import { DIAGNOSTIC_CLIENT_ID_QUERY_PARAM, DIAGNOSTIC_ELEMENT_ID_QUERY_PARAM, ProcessVscodeConnector } from './process-vscode-connector';
+import { ProcessVscodeConnector, getNavigationTargetElementId } from './process-vscode-connector';
 import { messenger } from '../..';
 
 export default class ProcessEditorProvider extends GlspEditorProvider {
   diagramType = 'ivy-glsp-process';
   static readonly viewType = 'ivy.glspDiagram';
 
+  private webViewCount = 0;
   private constructor(
     protected readonly extensionContext: vscode.ExtensionContext,
-    protected override readonly glspVscodeConnector: GlspVscodeConnector,
+    protected override readonly glspVscodeConnector: ProcessVscodeConnector,
     readonly websocketUrl: URL
   ) {
     super(glspVscodeConnector);
@@ -31,48 +35,102 @@ export default class ProcessEditorProvider extends GlspEditorProvider {
     _token: vscode.CancellationToken,
     clientId: string
   ): Promise<void> {
-    const client = this.glspVscodeConnector['clientMap'].get(clientId);
+    const client = this.glspVscodeConnector.clientMap.get(clientId);
     setupCommunication(this.websocketUrl, this.glspVscodeConnector.messenger, webviewPanel, client?.webviewEndpoint.messageParticipant);
     webviewPanel.webview.options = { enableScripts: true };
     webviewPanel.webview.html = createWebViewContent(this.extensionContext, webviewPanel.webview, 'process-editor');
   }
 
-  override openCustomDocument(uri: vscode.Uri): vscode.CustomDocument | Thenable<vscode.CustomDocument> {
-    const uriParams = new URLSearchParams(uri.query);
-
-    if (uriParams.has(DIAGNOSTIC_ELEMENT_ID_QUERY_PARAM)) {
-      const targetElementId = uriParams.get(DIAGNOSTIC_ELEMENT_ID_QUERY_PARAM);
-      const targetClientId = uriParams.get(DIAGNOSTIC_CLIENT_ID_QUERY_PARAM);
-
-      if (targetElementId && targetClientId) {
-        const client = this.glspVscodeConnector['clientMap'].get(targetClientId);
-
-        if (client) {
-          client.webviewEndpoint.webviewPanel.reveal();
-          client.webviewEndpoint.sendMessage({ clientId: client.clientId, action: CenterAction.create([targetElementId]) });
-          client.webviewEndpoint.sendMessage({
-            clientId: client.clientId,
-            action: SelectAction.create({ selectedElementsIDs: [targetElementId], deselectedElementsIDs: true })
-          });
-        }
-      }
-
-      // New document was opened from diagnostic tab -> return plain document, because it will be instantly disposed anyways
-    }
-    return { uri, dispose: () => undefined };
+  private getOriginalClient(uri: vscode.Uri): GlspVscodeClient | undefined {
+    const cleanedUri = uri.with({ query: '' });
+    return Array.from(this.glspVscodeConnector.clientMap.values()).find(
+      client => client.diagramType === this.diagramType && client.document.uri.toString() === cleanedUri.toString()
+    );
   }
 
-  override resolveCustomEditor(
+  override openCustomDocument(uri: vscode.Uri): vscode.CustomDocument | Thenable<vscode.CustomDocument> {
+    const document = { uri, dispose: () => undefined };
+    const navigationTarget = getNavigationTargetElementId(uri);
+    if (!navigationTarget) {
+      return document;
+    }
+
+    const originalClient = this.getOriginalClient(uri);
+    if (originalClient) {
+      this.naviagteToElement(originalClient, navigationTarget);
+    }
+    return document;
+  }
+
+  private naviagteToElement(client: GlspVscodeClient | GlspVscodeClient, elementId: string): void {
+    if (client) {
+      client.webviewEndpoint.webviewPanel.reveal();
+      client.webviewEndpoint.sendMessage({ clientId: client.clientId, action: CenterAction.create([elementId]) });
+      client.webviewEndpoint.sendMessage({
+        clientId: client.clientId,
+        action: SelectAction.setSelection([elementId])
+      });
+    }
+  }
+
+  override async resolveCustomEditor(
     document: vscode.CustomDocument,
     webviewPanel: vscode.WebviewPanel,
     token: vscode.CancellationToken
   ): Promise<void> {
-    const documentUriParams = new URLSearchParams(document.uri.query);
-    if (documentUriParams.has(DIAGNOSTIC_ELEMENT_ID_QUERY_PARAM)) {
+    const navigationTarget = getNavigationTargetElementId(document.uri);
+    if (!navigationTarget) {
+      this.doResolveCustomEditor(document, webviewPanel, token);
+      return;
+    }
+
+    const originalClient = this.getOriginalClient(document.uri);
+    if (originalClient) {
+      // The original editor contributing the navigation information is still open (not preview mode) =>
+      // we can close the newly created editor
       webviewPanel.dispose();
       return Promise.resolve();
     }
-    return super.resolveCustomEditor(document, webviewPanel, token);
+
+    // In preview mode -> The newly create editor has replaced the original editor
+    // => navigate to the element in the new editor
+    const client = this.doResolveCustomEditor(document, webviewPanel, token);
+    const endpoint = client.webviewEndpoint;
+    endpoint.ready.then(() => {
+      // Use timeout since we cannot make sure that the diagram is already initialized before sending the navigation messages otherwise.
+      // https://github.com/eclipse-glsp/glsp/issues/1513
+      setTimeout(() => this.naviagteToElement(client, navigationTarget), 500);
+    });
+    return;
+  }
+
+  // Same implementation as the `resolveCustomEditor` method in the base class
+  // but it returns the registered cleint so that we can use it to send messages
+  private doResolveCustomEditor(
+    document: vscode.CustomDocument,
+    webviewPanel: vscode.WebviewPanel,
+    token: vscode.CancellationToken
+  ): GlspVscodeClient {
+    // This is used to initialize GLSP for our diagram
+    const diagramIdentifier: GLSPDiagramIdentifier = {
+      diagramType: this.diagramType,
+      uri: serializeUri(document.uri),
+      clientId: `${this.diagramType}_${this.webViewCount++}`
+    };
+
+    const endpoint = new WebviewEndpoint({ diagramIdentifier, messenger: this.glspVscodeConnector.messenger, webviewPanel });
+
+    // Register document/diagram panel/model in vscode connector
+    this.glspVscodeConnector.registerClient({
+      clientId: diagramIdentifier.clientId,
+      diagramType: diagramIdentifier.diagramType,
+      document: document,
+      webviewEndpoint: endpoint
+    });
+
+    this.setUpWebview(document, webviewPanel, token, diagramIdentifier.clientId);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this.glspVscodeConnector.clientMap.get(diagramIdentifier.clientId)!;
   }
 
   static register(context: vscode.ExtensionContext, websocketUrl: URL) {
@@ -106,4 +164,15 @@ export default class ProcessEditorProvider extends GlspEditorProvider {
 
     configureDefaultCommands({ extensionContext: context, connector: ivyVscodeConnector, diagramPrefix: 'workflow' });
   }
+}
+
+function serializeUri(uri: vscode.Uri): string {
+  // Remove optional navigation query parameters from the URI
+  const uriWithoutQuery = uri.with({ query: '' });
+  let uriString = uriWithoutQuery.toString();
+  const match = uriString.match(/file:\/\/\/([a-z])%3A/i);
+  if (match) {
+    uriString = 'file:///' + match[1] + ':' + uriString.substring(match[0].length);
+  }
+  return uriString;
 }
