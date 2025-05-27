@@ -1,5 +1,5 @@
 {
-  "name": "root",
+  "name": "@axonivy/vscode-designer-root",
   "private": true,
   "engines": {
     "node": ">=20.10.0"
@@ -22,9 +22,9 @@
     "package:with:engine": "lerna run package:with:engine",
     "publish:next": "lerna run publish:next",
     "sbom": "npx --yes @cyclonedx/cyclonedx-npm --output-format JSON --output-file bom.json",
-    "test:playwright": "npm run --workspace=@axonivy/vscode-designer-playwright ui-tests",
+    "test:playwright": "npm run -w @axonivy/vscode-designer-playwright ui-tests",
     "test:playwright:browser": "RUN_IN_BRWOSER=true npm run test:playwright",
-    "test:playwright:download:vscode": "npm run --workspace=@axonivy/vscode-designer-playwright download:vscode",
+    "test:playwright:download:vscode": "npm run -w @axonivy/vscode-designer-playwright download:vscode",
     "type": "lerna run type",
     "update:axonivy:next": "npx --yes npm-check-updates @axonivy* -ws -t patch -u",
     "watch": "lerna run watch --parallel"

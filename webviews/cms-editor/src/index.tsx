@@ -3,8 +3,8 @@ import '@axonivy/cms-editor/lib/editor.css';
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Messenger, VsCodeApi } from 'vscode-messenger-webview';
-import { InitializeConnection, initMessenger, toConnection } from 'vscode-webview-common';
-import 'vscode-webview-common/css/colors.css';
+import { InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
+import '@axonivy/vscode-webview-common/css/colors.css';
 import { initTranslation } from './i18n';
 
 declare function acquireVsCodeApi(): VsCodeApi;
