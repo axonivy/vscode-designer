@@ -7,7 +7,7 @@ import { RequestTypeHintsAction } from '@eclipse-glsp/vscode-integration';
 import { HOST_EXTENSION, NotificationType, RequestType } from 'vscode-messenger-common';
 import { Messenger } from 'vscode-messenger-webview';
 import './index.css';
-import { toConnection } from 'vscode-webview-common';
+import { toConnection } from '@axonivy/vscode-webview-common';
 
 const WebviewConnectionReadyNotification: NotificationType<void> = { method: 'connectionReady' };
 const InitializeConnectionRequest: RequestType<void, void> = { method: 'initializeConnection' };

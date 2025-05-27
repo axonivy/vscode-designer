@@ -1,10 +1,10 @@
-import 'vscode-webview-common/css/colors.css';
+import '@axonivy/vscode-webview-common/css/colors.css';
 import './index.css';
 import { App, ClientContextProvider, QueryProvider, initQueryClient } from '@axonivy/form-editor';
 import { FormClientJsonRpc } from '@axonivy/form-editor-core';
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
-import { InitializeConnection, initMessenger, toConnection } from 'vscode-webview-common';
+import { InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
 import { VsCodeApi, Messenger } from 'vscode-messenger-webview';
 import '@axonivy/form-editor/lib/editor.css';
 import { ThemeProvider } from '@axonivy/ui-components';
