@@ -21,7 +21,7 @@
     "clean": "rimraf lib dist *.tsbuildinfo",
     "package": "bash -c 'vsce package -o ${npm_package_name}.vsix --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version:0:4}.$(date \"+%Y%m%d%H\")'",
     "package:with:engine": "bash -c 'vsce package -o ${npm_package_name}-with-engine.vsix --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version:0:4}.$(date \"+%Y%m%d%H\")'",
-    "publish:next": "bash -c 'vsce publish --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version:0:4}.$(date \"+%Y%m%d%H\")'",
+    "publish:next": "bash -c 'vsce publish --no-update-package-json --no-git-tag-version --no-dependencies --pre-release ${npm_package_version:0:4}.$(date \"+%Y%m%d%H\")'",
     "type": "tsc --noEmit",
     "watch": "webpack --watch --mode development"
   },
