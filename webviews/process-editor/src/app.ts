@@ -1,6 +1,6 @@
 import '@eclipse-glsp/vscode-integration-webview/css/glsp-vscode.css';
 import '../css/colors.css';
-import 'vscode-webview-common/css/colors.css';
+import '@axonivy/vscode-webview-common/css/colors.css';
 import '../css/diagram.css';
 
 import { MonacoEditorUtil } from '@axonivy/process-editor-inscription-view';
