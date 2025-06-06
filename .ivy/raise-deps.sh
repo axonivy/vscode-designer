@@ -12,5 +12,5 @@ sed -i -E "s/(\"@axonivy[^\"]*\"): \"[^\"]*\"/\1: \"~${1/SNAPSHOT/next}\"/" webv
 
 npm run update:axonivy:next
 if [ "$DRY_RUN" = false ]; then
-  npm install --force
+  npm install
 fi
