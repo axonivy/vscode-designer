@@ -26,7 +26,7 @@
     "test:playwright:browser": "RUN_IN_BRWOSER=true npm run test:playwright",
     "test:playwright:download:vscode": "npm run -w @axonivy/vscode-designer-playwright download:vscode",
     "type": "lerna run type",
-    "update:axonivy:next": "npx --yes npm-check-updates @axonivy* -ws -t patch -u",
+    "update:axonivy:next": "npx --yes npm-check-updates @axonivy* -ws -t semver -u",
     "watch": "lerna run watch --parallel"
   },
   "dependencies": {
@@ -34,17 +34,17 @@
     "@axonivy/dataclass-editor": "13.1.0-next.570.0e56629",
     "@axonivy/form-editor": "13.1.0-next.795.a7e6d8d",
     "@axonivy/form-editor-core": "13.1.0-next.795.a7e6d8d",
-    "@axonivy/jsonrpc": "~13.1.0-next.700",
+    "@axonivy/jsonrpc": "~13.1.0-next.730",
     "@axonivy/process-editor": "13.1.0-next.1557.b1062e52",
     "@axonivy/process-editor-inscription": "13.1.0-next.1557.b1062e52",
-    "@axonivy/ui-components": "~13.1.0-next.700",
-    "@axonivy/ui-icons": "~13.1.0-next.700",
+    "@axonivy/ui-components": "~13.1.0-next.730",
+    "@axonivy/ui-icons": "~13.1.0-next.730",
     "@axonivy/variable-editor": "13.1.0-next.715.177f7d9",
     "vscode-messenger-common": "0.4.5"
   },
   "devDependencies": {
     "@axonivy/eslint-config": "13.1.0-next.700",
-    "@axonivy/prettier-config": "~13.1.0-next.700",
+    "@axonivy/prettier-config": "~13.1.0-next.730",
     "@types/adm-zip": "^0.5.7",
     "@types/node": "22.15.29",
     "@types/react": "19.1.6",
