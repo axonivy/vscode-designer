@@ -26,7 +26,7 @@
     "test:playwright:browser": "RUN_IN_BRWOSER=true npm run test:playwright",
     "test:playwright:download:vscode": "npm run -w @axonivy/vscode-designer-playwright download:vscode",
     "type": "lerna run type",
-    "update:axonivy:next": "npx --yes npm-check-updates @axonivy* -ws -t patch -u",
+    "update:axonivy:next": "npx --yes npm-check-updates @axonivy* -ws -t semver -u",
     "watch": "lerna run watch --parallel"
   },
   "dependencies": {
