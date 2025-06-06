@@ -32,7 +32,7 @@ pipeline {
       steps {
         nodejs(nodeJSInstallationName: '22.11.0') {
           bat 'npm run update:axonivy:next'
-          bat 'npm install'
+          bat 'npm install --force'
           bat 'npm run build:production'
           bat 'npm run download:engine ' //Encoding of url param '/' does not work on windows: + params.engineDownloadUrl
         }

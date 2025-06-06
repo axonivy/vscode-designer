@@ -24,7 +24,7 @@ pipeline {
       steps {
         script {
           sh 'npm run update:axonivy:next'
-          sh 'npm install'
+          sh 'npm install --force'
           sh 'npm run build:production'
         }
       }

@@ -17,7 +17,7 @@ pipeline {
             docker.build('node', '-f build/Dockerfile .').inside {
               withCredentials([string(credentialsId: 'dependency-track', variable: 'API_KEY')]) {
                 sh 'npm run update:axonivy:next'
-                sh 'npm install'
+                sh 'npm install --force'
                 sh 'npm run sbom'
                 def version = sh (script: "node -p \"require('./extension/package.json').version\"", returnStdout: true)
                 uploadBOM(projectName: 'vscode-designer', projectVersion: version, bomFile: 'bom.json')               

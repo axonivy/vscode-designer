@@ -22,7 +22,7 @@ pipeline {
           docker.build('node-webtest', '-f build/integration/openvscode-server/Dockerfile .').inside {
             sh """
             npm run update:axonivy:next
-            npm install
+            npm instal --force
             npm run build:production
             npm run download:engine ${params.engineDownloadUrl}
             nohup extension/AxonIvyEngine/bin/AxonIvyEngine &
