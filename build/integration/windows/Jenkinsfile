@@ -14,7 +14,7 @@ pipeline {
   }
 
   parameters {
-    string(name: 'engineDownloadUrl', defaultValue: 'https://jenkins.ivyteam.io/job/core_product-engine/job/master/lastSuccessfulBuild/artifact/workspace/ch.ivyteam.ivy.server.product/target/products/*_Slim_*.zip/*zip*/products.zip', description: 'engine that will be packaged')
+    string(name: 'engineDownloadUrl', defaultValue: 'https://jenkins.ivyteam.io/job/core_product-engine/job/release%252F13.1/lastSuccessfulBuild/artifact/workspace/ch.ivyteam.ivy.server.product/target/products/*_Slim_*.zip/*zip*/products.zip', description: 'engine that will be packaged')
   }
 
   triggers {
