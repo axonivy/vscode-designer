@@ -49,6 +49,11 @@
     "onStartupFinished"
   ],
   "contributes": {
+    "configurationDefaults": {
+      "workbench.editorAssociations": {
+        "{git,gitlens}:/**/*.p.json": "default"
+      }
+    },
     "customEditors": [
       {
         "viewType": "ivy.variableEditor",
@@ -74,6 +79,9 @@
         "selector": [
           {
             "filenamePattern": "*.p.json"
+          },
+          {
+            "filenamePattern": "*.pdiff"
           }
         ]
       },
@@ -268,6 +276,13 @@
         "command": "engine.deactivateAnimation",
         "title": "Deactivate Process Animation",
         "category": "Axon Ivy"
+      },
+      {
+        "command": "ivy.glspDiagram.diff",
+        "title": "Compare with Proces Diagram Editor",
+        "category": "Axon Ivy",
+        "icon": "$(diff)",
+        "enablement": "resourceFilename =~ /.*\\.p\\.json$/ && activeEditor == workbench.editors.textDiffEditor"
       }
     ],
     "configuration": [
@@ -387,6 +402,11 @@
         {
           "submenu": "workflow.editor.title",
           "group": "bookmarks"
+        },
+        {
+          "command": "ivy.glspDiagram.diff",
+          "when": "resourceFilename =~ /.*\\.p\\.json$/ && activeEditor == workbench.editors.textDiffEditor",
+          "group": "navigation"
         }
       ],
       "workflow.editor.title": [
