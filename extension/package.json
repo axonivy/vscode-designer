@@ -49,6 +49,11 @@
     "onStartupFinished"
   ],
   "contributes": {
+    "configurationDefaults": {
+      "workbench.editorAssociations": {
+        "{git,gitlens}:/**/*.p.json": "default"
+      }
+    },
     "customEditors": [
       {
         "viewType": "ivy.variableEditor",
