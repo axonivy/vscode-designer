@@ -29,7 +29,7 @@ test.describe('Problems View', () => {
     const script = processEditor.locatorForPID(pid);
     await processEditor.hasNoValidationMarker(script);
     const inscriptionView = await processEditor.openInscriptionView(pid);
-    await inscriptionView.openAccordion('Output');
+    await inscriptionView.openInscriptionTab('Output');
     await inscriptionView.openCollapsible('Code');
     const monacoEditor = inscriptionView.monacoEditor();
     await monacoEditor.click();

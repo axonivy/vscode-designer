@@ -17,9 +17,12 @@ export class InscriptionView extends PageObject {
     return this.parent.locator('.header');
   }
 
-  async openAccordion(name: string) {
-    const accordion = this.parent.locator(`.ui-accordion-item:has-text("${name}")`);
-    await this.open(accordion);
+  async openInscriptionTab(name: string) {
+    const inscriptionTab = this.parent.getByRole('tab', { name: name });
+    await expect(inscriptionTab).toBeVisible();
+    if ((await inscriptionTab.getAttribute('aria-selected')) !== 'true') {
+      await inscriptionTab.click();
+    }
   }
 
   async openCollapsible(name: string) {
