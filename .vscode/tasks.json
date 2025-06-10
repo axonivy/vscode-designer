@@ -11,8 +11,8 @@
         "base": "$tsc-watch",
         "background": {
           "activeOnStart": true,
-          "beginsPattern": "vscode-process-editor-webview: vite",
-          "endsPattern": "vscode-process-editor-webview: built in"
+          "beginsPattern": "@axonivy/vscode-webview-process-editor: vite",
+          "endsPattern": "@axonivy/vscode-webview-process-editor: built in"
         }
       },
       "presentation": {
