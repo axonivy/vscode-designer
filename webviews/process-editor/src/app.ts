@@ -4,7 +4,13 @@ import '@axonivy/vscode-webview-common/css/colors.css';
 import '../css/diagram.css';
 
 import { MonacoEditorUtil } from '@axonivy/process-editor-inscription-view';
-import { createIvyDiagramContainer, ivyBreakpointModule, ivyOpenDataClassModule, ivyOpenFormModule } from '@axonivy/process-editor';
+import {
+  createIvyDiagramContainer,
+  ivyBreakpointModule,
+  ivyOpenDataClassModule,
+  ivyOpenFormModule,
+  ivyStandaloneCopyPasteModule
+} from '@axonivy/process-editor';
 import { ivyInscriptionModule } from '@axonivy/process-editor-inscription';
 import { ContainerConfiguration, navigationModule } from '@eclipse-glsp/client';
 import { GLSPStarter } from '@eclipse-glsp/vscode-integration-webview';
@@ -34,6 +40,7 @@ class IvyGLSPStarter extends GLSPStarter {
       ivyStartActionModule,
       ivyInscriptionModule,
       ivyStartupDiagramModule,
+      ivyStandaloneCopyPasteModule,
       ivyOpenDataClassModule,
       ivyOpenFormModule,
       navigationModule
