@@ -28,7 +28,7 @@ jobs:
           npm install
           npm run build:production
           npx playwright install --with-deps chromium
-          npm run download:engine https://dev.axonivy.com/permalink/13/axonivy-engine.zip
+          npm run download:engine https://dev.axonivy.com/permalink/dev/axonivy-engine.zip
           rm -r extension/AxonIvyEngine/system/demo-applications
           wget -O openvsc.tar.gz https://github.com/gitpod-io/openvscode-server/releases/download/openvscode-server-$OPEN_VSCODE_VERSION/openvscode-server-$OPEN_VSCODE_VERSION-linux-x64.tar.gz
           tar -xzf openvsc.tar.gz --strip-components=1 --one-top-level=openvsc

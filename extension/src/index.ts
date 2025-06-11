@@ -13,7 +13,7 @@ let ivyEngineManager: IvyEngineManager;
 export const messenger = new Messenger({ ignoreHiddenViews: false });
 
 export const downloadDevEngine = () =>
-  vscode.env.openExternal(vscode.Uri.parse('https://dev.axonivy.com/permalink/13/axonivy-engine-slim.zip'));
+  vscode.env.openExternal(vscode.Uri.parse('https://dev.axonivy.com/permalink/dev/axonivy-engine-slim.zip'));
 
 export async function activate(context: vscode.ExtensionContext): Promise<MessengerDiagnostic> {
   ivyEngineManager = IvyEngineManager.init(context);

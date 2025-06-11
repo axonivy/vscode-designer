@@ -27,7 +27,7 @@ jobs:
           npm run update:axonivy:next
           npm install
           npm run build:production
-          npm run download:engine https://dev.axonivy.com/permalink/13/axonivy-engine.zip
+          npm run download:engine https://dev.axonivy.com/permalink/dev/axonivy-engine.zip
           rm -r extension/AxonIvyEngine/system/demo-applications
           npm run test:playwright:download:vscode
           extension/AxonIvyEngine/bin/AxonIvyEngine startdaemon
