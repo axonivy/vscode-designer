@@ -1,7 +1,8 @@
 {
-  "$schema": "node_modules/lerna/schemas/lerna-schema.json",
+  "$schema": "node_modules/@lerna-lite/cli/schemas/lerna-schema.json",
   "version": "13.2.0",
   "npmClient": "npm",
+  "useWorkspaces": true,
   "command": {
     "run": {
       "stream": true
