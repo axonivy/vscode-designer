@@ -12,18 +12,27 @@ import {
   ivyStandaloneCopyPasteModule
 } from '@axonivy/process-editor';
 import { ivyInscriptionModule } from '@axonivy/process-editor-inscription';
-import { ContainerConfiguration, navigationModule } from '@eclipse-glsp/client';
-import { GLSPStarter } from '@eclipse-glsp/vscode-integration-webview';
-import { Container } from 'inversify';
+import { ContainerConfiguration, navigationModule, createDiagramOptionsModule, EditMode } from '@eclipse-glsp/client';
+import { GLSPStarter, GLSPDiagramIdentifier, WebviewGlspClient, GLSPDiagramWidget } from '@eclipse-glsp/vscode-integration-webview';
+import { Container, ContainerModule } from 'inversify';
 import { NotificationType } from 'vscode-messenger-common';
 import { Messenger } from 'vscode-messenger-webview';
 import ivyStartActionModule from './start/di.config';
 import { ivyStartupDiagramModule } from './startup';
 import noopContextMenuServiceModule from './context-menu/di.config';
 import { initTranslation } from './i18n';
+import { IvyDiagramWidget } from './ivy-diagram-widget';
 
 type ColorTheme = 'dark' | 'light';
 const ColorThemeChangedNotification: NotificationType<ColorTheme> = { method: 'colorThemeChanged' };
+
+export interface ProcessEditorDiagramIdentifier extends GLSPDiagramIdentifier {
+  diff?: {
+    id: string;
+    side: 'left' | 'right';
+    content: string;
+  };
+}
 
 class IvyGLSPStarter extends GLSPStarter {
   constructor() {
@@ -47,8 +56,21 @@ class IvyGLSPStarter extends GLSPStarter {
     );
   }
 
-  protected override addVscodeBindings(container: Container) {
+  protected override createDiagramOptionsModule(identifier: ProcessEditorDiagramIdentifier): ContainerModule {
+    const glspClient = new WebviewGlspClient({ id: identifier.diagramType, messenger: this.messenger });
+    return createDiagramOptionsModule({
+      clientId: identifier.clientId,
+      diagramType: identifier.diagramType,
+      glspClientProvider: async () => glspClient,
+      sourceUri: decodeURIComponent(identifier.uri),
+      editMode: identifier.diff ? EditMode.READONLY : EditMode.EDITABLE
+    });
+  }
+
+  protected override addVscodeBindings(container: Container, diagramIdentifier: ProcessEditorDiagramIdentifier): void {
     container.bind(Messenger).toConstantValue(this.messenger);
+    container.bind(GLSPDiagramIdentifier).toConstantValue(diagramIdentifier);
+    container.rebind(GLSPDiagramWidget).to(IvyDiagramWidget).inSingletonScope();
   }
 }
 
