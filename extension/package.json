@@ -49,7 +49,7 @@
   "contributes": {
     "configurationDefaults": {
       "workbench.editorAssociations": {
-        "{git,gitlens}:/**/*.p.json": "default"
+        "{git,gitlens}:/**/{*.p.json,*.d.json,*.f.json,cms_*.yaml,variables.yaml}": "default"
       }
     },
     "customEditors": [
