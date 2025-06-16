@@ -27,6 +27,7 @@ jobs:
           npm run update:axonivy:next
           npm install
           npm run build:production
+          npm install -D @playwright/test@latest
           npx playwright install --with-deps chromium
           npm run download:engine https://dev.axonivy.com/permalink/dev/axonivy-engine.zip
           rm -r extension/AxonIvyEngine/system/demo-applications
