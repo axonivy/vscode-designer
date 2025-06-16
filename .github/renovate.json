@@ -8,7 +8,7 @@
   "packageRules": [
     {
       "matchBaseBranches": ["release/*", "master"],
-      "matchPackageNames": ["@axonivy/*"],
+      "matchPackageNames": ["@axonivy/*", "@types/vscode", "vscode-messenger*"],
       "enabled": false
     }
   ]
