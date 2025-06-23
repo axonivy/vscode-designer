@@ -29,9 +29,7 @@ test.describe('Process Editor', () => {
 
     const boundingBoxAfter = await userDialog.boundingBox();
     expect(boundingBoxAfter).toBeDefined();
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(boundingBoxAfter!.x).not.toBe(boundingBoxBefore!.x);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(boundingBoxAfter!.y).not.toBe(boundingBoxBefore!.y);
     await processEditor.isDirty();
   });
