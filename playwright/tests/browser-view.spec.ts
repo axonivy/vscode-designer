@@ -21,7 +21,8 @@ test.describe('Browser View', () => {
     await browserView.content().locator('#menuform\\:sr_starts').click();
     await assertToolbarInput(starts);
 
-    await browserView.reload().click({ clickCount: 2 });
+    await browserView.reload().click();
+    await assertToolbarInput(/vscodeBrowserReqId/);
     await assertToolbarInput(starts);
 
     await browserView.back().click();
