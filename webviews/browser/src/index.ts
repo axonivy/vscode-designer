@@ -81,7 +81,12 @@ onceDocumentLoaded(() => {
 
       // Try to bust the cache for the iframe
       // There does not appear to be any way to reliably do this except modifying the url
-      url.searchParams.append('vscodeBrowserReqId', Date.now().toString());
+      const paramName = 'vscodeBrowserReqId';
+      if (url.searchParams.has(paramName)) {
+        url.searchParams.delete(paramName);
+      } else {
+        url.searchParams.append(paramName, Date.now().toString());
+      }
       setIframeSrc(url.toString());
     } catch {
       setIframeSrc(rawUrl);
