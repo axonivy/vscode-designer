@@ -6,6 +6,7 @@ import '../css/diagram.css';
 import { MonacoEditorUtil } from '@axonivy/process-editor-inscription-view';
 import {
   createIvyDiagramContainer,
+  IVY_ACCESSIBILITY_MODULES,
   ivyBreakpointModule,
   ivyOpenDataClassModule,
   ivyOpenFormModule,
@@ -43,7 +44,8 @@ class IvyGLSPStarter extends GLSPStarter {
       ivyStandaloneCopyPasteModule,
       ivyOpenDataClassModule,
       ivyOpenFormModule,
-      navigationModule
+      navigationModule,
+      ...IVY_ACCESSIBILITY_MODULES
     );
   }
 
