@@ -13,7 +13,7 @@ import {
 import * as vscode from 'vscode';
 import { setupCommunication } from './webview-communication';
 import { createWebViewContent } from '../webview-helper';
-import { ProcessVscodeConnector, getNavigationTargetElementId } from './process-vscode-connector';
+import { NavigatableDocument, ProcessVscodeConnector } from './process-vscode-connector';
 import { messenger } from '../..';
 
 export default class ProcessEditorProvider extends GlspEditorProvider {
@@ -41,76 +41,61 @@ export default class ProcessEditorProvider extends GlspEditorProvider {
     webviewPanel.webview.html = createWebViewContent(this.extensionContext, webviewPanel.webview, 'process-editor');
   }
 
-  private getOriginalClient(uri: vscode.Uri): GlspVscodeClient | undefined {
-    const cleanedUri = uri.with({ query: '' });
-    return Array.from(this.glspVscodeConnector.clientMap.values()).find(
-      client => client.diagramType === this.diagramType && client.document.uri.toString() === cleanedUri.toString()
-    );
-  }
-
   override openCustomDocument(uri: vscode.Uri): vscode.CustomDocument | Thenable<vscode.CustomDocument> {
-    const document = { uri, dispose: () => undefined };
-    const navigationTarget = getNavigationTargetElementId(uri);
-    if (!navigationTarget) {
-      return document;
-    }
-
-    const originalClient = this.getOriginalClient(uri);
-    if (originalClient) {
-      this.naviagteToElement(originalClient, navigationTarget);
-    }
-    return document;
-  }
-
-  private naviagteToElement(client: GlspVscodeClient | GlspVscodeClient, elementId: string): void {
-    if (client) {
-      client.webviewEndpoint.webviewPanel.reveal();
-      client.webviewEndpoint.sendMessage({ clientId: client.clientId, action: CenterAction.create([elementId]) });
-      client.webviewEndpoint.sendMessage({
-        clientId: client.clientId,
-        action: SelectAction.setSelection([elementId])
-      });
-    }
+    return new NavigatableDocument(this.diagramType, uri);
   }
 
   override async resolveCustomEditor(
-    document: vscode.CustomDocument,
+    document: NavigatableDocument,
     webviewPanel: vscode.WebviewPanel,
     token: vscode.CancellationToken
   ): Promise<void> {
-    const navigationTarget = getNavigationTargetElementId(document.uri);
-    if (!navigationTarget) {
-      this.doResolveCustomEditor(document, webviewPanel, token);
+    // in order to trigger this behavior, we we always open a new editor with a URI that contains additional data
+    const existingClient = this.glspVscodeConnector.findClient(document);
+    if (existingClient) {
+      // we have an existing client for this document, so we can close the newly opened one
+      webviewPanel.dispose();
+      this.navigateToElement(existingClient, document);
       return;
     }
-
-    const originalClient = this.getOriginalClient(document.uri);
-    if (originalClient) {
-      // The original editor contributing the navigation information is still open (not preview mode) =>
-      // we can close the newly created editor
-      webviewPanel.dispose();
-      return Promise.resolve();
-    }
-
-    // In preview mode -> The newly create editor has replaced the original editor
-    // => navigate to the element in the new editor
-    const client = this.doResolveCustomEditor(document, webviewPanel, token);
-    const endpoint = client.webviewEndpoint;
-    endpoint.ready.then(() => {
+    // open a new editor for the document
+    const newClient = this.doResolveCustomEditor(document, webviewPanel, token);
+    newClient.webviewEndpoint.ready.then(() => {
       // Use timeout since we cannot make sure that the diagram is already initialized before sending the navigation messages otherwise.
       // https://github.com/eclipse-glsp/glsp/issues/1513
-      setTimeout(() => this.naviagteToElement(client, navigationTarget), 500);
+      setTimeout(() => this.navigateToElement(newClient, document), 500);
     });
-    return;
+  }
+
+  private navigateToElement(client: GlspVscodeClient<NavigatableDocument>, document: NavigatableDocument): void {
+    if (!client) {
+      return;
+    }
+    client.webviewEndpoint.webviewPanel.reveal();
+
+    const navigationTarget = document.navigationTarget;
+    if (navigationTarget) {
+      client.webviewEndpoint.sendMessage({ clientId: client.clientId, action: CenterAction.create([navigationTarget]) });
+      client.webviewEndpoint.sendMessage({ clientId: client.clientId, action: SelectAction.setSelection([navigationTarget]) });
+
+      // after navigation, we need to update the diagnostics URI to ensure they are treated as new documents
+      this.glspVscodeConnector.setDiagnostics(
+        client,
+        Array.from(this.glspVscodeConnector.getDiagnostics(client) ?? []).map(([uri, diagnostics]) => [
+          NavigatableDocument.uniqueUri(uri),
+          diagnostics
+        ])
+      );
+    }
   }
 
   // Same implementation as the `resolveCustomEditor` method in the base class
-  // but it returns the registered cleint so that we can use it to send messages
+  // but it returns the registered client so that we can use it to send messages
   private doResolveCustomEditor(
-    document: vscode.CustomDocument,
+    document: NavigatableDocument,
     webviewPanel: vscode.WebviewPanel,
     token: vscode.CancellationToken
-  ): GlspVscodeClient {
+  ): GlspVscodeClient<NavigatableDocument> {
     // This is used to initialize GLSP for our diagram
     const diagramIdentifier: GLSPDiagramIdentifier = {
       diagramType: this.diagramType,
@@ -124,7 +109,7 @@ export default class ProcessEditorProvider extends GlspEditorProvider {
     this.glspVscodeConnector.registerClient({
       clientId: diagramIdentifier.clientId,
       diagramType: diagramIdentifier.diagramType,
-      document: document,
+      document,
       webviewEndpoint: endpoint
     });
 

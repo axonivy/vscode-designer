@@ -1,4 +1,4 @@
-import { SetModelAction } from '@eclipse-glsp/protocol';
+import { Marker, SetModelAction } from '@eclipse-glsp/protocol';
 import {
   ActionMessage,
   GModelRootSchema,
@@ -16,31 +16,60 @@ import * as vscode from 'vscode';
 import { SelectedElement } from '../../base/process-editor-connector';
 import ProcessEditorProvider from './process-editor-provider';
 
-type IvyGlspClient = GlspVscodeClient & { app: string; pmv: string };
+export class NavigatableDocument implements vscode.CustomDocument {
+  constructor(
+    public readonly diagramType: string,
+    public readonly uri: vscode.Uri
+  ) {}
+
+  get documentUri(): vscode.Uri {
+    return this.uri.with({ query: '' });
+  }
+
+  get navigationTarget(): string | undefined {
+    return new URLSearchParams(this.uri.query).get('navTargetElement') ?? undefined;
+  }
+
+  uniqueUri(navigationTarget?: string): vscode.Uri {
+    return NavigatableDocument.uniqueUri(this.uri, navigationTarget);
+  }
+
+  dispose(): void {
+    // No specific disposal logic needed for this document
+  }
+
+  equals(other: vscode.CustomDocument): boolean {
+    return (
+      other instanceof NavigatableDocument &&
+      this.diagramType === other.diagramType &&
+      this.documentUri.toString() === other.documentUri.toString()
+    );
+  }
+
+  static uniqueUri(uri: vscode.Uri, navigationTarget?: string): vscode.Uri {
+    const uriParams = new URLSearchParams(uri.query);
+    if (navigationTarget) {
+      uriParams.set('navTargetElement', navigationTarget);
+    }
+    uriParams.set('timestamp', new Date().getTime().toString());
+    return uri.with({ query: uriParams.toString() });
+  }
+}
+
+type IvyGlspClient = GlspVscodeClient<NavigatableDocument> & { app: string; pmv: string };
 const severityMap = new Map([
   ['info', vscode.DiagnosticSeverity.Information],
   ['warning', vscode.DiagnosticSeverity.Warning],
   ['error', vscode.DiagnosticSeverity.Error]
 ]);
 
-export function getNavigationTargetElementId(uri: vscode.Uri): string | undefined {
-  const uriParams = new URLSearchParams(uri.query);
-  return uriParams.get('navTargetElement') ?? undefined;
-}
-
-export function appendNavigationTargetElementId(uri: vscode.Uri, elementId: string): vscode.Uri {
-  const uriParams = new URLSearchParams(uri.query);
-  uriParams.append('navTargetElement', elementId);
-  return uri.with({ query: uriParams.toString() });
-}
-
-export class ProcessVscodeConnector<D extends vscode.CustomDocument = vscode.CustomDocument> extends GlspVscodeConnector {
+export class ProcessVscodeConnector extends GlspVscodeConnector<NavigatableDocument> {
   private readonly emitter = new vscode.EventEmitter<SelectedElement>();
   private readonly onSelectedElementUpdate = this.emitter.event;
-  protected readonly onDidChangeActiveGlspEditorEventEmitter = new vscode.EventEmitter<{ client: GlspVscodeClient<D> }>();
+  protected readonly onDidChangeActiveGlspEditorEventEmitter = new vscode.EventEmitter<{ client: GlspVscodeClient<NavigatableDocument> }>();
   private readonly modelLoading: vscode.StatusBarItem;
   private readonly diagnosticsMap = new Map<string, vscode.DiagnosticCollection>(); // maps clientId to DiagnosticCollections
-  public override readonly clientMap: Map<string, GlspVscodeClient<vscode.CustomDocument>> = new Map();
+  public override readonly clientMap: Map<string, GlspVscodeClient<NavigatableDocument>> = new Map();
 
   constructor(options: GlspVscodeConnectorOptions) {
     super(options);
@@ -53,7 +82,7 @@ export class ProcessVscodeConnector<D extends vscode.CustomDocument = vscode.Cus
     return this.onDidChangeActiveGlspEditorEventEmitter.event;
   }
 
-  override async registerClient(client: GlspVscodeClient<D>): Promise<void> {
+  override async registerClient(client: GlspVscodeClient<NavigatableDocument>): Promise<void> {
     this.onDidChangeActiveGlspEditorEventEmitter.fire({ client });
 
     client.webviewEndpoint.webviewPanel.onDidChangeViewState(e => {
@@ -104,7 +133,7 @@ export class ProcessVscodeConnector<D extends vscode.CustomDocument = vscode.Cus
 
   protected override handleNavigateToExternalTargetAction(
     message: ActionMessage<NavigateToExternalTargetAction>,
-    _client: GlspVscodeClient<D> | undefined,
+    _client: GlspVscodeClient<NavigatableDocument> | undefined,
     _origin: MessageOrigin
   ) {
     const { args } = message.action.target;
@@ -164,23 +193,40 @@ export class ProcessVscodeConnector<D extends vscode.CustomDocument = vscode.Cus
 
   protected override handleSetMarkersAction(
     message: ActionMessage<SetMarkersAction>,
-    client: GlspVscodeClient<D> | undefined,
+    client: GlspVscodeClient<NavigatableDocument> | undefined,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _origin: MessageOrigin
   ): MessageProcessingResult {
     if (client) {
-      const diagnosticCollection = this.diagnosticsMap.get(client.clientId);
-      diagnosticCollection?.clear();
-      const updatedDiagnostics: [vscode.Uri, vscode.Diagnostic[]][] = message.action.markers.map(marker => {
-        const navUri = appendNavigationTargetElementId(client.document.uri, marker.elementId);
-
-        const diagnostic = new vscode.Diagnostic(new vscode.Range(0, 0, 0, 0), marker.description, severityMap.get(marker.kind));
-        diagnostic.source = marker.elementId;
-
-        return [navUri, [diagnostic]];
-      });
-      diagnosticCollection?.set(updatedDiagnostics);
+      this.setDiagnostics(
+        client,
+        message.action.markers.map(marker => [client.document.uniqueUri(marker.elementId), [this.markerToDiagnostic(marker)]])
+      );
     }
     return { processedMessage: message, messageChanged: false };
+  }
+
+  protected markerToDiagnostic(marker: Marker): vscode.Diagnostic {
+    const diagnostic = new vscode.Diagnostic(
+      new vscode.Range(0, 0, 0, 0),
+      marker.description,
+      severityMap.get(marker.kind) ?? vscode.DiagnosticSeverity.Information
+    );
+    diagnostic.source = marker.elementId;
+    return diagnostic;
+  }
+
+  findClient(document: NavigatableDocument): GlspVscodeClient<NavigatableDocument> | undefined {
+    return Array.from(this.clientMap.values()).find(client => client.document.equals(document));
+  }
+
+  setDiagnostics(client: GlspVscodeClient<NavigatableDocument>, diagnostics: [vscode.Uri, readonly vscode.Diagnostic[]][]): void {
+    const diagnosticCollection = this.getDiagnostics(client);
+    diagnosticCollection?.clear();
+    diagnosticCollection?.set(diagnostics);
+  }
+
+  getDiagnostics(client: GlspVscodeClient<NavigatableDocument>): vscode.DiagnosticCollection | undefined {
+    return this.diagnosticsMap.get(client.clientId);
   }
 }
