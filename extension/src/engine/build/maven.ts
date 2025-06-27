@@ -5,7 +5,7 @@ import { XMLParser } from 'fast-xml-parser';
 import path from 'path';
 import { config } from '../../base/configurations';
 
-const IVY_ENGINE_VERSION = '13.1.1';
+const IVY_ENGINE_VERSION = '13.1.2';
 
 export class MavenBuilder {
   private readonly outputChannel: vscode.OutputChannel;
