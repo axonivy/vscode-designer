@@ -8,7 +8,7 @@ test('Jump between editors', async ({ page }) => {
   await processEditor.hasDeployProjectStatusMessage();
   await processEditor.openEditorFile();
   await processEditor.isViewVisible();
-  await processEditor.toolbar.locator('.tool-bar-button[title*="Open Form"]').click();
+  await processEditor.toolbar.getByRole('button', { name: 'Open Form' }).click();
   await formEditor.isViewVisible();
   await formEditor.toolbar.getByRole('button', { name: 'Open Process' }).click();
   await processEditor.isViewVisible();
