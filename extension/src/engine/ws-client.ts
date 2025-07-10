@@ -3,8 +3,28 @@ import { WebIdeClientJsonRpc } from './api/jsonrpc';
 import * as vscode from 'vscode';
 import { animationSettings, handleOpenProcessEditor, openEditor } from './animation';
 import { IWebSocket, WebSocketMessageReader, WebSocketMessageWriter } from 'vscode-ws-jsonrpc';
+import { LogClientJsonRpc } from '@axonivy/log-view-core';
 
 export const WebSocketClientProvider = (webSocketUrl: URL) => {
+  const runtimeLogWebSocket = new WebSocket(new URL('ivy-runtime-log-lsp', webSocketUrl));
+  runtimeLogWebSocket.onopen = () => {
+    const connection = toSocketConnection(runtimeLogWebSocket);
+    const outputChannel = vscode.window.createOutputChannel('Runtime Log');
+
+    LogClientJsonRpc.startClient(connection).then(client => {
+      client.data().then(data =>
+        data.forEach(entry => {
+          outputChannel.appendLine(`[${entry.timestamp}][${entry.level}][${entry.project}] ${entry.message} ${entry.stacktrace}`);
+          outputChannel.show();
+        })
+      );
+      client.onNotification('newEntry', entry => {
+        outputChannel.appendLine(`[${entry.timestamp}][${entry.level}][${entry.project}] ${entry.message} ${entry.stacktrace}`);
+        outputChannel.show();
+      });
+    });
+  };
+
   const webSocket = new WebSocket(new URL('ivy-web-ide-lsp', webSocketUrl));
   webSocket.onopen = () => {
     const connection = toSocketConnection(webSocket);
