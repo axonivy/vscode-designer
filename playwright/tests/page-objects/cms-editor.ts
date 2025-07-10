@@ -16,7 +16,7 @@ export class CmsEditor extends Editor {
   }
 
   async hasContentObject(contentObject: string) {
-    const field = this.viewFrameLoactor().locator('td > span').first();
+    const field = this.viewFrameLoactor().locator('td span').first();
     await expect(field).toHaveText(contentObject);
   }
 }

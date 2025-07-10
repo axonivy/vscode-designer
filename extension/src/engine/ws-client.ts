@@ -4,23 +4,22 @@ import * as vscode from 'vscode';
 import { animationSettings, handleOpenProcessEditor, openEditor } from './animation';
 import { IWebSocket, WebSocketMessageReader, WebSocketMessageWriter } from 'vscode-ws-jsonrpc';
 import { LogClientJsonRpc } from '@axonivy/log-view-core';
+import { RuntimeLogEntry } from '@axonivy/log-view-protocol';
 
 export const WebSocketClientProvider = (webSocketUrl: URL) => {
   const runtimeLogWebSocket = new WebSocket(new URL('ivy-runtime-log-lsp', webSocketUrl));
   runtimeLogWebSocket.onopen = () => {
     const connection = toSocketConnection(runtimeLogWebSocket);
-    const outputChannel = vscode.window.createOutputChannel('Runtime Log');
+    const outputChannel = vscode.window.createOutputChannel('Axon Ivy Runtime Log');
 
     LogClientJsonRpc.startClient(connection).then(client => {
       client.data().then(data =>
         data.forEach(entry => {
-          outputChannel.appendLine(`[${entry.timestamp}][${entry.level}][${entry.project}] ${entry.message} ${entry.stacktrace}`);
-          outputChannel.show();
+          outputChannel.appendLine(logMessage(entry));
         })
       );
       client.onNotification('newEntry', entry => {
-        outputChannel.appendLine(`[${entry.timestamp}][${entry.level}][${entry.project}] ${entry.message} ${entry.stacktrace}`);
-        outputChannel.show();
+        outputChannel.appendLine(logMessage(entry));
       });
     });
   };
@@ -39,6 +38,11 @@ export const WebSocketClientProvider = (webSocketUrl: URL) => {
       });
     });
   };
+};
+
+const logMessage = (entry: RuntimeLogEntry) => {
+  const logMessage = `[${entry.timestamp}][${entry.level}][${entry.project}] ${entry.message}`;
+  return entry.stacktrace ? `${logMessage} ${entry.stacktrace}` : logMessage;
 };
 
 const toSocketConnection = (webSocket: WebSocket) => {
