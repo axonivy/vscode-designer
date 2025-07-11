@@ -1,7 +1,7 @@
-import * as vscode from 'vscode';
 import path from 'path';
-import { TreeSelection, treeSelectionToUri } from './tree-selection';
+import * as vscode from 'vscode';
 import { IvyEngineManager } from '../engine/engine-manager';
+import { TreeSelection, treeSelectionToUri } from './tree-selection';
 import { validateArtifactName, validateDotSeparatedName } from './util';
 
 export const addNewProject = async (selection: TreeSelection) => {

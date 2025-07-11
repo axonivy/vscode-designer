@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { resolveNamespaceFromPath } from './util';
-import { IvyEngineManager } from '../engine/engine-manager';
 import { ProcessInit } from '../engine/api/generated/client';
+import { IvyEngineManager } from '../engine/engine-manager';
+import { resolveNamespaceFromPath } from './util';
 
 export type ProcessKind = 'Business Process' | 'Callable Sub Process' | 'Web Service Process' | '';
 

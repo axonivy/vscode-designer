@@ -1,8 +1,8 @@
+import { Locator } from '@playwright/test';
 import { Page } from 'playwright-core';
 import { expect } from 'playwright/test';
 import { Editor } from './editor';
 import { InscriptionView } from './inscription-view';
-import { Locator } from '@playwright/test';
 
 export class ProcessEditor extends Editor {
   constructor(page: Page, editorFile: string = 'ProcurementRequestUserTask.p.json') {

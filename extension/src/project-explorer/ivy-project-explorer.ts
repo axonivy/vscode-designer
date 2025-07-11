@@ -1,13 +1,13 @@
-import * as vscode from 'vscode';
-import { IvyProjectTreeDataProvider, IVY_RPOJECT_FILE_PATTERN, Entry } from './ivy-project-tree-data-provider';
-import { Command, executeCommand, registerCommand } from '../base/commands';
-import { ProcessKind, addNewProcess } from './new-process';
 import path from 'path';
-import { addNewProject } from './new-project';
-import { TreeSelection, treeSelectionToProjectPath, treeSelectionToUri } from './tree-selection';
-import { DialogType, addNewUserDialog } from './new-user-dialog';
+import * as vscode from 'vscode';
+import { Command, executeCommand, registerCommand } from '../base/commands';
 import { IvyEngineManager } from '../engine/engine-manager';
+import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
 import { addNewDataClass } from './new-data-class';
+import { ProcessKind, addNewProcess } from './new-process';
+import { addNewProject } from './new-project';
+import { DialogType, addNewUserDialog } from './new-user-dialog';
+import { TreeSelection, treeSelectionToProjectPath, treeSelectionToUri } from './tree-selection';
 
 export const VIEW_ID = 'ivyProjects';
 

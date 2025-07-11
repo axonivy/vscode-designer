@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
-import { Entry } from './ivy-project-tree-data-provider';
-import { executeCommand } from '../base/commands';
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+import * as vscode from 'vscode';
+import { executeCommand } from '../base/commands';
+import { Entry } from './ivy-project-tree-data-provider';
 
 export type TreeSelection = Entry | vscode.Uri | undefined;
 

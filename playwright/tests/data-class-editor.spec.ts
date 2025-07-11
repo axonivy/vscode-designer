@@ -1,6 +1,6 @@
 import { expect } from 'playwright/test';
-import { BrowserView } from './page-objects/browser-view';
 import { test } from './fixtures/baseTest';
+import { BrowserView } from './page-objects/browser-view';
 import { DataClassEditor } from './page-objects/data-class-editor';
 import { Editor } from './page-objects/editor';
 

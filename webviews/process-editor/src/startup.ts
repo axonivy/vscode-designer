@@ -3,11 +3,11 @@ import { ContainerModule, inject, injectable } from 'inversify';
 
 import { EnableInscriptionAction } from '@axonivy/process-editor-inscription';
 import { EnableViewportAction, UpdatePaletteItems } from '@axonivy/process-editor-protocol';
+import { toConnection } from '@axonivy/vscode-webview-common';
 import { RequestTypeHintsAction } from '@eclipse-glsp/vscode-integration';
 import { HOST_EXTENSION, NotificationType, RequestType } from 'vscode-messenger-common';
 import { Messenger } from 'vscode-messenger-webview';
 import './index.css';
-import { toConnection } from '@axonivy/vscode-webview-common';
 
 const WebviewConnectionReadyNotification: NotificationType<void> = { method: 'connectionReady' };
 const InitializeConnectionRequest: RequestType<void, void> = { method: 'initializeConnection' };

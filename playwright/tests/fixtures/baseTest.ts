@@ -1,12 +1,12 @@
-import { test as base, _electron, Page, chromium } from '@playwright/test';
+import { _electron, test as base, chromium, Page } from '@playwright/test';
 import { downloadAndUnzipVSCode } from '@vscode/test-electron/out/download';
-export { expect } from '@playwright/test';
+import fs from 'fs';
+import os from 'os';
 import path from 'path';
-import { prebuiltWorkspacePath } from '../workspaces/workspace';
 import { FileExplorer } from '../page-objects/explorer-view';
 import { downloadVersion } from '../utils/download-version';
-import os from 'os';
-import fs from 'fs';
+import { prebuiltWorkspacePath } from '../workspaces/workspace';
+export { expect } from '@playwright/test';
 
 export const runInBrowser = process.env.RUN_IN_BRWOSER ? true : false;
 

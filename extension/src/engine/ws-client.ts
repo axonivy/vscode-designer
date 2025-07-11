@@ -1,10 +1,10 @@
-import { WebSocket } from 'ws';
-import { WebIdeClientJsonRpc } from './api/jsonrpc';
 import * as vscode from 'vscode';
-import { animationSettings, handleOpenProcessEditor, openEditor } from './animation';
 import { IWebSocket, WebSocketMessageReader, WebSocketMessageWriter } from 'vscode-ws-jsonrpc';
 import { LogClientJsonRpc } from '@axonivy/log-view-core';
 import { RuntimeLogEntry } from '@axonivy/log-view-protocol';
+import { WebSocket } from 'ws';
+import { animationSettings, handleOpenProcessEditor, openEditor } from './animation';
+import { WebIdeClientJsonRpc } from './api/jsonrpc';
 
 const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Axon Ivy Runtime Log');
 

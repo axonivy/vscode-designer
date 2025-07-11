@@ -1,8 +1,8 @@
 import { expect } from '@playwright/test';
-import { OutputView } from './page-objects/output-view';
-import { embeddedEngineWorkspace, noEngineWorkspacePath, noProjectWorkspacePath } from './workspaces/workspace';
-import { SettingsView } from './page-objects/settings-view';
 import { test } from './fixtures/baseTest';
+import { OutputView } from './page-objects/output-view';
+import { SettingsView } from './page-objects/settings-view';
+import { embeddedEngineWorkspace, noEngineWorkspacePath, noProjectWorkspacePath } from './workspaces/workspace';
 
 test.describe('Engine embeddedEngineWorkspace', () => {
   test.use({ workspace: embeddedEngineWorkspace });

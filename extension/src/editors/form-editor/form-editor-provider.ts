@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { setupCommunication } from './webview-communication';
-import { createWebViewContent } from '../webview-helper';
 import { messenger } from '../..';
+import { createWebViewContent } from '../webview-helper';
+import { setupCommunication } from './webview-communication';
 
 export default class FormEditorProvider implements vscode.CustomTextEditorProvider {
   private static readonly viewType = 'ivy.formEditor';

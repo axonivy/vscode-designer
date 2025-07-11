@@ -1,5 +1,5 @@
-import * as vscode from 'vscode';
 import fs from 'fs';
+import * as vscode from 'vscode';
 import { registerCommand } from '../../base/commands';
 import { VariableEditorProvider } from './variable-editor-provider';
 

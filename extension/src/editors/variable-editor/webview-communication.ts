@@ -1,12 +1,12 @@
+import type { VariablesActionArgs } from '@axonivy/variable-editor-protocol';
+import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
-import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
-import { WebSocketForwarder } from '../websocket-forwarder';
-import type { VariablesActionArgs } from '@axonivy/variable-editor-protocol';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
-import { hasEditorFileContent, InitializeConnectionRequest, isAction, WebviewReadyNotification } from '../notification-helper';
 import { updateTextDocumentContent } from '../content-writer';
+import { hasEditorFileContent, InitializeConnectionRequest, isAction, WebviewReadyNotification } from '../notification-helper';
+import { WebSocketForwarder } from '../websocket-forwarder';
 
 const ConfigWebSocketMessage: NotificationType<unknown> = { method: 'configWebSocketMessage' };
 

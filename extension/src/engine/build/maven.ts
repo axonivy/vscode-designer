@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
 import { exec } from 'child_process';
-import fs from 'fs';
 import { XMLParser } from 'fast-xml-parser';
+import fs from 'fs';
 import path from 'path';
+import * as vscode from 'vscode';
 import { config } from '../../base/configurations';
 
 const IVY_ENGINE_VERSION = '13.2.0';

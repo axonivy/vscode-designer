@@ -1,7 +1,7 @@
+import * as vscode from 'vscode';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
 import { ProcessBean } from './api/generated/client';
-import * as vscode from 'vscode';
 
 export type AnimationFollowMode = 'all' | 'currentProcess' | 'openProcesses' | 'noDialogProcesses' | 'noEmbeddedProcesses';
 

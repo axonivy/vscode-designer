@@ -1,8 +1,8 @@
 import { InscriptionActionArgs, InscriptionNotificationTypes } from '@axonivy/process-editor-inscription-protocol';
-import { OpenPageActionHandler } from './open-page';
+import { isAction } from '../../notification-helper';
 import { NewProcessActionHandler } from './new-process';
 import { NewHtmlDialogActionHandler } from './new-user-dialog';
-import { isAction } from '../../notification-helper';
+import { OpenPageActionHandler } from './open-page';
 
 const ActionHandlers = [new NewProcessActionHandler(), new NewHtmlDialogActionHandler(), new OpenPageActionHandler()];
 

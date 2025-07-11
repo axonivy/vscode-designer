@@ -1,6 +1,6 @@
-import { Page, expect, Locator } from '@playwright/test';
-import { View, ViewData } from './view';
+import { expect, Locator, Page } from '@playwright/test';
 import path from 'path';
+import { View, ViewData } from './view';
 
 export abstract class ExplorerView extends View {
   constructor(

@@ -1,22 +1,22 @@
 import * as vscode from 'vscode';
 import { executeCommand } from '../base/commands';
-import { MavenBuilder } from './build/maven';
-import { NewProcessParams } from '../project-explorer/new-process';
-import { IvyEngineApi } from './api/engine-api';
 import { config } from '../base/configurations';
-import { NewUserDialogParams } from '../project-explorer/new-user-dialog';
-import { toWebSocketUrl } from '../base/url-util';
-import { EngineRunner } from './engine-runner';
-import { VariableEditorProvider } from '../editors/variable-editor/variable-editor-provider';
-import FormEditorProvider from '../editors/form-editor/form-editor-provider';
-import { IvyBrowserViewProvider } from '../browser/ivy-browser-view-provider';
-import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
-import ProcessEditorProvider from '../editors/process-editor/process-editor-provider';
 import { setStatusBarMessage } from '../base/status-bar';
-import { DataClassInit, NewProjectParams } from './api/generated/client';
-import { WebSocketClientProvider } from './ws-client';
-import DataClassEditorProvider from '../editors/dataclass-editor/dataclass-editor-provider';
+import { toWebSocketUrl } from '../base/url-util';
+import { IvyBrowserViewProvider } from '../browser/ivy-browser-view-provider';
 import { CmsEditorProvider } from '../editors/cms-editor/cms-editor-provider';
+import DataClassEditorProvider from '../editors/dataclass-editor/dataclass-editor-provider';
+import FormEditorProvider from '../editors/form-editor/form-editor-provider';
+import ProcessEditorProvider from '../editors/process-editor/process-editor-provider';
+import { VariableEditorProvider } from '../editors/variable-editor/variable-editor-provider';
+import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
+import { NewProcessParams } from '../project-explorer/new-process';
+import { NewUserDialogParams } from '../project-explorer/new-user-dialog';
+import { IvyEngineApi } from './api/engine-api';
+import { DataClassInit, NewProjectParams } from './api/generated/client';
+import { MavenBuilder } from './build/maven';
+import { EngineRunner } from './engine-runner';
+import { WebSocketClientProvider } from './ws-client';
 
 export class IvyEngineManager {
   private static _instance: IvyEngineManager;

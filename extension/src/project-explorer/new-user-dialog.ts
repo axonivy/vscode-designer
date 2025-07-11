@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { resolveNamespaceFromPath, validateArtifactName, validateDotSeparatedName } from './util';
-import { IvyEngineManager } from '../engine/engine-manager';
 import { HdInit } from '../engine/api/generated/client';
+import { IvyEngineManager } from '../engine/engine-manager';
+import { resolveNamespaceFromPath, validateArtifactName, validateDotSeparatedName } from './util';
 
 export const dialogTypes = ['JSF', 'Form', 'JSFOffline'] as const;
 export type DialogType = (typeof dialogTypes)[number];
