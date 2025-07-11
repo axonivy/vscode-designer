@@ -1,10 +1,10 @@
+import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
-import { WebSocketForwarder } from '../websocket-forwarder';
 import { MessageParticipant, NotificationType, RequestType } from 'vscode-messenger-common';
-import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
-import { SendInscriptionNotification, handleActionLocal } from './inscription-view/action-handlers';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
+import { WebSocketForwarder } from '../websocket-forwarder';
+import { SendInscriptionNotification, handleActionLocal } from './inscription-view/action-handlers';
 
 const ColorThemeChangedNotification: NotificationType<'dark' | 'light'> = { method: 'colorThemeChanged' };
 const WebviewConnectionReadyNotification: NotificationType<void> = { method: 'connectionReady' };

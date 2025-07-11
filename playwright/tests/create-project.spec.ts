@@ -1,8 +1,8 @@
 import { test } from './fixtures/baseTest';
-import { ProcessEditor } from './page-objects/process-editor';
-import { empty } from './workspaces/workspace';
 import { FileExplorer } from './page-objects/explorer-view';
 import { ProblemsView } from './page-objects/problems-view';
+import { ProcessEditor } from './page-objects/process-editor';
+import { empty } from './workspaces/workspace';
 
 test.describe('Create Project', () => {
   test.use({ workspace: empty });

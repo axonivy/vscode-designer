@@ -1,4 +1,4 @@
-import { Disposable, DataCallback, AbstractMessageReader, MessageReader } from 'vscode-jsonrpc';
+import { AbstractMessageReader, DataCallback, Disposable, MessageReader } from 'vscode-jsonrpc';
 import { NotificationType } from 'vscode-messenger-common';
 import { Messenger } from 'vscode-messenger-webview';
 

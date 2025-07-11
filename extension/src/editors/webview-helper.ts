@@ -1,9 +1,9 @@
-import * as vscode from 'vscode';
-import fs from 'fs';
-import { ViteManifestEntry, findEditorWorker, findRootEntry, findRootHtml, parseBuildManifest } from './build-manifest';
-import { DomUtils, parseDocument } from 'htmlparser2';
-import { Element, Text } from 'domhandler';
 import { render } from 'dom-serializer';
+import { Element, Text } from 'domhandler';
+import fs from 'fs';
+import { DomUtils, parseDocument } from 'htmlparser2';
+import * as vscode from 'vscode';
+import { ViteManifestEntry, findEditorWorker, findRootEntry, findRootHtml, parseBuildManifest } from './build-manifest';
 
 export const createWebViewContent = (
   context: vscode.ExtensionContext,

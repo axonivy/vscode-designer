@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
-import { InscriptionActionHandler, SendInscriptionNotification } from './action-handlers';
 import { InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
-import { DialogType, dialogTypes } from '../../../project-explorer/new-user-dialog';
+import * as vscode from 'vscode';
 import { IvyProjectExplorer } from '../../../project-explorer/ivy-project-explorer';
+import { DialogType, dialogTypes } from '../../../project-explorer/new-user-dialog';
+import { InscriptionActionHandler, SendInscriptionNotification } from './action-handlers';
 
 export class NewHtmlDialogActionHandler implements InscriptionActionHandler {
   actionId = 'newHtmlDialog' as const;

@@ -1,24 +1,24 @@
-import * as vscode from 'vscode';
 import path from 'path';
-import { pollWithProgress } from './poll';
+import * as vscode from 'vscode';
+import { setStatusBarMessage } from '../../base/status-bar';
 import { NewProcessParams } from '../../project-explorer/new-process';
 import { NewUserDialogParams } from '../../project-explorer/new-user-dialog';
-import { setStatusBarMessage } from '../../base/status-bar';
+import { handleAxiosError } from './axios-error-handler';
 import {
+  DataClassInit,
   NewProjectParams,
   buildProjects,
+  createDataClass,
   createHd,
-  createProcess,
   createPmvAndProjectFiles,
+  createProcess,
+  createWorkspace,
   deleteProject,
   deployProjects,
   findOrCreatePmv,
-  stopBpmEngine,
-  createDataClass,
-  DataClassInit,
-  createWorkspace
+  stopBpmEngine
 } from './generated/client';
-import { handleAxiosError } from './axios-error-handler';
+import { pollWithProgress } from './poll';
 
 const progressOptions = (title: string) => {
   return {

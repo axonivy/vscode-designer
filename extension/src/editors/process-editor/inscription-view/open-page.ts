@@ -1,11 +1,11 @@
-import * as vscode from 'vscode';
+import { InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
 import * as fs from 'fs';
 import * as path from 'path';
-import { InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
-import { InscriptionActionHandler } from './action-handlers';
+import * as vscode from 'vscode';
 import { executeCommand } from '../../../base/commands';
 import { IvyBrowserViewProvider } from '../../../browser/ivy-browser-view-provider';
 import { IvyProjectExplorer } from '../../../project-explorer/ivy-project-explorer';
+import { InscriptionActionHandler } from './action-handlers';
 
 export class OpenPageActionHandler implements InscriptionActionHandler {
   actionId = 'openPage' as const;

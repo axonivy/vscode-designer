@@ -1,6 +1,6 @@
+import { enTranslation } from '@axonivy/variable-editor';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { enTranslation } from '@axonivy/variable-editor';
 
 export const initTranslation = () => {
   if (i18n.isInitializing || i18n.isInitialized) return;

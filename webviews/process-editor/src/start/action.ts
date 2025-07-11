@@ -1,8 +1,8 @@
-import { inject, injectable } from 'inversify';
+import { StartProcessAction } from '@axonivy/process-editor-protocol';
 import { IActionHandler } from '@eclipse-glsp/client';
+import { inject, injectable } from 'inversify';
 import { HOST_EXTENSION, RequestType } from 'vscode-messenger-common';
 import { Messenger } from 'vscode-messenger-webview';
-import { StartProcessAction } from '@axonivy/process-editor-protocol';
 
 const StartProcessRequest: RequestType<string, void> = { method: 'startProcess' };
 

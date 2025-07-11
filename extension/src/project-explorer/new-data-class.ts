@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { resolveNamespaceFromPath, validateArtifactName, validateDotSeparatedName } from './util';
 import { IvyEngineManager } from '../engine/engine-manager';
+import { resolveNamespaceFromPath, validateArtifactName, validateDotSeparatedName } from './util';
 
 export const addNewDataClass = async (selectedUri: vscode.Uri, projectDir: string) => {
   const input = await collectNewDataClassParams(selectedUri, projectDir);

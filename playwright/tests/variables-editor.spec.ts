@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
-import { VariablesEditor } from './page-objects/variables-editor';
-import { BrowserView } from './page-objects/browser-view';
 import { test } from './fixtures/baseTest';
+import { BrowserView } from './page-objects/browser-view';
+import { VariablesEditor } from './page-objects/variables-editor';
 
 test('Read, write and open help', async ({ page }) => {
   const editor = new VariablesEditor(page);
