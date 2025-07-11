@@ -46,4 +46,5 @@ type ViewCommand =
   | 'ivyBrowserView.openDevWfUi'
   | 'ivyBrowserView.openEngineCockpit'
   | 'ivyBrowserView.openNEO'
-  | 'ivyBrowserView.openCmsEditor';
+  | 'ivyBrowserView.openCmsEditor'
+  | 'ivyPanelView.openRuntimeLog';
