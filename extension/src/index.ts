@@ -7,6 +7,7 @@ import { addDevContainer } from './dev-container/command';
 import { IvyEngineManager } from './engine/engine-manager';
 import { IvyProjectExplorer } from './project-explorer/ivy-project-explorer';
 import { setStatusBarIcon } from './base/status-bar';
+import { showRuntimeLog } from './engine/ws-client';
 
 let ivyEngineManager: IvyEngineManager;
 
@@ -26,6 +27,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Messen
   registerCommand('engine.activateAnimation', context, async () => await config.setProcessAnimationAnimate(true));
   registerCommand('engine.deactivateAnimation', context, async () => await config.setProcessAnimationAnimate(false));
   registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));
+  registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
   IvyProjectExplorer.init(context);
   setStatusBarIcon();
 

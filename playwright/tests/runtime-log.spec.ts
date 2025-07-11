@@ -6,14 +6,16 @@ test.describe('Runtime Log', () => {
   test('Runtime Log view output channel', async ({ page }) => {
     const processEditor = new ProcessEditor(page, 'RuntimeLog.p.json');
     await processEditor.hasDeployProjectStatusMessage();
-    await processEditor.executeCommand('View: Focus into Panel');
-
     await processEditor.openEditorFile();
-    const start = processEditor.locatorForPID('197F45CCD461274C-f0');
+    await processEditor.isViewVisible();
+
+    const start = processEditor.locatorForPID('197F9A7B42E24AE0-f0');
     await expect(start).toBeVisible();
 
-    const endOfTask = processEditor.locatorForPID('197F45CCD461274C-f3');
+    const endOfTask = processEditor.locatorForPID('197F9A7B42E24AE0-f3');
     await processEditor.startProcessAndAssertExecuted(start, endOfTask);
+
+    await processEditor.executeCommand('Axon Ivy: Open Axon Ivy Runtime Log');
 
     const runtimeLogOutput = page.getByRole('document', { name: 'Runtime Log - Output' }).getByRole('code');
 

@@ -6,11 +6,12 @@ import { IWebSocket, WebSocketMessageReader, WebSocketMessageWriter } from 'vsco
 import { LogClientJsonRpc } from '@axonivy/log-view-core';
 import { RuntimeLogEntry } from '@axonivy/log-view-protocol';
 
+const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Axon Ivy Runtime Log');
+
 export const WebSocketClientProvider = (webSocketUrl: URL) => {
   const runtimeLogWebSocket = new WebSocket(new URL('ivy-runtime-log-lsp', webSocketUrl));
   runtimeLogWebSocket.onopen = () => {
     const connection = toSocketConnection(runtimeLogWebSocket);
-    const outputChannel = vscode.window.createOutputChannel('Axon Ivy Runtime Log');
 
     LogClientJsonRpc.startClient(connection).then(client => {
       client.data().then(data =>
@@ -45,6 +46,9 @@ const logMessage = (entry: RuntimeLogEntry) => {
   return entry.stacktrace ? `${logMessage} ${entry.stacktrace}` : logMessage;
 };
 
+export const showRuntimeLog = () => {
+  outputChannel.show();
+};
 const toSocketConnection = (webSocket: WebSocket) => {
   const socket = toSocket(webSocket);
   const reader = new WebSocketMessageReader(socket);
