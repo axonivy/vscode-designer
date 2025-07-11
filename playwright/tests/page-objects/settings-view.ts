@@ -1,6 +1,6 @@
 import { Page, expect } from '@playwright/test';
-import { View, ViewData } from './view';
 import { getCtrlOrMeta } from '../utils/keyboard';
+import { View, ViewData } from './view';
 
 const settingsViewData: ViewData = {
   tabSelector: 'div.tab.tab-actions-right',

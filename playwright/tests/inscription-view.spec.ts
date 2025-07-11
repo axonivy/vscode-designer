@@ -1,8 +1,8 @@
 import { expect } from '@playwright/test';
-import { ProcessEditor } from './page-objects/process-editor';
-import { BrowserView } from './page-objects/browser-view';
-import { wait } from './utils/timeout';
 import { test } from './fixtures/baseTest';
+import { BrowserView } from './page-objects/browser-view';
+import { ProcessEditor } from './page-objects/process-editor';
+import { wait } from './utils/timeout';
 
 const userDialogPID1 = '15254DCE818AD7A2-f3';
 const userDialogPID2 = '15254DCE818AD7A2-f14';

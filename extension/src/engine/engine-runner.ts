@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
 import { ChildProcess, execFile } from 'child_process';
 import Os from 'os';
-import { config } from '../base/configurations';
+import * as vscode from 'vscode';
 import { downloadDevEngine } from '..';
+import { config } from '../base/configurations';
 
 export class EngineRunner {
   private childProcess: ChildProcess;

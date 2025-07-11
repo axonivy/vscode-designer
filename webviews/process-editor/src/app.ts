@@ -1,9 +1,8 @@
+import '@axonivy/vscode-webview-common/css/colors.css';
 import '@eclipse-glsp/vscode-integration-webview/css/glsp-vscode.css';
 import '../css/colors.css';
-import '@axonivy/vscode-webview-common/css/colors.css';
 import '../css/diagram.css';
 
-import { MonacoEditorUtil } from '@axonivy/process-editor-inscription-view';
 import {
   createIvyDiagramContainer,
   IVY_ACCESSIBILITY_MODULES,
@@ -13,15 +12,16 @@ import {
   ivyStandaloneCopyPasteModule
 } from '@axonivy/process-editor';
 import { ivyInscriptionModule } from '@axonivy/process-editor-inscription';
+import { MonacoEditorUtil } from '@axonivy/process-editor-inscription-view';
 import { ContainerConfiguration, navigationModule } from '@eclipse-glsp/client';
 import { GLSPStarter } from '@eclipse-glsp/vscode-integration-webview';
 import { Container } from 'inversify';
 import { NotificationType } from 'vscode-messenger-common';
 import { Messenger } from 'vscode-messenger-webview';
-import ivyStartActionModule from './start/di.config';
-import { ivyStartupDiagramModule } from './startup';
 import noopContextMenuServiceModule from './context-menu/di.config';
 import { initTranslation } from './i18n';
+import ivyStartActionModule from './start/di.config';
+import { ivyStartupDiagramModule } from './startup';
 
 type ColorTheme = 'dark' | 'light';
 const ColorThemeChangedNotification: NotificationType<ColorTheme> = { method: 'colorThemeChanged' };

@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
+import { messenger } from '../..';
 import { createWebViewContent } from '../webview-helper';
 import { registerNewVariablesFileCmd } from './new-variable-file-cmd';
 import { setupCommunication } from './webview-communication';
-import { messenger } from '../..';
 
 export class VariableEditorProvider implements vscode.CustomTextEditorProvider {
   static readonly viewType = 'ivy.variableEditor';

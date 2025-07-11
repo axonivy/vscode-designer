@@ -1,14 +1,14 @@
-import '@axonivy/vscode-webview-common/css/colors.css';
-import './index.css';
 import { App, ClientContextProvider, QueryProvider, initQueryClient } from '@axonivy/form-editor';
 import { FormClientJsonRpc } from '@axonivy/form-editor-core';
-import * as React from 'react';
-import { createRoot } from 'react-dom/client';
-import { InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
-import { VsCodeApi, Messenger } from 'vscode-messenger-webview';
 import '@axonivy/form-editor/lib/editor.css';
 import { ThemeProvider } from '@axonivy/ui-components';
+import { InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
+import '@axonivy/vscode-webview-common/css/colors.css';
+import * as React from 'react';
+import { createRoot } from 'react-dom/client';
+import { Messenger, VsCodeApi } from 'vscode-messenger-webview';
 import { initTranslation } from './i18n';
+import './index.css';
 
 declare function acquireVsCodeApi(): VsCodeApi;
 const messenger = new Messenger(acquireVsCodeApi());

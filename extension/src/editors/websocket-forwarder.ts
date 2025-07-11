@@ -1,8 +1,8 @@
-import { WebSocket } from 'ws';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import vscode from 'vscode';
-import { NotificationType, MessageParticipant } from 'vscode-messenger-common';
 import { Messenger } from 'vscode-messenger';
+import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
+import { WebSocket } from 'ws';
 
 type Endpoint = 'ivy-inscription-lsp' | 'ivy-script-lsp' | 'ivy-form-lsp' | 'ivy-variables-lsp' | 'ivy-data-class-lsp' | 'ivy-cms-lsp';
 

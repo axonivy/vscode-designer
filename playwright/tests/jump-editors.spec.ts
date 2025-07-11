@@ -1,6 +1,6 @@
-import { ProcessEditor } from './page-objects/process-editor';
-import { FormEditor } from './page-objects/form-editor';
 import { test } from './fixtures/baseTest';
+import { FormEditor } from './page-objects/form-editor';
+import { ProcessEditor } from './page-objects/process-editor';
 
 test('Jump between editors', async ({ page }) => {
   const processEditor = new ProcessEditor(page, 'testFormProcess.p.json');

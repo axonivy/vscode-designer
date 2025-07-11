@@ -1,15 +1,15 @@
 import {
-  GlspVscodeConnector,
   GlspEditorProvider,
+  GlspVscodeConnector,
   SocketGlspVscodeServer,
   Writable,
   configureDefaultCommands
 } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
-import { setupCommunication } from './webview-communication';
+import { messenger } from '../..';
 import { createWebViewContent } from '../webview-helper';
 import { ProcessVscodeConnector } from './process-vscode-connector';
-import { messenger } from '../..';
+import { setupCommunication } from './webview-communication';
 
 export default class ProcessEditorProvider extends GlspEditorProvider {
   diagramType = 'ivy-glsp-process';

@@ -1,7 +1,7 @@
-import * as vscode from 'vscode';
-import { InscriptionActionHandler, SendInscriptionNotification } from './action-handlers';
 import { InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
+import * as vscode from 'vscode';
 import { IvyProjectExplorer } from '../../../project-explorer/ivy-project-explorer';
+import { InscriptionActionHandler, SendInscriptionNotification } from './action-handlers';
 
 export class NewProcessActionHandler implements InscriptionActionHandler {
   actionId = 'newProcess' as const;

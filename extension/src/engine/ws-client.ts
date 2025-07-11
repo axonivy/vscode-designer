@@ -1,8 +1,8 @@
-import { WebSocket } from 'ws';
-import { WebIdeClientJsonRpc } from './api/jsonrpc';
 import * as vscode from 'vscode';
-import { animationSettings, handleOpenProcessEditor, openEditor } from './animation';
 import { IWebSocket, WebSocketMessageReader, WebSocketMessageWriter } from 'vscode-ws-jsonrpc';
+import { WebSocket } from 'ws';
+import { animationSettings, handleOpenProcessEditor, openEditor } from './animation';
+import { WebIdeClientJsonRpc } from './api/jsonrpc';
 
 export const WebSocketClientProvider = (webSocketUrl: URL) => {
   const webSocket = new WebSocket(new URL('ivy-web-ide-lsp', webSocketUrl));

@@ -1,6 +1,6 @@
 import { Page, expect } from '@playwright/test';
-import { View } from './view';
 import { getCtrlOrMeta } from '../utils/keyboard';
+import { View } from './view';
 
 export class Editor extends View {
   constructor(

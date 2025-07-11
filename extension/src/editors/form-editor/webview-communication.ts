@@ -1,13 +1,12 @@
+import { FormActionArgs } from '@axonivy/form-editor-protocol';
+import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
-import { WebSocketForwarder } from '../websocket-forwarder';
-import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
-import { FormActionArgs } from '@axonivy/form-editor-protocol';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
-import { hasEditorFileContent, InitializeConnectionRequest, WebviewReadyNotification } from '../notification-helper';
 import { updateTextDocumentContent } from '../content-writer';
-import { isAction } from '../notification-helper';
+import { hasEditorFileContent, InitializeConnectionRequest, isAction, WebviewReadyNotification } from '../notification-helper';
+import { WebSocketForwarder } from '../websocket-forwarder';
 
 const FormWebSocketMessage: NotificationType<unknown> = { method: 'formWebSocketMessage' };
 

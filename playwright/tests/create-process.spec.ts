@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
-import { ProcessEditor } from './page-objects/process-editor';
-import { FileExplorer } from './page-objects/explorer-view';
 import { test } from './fixtures/baseTest';
+import { FileExplorer } from './page-objects/explorer-view';
+import { ProcessEditor } from './page-objects/process-editor';
 
 test.describe('Create Process', () => {
   let explorer: FileExplorer;

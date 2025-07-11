@@ -1,5 +1,5 @@
-import { NotificationType } from 'vscode-messenger-common';
 import { EditorFileContent } from '@axonivy/dataclass-editor-protocol';
+import { NotificationType } from 'vscode-messenger-common';
 
 export const WebviewReadyNotification: NotificationType<void> = { method: 'ready' };
 export const InitializeConnectionRequest: NotificationType<{ file: string }> = { method: 'initializeConnection' };
