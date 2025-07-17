@@ -1,13 +1,16 @@
+import { IncomingMessage } from 'http';
 import path from 'path';
 import * as vscode from 'vscode';
 import { setStatusBarMessage } from '../../base/status-bar';
 import { NewProcessParams } from '../../project-explorer/new-process';
 import { NewUserDialogParams } from '../../project-explorer/new-user-dialog';
+import { handleProjectConversionLog } from '../project-conversion-log';
 import { handleAxiosError } from './axios-error-handler';
 import {
   DataClassInit,
   NewProjectParams,
   buildProjects,
+  convertProject,
   createDataClass,
   createHd,
   createPmvAndProjectFiles,
@@ -16,6 +19,8 @@ import {
   deleteProject,
   deployProjects,
   findOrCreatePmv,
+  projects,
+  refreshProjectStatuses,
   stopBpmEngine
 } from './generated/client';
 import { pollWithProgress } from './poll';
@@ -127,6 +132,30 @@ export class IvyEngineApi {
     await vscode.window.withProgress(progressOptions('Delete Project'), async () => {
       await deleteProject({ projectDir }, { baseURL, ...options }).catch(handleAxiosError);
     });
+  }
+
+  public async convertProject(projectDir: string) {
+    const baseURL = await this.baseURL;
+    const data = await convertProject({ projectDir }, { baseURL, ...options, responseType: 'stream' })
+      .catch(handleAxiosError)
+      .then(res => res.data);
+    if (data instanceof IncomingMessage) {
+      await handleProjectConversionLog(data);
+    }
+  }
+
+  public async refreshProjectStatuses() {
+    const baseURL = await this.baseURL;
+    return vscode.window.withProgress(progressOptions('Create new Project'), async () => {
+      return refreshProjectStatuses({ baseURL, ...options })
+        .then(res => res.data)
+        .catch(handleAxiosError);
+    });
+  }
+
+  public async projects() {
+    const baseURL = await this.baseURL;
+    return (await projects({}, { baseURL, ...options })).data;
   }
 
   public get devContextPath(): Promise<string> {

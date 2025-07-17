@@ -3,11 +3,12 @@ import * as vscode from 'vscode';
 import { Messenger, MessengerDiagnostic } from 'vscode-messenger';
 import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
-import { addDevContainer } from './dev-container/command';
-import { IvyEngineManager } from './engine/engine-manager';
-import { IvyProjectExplorer } from './project-explorer/ivy-project-explorer';
 import { setStatusBarIcon } from './base/status-bar';
+import { addDevContainer } from './dev-container/command';
+import { IvyDiagnostics } from './engine/diagnostics';
+import { IvyEngineManager } from './engine/engine-manager';
 import { showRuntimeLog } from './engine/ws-client';
+import { IvyProjectExplorer } from './project-explorer/ivy-project-explorer';
 
 let ivyEngineManager: IvyEngineManager;
 
@@ -29,6 +30,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Messen
   registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));
   registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
   IvyProjectExplorer.init(context);
+  IvyDiagnostics.init(context);
   setStatusBarIcon();
 
   return messenger.diagnosticApi();

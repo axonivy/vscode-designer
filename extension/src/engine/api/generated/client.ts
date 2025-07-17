@@ -156,7 +156,9 @@ export interface ProjectBean {
   version: string;
   isDeletable: boolean;
   defaultNamespace: string;
+  projectDirectory: string;
   dependencies: ProjectIdentifier[];
+  errorMessage: string;
 }
 
 export interface NewProjectParams {
@@ -306,6 +308,12 @@ export type ProjectsParams = {
   withDependencies?: boolean;
 };
 
+export type ConvertProjectParams = {
+  projectDir?: string;
+  app?: string;
+  pmv?: string;
+};
+
 export type DeleteProjectParams = {
   projectDir?: string;
   app?: string;
@@ -432,6 +440,20 @@ export const projects = <TData = AxiosResponse<ProjectBean[]>>(params?: Projects
   });
 };
 
+export const refreshProjectStatuses = <TData = AxiosResponse<ProjectBean[]>>(options?: AxiosRequestConfig): Promise<TData> => {
+  return axios.post(`/web-ide/projects/refreshProjectStatuses`, undefined, options);
+};
+
+export const convertProject = <TData = AxiosResponse<unknown>>(
+  params?: ConvertProjectParams,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.post(`/web-ide/project/convert`, undefined, {
+    ...options,
+    params: { ...params, ...options?.params }
+  });
+};
+
 export const createPmvAndProjectFiles = <TData = AxiosResponse<unknown>>(
   newProjectParams: NewProjectParams,
   options?: AxiosRequestConfig
@@ -552,6 +574,8 @@ export type DeleteProcessResult = AxiosResponse<unknown>;
 export type BuildProjectsResult = AxiosResponse<unknown>;
 export type DeployProjectsResult = AxiosResponse<unknown>;
 export type ProjectsResult = AxiosResponse<ProjectBean[]>;
+export type RefreshProjectStatusesResult = AxiosResponse<ProjectBean[]>;
+export type ConvertProjectResult = AxiosResponse<unknown>;
 export type CreatePmvAndProjectFilesResult = AxiosResponse<unknown>;
 export type FindOrCreatePmvResult = AxiosResponse<unknown>;
 export type DeleteProjectResult = AxiosResponse<unknown>;

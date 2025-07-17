@@ -1,6 +1,7 @@
 import path from 'path';
 import * as vscode from 'vscode';
 import { Command, executeCommand, registerCommand } from '../base/commands';
+import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
 import { addNewDataClass } from './new-data-class';
@@ -64,6 +65,7 @@ export class IvyProjectExplorer {
     );
     registerCmd(`${VIEW_ID}.addNewDataClass`, (s: TreeSelection) => this.addDataClass(s));
     registerCmd(`${VIEW_ID}.revealInExplorer`, (entry: Entry) => executeCommand('revealInExplorer', this.getCmdEntry(entry)?.uri));
+    registerCmd(`${VIEW_ID}.convertProject`, (s: TreeSelection) => this.convertProject(s));
   }
 
   private defineFileWatchers() {
@@ -96,6 +98,7 @@ export class IvyProjectExplorer {
     const hasIvyProjects = await this.hasIvyProjects();
     await this.setProjectExplorerActivationCondition(hasIvyProjects);
     await this.activateEngineExtension(hasIvyProjects);
+    await IvyDiagnostics.instance.refresh(true);
   }
 
   private async runEngineAction(action: (projectDir: string) => Promise<void>, selection: TreeSelection) {
@@ -187,6 +190,25 @@ export class IvyProjectExplorer {
       return this.treeView.selection[0];
     }
     return undefined;
+  }
+
+  private async convertProject(selection: TreeSelection) {
+    const projectPath = await treeSelectionToProjectPath(selection, this.getIvyProjects());
+    const quickPick = vscode.window.createQuickPick();
+    quickPick.title = 'Select Axon Ivy projects to be converted';
+    quickPick.canSelectMany = true;
+    quickPick.items = (await this.getIvyProjects()).map(p => ({ label: path.basename(p), detail: p }));
+    quickPick.selectedItems = quickPick.items.filter(item => item.detail === projectPath);
+    quickPick.show();
+    quickPick.onDidAccept(async () => {
+      for (const item of quickPick.selectedItems) {
+        if (item.detail) {
+          await IvyEngineManager.instance.convertProject(item.detail);
+        }
+      }
+      IvyDiagnostics.instance.refresh();
+      quickPick.dispose();
+    });
   }
 
   getIvyProjects() {
