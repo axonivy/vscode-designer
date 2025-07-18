@@ -13,10 +13,6 @@ pipeline {
     disableConcurrentBuilds()
   }
 
-  parameters {
-    string(name: 'engineDownloadUrl', defaultValue: 'https://jenkins.ivyteam.io/job/core_product-engine/job/master/lastSuccessfulBuild/artifact/workspace/ch.ivyteam.ivy.server.product/target/products/*_Slim_*.zip/*zip*/products.zip', description: 'engine that will be packaged')
-  }
-
   triggers {
     cron '@midnight'
   }
@@ -34,7 +30,7 @@ pipeline {
           bat 'npm run update:axonivy:next'
           bat 'npm install'
           bat 'npm run build:production'
-          bat 'npm run download:engine ' //Encoding of url param '/' does not work on windows: + params.engineDownloadUrl
+          bat 'npm run download:engine'
         }
       }
     }

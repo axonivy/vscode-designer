@@ -13,28 +13,35 @@ export class ProblemsView extends View {
 
   static async initProblemsView(page: Page) {
     const problemsView = new ProblemsView(page);
-    await problemsView.tabLocator.click();
-    await problemsView.isChecked();
+    await problemsView.show();
     return problemsView;
   }
 
-  private async hasMaker(message: string, pid: string, type: 'error' | 'warning') {
+  private async hasMaker(message: string, type: 'error' | 'warning', pid?: string) {
     const marker = this.viewLocator.locator(`div.monaco-tl-row:has-text("${message}")`);
     await expect(marker).toBeVisible();
     await expect(marker.locator(`div.marker-icon.${type}`)).toBeVisible();
-    await expect(marker).toContainText(pid);
+    if (pid) {
+      await expect(marker).toContainText(pid);
+    }
+  }
+
+  async show() {
+    await this.tabLocator.click();
+    await this.isChecked();
   }
 
   async hasWarning(message: string, pid: string) {
-    await this.hasMaker(message, pid, 'warning');
+    await this.hasMaker(message, 'warning', pid);
   }
 
-  async hasError(message: string, pid: string) {
-    await this.hasMaker(message, pid, 'error');
+  async hasError(message: string, pid?: string) {
+    await this.hasMaker(message, 'error', pid);
   }
 
   async hasNoMarker() {
     const marker = this.viewLocator.locator('div.monaco-tl-row');
     await expect(marker).not.toBeAttached();
+    await expect(this.viewLocator).toContainText('No problems have been detected in the workspace.');
   }
 }
