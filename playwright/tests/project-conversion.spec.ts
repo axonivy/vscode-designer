@@ -3,6 +3,7 @@ import { test } from './fixtures/baseTest';
 import { Editor } from './page-objects/editor';
 import { OutputView } from './page-objects/output-view';
 import { ProblemsView } from './page-objects/problems-view';
+import { wait } from './utils/timeout';
 
 const PREF_PREFIX = 'ch.ivyteam.ivy.project.preferences\\:PROJECT_VERSION=';
 
@@ -18,6 +19,7 @@ test('Convert project', async ({ page }) => {
   await page.keyboard.insertText(`${PREF_PREFIX}100000`);
   await editor.activeEditorHasText(`${PREF_PREFIX}100000`);
   await editor.saveAllFiles();
+  await wait(page);
   await editor.executeCommand('Axon Ivy: Refresh Project Explorer');
   await editor.executeCommand('View: Focus into Panel');
   const problemsView = await ProblemsView.initProblemsView(page);
