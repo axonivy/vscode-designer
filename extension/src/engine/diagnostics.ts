@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { IvyEngineManager } from './engine-manager';
 
 const DIAGNOSTIC_SOURCE = 'Axon Ivy';
+const CONVERSION_MESSAGE_PREFIX = 'Project is outdated and needs to be converted';
 export class IvyDiagnostics {
   private static _instance: IvyDiagnostics;
 
@@ -32,6 +33,16 @@ export class IvyDiagnostics {
       });
   }
 
+  public projectsToBeConverted() {
+    const projects: string[] = [];
+    this.diagnostics.forEach((uri, diagnostics) => {
+      if (diagnostics.find(d => d.message.startsWith(CONVERSION_MESSAGE_PREFIX))) {
+        projects.push(uri.fsPath);
+      }
+    });
+    return projects;
+  }
+
   static get instance() {
     if (IvyDiagnostics._instance) {
       return IvyDiagnostics._instance;
@@ -46,7 +57,7 @@ export class ConvertProjectQuickFix implements vscode.CodeActionProvider {
       return [];
     }
     const diagnostic = context.diagnostics[0];
-    if (diagnostic.source !== DIAGNOSTIC_SOURCE || !diagnostic.message.startsWith('Project is outdated and needs to be converted')) {
+    if (diagnostic.source !== DIAGNOSTIC_SOURCE || !diagnostic.message.startsWith(CONVERSION_MESSAGE_PREFIX)) {
       return [];
     }
     const title = 'Axon Ivy: Convert Project';

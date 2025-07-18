@@ -194,10 +194,11 @@ export class IvyProjectExplorer {
 
   private async convertProject(selection: TreeSelection) {
     const projectPath = await treeSelectionToProjectPath(selection, this.getIvyProjects());
+    const projects = IvyDiagnostics.instance.projectsToBeConverted();
     const quickPick = vscode.window.createQuickPick();
     quickPick.title = 'Select Axon Ivy projects to be converted';
     quickPick.canSelectMany = true;
-    quickPick.items = (await this.getIvyProjects()).map(p => ({ label: path.basename(p), detail: p }));
+    quickPick.items = projects.map(pom => path.dirname(pom)).map(project => ({ label: path.basename(project), detail: project }));
     quickPick.selectedItems = quickPick.items.filter(item => item.detail === projectPath);
     quickPick.show();
     quickPick.onDidAccept(async () => {
