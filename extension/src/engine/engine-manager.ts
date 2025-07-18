@@ -15,6 +15,7 @@ import { NewUserDialogParams } from '../project-explorer/new-user-dialog';
 import { IvyEngineApi } from './api/engine-api';
 import { DataClassInit, NewProjectParams } from './api/generated/client';
 import { MavenBuilder } from './build/maven';
+import { IvyDiagnostics } from './diagnostics';
 import { EngineRunner } from './engine-runner';
 import { WebSocketClientProvider } from './ws-client';
 
@@ -57,6 +58,7 @@ export class IvyEngineManager {
     CmsEditorProvider.register(this.context, websocketUrl);
     DataClassEditorProvider.register(this.context, websocketUrl);
     WebSocketClientProvider(websocketUrl);
+    IvyDiagnostics.instance.refresh();
   }
 
   private async resolveEngineUrl() {
@@ -156,6 +158,18 @@ export class IvyEngineManager {
 
   public async deleteProject(ivyProjectDirectory: string) {
     this.ivyEngineApi.deleteProject(ivyProjectDirectory);
+  }
+
+  public async convertProject(ivyProjectDirectory: string) {
+    await this.ivyEngineApi.convertProject(ivyProjectDirectory);
+  }
+
+  public async refreshProjectStatuses() {
+    return await this.ivyEngineApi.refreshProjectStatuses();
+  }
+
+  public async projects() {
+    return this.ivyEngineApi.projects();
   }
 
   async ivyProjectDirectories() {

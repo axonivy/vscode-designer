@@ -39,7 +39,8 @@ type ProjectViewCommand =
   | 'ivyProjects.addNewOfflineDialog'
   | 'ivyProjects.addNewDataClass'
   | 'ivyProjects.revealInExplorer'
-  | 'ivyProjects.stopBpmEngine';
+  | 'ivyProjects.stopBpmEngine'
+  | 'ivyProjects.convertProject';
 type ViewCommand =
   | 'ivyBrowserView.focus'
   | 'ivyBrowserView.open'
