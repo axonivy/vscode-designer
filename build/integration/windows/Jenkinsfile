@@ -26,7 +26,7 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        nodejs(nodeJSInstallationName: '22.11.0') {
+        nodejs(nodeJSInstallationName: '22.17.1') {
           bat 'npm run update:axonivy:next'
           bat 'npm install'
           bat 'npm run build:production'
@@ -37,7 +37,7 @@ pipeline {
 
     stage('Playwright Tests') {
       steps {
-        nodejs(nodeJSInstallationName: '22.11.0') {
+        nodejs(nodeJSInstallationName: '22.17.1') {
           catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
             bat 'start extension/AxonIvyEngine/bin/AxonIvyEngine.exe'
             bat 'npm run test:playwright:download:vscode'
@@ -57,7 +57,7 @@ pipeline {
         expression { isReleasingBranch() }
       }
       steps {
-        nodejs(nodeJSInstallationName: '22.11.0') {
+        nodejs(nodeJSInstallationName: '22.17.1') {
           catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
             script {
               bat 'npm run download:openapi'
