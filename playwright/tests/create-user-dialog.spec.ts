@@ -22,7 +22,7 @@ test.describe('Create User Dialog', () => {
     await explorer.hasNode(`${userDialogName}Data.d.json`);
     await explorer.hasNode(`${userDialogName}Process.p.json`);
     await explorer.isTabWithNameVisible(userDialogName + '.xhtml');
-    await processEditor.activeEditorHasText('>Html Dialog</a>');
+    await expect(processEditor.editorContent()).toContainText('>Html Dialog</a>');
     await explorer.doubleClickNode(`${userDialogName}Process.p.json`);
     const start = processEditor.locatorForElementType('g.start\\:htmlDialogStart');
     await expect(start).toBeVisible();
@@ -34,7 +34,7 @@ test.describe('Create User Dialog', () => {
     await explorer.hasNode(`${userDialogName}Data.d.json`);
     await explorer.hasNode(`${userDialogName}Process.p.json`);
     await explorer.isTabWithNameVisible(userDialogName + '.xhtml');
-    await processEditor.activeEditorHasText('>Offline Html Dialog</a>');
+    await expect(processEditor.editorContent()).toContainText('>Offline Html Dialog</a>');
     await explorer.doubleClickNode(`${userDialogName}Process.p.json`);
     const start = processEditor.locatorForElementType('g.start\\:htmlDialogStart');
     await expect(start).toBeVisible();
@@ -55,7 +55,7 @@ test.describe('Create User Dialog', () => {
     const xhtmlEditor = new FormEditor(page, `${userDialogName}.xhtml`);
     await xhtmlEditor.openEditorFile();
     await xhtmlEditor.isTabVisible();
-    await xhtmlEditor.activeEditorHasText('<h:form id="form">');
+    await expect(xhtmlEditor.editorContent()).toContainText('<h:form id="form">');
     await xhtmlEditor.revertAndCloseEditor();
   });
 });

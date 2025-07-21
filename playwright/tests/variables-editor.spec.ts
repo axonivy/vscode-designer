@@ -19,7 +19,7 @@ test('Read, write and open help', async ({ page }) => {
   await page.waitForTimeout(300);
   await editor.saveAllFiles();
   await editor.executeCommand('View: Reopen Editor With Text Editor');
-  await editor.activeEditorHasText(`originalKey: ${newValue}`);
+  await expect(editor.editorContent()).toContainText(`originalKey: ${newValue}`);
 
   await editor.executeCommand('View: Reopen Editor With...', 'Axon Ivy Variables Editor');
   const browserView = new BrowserView(page);

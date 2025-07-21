@@ -27,4 +27,8 @@ export class Editor extends View {
     }
     await expect(this.tabLocator).toBeHidden();
   }
+
+  editorContent() {
+    return this.page.locator('div.editor-container');
+  }
 }

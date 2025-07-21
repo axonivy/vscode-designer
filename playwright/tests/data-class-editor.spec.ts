@@ -32,6 +32,6 @@ test.describe('Data Class Editor', () => {
     const javaEditor = new Editor('DataClassEditorTest.java', page);
     await javaEditor.openEditorFile();
     await javaEditor.isTabVisible();
-    await javaEditor.activeEditorHasText(`  private java.lang.String ${attributeName};`);
+    await expect(javaEditor.editorContent()).toContainText(`  private java.lang.String ${attributeName};`);
   });
 });
