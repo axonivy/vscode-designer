@@ -6,7 +6,7 @@ RUN apt-get update &&\
   apt-get update &&\
   apt-get install openjdk-21-jdk -y
 
-ARG MAVEN_VERSION=3.9.8
+ARG MAVEN_VERSION=3.9.11
 ARG BASE_URL=https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries
 
 RUN mkdir -p /usr/share/maven /usr/share/maven/ref \
