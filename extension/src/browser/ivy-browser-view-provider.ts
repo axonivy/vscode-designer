@@ -12,20 +12,19 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
   private constructor(
     readonly extensionUri: vscode.Uri,
     readonly engineUrl: URL,
-    readonly devWfUiUrl: URL
+    readonly devContextPath: string
   ) {}
 
-  private static init(context: vscode.ExtensionContext, engineUrl: URL, devWfUiUrl: URL) {
+  private static init(context: vscode.ExtensionContext, engineUrl: URL, devContextPath: string) {
     if (!IvyBrowserViewProvider._instance) {
-      IvyBrowserViewProvider._instance = new IvyBrowserViewProvider(context.extensionUri, engineUrl, devWfUiUrl);
+      IvyBrowserViewProvider._instance = new IvyBrowserViewProvider(context.extensionUri, engineUrl, devContextPath);
     }
     return IvyBrowserViewProvider._instance;
   }
 
   public static register(context: vscode.ExtensionContext, engineUrl: URL, devContextPath: string) {
     const resolvedEngineUrl = this.resolveCodespacesEngineHost(engineUrl);
-    const devWfUiUrl = new URL(devContextPath, resolvedEngineUrl);
-    const provider = IvyBrowserViewProvider.init(context, resolvedEngineUrl, devWfUiUrl);
+    const provider = IvyBrowserViewProvider.init(context, resolvedEngineUrl, devContextPath);
     context.subscriptions.push(
       vscode.window.registerWebviewViewProvider(IvyBrowserViewProvider.viewType, provider, {
         webviewOptions: { retainContextWhenHidden: true }
@@ -33,10 +32,8 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
     );
     registerCommand('ivyBrowserView.open', context, (url?: string) => provider.open(url));
     registerCommand('ivyBrowserView.openDevWfUi', context, () => provider.openDevWfUi());
-    registerCommand('ivyBrowserView.openEngineCockpit', context, () =>
-      provider.openUrl(new URL('system/engine-cockpit', resolvedEngineUrl))
-    );
-    registerCommand('ivyBrowserView.openNEO', context, () => provider.openUrl(new URL('neo', resolvedEngineUrl)));
+    registerCommand('ivyBrowserView.openEngineCockpit', context, () => provider.openEngineRelativeUrl('system/engine-cockpit'));
+    registerCommand('ivyBrowserView.openNEO', context, () => provider.openEngineRelativeUrl('neo'));
   }
 
   private static resolveCodespacesEngineHost(engineUrl: URL): URL {
@@ -70,8 +67,8 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
     });
   }
 
-  private async openUrl(url: URL) {
-    this.refreshWebviewHtml(url.toString());
+  async openEngineRelativeUrl(input: string) {
+    this.refreshWebviewHtml(new URL(input, this.engineUrl).toString());
   }
 
   async open(url?: string) {
@@ -86,12 +83,7 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
   }
 
   private async openDevWfUi() {
-    this.openUrl(this.devWfUiUrl);
-  }
-
-  async startProcess(processStart: string) {
-    const startUrl = new URL(processStart, this.engineUrl);
-    this.openUrl(startUrl);
+    this.openEngineRelativeUrl(this.devContextPath);
   }
 
   private refreshWebviewHtml(url: string) {
