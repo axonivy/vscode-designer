@@ -33,7 +33,7 @@ test.describe('Form Editor', () => {
     const xhtmlEditor = new FormEditor(page, 'testForm.xhtml');
     await xhtmlEditor.openEditorFile();
     await xhtmlEditor.isTabVisible();
-    await xhtmlEditor.activeEditorHasText(`value="${newLabel}" />`);
+    await expect(xhtmlEditor.editorContent()).toContainText(`value="${newLabel}" />`);
     await xhtmlEditor.revertAndCloseEditor();
   });
 

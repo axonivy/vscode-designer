@@ -11,13 +11,13 @@ test('Convert project', async ({ page }) => {
   const editor = new Editor('ch.ivyteam.ivy.designer.prefs', page);
   await editor.hasDeployProjectStatusMessage();
   await editor.openEditorFile();
-  await editor.activeEditorHasText(PREF_PREFIX);
+  const editorContent = editor.editorContent();
+  await expect(editorContent).toContainText(PREF_PREFIX);
   await editor.executeCommand('Select All');
-  const editorContainer = editor.editorContainer();
   await page.keyboard.press('Delete');
-  await expect(editorContainer).not.toContainText(PREF_PREFIX);
+  await expect(editorContent).not.toContainText(PREF_PREFIX);
   await page.keyboard.insertText(`${PREF_PREFIX}100000`);
-  await editor.activeEditorHasText(`${PREF_PREFIX}100000`);
+  await expect(editorContent).toContainText(`${PREF_PREFIX}100000`);
   await editor.saveAllFiles();
   await wait(page);
   await editor.executeCommand('Axon Ivy: Refresh Project Explorer');
@@ -29,8 +29,8 @@ test('Convert project', async ({ page }) => {
   await quickPick.getByRole('button').getByText('OK').click();
   const output = new OutputView(page);
   await expect(output.viewLocator).toContainText('[info] Finished conversion of project playwrightTestWorkspace');
-  await editor.activeEditorHasText(PREF_PREFIX);
-  await expect(editorContainer).not.toContainText(`${PREF_PREFIX}100000`);
+  await expect(editorContent).toContainText(PREF_PREFIX);
+  await expect(editorContent).not.toContainText(`${PREF_PREFIX}100000`);
   await problemsView.show();
   await problemsView.hasNoMarker();
 });

@@ -28,11 +28,7 @@ export class Editor extends View {
     await expect(this.tabLocator).toBeHidden();
   }
 
-  async activeEditorHasText(text: string) {
-    await expect(this.editorContainer()).toContainText(text);
-  }
-
-  editorContainer() {
+  editorContent() {
     return this.page.locator('div.editor-container');
   }
 }

@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import { test } from './fixtures/baseTest';
 import { DataClassEditor } from './page-objects/data-class-editor';
 import { Editor } from './page-objects/editor';
@@ -15,7 +16,8 @@ test.describe('Create Data Class', () => {
     const javaEditor = new Editor(`${dataClassName}.java`, page);
     await javaEditor.openEditorFile();
     await javaEditor.isTabVisible();
-    await javaEditor.activeEditorHasText(`package ch.ivyteam.test.data;`);
-    await javaEditor.activeEditorHasText(`public class ${dataClassName} extends ch.ivyteam.ivy.scripting.objects.CompositeObject`);
+    const content = javaEditor.editorContent();
+    await expect(content).toContainText(`package ch.ivyteam.test.data;`);
+    await expect(content).toContainText(`public class ${dataClassName} extends ch.ivyteam.ivy.scripting.objects.CompositeObject`);
   });
 });
