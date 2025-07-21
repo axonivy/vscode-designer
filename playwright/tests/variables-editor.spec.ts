@@ -8,7 +8,6 @@ test('Read, write and open help', async ({ page }) => {
   await editor.hasDeployProjectStatusMessage();
   await editor.openEditorFile();
   await editor.isTabVisible();
-  await editor.executeCommand('View: Reopen Editor With...', 'Axon Ivy Variables Editor');
   await editor.isViewVisible();
 
   await editor.hasKey('originalKey');
