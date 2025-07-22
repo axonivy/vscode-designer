@@ -29,7 +29,7 @@ class CmsEditorWebSocketForwarder extends WebSocketForwarder {
 
   protected override handleClientMessage(message: unknown) {
     if (isAction<CmsActionArgs>(message) && message.params.actionId === 'openUrl') {
-      IvyBrowserViewProvider.instance.open(message.params.payload);
+      IvyBrowserViewProvider.instance.openEngineRelativeUrl(message.params.payload);
     }
     super.handleClientMessage(message);
   }

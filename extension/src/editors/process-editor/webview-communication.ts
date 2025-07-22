@@ -29,9 +29,13 @@ export const setupCommunication = (
     messenger.onNotification(WebviewConnectionReadyNotification, () => handleWebviewReadyNotification(messenger, messageParticipant), {
       sender: messageParticipant
     }),
-    messenger.onRequest<string, Promise<void>>(StartProcessRequest, startUri => IvyBrowserViewProvider.instance.startProcess(startUri), {
-      sender: messageParticipant
-    }),
+    messenger.onRequest<string, Promise<void>>(
+      StartProcessRequest,
+      startUri => IvyBrowserViewProvider.instance.openEngineRelativeUrl(startUri),
+      {
+        sender: messageParticipant
+      }
+    ),
     vscode.window.onDidChangeActiveColorTheme(theme =>
       messenger.sendNotification(ColorThemeChangedNotification, messageParticipant, vsCodeThemeToMonacoTheme(theme))
     )
