@@ -32,6 +32,7 @@ test.describe('Project Explorer - several Ivy Projects', () => {
 
 test('cms entry', async ({ page }) => {
   const explorer = new ProjectExplorerView(page);
+  await explorer.hasDeployProjectStatusMessage();
   explorer.openView();
   explorer.selectNode('playwrightTestWorkspace');
   explorer.selectNode('cms');
