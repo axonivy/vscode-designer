@@ -1,12 +1,12 @@
-import * as vscode from 'vscode';
-import { IWebSocket, WebSocketMessageReader, WebSocketMessageWriter } from 'vscode-ws-jsonrpc';
 import { LogClientJsonRpc } from '@axonivy/log-view-core';
 import { RuntimeLogEntry } from '@axonivy/log-view-protocol';
+import * as vscode from 'vscode';
+import { IWebSocket, WebSocketMessageReader, WebSocketMessageWriter } from 'vscode-ws-jsonrpc';
 import { WebSocket } from 'ws';
 import { animationSettings, handleOpenProcessEditor, openEditor } from './animation';
 import { WebIdeClientJsonRpc } from './api/jsonrpc';
 
-const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Axon Ivy Runtime Log');
+const outputChannel: vscode.LogOutputChannel = vscode.window.createOutputChannel('Axon Ivy Runtime Log', { log: true });
 
 export const WebSocketClientProvider = (webSocketUrl: URL) => {
   const runtimeLogWebSocket = new WebSocket(new URL('ivy-runtime-log-lsp', webSocketUrl));
@@ -16,11 +16,11 @@ export const WebSocketClientProvider = (webSocketUrl: URL) => {
     LogClientJsonRpc.startClient(connection).then(client => {
       client.data().then(data =>
         data.forEach(entry => {
-          outputChannel.appendLine(logMessage(entry));
+          logByLevel(entry);
         })
       );
       client.onNotification('newEntry', entry => {
-        outputChannel.appendLine(logMessage(entry));
+        logByLevel(entry);
       });
     });
   };
@@ -42,8 +42,28 @@ export const WebSocketClientProvider = (webSocketUrl: URL) => {
 };
 
 const logMessage = (entry: RuntimeLogEntry) => {
-  const logMessage = `[${entry.timestamp}][${entry.level}][${entry.project}] ${entry.message}`;
+  const logMessage = `[${entry.project}] ${entry.message}`;
   return entry.stacktrace ? `${logMessage} ${entry.stacktrace}` : logMessage;
+};
+
+const logByLevel = (entry: RuntimeLogEntry): void => {
+  const message = logMessage(entry);
+  switch (entry.level) {
+    case 'DEBUG':
+      outputChannel.debug(message);
+      break;
+    case 'INFO':
+      outputChannel.info(message);
+      break;
+    case 'WARN':
+      outputChannel.warn(message);
+      break;
+    case 'ERROR':
+      outputChannel.error(message);
+      break;
+    default:
+      outputChannel.appendLine(message);
+  }
 };
 
 export const showRuntimeLog = () => {
