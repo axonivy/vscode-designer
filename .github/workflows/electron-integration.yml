@@ -1,6 +1,8 @@
 name: Playwright Tests - Electron
 on:
   push:
+    branches:
+      - master
   schedule:
     - cron: '21 21 * * *'
 permissions: {}
