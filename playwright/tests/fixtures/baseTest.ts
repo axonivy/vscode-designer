@@ -8,7 +8,7 @@ import { downloadVersion } from '../utils/download-version';
 import { prebuiltWorkspacePath } from '../workspaces/workspace';
 export { expect } from '@playwright/test';
 
-export const runInBrowser = process.env.RUN_IN_BRWOSER ? true : false;
+export const runInBrowser = process.env.RUN_IN_BROWSER ? true : false;
 
 export const test = base.extend<{ workspace: string; page: Page }>({
   workspace: prebuiltWorkspacePath,
