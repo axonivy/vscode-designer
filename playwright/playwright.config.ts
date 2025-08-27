@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   use: {
-    permissions: ['clipboard-read'],
+    // permissions: ['clipboard-read'],
     trace: 'on-first-retry',
     screenshot: 'on',
     video: 'on-first-retry'
