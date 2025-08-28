@@ -1,4 +1,4 @@
-import { _electron, test as base, firefox, Page } from '@playwright/test';
+import { _electron, test as base, chromium, Page } from '@playwright/test';
 import { downloadAndUnzipVSCode } from '@vscode/test-electron/out/download';
 import fs from 'fs';
 import os from 'os';
@@ -22,7 +22,7 @@ export const test = base.extend<{ workspace: string; page: Page }>({
 });
 
 const runBrowserTest = async (workspace: string, take: (r: Page) => Promise<void>) => {
-  const browser = await firefox.launch();
+  const browser = await chromium.launch();
   const page = await browser.newPage();
   await page.setViewportSize({ width: 1920, height: 1080 });
   const tmpWorkspace = await createTmpWorkspace(workspace);
