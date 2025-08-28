@@ -29,10 +29,7 @@ const runBrowserTest = async (workspace: string, take: (r: Page) => Promise<void
   await page.goto(`http://localhost:3000/?folder=${tmpWorkspace}`);
   await initialize(page);
   await take(page);
-  console.log('browsercontexts: ' + browser.contexts().length);
-  for (const ctx of browser.contexts()) {
-    await ctx.close();
-  }
+  await page.close({ runBeforeUnload: true });
   await browser.close();
   await fs.promises.rm(tmpWorkspace, { recursive: true });
 };
