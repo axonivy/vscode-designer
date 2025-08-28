@@ -23,7 +23,7 @@
     "publish:next": "lerna run publish:next",
     "sbom": "npx --yes @cyclonedx/cyclonedx-npm --output-format JSON --output-file bom.json",
     "test:playwright": "npm run -w @axonivy/vscode-designer-playwright ui-tests",
-    "test:playwright:browser": "RUN_IN_BRWOSER=true npm run test:playwright",
+    "test:playwright:browser": "RUN_IN_BROWSER=true npm run test:playwright",
     "test:playwright:download:vscode": "npm run -w @axonivy/vscode-designer-playwright download:vscode",
     "type": "lerna run type",
     "update:axonivy:next": "npx --yes npm-check-updates @axonivy* -ws -t semver -u",
