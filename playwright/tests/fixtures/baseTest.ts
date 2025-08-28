@@ -30,7 +30,7 @@ const runBrowserTest = async (workspace: string, take: (r: Page) => Promise<void
   await initialize(page);
   await take(page);
   // this goto closes WebSocket connections
-  await page.goto('http://localhost:3000');
+  await page.goto('about:blank');
   await browser.close();
   await fs.promises.rm(tmpWorkspace, { recursive: true });
 };
