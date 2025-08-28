@@ -30,7 +30,6 @@ const runBrowserTest = async (workspace: string, take: (r: Page) => Promise<void
   await initialize(page);
   await take(page);
   console.log('browsercontexts: ' + browser.contexts().length);
-  browser.contexts().forEach(c => c.close());
   for (const ctx of browser.contexts()) {
     await ctx.close();
   }
