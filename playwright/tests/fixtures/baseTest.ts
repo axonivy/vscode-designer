@@ -1,4 +1,4 @@
-import { _electron, test as base, firefox, Page } from '@playwright/test';
+import { _electron, test as base, chromium, Page } from '@playwright/test';
 import { downloadAndUnzipVSCode } from '@vscode/test-electron/out/download';
 import fs from 'fs';
 import os from 'os';
@@ -22,14 +22,15 @@ export const test = base.extend<{ workspace: string; page: Page }>({
 });
 
 const runBrowserTest = async (workspace: string, take: (r: Page) => Promise<void>) => {
-  const browser = await firefox.launch();
-  const page = await browser.newPage();
+  const browser = await chromium.launch();
+  const context = await browser.newContext();
+  const page = await context.newPage();
   await page.setViewportSize({ width: 1920, height: 1080 });
   const tmpWorkspace = await createTmpWorkspace(workspace);
   await page.goto(`http://localhost:3000/?folder=${tmpWorkspace}`);
   await initialize(page);
   await take(page);
-  await page.close({ runBeforeUnload: true });
+  await context.close();
   await browser.close();
   await fs.promises.rm(tmpWorkspace, { recursive: true });
 };
