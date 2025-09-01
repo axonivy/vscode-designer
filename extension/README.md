@@ -7,7 +7,7 @@ Axon Ivy PRO Designer is the official Visual Studio Code extension for developin
 This extension can be used locally or in a [Dev Container](https://code.visualstudio.com/docs/devcontainers/containers). Different installations are required for the two options, see below.
 [Or simply start by cloning our demo-projects repository into your GitHub codespace.](https://github.com/codespaces/new/axonivy/demo-projects)
 
-### Local ussage
+### Local usage
 
 Make sure that **Java SE 21** and **Maven 3** are installed on your machine.
 
