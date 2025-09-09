@@ -66,7 +66,7 @@ export class ProcessEditor extends Editor {
     await expect(target).toHaveClass(/selected/);
     const activities = this.viewFrameLoactor().getByTitle('Activities (A)');
     await activities.click();
-    const newItemButton = this.viewFrameLoactor().locator('#activity-group').getByText(activityName, { exact: true });
+    const newItemButton = this.viewFrameLoactor().locator('div.quick-action-bar-menu').getByRole('button', { name: activityName }).first();
     await newItemButton.click();
   }
 

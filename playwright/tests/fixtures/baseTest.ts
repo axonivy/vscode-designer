@@ -1,4 +1,4 @@
-import { _electron, test as base, chromium, Page } from '@playwright/test';
+import { _electron, test as base, chromium, expect, Page } from '@playwright/test';
 import { downloadAndUnzipVSCode } from '@vscode/test-electron/out/download';
 import fs from 'fs';
 import os from 'os';
@@ -55,6 +55,7 @@ const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.context().tracing.start({ screenshots: true, snapshots: true, title: test.info().title });
   await initialize(page);
+  await closeCopilotChat(page);
   await take(page);
   if (test.info().status === 'failed') {
     const tracePath = test.info().outputPath('trace.zip');
@@ -78,4 +79,12 @@ const createTmpWorkspace = async (workspace: string) => {
   const tmpDir = await fs.promises.realpath(await fs.promises.mkdtemp(path.join(os.tmpdir(), 'playwrightTestWorkspace')));
   await fs.promises.cp(workspace, tmpDir, { recursive: true });
   return tmpDir;
+};
+
+const closeCopilotChat = async (page: Page) => {
+  const sidebar = page.locator('#workbench\\.parts\\.auxiliarybar');
+  if (await sidebar.isVisible()) {
+    await sidebar.getByRole('button', { name: 'hide' }).click();
+    await expect(sidebar).toBeHidden();
+  }
 };
