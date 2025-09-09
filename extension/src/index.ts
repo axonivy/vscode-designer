@@ -18,6 +18,11 @@ export const downloadDevEngine = () =>
   vscode.env.openExternal(vscode.Uri.parse('https://dev.axonivy.com/permalink/dev/axonivy-engine-slim.zip'));
 
 export async function activate(context: vscode.ExtensionContext): Promise<MessengerDiagnostic> {
+  const vscodeXml = await vscode.extensions.getExtension('redhat.vscode-xml')?.activate();
+  if (vscodeXml) {
+    vscodeXml.addXMLCatalogs([]);
+  }
+
   ivyEngineManager = IvyEngineManager.init(context);
 
   registerCommand('engine.deployProjects', context, () => ivyEngineManager.deployProjects());
