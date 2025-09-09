@@ -7,8 +7,8 @@ import { setStatusBarIcon } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
 import { IvyDiagnostics } from './engine/diagnostics';
 import { IvyEngineManager } from './engine/engine-manager';
-import { showRuntimeLog } from './engine/ws-client';
 import { IvyProjectExplorer } from './project-explorer/ivy-project-explorer';
+import { showRuntimeLog } from './views/runtimelog-view';
 
 let ivyEngineManager: IvyEngineManager;
 
@@ -19,7 +19,6 @@ export const downloadDevEngine = () =>
 
 export async function activate(context: vscode.ExtensionContext): Promise<MessengerDiagnostic> {
   ivyEngineManager = IvyEngineManager.init(context);
-
   registerCommand('engine.deployProjects', context, () => ivyEngineManager.deployProjects());
   registerCommand('engine.buildProjects', context, () => ivyEngineManager.buildProjects());
   registerCommand('engine.buildAndDeployProjects', context, () => ivyEngineManager.buildAndDeployProjects());
