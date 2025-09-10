@@ -2,7 +2,6 @@ import {
   GlspEditorProvider,
   GlspVscodeConnector,
   SocketGlspVscodeServer,
-  Writable,
   configureDefaultCommands
 } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
@@ -47,10 +46,9 @@ export default class ProcessEditorProvider extends GlspEditorProvider {
     // Initialize GLSP-VSCode connector with server wrapper
     const ivyVscodeConnector = new ProcessVscodeConnector({
       server: workflowServer,
+      messenger,
       logging: true
     });
-    // use our own custom messenger which may have a different configuration
-    (ivyVscodeConnector as Writable<GlspVscodeConnector>).messenger = messenger;
 
     const customEditorProvider = vscode.window.registerCustomEditorProvider(
       ProcessEditorProvider.viewType,
