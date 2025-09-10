@@ -30,23 +30,23 @@
     "watch": "lerna run watch --parallel"
   },
   "dependencies": {
-    "@axonivy/cms-editor": "~13.2.0-next.425.16d0955",
-    "@axonivy/dataclass-editor": "~13.2.0-next.677.7915055",
+    "@axonivy/cms-editor": "~13.2.0-next.429.fc20887",
+    "@axonivy/dataclass-editor": "~13.2.0-next.681.94594e1",
     "@axonivy/form-editor": "~13.2.0-next.942.7efd3ec",
     "@axonivy/form-editor-core": "~13.2.0-next.942.7efd3ec",
-    "@axonivy/jsonrpc": "~13.2.0-next.854.2ac7a33",
-    "@axonivy/log-view-core": "~13.2.0-next.224.e3294c6",
-    "@axonivy/process-editor": "~13.2.0-next.1769.2eec3b95",
-    "@axonivy/process-editor-inscription": "~13.2.0-next.1769.2eec3b95",
-    "@axonivy/process-editor-inscription-view": "~13.2.0-next.1769.2eec3b95",
-    "@axonivy/ui-components": "~13.2.0-next.854.2ac7a33",
-    "@axonivy/ui-icons": "~13.2.0-next.854.2ac7a33",
-    "@axonivy/variable-editor": "~13.2.0-next.815.5511dac",
+    "@axonivy/jsonrpc": "~13.2.0-next.860.d9aa0de",
+    "@axonivy/log-view-core": "~13.2.0-next.226.b27a7cf",
+    "@axonivy/process-editor": "~13.2.0-next.1773.f6868a1d",
+    "@axonivy/process-editor-inscription": "~13.2.0-next.1773.f6868a1d",
+    "@axonivy/process-editor-inscription-view": "~13.2.0-next.1773.f6868a1d",
+    "@axonivy/ui-components": "~13.2.0-next.860.d9aa0de",
+    "@axonivy/ui-icons": "~13.2.0-next.860.d9aa0de",
+    "@axonivy/variable-editor": "~13.2.0-next.817.23f59fb",
     "vscode-messenger-common": "0.4.5"
   },
   "devDependencies": {
-    "@axonivy/eslint-config": "~13.2.0-next.854.2ac7a33",
-    "@axonivy/prettier-config": "~13.2.0-next.854.2ac7a33",
+    "@axonivy/eslint-config": "~13.2.0-next.860.d9aa0de",
+    "@axonivy/prettier-config": "~13.2.0-next.860.d9aa0de",
     "@lerna-lite/cli": "^4.0.0",
     "@lerna-lite/run": "^4.0.0",
     "@lerna-lite/version": "^4.0.0",
@@ -72,7 +72,7 @@
   },
   "overrides": {
     "vscode-jsonrpc": "8.2.1",
-    "@eclipse-glsp/sprotty": "2.4.0"
+    "@eclipse-glsp/sprotty": "2.5.0"
   },
   "workspaces": [
     "extension",
