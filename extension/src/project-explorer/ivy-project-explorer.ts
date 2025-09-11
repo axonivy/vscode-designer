@@ -78,6 +78,9 @@ export class IvyProjectExplorer {
     vscode.workspace
       .createFileSystemWatcher('**/{cms,config,webContent}/**/*', true, false, true)
       .onDidChange(e => this.runEngineAction((d: string) => IvyEngineManager.instance.deployProject(d), e));
+    vscode.workspace
+      .createFileSystemWatcher('**/pom.xml', true, false, true)
+      .onDidChange(e => this.runEngineAction((d: string) => IvyEngineManager.instance.deployProject(d), e));
   }
 
   private deleteProjectOnEngine(uri: vscode.Uri, ivyProjects: string[]) {
