@@ -1,0 +1,16 @@
+{
+  "name": "@axonivy/vscode-webview-database-editor",
+  "version": "13.2.0",
+  "private": true,
+  "dependencies": {
+    "@axonivy/vscode-webview-common": "~13.2.0-next"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "vite build --mode development --emptyOutDir",
+    "build:production": "vite build --emptyOutDir",
+    "clean": "rimraf dist lib",
+    "type": "tsc --noEmit",
+    "watch": "vite build --mode development --watch --emptyOutDir"
+  }
+}

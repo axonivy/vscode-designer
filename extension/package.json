@@ -97,6 +97,15 @@
             "filenamePattern": "*.d.json"
           }
         ]
+      },
+      {
+        "viewType": "ivy.databaseEditor",
+        "displayName": "Axon Ivy Database Editor",
+        "selector": [
+          {
+            "filenamePattern": "**/config/databases.yaml"
+          }
+        ]
       }
     ],
     "commands": [
@@ -109,6 +118,11 @@
       {
         "command": "ivyBrowserView.openCmsEditor",
         "title": "Open CMS Editor",
+        "category": "Axon Ivy"
+      },
+      {
+        "command": "ivyBrowserView.openDatabaseEditor",
+        "title": "Open Database Editor",
         "category": "Axon Ivy"
       },
       {

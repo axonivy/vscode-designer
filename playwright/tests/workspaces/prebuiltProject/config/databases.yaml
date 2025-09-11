@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=https://json-schema.axonivy.com/app/13.2.1/databases.json
+Databases:
+  demo_db:
+    Url: jdbc:mysql://localhost:3306/demo
+    Driver: com.mysql.cj.jdbc.Driver
+    UserName: root
+    Password: ${decrypt:XeeBN6Jd8ho3yTrzZlzcMg==}

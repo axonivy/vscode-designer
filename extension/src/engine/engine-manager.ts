@@ -5,6 +5,7 @@ import { setStatusBarMessage } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
 import { IvyBrowserViewProvider } from '../browser/ivy-browser-view-provider';
 import { CmsEditorProvider } from '../editors/cms-editor/cms-editor-provider';
+import { DatabaseEditorProvider } from '../editors/database-editor/database-editor-provider';
 import DataClassEditorProvider from '../editors/dataclass-editor/dataclass-editor-provider';
 import FormEditorProvider from '../editors/form-editor/form-editor-provider';
 import ProcessEditorProvider from '../editors/process-editor/process-editor-provider';
@@ -56,6 +57,7 @@ export class IvyEngineManager {
     FormEditorProvider.register(this.context, websocketUrl);
     VariableEditorProvider.register(this.context, websocketUrl);
     CmsEditorProvider.register(this.context, websocketUrl);
+    DatabaseEditorProvider.register(this.context, websocketUrl);
     DataClassEditorProvider.register(this.context, websocketUrl);
     WebSocketClientProvider(websocketUrl);
     IvyDiagnostics.instance.refresh();
