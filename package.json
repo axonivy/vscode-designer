@@ -10,9 +10,9 @@
   "scripts": {
     "build": "lerna run build",
     "build:production": "lerna run build:production",
-    "download:engine": "node --experimental-strip-types scripts/download-engine.mts",
-    "download:openapi": "mvn clean validate",
-    "codegen:openapi": "orval",
+    "engine:download": "node --experimental-strip-types scripts/download-engine.mts",
+    "openapi:download": "mvn clean validate",
+    "openapi:codegen": "orval",
     "clean": "lerna run clean",
     "lint": "eslint",
     "lint:ci": "eslint -o eslint.xml -f checkstyle",

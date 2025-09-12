@@ -30,7 +30,7 @@ pipeline {
           bat 'npm run update:axonivy:next'
           bat 'npm install'
           bat 'npm run build:production'
-          bat 'npm run download:engine'
+          bat 'npm run engine:download'
         }
       }
     }
@@ -60,8 +60,8 @@ pipeline {
         nodejs(nodeJSInstallationName: '22.17.1') {
           catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
             script {
-              bat 'npm run download:openapi'
-              bat 'npm run codegen:openapi'
+              bat 'npm run openapi:download'
+              bat 'npm run openapi:codegen'
               bat 'npm run type'
               bat 'npm run lint:ci'
             }
