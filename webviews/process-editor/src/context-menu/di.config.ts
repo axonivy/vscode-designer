@@ -1,4 +1,4 @@
-import { FeatureModule, IContextMenuService, TYPES } from '@eclipse-glsp/client';
+import { FeatureModule, type IContextMenuService, TYPES } from '@eclipse-glsp/client';
 
 const noopContextMenuServiceModule = new FeatureModule((bind, _unbind, isBound) => {
   if (!isBound(TYPES.IContextMenuService)) {

@@ -50,9 +50,13 @@ export class IvyEngineApi {
     await pollWithProgress(engineUrl, 'Waiting for Axon Ivy Engine to be ready.');
     const baseURL = new URL(path.join('api'), engineUrl).toString();
     const workspaces = vscode.workspace.workspaceFolders;
-    if (!workspaces || workspaces.length === 0) throw new Error('No workspace available');
-    if (workspaces.length !== 1) throw new Error('Too many workspaces available, only one workspace supported');
-    const workspace = workspaces[0];
+    const workspace = workspaces?.at(0);
+    if (!workspaces || !workspace) {
+      throw new Error('No workspace available');
+    }
+    if (workspaces.length > 1) {
+      throw new Error('Too many workspaces available, only one workspace is supported');
+    }
     const workspaceInit = { name: workspace.name, path: workspace.uri.fsPath };
     return await vscode.window.withProgress(progressOptions('Create workspace'), async () => {
       return (await createWorkspace(workspaceInit, { baseURL, ...options })).data;

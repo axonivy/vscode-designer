@@ -1,5 +1,5 @@
 import DOMPurify from 'dompurify';
-import { VsCodeApi } from 'vscode-messenger-webview';
+import type { VsCodeApi } from 'vscode-messenger-webview';
 
 declare function acquireVsCodeApi(): VsCodeApi;
 const vscode = acquireVsCodeApi();

@@ -5,8 +5,8 @@ import { downloadDevEngine } from '..';
 import { config } from '../base/configurations';
 
 export class EngineRunner {
-  private childProcess: ChildProcess;
-  private _engineUrl: string;
+  private childProcess?: ChildProcess;
+  private _engineUrl?: string;
   private outputChannel = vscode.window.createOutputChannel('Axon Ivy Engine');
 
   constructor(private readonly embeddedEngineDirectory: vscode.Uri) {}
@@ -20,10 +20,10 @@ export class EngineRunner {
     });
     return new Promise<void>(resolve => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.childProcess.stdout?.on('data', (data: any) => {
+      this.childProcess?.stdout?.on('data', (data: any) => {
         const output = data.toString() as string;
         if (output && output.startsWith('Go to http')) {
-          this._engineUrl = output.split('Go to ')[1].split(' to see')[0];
+          this._engineUrl = output.split('Go to ')[1]?.split(' to see')[0];
           resolve();
         }
         this.outputChannel.append(output);
@@ -88,7 +88,7 @@ export class EngineRunner {
     }
     console.log("Send 'shutdown' to Axon Ivy Engine");
     const shutdown = new Promise<void>(resolve => {
-      this.childProcess.on('exit', function (code: number) {
+      this.childProcess?.on('exit', function (code: number) {
         console.log('Axon Ivy Engine has shutdown with exit code ' + code);
         resolve();
       });
@@ -104,6 +104,6 @@ export class EngineRunner {
   }
 
   public get engineUrl(): string {
-    return this._engineUrl;
+    return this._engineUrl ?? '';
   }
 }

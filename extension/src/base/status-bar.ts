@@ -10,7 +10,7 @@ export function setStatusBarIcon() {
   if (vscode.workspace.workspaceFolders) {
     item.command = {
       command: 'ivyProjects.addNewProject',
-      arguments: vscode.workspace.workspaceFolders.length > 0 ? [vscode.workspace.workspaceFolders[0].uri] : [],
+      arguments: vscode.workspace.workspaceFolders[0] !== undefined ? [vscode.workspace.workspaceFolders[0].uri] : [],
       title: 'Add new Project'
     };
   }

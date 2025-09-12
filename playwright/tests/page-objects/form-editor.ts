@@ -1,4 +1,4 @@
-import { Page } from 'playwright-core';
+import type { Page } from 'playwright-core';
 import { expect } from 'playwright/test';
 import { Editor } from './editor';
 

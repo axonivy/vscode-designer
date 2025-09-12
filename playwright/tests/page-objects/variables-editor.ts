@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
 import { Editor } from './editor';
 
 export class VariablesEditor extends Editor {

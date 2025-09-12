@@ -1,5 +1,4 @@
-import { Locator } from '@playwright/test';
-import { Page } from 'playwright-core';
+import type { Locator, Page } from '@playwright/test';
 import { expect } from 'playwright/test';
 import { Editor } from './editor';
 import { InscriptionView } from './inscription-view';

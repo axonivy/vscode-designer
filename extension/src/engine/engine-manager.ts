@@ -25,7 +25,7 @@ export class IvyEngineManager {
 
   private readonly mavenBuilder: MavenBuilder;
   private readonly engineRunner: EngineRunner;
-  private ivyEngineApi: IvyEngineApi;
+  private ivyEngineApi?: IvyEngineApi;
   private started = false;
 
   private constructor(readonly context: vscode.ExtensionContext) {
@@ -75,14 +75,14 @@ export class IvyEngineManager {
   private async initExistingProjects() {
     const ivyProjectDirectories = await this.ivyProjectDirectories();
     for (const projectDir of ivyProjectDirectories) {
-      await this.ivyEngineApi.initExistingProject(projectDir);
+      await this.ivyEngineApi?.initExistingProject(projectDir);
     }
-    await this.ivyEngineApi.deployProjects(ivyProjectDirectories);
+    await this.ivyEngineApi?.deployProjects(ivyProjectDirectories);
   }
 
   public async deployProjects() {
     const ivyProjectDirectories = await this.ivyProjectDirectories();
-    await this.ivyEngineApi.deployProjects(ivyProjectDirectories);
+    await this.ivyEngineApi?.deployProjects(ivyProjectDirectories);
   }
 
   public async buildProjects() {
@@ -91,7 +91,7 @@ export class IvyEngineManager {
       return;
     }
     const ivyProjectDirectories = await this.ivyProjectDirectories();
-    await this.ivyEngineApi.buildProjects(ivyProjectDirectories);
+    await this.ivyEngineApi?.buildProjects(ivyProjectDirectories);
   }
 
   public async buildProject(ivyProjectDirectory: string) {
@@ -99,26 +99,26 @@ export class IvyEngineManager {
       await this.mavenBuilder.buildProject(ivyProjectDirectory);
       return;
     }
-    await this.ivyEngineApi.buildProjects([ivyProjectDirectory]);
+    await this.ivyEngineApi?.buildProjects([ivyProjectDirectory]);
   }
 
   public async deployProject(ivyProjectDirectory: string) {
-    await this.ivyEngineApi.deployProjects([ivyProjectDirectory]);
+    await this.ivyEngineApi?.deployProjects([ivyProjectDirectory]);
   }
 
   public async buildAndDeployProjects() {
     const ivyProjectDirectories = await this.ivyProjectDirectories();
     await this.buildProjects();
-    await this.ivyEngineApi.deployProjects(ivyProjectDirectories);
+    await this.ivyEngineApi?.deployProjects(ivyProjectDirectories);
   }
 
   public async buildAndDeployProject(ivyProjectDirectory: string) {
     await this.buildProject(ivyProjectDirectory);
-    await this.ivyEngineApi.deployProjects([ivyProjectDirectory]);
+    await this.ivyEngineApi?.deployProjects([ivyProjectDirectory]);
   }
 
   public async stopBpmEngine(ivyProjectDirectory: string) {
-    await this.ivyEngineApi.stopBpmEngine(ivyProjectDirectory);
+    await this.ivyEngineApi?.stopBpmEngine(ivyProjectDirectory);
   }
 
   public async createProcess(newProcessParams: NewProcessParams) {
@@ -126,11 +126,10 @@ export class IvyEngineManager {
   }
 
   public async createUserDialog(newUserDialogParams: NewUserDialogParams) {
-    const hdBean = await this.ivyEngineApi.createUserDialog(newUserDialogParams);
-    if (!hdBean.uri) {
-      return;
+    const hdBean = await this.ivyEngineApi?.createUserDialog(newUserDialogParams);
+    if (hdBean?.uri) {
+      executeCommand('vscode.open', vscode.Uri.parse(hdBean.uri));
     }
-    executeCommand('vscode.open', vscode.Uri.parse(hdBean.uri));
   }
 
   public async createProject(newProjectParams: NewProjectParams & { path: string }) {
@@ -140,38 +139,40 @@ export class IvyEngineManager {
     }
     const path = newProjectParams.path;
     this.ivyEngineApi
-      .createProject(newProjectParams)
+      ?.createProject(newProjectParams)
       .then(() => this.createAndOpenProcess({ name: 'BusinessProcess', kind: 'Business Process', path, namespace: '' }))
       .then(() => setStatusBarMessage('Finished: Create new Project'));
   }
 
   public async createDataClass(params: DataClassInit) {
-    const dataClassBean = await this.ivyEngineApi.createDataClass(params);
-    if (params.projectDir) {
+    const dataClassBean = await this.ivyEngineApi?.createDataClass(params);
+    if (dataClassBean && params.projectDir) {
       const dataClassUri = vscode.Uri.joinPath(vscode.Uri.file(params.projectDir), dataClassBean.path);
       executeCommand('vscode.open', dataClassUri);
     }
   }
 
   private async createAndOpenProcess(newProcessParams: NewProcessParams) {
-    const processBean = await this.ivyEngineApi.createProcess(newProcessParams);
-    if (processBean.uri) executeCommand('vscode.open', vscode.Uri.parse(processBean.uri));
+    const processBean = await this.ivyEngineApi?.createProcess(newProcessParams);
+    if (processBean?.uri) {
+      executeCommand('vscode.open', vscode.Uri.parse(processBean.uri));
+    }
   }
 
   public async deleteProject(ivyProjectDirectory: string) {
-    this.ivyEngineApi.deleteProject(ivyProjectDirectory);
+    this.ivyEngineApi?.deleteProject(ivyProjectDirectory);
   }
 
   public async convertProject(ivyProjectDirectory: string) {
-    await this.ivyEngineApi.convertProject(ivyProjectDirectory);
+    await this.ivyEngineApi?.convertProject(ivyProjectDirectory);
   }
 
   public async refreshProjectStatuses() {
-    return await this.ivyEngineApi.refreshProjectStatuses();
+    return await this.ivyEngineApi?.refreshProjectStatuses();
   }
 
   public async projects() {
-    return this.ivyEngineApi.projects();
+    return this.ivyEngineApi?.projects();
   }
 
   async ivyProjectDirectories() {

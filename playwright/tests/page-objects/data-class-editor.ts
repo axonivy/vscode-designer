@@ -1,4 +1,4 @@
-import { expect, Page } from 'playwright/test';
+import { expect, type Page } from 'playwright/test';
 import { Editor } from './editor';
 
 export class DataClassEditor extends Editor {

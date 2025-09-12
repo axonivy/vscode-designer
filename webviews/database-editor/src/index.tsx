@@ -1,10 +1,10 @@
 import { ClientContextProvider, ClientJsonRpc, DatabaseEditor, initQueryClient, QueryProvider } from '@axonivy/database-editor';
 import '@axonivy/database-editor/lib/editor.css';
-import { InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
+import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
 import '@axonivy/vscode-webview-common/css/colors.css';
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
-import { Messenger, VsCodeApi } from 'vscode-messenger-webview';
+import { Messenger, type VsCodeApi } from 'vscode-messenger-webview';
 import { initTranslation } from './i18n';
 
 declare function acquireVsCodeApi(): VsCodeApi;

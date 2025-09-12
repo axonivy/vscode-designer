@@ -1,4 +1,5 @@
-import { downloadAndUnzipVSCode } from '@vscode/test-electron';
-import { downloadVersion } from './download-version';
+import { downloadAndUnzipVSCode, type DownloadOptions } from '@vscode/test-electron';
 
-downloadAndUnzipVSCode(downloadVersion);
+const downloadVersion: DownloadOptions['version'] = process.env.RUN_STABLE_VERSION === 'true' ? 'stable' : 'insiders';
+
+downloadAndUnzipVSCode({ version: downloadVersion });

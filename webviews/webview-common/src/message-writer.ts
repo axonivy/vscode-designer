@@ -1,5 +1,5 @@
 import { AbstractMessageWriter, Message, MessageWriter } from 'vscode-jsonrpc';
-import { HOST_EXTENSION, NotificationType } from 'vscode-messenger-common';
+import { HOST_EXTENSION, type NotificationType } from 'vscode-messenger-common';
 import { Messenger } from 'vscode-messenger-webview';
 
 export class WebviewMessageWriter extends AbstractMessageWriter implements MessageWriter {

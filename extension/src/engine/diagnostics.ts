@@ -22,9 +22,11 @@ export class IvyDiagnostics {
 
   public async refresh(refreshProjectStatuses = false) {
     this.diagnostics.clear();
-    const projects = refreshProjectStatuses ? IvyEngineManager.instance.refreshProjectStatuses() : IvyEngineManager.instance.projects();
-    (await projects)
-      .filter(p => p.errorMessage)
+    const projects = refreshProjectStatuses
+      ? await IvyEngineManager.instance.refreshProjectStatuses()
+      : await IvyEngineManager.instance.projects();
+    projects
+      ?.filter(p => p.errorMessage)
       .forEach(project => {
         const uri = vscode.Uri.joinPath(vscode.Uri.parse(project.projectDirectory), 'pom.xml');
         const diagnostic = new vscode.Diagnostic(new vscode.Range(0, 0, 0, 0), project.errorMessage, vscode.DiagnosticSeverity.Error);
@@ -57,7 +59,7 @@ export class ConvertProjectQuickFix implements vscode.CodeActionProvider {
       return [];
     }
     const diagnostic = context.diagnostics[0];
-    if (diagnostic.source !== DIAGNOSTIC_SOURCE || !diagnostic.message.startsWith(CONVERSION_MESSAGE_PREFIX)) {
+    if (diagnostic?.source !== DIAGNOSTIC_SOURCE || !diagnostic.message.startsWith(CONVERSION_MESSAGE_PREFIX)) {
       return [];
     }
     const title = 'Axon Ivy: Convert Project';

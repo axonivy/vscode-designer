@@ -13,10 +13,10 @@ import {
 } from '@axonivy/process-editor';
 import { ivyInscriptionModule } from '@axonivy/process-editor-inscription';
 import { MonacoEditorUtil } from '@axonivy/process-editor-inscription-view';
-import { ContainerConfiguration, navigationModule } from '@eclipse-glsp/client';
+import { type ContainerConfiguration, navigationModule } from '@eclipse-glsp/client';
 import { GLSPStarter } from '@eclipse-glsp/vscode-integration-webview';
 import { Container } from 'inversify';
-import { NotificationType } from 'vscode-messenger-common';
+import type { NotificationType } from 'vscode-messenger-common';
 import { Messenger } from 'vscode-messenger-webview';
 import noopContextMenuServiceModule from './context-menu/di.config';
 import { initTranslation } from './i18n';

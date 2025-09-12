@@ -8,7 +8,7 @@ const fileName = 'variables.yaml';
 export const registerNewVariablesFileCmd = (context: vscode.ExtensionContext) => {
   registerCommand('yaml-variables-editor.new', context, () => {
     const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (!workspaceFolders) {
+    if (!workspaceFolders || !workspaceFolders[0]) {
       vscode.window.showErrorMessage('No workspace found');
       return;
     }

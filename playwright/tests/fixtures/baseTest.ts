@@ -1,4 +1,4 @@
-import { _electron, test as base, chromium, expect, Page } from '@playwright/test';
+import { _electron, test as base, chromium, expect, type Page } from '@playwright/test';
 import { downloadAndUnzipVSCode } from '@vscode/test-electron/out/download';
 import fs from 'fs';
 import os from 'os';

@@ -1,4 +1,4 @@
-import { HOST_EXTENSION, NotificationType } from 'vscode-messenger-common';
+import { HOST_EXTENSION, type NotificationType } from 'vscode-messenger-common';
 import { Messenger } from 'vscode-messenger-webview';
 import { WebviewMessageReader } from './message-reader';
 import { WebviewMessageWriter } from './message-writer';

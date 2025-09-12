@@ -1,7 +1,10 @@
 {
-  "extends": "../config/tsconfig.base.json",
+  "extends": "@axonivy/ts-config/integration",
   "compilerOptions": {
-    "module": "commonjs"
+    "rootDir": ".",
+    "rootDirs": ["tests"],
+    "outDir": "lib",
+    "types": ["node"]
   },
   "include": ["tests"]
 }

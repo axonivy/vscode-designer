@@ -1,5 +1,5 @@
-import { AbstractMessageReader, DataCallback, Disposable, MessageReader } from 'vscode-jsonrpc';
-import { NotificationType } from 'vscode-messenger-common';
+import { AbstractMessageReader, type DataCallback, Disposable, MessageReader } from 'vscode-jsonrpc';
+import type { NotificationType } from 'vscode-messenger-common';
 import { Messenger } from 'vscode-messenger-webview';
 
 export class WebviewMessageReader extends AbstractMessageReader implements MessageReader {

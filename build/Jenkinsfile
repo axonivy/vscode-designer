@@ -26,6 +26,7 @@ pipeline {
           sh 'npm run update:axonivy:next'
           sh 'npm install'
           sh 'npm run build:production'
+          sh 'npm run type'
         }
       }
     }
