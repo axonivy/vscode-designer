@@ -8,7 +8,7 @@ The available VS Code extension can be found under `/extension`.
 
 - `npm install`: install all packages
 - `npm run build`: build the extension and webviews
-- `npm run download:engine`: download and unpack the latest master engine
+- `npm run engine:download`: download and unpack the latest master engine
 - `npm run package`: package the extension as .vsix file
 
 ### Generate REST Client from Axon Ivy OpenAPI
@@ -16,13 +16,13 @@ The available VS Code extension can be found under `/extension`.
 To access the REST API of the engine, we generate the Axios client from OpenAPI. For the creation, it is expected that the OpenAPI specification is located under `target/engine/openapi.json`. The easiest way to retrieve the specification is to run the following command (Maven needed). Otherwise, you can load the file from https://jenkins.ivyteam.io/job/core_openapi/
 
 ```shellscript
-npm run download:openapi
+npm run openapi:download
 ```
 
 For client generation run:
 
 ```shellscript
-npm run codegen:openapi
+npm run openapi:codegen
 ```
 
 ## Debugging the extension

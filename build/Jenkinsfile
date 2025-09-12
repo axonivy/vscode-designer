@@ -62,7 +62,7 @@ pipeline {
       steps {
         script {
           sh 'npm run package'
-          sh 'npm run download:engine ' + params.engineDownloadUrl
+          sh 'npm run engine:download ' + params.engineDownloadUrl
           sh 'npm run package:with:engine'
           archiveArtifacts 'extension/**/*.vsix'
         }
