@@ -2,11 +2,11 @@ import { App, ClientContextProvider, QueryProvider, initQueryClient } from '@axo
 import { FormClientJsonRpc } from '@axonivy/form-editor-core';
 import '@axonivy/form-editor/lib/editor.css';
 import { ThemeProvider } from '@axonivy/ui-components';
-import { InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
+import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
 import '@axonivy/vscode-webview-common/css/colors.css';
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
-import { Messenger, VsCodeApi } from 'vscode-messenger-webview';
+import { Messenger, type VsCodeApi } from 'vscode-messenger-webview';
 import { initTranslation } from './i18n';
 import './index.css';
 

@@ -1,4 +1,4 @@
-import { FrameLocator, Locator, Page, expect } from '@playwright/test';
+import { type FrameLocator, type Locator, type Page, expect } from '@playwright/test';
 import { PageObject } from './page-object';
 
 export interface ViewData {

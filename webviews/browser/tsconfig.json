@@ -1,5 +1,5 @@
 {
-  "extends": "../../config/tsconfig.base.json",
+  "extends": "@axonivy/ts-config/base",
   "compilerOptions": {
     "rootDir": "src",
     "types": ["node", "reflect-metadata", "vscode", "vite/client"]

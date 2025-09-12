@@ -1,5 +1,5 @@
-import { Page, expect } from '@playwright/test';
-import { View, ViewData } from './view';
+import { type Page, expect } from '@playwright/test';
+import { View, type ViewData } from './view';
 
 export class BrowserView extends View {
   constructor(page: Page) {

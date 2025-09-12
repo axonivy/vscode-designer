@@ -23,6 +23,9 @@ export const createWebViewContent = (
   const htmlDoc = parseDocument(htmlContent, { xmlMode: true, decodeEntities: false });
   const head = DomUtils.getElementsByTagName('head', [htmlDoc])[0];
   const body = DomUtils.getElementsByTagName('body', [htmlDoc])[0];
+  if (!head || !body) {
+    throw new Error('Invalid HTML template, missing head or body element');
+  }
 
   // replace script and style references with webview URI references as otherwise we get an net::ERR_ACCESS_DENIED error
   Array.from(DomUtils.getElementsByTagName('script', htmlDoc)).forEach(DomUtils.removeElement);

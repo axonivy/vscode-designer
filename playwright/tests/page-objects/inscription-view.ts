@@ -1,4 +1,4 @@
-import { Locator, Page, expect } from '@playwright/test';
+import { type Locator, type Page, expect } from '@playwright/test';
 import { PageObject } from './page-object';
 
 export class InscriptionView extends PageObject {

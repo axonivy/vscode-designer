@@ -73,7 +73,7 @@ export class ProcessVscodeConnector<D extends vscode.CustomDocument = vscode.Cus
     for (const [_, client] of this.clientMap) {
       if (client.webviewEndpoint.webviewPanel.active) {
         const ivyClient = client as IvyGlspClient;
-        if (pids.length > 0) {
+        if (pids[0]) {
           return this.newSelectedElement(ivyClient, pids[0]);
         }
       }

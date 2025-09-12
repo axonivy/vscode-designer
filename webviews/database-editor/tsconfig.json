@@ -1,8 +1,9 @@
 {
-  "extends": "../../config/tsconfig.base.json",
+  "extends": "@axonivy/ts-config/integration",
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "lib",
+    "jsx": "preserve",
     "types": ["vite/client"]
   },
   "include": ["src"]
