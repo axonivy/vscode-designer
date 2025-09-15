@@ -5,7 +5,7 @@ import { EnableInscriptionAction } from '@axonivy/process-editor-inscription';
 import { EnableViewportAction, UpdatePaletteItems } from '@axonivy/process-editor-protocol';
 import { toConnection } from '@axonivy/vscode-webview-common';
 import { RequestTypeHintsAction } from '@eclipse-glsp/vscode-integration';
-import { HOST_EXTENSION, NotificationType, RequestType } from 'vscode-messenger-common';
+import { HOST_EXTENSION, type NotificationType, type RequestType } from 'vscode-messenger-common';
 import { Messenger } from 'vscode-messenger-webview';
 import './index.css';
 
@@ -14,8 +14,8 @@ const InitializeConnectionRequest: RequestType<void, void> = { method: 'initiali
 
 @injectable()
 export class StandaloneDiagramStartup implements IDiagramStartup {
-  @inject(Messenger) protected messenger: Messenger;
-  @inject(GLSPActionDispatcher) protected actionDispatcher: GLSPActionDispatcher;
+  @inject(Messenger) protected messenger!: Messenger;
+  @inject(GLSPActionDispatcher) protected actionDispatcher!: GLSPActionDispatcher;
 
   async preRequestModel(): Promise<void> {
     this.actionDispatcher.dispatch(RequestTypeHintsAction.create());

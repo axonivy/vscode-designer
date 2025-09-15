@@ -22,7 +22,7 @@ export namespace config {
       canSelectMany: false,
       title: 'Select Engine Directory'
     });
-    if (!selection) {
+    if (!selection || !selection[0]) {
       return;
     }
     await configs().update('engine.directory', selection[0].fsPath, true);
