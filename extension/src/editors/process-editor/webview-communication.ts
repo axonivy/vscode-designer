@@ -1,7 +1,7 @@
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
-import { MessageParticipant, NotificationType, RequestType } from 'vscode-messenger-common';
+import { Message, MessageParticipant, NotificationType, RequestType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
 import { WebSocketForwarder } from '../websocket-forwarder';
 import { SendInscriptionNotification, handleActionLocal } from './inscription-view/action-handlers';
@@ -61,7 +61,7 @@ class InscriptionWebSocketForwarder extends WebSocketForwarder {
       this.messenger.sendNotification(this.notificationType, this.messageParticipant, JSON.stringify({ method: type }));
   }
 
-  protected override handleClientMessage(message: unknown) {
+  protected override handleClientMessage(message: Message) {
     const handled = handleActionLocal(message, this.sendInscriptionNotification);
     if (handled) {
       return;
