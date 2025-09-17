@@ -57,8 +57,9 @@ export class WebSocketForwarder implements vscode.Disposable {
         result.items.forEach(item => {
           if (item.kind === 'full') {
             const report = item as WorkspaceFullDocumentDiagnosticReport;
+            const uri = Uri.parse(item.uri);
             this.diagnostics.set(
-              Uri.parse(item.uri),
+              uri,
               report.items.map(item => this.toDiag(item))
             );
           }
