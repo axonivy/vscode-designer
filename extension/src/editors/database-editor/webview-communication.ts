@@ -1,7 +1,7 @@
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
-import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
+import { Message, MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { InitializeConnectionRequest, WebviewReadyNotification } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 
@@ -25,7 +25,7 @@ class DatabaseEditorWebSocketForwarder extends WebSocketForwarder {
     super(websocketUrl, 'ivy-database-lsp', messenger, messageParticipant, ConfigWebSocketMessage);
   }
 
-  protected override handleClientMessage(message: unknown) {
+  protected override handleClientMessage(message: Message) {
     super.handleClientMessage(message);
   }
 }

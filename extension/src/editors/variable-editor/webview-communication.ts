@@ -2,7 +2,7 @@ import type { VariablesActionArgs } from '@axonivy/variable-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
-import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
+import { Message, MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
 import { updateTextDocumentContent } from '../content-writer';
 import { hasEditorFileContent, InitializeConnectionRequest, isAction, WebviewReadyNotification } from '../notification-helper';
@@ -38,7 +38,7 @@ class VariableEditorWebSocketForwarder extends WebSocketForwarder {
     super(websocketUrl, 'ivy-variables-lsp', messenger, messageParticipant, ConfigWebSocketMessage);
   }
 
-  protected override handleClientMessage(message: unknown) {
+  protected override handleClientMessage(message: Message) {
     if (isAction<VariablesActionArgs>(message) && message.params.actionId === 'openUrl') {
       IvyBrowserViewProvider.instance.open(message.params.payload);
     }

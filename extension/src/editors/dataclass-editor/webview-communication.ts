@@ -2,7 +2,7 @@ import { DataActionArgs } from '@axonivy/dataclass-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
-import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
+import { Message, MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
 import { updateTextDocumentContent } from '../content-writer';
 import { hasEditorFileContent, InitializeConnectionRequest, isAction, WebviewReadyNotification } from '../notification-helper';
@@ -38,7 +38,7 @@ class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
     super(websocketUrl, 'ivy-data-class-lsp', messenger, messageParticipant, DataClassWebSocketMessage);
   }
 
-  protected override handleClientMessage(message: unknown) {
+  protected override handleClientMessage(message: Message) {
     if (isAction<DataActionArgs>(message) && message.params.actionId === 'openUrl') {
       IvyBrowserViewProvider.instance.open(message.params.payload);
     }

@@ -2,7 +2,7 @@ import type { CmsActionArgs } from '@axonivy/cms-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
-import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
+import { Message, MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
 import { InitializeConnectionRequest, isAction, WebviewReadyNotification } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
@@ -27,7 +27,7 @@ class CmsEditorWebSocketForwarder extends WebSocketForwarder {
     super(websocketUrl, 'ivy-cms-lsp', messenger, messageParticipant, ConfigWebSocketMessage);
   }
 
-  protected override handleClientMessage(message: unknown) {
+  protected override handleClientMessage(message: Message) {
     if (isAction<CmsActionArgs>(message) && message.params.actionId === 'openUrl') {
       IvyBrowserViewProvider.instance.openEngineRelativeUrl(message.params.payload);
     }
