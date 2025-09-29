@@ -58,6 +58,6 @@ test.describe('Create Process', () => {
 
   test('Process name validation', async ({ page }) => {
     await explorer.addProcess('default', 'Business Process');
-    await expect(page.locator('div.notification-toast-container')).toHaveText('Error validating Artifact Name: The entered name "default" is forbidden for this input');
+    await expect(page.locator('div.notification-toast-container').first()).toHaveText('Error validating Artifact Name: The entered name "default" is forbidden for this input');
   });
 });

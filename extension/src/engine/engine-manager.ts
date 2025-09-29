@@ -10,15 +10,17 @@ import DataClassEditorProvider from '../editors/dataclass-editor/dataclass-edito
 import FormEditorProvider from '../editors/form-editor/form-editor-provider';
 import ProcessEditorProvider from '../editors/process-editor/process-editor-provider';
 import { VariableEditorProvider } from '../editors/variable-editor/variable-editor-provider';
+import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language-client';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { NewProcessParams } from '../project-explorer/new-process';
 import { NewUserDialogParams } from '../project-explorer/new-user-dialog';
+import { RuntimeLogViewProvider } from '../views/runtimelog-view';
 import { IvyEngineApi } from './api/engine-api';
 import { DataClassInit, NewProjectParams } from './api/generated/client';
 import { MavenBuilder } from './build/maven';
 import { IvyDiagnostics } from './diagnostics';
 import { EngineRunner } from './engine-runner';
-import { WebSocketClientProvider } from './ws-client';
+import { WebIdeWebSocketProvider } from './ws-client';
 
 export class IvyEngineManager {
   private static _instance: IvyEngineManager;
@@ -59,7 +61,11 @@ export class IvyEngineManager {
     CmsEditorProvider.register(this.context, websocketUrl);
     DatabaseEditorProvider.register(this.context, websocketUrl);
     DataClassEditorProvider.register(this.context, websocketUrl);
-    WebSocketClientProvider(websocketUrl);
+
+    RuntimeLogViewProvider(websocketUrl);
+    WebIdeWebSocketProvider(websocketUrl);
+    XhtmlLanguageClientProvider(websocketUrl);
+
     IvyDiagnostics.instance.refresh();
   }
 
