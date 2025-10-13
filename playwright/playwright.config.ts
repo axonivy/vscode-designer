@@ -6,7 +6,10 @@ export default defineConfig({
     headless: true,
     trace: 'on-first-retry',
     screenshot: 'on',
-    video: 'on-first-retry'
+    video: {
+      mode: 'on',
+      size: { width: 1920, height: 1080 }
+    }
   },
   testDir: './tests',
   workers: 1,

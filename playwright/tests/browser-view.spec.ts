@@ -4,9 +4,10 @@ import { BrowserView } from './page-objects/browser-view';
 test.describe('Browser View', () => {
   let browserView: BrowserView;
 
-  test('Toolbar and navigation', async ({ page }) => {
+  test.only('Toolbar and navigation', async ({ page }) => {
     browserView = new BrowserView(page);
     await browserView.hasDeployProjectStatusMessage();
+    await browserView.hasNoStatusMessage();
 
     const home = /home.xhtml/;
     const starts = /starts.xhtml/;

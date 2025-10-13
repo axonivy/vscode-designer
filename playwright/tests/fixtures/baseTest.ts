@@ -23,13 +23,16 @@ export const test = base.extend<{ workspace: string; page: Page }>({
 
 const runBrowserTest = async (workspace: string, take: (r: Page) => Promise<void>) => {
   const browser = await chromium.launch();
-  const page = await browser.newPage();
+  const page = await browser.newPage({ recordVideo: { dir: test.info().outputPath('video') } });
   await page.setViewportSize({ width: 1920, height: 1080 });
   const tmpWorkspace = await createTmpWorkspace(workspace);
   await page.goto(`http://localhost:3000/?folder=${tmpWorkspace}`);
   await initialize(page);
   await take(page);
   // this goto closes WebSocket connections
+  const videoPath = test.info().outputPath('vid.webm');
+  await page.video()?.saveAs(videoPath);
+  test.info().attachments.push({ name: 'video', path: videoPath, contentType: 'video/webm' });
   await page.goto('about:blank');
   await browser.close();
   await fs.promises.rm(tmpWorkspace, { recursive: true });
