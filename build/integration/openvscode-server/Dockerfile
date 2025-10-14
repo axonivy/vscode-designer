@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.55.1
+FROM mcr.microsoft.com/playwright:v1.56.0
 
 RUN apt-get update &&\
   apt-get install software-properties-common -y &&\
@@ -6,6 +6,6 @@ RUN apt-get update &&\
   apt-get update &&\
   apt-get install openjdk-21-jdk -y
 
-ENV JAVA_OPTS_IVY_SYSTEM=-Divy.engine.testheadless=true
+ENV JAVA_OPTS_IVY_SYSTEM='-Ddev.mode=true -Divy.engine.testheadless=true'
 ENV CI=true
 ENV RUN_IN_BROWSER=true

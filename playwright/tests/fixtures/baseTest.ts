@@ -22,7 +22,7 @@ export const test = base.extend<{ workspace: string; page: Page }>({
 });
 
 const runBrowserTest = async (workspace: string, take: (r: Page) => Promise<void>) => {
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ args: ['--disable-web-security'] }); // disable-web-security because of https://chromestatus.com/feature/5152728072060928
   const page = await browser.newPage();
   await page.setViewportSize({ width: 1920, height: 1080 });
   const tmpWorkspace = await createTmpWorkspace(workspace);
