@@ -1,0 +1,85 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/process/13.1.2/process.json",
+  "id" : "13B69F6D60FCC080",
+  "kind" : "HTML_DIALOG",
+  "config" : {
+    "data" : "ch.xhtml.test.AddressComponent.AddressComponentData"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "HtmlDialogStart",
+      "name" : "start(Address)",
+      "config" : {
+        "signature" : "start",
+        "input" : {
+          "params" : [
+            { "name" : "address", "type" : "prebuiltProject.Address", "desc" : "" }
+          ],
+          "map" : {
+            "out.address" : "param.address.clone()"
+          }
+        },
+        "result" : {
+          "params" : [
+            { "name" : "address", "type" : "prebuiltProject.Address", "desc" : "" }
+          ],
+          "map" : {
+            "result.address" : "in.address"
+          }
+        },
+        "guid" : "13B69F6D63DF676C"
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 64 },
+        "labelOffset" : { "x" : 14, "y" : 32 }
+      },
+      "connect" : [
+        { "id" : "f2", "to" : "f1" }
+      ]
+    }, {
+      "id" : "f1",
+      "type" : "HtmlDialogEnd",
+      "visual" : {
+        "at" : { "x" : 224, "y" : 64 }
+      }
+    }, {
+      "id" : "f3",
+      "type" : "HtmlDialogStart",
+      "name" : "start2(Address)",
+      "config" : {
+        "signature" : "start2",
+        "input" : {
+          "params" : [
+            { "name" : "address", "type" : "prebuiltProject.Address", "desc" : "" }
+          ],
+          "map" : {
+            "out.address" : "param.address.clone()"
+          }
+        },
+        "result" : {
+          "params" : [
+            { "name" : "address", "type" : "prebuiltProject.Address", "desc" : "" }
+          ],
+          "map" : {
+            "result.address" : "in.address"
+          }
+        },
+        "guid" : "19A002E1CBEDD4B1"
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 144 },
+        "labelOffset" : { "x" : 14, "y" : 32 }
+      }
+    }, {
+      "id" : "f4",
+      "type" : "HtmlDialogMethodStart",
+      "name" : "method()",
+      "config" : {
+        "signature" : "method",
+        "guid" : "19A003D58CF1025A"
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 232 }
+      }
+    } ]
+}
