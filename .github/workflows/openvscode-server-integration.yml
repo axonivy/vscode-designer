@@ -14,14 +14,26 @@ jobs:
       RUN_IN_BROWSER: true
       OPEN_VSCODE_VERSION: v1.103.1
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
           node-version: 22
-      - uses: actions/setup-java@v5
+      
+      - name: Setup Java
+        uses: actions/setup-java@v5
         with:
           java-version: 21
           distribution: 'temurin'
+
       - name: Install dependencies
         run: |
           pnpm run update:axonivy:next
@@ -36,9 +48,12 @@ jobs:
           cp -r extension/. openvsc/extensions/extension
           nohup openvsc/bin/openvscode-server --host 0.0.0.0 --without-connection-token --disable-workspace-trust &
           extension/AxonIvyEngine/bin/AxonIvyEngine startdaemon
+
       - name: Run Playwright tests
         run: npm run test:playwright:browser
-      - uses: actions/upload-artifact@v4
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
           name: test-results
