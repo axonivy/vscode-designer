@@ -5,14 +5,18 @@
   "description": "VSCode extension common code for webviews",
   "license": "(EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0)",
   "dependencies": {
-    "vscode-messenger-webview": "0.4.5"
+    "@axonivy/ui-components": "~13.2.0-next.909.6b8b57e",
+    "@axonivy/ui-icons": "~13.2.0-next.909.6b8b57e",
+    "vscode-messenger-webview": "0.4.5",
+    "vscode-messenger-common": "0.4.5",
+    "vscode-jsonrpc": "8.2.0"
   },
   "type": "module",
   "module": "lib/index",
   "types": "lib/index",
   "scripts": {
     "build": "tsc",
-    "build:production": "npm run build",
+    "build:production": "pnpm run build",
     "clean": "rimraf lib *.tsbuildinfo",
     "type": "tsc --noEmit"
   }
