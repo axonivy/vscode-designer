@@ -1,4 +1,4 @@
-import { expect } from 'playwright/test';
+import { expect } from '@playwright/test';
 import { test } from './fixtures/baseTest';
 import { ProcessEditor } from './page-objects/process-editor';
 import { getCtrlOrMeta } from './utils/keyboard';
