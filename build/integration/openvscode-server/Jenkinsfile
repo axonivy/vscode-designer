@@ -21,10 +21,10 @@ pipeline {
         script {
           docker.build('node-webtest', '-f build/integration/openvscode-server/Dockerfile .').inside {
             sh """
-            npm run update:axonivy:next
-            npm install
-            npm run build:production
-            npm run engine:download ${params.engineDownloadUrl}
+            pnpm run update:axonivy:next
+            pnpm install --no-frozen-lockfile
+            pnpm run build:production
+            pnpm run engine:download ${params.engineDownloadUrl}
             extension/AxonIvyEngine/bin/AxonIvyEngine startdaemon > ivy-engine-console.out &
             wget -O openvsc.tar.gz https://github.com/gitpod-io/openvscode-server/releases/download/openvscode-server-${params.openvscodeVersion}/openvscode-server-${params.openvscodeVersion}-linux-x64.tar.gz
             tar -xzf openvsc.tar.gz --strip-components=1 --one-top-level=openvsc
@@ -32,7 +32,7 @@ pipeline {
             nohup openvsc/bin/openvscode-server --host 0.0.0.0 --without-connection-token --disable-workspace-trust &
             """
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-              sh 'npm run test:playwright:browser'
+              sh 'pnpm run test:playwright:browser'
             }
           }
           archiveArtifacts artifacts: '**/playwright/test-results/**', allowEmptyArchive: true

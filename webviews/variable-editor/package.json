@@ -3,7 +3,10 @@
   "version": "13.2.0",
   "private": true,
   "dependencies": {
-    "@axonivy/vscode-webview-common": "~13.2.0-next"
+    "@axonivy/ui-components": "~13.2.0-next.909.6b8b57e",
+    "@axonivy/variable-editor": "~13.2.0-next.849.4424b1c",
+    "@axonivy/vscode-webview-common": "workspace:~13.2.0-next",
+    "vscode-messenger-webview": "0.4.5"
   },
   "type": "module",
   "scripts": {

@@ -1,4 +1,4 @@
-import { expect } from 'playwright/test';
+import { expect } from '@playwright/test';
 import { test } from './fixtures/baseTest';
 import { BrowserView } from './page-objects/browser-view';
 import { CmsEditor } from './page-objects/cms-editor';

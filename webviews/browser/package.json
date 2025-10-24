@@ -5,8 +5,9 @@
   "description": "VSCode extension webview script for the embedded browser",
   "license": "(EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0)",
   "dependencies": {
-    "@axonivy/vscode-webview-common": "~13.2.0-next",
-    "dompurify": "^3.2.4"
+    "@axonivy/vscode-webview-common": "workspace:~13.2.0-next",
+    "dompurify": "^3.2.4",
+    "vscode-messenger-webview": "0.4.5"
   },
   "type": "module",
   "scripts": {

@@ -3,9 +3,9 @@ set -e
 
 mvn --batch-mode -f pom.xml versions:set versions:commit -DnewVersion=${1}
 
-npm install
-npx lerna version ${1/-SNAPSHOT/} --no-git-tag-version --no-push --ignore-scripts --exact --yes
-npm install
+pnpm install
+pnpx run raise:version ${1/-SNAPSHOT/}
+pnpm install --no-frozen-lockfile
 
 echo "update ivy version in maven.ts"
 oldVersion="IVY_ENGINE_VERSION = '[0-9]+.[0-9]+.[0-9]+'"
