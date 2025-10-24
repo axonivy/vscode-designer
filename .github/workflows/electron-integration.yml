@@ -24,15 +24,15 @@ jobs:
           distribution: 'temurin'
       - name: Install dependencies
         run: |
-          npm run update:axonivy:next
-          npm install
-          npm run build:production
-          npm run engine:download https://dev.axonivy.com/permalink/dev/axonivy-engine.zip
+          pnpm run update:axonivy:next
+          pnpm install --no-frozen-lockfile
+          pnpm run build:production
+          pnpm run engine:download https://dev.axonivy.com/permalink/dev/axonivy-engine.zip
           rm -r extension/AxonIvyEngine/system/demo-applications
-          npm run test:playwright:download:vscode
+          pnpm run test:playwright:download:vscode
           extension/AxonIvyEngine/bin/AxonIvyEngine startdaemon
       - name: Run Playwright tests
-        run: xvfb-run npm run test:playwright
+        run: xvfb-run pnpm run test:playwright
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

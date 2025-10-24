@@ -12,7 +12,7 @@
   "types": "lib/index",
   "scripts": {
     "build": "tsc",
-    "build:production": "npm run build",
+    "build:production": "pnpm run build",
     "clean": "rimraf lib *.tsbuildinfo",
     "type": "tsc --noEmit"
   }

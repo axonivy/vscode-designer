@@ -1,5 +1,9 @@
 FROM mcr.microsoft.com/playwright:v1.56.1
 
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable pnpm
+
 RUN apt-get update &&\
   apt-get install software-properties-common -y &&\
   apt-add-repository universe -y &&\
