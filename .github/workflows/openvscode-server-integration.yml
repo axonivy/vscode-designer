@@ -49,7 +49,7 @@ jobs:
           extension/AxonIvyEngine/bin/AxonIvyEngine startdaemon
 
       - name: Run Playwright tests
-        run: npm run test:playwright:browser
+        run: pnpm run test:playwright:browser
 
       - name: Upload test results
         uses: actions/upload-artifact@v5
