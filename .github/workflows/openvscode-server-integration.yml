@@ -14,31 +14,45 @@ jobs:
       RUN_IN_BROWSER: true
       OPEN_VSCODE_VERSION: v1.103.1
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
           node-version: 22
-      - uses: actions/setup-java@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
         with:
           java-version: 21
           distribution: 'temurin'
+
       - name: Install dependencies
         run: |
-          npm run update:axonivy:next
-          npm install
-          npm run build:production
-          npm install -D @playwright/test@latest
-          npx playwright install --with-deps chromium
-          npm run engine:download https://dev.axonivy.com/permalink/dev/axonivy-engine.zip
+          pnpm run update:axonivy:next
+          pnpm install --no-frozen-lockfile
+          pnpm run build:production
+          pnpx playwright install --with-deps chromium
+          pnpm run engine:download https://dev.axonivy.com/permalink/dev/axonivy-engine.zip
           rm -r extension/AxonIvyEngine/system/demo-applications
           wget -O openvsc.tar.gz https://github.com/gitpod-io/openvscode-server/releases/download/openvscode-server-$OPEN_VSCODE_VERSION/openvscode-server-$OPEN_VSCODE_VERSION-linux-x64.tar.gz
           tar -xzf openvsc.tar.gz --strip-components=1 --one-top-level=openvsc
           cp -r extension/. openvsc/extensions/extension
           nohup openvsc/bin/openvscode-server --host 0.0.0.0 --without-connection-token --disable-workspace-trust &
           extension/AxonIvyEngine/bin/AxonIvyEngine startdaemon
+
       - name: Run Playwright tests
         run: npm run test:playwright:browser
-      - uses: actions/upload-artifact@v5
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
         with:
           name: test-results

@@ -27,10 +27,10 @@ pipeline {
     stage('Build') {
       steps {
         nodejs(nodeJSInstallationName: '22.21.0') {
-          bat 'npm run update:axonivy:next'
-          bat 'npm install'
-          bat 'npm run build:production'
-          bat 'npm run engine:download'
+          bat 'pnpm run update:axonivy:next'
+          bat 'pnpm install --no-frozen-lockfile'
+          bat 'pnpm run build:production'
+          bat 'pnpm run engine:download'
         }
       }
     }
@@ -40,8 +40,8 @@ pipeline {
         nodejs(nodeJSInstallationName: '22.21.0') {
           catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
             bat 'start extension/AxonIvyEngine/bin/AxonIvyEngine.exe'
-            bat 'npm run test:playwright:download:vscode'
-            bat 'npm run test:playwright'
+            bat 'pnpm run test:playwright:download:vscode'
+            bat 'pnpm run test:playwright'
             bat 'start extension/AxonIvyEngine/bin/AxonIvyEngine.exe stop'
           }
           archiveArtifacts artifacts: '**/playwright/playwright-videos/**', allowEmptyArchive: true
@@ -60,10 +60,10 @@ pipeline {
         nodejs(nodeJSInstallationName: '22.21.0') {
           catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
             script {
-              bat 'npm run openapi:download'
-              bat 'npm run openapi:codegen'
-              bat 'npm run type'
-              bat 'npm run lint:ci'
+              bat 'pnpm run openapi:download'
+              bat 'pnpm run openapi:codegen'
+              bat 'pnpm run type'
+              bat 'pnpm run lint:ci'
             }
           }
           withChecks('Integration Protocol ESLint') {

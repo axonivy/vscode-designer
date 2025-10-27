@@ -12,7 +12,4 @@ sed -i -E "s/(\"@axonivy[^\"]*\"): \"[^\"]*\"/\1: \"~${1/SNAPSHOT/next}\"/" pack
 sed -i -E "s/(\"@axonivy[^\"]*\"): \"[^\"]*\"/\1: \"~${1/SNAPSHOT/next}\"/" extension/package.json
 sed -i -E "s/(\"@axonivy[^\"]*\"): \"[^\"]*\"/\1: \"~${1/SNAPSHOT/next}\"/" webviews/*/package.json
 
-npm run update:axonivy:next
-if [ "$DRY_RUN" = false ]; then
-  npm install --force
-fi
+pnpm run update:axonivy:next

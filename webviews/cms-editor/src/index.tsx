@@ -1,5 +1,6 @@
 import { ClientContextProvider, ClientJsonRpc, CmsEditor, initQueryClient, QueryProvider } from '@axonivy/cms-editor';
 import '@axonivy/cms-editor/lib/editor.css';
+import { ThemeProvider } from '@axonivy/ui-components';
 import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
 import '@axonivy/vscode-webview-common/css/colors.css';
 import * as React from 'react';
@@ -21,11 +22,13 @@ export async function start({ file }: InitializeConnection) {
   initTranslation();
   createRoot(rootElement).render(
     <React.StrictMode>
-      <ClientContextProvider client={client}>
-        <QueryProvider client={queryClient}>
-          <CmsEditor context={{ app: '', pmv: '', file }} />
-        </QueryProvider>
-      </ClientContextProvider>
+      <ThemeProvider disabled={true}>
+        <ClientContextProvider client={client}>
+          <QueryProvider client={queryClient}>
+            <CmsEditor context={{ app: '', pmv: '', file }} />
+          </QueryProvider>
+        </ClientContextProvider>
+      </ThemeProvider>
     </React.StrictMode>
   );
 }

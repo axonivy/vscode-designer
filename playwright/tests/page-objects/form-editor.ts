@@ -1,5 +1,4 @@
-import type { Page } from 'playwright-core';
-import { expect } from 'playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { Editor } from './editor';
 
 export class FormEditor extends Editor {

@@ -1,0 +1,19 @@
+packages:
+  - webviews/*
+  - playwright
+  - extension
+
+ignoredBuiltDependencies:
+  - '@vscode/vsce-sign'
+  - esbuild
+  - keytar
+
+onlyBuiltDependencies:
+  - monaco-languageclient
+
+preferWorkspacePackages: true
+
+publicHoistPattern:
+  - eslint
+
+sideEffectsCache: false

@@ -5,7 +5,11 @@
   "description": "VSCode extension webview for the Axon Ivy form editor",
   "license": "(EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0)",
   "dependencies": {
-    "@axonivy/vscode-webview-common": "~13.2.0-next"
+    "@axonivy/form-editor": "~13.2.0-next.975.e6276d0",
+    "@axonivy/form-editor-core": "~13.2.0-next.975.e6276d0",
+    "@axonivy/ui-components": "~13.2.0-next.909.6b8b57e",
+    "@axonivy/vscode-webview-common": "workspace:~13.2.0-next",
+    "vscode-messenger-webview": "0.4.5"
   },
   "type": "module",
   "scripts": {
