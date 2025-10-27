@@ -30,7 +30,7 @@
     "type": "pnpm run -r type",
     "update:axonivy:next": "npx --yes npm-check-updates @axonivy* -ws -t semver -u",
     "raise:version": "lerna version --allow-peer-dependencies-update --no-git-tag-version --no-push --ignore-scripts --exact --yes",
-    "watch": "pnpm run -r watch --parallel"
+    "watch": "pnpm run -r --parallel watch"
   },
   "devDependencies": {
     "@axonivy/eslint-config": "~13.2.0-next.909.6b8b57e",

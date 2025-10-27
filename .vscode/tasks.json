@@ -4,15 +4,15 @@
     {
       "label": "Watch",
       "dependsOn": ["Build webview common"],
-      "type": "npm",
-      "script": "watch",
+      "type": "shell",
+      "command": "pnpm run watch",
       "isBackground": true,
       "problemMatcher": {
         "base": "$tsc-watch",
         "background": {
           "activeOnStart": true,
-          "beginsPattern": "@axonivy/vscode-webview-process-editor: vite",
-          "endsPattern": "@axonivy/vscode-webview-process-editor: built in"
+          "beginsPattern": "webviews/process-editor watch: vite",
+          "endsPattern": "webviews/process-editor watch: built in"
         }
       },
       "presentation": {
@@ -23,7 +23,7 @@
     {
       "label": "Build webview common",
       "type": "shell",
-      "command": "pnpm run build --filter @axonivy/vscode-webview-common",
+      "command": "pnpm --filter @axonivy/vscode-webview-common run build",
       "isBackground": true,
       "presentation": {
         "reveal": "always",
