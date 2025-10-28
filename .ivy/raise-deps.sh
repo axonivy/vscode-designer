@@ -1,15 +1,21 @@
 #!/bin/bash
 set -e
 
-shopt -s globstar
-# likely not working on mac
+if [ -z "$1" ]; then
+  echo "Usage: $0 <version>"
+  exit 1
+fi
 
+VERSION="$1"
+
+update_version() {
+  local version="${1/SNAPSHOT/next}"
+  sed -i -E "s/(\"@axonivy[^\"]*\": \"(workspace:)?)[^\"]*(\")/\1~$version\3/" "$2"
+}
+
+for pkg in webviews/*/package.json extension/package.json package.json; do
+  update_version "$VERSION" "$pkg"
+done
 mvn --batch-mode versions:set-property versions:commit -Dproperty=openapi.version -DnewVersion=${1} -DallowSnapshots=true
-
-# This should only be done if branch is not master...
-# sed -i -E "s|core_product-engine/job/master/|core_product-engine/job/release%2F${1/.[0-9]-SNAPSHOT/}/|" build/**/Jenkinsfile
-sed -i -E "s/(\"@axonivy[^\"]*\"): \"[^\"]*\"/\1: \"~${1/SNAPSHOT/next}\"/" package.json
-sed -i -E "s/(\"@axonivy[^\"]*\"): \"[^\"]*\"/\1: \"~${1/SNAPSHOT/next}\"/" extension/package.json
-sed -i -E "s/(\"@axonivy[^\"]*\"): \"[^\"]*\"/\1: \"~${1/SNAPSHOT/next}\"/" webviews/*/package.json
 
 pnpm run update:axonivy:next
