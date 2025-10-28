@@ -150,7 +150,7 @@ export class IvyEngineApi {
 
   public async refreshProjectStatuses() {
     const baseURL = await this.baseURL;
-    return vscode.window.withProgress(progressOptions('Create new Project'), async () => {
+    return vscode.window.withProgress(progressOptions('Refresh project statuses'), async () => {
       return refreshProjectStatuses({ baseURL, ...options })
         .then(res => res.data)
         .catch(handleAxiosError);

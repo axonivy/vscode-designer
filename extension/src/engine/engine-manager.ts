@@ -66,7 +66,7 @@ export class IvyEngineManager {
     WebIdeWebSocketProvider(websocketUrl);
     XhtmlLanguageClientProvider(websocketUrl);
 
-    IvyDiagnostics.instance.refresh();
+    await IvyDiagnostics.instance.refresh();
   }
 
   private async resolveEngineUrl() {
