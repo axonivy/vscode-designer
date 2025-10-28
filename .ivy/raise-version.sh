@@ -4,7 +4,7 @@ set -e
 mvn --batch-mode -f pom.xml versions:set versions:commit -DnewVersion=${1}
 
 pnpm install
-pnpx run raise:version ${1/-SNAPSHOT/}
+pnpm run raise:version ${1/-SNAPSHOT/}
 pnpm install --no-frozen-lockfile
 
 echo "update ivy version in maven.ts"
