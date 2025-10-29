@@ -70,11 +70,14 @@ export class IvyProjectExplorer {
 
   private defineFileWatchers() {
     vscode.workspace.createFileSystemWatcher(IVY_RPOJECT_FILE_PATTERN, false, true, true).onDidCreate(async () => await this.refresh());
-    vscode.workspace.createFileSystemWatcher('**/*', true, true, false).onDidDelete(e =>
+    vscode.workspace.createFileSystemWatcher('**/*', true, true, false).onDidDelete(e => {
+      if (e.path.includes('/target/')) {
+        return;
+      }
       this.getIvyProjects()
         .then(projects => this.deleteProjectOnEngine(e, projects))
-        .then(() => this.refresh())
-    );
+        .then(() => this.refresh());
+    });
     vscode.workspace
       .createFileSystemWatcher('**/{cms,config,webContent}/**/*', true, false, true)
       .onDidChange(e => this.runEngineAction((d: string) => IvyEngineManager.instance.deployProject(d), e));
