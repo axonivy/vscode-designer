@@ -25,8 +25,9 @@ import { XhtmlEditor } from './page-objects/xhtml-editor';
     const completionDialog = page.locator(completionDialogSelector);
     await expect(completionDialog).toBeVisible();
     await expect(completionDialog.getByText('rendered')).toBeVisible();
-    // await page.keyboard.press('ArrowDown'); //go to 2nd attribute closable
-    // await expect(page.getByText('Adds a close icon to hide the messages')).toBeVisible();
+    await page.keyboard.press('ArrowDown'); //go to 2nd attribute closable
+    await page.keyboard.press('Control+Space');
+    await expect(page.getByText('Adds a close icon to hide the messages')).toBeVisible();
   });
 
   test('htmlBasic_tag_completion', async ({ page }) => {
