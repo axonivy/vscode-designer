@@ -21,9 +21,8 @@ import { XhtmlEditor } from './page-objects/xhtml-editor';
     await page.keyboard.press('Control+Space');
     await expect(editor.complitions).toBeVisible();
     await expect(editor.complitions.getByText('rendered')).toBeVisible();
-    await page.keyboard.press('ArrowDown'); //go to 2nd attribute closable
     await page.keyboard.press('Control+Space');
-    await expect(page.getByText('Adds a close icon to hide the messages')).toBeVisible();
+    await expect(page.getByText('An el expression referring to a server side UIComponent instance in a backing bean')).toBeVisible();
   });
 
   test('htmlBasic tag completion', async ({ page }) => {
