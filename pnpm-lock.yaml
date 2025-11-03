@@ -138,8 +138,8 @@ importers:
         specifier: 10.0.0
         version: 10.0.0
       vscode-languageclient:
-        specifier: 8.1.0
-        version: 8.1.0
+        specifier: 9.0.1
+        version: 9.0.1
       vscode-messenger:
         specifier: 0.4.5
         version: 0.4.5
@@ -5949,6 +5949,10 @@ packages:
   vscode-languageclient@8.1.0:
     resolution: {integrity: sha512-GL4QdbYUF/XxQlAsvYWZRV3V34kOkpRlvV60/72ghHfsYFnS/v2MANZ9P6sHmxFcZKOse8O+L9G7Czg0NUWing==}
     engines: {vscode: ^1.67.0}
+
+  vscode-languageclient@9.0.1:
+    resolution: {integrity: sha512-JZiimVdvimEuHh5olxhxkht09m3JzUGwggb5eRUkzzJhZ2KjCN0nh55VfiED9oez9DyF8/fz1g1iBV3h+0Z2EA==}
+    engines: {vscode: ^1.82.0}
 
   vscode-languageserver-protocol@3.17.3:
     resolution: {integrity: sha512-924/h0AqsMtA5yK22GgMtCYiMdCOtWTSGgUOkgEDX+wk2b0x4sAfLiO4NxBxqbiVtz7K7/1/RgVrVI0NClZwqA==}
@@ -13075,6 +13079,12 @@ snapshots:
       minimatch: 5.1.6
       semver: 7.7.3
       vscode-languageserver-protocol: 3.17.3
+
+  vscode-languageclient@9.0.1:
+    dependencies:
+      minimatch: 5.1.6
+      semver: 7.7.3
+      vscode-languageserver-protocol: 3.17.5
 
   vscode-languageserver-protocol@3.17.3:
     dependencies:
