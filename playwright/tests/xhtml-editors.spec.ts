@@ -1,44 +1,43 @@
 import { expect, test } from './fixtures/baseTest';
 import { XhtmlEditor } from './page-objects/xhtml-editor';
 
-  test('primeface_tag_completion', async ({ page }) => {
+  test('primeface tag completion', async ({ page }) => {
     const editor = new XhtmlEditor(page);
-    const completionDialogSelector = '.suggest-widget';
-    await editor.openEditorFile();
     await editor.hasNoStatusMessage();
+    await editor.openEditorFile();
     await page.getByText('<p:messages').click();
     await page.keyboard.press('Control+Space');
-    const completionDialog = page.locator(completionDialogSelector);
-    await expect(completionDialog).toBeVisible();
-    await expect(completionDialog.getByText('p:media')).toBeVisible();
+    await expect(editor.complitions).toBeVisible();
+    await expect(editor.complitions.getByText('p:media')).toBeVisible();
   });
 
-  test('primeface_attr_compition', async ({ page }) => {
+  test('primeface attr compition', async ({ page }) => {
     const editor = new XhtmlEditor(page);
-    const completionDialogSelector = '.suggest-widget';
-    await editor.openEditorFile();
     await editor.hasNoStatusMessage();
+    await editor.openEditorFile();
     await page.getByText('<p:messages />').click();
-    await page.keyboard.press('ArrowRight+ArrowRight+ArrowRight+ArrowRight');
-    await page.keyboard.press('ArrowRight+ArrowRight+ArrowRight+ArrowRight');
+    await page.keyboard.press('End');
+    await page.keyboard.press('ArrowLeft+ArrowLeft');
     await page.keyboard.press('Control+Space');
-    const completionDialog = page.locator(completionDialogSelector);
-    await expect(completionDialog).toBeVisible();
-    await expect(completionDialog.getByText('rendered')).toBeVisible();
+    await expect(editor.complitions).toBeVisible();
+    await expect(editor.complitions.getByText('rendered')).toBeVisible();
     await page.keyboard.press('ArrowDown'); //go to 2nd attribute closable
     await page.keyboard.press('Control+Space');
     await expect(page.getByText('Adds a close icon to hide the messages')).toBeVisible();
   });
 
-  test('htmlBasic_tag_completion', async ({ page }) => {
+  test('htmlBasic tag completion', async ({ page }) => {
     const editor = new XhtmlEditor(page);
-    const completionDialogSelector = '.suggest-widget';
-    await editor.openEditorFile();
     await editor.hasNoStatusMessage();
+    await editor.openEditorFile();
     await page.getByText('<h:form').click();
-    const completionDialog = page.locator(completionDialogSelector);
-    await page.keyboard.press('ArrowLeft+ArrowLeft+ArrowLeft+ArrowLeft');
+    await page.keyboard.press('Home');
+    await page.keyboard.press('ArrowRight+ArrowRight');
     await page.keyboard.press('Control+Space');
-    await expect(completionDialog).toBeVisible();
-    await expect(completionDialog.getByText('h:body')).toBeVisible();
+    await expect(editor.complitions).toBeVisible();
+    await expect(editor.complitions.getByText('h:body')).toBeVisible();
   });
+
+
+
+
