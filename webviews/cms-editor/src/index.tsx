@@ -20,12 +20,14 @@ export async function start({ file }: InitializeConnection) {
     throw new Error('Root element not found');
   }
   initTranslation();
+  const context = { app: '', pmv: '', file };
+  const initializePromise = client.initialize(context);
   createRoot(rootElement).render(
     <React.StrictMode>
       <ThemeProvider disabled={true}>
         <ClientContextProvider client={client}>
           <QueryProvider client={queryClient}>
-            <CmsEditor context={{ app: '', pmv: '', file }} />
+            <CmsEditor context={context} initializePromise={initializePromise} />
           </QueryProvider>
         </ClientContextProvider>
       </ThemeProvider>
