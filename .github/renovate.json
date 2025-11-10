@@ -1,6 +1,10 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["local>axonivy/renovate-config:npm", "group:allNonMajor", "npm:unpublishSafe"],
+  "extends": [
+    "local>axonivy/renovate-config:npm",
+    "group:allNonMajor",
+    "security:minimumReleaseAgeNpm"
+  ],
   "lockFileMaintenance": {
     "enabled": true
   },
@@ -8,7 +12,12 @@
   "packageRules": [
     {
       "matchBaseBranches": ["release/*", "master"],
-      "matchPackageNames": ["@axonivy/*", "@types/vscode", "vscode-messenger*", "@codingame/*"],
+      "matchPackageNames": [
+        "@axonivy/*",
+        "@types/vscode",
+        "vscode-messenger*",
+        "@codingame/*"
+      ],
       "enabled": false
     },
     {
