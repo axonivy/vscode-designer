@@ -23,5 +23,5 @@ test('Open by file and open help', async ({ page }) => {
 
   await editor.help.click();
   const browserView = new BrowserView(page);
-  expect((await browserView.input().inputValue()).toString()).toMatch(/^https:\/\/developer\.axonivy\.com.*cms\/index.html$/);
+  expect((await browserView.input().inputValue()).toString()).toMatch(/^https:\/\/developer\.axonivy\.com.*cms\/cms-editor.html$/);
 });
