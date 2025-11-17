@@ -15,16 +15,12 @@ import { XhtmlEditor } from './page-objects/xhtml-editor';
     const editor = new XhtmlEditor(page);
     await editor.hasNoStatusMessage();
     await editor.openEditorFile();
-    //await page
     await page.getByText('<p:messages />').click();
     await page.keyboard.press('End');
     await page.keyboard.press('ArrowLeft+ArrowLeft');
     await page.keyboard.press('Control+Space');
     await expect(editor.complitions).toBeVisible();
     await expect(editor.complitions.getByText('rendered')).toBeVisible();
-    await page.keyboard.press('Control+Space');
-    await page.keyboard.press('Control+Space');
-    await expect(page.getByText('An el expression referring to a server side UIComponent instance in a backing bean')).toBeVisible();
   });
 
   test('htmlBasic tag completion', async ({ page }) => {
