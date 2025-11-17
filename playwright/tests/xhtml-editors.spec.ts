@@ -11,7 +11,7 @@ import { XhtmlEditor } from './page-objects/xhtml-editor';
     await expect(editor.complitions.getByText('p:media')).toBeVisible();
   });
 
-  test('primeface attr compition', async ({ page }) => {
+  test('primeface attr completion', async ({ page }) => {
     const editor = new XhtmlEditor(page);
     await editor.hasNoStatusMessage();
     await editor.openEditorFile();
