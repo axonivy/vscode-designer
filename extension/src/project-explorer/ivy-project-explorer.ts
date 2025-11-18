@@ -5,7 +5,7 @@ import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
 import { addNewDataClass } from './new-data-class';
-import { ProcessKind, addNewProcess } from './new-process';
+import { ProcessKind, addNewProcess, importNewProcess } from './new-process';
 import { addNewProject } from './new-project';
 import { DialogType, addNewUserDialog } from './new-user-dialog';
 import { TreeSelection, treeSelectionToProjectPath, treeSelectionToUri } from './tree-selection';
@@ -53,6 +53,8 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.addBusinessProcess`, (s: TreeSelection) => this.addProcess(s, 'Business Process'));
     registerCmd(`${VIEW_ID}.addCallableSubProcess`, (s: TreeSelection) => this.addProcess(s, 'Callable Sub Process'));
     registerCmd(`${VIEW_ID}.addWebServiceProcess`, (s: TreeSelection) => this.addProcess(s, 'Web Service Process'));
+    registerCmd(`${VIEW_ID}.importBpmnProcess`, (s: TreeSelection) => this.importBpmnProcess(s));
+
     registerCmd(`${VIEW_ID}.addNewProject`, (s: TreeSelection) => addNewProject(s));
     registerCmd(`${VIEW_ID}.addNewHtmlDialog`, (s: TreeSelection, selections?: [TreeSelection], pid?: string) =>
       this.addUserDialog(s, 'JSF', pid)
@@ -118,6 +120,15 @@ export class IvyProjectExplorer {
       return;
     }
     vscode.window.showErrorMessage('Add Process: no valid Axon Ivy Project selected.');
+  }
+
+  public async importBpmnProcess(selection: TreeSelection) {
+    const projectPath = await treeSelectionToProjectPath(selection, this.getIvyProjects());
+    if (projectPath) {
+      await importNewProcess(await treeSelectionToUri(selection), projectPath);
+      return;
+    }
+    vscode.window.showErrorMessage('Import BPMN Process: no valid Axon Ivy Project selected.');
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {
