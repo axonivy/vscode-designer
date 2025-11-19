@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ImportProcessBody, ProcessInit } from '../engine/api/generated/client';
+import { ProcessInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { resolveNamespaceFromPath } from './util';
 
@@ -44,26 +44,4 @@ const validateNameWithNamespace = (value: string) => {
     return;
   }
   return `Alphanumeric name expected. ${prompt}`;
-};
-
-export const importNewProcess = async (selectedUri: vscode.Uri, projectDir: string) => {
-  const input = await collectImportBpmnProcessParams(selectedUri, projectDir);
-  if (input) {
-    await IvyEngineManager.instance.createProcessFromBpmn(input);
-  }
-};
-
-const collectImportBpmnProcessParams = async (selectedUri: vscode.Uri, projectDir: string): Promise<ImportProcessBody> => {
-  const bpmnXmlFile = await vscode.window.showOpenDialog({
-    canSelectMany: false,
-    openLabel: 'Select BPMN XML File to Import'
-  });
-  if (!bpmnXmlFile || bpmnXmlFile.length === 0 || !bpmnXmlFile[0]) {
-    vscode.window.showErrorMessage('Cannot pick BPMN or XML file.');
-    return Promise.reject(new Error('BPMN or XML file not selected'));
-  }
-  const fileData = await vscode.workspace.fs.readFile(bpmnXmlFile[0]);
-  const regularArray = new Uint8Array(fileData);
-  const fileBlob = new Blob([regularArray.buffer], { type: 'application/xml' });
-  return { projectDir, file: fileBlob };
 };
