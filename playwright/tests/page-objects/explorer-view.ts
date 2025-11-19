@@ -90,6 +90,11 @@ export class FileExplorer extends ExplorerView {
     await this.provideUserInput(processName);
   }
 
+  async importBpmnProcess(bpmnXml: string) {
+    await this.executeCommand('Axon Ivy: Import BPMN Process');
+    await this.provideUserInput(bpmnXml);
+  }
+
   async addUserDialog(dialogName: string, namespace: string, kind: 'Html Dialog' | 'Offline Dialog' | 'Form Dialog') {
     await this.selectNode('config');
     await this.executeCommand('Axon Ivy: New ' + kind);
