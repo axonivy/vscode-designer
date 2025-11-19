@@ -33,6 +33,7 @@ type ProjectViewCommand =
   | 'ivyProjects.addBusinessProcess'
   | 'ivyProjects.addCallableSubProcess'
   | 'ivyProjects.addWebServiceProcess'
+  | 'ivyProjects.importBpmnProcess'
   | 'ivyProjects.addNewProject'
   | 'ivyProjects.addNewHtmlDialog'
   | 'ivyProjects.addNewFormDialog'

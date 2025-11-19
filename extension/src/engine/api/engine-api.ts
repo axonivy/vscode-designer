@@ -8,6 +8,7 @@ import { handleProjectConversionLog } from '../project-conversion-log';
 import { handleAxiosError } from './axios-error-handler';
 import {
   DataClassInit,
+  ImportProcessBody,
   NewProjectParams,
   buildProjects,
   convertProject,
@@ -19,6 +20,7 @@ import {
   deleteProject,
   deployProjects,
   findOrCreatePmv,
+  importProcess,
   projects,
   refreshProjectStatuses,
   stopBpmEngine
@@ -101,6 +103,15 @@ export class IvyEngineApi {
     const baseURL = await this.baseURL;
     return vscode.window.withProgress(progressOptions('Create new Process'), async () => {
       return createProcess(newProcessParams, { baseURL, ...options })
+        .then(res => res.data)
+        .catch(handleAxiosError);
+    });
+  }
+
+  public async createProcessFromBpmn(params: ImportProcessBody) {
+    const baseURL = await this.baseURL;
+    return vscode.window.withProgress(progressOptions('Import BPMN Process'), async () => {
+      return importProcess(params, { baseURL, ...options })
         .then(res => res.data)
         .catch(handleAxiosError);
     });
