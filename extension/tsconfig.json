@@ -6,7 +6,10 @@
     "resolveJsonModule": true,
     "module": "commonjs",
     "verbatimModuleSyntax": false,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "inlineSourceMap": false,
+    "sourceRoot": "."
   },
   "include": ["src"],
   "types": ["node", "vscode"]

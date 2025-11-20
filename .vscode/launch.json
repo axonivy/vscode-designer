@@ -10,8 +10,13 @@
         "--extensionDevelopmentPath=${workspaceFolder}/extension",
         "${env:CONTAINER_WORKSPACE}"
       ],
-      "outFiles": ["${workspaceFolder}/extension/dist/**/*.js"],
+      "outFiles": ["${workspaceFolder}/extension/dist/**/*.js", "!**/node_modules/**"],
       "sourceMaps": true,
+      "smartStep": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "sourceMapPathOverrides": {
+        "extension/*": "${workspaceFolder}/extension/*"
+      },
       "preLaunchTask": "Watch"
     }
   ]
