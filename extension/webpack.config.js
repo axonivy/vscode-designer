@@ -13,24 +13,7 @@ const config = {
     library: {
       type: 'commonjs'
     },
-    devtoolModuleFilenameTemplate: info => {
-      const absPath = info.absoluteResourcePath;
-
-      // For our TypeScript source files, return absolute path from workspace root
-      if (absPath.includes('/extension/src/')) {
-        const srcIndex = absPath.indexOf('/extension/src/');
-        const workspaceRelativePath = 'extension/' + absPath.substring(srcIndex + '/extension/'.length);
-        return workspaceRelativePath;
-      } else if (absPath.includes('\\extension\\src\\')) {
-        const srcIndex = absPath.indexOf('\\extension\\src\\');
-        const workspaceRelativePath = 'extension/' + absPath.substring(srcIndex + '\\extension\\'.length).replace(/\\/g, '/');
-        return workspaceRelativePath;
-      }
-
-      // For node_modules and other external files, use standard relative path
-      const rel = path.relative(__dirname, absPath);
-      return path.posix.join('..', rel.replace(/\\/g, '/'));
-    }
+    devtoolModuleFilenameTemplate: '../[resource-path]'
   },
   devtool: 'source-map',
   externals: {

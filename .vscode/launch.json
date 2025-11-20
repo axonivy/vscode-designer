@@ -14,9 +14,6 @@
       "sourceMaps": true,
       "smartStep": true,
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-      "sourceMapPathOverrides": {
-        "extension/*": "${workspaceFolder}/extension/*"
-      },
       "preLaunchTask": "Watch"
     }
   ]
