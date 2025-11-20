@@ -22,7 +22,8 @@ const config = {
     bufferutil: 'bufferutil'
   },
   resolve: {
-    extensions: ['.ts', '.js']
+    extensions: ['.ts', '.js'],
+    symlinks: true
   },
   module: {
     rules: [
@@ -34,7 +35,8 @@ const config = {
             loader: 'ts-loader',
             options: {
               compilerOptions: {
-                module: 'es6'
+                module: 'es6',
+                sourceMap: true
               }
             }
           }
