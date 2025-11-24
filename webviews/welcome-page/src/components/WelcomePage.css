@@ -1,0 +1,32 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.welcome-page {
+  background-color: var(--background);
+  width: 100%;
+  height: 100%;
+}
+
+.welcome-page-content {
+  height: 100%;
+  width: clamp(1000px, 1500px, 100%);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.welcome-page-logo {
+  width: 150px;
+}
+
+.vscode-dark .welcome-page-logo,
+.dark .welcome-page-logo {
+  filter: invert(1);
+}
+
+.welcome-page-version {
+  color: var(--N800);
+  font-size: 15px;
+  font-weight: bold;
+}

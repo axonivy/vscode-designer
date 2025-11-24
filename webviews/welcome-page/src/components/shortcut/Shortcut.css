@@ -1,0 +1,36 @@
+.welcome-shortcut-card-button {
+  height: 100%;
+  max-height: 100%;
+  padding: 20px 40px;
+  width: 100%;
+  background-color: var(--N50);
+  border: var(--basic-border);
+  border-radius: 1em;
+}
+
+.welcome-shortcut-card > * {
+  padding: 0;
+  margin: 0;
+  max-width: 100%;
+  text-align: center;
+  overflow: hidden;
+}
+
+.welcome-shortcut-card > span {
+  font-size: 12px;
+}
+
+.welcome-shortcut-icon {
+  font-size: 80px;
+  color: var(--P75);
+}
+
+.welcome-shortcut-description {
+  color: var(--N900);
+}
+
+.shortcut-card-oversize {
+  height: 100%;
+  width: 100%;
+  min-width: 240px;
+}

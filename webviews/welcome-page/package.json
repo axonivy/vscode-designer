@@ -1,0 +1,24 @@
+{
+  "name": "@axonivy/vscode-webview-welcome-page",
+  "version": "13.2.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@axonivy/ui-components": "~13.2.0-next.946.b9679c2",
+    "@axonivy/ui-icons": "~13.2.0-next.946.b9679c2",
+    "@axonivy/vscode-webview-common": "workspace:~13.2.0-next",
+    "vscode-messenger-webview": "0.4.5"
+  },
+  "devDependencies": {
+    "i18next-cli": "^1.21.1"
+  },
+  "scripts": {
+    "build": "vite build --mode development --emptyOutDir",
+    "build:production": "vite build --emptyOutDir",
+    "clean": "rimraf dist lib",
+    "type": "tsc --noEmit",
+    "watch": "vite build --mode development --watch --emptyOutDir",
+    "i18n": "i18next-cli extract",
+    "dev": "vite"
+  }
+}

@@ -1,0 +1,40 @@
+.welcome-socialmedia-wrapper {
+  border: var(--basic-border);
+  border-radius: var(--border-r3);
+  overflow: hidden;
+  --btn-width: 80px;
+  min-width: max-content;
+}
+
+.welcome-socialmeda-btn {
+  border-right: var(--basic-border);
+  border-radius: unset;
+}
+
+.welcome-socialmedia-icon {
+  width: 15px;
+}
+
+.vscode-dark .welcome-socialmedia-icon,
+.dark .welcome-socialmedia-icon {
+  filter: invert(1);
+}
+
+.welcome-socialmedia-name {
+  width: 0;
+  overflow: hidden;
+  transition: width 0.4s ease;
+  white-space: nowrap;
+}
+
+.welcome-socialmeda-btn:last-child .welcome-socialmedia-name {
+  width: var(--btn-width);
+}
+
+.welcome-socialmedia-wrapper:hover .welcome-socialmedia-name {
+  width: 0;
+}
+
+.welcome-socialmeda-btn:hover .welcome-socialmedia-name {
+  width: var(--btn-width);
+}
