@@ -13,6 +13,16 @@ export const showWelcomePage = (context: vscode.ExtensionContext) => {
     enableScripts: true
   });
 
+  panel.webview.onDidReceiveMessage(
+    message => {
+      if (message?.type === 'open-external-link' && typeof message.url === 'string') {
+        vscode.env.openExternal(vscode.Uri.parse(message.url));
+      }
+    },
+    undefined,
+    context.subscriptions
+  );
+
   panel.webview.html = createWebViewContent(context, panel.webview, 'welcome-page');
   currentPanel = panel;
 };

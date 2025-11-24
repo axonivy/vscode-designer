@@ -1,0 +1,23 @@
+.welcome-shortcut-card {
+  background-color: var(--N50);
+  height: 200px;
+  width: 250px;
+  padding: 20px 50px 20px 50px;
+  box-sizing: border-box;
+  border: var(--basic-border);
+  border-radius: 1em;
+  cursor: pointer;
+}
+
+.welcome-shortcut-card:hover {
+  background-color: var(--N100);
+}
+
+.welcome-shortcut-icon {
+  font-size: 80px;
+  color: var(--P75);
+}
+
+.welcome-shortcut-description {
+  color: var(--N900);
+}

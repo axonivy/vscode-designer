@@ -2,6 +2,7 @@ import { ThemeProvider } from '@axonivy/ui-components';
 import '@axonivy/vscode-webview-common/css/colors.css';
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
+
 import { WelcomePage } from './components/WelcomePage';
 import { initTranslation } from './i18n';
 
@@ -13,7 +14,7 @@ export async function start() {
   initTranslation();
   createRoot(rootElement).render(
     <React.StrictMode>
-      <ThemeProvider disabled={true}>
+      <ThemeProvider disabled={false}>
         <WelcomePage />
       </ThemeProvider>
     </React.StrictMode>

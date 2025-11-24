@@ -9,6 +9,10 @@ export default defineConfig(() => {
       outDir: '../../extension/dist/webviews/welcome-page',
       chunkSizeWarningLimit: 5000
     },
+    server: {
+      port: 3001,
+      open: false
+    },
     base: './'
   };
   return config;
