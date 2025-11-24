@@ -5,6 +5,7 @@ import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
 import { setStatusBarIcon } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
+import { showWelcomePage } from './editors/welcome-page/welcome-page';
 import { IvyDiagnostics } from './engine/diagnostics';
 import { IvyEngineManager } from './engine/engine-manager';
 import { IvyProjectExplorer } from './project-explorer/ivy-project-explorer';
@@ -28,9 +29,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<Messen
   registerCommand('engine.deactivateAnimation', context, async () => await config.setProcessAnimationAnimate(false));
   registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));
   registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
+  registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
+
   IvyProjectExplorer.init(context);
   IvyDiagnostics.init(context);
   setStatusBarIcon();
+
+  const hasShownWelcome = context.workspaceState.get<boolean>('welcomeShown');
+  if (!hasShownWelcome) {
+    showWelcomePage(context);
+    await context.workspaceState.update('welcomeShown', true);
+  }
 
   return messenger.diagnosticApi();
 }

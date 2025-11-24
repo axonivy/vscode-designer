@@ -50,4 +50,5 @@ type ViewCommand =
   | 'ivyBrowserView.openNEO'
   | 'ivyBrowserView.openCmsEditor'
   | 'ivyBrowserView.openDatabaseEditor'
-  | 'ivyPanelView.openRuntimeLog';
+  | 'ivyPanelView.openRuntimeLog'
+  | 'ivyPanelView.openWelcomePage';
