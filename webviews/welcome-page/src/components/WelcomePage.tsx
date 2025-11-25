@@ -1,20 +1,29 @@
-import { cn, Flex, useTheme } from '@axonivy/ui-components';
+import { cn, Flex } from '@axonivy/ui-components';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import logo from '../axonivy-logo.svg';
-import { ShortcutOverview } from './ShortcutOverview';
+import { useVscode } from '../util/useWebsite';
+import { ShortcutSection } from './shortcut/ShortcutSection';
 import './WelcomePage.css';
 
 export const WelcomePage = () => {
   const { t } = useTranslation();
-  const theme = useTheme();
-  console.log(theme.realTheme);
+  const [initData, setInitData] = useState({ version: '' });
+  const { getData } = useVscode();
+  getData(setInitData);
+
   return (
-    <Flex className='welcome-page-content' direction='column'>
-      <Flex direction='row' justifyContent='space-between'>
-        <h1>{t('welcomeToProDesigner')}</h1>
-        <img className={cn('welcome-page-logo', theme.realTheme === 'dark' && 'logo-light')} src={logo} />
+    <Flex justifyContent='center'>
+      <Flex className='welcome-page-content' alignItems='center' direction='column' gap={4}>
+        <Flex direction='column' gap={2} style={{ width: '100%' }}>
+          <Flex direction='row' justifyContent='space-between'>
+            <h1>{t('welcomeToProDesigner')}</h1>
+            <img className={cn('welcome-page-logo', document.body.getAttribute('color-scheme') == 'dark')} src={logo} />
+          </Flex>
+          <span className='welcome-page-version'>{`${t('version')} ${initData['version'] ?? ''}`}</span>
+        </Flex>
+        <ShortcutSection />
       </Flex>
-      <ShortcutOverview />
     </Flex>
   );
 };

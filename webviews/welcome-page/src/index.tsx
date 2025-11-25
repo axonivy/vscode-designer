@@ -14,7 +14,7 @@ export async function start() {
   initTranslation();
   createRoot(rootElement).render(
     <React.StrictMode>
-      <ThemeProvider disabled={false}>
+      <ThemeProvider disabled={true}>
         <WelcomePage />
       </ThemeProvider>
     </React.StrictMode>

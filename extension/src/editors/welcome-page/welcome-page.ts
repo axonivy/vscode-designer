@@ -10,7 +10,8 @@ export const showWelcomePage = (context: vscode.ExtensionContext) => {
   }
 
   const panel = vscode.window.createWebviewPanel('ivy.welcomePage', 'Axon Ivy Pro Designer', vscode.ViewColumn.One, {
-    enableScripts: true
+    enableScripts: true,
+    retainContextWhenHidden: true
   });
 
   panel.webview.onDidReceiveMessage(
@@ -25,4 +26,7 @@ export const showWelcomePage = (context: vscode.ExtensionContext) => {
 
   panel.webview.html = createWebViewContent(context, panel.webview, 'welcome-page');
   currentPanel = panel;
+
+  panel.webview.postMessage({ type: 'initialData', version: '13.2.0' });
+  panel.onDidDispose(() => panel.dispose());
 };

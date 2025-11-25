@@ -7,7 +7,7 @@ type Message = {
   url: string;
 };
 
-export const useWebsite = () => {
+export const useVscode = () => {
   let vscode;
   try {
     vscode = acquireVsCodeApi();
@@ -19,5 +19,13 @@ export const useWebsite = () => {
     vscode.postMessage({ type: 'open-external-link', url });
   };
 
-  return { openUrl };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getData = (callback: (value: any) => void) => {
+    window.addEventListener('message', event => {
+      callback(event.data);
+      console.log(event.data);
+    });
+  };
+
+  return { openUrl, getData };
 };
