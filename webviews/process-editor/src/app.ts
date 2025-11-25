@@ -4,8 +4,8 @@ import '../css/colors.css';
 import '../css/diagram.css';
 
 import {
-  createIvyDiagramContainer,
   IVY_ACCESSIBILITY_MODULES,
+  createIvyDiagramContainer,
   ivyBreakpointModule,
   ivyOpenDataClassModule,
   ivyOpenFormModule,
@@ -77,31 +77,29 @@ async function initMonaco(): Promise<unknown> {
   //
   // So what we do instead is to expose the editor worker location as Webview Uri in our IvyEditorProvider and store it in the 'editorWorkerLocation' variable.
   // We then fetch the script stored at that location and translate it into a blob as blob and data URLs are supported for workers.
-  //
-  // Packaging with Vite has it's own handling of web workers so it can be properly accessed without any custom configuration.
-  // We therefore trigger the generation of the necessary script file here through the import so that we can later expose the generated file under the
-  // 'editorWorkerLocation' variable:
-  import('monaco-editor/esm/vs/editor/editor.worker?worker');
-
   if (!editorWorkerLocation) {
     console.warn('Could not find editor worker location for web worker creation. Initialize without dedicated web worker support.');
-    return MonacoEditorUtil.configureInstance({ theme: 'light', worker: { skip: true } });
+    return MonacoEditorUtil.configureMonaco({ theme: 'light' });
   }
   try {
+    console.info('Translate editor worker script from webview uri to blob: ' + editorWorkerLocation);
     const script = await fetch(editorWorkerLocation);
     if (script.status === 404) {
       throw Error('File not found ' + editorWorkerLocation);
     }
     const blob = await script.blob();
     class BlobWorker extends Worker {
-      constructor(workerId?: string, label?: string, url = URL.createObjectURL(blob)) {
-        super(url, { name: workerId ?? label });
+      constructor(name: string, url = URL.createObjectURL(blob)) {
+        super(url, { name, type: 'module' });
         this.addEventListener('error', () => URL.revokeObjectURL(url));
       }
     }
-    return MonacoEditorUtil.configureInstance({ theme: 'light', worker: { workerConstructor: BlobWorker } });
+    return MonacoEditorUtil.configureMonaco({
+      theme: 'light',
+      workerLoaders: { TextEditorWorker: () => new BlobWorker('TextEditorWorker') }
+    });
   } catch (error) {
     console.error('Problem with retrieving the editor worker script. Initialize without dedicated web worker support.', error);
-    return MonacoEditorUtil.configureInstance({ theme: 'light', worker: { skip: true } });
+    return MonacoEditorUtil.configureMonaco({ theme: 'light' });
   }
 }
