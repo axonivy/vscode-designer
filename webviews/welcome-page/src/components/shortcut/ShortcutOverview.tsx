@@ -26,7 +26,7 @@ export const ShortcutOverview = () => {
     },
     {
       title: t('shortcut.news'),
-      link: 'https://dev.axonivy.com/doc',
+      link: 'https://dev.axonivy.com/news',
       description: t('shortcut.newsDescription'),
       icon: IvyIcons.InfoCircle
     }

@@ -1,7 +1,7 @@
 import { Button, cn, Flex, IvyIcon } from '@axonivy/ui-components';
 import { IvyIcons } from '@axonivy/ui-icons';
 
-import { useVscode } from '../../util/useWebsite';
+import { useVscode } from '../../util/useVscode';
 import './Shortcut.css';
 
 export type Shortcut = { title: string; icon: IvyIcons; link: string; description: string; oversize?: boolean };
