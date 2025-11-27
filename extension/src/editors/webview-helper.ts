@@ -53,7 +53,7 @@ export const createWebViewContent = (
   }
 
   // script to set the editor worker location, needed to load the editor worker from the webview as it only allows blob: or data: fetching
-  const workerUri = findEditorWorker(rootPath, manifest);
+  const workerUri = findEditorWorker(context.extensionUri);
   if (workerUri) {
     const editorWorkerLocation = webview.asWebviewUri(workerUri);
     const editorWorkerLocationScript = new Element('script', { nonce: nonce }, [

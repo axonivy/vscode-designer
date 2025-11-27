@@ -46,4 +46,21 @@ const config = {
   }
 };
 
-module.exports = config;
+// cf. https://github.com/TypeFox/monaco-languageclient/blob/067681adb1c283bfc9a85db989e79bd06599f3a7/docs/guides/troubleshooting.md#webpack-worker-issues
+/**@type {import('webpack').Configuration}*/
+const monacoWorkerConfig = {
+  entry: {
+    editor: './node_modules/@codingame/monaco-vscode-editor-api/esm/vs/editor/editor.worker.js'
+    // textmate: './node_modules/@codingame/monaco-vscode-textmate-service-override/worker.js'
+  },
+  output: {
+    filename: '[name].js',
+    path: path.resolve(__dirname, './assets/monaco-workers')
+  },
+  mode: 'production',
+  performance: {
+    hints: false
+  }
+};
+
+module.exports = [config, monacoWorkerConfig];
