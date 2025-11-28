@@ -14,12 +14,16 @@ import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { NewProcessParams } from '../project-explorer/new-process';
 import { NewUserDialogParams } from '../project-explorer/new-user-dialog';
+import { extensionVersion } from '../version/extension-version';
 import { RuntimeLogViewProvider } from '../views/runtimelog-view';
 import { IvyEngineApi } from './api/engine-api';
 import { DataClassInit, ImportProcessBody, NewProjectParams } from './api/generated/client';
 import { MavenBuilder } from './build/maven';
 import { IvyDiagnostics } from './diagnostics';
+import { EngineDownloader } from './engine-downloader';
 import { EngineRunner } from './engine-runner';
+import { EngineValidator } from './engine-validator';
+import { outputChannel } from './output-channel';
 import { WebIdeWebSocketProvider } from './ws-client';
 
 export class IvyEngineManager {
@@ -31,9 +35,8 @@ export class IvyEngineManager {
   private started = false;
 
   private constructor(readonly context: vscode.ExtensionContext) {
-    const embeddedEngineDirectory = vscode.Uri.joinPath(context.extensionUri, 'AxonIvyEngine');
-    this.mavenBuilder = new MavenBuilder(embeddedEngineDirectory);
-    this.engineRunner = new EngineRunner(embeddedEngineDirectory);
+    this.mavenBuilder = new MavenBuilder();
+    this.engineRunner = new EngineRunner(this.resolveEngineDir());
   }
 
   static init(context: vscode.ExtensionContext) {
@@ -41,6 +44,51 @@ export class IvyEngineManager {
       IvyEngineManager._instance = new IvyEngineManager(context);
     }
     return IvyEngineManager._instance;
+  }
+
+  async resolveEngineDir() {
+    const engineDir = config.engineDirectory();
+    if (!config.engineRunByExtension()) {
+      return engineDir; // ok to be undefined, e.g. in cloud setup
+    }
+    outputChannel.show(true);
+    const engineValidator = new EngineValidator(extensionVersion);
+    const engineDownloader = new EngineDownloader(this.context);
+    if ((await engineValidator.validate(engineDir)).valid) {
+      engineDownloader.tryToUpdateEngine();
+      return engineDir;
+    }
+    const newEngineDir = await engineDownloader.loadBestMatchingVersion();
+    await config.updateEngineDirectory(newEngineDir);
+    const validationResult = await engineValidator.validate(newEngineDir);
+    if (validationResult.valid) {
+      return newEngineDir;
+    }
+    if (validationResult.reason) {
+      outputChannel.appendLine(validationResult.reason);
+    }
+    throw new Error(`Downloaded engine is invalid: ${newEngineDir}`);
+  }
+
+  async reloadDevEngine() {
+    if (!config.engineRunByExtension()) {
+      setStatusBarMessage('Engine reload is only available when the engine is run by the extension.');
+      return;
+    }
+    const quickPick = await vscode.window.showQuickPick(
+      [
+        { label: 'dev', detail: 'asdasd' },
+        { label: 'nightly', detail: 'asdasd' },
+        { label: 'sprint', detail: 'asdasd' }
+      ],
+      {
+        placeHolder: 'Select the Axon Ivy Engine version to be downloaded'
+      }
+    );
+    if (!quickPick) {
+      return;
+    }
+    await this.engineRunner.stop();
   }
 
   async start() {

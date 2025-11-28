@@ -21,7 +21,7 @@ type EngineCommand =
   | 'engine.deployProjects'
   | 'engine.buildProjects'
   | 'engine.buildAndDeployProjects'
-  | 'engine.downloadDevEngine'
+  | 'engine.reloadDevEngine'
   | 'engine.setEngineDirectory'
   | 'engine.deactivateAnimation'
   | 'engine.activateAnimation';

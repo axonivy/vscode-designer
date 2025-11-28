@@ -25,7 +25,11 @@ export namespace config {
     if (!selection || !selection[0]) {
       return;
     }
-    await configs().update('engine.directory', selection[0].fsPath, true);
+    await updateEngineDirectory(selection[0].fsPath);
+  };
+
+  export const updateEngineDirectory = async (engineDir: string) => {
+    await configs().update('engine.directory', engineDir, true);
   };
 
   export const setProcessAnimationAnimate = async (animate: boolean) => {
