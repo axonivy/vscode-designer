@@ -15,7 +15,7 @@ export default config.defineConfig(
   // Project specific configs
   {
     name: 'ignore-files',
-    ignores: ['**/scripts/download-*', '**/.vscode-test/*', '**/generated/client*', '**/browser/media/*']
+    ignores: ['**/scripts/download-*', '**/.vscode-test/*', '**/generated/client*', '**/browser/media/*', '**/monaco-workers/*']
   },
   {
     name: 'vscode/rules',
