@@ -39,10 +39,10 @@ pipeline {
       steps {
         nodejs(nodeJSInstallationName: '24.11.0') {
           catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-            bat 'start extension/AxonIvyEngine/bin/AxonIvyEngine.exe'
+            bat 'start AxonIvyEngine/bin/AxonIvyEngine.exe'
             bat 'pnpm run test:playwright:download:vscode'
             bat 'pnpm run test:playwright'
-            bat 'start extension/AxonIvyEngine/bin/AxonIvyEngine.exe stop'
+            bat 'start AxonIvyEngine/bin/AxonIvyEngine.exe stop'
           }
           archiveArtifacts artifacts: '**/playwright/test-results/**', allowEmptyArchive: true
           archiveArtifacts artifacts: '**/playwright/playwright-videos/**', allowEmptyArchive: true

@@ -8,22 +8,19 @@ import { addDevContainer } from './dev-container/command';
 import { IvyDiagnostics } from './engine/diagnostics';
 import { IvyEngineManager } from './engine/engine-manager';
 import { IvyProjectExplorer } from './project-explorer/ivy-project-explorer';
+import { resolveExtensionVersion } from './version/extension-version';
 import { showRuntimeLog } from './views/runtimelog-view';
 
 let ivyEngineManager: IvyEngineManager;
-
 export const messenger = new Messenger({ ignoreHiddenViews: false });
 
-export const downloadDevEngine = () =>
-  vscode.env.openExternal(vscode.Uri.parse('https://dev.axonivy.com/permalink/dev/axonivy-engine-slim.zip'));
-
 export async function activate(context: vscode.ExtensionContext): Promise<MessengerDiagnostic> {
+  resolveExtensionVersion(context);
   ivyEngineManager = IvyEngineManager.init(context);
   registerCommand('engine.deployProjects', context, () => ivyEngineManager.deployProjects());
   registerCommand('engine.buildProjects', context, () => ivyEngineManager.buildProjects());
   registerCommand('engine.buildAndDeployProjects', context, () => ivyEngineManager.buildAndDeployProjects());
-  registerCommand('engine.downloadDevEngine', context, downloadDevEngine);
-  registerCommand('engine.setEngineDirectory', context, () => config.setEngineDirectory());
+  registerCommand('engine.switchEngineReleaseTrain', context, () => ivyEngineManager.switchEngineReleaseTrain());
   registerCommand('engine.activateAnimation', context, async () => await config.setProcessAnimationAnimate(true));
   registerCommand('engine.deactivateAnimation', context, async () => await config.setProcessAnimationAnimate(false));
   registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));

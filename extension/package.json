@@ -20,8 +20,9 @@
     "build:production": "webpack --mode=production",
     "clean": "rimraf lib dist *.tsbuildinfo",
     "package": "bash -c 'vsce package -o ${npm_package_name}.vsix --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version:0:4}.$(date \"+%Y%m%d%H\")'",
-    "package:with:engine": "bash -c 'vsce package -o ${npm_package_name}-with-engine.vsix --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version:0:4}.$(date \"+%Y%m%d%H\")'",
     "publish:next": "bash -c 'vsce publish --no-update-package-json --no-git-tag-version --no-dependencies --pre-release ${npm_package_version:0:4}.$(date \"+%Y%m%d%H\")'",
+    "test": "vitest",
+    "test:ci": "vitest run",
     "type": "tsc --noEmit",
     "watch": "webpack --watch --mode development"
   },
@@ -57,6 +58,7 @@
     "@types/vscode-webview": "1.57.5",
     "@types/ws": "8.18.1",
     "@vscode/vsce": "3.7.0",
+    "vitest": "4.0.14",
     "webpack": "5.103.0",
     "webpack-cli": "6.0.1"
   },
@@ -211,13 +213,8 @@
         "icon": "$(cloud-upload)"
       },
       {
-        "command": "engine.downloadDevEngine",
-        "title": "Download Dev Engine",
-        "category": "Axon Ivy"
-      },
-      {
-        "command": "engine.setEngineDirectory",
-        "title": "Set Engine Directory Configuration",
+        "command": "engine.switchEngineReleaseTrain",
+        "title": "Switch Engine release train",
         "category": "Axon Ivy"
       },
       {
@@ -324,55 +321,55 @@
       {
         "title": "Axon Ivy",
         "properties": {
-          "engine.runByExtension": {
+          "axonivy.engine.runByExtension": {
             "type": "boolean",
             "default": true,
-            "markdownDescription": "Configure whether a local Axon Ivy Engine will be run by this extension. If set true, you must specify `#engine.directory#`. If set false, you have to define `#engine.url#`.",
+            "markdownDescription": "Configure whether a local Axon Ivy Engine will be run by this extension. If set true, you can specify `#axonivy.engine.releaseTrain#`. If set false, you have to define `#axonivy.engine.url#`.",
             "order": 1000
           },
-          "engine.directory": {
+          "axonivy.engine.releaseTrain": {
             "type": "string",
             "default": "",
-            "markdownDescription": "[Set Engine Directory](command:engine.setEngineDirectory). Specifies the path of a locally unzipped Axon Ivy Engine to be run as the backend. Only relevant if `#engine.runByExtension#` is set to true. [Download Dev Engine](command:engine.downloadDevEngine)",
+            "markdownDescription": "Release train of Axon Ivy Engine to be used as Developer Engine. Expected to be a release tag like '14.0' or an absoulute path to an existing Axon Ivy Engine.",
             "order": 1100
           },
-          "engine.url": {
+          "axonivy.engine.url": {
             "type": "string",
             "default": "http://localhost:8080/",
-            "markdownDescription": "Url of the Axon Ivy Engine that will be used as backend. Only relevant if `#engine.runByExtension#` is set to false.",
+            "markdownDescription": "Url of the Axon Ivy Engine that will be used as backend. Only relevant if `#axonivy.engine.runByExtension#` is set to false.",
             "order": 1200
           },
-          "project.excludePattern": {
+          "axonivy.project.excludePattern": {
             "type": "string",
             "default": "**/target/**",
             "markdownDescription": "A Glob Pattern that is used to exclude Axon Ivy projects during detection. [Learn more about Glob Pattern](https://code.visualstudio.com/docs/editor/glob-patterns)",
             "order": 2000
           },
-          "project.maximumNumber": {
+          "axonivy.project.maximumNumber": {
             "type": "integer",
             "default": 50,
             "markdownDescription": "Maximum number of Axon Ivy projects that will be detected.",
             "order": 2100
           },
-          "project.useMavenBuilder": {
+          "axonivy.project.useMavenBuilder": {
             "type": "boolean",
             "default": true,
             "markdownDescription": "Configure whether Maven Builder is used for building Axon Ivy Projects.",
             "order": 2200
           },
-          "process.animation.animate": {
+          "axonivy.process.animation.animate": {
             "type": "boolean",
             "default": true,
             "markdownDescription": "Specify whether processes should be animated during preview."
           },
-          "process.animation.speed": {
+          "axonivy.process.animation.speed": {
             "type": "integer",
             "default": 50,
             "minimum": 0,
             "maximum": 100,
             "markdownDescription": "Specify process animation speed."
           },
-          "process.animation.mode": {
+          "axonivy.process.animation.mode": {
             "type": "string",
             "default": "all",
             "enum": [

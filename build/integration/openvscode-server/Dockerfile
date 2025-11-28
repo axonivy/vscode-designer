@@ -10,6 +10,6 @@ RUN apt-get update &&\
   apt-get update &&\
   apt-get install openjdk-21-jdk -y
 
-ENV JAVA_OPTS_IVY_SYSTEM='-Ddev.mode=true -Divy.engine.testheadless=true'
+ENV JAVA_OPTS_IVY_SYSTEM="-Ddev.mode=true -Divy.engine.testheadless=true"
 ENV CI=true
 ENV RUN_IN_BROWSER=true

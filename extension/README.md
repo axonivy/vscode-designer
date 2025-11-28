@@ -11,15 +11,8 @@ This extension can be used locally or in a [Dev Container](https://code.visualst
 
 Make sure that **Java SE 21** and **Maven 3** are installed on your machine.
 
-After installing the extension, you have to define the **Engine Directory** setting. Proceed as follows:
-
-1. Run **Axon Ivy: Download Dev Engine** command in VS Code
-2. Unzip the downloaded Engine on your machine
-3. Run **Axon Ivy: Set Engine Directory Configuration** command in VS Code
-4. Choose the directory where your unpacked engine is located
-
-See how it works:
-![Set Engine Directory](extension/assets/readme/engine-dir.gif)
+The first time the extension is launched, an Axon Ivy Engine is automatically downloaded in the background. The download is displayed in the lower right corner.
+Advanced users may wish to specify the Axon Ivy Engine release train. To do so, execute the command **Axon Ivy: Switch Engine release train**.
 
 ### Dev Container
 
