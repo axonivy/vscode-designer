@@ -5,19 +5,18 @@ import path from 'path';
 import * as vscode from 'vscode';
 import { config } from '../../base/configurations';
 
-const IVY_ENGINE_VERSION = '13.2.0';
-
 export class MavenBuilder {
   private readonly outputChannel: vscode.OutputChannel;
   private readonly xmlParser = new XMLParser();
   private readonly excludePattern: string;
-  constructor(private readonly embeddedEngineDirectory: vscode.Uri) {
+  constructor(readonly engineDir: Promise<string | undefined>) {
     this.outputChannel = vscode.window.createOutputChannel('Axon Ivy Maven');
     this.excludePattern = config.projectExcludePattern() ?? '';
   }
 
   async buildProject(ivyProjectDir: string) {
-    const childProcess = exec(this.buildCommand(), { cwd: ivyProjectDir });
+    const resolvedEngineDir = await this.engineDir;
+    const childProcess = exec(this.buildCommand(resolvedEngineDir), { cwd: ivyProjectDir });
     this.outputChannel.show(true);
     childProcess.on('error', (error: Error) => {
       this.outputChannel.append(error.message);
@@ -37,10 +36,9 @@ export class MavenBuilder {
     });
   }
 
-  private buildCommand(): string {
-    const configEngineDirectory = config.engineDirectory();
-    const engineDirectory = configEngineDirectory ? vscode.Uri.file(configEngineDirectory) : this.embeddedEngineDirectory;
-    return `mvn package --batch-mode -Dmaven.test.skip=true -Divy.engine.directory=${engineDirectory.fsPath} -Divy.engine.version=${IVY_ENGINE_VERSION} -Dstyle.color=never`;
+  private buildCommand(engineDir?: string) {
+    const ivyEngineDirectory = engineDir ? `-Divy.engine.directory="${engineDir}" ` : '';
+    return `mvn package --batch-mode -Dmaven.test.skip=true ${ivyEngineDirectory}-Dstyle.color=never`;
   }
 
   async buildProjects() {

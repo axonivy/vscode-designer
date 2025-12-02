@@ -25,7 +25,7 @@ pipeline {
             pnpm install --no-frozen-lockfile
             pnpm run build:production
             pnpm run engine:download ${params.engineDownloadUrl}
-            extension/AxonIvyEngine/bin/AxonIvyEngine startdaemon > ivy-engine-console.out &
+            nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
             wget -O openvsc.tar.gz https://github.com/gitpod-io/openvscode-server/releases/download/openvscode-server-${params.openvscodeVersion}/openvscode-server-${params.openvscodeVersion}-linux-x64.tar.gz
             tar -xzf openvsc.tar.gz --strip-components=1 --one-top-level=openvsc
             cp -r extension/. openvsc/extensions/extension
@@ -36,7 +36,7 @@ pipeline {
             }
           }
           archiveArtifacts artifacts: '**/playwright/test-results/**', allowEmptyArchive: true
-          archiveArtifacts artifacts: 'extension/AxonIvyEngine/logs/ivy.log', allowEmptyArchive: true
+          archiveArtifacts artifacts: 'AxonIvyEngine/logs/ivy.log', allowEmptyArchive: true
           archiveArtifacts artifacts: 'ivy-engine-console.out', allowEmptyArchive: true
           withChecks('WebTests') {
             junit testDataPublishers: [[$class: 'StabilityTestDataPublisher']], testResults: '**/node_modules/**/report.xml'

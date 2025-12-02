@@ -14,33 +14,23 @@ pipeline {
     upstream(upstreamProjects: "core_product-engine/${java.net.URLEncoder.encode(env.BRANCH_NAME, 'UTF-8')},process-editor-client/${java.net.URLEncoder.encode(env.BRANCH_NAME, 'UTF-8')}", threshold: hudson.model.Result.UNSTABLE)
   }
 
-  parameters {
-    string(name: 'engineDownloadUrl', defaultValue: 'https://jenkins.ivyteam.io/job/core_product-engine/job/master/lastSuccessfulBuild/artifact/workspace/ch.ivyteam.ivy.server.product/target/products/*_Slim_*.zip/*zip*/products.zip', description: 'engine that will be packaged')
-    booleanParam(name: 'publishToMarket', defaultValue: false, description: 'Publish to VS Code Marketplace?')
-  }
-
   stages {
     stage('Build') {
       steps {
         script {
-          sh 'pnpm run update:axonivy:next'
-          sh 'pnpm install --no-frozen-lockfile'
-          sh 'pnpm run build:production'
-          sh 'pnpm run type'
-        }
-      }
-    }
-
-    stage('Codechecks (ESLint)') {
-      steps {
-        script {
           catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-            timeout(30) {
-              sh 'pnpm run lint:ci'
-            }
+            sh 'pnpm run update:axonivy:next'
+            sh 'pnpm install --no-frozen-lockfile'
+            sh 'pnpm run build:production'
+            sh 'pnpm run type'
+            sh 'pnpm run lint:ci'
+            sh 'pnpm run test:ci'
           }
           withChecks('ESLint') {
             recordIssues enabledForFailure: true, publishAllIssues: true, aggregatingResults: true, tools: [esLint(pattern: 'eslint.xml', skipSymbolicLinks: true)], qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+          }
+          withChecks('Test') {
+            junit testDataPublishers: [[$class: 'StabilityTestDataPublisher']], testResults: 'extension/report.xml'
           }
         }
       }
@@ -63,8 +53,6 @@ pipeline {
       steps {
         script {
           sh 'pnpm run package'
-          sh 'pnpm run engine:download ' + params.engineDownloadUrl
-          sh 'pnpm run package:with:engine'
           archiveArtifacts 'extension/**/*.vsix'
         }
       }

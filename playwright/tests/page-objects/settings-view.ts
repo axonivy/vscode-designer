@@ -21,10 +21,19 @@ export class SettingsView extends View {
   }
 
   async containsSetting(expectedSetting: string) {
+    await this.search(expectedSetting);
+    await expect(this.viewLocator.locator('div.find-widget')).toContainText('1 of 1');
+  }
+
+  async doesNotContainSetting(unexpectedSetting: string) {
+    await this.search(unexpectedSetting);
+    await expect(this.viewLocator.locator('div.find-widget')).toContainText('No results');
+  }
+
+  async search(text: string) {
     await expect(this.viewLocator).toBeVisible();
     await this.viewLocator.click();
     await this.page.keyboard.press(getCtrlOrMeta() + '+KeyF');
-    await this.page.keyboard.insertText(expectedSetting);
-    await expect(this.viewLocator.locator('div.find-widget')).toContainText('1 of 1');
+    await this.page.keyboard.insertText(text);
   }
 }

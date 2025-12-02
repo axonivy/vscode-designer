@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
+import { reloadWindow } from '../base/reload-window';
 import { setStatusBarMessage } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
 import { IvyBrowserViewProvider } from '../browser/ivy-browser-view-provider';
@@ -14,12 +15,17 @@ import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { NewProcessParams } from '../project-explorer/new-process';
 import { NewUserDialogParams } from '../project-explorer/new-user-dialog';
+import { extensionVersion } from '../version/extension-version';
 import { RuntimeLogViewProvider } from '../views/runtimelog-view';
 import { IvyEngineApi } from './api/engine-api';
 import { DataClassInit, ImportProcessBody, NewProjectParams } from './api/generated/client';
 import { MavenBuilder } from './build/maven';
 import { IvyDiagnostics } from './diagnostics';
+import { EngineDownloader } from './engine-downloader';
+import { engineDirFromGlobalState, engineReleaseTrain, switchEngineReleaseTrain, updateGlobalStateEngineDir } from './engine-release-train';
 import { EngineRunner } from './engine-runner';
+import { outputChannel } from './output-channel';
+import { ReleaseTrainValidator } from './release-train-validator';
 import { WebIdeWebSocketProvider } from './ws-client';
 
 export class IvyEngineManager {
@@ -31,9 +37,9 @@ export class IvyEngineManager {
   private started = false;
 
   private constructor(readonly context: vscode.ExtensionContext) {
-    const embeddedEngineDirectory = vscode.Uri.joinPath(context.extensionUri, 'AxonIvyEngine');
-    this.mavenBuilder = new MavenBuilder(embeddedEngineDirectory);
-    this.engineRunner = new EngineRunner(embeddedEngineDirectory);
+    const engineDir = this.resolveEngineDir();
+    this.mavenBuilder = new MavenBuilder(engineDir);
+    this.engineRunner = new EngineRunner(engineDir);
   }
 
   static init(context: vscode.ExtensionContext) {
@@ -41,6 +47,48 @@ export class IvyEngineManager {
       IvyEngineManager._instance = new IvyEngineManager(context);
     }
     return IvyEngineManager._instance;
+  }
+
+  async resolveEngineDir(): Promise<string | undefined> {
+    if (!config.engineRunByExtension()) {
+      return; // ok to be undefined, e.g. in cloud setup
+    }
+    const releaseTrain = engineReleaseTrain();
+    const releaseTrainValidator = new ReleaseTrainValidator(extensionVersion);
+    const validationResult = await releaseTrainValidator.validate(releaseTrain);
+    if (!validationResult.valid) {
+      return this.handleInvalidReleaseTrain(releaseTrain, validationResult.reason);
+    }
+    if (validationResult.isDirectory) {
+      return releaseTrain;
+    }
+    const engineDownloader = new EngineDownloader(this.context);
+    const globalStateEngineDir = engineDirFromGlobalState(this.context, releaseTrain);
+    if (globalStateEngineDir && (await releaseTrainValidator.isValidEngineDir(globalStateEngineDir)).valid) {
+      engineDownloader.tryToUpdateDevEngine(releaseTrain);
+      return globalStateEngineDir;
+    }
+    const newEngineDir = await engineDownloader.loadReleaseTrain(releaseTrain);
+    if ((await releaseTrainValidator.isValidEngineDir(newEngineDir)).valid) {
+      await updateGlobalStateEngineDir(this.context, releaseTrain, newEngineDir);
+      return newEngineDir;
+    }
+    vscode.window.showErrorMessage(`Downloaded engine is invalid: ${newEngineDir}`);
+  }
+
+  private async handleInvalidReleaseTrain(releaseTrain: string, reason?: string) {
+    outputChannel.appendLine(`Engine release train validation failed: ${reason}`);
+    const newTrain = await switchEngineReleaseTrain(`Provided engine release train is invalid: '${reason}'`);
+    if (!newTrain) {
+      return vscode.window.showErrorMessage('No engine release train selected.');
+    }
+    return await this.resolveEngineDir();
+  }
+
+  async switchEngineReleaseTrain() {
+    if (await switchEngineReleaseTrain()) {
+      await reloadWindow('Engine release train switched. You have to reload the window to apply the changes.');
+    }
   }
 
   async start() {

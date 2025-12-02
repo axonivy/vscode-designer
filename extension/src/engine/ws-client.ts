@@ -13,7 +13,7 @@ export const WebIdeWebSocketProvider = (webSocketUrl: URL) => {
       client.onOpenProcessEditor.set(process => handleOpenProcessEditor(process));
       client.onOpenFormEditor.set(form => openEditor(form));
       vscode.workspace.onDidChangeConfiguration(e => {
-        if (e.affectsConfiguration('process.animation')) {
+        if (e.affectsConfiguration('axonivy.process.animation')) {
           client.animationSettings(animationSettings());
         }
       });

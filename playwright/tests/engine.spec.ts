@@ -20,21 +20,31 @@ test.describe('Engine noProjectWorkspacePath', () => {
   test('check default engine settings', async ({ page }) => {
     const settingsView = new SettingsView(page);
     await settingsView.openDefaultSettings();
-    await settingsView.containsSetting('"engine.runByExtension": true');
-    await settingsView.containsSetting('"engine.directory": ""');
-    await settingsView.containsSetting('"engine.url": "http://localhost:8080/"');
-    await settingsView.containsSetting('"project.excludePattern": "**/target/**"');
-    await settingsView.containsSetting('"process.animation.animate": true');
-    await settingsView.containsSetting('"process.animation.mode": "all"');
-    await settingsView.containsSetting('"process.animation.speed": 50');
+    await settingsView.containsSetting('"axonivy.engine.runByExtension": true');
+    await settingsView.containsSetting('"axonivy.engine.releaseTrain": ""');
+    await settingsView.containsSetting('"axonivy.engine.url": "http://localhost:8080/"');
+    await settingsView.containsSetting('"axonivy.project.excludePattern": "**/target/**"');
+    await settingsView.containsSetting('"axonivy.process.animation.animate": true');
+    await settingsView.containsSetting('"axonivy.process.animation.mode": "all"');
+    await settingsView.containsSetting('"axonivy.process.animation.speed": 50');
   });
 
   test('ensure that embedded engine is not started due to missing project file', async ({ page }) => {
     const settingsView = new SettingsView(page);
     await settingsView.openWorkspaceSettings();
-    await settingsView.containsSetting('"engine.runByExtension": true');
+    await settingsView.containsSetting('"axonivy.engine.runByExtension": true');
     const outputview = new OutputView(page);
     await expect(outputview.viewLocator).toBeHidden();
+  });
+
+  test('switch release train', async ({ page }) => {
+    const settingsView = new SettingsView(page);
+    await settingsView.openWorkspaceSettings();
+    await settingsView.doesNotContainSetting('"axonivy.engine.releaseTrain":');
+    await settingsView.executeCommand('Axon Ivy: Switch Engine Release Train');
+    await settingsView.page.locator('div.quick-input-list').locator('div.monaco-icon-label-container').filter({ hasText: 'nightly' }).first().click();
+    await settingsView.containsSetting('"axonivy.engine.releaseTrain": "nightly');
+    await expect(page.locator('div.notification-toast-container').first()).toContainText('Engine release train switched. You have to reload the window to apply the changes.');
   });
 });
 
@@ -44,8 +54,8 @@ test.describe('Engine noEngineWorkspacePath', () => {
     const settingsView = new SettingsView(page);
     await settingsView.isExplorerActionItemChecked();
     await settingsView.openWorkspaceSettings();
-    await settingsView.containsSetting('"engine.runByExtension": false');
-    await settingsView.containsSetting('"engine.url": "http://localhost:8080/"');
+    await settingsView.containsSetting('"axonivy.engine.runByExtension": false');
+    await settingsView.containsSetting('"axonivy.engine.url": "http://localhost:8080/"');
     const outputview = new OutputView(page);
     await expect(outputview.viewLocator).toBeHidden();
   });

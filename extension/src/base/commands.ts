@@ -21,8 +21,7 @@ type EngineCommand =
   | 'engine.deployProjects'
   | 'engine.buildProjects'
   | 'engine.buildAndDeployProjects'
-  | 'engine.downloadDevEngine'
-  | 'engine.setEngineDirectory'
+  | 'engine.switchEngineReleaseTrain'
   | 'engine.deactivateAnimation'
   | 'engine.activateAnimation';
 type ProjectViewCommand =

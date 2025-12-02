@@ -40,9 +40,9 @@ jobs:
           pnpm install --no-frozen-lockfile
           pnpm run build:production
           pnpm run engine:download https://dev.axonivy.com/permalink/dev/axonivy-engine.zip
-          rm -r extension/AxonIvyEngine/system/demo-applications
+          rm -r AxonIvyEngine/system/demo-applications
           pnpm run test:playwright:download:vscode
-          extension/AxonIvyEngine/bin/AxonIvyEngine startdaemon
+          nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
 
       - name: Run Playwright tests
         run: xvfb-run pnpm run test:playwright
