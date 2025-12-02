@@ -8,7 +8,7 @@ export default defineConfig([
     name: 'typescript-eslint',
     languageOptions: {
       parserOptions: {
-        project: true, // Uses tsconfig.json from current directory
+        project: true,
         tsconfigRootDir: import.meta.dirname
       }
     }

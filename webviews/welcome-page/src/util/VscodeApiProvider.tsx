@@ -1,18 +1,30 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
-import type { VsCodeApi } from 'vscode-messenger-webview';
+import { createContext, useContext, type ReactNode } from 'react';
+import { Messenger, type VsCodeApi } from 'vscode-messenger-webview';
 
-const Context = createContext<VsCodeApi | undefined>(undefined);
+const Context = createContext<Messenger | undefined>(undefined);
 
-export const VscodeApiProvider = ({ vscodeApi, children }: { vscodeApi: VsCodeApi; children: ReactNode }) => {
-  const [vscode] = useState<VsCodeApi>(vscodeApi);
-  return <Context.Provider value={vscode}>{children}</Context.Provider>;
+export const VscodeMessengerProvider = ({ children }: { children: ReactNode }) => {
+  return <Context.Provider value={getMessenger()}>{children}</Context.Provider>;
 };
 
-export const useVscodeApi = () => {
-  const vscode = useContext(Context);
-  if (!vscode) {
-    throw new Error('useVscodeApi must be used within an VscodeApiProvider');
+export const useMessenger = () => {
+  const messenger = useContext(Context);
+  if (!messenger) {
+    throw new Error('useMessenger must be used within an VscodeMessengerProvider');
   }
+  return { messenger };
+};
 
-  return { vscode };
+declare function acquireVsCodeApi(): VsCodeApi;
+
+const getMessenger = () => {
+  let vscodeApi: VsCodeApi;
+  try {
+    vscodeApi = acquireVsCodeApi();
+  } catch {
+    vscodeApi = {} as VsCodeApi;
+  }
+  const messenger = new Messenger(vscodeApi);
+  messenger.start();
+  return messenger;
 };

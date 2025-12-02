@@ -5,7 +5,7 @@ import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
 import { setStatusBarIcon } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
-import { showWelcomePage } from './editors/welcome-page/welcome-page';
+import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
 import { IvyDiagnostics } from './engine/diagnostics';
 import { IvyEngineManager } from './engine/engine-manager';
 import { IvyProjectExplorer } from './project-explorer/ivy-project-explorer';
@@ -39,11 +39,3 @@ export async function activate(context: vscode.ExtensionContext): Promise<Messen
 export async function deactivate() {
   await ivyEngineManager.stop();
 }
-
-const conditionalWelcomePage = async (context: vscode.ExtensionContext) => {
-  const hasShownWelcome = context.workspaceState.get<boolean>('welcomeShown');
-  if (!hasShownWelcome) {
-    showWelcomePage(context);
-    await context.workspaceState.update('welcomeShown', true);
-  }
-};

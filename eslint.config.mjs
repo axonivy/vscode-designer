@@ -2,6 +2,7 @@ import config from '@axonivy/eslint-config';
 
 export default config.defineConfig(
   ...config.base,
+  ...config.i18n,
   // TypeScript configs
   {
     name: 'typescript-eslint',

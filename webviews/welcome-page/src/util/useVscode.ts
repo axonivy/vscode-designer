@@ -1,36 +1,19 @@
-import type { VsCodeApi } from 'vscode-messenger-webview';
-import { useVscodeApi } from './VscodeApiProvider';
+import { HOST_EXTENSION, type NotificationType } from 'vscode-messenger-common';
+import { useMessenger } from './VscodeApiProvider';
+
+const openUrlType: NotificationType<string> = { method: 'openUrl' };
+const commandType: NotificationType<string> = { method: 'executeCommand' };
 
 export const useVscode = () => {
-  const vscodeApi = useVscodeApi();
+  const { messenger } = useMessenger();
 
   const openUrl = (url: string) => {
-    vscodeApi.vscode.postMessage({ type: 'open-external-link', url });
+    messenger.sendNotification(openUrlType, HOST_EXTENSION, url);
   };
 
   const executeCommand = (command: string) => {
-    vscodeApi.vscode.postMessage({ type: 'execute-command', command });
+    messenger.sendNotification(commandType, HOST_EXTENSION, command);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getData = (callback: (value: any) => void) => {
-    window.addEventListener('message', event => {
-      callback(event.data);
-      console.log(event.data);
-    });
-  };
-
-  return { openUrl, getData, executeCommand };
-};
-
-declare function acquireVsCodeApi(): VsCodeApi;
-
-export const getVscodeApi = () => {
-  let vscode: VsCodeApi;
-  try {
-    vscode = acquireVsCodeApi();
-  } catch {
-    vscode = { postMessage: message => console.log(message) } as VsCodeApi;
-  }
-  return vscode;
+  return { openUrl, executeCommand };
 };

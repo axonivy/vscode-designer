@@ -8,13 +8,13 @@ export type Shortcut = {
   icon: IvyIcons;
   value: string;
   description: string;
-  callback: (value: string) => void;
+  onClick: (value: string) => void;
   oversize?: boolean;
 };
 
-export const ShortcutCard = ({ title, icon, value, description, callback, oversize }: Shortcut) => {
+export const ShortcutCard = ({ title, icon, value, description, onClick, oversize }: Shortcut) => {
   return (
-    <Button className={cn('welcome-shortcut-card-button', oversize && 'shortcut-card-oversize')} onClick={() => callback(value)}>
+    <Button className={cn('welcome-shortcut-card-button', oversize && 'shortcut-card-oversize')} onClick={() => onClick(value)}>
       <Flex direction='column' gap={2} justifyContent='center' alignItems='center' className='welcome-shortcut-card'>
         <IvyIcon className='welcome-shortcut-icon' icon={icon} />
         <h3>{title}</h3>

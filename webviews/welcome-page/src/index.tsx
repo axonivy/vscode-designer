@@ -5,8 +5,7 @@ import { createRoot } from 'react-dom/client';
 
 import { WelcomePage } from './components/WelcomePage';
 import { initTranslation } from './i18n';
-import { VscodeApiProvider } from './util/VscodeApiProvider';
-import { getVscodeApi } from './util/useVscode';
+import { VscodeMessengerProvider } from './util/VscodeApiProvider';
 
 export async function start() {
   const rootElement = document.getElementById('root');
@@ -18,9 +17,9 @@ export async function start() {
   createRoot(rootElement).render(
     <React.StrictMode>
       <ThemeProvider disabled={true}>
-        <VscodeApiProvider vscodeApi={getVscodeApi()}>
+        <VscodeMessengerProvider>
           <WelcomePage />
-        </VscodeApiProvider>
+        </VscodeMessengerProvider>
       </ThemeProvider>
     </React.StrictMode>
   );
