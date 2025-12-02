@@ -14,7 +14,7 @@ test('valid sample', async () => {
 });
 
 test('wrong major', async () => {
-  const customValidator = new ReleaseTrainValidator({ major: 14, minor: 2, patch: 0, rawVersion: '14.2.0', isPreview: false });
+  const customValidator = new ReleaseTrainValidator({ major: 14, minor: 2, patch: 0, isPreview: false });
   expect(await customValidator.validate(testDir('engine'))).toEqual({
     valid: false,
     isDirectory: true,
@@ -23,7 +23,7 @@ test('wrong major', async () => {
 });
 
 test('wrong minor', async () => {
-  const customValidator = new ReleaseTrainValidator({ major: 13, minor: 3, patch: 0, rawVersion: '13.3.0', isPreview: false });
+  const customValidator = new ReleaseTrainValidator({ major: 13, minor: 3, patch: 0, isPreview: false });
   expect(await customValidator.validate(testDir('engine'))).toEqual({
     valid: false,
     isDirectory: true,
@@ -70,7 +70,7 @@ test('preview train', async () => {
 });
 
 test('lts train', async () => {
-  const customValidator = new ReleaseTrainValidator({ major: 14, minor: 0, patch: 10, rawVersion: '14.0.10', isPreview: false });
+  const customValidator = new ReleaseTrainValidator({ major: 14, minor: 0, patch: 10, isPreview: false });
   expect((await customValidator.validate('nightly-14')).valid).toBeTruthy();
   expect((await customValidator.validate('14')).valid).toBeTruthy();
   expect((await customValidator.validate('14.0')).valid).toBeTruthy();

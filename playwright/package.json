@@ -4,7 +4,7 @@
   "scripts": {
     "type": "tsc --noEmit",
     "download:vscode": "node --experimental-strip-types tests/utils/download-vscode.ts",
-    "ui-tests": "playwright test"
+    "ui-tests": "pnpm exec playwright test"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",
