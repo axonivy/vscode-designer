@@ -4,7 +4,18 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig(() => {
   const config = {
-    plugins: [tsconfigPaths(), monacoConfigPlugin()],
+    plugins: [
+      tsconfigPaths(),
+      monacoConfigPlugin({
+        ignorePackages: [
+          'vscode-messenger-webview',
+          'vscode-messenger-common',
+          '@eclipse-glsp/vscode-integration',
+          '@eclipse-glsp/vscode-integration-webview',
+          '@axonivy/vscode-webview-common'
+        ]
+      })
+    ],
     build: {
       manifest: 'build.manifest.json',
       outDir: '../../extension/dist/webviews/process-editor',
