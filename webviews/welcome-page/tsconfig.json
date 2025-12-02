@@ -1,0 +1,11 @@
+{
+  "extends": "@axonivy/ts-config/integration",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib",
+    "types": ["vite/client"],
+    "jsx": "react-jsx"
+  },
+
+  "include": ["src"]
+}
