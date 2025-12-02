@@ -3,16 +3,8 @@ import { config } from '../base/configurations';
 import { extensionVersion } from '../version/extension-version';
 import { ReleaseTrainValidator } from './release-train-validator';
 
-export const PREVIEW_TRAINS = {
-  dev: 'dev',
-  nightly: 'nightly',
-  sprint: 'sprint'
-};
-
-export const STABLE_TRAINS = {
-  latest: (major: number) => `${major}`,
-  nightly: (major: number) => `nightly-${major}`
-};
+export const PREVIEW_TRAINS = ['nightly', 'dev', 'sprint'];
+export const stableTrains = (major: number) => [`${major}`, `nightly-${major}`];
 
 export const engineReleaseTrain = () => {
   const train = config.engineReleaseTrain();
@@ -33,11 +25,8 @@ export const updateGlobalStateEngineDir = async (contentx: vscode.ExtensionConte
 export const switchEngineReleaseTrain = async (reason?: string) => {
   const currentTrain = config.engineReleaseTrain();
   const items = extensionVersion.isPreview
-    ? [toItem(PREVIEW_TRAINS.nightly, currentTrain), toItem(PREVIEW_TRAINS.sprint, currentTrain), toItem(PREVIEW_TRAINS.dev, currentTrain)]
-    : [
-        toItem(STABLE_TRAINS.latest(extensionVersion.major), currentTrain),
-        toItem(STABLE_TRAINS.nightly(extensionVersion.major), currentTrain)
-      ];
+    ? PREVIEW_TRAINS.map(train => toItem(train, currentTrain))
+    : stableTrains(extensionVersion.major).map(train => toItem(train, currentTrain));
   let selectedTrain = (
     await vscode.window.showQuickPick([...items, { label: 'Enter custom value' }], {
       ignoreFocusOut: true,

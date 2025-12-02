@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { ExtensionVersion } from '../version/extension-version';
-import { PREVIEW_TRAINS, STABLE_TRAINS } from './engine-release-train';
+import { PREVIEW_TRAINS, stableTrains } from './engine-release-train';
 
 const MIN_PATCH_VERSION = 0; // to be maintained manually
 
@@ -76,15 +76,9 @@ export class ReleaseTrainValidator {
 
   private isValidReleaseTrainTag = (train: string) => {
     if (this.extensionVersion.isPreview) {
-      return [PREVIEW_TRAINS.dev, PREVIEW_TRAINS.sprint, PREVIEW_TRAINS.nightly].includes(train);
+      return PREVIEW_TRAINS.includes(train);
     }
-    if (train === STABLE_TRAINS.nightly(this.extensionVersion.major)) {
-      return true;
-    }
-    if (train === `${this.extensionVersion.major}`) {
-      return true;
-    }
-    if (train === `${this.extensionVersion.major}.${this.extensionVersion.minor}`) {
+    if (stableTrains(this.extensionVersion.major).includes(train)) {
       return true;
     }
     if (new RegExp(`^${this.extensionVersion.major}\\.${this.extensionVersion.minor}\\.(\\d+)$`).test(train)) {

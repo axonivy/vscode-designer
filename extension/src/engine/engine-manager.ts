@@ -78,7 +78,7 @@ export class IvyEngineManager {
 
   private async handleInvalidReleaseTrain(releaseTrain: string, reason?: string) {
     outputChannel.appendLine(`Engine release train validation failed: ${reason}`);
-    const newTrain = await switchEngineReleaseTrain(`Provided engine release train is invalid: '${releaseTrain}'`);
+    const newTrain = await switchEngineReleaseTrain(`Provided engine release train is invalid: '${reason}'`);
     if (!newTrain) {
       return vscode.window.showErrorMessage('No engine release train selected.');
     }

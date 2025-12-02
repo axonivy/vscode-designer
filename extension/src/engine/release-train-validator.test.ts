@@ -73,7 +73,6 @@ test('lts train', async () => {
   const customValidator = new ReleaseTrainValidator({ major: 14, minor: 0, patch: 10, isPreview: false });
   expect((await customValidator.validate('nightly-14')).valid).toBeTruthy();
   expect((await customValidator.validate('14')).valid).toBeTruthy();
-  expect((await customValidator.validate('14.0')).valid).toBeTruthy();
   expect((await customValidator.validate('14.0.0')).valid).toBeTruthy();
   expect((await customValidator.validate('14.0.999')).valid).toBeTruthy();
 
@@ -82,6 +81,7 @@ test('lts train', async () => {
     isDirectory: false,
     reason: "Failed to determine engine version, directory does not exist '14.b/system/plugins'."
   });
+  expect((await customValidator.validate('14.0')).valid).toBeFalsy();
   expect((await customValidator.validate('14.0.0.')).valid).toBeFalsy();
   expect((await customValidator.validate('14.1')).valid).toBeFalsy();
   expect((await customValidator.validate('14.')).valid).toBeFalsy();
