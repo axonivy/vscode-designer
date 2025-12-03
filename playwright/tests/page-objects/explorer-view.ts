@@ -3,7 +3,10 @@ import path from 'path';
 import { View, type ViewData } from './view';
 
 export abstract class ExplorerView extends View {
-  constructor(private viewName: string, page: Page) {
+  constructor(
+    private viewName: string,
+    page: Page
+  ) {
     const data: ViewData = {
       tabSelector: `div.pane-header:has-text("${viewName}")`,
       viewSelector: ''
@@ -81,10 +84,11 @@ export class FileExplorer extends ExplorerView {
     await this.hasNode(rootFolder + path.sep + projectName);
   }
 
-  async addProcess(processName: string, kind: 'Business Process' | 'Callable Sub Process' | 'Web Service Process') {
+  async addProcess(processName: string, kind: 'Business Process' | 'Callable Sub Process' | 'Web Service Process', namespace?: string) {
     await this.selectNode('config');
     await this.executeCommand('Axon Ivy: New ' + kind);
     await this.provideUserInput(processName);
+    await this.provideUserInput(namespace);
   }
 
   async importBpmnProcess(bpmnXml: string) {

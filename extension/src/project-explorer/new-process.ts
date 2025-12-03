@@ -20,7 +20,7 @@ const collectNewProcessParams = async (selectedUri: vscode.Uri, projectDir: stri
     return;
   }
   const namespace = await collectNamespace(selectedUri, projectDir);
-  if (!namespace) {
+  if (namespace === undefined) {
     return;
   }
   return { name, path: projectDir, namespace };
@@ -48,7 +48,7 @@ const collectNamespace = async (selectedUri: vscode.Uri, projectDir: string) => 
 };
 
 export const validateNamespace = (value: string, errorMessage = 'Invalid namespace.') => {
-  const pattern = /^\w+(\/\w+)*(-\w+)*$/;
+  const pattern = /^(\w+(\/\w+)*(-\w+)*)?$/;
   if (pattern.test(value)) {
     return;
   }

@@ -13,7 +13,7 @@ import {
   SetMarkersAction
 } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
-import { logMessage } from '../../base/logging-util';
+import { logErrorMessage, logInformationMessage, logWarningMessage } from '../../base/logging-util';
 import { SelectedElement } from '../../base/process-editor-connector';
 import ProcessEditorProvider from './process-editor-provider';
 
@@ -122,17 +122,17 @@ export class ProcessVscodeConnector<D extends vscode.CustomDocument = vscode.Cus
     switch (message.action.severity) {
       case 'ERROR':
       case 'FATAL':
-        logMessage('error', message.action.message);
+        logErrorMessage(message.action.message);
         break;
       case 'WARNING':
-        logMessage('warning', message.action.message);
+        logWarningMessage(message.action.message);
         break;
       case 'INFO':
       case 'OK':
         if (message.action.message.includes('Model loading')) {
           this.modelLoading.show();
         } else {
-          logMessage('info', message.action.message);
+          logInformationMessage(message.action.message);
         }
         break;
       case 'NONE':

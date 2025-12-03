@@ -1,14 +1,18 @@
 import * as vscode from 'vscode';
 
-export type LogType = 'info' | 'warning' | 'error';
+const outputChannel = vscode.window.createOutputChannel('Axon Ivy Extension Log', { log: true });
 
-export const logMessage = (type: LogType, message: string, ...items: Array<string>) => {
-  switch (type) {
-    case 'info':
-      return vscode.window.showInformationMessage(message, ...items);
-    case 'warning':
-      return vscode.window.showWarningMessage(message, ...items);
-    case 'error':
-      return vscode.window.showErrorMessage('error', message, ...items);
-  }
+export const logErrorMessage = (message: string, ...items: Array<string>) => {
+  outputChannel.error(message, ...items);
+  return vscode.window.showErrorMessage(message, ...items);
+};
+
+export const logWarningMessage = (message: string, ...items: Array<string>) => {
+  outputChannel.warn(message, ...items);
+  return vscode.window.showWarningMessage(message, ...items);
+};
+
+export const logInformationMessage = (message: string, ...items: Array<string>) => {
+  outputChannel.info(message, ...items);
+  return vscode.window.showInformationMessage(message, ...items);
 };

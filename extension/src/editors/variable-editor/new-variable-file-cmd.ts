@@ -1,7 +1,7 @@
 import fs from 'fs';
 import * as vscode from 'vscode';
 import { registerCommand } from '../../base/commands';
-import { logMessage } from '../../base/logging-util';
+import { logErrorMessage } from '../../base/logging-util';
 import { VariableEditorProvider } from './variable-editor-provider';
 
 const fileName = 'variables.yaml';
@@ -10,17 +10,17 @@ export const registerNewVariablesFileCmd = (context: vscode.ExtensionContext) =>
   registerCommand('yaml-variables-editor.new', context, () => {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders || !workspaceFolders[0]) {
-      logMessage('error', 'No workspace found');
+      logErrorMessage('No workspace found');
       return;
     }
     const configPath = vscode.Uri.joinPath(workspaceFolders[0].uri, 'config');
     if (!fs.existsSync(configPath.fsPath)) {
-      logMessage('error', `No config directory found in the workspace`);
+      logErrorMessage(`No config directory found in the workspace`);
       return;
     }
     const variablesPath = vscode.Uri.joinPath(configPath, fileName);
     if (fs.existsSync(variablesPath.fsPath)) {
-      logMessage('error', `${fileName} file already exists`);
+      logErrorMessage(`${fileName} file already exists`);
       return;
     }
     vscode.workspace.fs.writeFile(variablesPath, new TextEncoder().encode('Variables:'));
