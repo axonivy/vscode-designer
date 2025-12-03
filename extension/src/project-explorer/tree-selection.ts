@@ -27,7 +27,7 @@ async function selectionFromExplorer(): Promise<vscode.Uri> {
   const selectedFile = vscode.Uri.file(await vscode.env.clipboard.readText());
   await vscode.env.clipboard.writeText(originalClipboard);
   if (!fs.existsSync(selectedFile.fsPath)) {
-    throw Error('No valid directory selected.');
+    vscode.window.showErrorMessage('No valid directory selected.');
   }
   return selectedFile;
 }

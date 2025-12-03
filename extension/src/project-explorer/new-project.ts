@@ -5,6 +5,9 @@ import { TreeSelection, treeSelectionToUri } from './tree-selection';
 import { validateArtifactName, validateDotSeparatedName } from './util';
 
 export const addNewProject = async (selection: TreeSelection) => {
+  if (selection === undefined) {
+    selection = vscode.workspace.workspaceFolders?.at(0)?.uri;
+  }
   const selectedUri = await treeSelectionToUri(selection);
   const input = await collectNewProjectParams(selectedUri);
   if (input) {
