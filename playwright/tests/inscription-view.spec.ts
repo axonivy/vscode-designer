@@ -103,7 +103,8 @@ test.describe('Inscription View', () => {
     await expect(processStartField).toBeEmpty();
     await inscriptionView.clickButton('Create new Sub Process');
     const processName = 'subProcess';
-    await inscriptionView.provideUserInput(`${namespace}/${processName}`);
+    await inscriptionView.provideUserInput(processName);
+    await inscriptionView.provideUserInput(namespace);
     await processEditor.isDirty();
     await processEditor.isInactive();
     await processEditor.tabLocator.click();

@@ -2,7 +2,7 @@ import path from 'path';
 import * as vscode from 'vscode';
 import { Command, executeCommand, registerCommand } from '../base/commands';
 import { getIvyProject } from '../base/ivyProjectSelection';
-import { logMessage } from '../base/logging-util';
+import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { importNewProcess } from './import-process';
@@ -11,7 +11,7 @@ import { addNewDataClass } from './new-data-class';
 import { ProcessKind, addNewProcess } from './new-process';
 import { addNewProject } from './new-project';
 import { DialogType, addNewUserDialog } from './new-user-dialog';
-import { TreeSelection, treeSelectionToProjectPath, treeSelectionToUri } from './tree-selection';
+import { TreeSelection, treeSelectionToUri, treeUriToProjectPath } from './tree-selection';
 
 export const VIEW_ID = 'ivyProjects';
 
@@ -113,55 +113,64 @@ export class IvyProjectExplorer {
   }
 
   private async runEngineAction(action: (projectDir: string) => Promise<void>, selection: TreeSelection) {
-    treeSelectionToProjectPath(selection, this.getIvyProjects()).then(selectionPath => (selectionPath ? action(selectionPath) : {}));
+    const uri = await treeSelectionToUri(selection);
+    treeUriToProjectPath(uri, this.getIvyProjects()).then(selectionPath => (selectionPath ? action(selectionPath) : {}));
   }
 
   public async addProcess(selection: TreeSelection, kind: ProcessKind, pid?: string) {
-    if (!selection) {
-      selection = await getIvyProject(this);
-    }
-    const projectPath = await treeSelectionToProjectPath(selection, this.getIvyProjects());
-    if (projectPath) {
-      await addNewProcess(await treeSelectionToUri(selection), projectPath, kind, pid);
+    const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
+    if (!uri) {
+      logErrorMessage('Add Process: no valid Axon Ivy Project selected.');
       return;
     }
-    logMessage('error', 'Add Process: no valid Axon Ivy Project selected.');
+    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
+    if (projectPath) {
+      await addNewProcess(uri, projectPath, kind, pid);
+      return;
+    }
+    logErrorMessage('Add Process: no valid Axon Ivy Project selected.');
   }
 
   public async importBpmnProcess(selection: TreeSelection) {
-    if (!selection) {
-      selection = await getIvyProject(this);
-    }
-    const projectPath = await treeSelectionToProjectPath(selection, this.getIvyProjects());
-    if (projectPath) {
-      await importNewProcess(await treeSelectionToUri(selection), projectPath);
+    const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
+    if (!uri) {
+      logErrorMessage('Import BPMN Process: no valid Axon Ivy Project selected.');
       return;
     }
-    logMessage('error', 'Import BPMN Process: no valid Axon Ivy Project selected.');
+    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
+    if (projectPath) {
+      await importNewProcess(uri, projectPath);
+      return;
+    }
+    logErrorMessage('Import BPMN Process: no valid Axon Ivy Project selected.');
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {
-    if (!selection) {
-      selection = await getIvyProject(this);
-    }
-    const projectPath = await treeSelectionToProjectPath(selection, this.getIvyProjects());
-    if (projectPath) {
-      await addNewUserDialog(await treeSelectionToUri(selection), projectPath, type, pid);
+    const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
+    if (!uri) {
+      logInformationMessage('Add User Dialog: no valid Axon Ivy Project selected.');
       return;
     }
-    logMessage('info', 'Add User Dialog: no valid Axon Ivy Project selected.');
+    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
+    if (projectPath) {
+      await addNewUserDialog(uri, projectPath, type, pid);
+      return;
+    }
+    logInformationMessage('Add User Dialog: no valid Axon Ivy Project selected.');
   }
 
   private async addDataClass(selection: TreeSelection) {
-    if (!selection) {
-      selection = await getIvyProject(this);
-    }
-    const projectPath = await treeSelectionToProjectPath(selection, this.getIvyProjects());
-    if (projectPath) {
-      await addNewDataClass(await treeSelectionToUri(selection), projectPath);
+    const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
+    if (!uri) {
+      logInformationMessage('Add Data Class: no valid Axon Ivy Project selected.');
       return;
     }
-    logMessage('info', 'Add Data Class: no valid Axon Ivy Project selected.');
+    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
+    if (projectPath) {
+      await addNewDataClass(uri, projectPath);
+      return;
+    }
+    logInformationMessage('Add Data Class: no valid Axon Ivy Project selected.');
   }
 
   public async setProjectExplorerActivationCondition(hasIvyProjects: boolean) {
@@ -225,7 +234,8 @@ export class IvyProjectExplorer {
   }
 
   private async convertProject(selection: TreeSelection) {
-    const projectPath = await treeSelectionToProjectPath(selection, this.getIvyProjects());
+    const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
+    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
     const projects = IvyDiagnostics.instance.projectsToBeConverted();
     const quickPick = vscode.window.createQuickPick();
     quickPick.title = 'Select Axon Ivy projects to be converted';

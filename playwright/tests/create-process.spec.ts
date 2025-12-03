@@ -34,7 +34,7 @@ test.describe('Create Process', () => {
   });
 
   test('Add nested business process', async () => {
-    await explorer.addProcess(`parent1/parent2/${processName}`, 'Business Process');
+    await explorer.addProcess(processName, 'Business Process', 'parent1/parent2');
     await explorer.hasNode('parent1');
     await explorer.hasNode('parent2');
     await explorer.hasNode(`${processName}.p.json`);
