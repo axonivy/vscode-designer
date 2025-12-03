@@ -2,6 +2,7 @@ import path from 'path';
 import * as vscode from 'vscode';
 import { Command, executeCommand, registerCommand } from '../base/commands';
 import { getIvyProject } from '../base/ivyProjectSelection';
+import { logMessage } from '../base/logging-util';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { importNewProcess } from './import-process';
@@ -124,7 +125,7 @@ export class IvyProjectExplorer {
       await addNewProcess(await treeSelectionToUri(selection), projectPath, kind, pid);
       return;
     }
-    vscode.window.showErrorMessage('Add Process: no valid Axon Ivy Project selected.');
+    logMessage('error', 'Add Process: no valid Axon Ivy Project selected.');
   }
 
   public async importBpmnProcess(selection: TreeSelection) {
@@ -136,7 +137,7 @@ export class IvyProjectExplorer {
       await importNewProcess(projectPath);
       return;
     }
-    vscode.window.showErrorMessage('Import BPMN Process: no valid Axon Ivy Project selected.');
+    logMessage('error', 'Import BPMN Process: no valid Axon Ivy Project selected.');
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {
@@ -148,7 +149,7 @@ export class IvyProjectExplorer {
       await addNewUserDialog(await treeSelectionToUri(selection), projectPath, type, pid);
       return;
     }
-    vscode.window.showWarningMessage('Add User Dialog: no valid Axon Ivy Project selected.');
+    logMessage('info', 'Add User Dialog: no valid Axon Ivy Project selected.');
   }
 
   private async addDataClass(selection: TreeSelection) {
@@ -160,7 +161,7 @@ export class IvyProjectExplorer {
       await addNewDataClass(await treeSelectionToUri(selection), projectPath);
       return;
     }
-    vscode.window.showWarningMessage('Add Data Class: no valid Axon Ivy Project selected.');
+    logMessage('info', 'Add Data Class: no valid Axon Ivy Project selected.');
   }
 
   public async setProjectExplorerActivationCondition(hasIvyProjects: boolean) {

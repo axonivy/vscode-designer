@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import * as vscode from 'vscode';
 import { executeCommand } from '../base/commands';
+import { logMessage } from '../base/logging-util';
 import { Entry } from './ivy-project-tree-data-provider';
 
 export type TreeSelection = Entry | vscode.Uri | undefined;
@@ -27,7 +28,7 @@ async function selectionFromExplorer(): Promise<vscode.Uri> {
   const selectedFile = vscode.Uri.file(await vscode.env.clipboard.readText());
   await vscode.env.clipboard.writeText(originalClipboard);
   if (!fs.existsSync(selectedFile.fsPath)) {
-    vscode.window.showErrorMessage('No valid directory selected.');
+    logMessage('error', 'No valid directory selected.');
   }
   return selectedFile;
 }

@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
+import { logMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { setStatusBarMessage } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
@@ -73,14 +74,14 @@ export class IvyEngineManager {
       await updateGlobalStateEngineDir(this.context, releaseTrain, newEngineDir);
       return newEngineDir;
     }
-    vscode.window.showErrorMessage(`Downloaded engine is invalid: ${newEngineDir}`);
+    logMessage('error', `Downloaded engine is invalid: ${newEngineDir}`);
   }
 
   private async handleInvalidReleaseTrain(releaseTrain: string, reason?: string) {
     outputChannel.appendLine(`Engine release train validation failed: ${reason}`);
     const newTrain = await switchEngineReleaseTrain(`Provided engine release train is invalid: '${reason}'`);
     if (!newTrain) {
-      return vscode.window.showErrorMessage('No engine release train selected.');
+      return logMessage('error', 'No engine release train selected.');
     }
     return await this.resolveEngineDir();
   }

@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { messenger } from '../..';
 import { registerCommand } from '../../base/commands';
+import { logMessage } from '../../base/logging-util';
 import { IvyProjectExplorer } from '../../project-explorer/ivy-project-explorer';
 import { TreeSelection, treeSelectionToProjectPath } from '../../project-explorer/tree-selection';
 import { createWebViewContent } from '../webview-helper';
@@ -26,5 +27,5 @@ export const registerOpenCmsEditorCmd = (context: vscode.ExtensionContext, webso
 };
 
 const showError = (message: string) => {
-  vscode.window.showErrorMessage(`Open CMS Editor: ${message}`);
+  logMessage('error', `Open CMS Editor: ${message}`);
 };
