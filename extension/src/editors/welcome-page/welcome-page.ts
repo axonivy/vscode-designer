@@ -67,7 +67,13 @@ const executeCommand = async (command: Command) => {
 };
 
 const executeAddProject = async () => {
-  const folder = await vscode.window.showWorkspaceFolderPick();
+  let folder;
+  if (vscode.workspace.workspaceFolders?.length === 1) {
+    folder = vscode.workspace.workspaceFolders[0];
+  } else {
+    folder = await vscode.window.showWorkspaceFolderPick();
+  }
+
   if (!folder) {
     return;
   }
