@@ -3,10 +3,7 @@ import path from 'path';
 import { View, type ViewData } from './view';
 
 export abstract class ExplorerView extends View {
-  constructor(
-    private viewName: string,
-    page: Page
-  ) {
+  constructor(private viewName: string, page: Page) {
     const data: ViewData = {
       tabSelector: `div.pane-header:has-text("${viewName}")`,
       viewSelector: ''
@@ -95,12 +92,12 @@ export class FileExplorer extends ExplorerView {
     await this.provideUserInput(bpmnXml);
   }
 
-  async addUserDialog(dialogName: string, namespace: string, kind: 'Html Dialog' | 'Offline Dialog' | 'Form Dialog') {
+  async addUserDialog(dialogName: string, namespace: string, kind: 'Html Dialog (JSF)' | 'Offline Dialog (JSF)' | 'Dialog Form') {
     await this.selectNode('config');
     await this.executeCommand('Axon Ivy: New ' + kind);
     await this.provideUserInput(dialogName);
     await this.provideUserInput(namespace);
-    if (kind === 'Html Dialog') {
+    if (kind === 'Html Dialog (JSF)') {
       await this.provideUserInput();
       await this.provideUserInput();
     }
