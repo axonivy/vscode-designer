@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { messenger } from '../..';
 import { registerCommand } from '../../base/commands';
+import { logMessage } from '../../base/logging-util';
 import { IvyProjectExplorer } from '../../project-explorer/ivy-project-explorer';
 import { TreeSelection, treeSelectionToProjectPath } from '../../project-explorer/tree-selection';
 import { createWebViewContent } from '../webview-helper';
@@ -28,5 +29,5 @@ export const registerOpenDatabaseEditorCmd = (context: vscode.ExtensionContext, 
 };
 
 const showError = (message: string) => {
-  vscode.window.showErrorMessage(`Open Database Editor: ${message}`);
+  logMessage('error', `Open Database Editor: ${message}`);
 };

@@ -1,12 +1,13 @@
 import * as vscode from 'vscode';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
+import { logMessage } from './logging-util';
 
 export const getIvyProject = async (projectExplorer: IvyProjectExplorer) => {
   const projects = await projectExplorer.getIvyProjects();
   let uri: string;
 
   if (!projects || projects.length === 0) {
-    vscode.window.showErrorMessage('No ivy-projects are open in the workspace.');
+    logMessage('error', 'No ivy-projects are open in the workspace.');
     return;
   } else if (projects.length === 1) {
     uri = projects[0] ?? '';
