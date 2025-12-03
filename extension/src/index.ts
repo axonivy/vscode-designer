@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { Messenger, MessengerDiagnostic } from 'vscode-messenger';
 import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
+import { askToReloadWindow } from './base/reload-window';
 import { setStatusBarIcon } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
@@ -24,6 +25,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Messen
   registerCommand('engine.switchEngineReleaseTrain', context, () => ivyEngineManager.switchEngineReleaseTrain());
   registerCommand('engine.activateAnimation', context, async () => await config.setProcessAnimationAnimate(true));
   registerCommand('engine.deactivateAnimation', context, async () => await config.setProcessAnimationAnimate(false));
+  registerCommand('engine.restart', context, async () => await askToReloadWindow('Engine restart'));
   registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));
   registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
   registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));

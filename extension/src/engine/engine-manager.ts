@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
-import { reloadWindow } from '../base/reload-window';
+import { askToReloadWindow } from '../base/reload-window';
 import { setStatusBarMessage } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
 import { IvyBrowserViewProvider } from '../browser/ivy-browser-view-provider';
@@ -87,7 +87,7 @@ export class IvyEngineManager {
 
   async switchEngineReleaseTrain() {
     if (await switchEngineReleaseTrain()) {
-      await reloadWindow('Engine release train switched. You have to reload the window to apply the changes.');
+      await askToReloadWindow('Engine release train switched');
     }
   }
 

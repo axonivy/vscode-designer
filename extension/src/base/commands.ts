@@ -23,7 +23,8 @@ type EngineCommand =
   | 'engine.buildAndDeployProjects'
   | 'engine.switchEngineReleaseTrain'
   | 'engine.deactivateAnimation'
-  | 'engine.activateAnimation';
+  | 'engine.activateAnimation'
+  | 'engine.restart';
 type ProjectViewCommand =
   | 'ivyProjects.refreshEntry'
   | 'ivyProjects.buildProject'

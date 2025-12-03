@@ -1,8 +1,14 @@
 import * as vscode from 'vscode';
 
-export const reloadWindow = async (message: string) => {
-  const selection = await vscode.window.showInformationMessage(message, 'Reload Window', 'Cancel');
-  if (selection === 'Reload Window') {
+export const askToReloadWindow = async (reason: string) => {
+  const selection = await vscode.window.showQuickPick(
+    [{ label: 'Reload Window', detail: 'Unsaved changes will be lost' }, { label: 'Cancel' }],
+    {
+      ignoreFocusOut: true,
+      title: `${reason} - reload window to apply new settings and restart the engine`
+    }
+  );
+  if (selection?.label === 'Reload Window') {
     await vscode.commands.executeCommand('workbench.action.reloadWindow');
   }
 };
