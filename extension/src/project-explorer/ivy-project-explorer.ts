@@ -1,6 +1,7 @@
 import path from 'path';
 import * as vscode from 'vscode';
 import { Command, executeCommand, registerCommand } from '../base/commands';
+import { getIvyProject } from '../base/ivyProjectSelection';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { importNewProcess } from './import-process';
@@ -115,6 +116,9 @@ export class IvyProjectExplorer {
   }
 
   public async addProcess(selection: TreeSelection, kind: ProcessKind, pid?: string) {
+    if (!selection) {
+      selection = await getIvyProject(this);
+    }
     const projectPath = await treeSelectionToProjectPath(selection, this.getIvyProjects());
     if (projectPath) {
       await addNewProcess(await treeSelectionToUri(selection), projectPath, kind, pid);
@@ -124,6 +128,9 @@ export class IvyProjectExplorer {
   }
 
   public async importBpmnProcess(selection: TreeSelection) {
+    if (!selection) {
+      selection = await getIvyProject(this);
+    }
     const projectPath = await treeSelectionToProjectPath(selection, this.getIvyProjects());
     if (projectPath) {
       await importNewProcess(projectPath);
@@ -133,6 +140,9 @@ export class IvyProjectExplorer {
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {
+    if (!selection) {
+      selection = await getIvyProject(this);
+    }
     const projectPath = await treeSelectionToProjectPath(selection, this.getIvyProjects());
     if (projectPath) {
       await addNewUserDialog(await treeSelectionToUri(selection), projectPath, type, pid);
@@ -142,6 +152,9 @@ export class IvyProjectExplorer {
   }
 
   private async addDataClass(selection: TreeSelection) {
+    if (!selection) {
+      selection = await getIvyProject(this);
+    }
     const projectPath = await treeSelectionToProjectPath(selection, this.getIvyProjects());
     if (projectPath) {
       await addNewDataClass(await treeSelectionToUri(selection), projectPath);
