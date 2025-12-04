@@ -126,7 +126,7 @@ export class IvyProjectExplorer {
   public async importBpmnProcess(selection: TreeSelection) {
     const projectPath = await treeSelectionToProjectPath(selection, this.getIvyProjects());
     if (projectPath) {
-      await importNewProcess(await treeSelectionToUri(selection), projectPath);
+      await importNewProcess(projectPath);
       return;
     }
     vscode.window.showErrorMessage('Import BPMN Process: no valid Axon Ivy Project selected.');
