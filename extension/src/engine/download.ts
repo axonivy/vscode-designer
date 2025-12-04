@@ -13,7 +13,7 @@ export const downloadEngine = async (url: string, rootDir: string, logger: (mess
     logger(`Engine does already exist under '${enginePath}'`);
     return enginePath;
   }
-  fs.mkdirSync(enginePath, { recursive: true });
+  fs.mkdirSync(path.dirname(enginePath), { recursive: true });
   const zipPath = path.join(rootDir, zipName);
   logger(`Download engine from '${url}' to '${zipPath}'`);
   const fileStream = fs.createWriteStream(zipPath);

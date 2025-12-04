@@ -15,10 +15,14 @@ export class EngineDownloader {
   loadReleaseTrain = async (releaseTrain: string) => {
     return await vscode.window.withProgress(
       { location: vscode.ProgressLocation.Notification, title: 'Downloading Axon Ivy Engine', cancellable: false },
-      async () => {
+      async progress => {
+        const logger = (message: string) => {
+          progress.report({ message });
+          outputChannel.appendLine(message);
+        };
         const url = this.downloadUrl(releaseTrain);
         try {
-          return await downloadEngine(url, this.globalEngieStoragePath, outputChannel.appendLine);
+          return await downloadEngine(url, this.globalEngieStoragePath, logger);
         } catch (error) {
           await vscode.window.showErrorMessage(`Failed to download engine from ${url}, error: ${error}`);
           throw error;
