@@ -18,8 +18,7 @@ export class ReleaseTrainValidator {
     if (this.isValidReleaseTrainTag(releaseTrain)) {
       return { valid: true };
     }
-    const result = await this.isValidEngineDir(releaseTrain);
-    return { isDirectory: result.valid, ...result };
+    return await this.isValidEngineDir(releaseTrain);
   };
 
   private isDirectory = (engineDir: string) => {
@@ -33,7 +32,7 @@ export class ReleaseTrainValidator {
   public isValidEngineDir = async (engineDir: string) => {
     const pluginsDir = path.join(engineDir, 'system', 'plugins');
     if (!this.isDirectory(pluginsDir)) {
-      return { valid: false, reason: `Failed to determine engine version, directory does not exist '${pluginsDir}'.` };
+      return { valid: false, reason: `Invalid release train tag or engine directory '${engineDir}'` };
     }
     const isDirectory = true;
     const utilBundleFileName = await fs.promises

@@ -40,9 +40,9 @@ export const switchEngineReleaseTrain = async (reason?: string) => {
       validateInput: async (value: string) => {
         const result = await releaseTrainValidator.validate(value);
         if (result.valid) {
-          return undefined;
+          return;
         }
-        return result.isDirectory && result.reason ? result.reason : 'Invalid release train tag';
+        return result.reason ?? 'Invalid release train tag';
       },
       ignoreFocusOut: true
     });
