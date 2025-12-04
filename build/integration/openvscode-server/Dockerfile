@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.56.1
+FROM mcr.microsoft.com/playwright:v1.57.0
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
