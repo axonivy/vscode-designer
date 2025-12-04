@@ -113,7 +113,10 @@ export class IvyProjectExplorer {
   }
 
   private async runEngineAction(action: (projectDir: string) => Promise<void>, selection: TreeSelection) {
-    const uri = await treeSelectionToUri(selection);
+    let uri = await treeSelectionToUri(selection);
+    if (!uri) {
+      uri = await getIvyProject(this);
+    }
     treeUriToProjectPath(uri, this.getIvyProjects()).then(selectionPath => (selectionPath ? action(selectionPath) : {}));
   }
 

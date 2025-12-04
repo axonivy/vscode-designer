@@ -24,12 +24,15 @@ export const resolveNamespaceFromPath = async (
 ) => {
   const fileStat = await vscode.workspace.fs.stat(selectedUri);
   const selectedPath = fileStat.type === vscode.FileType.File ? path.dirname(selectedUri.path) : selectedUri.path;
-  const processPath = path.join(projectDir, target) + path.sep;
-  if (selectedPath.startsWith(processPath)) {
-    const namespace = selectedPath.replace(processPath, '').replaceAll(path.sep, target === 'processes' ? '/' : '.');
-    return namespace + (target === 'processes' ? '/' : '');
+  const namespace = selectedPath
+    .replace(projectDir, '')
+    .replace(target, '')
+    .replaceAll(path.sep, target === 'processes' ? '/' : '.');
+  if (!namespace) {
+    return defaultNamespaceOf(projectDir);
   }
-  return defaultNamespaceOf(projectDir);
+  const pattern = target === 'processes' ? /(^\/*|\/*$)/g : /(^\.*|\.*$)/g;
+  return namespace.replaceAll(pattern, '');
 };
 
 export const validateArtifactName = (value: string) => {
