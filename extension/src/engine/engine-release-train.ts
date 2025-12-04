@@ -38,7 +38,11 @@ export const switchEngineReleaseTrain = async (reason?: string) => {
     selectedTrain = await vscode.window.showInputBox({
       placeHolder: "Enter custom release train, e.g. '14.0.1' or a path of an existing engine directory)",
       validateInput: async (value: string) => {
-        return (await releaseTrainValidator.validate(value)).reason;
+        const result = await releaseTrainValidator.validate(value);
+        if (result.valid) {
+          return undefined;
+        }
+        return result.isDirectory && result.reason ? result.reason : 'Invalid release train tag';
       },
       ignoreFocusOut: true
     });
