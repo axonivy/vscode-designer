@@ -17,6 +17,7 @@ const defaultNamespaceOf = (projecDir: string) => {
     () => ''
   );
 };
+
 export const resolveNamespaceFromPath = async (
   selectedUri: vscode.Uri,
   projectDir: string,
@@ -24,12 +25,16 @@ export const resolveNamespaceFromPath = async (
 ) => {
   const fileStat = await vscode.workspace.fs.stat(selectedUri);
   const selectedPath = fileStat.type === vscode.FileType.File ? path.dirname(selectedUri.path) : selectedUri.path;
-  const processPath = path.join(projectDir, target) + path.sep;
-  if (selectedPath.startsWith(processPath)) {
-    const namespace = selectedPath.replace(processPath, '').replaceAll(path.sep, target === 'processes' ? '/' : '.');
-    return namespace + (target === 'processes' ? '/' : '');
+  const targetDir = path.join(projectDir, target);
+  if (selectedPath.includes(targetDir)) {
+    const pattern = target === 'processes' ? /(^\/*|\/*$)/g : /(^\.*|\.*$)/g;
+    return selectedPath
+      .replaceAll(targetDir, '')
+      .replaceAll(path.sep, target === 'processes' ? '/' : '.')
+      .replaceAll(pattern, '');
   }
-  return defaultNamespaceOf(projectDir);
+  const defaultNamespace = await defaultNamespaceOf(projectDir);
+  return target === 'processes' ? defaultNamespace.replaceAll('.', '/') : defaultNamespace;
 };
 
 export const validateArtifactName = (value: string) => {
