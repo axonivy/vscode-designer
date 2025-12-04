@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import * as vscode from 'vscode';
-import { reloadWindow } from '../base/reload-window';
+import { askToReloadWindow } from '../base/reload-window';
 import { downloadEngine } from './download';
 import { updateGlobalStateEngineDir } from './engine-release-train';
 import { outputChannel } from './output-channel';
@@ -53,7 +53,7 @@ export class EngineDownloader {
     }
     const newEngineDir = await this.loadReleaseTrain(releaseTrain);
     await updateGlobalStateEngineDir(this.context, releaseTrain, newEngineDir);
-    await reloadWindow('Axon Ivy Engine updated. You have to reload the window to apply the changes.');
+    await askToReloadWindow('Axon Ivy Engine updated');
   };
 
   private downloadUrl = (version: string) => {
