@@ -56,10 +56,10 @@ test.describe('Inscription View', () => {
     await inscriptionView.openCollapsible('Means / Documents');
     await inscriptionView.clickButton('Add row');
 
-    const firstRowURLCell = inscriptionView.cellInsideTable(0, 3);
+    const firstRowURLCell = inscriptionView.cellInsideTable(0, 1);
     await firstRowURLCell.locator('input').fill('pom.xml');
     await wait(page);
-    await inscriptionView.cellInsideTable(0, 2).click();
+    await inscriptionView.cellInsideTable(0, 0).click();
     await wait(page);
     await inscriptionView.clickButton('Open URL');
     const activeTabElement = page.locator('.tab.active');
