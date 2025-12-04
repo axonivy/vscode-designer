@@ -43,10 +43,12 @@ export class PageObject {
 
   async provideUserInput(input?: string) {
     if (input) {
-      await this.quickInputBox().locator('input.input').fill(input);
+      const textBox = this.quickInputBox().getByRole('textbox');
+      await textBox.fill(input);
+      await expect(textBox).toHaveValue(input);
     }
     await this.quickInputBox().click({ delay: 100 });
-    await this.quickInputBox().press('Enter');
+    await this.quickInputBox().press('Enter', { delay: 100 });
   }
 
   async closeAllTabs() {

@@ -2,14 +2,14 @@ import * as vscode from 'vscode';
 import { ImportProcessBody } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 
-export const importNewProcess = async (selectedUri: vscode.Uri, projectDir: string) => {
-  const input = await collectImportBpmnProcessParams(selectedUri, projectDir);
+export const importNewProcess = async (projectDir: string) => {
+  const input = await collectImportBpmnProcessParams(projectDir);
   if (input) {
     await IvyEngineManager.instance.createProcessFromBpmn(input);
   }
 };
 
-const collectImportBpmnProcessParams = async (selectedUri: vscode.Uri, projectDir: string): Promise<ImportProcessBody> => {
+const collectImportBpmnProcessParams = async (projectDir: string): Promise<ImportProcessBody> => {
   const bpmnXmlFile = await vscode.window.showOpenDialog({
     canSelectMany: false,
     openLabel: 'Select BPMN XML File to Import'
