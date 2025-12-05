@@ -142,20 +142,24 @@ export class IvyEngineManager {
   }
 
   public async buildProjects() {
-    if (config.projectUseMavenBuilder()) {
-      await this.mavenBuilder.buildProjects();
+    if (this.isRedHatJavaExtensionActive()) {
+      const ivyProjectDirectories = await this.ivyProjectDirectories();
+      await this.ivyEngineApi?.buildProjects(ivyProjectDirectories);
       return;
     }
-    const ivyProjectDirectories = await this.ivyProjectDirectories();
-    await this.ivyEngineApi?.buildProjects(ivyProjectDirectories);
+    await this.mavenBuilder.buildProjects();
   }
 
   public async buildProject(ivyProjectDirectory: string) {
-    if (config.projectUseMavenBuilder()) {
-      await this.mavenBuilder.buildProject(ivyProjectDirectory);
+    if (this.isRedHatJavaExtensionActive()) {
+      await this.ivyEngineApi?.buildProjects([ivyProjectDirectory]);
       return;
     }
-    await this.ivyEngineApi?.buildProjects([ivyProjectDirectory]);
+    await this.mavenBuilder.buildProject(ivyProjectDirectory);
+  }
+
+  private isRedHatJavaExtensionActive() {
+    return vscode.extensions.getExtension('redhat.java')?.isActive ?? false;
   }
 
   public async deployProject(ivyProjectDirectory: string) {

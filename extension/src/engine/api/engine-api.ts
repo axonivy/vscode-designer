@@ -71,6 +71,7 @@ export class IvyEngineApi {
     const baseURL = await this.baseURL;
     await vscode.window.withProgress(progressOptions('Initialize Ivy Project'), async () => {
       await findOrCreatePmv(params, { baseURL, ...options }).catch(handleAxiosError);
+      await buildProjects([projectDir], { baseURL, ...options }).catch(handleAxiosError);
     });
   }
 
