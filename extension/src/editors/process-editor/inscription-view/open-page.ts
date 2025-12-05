@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { executeCommand } from '../../../base/commands';
+import { logInformationMessage } from '../../../base/logging-util';
 import { IvyBrowserViewProvider } from '../../../browser/ivy-browser-view-provider';
 import { IvyProjectExplorer } from '../../../project-explorer/ivy-project-explorer';
 import { InscriptionActionHandler } from './action-handlers';
@@ -42,7 +43,7 @@ function openInExplorer(absolutePath: string | null) {
   if (absolutePath) {
     executeCommand('vscode.open', vscode.Uri.file(absolutePath));
   } else {
-    vscode.window.showInformationMessage('The entered url is not valid.');
+    logInformationMessage('The entered url is not valid.');
   }
 }
 

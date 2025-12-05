@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { executeCommand, registerCommand } from '../base/commands';
+import { logErrorMessage } from '../base/logging-util';
 import { findRootEntry, parseBuildManifest } from '../editors/build-manifest';
 
 export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
@@ -57,7 +58,7 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
             const url = vscode.Uri.parse(e.url);
             vscode.env.openExternal(url);
           } catch {
-            vscode.window.showErrorMessage(`Couldn't open uri '${e.url}' in external browser.`);
+            logErrorMessage(`Couldn't open uri '${e.url}' in external browser.`);
           }
           break;
         case 'openHome':

@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import * as vscode from 'vscode';
+import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { downloadEngine } from './download';
 import { updateGlobalStateEngineDir } from './engine-release-train';
@@ -24,7 +25,7 @@ export class EngineDownloader {
         try {
           return await downloadEngine(url, this.globalEngieStoragePath, logger);
         } catch (error) {
-          await vscode.window.showErrorMessage(`Failed to download engine from ${url}, error: ${error}`);
+          await logErrorMessage(`Failed to download engine from ${url}, error: ${error}`);
           throw error;
         }
       }
@@ -43,7 +44,7 @@ export class EngineDownloader {
       if (fs.existsSync(enginePath)) {
         return;
       }
-      const selection = await vscode.window.showInformationMessage(
+      const selection = await logInformationMessage(
         `There is a new Dev Axon Ivy Engine Version available ${zipName}`,
         'Download new Version',
         'Cancel'

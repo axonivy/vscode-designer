@@ -1,10 +1,6 @@
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import { NotificationType } from 'vscode-messenger-common';
-import { Command } from '../../base/commands';
-import { getIvyProject } from '../../base/ivyProjectSelection';
-import { IvyProjectExplorer } from '../../project-explorer/ivy-project-explorer';
-import { addNewProject } from '../../project-explorer/new-project';
 import { extensionVersion } from '../../version/extension-version';
 import { createWebViewContent } from '../webview-helper';
 
@@ -38,7 +34,9 @@ export const showWelcomePage = async (context: vscode.ExtensionContext) => {
   messenger.onNotification(openUrlType, (url: string) => {
     vscode.env.openExternal(vscode.Uri.parse(url));
   });
-  messenger.onNotification(commandType, (command: Command) => executeCommand(command));
+  messenger.onNotification(commandType, command => {
+    vscode.commands.executeCommand(command);
+  });
 
   panel.webview.html = createWebViewContent(context, panel.webview, 'welcome-page');
   currentPanel = panel;
@@ -49,44 +47,4 @@ export const showWelcomePage = async (context: vscode.ExtensionContext) => {
     panel.dispose();
     currentPanel = undefined;
   });
-};
-
-const executeCommand = async (command: Command) => {
-  switch (command) {
-    case 'ivyProjects.addNewProject':
-      executeAddProject();
-      break;
-    case 'ivyProjects.addBusinessProcess':
-    case 'ivyProjects.addNewFormDialog':
-    case 'ivyProjects.importBpmnProcess':
-      addProjectEntity(command);
-      break;
-    default:
-      vscode.commands.executeCommand(command);
-  }
-};
-
-const executeAddProject = async () => {
-  const folder = await vscode.window.showWorkspaceFolderPick();
-  if (!folder) {
-    return;
-  }
-  addNewProject(folder.uri);
-};
-
-const addProjectEntity = async (command: Command) => {
-  const projectExplorer = IvyProjectExplorer.instance;
-  const project = await getIvyProject(projectExplorer);
-
-  switch (command) {
-    case 'ivyProjects.addBusinessProcess':
-      projectExplorer.addProcess(project, 'Business Process');
-      break;
-    case 'ivyProjects.addNewFormDialog':
-      projectExplorer.addUserDialog(project, 'Form');
-      break;
-    case 'ivyProjects.importBpmnProcess':
-      projectExplorer.importBpmnProcess(project);
-      break;
-  }
 };

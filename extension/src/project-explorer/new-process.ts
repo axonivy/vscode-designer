@@ -1,14 +1,11 @@
 import * as vscode from 'vscode';
 import { ProcessInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { resolveNamespaceFromPath } from './util';
+import { resolveNamespaceFromPath, validateArtifactName } from './util';
 
 export type ProcessKind = 'Business Process' | 'Callable Sub Process' | 'Web Service Process' | '';
 
 export type NewProcessParams = ProcessInit;
-
-const prompt =
-  'Enter the new process name e.g. "myProcess". You can also specify its directory name in the form "parentDirectory/subDirectory/myProcess".';
 
 export const addNewProcess = async (selectedUri: vscode.Uri, projectDir: string, kind: ProcessKind, pid?: string) => {
   const input = await collectNewProcessParams(selectedUri, projectDir);
@@ -18,30 +15,42 @@ export const addNewProcess = async (selectedUri: vscode.Uri, projectDir: string,
 };
 
 const collectNewProcessParams = async (selectedUri: vscode.Uri, projectDir: string) => {
-  const resolvedNamespace = await resolveNamespaceFromPath(selectedUri, projectDir, 'processes');
-  const placeHolder = 'newProcessName';
-  const nameWithNamespace = await vscode.window.showInputBox({
-    title: 'Process Name',
-    prompt,
-    placeHolder,
-    value: resolvedNamespace ? resolvedNamespace + placeHolder : undefined,
-    valueSelection: resolvedNamespace ? [resolvedNamespace.length, -1] : undefined,
-    validateInput: validateNameWithNamespace,
-    ignoreFocusOut: true
-  });
-  if (!nameWithNamespace) {
+  const name = await collectName();
+  if (!name) {
     return;
   }
-  const nameStartIndex = nameWithNamespace.lastIndexOf('/') + 1;
-  const name = nameWithNamespace.substring(nameStartIndex, nameWithNamespace.length);
-  const namespace = nameWithNamespace.substring(0, nameStartIndex - 1);
+  const namespace = await collectNamespace(selectedUri, projectDir);
+  if (namespace === undefined) {
+    return;
+  }
   return { name, path: projectDir, namespace };
 };
 
-const validateNameWithNamespace = (value: string) => {
-  const pattern = /^\w+(\/\w+)*$/;
+const collectName = async () => {
+  return vscode.window.showInputBox({
+    title: 'Process Name',
+    placeHolder: 'Enter a name',
+    ignoreFocusOut: true,
+    validateInput: validateArtifactName
+  });
+};
+
+const collectNamespace = async (selectedUri: vscode.Uri, projectDir: string) => {
+  const namespace = await resolveNamespaceFromPath(selectedUri, projectDir, 'processes');
+  return vscode.window.showInputBox({
+    title: 'Process Namespace',
+    value: namespace,
+    prompt: 'Enter Namespace separated by "/"',
+    valueSelection: [namespace.length, -1],
+    ignoreFocusOut: true,
+    validateInput: validateNamespace
+  });
+};
+
+export const validateNamespace = (value: string, errorMessage = 'Invalid namespace.') => {
+  const pattern = /^(\w+(\/\w+)*(-\w+)*)?$/;
   if (pattern.test(value)) {
     return;
   }
-  return `Alphanumeric name expected. ${prompt}`;
+  return errorMessage;
 };
