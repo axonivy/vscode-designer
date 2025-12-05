@@ -44,8 +44,7 @@ test('wrong patch', async () => {
 test('invalid when engine directory is does not exist', async () => {
   expect(await validator.validate('path/to/nowhere')).toEqual({
     valid: false,
-    isDirectory: false,
-    reason: "Failed to determine engine version, directory does not exist 'path/to/nowhere/system/plugins'."
+    reason: "Invalid release train tag or engine directory 'path/to/nowhere'"
   });
 });
 
@@ -61,8 +60,7 @@ test('preview train', async () => {
 
   expect(await validator.validate('Dev')).toEqual({
     valid: false,
-    isDirectory: false,
-    reason: "Failed to determine engine version, directory does not exist 'Dev/system/plugins'."
+    reason: "Invalid release train tag or engine directory 'Dev'"
   });
   expect((await validator.validate('13')).valid).toBeFalsy();
   expect((await validator.validate('13.2')).valid).toBeFalsy();
@@ -78,8 +76,7 @@ test('lts train', async () => {
 
   expect(await customValidator.validate('14.b')).toEqual({
     valid: false,
-    isDirectory: false,
-    reason: "Failed to determine engine version, directory does not exist '14.b/system/plugins'."
+    reason: "Invalid release train tag or engine directory '14.b'"
   });
   expect((await customValidator.validate('14.0')).valid).toBeFalsy();
   expect((await customValidator.validate('14.0.0.')).valid).toBeFalsy();

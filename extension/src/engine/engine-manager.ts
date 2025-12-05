@@ -57,7 +57,7 @@ export class IvyEngineManager {
     const releaseTrainValidator = new ReleaseTrainValidator(extensionVersion);
     const validationResult = await releaseTrainValidator.validate(releaseTrain);
     if (!validationResult.valid) {
-      return this.handleInvalidReleaseTrain(releaseTrain, validationResult.reason);
+      return this.handleInvalidReleaseTrain(validationResult.reason);
     }
     if (validationResult.isDirectory) {
       return releaseTrain;
@@ -76,9 +76,10 @@ export class IvyEngineManager {
     vscode.window.showErrorMessage(`Downloaded engine is invalid: ${newEngineDir}`);
   }
 
-  private async handleInvalidReleaseTrain(releaseTrain: string, reason?: string) {
-    outputChannel.appendLine(`Engine release train validation failed: ${reason}`);
-    const newTrain = await switchEngineReleaseTrain(`Provided engine release train is invalid: '${reason}'`);
+  private async handleInvalidReleaseTrain(reason?: string) {
+    const errorMessage = `Engine release train validation failed: ${reason}`;
+    outputChannel.appendLine(errorMessage);
+    const newTrain = await switchEngineReleaseTrain(errorMessage);
     if (!newTrain) {
       return vscode.window.showErrorMessage('No engine release train selected.');
     }
