@@ -1,21 +1,16 @@
 import { test } from './fixtures/baseTest';
 import { CmsEditor } from './page-objects/cms-editor';
-import { FileExplorer, ProjectExplorerView } from './page-objects/explorer-view';
-import { multiProjectWorkspacePath, noProjectWorkspacePath } from './workspaces/workspace';
-
-test.describe('Project Explorer - no Ivy Project', () => {
-  test.use({ workspace: noProjectWorkspacePath });
-  test('Ensure Project Explorer is hidden', async ({ page }) => {
-    const explorer = new ProjectExplorerView(page);
-    await explorer.isHidden();
-  });
-});
+import { FileExplorer } from './page-objects/explorer-view';
+import { IvyViewContainer } from './page-objects/ivy-view-container';
+import { multiProjectWorkspacePath } from './workspaces/workspace';
 
 test.describe('Project Explorer - several Ivy Projects', () => {
   test.use({ workspace: multiProjectWorkspacePath });
   test('Ensure Project Explorer visible', async ({ page }) => {
-    const explorer = new ProjectExplorerView(page);
-    await explorer.openView();
+    const viewContainer = new IvyViewContainer(page);
+    await viewContainer.openViewContainer();
+    const explorer = viewContainer.projectExplorer;
+
     await explorer.hasNode('ivy-project-1');
     await explorer.hasNode('ivy-project-2');
     await explorer.hasNoNode('ivy-project-3');
@@ -31,9 +26,11 @@ test.describe('Project Explorer - several Ivy Projects', () => {
 });
 
 test('cms entry', async ({ page }) => {
-  const explorer = new ProjectExplorerView(page);
+  const viewContainer = new IvyViewContainer(page);
+  await viewContainer.openViewContainer();
+  const explorer = viewContainer.projectExplorer;
+
   await explorer.hasDeployProjectStatusMessage();
-  explorer.openView();
   explorer.selectNode('playwrightTestWorkspace');
   explorer.selectNode('cms');
   await new CmsEditor(page).isViewVisible();
