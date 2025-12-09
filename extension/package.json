@@ -395,6 +395,13 @@
       }
     ],
     "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ivy-view-container",
+          "title": "Axon Ivy Designer",
+          "icon": "./assets/ivy-logo.svg"
+        }
+      ],
       "panel": [
         {
           "id": "ivy-browser-container",
@@ -413,11 +420,10 @@
           "when": "ivy:hasIvyProjects"
         }
       ],
-      "explorer": [
+      "ivy-view-container": [
         {
           "id": "ivyProjects",
-          "name": "Axon Ivy Projects",
-          "when": "ivy:hasIvyProjects"
+          "name": "Axon Ivy Projects"
         }
       ]
     },
