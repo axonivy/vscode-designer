@@ -119,9 +119,4 @@ export class ProjectExplorerView extends ExplorerView {
   constructor(page: Page) {
     super('Axon Ivy Projects', page);
   }
-
-  async revealInExplorer(name: string) {
-    await this.selectNode(name);
-    await this.executeCommand('Axon Ivy: Reveal in Explorer');
-  }
 }

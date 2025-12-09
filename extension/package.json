@@ -307,11 +307,6 @@
         "category": "Axon Ivy"
       },
       {
-        "command": "ivyProjects.revealInExplorer",
-        "title": "Reveal in Explorer",
-        "category": "Axon Ivy"
-      },
-      {
         "command": "ivy.addDevContainer",
         "title": "Add Dev Container",
         "category": "Axon Ivy"
@@ -516,10 +511,6 @@
         },
         {
           "command": "ivyProjects.buildAndDeployProject",
-          "when": "view == ivyProjects"
-        },
-        {
-          "command": "ivyProjects.revealInExplorer",
           "when": "view == ivyProjects"
         },
         {

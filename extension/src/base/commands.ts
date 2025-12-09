@@ -16,7 +16,7 @@ export type Command =
   | ViewCommand
   | 'yaml-variables-editor.new'
   | 'ivy.addDevContainer';
-type VSCodeCommand = 'revealInExplorer' | 'setContext' | 'vscode.open' | 'copyFilePath';
+type VSCodeCommand = 'setContext' | 'vscode.open' | 'copyFilePath';
 type EngineCommand =
   | 'engine.deployProjects'
   | 'engine.buildProjects'
@@ -39,7 +39,6 @@ type ProjectViewCommand =
   | 'ivyProjects.addNewFormDialog'
   | 'ivyProjects.addNewOfflineDialog'
   | 'ivyProjects.addNewDataClass'
-  | 'ivyProjects.revealInExplorer'
   | 'ivyProjects.stopBpmEngine'
   | 'ivyProjects.convertProject';
 type ViewCommand =

@@ -26,10 +26,6 @@ export class IvyProjectExplorer {
     context.subscriptions.push(this.treeView);
     this.registerCommands(context);
     this.defineFileWatchers();
-    vscode.window.tabGroups.onDidChangeTabs(async event => this.changeTabListener(event));
-    this.treeDataProvider.onDidCreateTreeItem(entry => {
-      this.revealActiveEntry(entry);
-    });
     this.hasIvyProjects().then(hasIvyProjects =>
       this.setProjectExplorerActivationCondition(hasIvyProjects).then(() => this.activateEngineExtension(hasIvyProjects))
     );
@@ -69,7 +65,6 @@ export class IvyProjectExplorer {
       this.addUserDialog(s, 'JSFOffline', pid)
     );
     registerCmd(`${VIEW_ID}.addNewDataClass`, (s: TreeSelection) => this.addDataClass(s));
-    registerCmd(`${VIEW_ID}.revealInExplorer`, (entry: Entry) => executeCommand('revealInExplorer', this.getCmdEntry(entry)?.uri));
     registerCmd(`${VIEW_ID}.convertProject`, (s: TreeSelection) => this.convertProject(s));
   }
 
@@ -184,56 +179,6 @@ export class IvyProjectExplorer {
     if (hasIvyProjects) {
       await IvyEngineManager.instance.start();
     }
-  }
-
-  private changeTabListener(event: vscode.TabChangeEvent) {
-    if (event.changed.length > 0) {
-      this.syncProjectExplorerSelectionWithActiveTab();
-    }
-  }
-
-  private syncProjectExplorerSelectionWithActiveTab() {
-    const tabInput = vscode.window.tabGroups.activeTabGroup.activeTab?.input as { uri: vscode.Uri };
-    if (tabInput && tabInput.uri && this.treeView.visible) {
-      const entryPath = tabInput.uri.fsPath;
-      const entry = this.treeDataProvider.getEntryCache().get(entryPath);
-      if (entry) {
-        this.treeView.reveal(entry, { expand: true });
-        return;
-      }
-      this.refreshRecursively(path.dirname(entryPath));
-    }
-  }
-
-  private refreshRecursively(entryPath: string) {
-    const entry = this.treeDataProvider.getEntryCache().get(entryPath);
-    if (entry) {
-      this.treeDataProvider.refreshSubtree(entry);
-      return;
-    }
-    const parentEntryPath = path.dirname(entryPath);
-    if (vscode.workspace.getWorkspaceFolder(vscode.Uri.file(parentEntryPath))) {
-      this.refreshRecursively(parentEntryPath);
-    }
-  }
-
-  private revealActiveEntry(entry: Entry) {
-    const tabInput = vscode.window.tabGroups.activeTabGroup.activeTab?.input as { uri: vscode.Uri };
-    if (tabInput && tabInput.uri && this.treeView.visible) {
-      if (tabInput.uri.path.startsWith(entry.uri.path)) {
-        this.treeView.reveal(entry, { expand: true });
-      }
-    }
-  }
-
-  private getCmdEntry(entry: Entry): Entry | undefined {
-    if (entry) {
-      return entry;
-    }
-    if (this.treeView.selection.length > 0) {
-      return this.treeView.selection[0];
-    }
-    return undefined;
   }
 
   private async convertProject(selection: TreeSelection) {
