@@ -1,12 +1,12 @@
 import type { Page } from '@playwright/test';
 import { ProjectExplorerView } from './explorer-view';
+import { PageObject } from './page-object';
 
-export class IvyViewContainer {
-  readonly page: Page;
+export class IvyViewContainer extends PageObject {
   readonly projectExplorer: ProjectExplorerView;
 
   constructor(page: Page) {
-    this.page = page;
+    super(page);
     this.projectExplorer = new ProjectExplorerView(page);
   }
 

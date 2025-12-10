@@ -17,38 +17,16 @@ const IVY_PROJECT_CONTEXT_VALUE = 'ivyProject';
 
 export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry> {
   private ivyProjects: Promise<string[]>;
-  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-  private _onDidChangeTreeData = new vscode.EventEmitter<Entry | undefined | null | void>();
+  private _onDidChangeTreeData = new vscode.EventEmitter<Entry | undefined | null>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-  private _onDidCreateTreeItem = new vscode.EventEmitter<Entry>();
-  readonly onDidCreateTreeItem = this._onDidCreateTreeItem.event;
-
-  private entryCache = new Map<string, Entry>();
-  private openTabPaths: string[];
   private readonly excludePattern: string;
   private readonly maxResults: number;
 
   constructor() {
-    this.openTabPaths = this.currentOpenTabPaths();
     this.excludePattern = config.projectExcludePattern() ?? '';
     this.maxResults = config.projectMaximumNumber() ?? 50;
     this.ivyProjects = this.findIvyProjects();
-  }
-
-  private currentOpenTabPaths() {
-    return vscode.window.tabGroups.all
-      .flatMap(tabGroup => tabGroup.tabs.flatMap(tabs => tabs.input as { uri: vscode.Uri }))
-      .filter(input => input && input.uri)
-      .map(input => input.uri.fsPath);
-  }
-
-  getEntryCache() {
-    return this.entryCache;
-  }
-
-  private cacheEntry(entry: Entry) {
-    this.entryCache.set(entry.uri.fsPath, entry);
   }
 
   private async findIvyProjects(): Promise<string[]> {
@@ -80,15 +58,8 @@ export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry
   }
 
   refresh() {
-    this.entryCache.clear();
-    this.openTabPaths = this.currentOpenTabPaths();
     this.ivyProjects = this.findIvyProjects();
-    this._onDidChangeTreeData.fire();
-  }
-
-  refreshSubtree(entry: Entry) {
-    this.openTabPaths = this.currentOpenTabPaths();
-    this._onDidChangeTreeData.fire(entry);
+    this._onDidChangeTreeData.fire(undefined);
   }
 
   getTreeItem(element: Entry): vscode.TreeItem {
@@ -103,7 +74,6 @@ export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry
     if (element.contextValue) {
       treeItem.contextValue = element.contextValue;
     }
-    this._onDidCreateTreeItem.fire(element);
     return treeItem;
   }
 
@@ -114,9 +84,6 @@ export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry
     if (element.type !== vscode.FileType.Directory) {
       return vscode.TreeItemCollapsibleState.None;
     }
-    if (this.openTabPathStartsWith(element.uri.fsPath)) {
-      return vscode.TreeItemCollapsibleState.Expanded;
-    }
     return vscode.TreeItemCollapsibleState.Collapsed;
   }
 
@@ -126,10 +93,7 @@ export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry
 
   async getChildren(element?: Entry): Promise<Entry[]> {
     if (element) {
-      const children = await this.readDirectory(element.uri);
-      return children
-        .map(([childName, childType]) => this.createAndCacheChild(element, childName, childType))
-        .sort((a, b) => (a.type > b.type ? -1 : 0));
+      return [this.cmsEntry(element)];
     }
     return (await this.ivyProjects).map(dir => this.createAndCacheRoot(dir));
   }
@@ -141,42 +105,17 @@ export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry
       iconPath: path.join(__dirname, '..', 'assets', 'ivy-logo-black-background.svg'),
       contextValue: IVY_PROJECT_CONTEXT_VALUE
     };
-    this.cacheEntry(entry);
     return entry;
   }
 
-  private createAndCacheChild(parent: Entry, childName: string, childType: vscode.FileType): Entry {
-    const childUri = vscode.Uri.file(path.join(parent.uri.fsPath, childName));
-    const entry: Entry = { uri: childUri, type: childType, parent };
-    if (childType === vscode.FileType.File) {
-      entry.command = { command: 'vscode.open', title: 'Open File', arguments: [childUri] };
-      entry.contextValue = 'file';
-    }
-    if (this.isCmsDirectory(parent, childName, childType)) {
-      this.makeCmsEntry(entry);
-    }
-    this.cacheEntry(entry);
-    return entry;
-  }
-
-  private isCmsDirectory(parent: Entry, name: string, type: vscode.FileType) {
-    return parent.contextValue === IVY_PROJECT_CONTEXT_VALUE && name === 'cms' && type === vscode.FileType.Directory;
-  }
-
-  private makeCmsEntry(entry: Entry) {
+  private cmsEntry(element: Entry) {
+    const entry: Entry = { uri: vscode.Uri.parse(`${element.uri}/cms`), type: vscode.FileType.File, parent: element };
     entry.collapsibleState = vscode.TreeItemCollapsibleState.None;
     entry.iconPath = {
       light: vscode.Uri.file(path.join(__dirname, '..', 'assets', 'light', 'cms.svg')),
       dark: vscode.Uri.file(path.join(__dirname, '..', 'assets', 'dark', 'cms.svg'))
     };
     entry.command = { command: 'ivyBrowserView.openCmsEditor', title: 'Open CMS Editor', arguments: [entry.uri] };
-  }
-
-  private openTabPathStartsWith(childPath: string): boolean {
-    return this.openTabPaths.find(tabPath => tabPath.startsWith(childPath)) ? true : false;
-  }
-
-  async readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
-    return (await vscode.workspace.fs.readDirectory(uri)).filter(([childName]) => !childName.startsWith('.'));
+    return entry;
   }
 }
