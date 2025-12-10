@@ -6,6 +6,7 @@ import logo from '../axonivy-logo.svg';
 import { useMessenger } from '../util/VscodeApiProvider';
 import { GettingStartedCommands } from './GettingStartedCommands';
 import { ShortcutSection } from './shortcut/ShortcutSection';
+import { ShowOnActivationToggle } from './ShowOnActivation';
 import { SocialMediaLinkSection } from './SocialMediaLinkSection';
 import './WelcomePage.css';
 
@@ -25,7 +26,7 @@ export const WelcomePage = () => {
       <Flex className='welcome-page-content' alignItems='center' direction='column' gap={4}>
         <Flex direction='column' gap={2} style={{ width: '100%' }}>
           <Flex direction='row' justifyContent='space-between'>
-            <h1>{t('welcomeToProDesigner')}</h1>
+            <h1>{t('welcomePage.header')}</h1>
             <img className={'welcome-page-logo'} src={logo} />
           </Flex>
           <span className='welcome-page-version'>{`${t('version')} ${version ?? ''}`}</span>
@@ -35,6 +36,7 @@ export const WelcomePage = () => {
           <GettingStartedCommands />
         </Flex>
         <SocialMediaLinkSection />
+        <ShowOnActivationToggle />
       </Flex>
     </Flex>
   );

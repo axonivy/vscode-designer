@@ -7,8 +7,8 @@ export class CmsEditor extends Editor {
 
   constructor(page: Page, editorFile = 'cms_en.yaml') {
     super(editorFile, page);
-    this.toolbar = this.viewFrameLoactor().locator('.cms-editor-main-toolbar');
-    this.help = this.viewFrameLoactor().getByRole('button', { name: /Help/ });
+    this.toolbar = this.viewFrameLocator().locator('.cms-editor-main-toolbar');
+    this.help = this.viewFrameLocator().getByRole('button', { name: /Help/ });
   }
 
   override async isViewVisible() {
@@ -16,7 +16,7 @@ export class CmsEditor extends Editor {
   }
 
   async hasContentObject(contentObject: string) {
-    const field = this.viewFrameLoactor().locator('td span').first();
+    const field = this.viewFrameLocator().locator('td span').first();
     await expect(field).toHaveText(contentObject);
   }
 }

@@ -11,16 +11,16 @@ test.describe('Data Class Editor', () => {
     await editor.openEditorFile();
     await editor.isViewVisible();
 
-    await editor.viewFrameLoactor().getByRole('button', { name: /Help/ }).click();
+    await editor.viewFrameLocator().getByRole('button', { name: /Help/ }).click();
     const browserView = new BrowserView(page);
     expect((await browserView.input().inputValue()).toString()).toMatch(/^https:\/\/developer\.axonivy\.com.*data-classes\/data-classes.html#data-class-editor$/);
 
     await editor
-      .viewFrameLoactor()
+      .viewFrameLocator()
       .getByRole('button', { name: /Add Attribute/ })
       .click();
     const attributeName = 'testAttributeName';
-    const dialog = editor.viewFrameLoactor().getByRole('dialog');
+    const dialog = editor.viewFrameLocator().getByRole('dialog');
     await dialog.getByRole('textbox', { name: 'Name' }).fill(attributeName);
     await dialog.getByRole('button', { name: 'Create Attribute' }).click();
 
@@ -28,7 +28,7 @@ test.describe('Data Class Editor', () => {
     await editor.saveAllFiles();
     await editor.isNotDirty();
 
-    await expect(editor.viewFrameLoactor().locator('table')).toContainText(attributeName);
+    await expect(editor.viewFrameLocator().locator('table')).toContainText(attributeName);
     const javaEditor = new Editor('DataClassEditorTest.java', page);
     await javaEditor.openEditorFile();
     await javaEditor.isTabVisible();

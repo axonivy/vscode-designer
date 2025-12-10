@@ -51,10 +51,10 @@ export class BrowserView extends View {
   }
 
   content() {
-    return this.viewFrameLoactor().locator('.content').frameLocator('iFrame');
+    return this.viewFrameLocator().locator('.content').frameLocator('iFrame');
   }
 
   private header() {
-    return this.viewFrameLoactor().locator('.header');
+    return this.viewFrameLocator().locator('.header');
   }
 }
