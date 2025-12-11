@@ -30,3 +30,23 @@
   font-size: 15px;
   font-weight: bold;
 }
+
+.welcome-page-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1em;
+}
+
+.welcome-section-divider {
+  background-color: var(--N200);
+  border: none;
+  height: 1px;
+  grid-template-columns: 1fr 1fr;
+  gap: 1em;
+}
+
+.welcome-section-divider {
+  background-color: var(--N200);
+  border: none;
+  height: 1px;
+}
