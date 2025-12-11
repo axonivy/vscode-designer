@@ -15,6 +15,11 @@ export async function start({ file }: InitializeConnection) {
   const connection = toConnection(messenger, 'databaseWebSocketMessage');
   const client = await ClientJsonRpc.startClient(connection);
   const queryClient = initQueryClient();
+
+  const normalized = file.replace(/\\/g, '/');
+  const path = normalized.replace('/config/databases.yaml', '');
+  const projectName = path.substring(path.lastIndexOf('/') + 1);
+
   const rootElement = document.getElementById('root');
   if (!rootElement) {
     throw new Error('Root element not found');
@@ -25,7 +30,7 @@ export async function start({ file }: InitializeConnection) {
       <ThemeProvider disabled={true}>
         <ClientContextProvider client={client}>
           <QueryProvider client={queryClient}>
-            <DatabaseEditor context={{ app: '', projects: ['vscode-designer'], file }} />
+            <DatabaseEditor context={{ app: '', projects: [projectName], file }} />
           </QueryProvider>
         </ClientContextProvider>
       </ThemeProvider>
