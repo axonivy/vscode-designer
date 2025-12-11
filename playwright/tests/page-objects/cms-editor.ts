@@ -11,6 +11,10 @@ export class CmsEditor extends Editor {
     this.help = this.viewFrameLocator().getByRole('button', { name: /Help/ });
   }
 
+  override get tabLocator(): Locator {
+    return this.page.locator('div.tab:has-text("CMS -")');
+  }
+
   override async isViewVisible() {
     await expect(this.toolbar).toContainText('CMS -');
   }

@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { messenger } from '../..';
-import { createWebViewContent } from '../webview-helper';
-import { registerOpenCmsEditorCmd } from './open-cms-editor-cmd';
-import { setupCommunication } from './webview-communication';
+import { logErrorMessage } from '../../base/logging-util';
+import { IvyProjectExplorer } from '../../project-explorer/ivy-project-explorer';
+import { treeUriToProjectPath } from '../../project-explorer/tree-selection';
+import { registerOpenCmsEditorCmd, revealExistingPanel, setupWebviewPanel } from './open-cms-editor-cmd';
 
 export class CmsEditorProvider implements vscode.CustomTextEditorProvider {
   static readonly viewType = 'ivy.cmsEditor';
@@ -18,9 +18,16 @@ export class CmsEditorProvider implements vscode.CustomTextEditorProvider {
     return vscode.window.registerCustomEditorProvider(CmsEditorProvider.viewType, provider);
   }
 
-  resolveCustomTextEditor(document: vscode.TextDocument, webviewPanel: vscode.WebviewPanel) {
-    setupCommunication(this.websocketUrl, messenger, webviewPanel, document.fileName);
-    webviewPanel.webview.options = { enableScripts: true };
-    webviewPanel.webview.html = createWebViewContent(this.context, webviewPanel.webview, 'cms-editor');
+  async resolveCustomTextEditor(document: vscode.TextDocument, webviewPanel: vscode.WebviewPanel) {
+    const projectPath = await treeUriToProjectPath(document.uri, IvyProjectExplorer.instance.getIvyProjects());
+    if (!projectPath) {
+      logErrorMessage('Failed to find project associated with the document.');
+      return;
+    }
+    if (revealExistingPanel(projectPath)) {
+      webviewPanel.dispose();
+      return;
+    }
+    setupWebviewPanel(this.context, this.websocketUrl, projectPath, webviewPanel);
   }
 }

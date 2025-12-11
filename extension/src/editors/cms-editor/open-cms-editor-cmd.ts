@@ -5,6 +5,7 @@ import { logErrorMessage } from '../../base/logging-util';
 import { IvyProjectExplorer } from '../../project-explorer/ivy-project-explorer';
 import { TreeSelection, treeSelectionToUri, treeUriToProjectPath } from '../../project-explorer/tree-selection';
 import { createWebViewContent } from '../webview-helper';
+import { CmsEditorRegistry } from './cms-editor-registry';
 import { setupCommunication } from './webview-communication';
 
 export const registerOpenCmsEditorCmd = (context: vscode.ExtensionContext, websocketUrl: URL) => {
@@ -21,10 +22,38 @@ export const registerOpenCmsEditorCmd = (context: vscode.ExtensionContext, webso
       showError('No valid Axon Ivy Project selected.');
       return;
     }
-    const webviewPanel = vscode.window.createWebviewPanel('cms-editor', 'CMS', vscode.ViewColumn.One, { enableScripts: true });
-    setupCommunication(websocketUrl, messenger, webviewPanel, projectPath);
-    webviewPanel.webview.html = createWebViewContent(context, webviewPanel.webview, 'cms-editor');
+
+    if (revealExistingPanel(projectPath)) {
+      return;
+    }
+    const webviewPanel = vscode.window.createWebviewPanel('cms-editor', `CMS`, vscode.ViewColumn.One);
+    setupWebviewPanel(context, websocketUrl, projectPath, webviewPanel);
   });
+};
+
+export const revealExistingPanel = (projectPath: string) => {
+  const existingPanel = CmsEditorRegistry.find(projectPath);
+  if (!existingPanel) {
+    return false;
+  }
+  existingPanel.reveal();
+  return true;
+};
+
+export const setupWebviewPanel = (
+  context: vscode.ExtensionContext,
+  websocketUrl: URL,
+  projectPath: string,
+  webviewPanel: vscode.WebviewPanel
+) => {
+  CmsEditorRegistry.register(projectPath, webviewPanel);
+
+  const projectName = projectPath.split('/').pop();
+  webviewPanel.title = `CMS - ${projectName}`;
+
+  setupCommunication(websocketUrl, messenger, webviewPanel, projectPath);
+  webviewPanel.webview.options = { enableScripts: true };
+  webviewPanel.webview.html = createWebViewContent(context, webviewPanel.webview, 'cms-editor');
 };
 
 const showError = (message: string) => {

@@ -20,11 +20,11 @@ test.describe('Project Explorer', () => {
 
 test('CMS entry', async ({ page }) => {
   const viewContainer = new IvyViewContainer(page);
-  viewContainer.hasDeployProjectStatusMessage();
+  await viewContainer.hasDeployProjectStatusMessage();
   await viewContainer.openViewContainer();
   const explorer = viewContainer.projectExplorer;
 
-  explorer.selectNode('playwrightTestWorkspace');
-  explorer.selectNode('cms');
+  await explorer.selectNode('playwrightTestWorkspace');
+  await explorer.selectNode('cms');
   await new CmsEditor(page).isViewVisible();
 });
