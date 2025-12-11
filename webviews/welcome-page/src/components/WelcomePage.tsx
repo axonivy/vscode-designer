@@ -38,7 +38,7 @@ export const WelcomePage = () => {
             <TutorialSection />
             <ShortcutSection />
           </div>
-          <hr />
+          <hr className='welcome-section-divider' />
           <div className='welcome-page-row'>
             <CommandSection />
             <NewsSection />

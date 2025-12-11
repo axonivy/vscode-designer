@@ -12,11 +12,6 @@ export const NewsSection = () => {
         <h2>{t('News')}</h2>
         <SectionButton onClick={() => openUrl('https://www.axonivy.com/blog')}>Show all</SectionButton>
       </Flex>
-      <Flex direction='row'>
-        <div className='news-entry'>news entry place holder</div>
-        <div className='news-entry'>news entry place holder</div>
-        <div className='news-entry'>news entry place holder</div>
-      </Flex>
     </Flex>
   );
 };
