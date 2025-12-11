@@ -3,7 +3,7 @@ import { test } from './fixtures/baseTest';
 import { BrowserView } from './page-objects/browser-view';
 import { CmsEditor } from './page-objects/cms-editor';
 import { FileExplorer } from './page-objects/explorer-view';
-import { IvyViewContainer } from './page-objects/ivy-view-container';
+import { IvyViewContainer } from './page-objects/view-container';
 
 test('Open by command', async ({ page }) => {
   const editor = new CmsEditor(page);

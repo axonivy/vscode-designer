@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { Command, executeCommand, registerCommand } from '../base/commands';
 import { getIvyProject } from '../base/ivyProjectSelection';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
+import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { importNewProcess } from './import-process';
@@ -26,6 +27,14 @@ export class IvyProjectExplorer {
     context.subscriptions.push(this.treeView);
     this.registerCommands(context);
     this.defineFileWatchers();
+    this.treeView.onDidChangeVisibility((event: vscode.TreeViewVisibilityChangeEvent) => {
+      if (event.visible) {
+        const activeProjectCmsEditor = CmsEditorRegistry.findActive();
+        if (activeProjectCmsEditor) {
+          this.selectCmsEntry(activeProjectCmsEditor);
+        }
+      }
+    });
     this.hasIvyProjects().then(hasIvyProjects =>
       this.setProjectExplorerActivationCondition(hasIvyProjects).then(() => this.activateEngineExtension(hasIvyProjects))
     );
@@ -179,6 +188,18 @@ export class IvyProjectExplorer {
     if (hasIvyProjects) {
       await IvyEngineManager.instance.start();
     }
+  }
+
+  public async selectCmsEntry(projectPath: string) {
+    if (!this.treeView.visible) {
+      return;
+    }
+    await this.selectEntry(this.treeDataProvider.findEntry(projectPath));
+    this.selectEntry(this.treeDataProvider.findEntry(`${projectPath}/cms`));
+  }
+
+  public async selectEntry(entry?: Entry) {
+    this.treeView.reveal(entry, { select: true, expand: true });
   }
 
   private async convertProject(selection: TreeSelection) {
