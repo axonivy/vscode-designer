@@ -3,15 +3,16 @@ import { IvyIcons } from '@axonivy/ui-icons';
 import { useTranslation } from 'react-i18next';
 import { useVscode } from '../util/useVscode';
 import { Command } from './Command';
+import './CommandSection.css';
 
-export const GettingStartedCommands = () => {
+export const CommandSection = () => {
   const { t } = useTranslation();
   const { executeCommand } = useVscode();
 
   return (
     <Flex direction='column' className='command-section' gap={4} style={{ width: '100%' }}>
       <h2>{t('Start')}</h2>
-      <Flex direction='column'>
+      <div className='welcome-command-grid'>
         <Command
           title={t('commands.newProject')}
           value={'ivyProjects.addNewProject'}
@@ -37,7 +38,7 @@ export const GettingStartedCommands = () => {
           title={t('commands.importBpmnProcess')}
           value={'ivyProjects.importBpmnProcess'}
           description={t('commands.importBpmnProcessDescr')}
-          icon={IvyIcons.Bpmn}
+          icon={IvyIcons.Download}
           onClick={executeCommand}
         />
         <Command
@@ -54,7 +55,7 @@ export const GettingStartedCommands = () => {
           icon={IvyIcons.Edit}
           onClick={executeCommand}
         />
-      </Flex>
+      </div>
     </Flex>
   );
 };
