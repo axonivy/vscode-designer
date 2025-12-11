@@ -8,15 +8,15 @@ export class FormEditor extends Editor {
 
   override async isViewVisible() {
     await this.isTabVisible();
-    const graph = this.viewFrameLoactor().locator('#canvas');
+    const graph = this.viewFrameLocator().locator('#canvas');
     await expect(graph).toBeVisible();
   }
 
   locatorFor(type: string) {
-    return this.viewFrameLoactor().locator(type);
+    return this.viewFrameLocator().locator(type);
   }
 
   get toolbar() {
-    return this.viewFrameLoactor().locator('.toolbar');
+    return this.viewFrameLocator().locator('.toolbar');
   }
 }

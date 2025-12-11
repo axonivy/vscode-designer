@@ -13,11 +13,11 @@ export class ProcessEditor extends Editor {
   }
 
   graphLocator() {
-    return this.viewFrameLoactor().locator('#sprotty .sprotty-graph');
+    return this.viewFrameLocator().locator('#sprotty .sprotty-graph');
   }
 
   get toolbar() {
-    return this.viewFrameLoactor().locator('.ivy-tool-bar');
+    return this.viewFrameLocator().locator('.ivy-tool-bar');
   }
 
   locatorForPID(pid: string) {
@@ -32,7 +32,7 @@ export class ProcessEditor extends Editor {
     if (pid) {
       await this.locatorForPID(pid).dblclick();
     } else {
-      await this.viewFrameLoactor().locator('#btn_inscription_toggle').click();
+      await this.viewFrameLocator().locator('#btn_inscription_toggle').click();
     }
     const view = this.inscriptionView();
     await view.assertViewVisible();
@@ -40,13 +40,13 @@ export class ProcessEditor extends Editor {
   }
 
   inscriptionView() {
-    return new InscriptionView(this.page, this.viewFrameLoactor().locator('.inscription-ui-container'));
+    return new InscriptionView(this.page, this.viewFrameLocator().locator('.inscription-ui-container'));
   }
 
   async startProcessAndAssertExecuted(startEvent: Locator, executedElement: Locator) {
     await startEvent.click();
     await expect(startEvent).toHaveClass(/selected/);
-    const playButton = this.viewFrameLoactor().locator('i.ivy.ivy-play').first();
+    const playButton = this.viewFrameLocator().locator('i.ivy.ivy-play').first();
     await playButton.click();
     await this.assertExecuted(executedElement);
   }
@@ -62,9 +62,9 @@ export class ProcessEditor extends Editor {
   async appendActivity(target: Locator, activityName: string) {
     await target.click();
     await expect(target).toHaveClass(/selected/);
-    const activities = this.viewFrameLoactor().getByTitle('Activities (A)');
+    const activities = this.viewFrameLocator().getByTitle('Activities (A)');
     await activities.click();
-    const newItemButton = this.viewFrameLoactor().locator('div.quick-action-bar-menu').getByRole('button', { name: activityName }).first();
+    const newItemButton = this.viewFrameLocator().locator('div.quick-action-bar-menu').getByRole('button', { name: activityName }).first();
     await newItemButton.click();
   }
 

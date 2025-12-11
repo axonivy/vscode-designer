@@ -12,6 +12,6 @@ export class DataClassEditor extends Editor {
   }
 
   get toolbar() {
-    return this.viewFrameLoactor().locator('div.dataclass-editor-main-toolbar');
+    return this.viewFrameLocator().locator('div.dataclass-editor-main-toolbar');
   }
 }

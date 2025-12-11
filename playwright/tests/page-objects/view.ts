@@ -22,7 +22,7 @@ export class View extends PageObject {
     return this.page.locator(this.data.viewSelector);
   }
 
-  viewFrameLoactor(): FrameLocator {
+  viewFrameLocator(): FrameLocator {
     return this.viewLocator.frameLocator('iFrame').frameLocator('iFrame#active-frame');
   }
 

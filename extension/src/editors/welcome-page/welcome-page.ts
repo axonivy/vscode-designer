@@ -1,21 +1,23 @@
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
-import { NotificationType } from 'vscode-messenger-common';
+import { NotificationType, RequestType } from 'vscode-messenger-common';
 import { extensionVersion } from '../../version/extension-version';
 import { createWebViewContent } from '../webview-helper';
 
-const messenger = new Messenger();
+let messenger: Messenger | undefined;
 let currentPanel: vscode.WebviewPanel | undefined;
 
 const openUrlType: NotificationType<string> = { method: 'openUrl' };
 const commandType: NotificationType<string> = { method: 'executeCommand' };
 const versionType: NotificationType<string> = { method: 'versionDelivered' };
+const showWelcomePageType: NotificationType<boolean> = { method: 'showWelcomePage' };
+const toggleShowWelcomePageType: RequestType<boolean, boolean> = { method: 'toggleShowWelcomePage' };
+
+export const showWelcomePageKey = 'showWelcomePage';
 
 export const conditionalWelcomePage = async (context: vscode.ExtensionContext) => {
-  const hasShownWelcome = context.workspaceState.get<boolean>('welcomeShown');
-  if (!hasShownWelcome) {
+  if (showWelcomePageState(context)) {
     showWelcomePage(context);
-    await context.workspaceState.update('welcomeShown', true);
   }
 };
 
@@ -30,21 +32,41 @@ export const showWelcomePage = async (context: vscode.ExtensionContext) => {
     retainContextWhenHidden: true
   });
 
+  const messenger = initializeMessenger(context);
   messenger.registerWebviewPanel(panel);
+
+  panel.webview.html = createWebViewContent(context, panel.webview, 'welcome-page');
+  currentPanel = panel;
+
+  const version = `${extensionVersion.major}.${extensionVersion.minor}.${extensionVersion.patch}`;
+  messenger.sendNotification(versionType, { type: 'webview', webviewType: 'ivy.welcomePage' }, version);
+  messenger.sendNotification(showWelcomePageType, { type: 'webview', webviewType: 'ivy.welcomePage' }, showWelcomePageState(context));
+
+  panel.onDidDispose(() => {
+    panel.dispose();
+    currentPanel = undefined;
+  });
+};
+
+const showWelcomePageState = (context: vscode.ExtensionContext) => {
+  return context.workspaceState.get<boolean>(showWelcomePageKey, true);
+};
+
+const initializeMessenger = (context: vscode.ExtensionContext) => {
+  if (messenger) {
+    return messenger;
+  }
+  messenger = new Messenger();
   messenger.onNotification(openUrlType, (url: string) => {
     vscode.env.openExternal(vscode.Uri.parse(url));
   });
   messenger.onNotification(commandType, command => {
     vscode.commands.executeCommand(command);
   });
-
-  panel.webview.html = createWebViewContent(context, panel.webview, 'welcome-page');
-  currentPanel = panel;
-  const version = `${extensionVersion.major}.${extensionVersion.minor}.${extensionVersion.patch}`;
-  messenger.sendNotification(versionType, { type: 'webview', webviewType: 'ivy.welcomePage' }, version);
-
-  panel.onDidDispose(() => {
-    panel.dispose();
-    currentPanel = undefined;
+  messenger.onRequest(toggleShowWelcomePageType, () => {
+    const newShowWelcomePageState = !showWelcomePageState(context);
+    context.workspaceState.update(showWelcomePageKey, newShowWelcomePageState);
+    return newShowWelcomePageState;
   });
+  return messenger;
 };
