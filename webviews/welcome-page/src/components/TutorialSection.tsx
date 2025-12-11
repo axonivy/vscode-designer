@@ -1,17 +1,19 @@
 import { Flex } from '@axonivy/ui-components';
 import { IvyIcons } from '@axonivy/ui-icons';
 import { useTranslation } from 'react-i18next';
-import { useVscode } from '../../util/useVscode';
-import { ShortcutCard } from './Shortcut';
-import './ShortcutSection.css';
+import { useVscode } from '../util/useVscode';
+import { SectionButton } from './SectionButton';
+import { ShortcutCard } from './shortcut/Shortcut';
 
-export const ShortcutSection = () => {
+export const TutorialSection = () => {
   const { t } = useTranslation();
   const { openUrl } = useVscode();
-
   return (
     <Flex direction='column' gap={4} style={{ width: '100%' }}>
-      <h2>{t('shortcuts')}</h2>
+      <Flex directon='row' justifyContent='space-between'>
+        <h2>{t('Tutorials')}</h2>
+        <SectionButton onClick={() => openUrl('https://www.axonivy.com/tutorials')}>Show all</SectionButton>
+      </Flex>
       <div className='shortcut-grid'>
         <ShortcutCard
           title={t('shortcut.documentation')}
