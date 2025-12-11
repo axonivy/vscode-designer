@@ -1,25 +1,19 @@
 import { Flex } from '@axonivy/ui-components';
-import { useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { NotificationType } from 'vscode-messenger-common';
 import logo from '../axonivy-logo.svg';
-import { useMessenger } from '../util/VscodeApiProvider';
-import { GettingStartedCommands } from './GettingStartedCommands';
+import { VersionStore } from '../util/VersionStore';
+import { CommandSection } from './CommandSection';
+import { NewsSection } from './NewsSection';
 import { ShortcutSection } from './shortcut/ShortcutSection';
 import { ShowOnActivationToggle } from './ShowOnActivation';
 import { SocialMediaLinkSection } from './SocialMediaLinkSection';
+import { TutorialSection } from './TutorialSection';
 import './WelcomePage.css';
-
-const versionType: NotificationType<string> = { method: 'versionDelivered' };
 
 export const WelcomePage = () => {
   const { t } = useTranslation();
-  const [version, setVersion] = useState('');
-  const { messenger } = useMessenger();
-
-  messenger.onNotification(versionType, version => {
-    setVersion(version);
-  });
+  const version = useSyncExternalStore(VersionStore.subscribe, VersionStore.getVersion);
 
   return (
     <Flex justifyContent='center' className='welcome-page'>
@@ -32,8 +26,15 @@ export const WelcomePage = () => {
           <span className='welcome-page-version'>{`${t('version')} ${version ?? ''}`}</span>
         </Flex>
         <Flex direction='column' gap={4} style={{ width: '100%', height: '100%' }}>
-          <ShortcutSection />
-          <GettingStartedCommands />
+          <div className='welcome-page-row'>
+            <TutorialSection />
+            <ShortcutSection />
+          </div>
+          <hr className='welcome-section-divider' />
+          <div className='welcome-page-row'>
+            <CommandSection />
+            <NewsSection />
+          </div>
         </Flex>
         <SocialMediaLinkSection />
         <ShowOnActivationToggle />
