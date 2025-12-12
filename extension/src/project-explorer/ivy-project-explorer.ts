@@ -194,8 +194,9 @@ export class IvyProjectExplorer {
     if (!this.treeView.visible) {
       return;
     }
-    await this.selectEntry(this.treeDataProvider.findEntry(projectPath));
-    this.selectEntry(this.treeDataProvider.findEntry(`${projectPath}/cms`));
+    const projectPathUri = vscode.Uri.file(projectPath);
+    await this.selectEntry(this.treeDataProvider.findEntry(projectPathUri));
+    this.selectEntry(this.treeDataProvider.findEntry(vscode.Uri.joinPath(projectPathUri, 'cms')));
   }
 
   public async selectEntry(entry?: Entry) {

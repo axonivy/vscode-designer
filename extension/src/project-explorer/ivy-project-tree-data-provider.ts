@@ -37,8 +37,8 @@ export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry
     this.entryCache.set(entry.uri.fsPath, entry);
   }
 
-  public findEntry(uri: string) {
-    return this.entryCache.get(uri);
+  public findEntry(uri: vscode.Uri) {
+    return this.entryCache.get(uri.fsPath);
   }
 
   private async findIvyProjects(): Promise<string[]> {
@@ -125,7 +125,7 @@ export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry
   }
 
   private cmsEntry(element: Entry) {
-    const entry: Entry = { uri: vscode.Uri.parse(`${element.uri}/cms`), type: vscode.FileType.File, parent: element };
+    const entry: Entry = { uri: vscode.Uri.joinPath(element.uri, 'cms'), type: vscode.FileType.File, parent: element };
     entry.collapsibleState = vscode.TreeItemCollapsibleState.None;
     entry.iconPath = {
       light: vscode.Uri.file(path.join(__dirname, '..', 'assets', 'light', 'cms.svg')),
