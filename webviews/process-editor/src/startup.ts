@@ -1,4 +1,4 @@
-import { EnableToolPaletteAction, GLSPActionDispatcher, IDiagramStartup, TYPES } from '@eclipse-glsp/client';
+import { EnableToolPaletteAction, GLSPActionDispatcher, IDiagramStartup, ShowGridAction, TYPES } from '@eclipse-glsp/client';
 import { ContainerModule, inject, injectable } from 'inversify';
 
 import { EnableInscriptionAction } from '@axonivy/process-editor-inscription';
@@ -25,6 +25,7 @@ export class StandaloneDiagramStartup implements IDiagramStartup {
 
   async postRequestModel(): Promise<void> {
     this.actionDispatcher.dispatch(UpdatePaletteItems.create());
+    this.actionDispatcher.dispatch(ShowGridAction.create({ show: true }));
     this.messenger.onRequest(InitializeConnectionRequest, () => this.initConnection());
     this.messenger.sendNotification(WebviewConnectionReadyNotification, HOST_EXTENSION);
   }

@@ -22,26 +22,29 @@ body .editor-root {
   color-scheme: light;
 }
 
-body:where(.vscode-dark, .vscode-high-contrast:not(.vscode-high-contrast-light)) {
-  color-scheme: dark;
+body {
+  &.vscode-dark,
+  &.vscode-high-contrast:not(.vscode-high-contrast-light) {
+    color-scheme: dark;
 
-  --glsp-grid: #5a5a5a;
-  --glsp-node: #202020;
-  --glsp-lane-bg: rgba(44, 44, 44, 0.5);
-  --glsp-pool-bg: #202020;
+    --glsp-grid: var(--N100, #5a5a5a);
+    --glsp-node: #202020;
+    --glsp-lane-bg: rgba(44, 44, 44, 0.5);
+    --glsp-pool-bg: #202020;
 
-  --glsp-tool-bg: #202020;
-  --glsp-tool-bar-bg: #2c2c2c;
-  --glsp-tool-button: #e5e5e5;
-  --glsp-tool-button-active-bg: #2c2c2c;
-  --glsp-tool-bar-button-active-bg: #202020;
-  --glsp-tool-text: #bababa;
+    --glsp-tool-bg: #202020;
+    --glsp-tool-bar-bg: #2c2c2c;
+    --glsp-tool-button: #e5e5e5;
+    --glsp-tool-button-active-bg: #2c2c2c;
+    --glsp-tool-bar-button-active-bg: #202020;
+    --glsp-tool-text: #bababa;
 
-  --glsp-bar-menu-bg: #2c2c2c;
-  --glsp-bar-menu-header-bg: #202020;
-  --glsp-bar-menu-triangle: #2c2c2c;
-  --glsp-bar-menu-item: #bababa;
-  --glsp-bar-menu-item-hover: #202020;
-  --glsp-bar-menu-switch: #2c2c2c;
-  --glsp-bar-menu-switch-bg: #202020;
+    --glsp-bar-menu-bg: #2c2c2c;
+    --glsp-bar-menu-header-bg: #202020;
+    --glsp-bar-menu-triangle: #2c2c2c;
+    --glsp-bar-menu-item: #bababa;
+    --glsp-bar-menu-item-hover: #202020;
+    --glsp-bar-menu-switch: #2c2c2c;
+    --glsp-bar-menu-switch-bg: #202020;
+  }
 }
