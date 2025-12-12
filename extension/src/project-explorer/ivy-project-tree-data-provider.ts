@@ -1,6 +1,8 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { config } from '../base/configurations';
+import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
+import { IvyProjectExplorer } from './ivy-project-explorer';
 
 export interface Entry {
   uri: vscode.Uri;
@@ -20,6 +22,8 @@ export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry
   private _onDidChangeTreeData = new vscode.EventEmitter<Entry | undefined | null>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
+  private entryCache = new Map<string, Entry>();
+
   private readonly excludePattern: string;
   private readonly maxResults: number;
 
@@ -27,6 +31,14 @@ export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry
     this.excludePattern = config.projectExcludePattern() ?? '';
     this.maxResults = config.projectMaximumNumber() ?? 50;
     this.ivyProjects = this.findIvyProjects();
+  }
+
+  private cacheEntry(entry: Entry) {
+    this.entryCache.set(entry.uri.fsPath, entry);
+  }
+
+  public findEntry(uri: vscode.Uri) {
+    return this.entryCache.get(uri.fsPath);
   }
 
   private async findIvyProjects(): Promise<string[]> {
@@ -84,6 +96,9 @@ export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry
     if (element.type !== vscode.FileType.Directory) {
       return vscode.TreeItemCollapsibleState.None;
     }
+    if (CmsEditorRegistry.find(element.uri.fsPath)?.active) {
+      return vscode.TreeItemCollapsibleState.Expanded;
+    }
     return vscode.TreeItemCollapsibleState.Collapsed;
   }
 
@@ -105,17 +120,22 @@ export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry
       iconPath: path.join(__dirname, '..', 'assets', 'ivy-logo-black-background.svg'),
       contextValue: IVY_PROJECT_CONTEXT_VALUE
     };
+    this.cacheEntry(entry);
     return entry;
   }
 
   private cmsEntry(element: Entry) {
-    const entry: Entry = { uri: vscode.Uri.parse(`${element.uri}/cms`), type: vscode.FileType.File, parent: element };
+    const entry: Entry = { uri: vscode.Uri.joinPath(element.uri, 'cms'), type: vscode.FileType.File, parent: element };
     entry.collapsibleState = vscode.TreeItemCollapsibleState.None;
     entry.iconPath = {
       light: vscode.Uri.file(path.join(__dirname, '..', 'assets', 'light', 'cms.svg')),
       dark: vscode.Uri.file(path.join(__dirname, '..', 'assets', 'dark', 'cms.svg'))
     };
     entry.command = { command: 'ivyBrowserView.openCmsEditor', title: 'Open CMS Editor', arguments: [entry.uri] };
+    this.cacheEntry(entry);
+    if (CmsEditorRegistry.find(element.uri.fsPath)?.active) {
+      IvyProjectExplorer.instance.selectEntry(entry);
+    }
     return entry;
   }
 }
