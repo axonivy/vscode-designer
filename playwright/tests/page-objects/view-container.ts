@@ -12,15 +12,15 @@ abstract class ViewContainer extends PageObject {
 
   async openViewContainer() {
     const tab = this.page.locator('div.activitybar').getByRole('tab', { name: this.viewContainerName });
-    for (let attempt = 0; attempt < 3; attempt++) {
+    // Opening a view container is prone to fail if it is done directly after another action.
+    // E.g. after opening a file or after having opened another view container.
+    await expect(async () => {
       await tab.click();
-      try {
-        await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 100 });
-        break;
-      } catch (error) {
-        if (attempt >= 2) throw error;
-      }
-    }
+      await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 100 });
+    }).toPass({
+      intervals: [100],
+      timeout: 500
+    });
   }
 }
 
