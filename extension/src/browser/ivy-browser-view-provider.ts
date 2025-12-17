@@ -10,11 +10,7 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
 
   private view?: vscode.WebviewView;
 
-  private constructor(
-    readonly extensionUri: vscode.Uri,
-    readonly engineUrl: URL,
-    readonly devContextPath: string
-  ) {}
+  private constructor(readonly extensionUri: vscode.Uri, readonly engineUrl: URL, readonly devContextPath: string) {}
 
   private static init(context: vscode.ExtensionContext, engineUrl: URL, devContextPath: string) {
     if (!IvyBrowserViewProvider._instance) {
@@ -33,8 +29,8 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
     );
     registerCommand('ivyBrowserView.open', context, (url?: string) => provider.open(url));
     registerCommand('ivyBrowserView.openDevWfUi', context, () => provider.openDevWfUi());
-    registerCommand('ivyBrowserView.openEngineCockpit', context, () => provider.openEngineRelativeUrl('system/engine-cockpit'));
-    registerCommand('ivyBrowserView.openNEO', context, () => provider.openEngineRelativeUrl('neo'));
+    registerCommand('ivyBrowserView.openEngineCockpit', context, () => provider.openEngineRelativeUrlExternally('system/engine-cockpit'));
+    registerCommand('ivyBrowserView.openNEO', context, () => provider.openEngineRelativeUrlExternally('neo'));
   }
 
   private static resolveCodespacesEngineHost(engineUrl: URL): URL {
@@ -69,8 +65,15 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
   }
 
   async openEngineRelativeUrl(input: string) {
-    this.refreshWebviewHtml(new URL(input, this.engineUrl).toString());
+    this.refreshWebviewHtml(this.toEngineUrl(input));
   }
+
+  async openEngineRelativeUrlExternally(input: string) {
+    const uri = vscode.Uri.parse(this.toEngineUrl(input));
+    vscode.env.openExternal(uri);
+  }
+
+  toEngineUrl = (input: string) => new URL(input, this.engineUrl).toString();
 
   async open(url?: string) {
     if (!url) {
