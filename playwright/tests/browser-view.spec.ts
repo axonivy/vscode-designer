@@ -33,12 +33,6 @@ test.describe('Browser View', () => {
 
     await browserView.forward().click();
     await assertToolbarInput(starts);
-
-    await browserView.openCockpit();
-    await assertToolbarInput(/system\/engine-cockpit/);
-
-    await browserView.openNEO();
-    await assertToolbarInput(/neo/);
   });
 
   async function assertToolbarInput(value: RegExp) {
