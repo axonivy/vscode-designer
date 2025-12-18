@@ -39,7 +39,7 @@ jobs:
           pnpm run update:axonivy:next
           pnpm install --no-frozen-lockfile
           pnpm run build:production
-          pnpm run engine:download https://dev.axonivy.com/permalink/dev/axonivy-engine.zip
+          pnpm run engine:download https://dev.axonivy.com/permalink/nightly-13.2/axonivy-engine.zip
           rm -r AxonIvyEngine/system/demo-applications
           pnpm run test:playwright:download:vscode
           nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
