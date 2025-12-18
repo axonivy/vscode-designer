@@ -1,7 +1,8 @@
 import { test } from './fixtures/baseTest';
 import { CmsEditor } from './page-objects/cms-editor';
+import { ProcessEditor } from './page-objects/process-editor';
 import { ExplorerViewContainer, IvyViewContainer } from './page-objects/view-container';
-import { multiProjectWorkspacePath } from './workspaces/workspace';
+import { minimalProjectWorkspacePath, multiProjectWorkspacePath } from './workspaces/workspace';
 
 test.describe('Project Explorer', () => {
   test.use({ workspace: multiProjectWorkspacePath });
@@ -58,5 +59,20 @@ test.describe('CMS entry', () => {
     await ivyViewContainer.projectExplorer.hasNoNode('cms');
     await editor.tabLocator.click();
     await ivyViewContainer.projectExplorer.isSelected('cms');
+  });
+
+  test.describe('Context menu', () => {
+    test.use({ workspace: minimalProjectWorkspacePath });
+    test('New Resource', async ({ page }) => {
+      const viewContainer = new IvyViewContainer(page);
+      await viewContainer.hasDeployProjectStatusMessage();
+      await viewContainer.openViewContainer();
+      const explorer = viewContainer.projectExplorer;
+      await explorer.selectNode('playwrightTestWorkspace');
+      await explorer.selectInContextMenuOfNode('cms', 'New', 'New Business Process');
+      await explorer.provideUserInput('TestProcess');
+      await explorer.provideUserInput('TestNamespace');
+      await new ProcessEditor(page, 'TestProcess.p.json').isViewVisible();
+    });
   });
 });

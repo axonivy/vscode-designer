@@ -59,6 +59,14 @@ export abstract class ExplorerView extends View {
   async doubleClickNode(name: string) {
     await this.viewLocator.getByText(name).dblclick();
   }
+
+  async selectInContextMenuOfNode(name: string, ...menuPath: Array<string>) {
+    await this.viewLocator.getByText(name).click({ button: 'right' });
+    for (const menuEntry of menuPath) {
+      const menuItem = this.page.getByRole('menuitem', { name: menuEntry });
+      await menuItem.click();
+    }
+  }
 }
 
 export class FileExplorer extends ExplorerView {
