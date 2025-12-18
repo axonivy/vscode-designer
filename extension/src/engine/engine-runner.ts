@@ -29,7 +29,7 @@ export class EngineRunner {
     });
   }
 
-  private async launchEngineChildProcess(): Promise<ChildProcess> {
+  private async launchEngineChildProcess() {
     const executable = Os.platform() === 'win32' ? 'AxonIvyEngineC.exe' : 'AxonIvyEngine';
     const resolvedEngineDir = await this.engineDir;
     if (!resolvedEngineDir) {

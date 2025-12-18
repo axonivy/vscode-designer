@@ -15,7 +15,7 @@ export const addNewProject = async (selection: TreeSelection) => {
 
   const input = await collectNewProjectParams(selectedUri);
   if (input) {
-    IvyEngineManager.instance.createProject(input);
+    await IvyEngineManager.instance.createProject(input);
   }
 };
 
