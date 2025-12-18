@@ -3,8 +3,8 @@ import { Messenger, type VsCodeApi } from 'vscode-messenger-webview';
 
 const Context = createContext<Messenger | undefined>(undefined);
 
-export const VscodeMessengerProvider = ({ children }: { children: ReactNode }) => {
-  return <Context.Provider value={getMessenger()}>{children}</Context.Provider>;
+export const VscodeMessengerProvider = ({ children, messenger }: { children: ReactNode; messenger: Messenger }) => {
+  return <Context.Provider value={messenger}>{children}</Context.Provider>;
 };
 
 export const useMessenger = () => {
@@ -17,7 +17,7 @@ export const useMessenger = () => {
 
 declare function acquireVsCodeApi(): VsCodeApi;
 
-const getMessenger = () => {
+export const getMessenger = () => {
   let vscodeApi: VsCodeApi;
   try {
     vscodeApi = acquireVsCodeApi();

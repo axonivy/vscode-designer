@@ -1,8 +1,12 @@
 .welcome-page-link {
-  width: fit-content;
-  color: var(--P300);
+  height: 60px;
+  background-color: var(--N50);
+  border: var(--basic-border);
+  justify-content: start;
+  border-radius: 1em;
 }
 
-.welcome-page-link:hover {
-  background-color: transparent;
+.welcome-page-link i {
+  color: var(--P75);
+  font-size: 25px;
 }
