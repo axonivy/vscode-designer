@@ -18,21 +18,30 @@ const defaultNamespaceOf = (projecDir: string) => {
   );
 };
 
-export const resolveNamespaceFromPath = async (
-  selectedUri: vscode.Uri,
-  projectDir: string,
-  target: 'processes' | 'src_hd' | 'dataclasses'
-) => {
-  const fileStat = await vscode.workspace.fs.stat(selectedUri);
+type ResourceDirectoryTarget = 'processes' | 'src_hd' | 'dataclasses';
+
+export const resolveNamespaceFromPath = async (selectedUri: vscode.Uri, projectDir: string, target: ResourceDirectoryTarget) => {
+  let fileStat: vscode.FileStat;
+  try {
+    fileStat = await vscode.workspace.fs.stat(selectedUri);
+  } catch {
+    return resolveDefaultNamespace(projectDir, target);
+  }
+
   const selectedPath = fileStat.type === vscode.FileType.File ? path.dirname(selectedUri.path) : selectedUri.path;
   const targetDir = path.join(projectDir, target);
-  if (selectedPath.includes(targetDir)) {
-    const pattern = target === 'processes' ? /(^\/*|\/*$)/g : /(^\.*|\.*$)/g;
-    return selectedPath
-      .replaceAll(targetDir, '')
-      .replaceAll(path.sep, target === 'processes' ? '/' : '.')
-      .replaceAll(pattern, '');
+  if (!selectedPath.includes(targetDir)) {
+    return resolveDefaultNamespace(projectDir, target);
   }
+
+  const pattern = target === 'processes' ? /(^\/*|\/*$)/g : /(^\.*|\.*$)/g;
+  return selectedPath
+    .replaceAll(targetDir, '')
+    .replaceAll(path.sep, target === 'processes' ? '/' : '.')
+    .replaceAll(pattern, '');
+};
+
+const resolveDefaultNamespace = async (projectDir: string, target: ResourceDirectoryTarget) => {
   const defaultNamespace = await defaultNamespaceOf(projectDir);
   return target === 'processes' ? defaultNamespace.replaceAll('.', '/') : defaultNamespace;
 };
