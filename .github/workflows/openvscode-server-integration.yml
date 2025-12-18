@@ -41,7 +41,7 @@ jobs:
           pnpm install --no-frozen-lockfile
           pnpm run build:production
           pnpm --dir playwright exec playwright install --with-deps chromium
-          pnpm run engine:download https://dev.axonivy.com/permalink/dev/axonivy-engine.zip
+          pnpm run engine:download https://dev.axonivy.com/permalink/nightly-13.2/axonivy-engine.zip
           rm -r AxonIvyEngine/system/demo-applications
           wget -O openvsc.tar.gz https://github.com/gitpod-io/openvscode-server/releases/download/openvscode-server-$OPEN_VSCODE_VERSION/openvscode-server-$OPEN_VSCODE_VERSION-linux-x64.tar.gz
           tar -xzf openvsc.tar.gz --strip-components=1 --one-top-level=openvsc

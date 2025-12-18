@@ -3,7 +3,7 @@ import { config } from '../base/configurations';
 import { extensionVersion } from '../version/extension-version';
 import { ReleaseTrainValidator } from './release-train-validator';
 
-export const PREVIEW_TRAINS = ['nightly', 'dev', 'sprint'];
+export const PREVIEW_TRAINS = ['nightly-13.2'];
 export const stableTrains = (major: number) => [`${major}`, `nightly-${major}`];
 
 export const engineReleaseTrain = () => {
@@ -11,7 +11,7 @@ export const engineReleaseTrain = () => {
   if (train) {
     return train;
   }
-  return extensionVersion.isPreview ? 'nightly' : `${extensionVersion.major}.${extensionVersion.minor}`;
+  return extensionVersion.isPreview ? 'nightly-13.2' : `${extensionVersion.major}.${extensionVersion.minor}`;
 };
 
 export const engineDirFromGlobalState = (contentx: vscode.ExtensionContext, releaseTrain: string) => {
