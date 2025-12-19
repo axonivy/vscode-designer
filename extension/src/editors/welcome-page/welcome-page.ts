@@ -29,7 +29,7 @@ export const showWelcomePage = async (context: vscode.ExtensionContext) => {
     return;
   }
 
-  const panel = vscode.window.createWebviewPanel('ivy.welcomePage', 'Axon Ivy Pro Designer', vscode.ViewColumn.One, {
+  const panel = vscode.window.createWebviewPanel('ivy.welcomePage', 'Axon Ivy PRO Designer', vscode.ViewColumn.One, {
     enableScripts: true,
     retainContextWhenHidden: true
   });
