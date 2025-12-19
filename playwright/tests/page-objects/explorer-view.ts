@@ -19,10 +19,6 @@ export abstract class ExplorerView extends View {
     await expect(this.tabLocator).toBeHidden();
   }
 
-  async focus() {
-    throw new Error('Method not implemented.');
-  }
-
   async openView() {
     if (!(await this.page.locator(`${this.data.tabSelector}.expanded`).isVisible())) {
       await this.tabLocator.click();
@@ -73,10 +69,6 @@ export abstract class ExplorerView extends View {
 export class FileExplorer extends ExplorerView {
   constructor(page: Page) {
     super('Explorer', page);
-  }
-
-  override async focus() {
-    await this.executeCommand('File: Focus on Files Explorer');
   }
 
   async addFolder(name: string) {
@@ -130,9 +122,5 @@ export class FileExplorer extends ExplorerView {
 export class ProjectExplorerView extends ExplorerView {
   constructor(page: Page) {
     super('Axon Ivy Projects', page);
-  }
-
-  override async focus() {
-    await this.executeCommand('Axon Ivy Designer: Focus on Axon Ivy Projects View');
   }
 }
