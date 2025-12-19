@@ -13,7 +13,7 @@ export class PageObject {
       await this.page.locator(`.quick-input-list-entry:has-text("${command}")`).nth(0).click({ force: true, timeout: 100 });
     }).toPass();
     for (const userInput of userInputs) {
-      this.provideUserInput(userInput);
+      await this.provideUserInput(userInput);
     }
   }
 
