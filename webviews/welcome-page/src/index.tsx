@@ -2,7 +2,6 @@ import { ThemeProvider } from '@axonivy/ui-components';
 import '@axonivy/vscode-webview-common/css/colors.css';
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
-
 import type { NotificationType } from 'vscode-messenger-common';
 import { WelcomePage } from './components/WelcomePage';
 import { initTranslation } from './i18n';
