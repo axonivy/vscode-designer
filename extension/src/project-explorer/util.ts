@@ -27,8 +27,7 @@ export const resolveNamespaceFromPath = async (selectedUri: vscode.Uri, projectD
   } catch {
     return resolveDefaultNamespace(projectDir, target);
   }
-
-  const selectedPath = fileStat.type === vscode.FileType.File ? path.dirname(selectedUri.path) : selectedUri.path;
+  const selectedPath = fileStat.type === vscode.FileType.File ? getDirectory(selectedUri.path, target) : selectedUri.path;
   const targetDir = path.join(projectDir, target);
   if (!selectedPath.includes(targetDir)) {
     return resolveDefaultNamespace(projectDir, target);
@@ -39,6 +38,14 @@ export const resolveNamespaceFromPath = async (selectedUri: vscode.Uri, projectD
     .replaceAll(targetDir, '')
     .replaceAll(path.sep, target === 'processes' ? '/' : '.')
     .replaceAll(pattern, '');
+};
+
+const getDirectory = (filePath: string, target: ResourceDirectoryTarget) => {
+  let directory = path.dirname(filePath);
+  if (target === 'src_hd') {
+    directory = path.dirname(directory);
+  }
+  return directory;
 };
 
 const resolveDefaultNamespace = async (projectDir: string, target: ResourceDirectoryTarget) => {
