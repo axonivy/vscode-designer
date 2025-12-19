@@ -49,4 +49,11 @@ export class View extends PageObject {
   async isNotDirty() {
     await expect(this.tabLocator).not.toHaveClass(/dirty/);
   }
+
+  async hasBreadCrumbs(...breadCrumbs: Array<string>) {
+    const breadCrumbsLocator = this.page.locator('div.breadcrumbs-below-tabs').getByRole('listitem');
+    for (let i = 0; i < breadCrumbs.length; i++) {
+      await expect(breadCrumbsLocator.nth(i)).toHaveText(breadCrumbs[i]!);
+    }
+  }
 }

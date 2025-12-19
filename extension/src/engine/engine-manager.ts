@@ -200,7 +200,14 @@ export class IvyEngineManager {
     const path = newProjectParams.path;
     this.ivyEngineApi
       ?.createProject(newProjectParams)
-      .then(() => this.createAndOpenProcess({ name: 'BusinessProcess', kind: 'Business Process', path, namespace: '' }))
+      .then(() =>
+        this.createAndOpenProcess({
+          name: 'BusinessProcess',
+          kind: 'Business Process',
+          path,
+          namespace: newProjectParams.defaultNamespace.replaceAll('.', '/')
+        })
+      )
       .then(() => setStatusBarMessage('Finished: Create new Project'));
   }
 
