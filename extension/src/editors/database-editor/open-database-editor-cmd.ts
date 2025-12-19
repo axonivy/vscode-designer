@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { messenger } from '../..';
 import { registerCommand } from '../../base/commands';
+import { getIvyProject } from '../../base/ivyProjectSelection';
 import { logErrorMessage } from '../../base/logging-util';
 import { IvyProjectExplorer } from '../../project-explorer/ivy-project-explorer';
 import { TreeSelection, treeSelectionToUri, treeUriToProjectPath } from '../../project-explorer/tree-selection';
@@ -11,7 +12,11 @@ export const registerOpenDatabaseEditorCmd = (context: vscode.ExtensionContext, 
   registerCommand('ivyBrowserView.openDatabaseEditor', context, async (selection: TreeSelection) => {
     let projectPath: string | undefined;
     try {
-      const uri = await treeSelectionToUri(selection);
+      const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(IvyProjectExplorer.instance));
+      if (!uri) {
+        logErrorMessage('Open Database Editor: no valid Axon Ivy Project selected.');
+        return;
+      }
       projectPath = await treeUriToProjectPath(uri, IvyProjectExplorer.instance.getIvyProjects());
     } catch (error) {
       showError(error instanceof Error ? error.message : String(error));
