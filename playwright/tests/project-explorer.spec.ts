@@ -8,7 +8,7 @@ test.describe('Project Explorer', () => {
   test.use({ workspace: multiProjectWorkspacePath });
   test('Projects are visible', async ({ page }) => {
     const explorer = new ProjectExplorerView(page);
-    await explorer.focus();
+    await explorer.openView();
 
     await explorer.hasNode('ivy-project-1');
     await explorer.hasNode('ivy-project-2');
@@ -22,7 +22,7 @@ test.describe('CMS entry', () => {
   test('Open', async ({ page }) => {
     const explorer = new ProjectExplorerView(page);
     await explorer.hasDeployProjectStatusMessage();
-    await explorer.focus();
+    await explorer.openView();
 
     await explorer.selectNode('playwrightTestWorkspace');
     await explorer.selectNode('cms');
@@ -39,20 +39,20 @@ test.describe('CMS entry', () => {
     await editor.executeCommand('Axon Ivy: Open CMS Editor');
     await editor.isViewVisible();
 
-    await projectExplorer.focus();
+    await projectExplorer.openView();
     await projectExplorer.isSelected('cms');
 
     await projectExplorer.selectNode('playwrightTestWorkspace');
     await projectExplorer.hasNoNode('cms');
-    await fileExplorer.focus();
-    await projectExplorer.focus();
+    await projectExplorer.closeView();
+    await projectExplorer.openView();
     await projectExplorer.isSelected('cms');
 
     await projectExplorer.selectNode('playwrightTestWorkspace');
     await projectExplorer.hasNoNode('cms');
-    await fileExplorer.focus();
+    await projectExplorer.closeView();
     await fileExplorer.doubleClickNode('pom.xml');
-    await projectExplorer.focus();
+    await projectExplorer.openView();
     await editor.isInactive();
     await projectExplorer.hasNoNode('cms');
     await editor.tabLocator.click();
@@ -64,7 +64,7 @@ test.describe('CMS entry', () => {
     test('New Resource', async ({ page }) => {
       const explorer = new ProjectExplorerView(page);
       await explorer.hasDeployProjectStatusMessage();
-      await explorer.focus();
+      await explorer.openView();
       await explorer.selectNode('playwrightTestWorkspace');
       await explorer.selectInContextMenuOfNode('cms', 'New', 'New Business Process');
       await explorer.provideUserInput('TestProcess');
