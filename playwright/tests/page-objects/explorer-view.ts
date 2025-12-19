@@ -3,10 +3,7 @@ import path from 'path';
 import { View, type ViewData } from './view';
 
 export abstract class ExplorerView extends View {
-  constructor(
-    private viewName: string,
-    page: Page
-  ) {
+  constructor(private viewName: string, page: Page) {
     const data: ViewData = {
       tabSelector: `div.pane-header:has-text("${viewName}")`,
       viewSelector: ''
@@ -100,8 +97,7 @@ export class FileExplorer extends ExplorerView {
   }
 
   async importBpmnProcess(bpmnXml: string) {
-    await this.executeCommand('Axon Ivy: Import BPMN Process');
-    await this.provideUserInput(bpmnXml);
+    await this.executeCommand('Axon Ivy: Import BPMN Process', bpmnXml);
   }
 
   async addUserDialog(dialogName: string, namespace: string, kind: 'Html Dialog (JSF)' | 'Offline Dialog (JSF)' | 'Dialog Form') {
