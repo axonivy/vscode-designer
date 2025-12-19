@@ -43,7 +43,7 @@ test('Reuse and reveal existing panel', async ({ page }) => {
   await explorer.doubleClickNode('pom.xml');
   await editor.isInactive();
   const projectExplorer = new ProjectExplorerView(page);
-  await projectExplorer.focus();
+  await projectExplorer.openView();
   await projectExplorer.selectNode('playwrightTestWorkspace');
   await projectExplorer.selectNode('cms');
   await editor.isViewVisible();
