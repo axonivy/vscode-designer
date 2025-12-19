@@ -1,4 +1,4 @@
-import { test } from './fixtures/baseTest';
+import { expect, test } from './fixtures/baseTest';
 import { FileExplorer } from './page-objects/explorer-view';
 import { ProcessEditor } from './page-objects/process-editor';
 
@@ -10,6 +10,8 @@ test('Import BPMN Process', async ({ page }) => {
 
   await explorer.selectNode('resources');
   await explorer.selectNode('all_elements_diagram.bpmn');
+  await expect(processEditor.editorContent()).toContainText('<bpmn:category id=');
   await explorer.importBpmnProcess('resources/all_elements_diagram.bpmn');
+  await explorer.executeCommand('Refresh Explorer');
   await explorer.hasNode(`all_elements_diagram.p.json`);
 });
