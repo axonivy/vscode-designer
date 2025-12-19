@@ -2,8 +2,7 @@ import { expect } from '@playwright/test';
 import { test } from './fixtures/baseTest';
 import { BrowserView } from './page-objects/browser-view';
 import { CmsEditor } from './page-objects/cms-editor';
-import { FileExplorer } from './page-objects/explorer-view';
-import { IvyViewContainer } from './page-objects/view-container';
+import { FileExplorer, ProjectExplorerView } from './page-objects/explorer-view';
 
 test('Open by command', async ({ page }) => {
   const editor = new CmsEditor(page);
@@ -43,9 +42,8 @@ test('Reuse and reveal existing panel', async ({ page }) => {
 
   await explorer.doubleClickNode('pom.xml');
   await editor.isInactive();
-  const ivyViewContainer = new IvyViewContainer(page);
-  await ivyViewContainer.openViewContainer();
-  const projectExplorer = ivyViewContainer.projectExplorer;
+  const projectExplorer = new ProjectExplorerView(page);
+  await projectExplorer.focus();
   await projectExplorer.selectNode('playwrightTestWorkspace');
   await projectExplorer.selectNode('cms');
   await editor.isViewVisible();
