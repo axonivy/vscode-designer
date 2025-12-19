@@ -1,15 +1,14 @@
 import { test } from './fixtures/baseTest';
 import { CmsEditor } from './page-objects/cms-editor';
+import { FileExplorer, ProjectExplorerView } from './page-objects/explorer-view';
 import { ProcessEditor } from './page-objects/process-editor';
-import { ExplorerViewContainer, IvyViewContainer } from './page-objects/view-container';
 import { minimalProjectWorkspacePath, multiProjectWorkspacePath } from './workspaces/workspace';
 
 test.describe('Project Explorer', () => {
   test.use({ workspace: multiProjectWorkspacePath });
   test('Projects are visible', async ({ page }) => {
-    const viewContainer = new IvyViewContainer(page);
-    await viewContainer.openViewContainer();
-    const explorer = viewContainer.projectExplorer;
+    const explorer = new ProjectExplorerView(page);
+    await explorer.focus();
 
     await explorer.hasNode('ivy-project-1');
     await explorer.hasNode('ivy-project-2');
@@ -21,10 +20,9 @@ test.describe('Project Explorer', () => {
 
 test.describe('CMS entry', () => {
   test('Open', async ({ page }) => {
-    const viewContainer = new IvyViewContainer(page);
-    await viewContainer.hasDeployProjectStatusMessage();
-    await viewContainer.openViewContainer();
-    const explorer = viewContainer.projectExplorer;
+    const explorer = new ProjectExplorerView(page);
+    await explorer.hasDeployProjectStatusMessage();
+    await explorer.focus();
 
     await explorer.selectNode('playwrightTestWorkspace');
     await explorer.selectNode('cms');
@@ -33,41 +31,40 @@ test.describe('CMS entry', () => {
 
   test('Reveal and select when CMS Editor tab is active', async ({ page }) => {
     const editor = new CmsEditor(page);
-    const explorerViewContainer = new ExplorerViewContainer(page);
-    const ivyViewContainer = new IvyViewContainer(page);
+    const fileExplorer = new FileExplorer(page);
+    const projectExplorer = new ProjectExplorerView(page);
 
     await editor.hasDeployProjectStatusMessage();
-    await explorerViewContainer.fileExplorer.selectNode('cms');
+    await fileExplorer.selectNode('cms');
     await editor.executeCommand('Axon Ivy: Open CMS Editor');
     await editor.isViewVisible();
 
-    await ivyViewContainer.openViewContainer();
-    await ivyViewContainer.projectExplorer.isSelected('cms');
+    await projectExplorer.focus();
+    await projectExplorer.isSelected('cms');
 
-    await ivyViewContainer.projectExplorer.selectNode('playwrightTestWorkspace');
-    await ivyViewContainer.projectExplorer.hasNoNode('cms');
-    await explorerViewContainer.openViewContainer();
-    await ivyViewContainer.openViewContainer();
-    await ivyViewContainer.projectExplorer.isSelected('cms');
+    await projectExplorer.selectNode('playwrightTestWorkspace');
+    await projectExplorer.hasNoNode('cms');
+    await fileExplorer.focus();
+    await projectExplorer.focus();
+    await projectExplorer.isSelected('cms');
 
-    await ivyViewContainer.projectExplorer.selectNode('playwrightTestWorkspace');
-    await ivyViewContainer.projectExplorer.hasNoNode('cms');
-    await explorerViewContainer.openViewContainer();
-    await explorerViewContainer.fileExplorer.doubleClickNode('pom.xml');
-    await ivyViewContainer.openViewContainer();
+    await projectExplorer.selectNode('playwrightTestWorkspace');
+    await projectExplorer.hasNoNode('cms');
+    await fileExplorer.focus();
+    await fileExplorer.doubleClickNode('pom.xml');
+    await projectExplorer.focus();
     await editor.isInactive();
-    await ivyViewContainer.projectExplorer.hasNoNode('cms');
+    await projectExplorer.hasNoNode('cms');
     await editor.tabLocator.click();
-    await ivyViewContainer.projectExplorer.isSelected('cms');
+    await projectExplorer.isSelected('cms');
   });
 
   test.describe('Context menu', () => {
     test.use({ workspace: minimalProjectWorkspacePath });
     test('New Resource', async ({ page }) => {
-      const viewContainer = new IvyViewContainer(page);
-      await viewContainer.hasDeployProjectStatusMessage();
-      await viewContainer.openViewContainer();
-      const explorer = viewContainer.projectExplorer;
+      const explorer = new ProjectExplorerView(page);
+      await explorer.hasDeployProjectStatusMessage();
+      await explorer.focus();
       await explorer.selectNode('playwrightTestWorkspace');
       await explorer.selectInContextMenuOfNode('cms', 'New', 'New Business Process');
       await explorer.provideUserInput('TestProcess');
