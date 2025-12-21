@@ -119,8 +119,8 @@ importers:
         specifier: 7.2.7
         version: 7.2.7(@types/node@24.10.3)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)
       vite-tsconfig-paths:
-        specifier: 5.1.4
-        version: 5.1.4(typescript@5.9.3)(vite@7.2.7(@types/node@24.10.3)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))
+        specifier: 6.0.3
+        version: 6.0.3(typescript@5.9.3)(vite@7.2.7(@types/node@24.10.3)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))
 
   extension:
     dependencies:
@@ -340,10 +340,10 @@ importers:
         version: 6.2.2(reflect-metadata@0.2.2)
       monaco-editor:
         specifier: npm:@codingame/monaco-vscode-editor-api
-        version: '@codingame/monaco-vscode-editor-api@23.3.0'
+        version: '@codingame/monaco-vscode-editor-api@24.2.0'
       vscode:
         specifier: npm:@codingame/monaco-vscode-extension-api
-        version: '@codingame/monaco-vscode-extension-api@23.3.0'
+        version: '@codingame/monaco-vscode-extension-api@24.2.0'
       vscode-messenger-common:
         specifier: 0.4.5
         version: 0.4.5
@@ -996,6 +996,9 @@ packages:
   '@codingame/monaco-vscode-editor-api@23.3.0':
     resolution: {integrity: sha512-v+awScYO8WMzGdgG1SYLyrZvDuPF9J63JErXBWWU0MSchGtFzXy0D7GzFe2MbmL6jmkL5A6Z+4b7T5/bBw36dg==}
 
+  '@codingame/monaco-vscode-editor-api@24.2.0':
+    resolution: {integrity: sha512-btwnwatbKuhxCyY6n9gBJkGcRGhZrJTzhoPnbW/fyC4O9yXX4WxwiAQzJdYpn/0YDlehcczgAWftXiCrMcCNYA==}
+
   '@codingame/monaco-vscode-editor-service-override@23.3.0':
     resolution: {integrity: sha512-+iJZY84od6j0DBvP99k7Ah7eUa+rtzcVlp4x3PwoUDGqjQaLLNameieNaaIA2WVZn8MSsAY5LoOykPem0CkOSg==}
 
@@ -1007,6 +1010,9 @@ packages:
 
   '@codingame/monaco-vscode-extension-api@23.3.0':
     resolution: {integrity: sha512-7BuGVdnae9g/gEY2L9CmEOzmxJH6Yiny/agt/mzDeRy+WFd6+4spo7Knlgxd9jALgHKJ1hcLuGo69IkYo4CCJA==}
+
+  '@codingame/monaco-vscode-extension-api@24.2.0':
+    resolution: {integrity: sha512-NiPXvGwIIQua4m3cUjL4JaGZms5lMCJqpHYSW5MbyHVdFKxE0Ns18ihk5sMuCj7lSuci24okWyklH+XZkiI1/g==}
 
   '@codingame/monaco-vscode-extensions-service-override@23.3.0':
     resolution: {integrity: sha512-ogresQw8Kd+us7tdIaEXg7xLxpkg6AePg7rrH502HSp0uE4cFyfD96iohEZLAlS6p1Np0EpzpOwZmKCyo6VMWw==}
@@ -6690,8 +6696,8 @@ packages:
     resolution: {integrity: sha512-Ck0EJbAGxHwprkzFO966t4/5QkRuzh+/I1RxhLgUKKwEn+Cd8NwM60mE3AqBZg5gYODoXW0EFsQvbZjRlvdqbg==}
     engines: {node: '>=4'}
 
-  vite-tsconfig-paths@5.1.4:
-    resolution: {integrity: sha512-cYj0LRuLV2c2sMqhqhGpaO3LretdtMn/BVX4cPLanIZuwwrkVl+lK84E/miEXkCHWXuq65rhNN4rXsBcOB3S4w==}
+  vite-tsconfig-paths@6.0.3:
+    resolution: {integrity: sha512-7bL7FPX/DSviaZGYUKowWF1AiDVWjMjxNbE8lyaVGDezkedWqfGhlnQ4BZXre0ZN5P4kAgIJfAlgFDVyjrCIyg==}
     peerDependencies:
       vite: '*'
     peerDependenciesMeta:
@@ -8017,6 +8023,10 @@ snapshots:
       '@codingame/monaco-vscode-5452e2b7-9081-5f95-839b-4ab3544ce28f-common': 23.3.0
       '@codingame/monaco-vscode-api': 23.3.0
 
+  '@codingame/monaco-vscode-editor-api@24.2.0':
+    dependencies:
+      '@codingame/monaco-vscode-api': 23.3.0
+
   '@codingame/monaco-vscode-editor-service-override@23.3.0':
     dependencies:
       '@codingame/monaco-vscode-7aa7b0aa-41af-57b3-860a-86d2f987a6c8-common': 23.3.0
@@ -8038,6 +8048,11 @@ snapshots:
     dependencies:
       '@codingame/monaco-vscode-4a3ac544-9a61-534c-88df-756262793ef7-common': 23.3.0
       '@codingame/monaco-vscode-4bf376c2-03c7-58cb-8303-c67aeefa3d3d-common': 23.3.0
+      '@codingame/monaco-vscode-api': 23.3.0
+      '@codingame/monaco-vscode-extensions-service-override': 23.3.0
+
+  '@codingame/monaco-vscode-extension-api@24.2.0':
+    dependencies:
       '@codingame/monaco-vscode-api': 23.3.0
       '@codingame/monaco-vscode-extensions-service-override': 23.3.0
 
@@ -15049,7 +15064,7 @@ snapshots:
 
   version-range@4.15.0: {}
 
-  vite-tsconfig-paths@5.1.4(typescript@5.9.3)(vite@7.2.7(@types/node@24.10.3)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)):
+  vite-tsconfig-paths@6.0.3(typescript@5.9.3)(vite@7.2.7(@types/node@24.10.3)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)):
     dependencies:
       debug: 4.4.3
       globrex: 0.1.2
