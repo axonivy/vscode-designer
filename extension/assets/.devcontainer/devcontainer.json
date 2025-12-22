@@ -9,12 +9,12 @@
       "jdkDistro": "tem"
     },
     "ghcr.io/axonivy/devcontainer-features/engine:1": {
-      "downloadUrl": "https://dev.axonivy.com/permalink/nightly-13.2/axonivy-engine-slim.zip"
+      "downloadUrl": "https://dev.axonivy.com/permalink/13.2/axonivy-engine-slim.zip"
     }
   },
   "customizations": {
     "vscode": {
-      "extensions": ["axonivy.vscode-designer-13@prerelease"],
+      "extensions": ["axonivy.vscode-designer-13"],
       "settings": {
         "axonivy.engine.releaseTrain": "/usr/lib/axonivy-engine"
       }

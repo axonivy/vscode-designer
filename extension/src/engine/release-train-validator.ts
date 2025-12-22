@@ -77,7 +77,7 @@ export class ReleaseTrainValidator {
     if (this.extensionVersion.isPreview) {
       return PREVIEW_TRAINS.includes(train);
     }
-    if (stableTrains(this.extensionVersion.major).includes(train)) {
+    if (stableTrains(this.extensionVersion).includes(train)) {
       return true;
     }
     if (new RegExp(`^${this.extensionVersion.major}\\.${this.extensionVersion.minor}\\.(\\d+)$`).test(train)) {
