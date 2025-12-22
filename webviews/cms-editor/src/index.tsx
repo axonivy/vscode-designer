@@ -1,6 +1,6 @@
 import { ClientContextProvider, ClientJsonRpc, CmsEditor, initQueryClient, QueryProvider } from '@axonivy/cms-editor';
 import '@axonivy/cms-editor/lib/editor.css';
-import { ThemeProvider } from '@axonivy/ui-components';
+import { HotkeysProvider, ThemeProvider } from '@axonivy/ui-components';
 import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
 import '@axonivy/vscode-webview-common/css/colors.css';
 import * as React from 'react';
@@ -27,7 +27,9 @@ export async function start({ file }: InitializeConnection) {
       <ThemeProvider disabled={true}>
         <ClientContextProvider client={client}>
           <QueryProvider client={queryClient}>
-            <CmsEditor context={context} initializePromise={initializePromise} />
+            <HotkeysProvider initiallyActiveScopes={['global']}>
+              <CmsEditor context={context} initializePromise={initializePromise} />
+            </HotkeysProvider>
           </QueryProvider>
         </ClientContextProvider>
       </ThemeProvider>

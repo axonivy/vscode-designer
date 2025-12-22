@@ -1,6 +1,6 @@
 import { ClientContextProvider, ClientJsonRpc, DatabaseEditor, initQueryClient, QueryProvider } from '@axonivy/database-editor';
 import '@axonivy/database-editor/lib/editor.css';
-import { ThemeProvider } from '@axonivy/ui-components';
+import { HotkeysProvider, ThemeProvider } from '@axonivy/ui-components';
 import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
 import '@axonivy/vscode-webview-common/css/colors.css';
 import * as React from 'react';
@@ -30,7 +30,9 @@ export async function start({ file }: InitializeConnection) {
       <ThemeProvider disabled={true}>
         <ClientContextProvider client={client}>
           <QueryProvider client={queryClient}>
-            <DatabaseEditor context={{ app: '', projects: [projectName], file }} />
+            <HotkeysProvider initiallyActiveScopes={['global']}>
+              <DatabaseEditor context={{ app: '', projects: [projectName], file }} />
+            </HotkeysProvider>
           </QueryProvider>
         </ClientContextProvider>
       </ThemeProvider>
