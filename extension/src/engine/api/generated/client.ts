@@ -199,6 +199,7 @@ export interface MarketInstallResult {
 export interface ProductInstallParams {
   productJson: string;
   dependentProject?: ProjectIdentifier;
+  dependentProjectPath?: string;
 }
 
 export interface AggBean { [key: string]: unknown }

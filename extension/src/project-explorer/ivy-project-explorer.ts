@@ -6,6 +6,7 @@ import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
+import { importMarketProduct } from './import-market';
 import { importNewProcess } from './import-process';
 import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
 import { addNewDataClass } from './new-data-class';
@@ -62,6 +63,7 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.addCallableSubProcess`, (s: TreeSelection) => this.addProcess(s, 'Callable Sub Process'));
     registerCmd(`${VIEW_ID}.addWebServiceProcess`, (s: TreeSelection) => this.addProcess(s, 'Web Service Process'));
     registerCmd(`${VIEW_ID}.importBpmnProcess`, (s: TreeSelection) => this.importBpmnProcess(s));
+    registerCmd(`${VIEW_ID}.installMarketProduct`, (s: TreeSelection) => this.importMarketProduct(s));
 
     registerCmd(`${VIEW_ID}.addNewProject`, (s: TreeSelection) => addNewProject(s));
     registerCmd(`${VIEW_ID}.addNewHtmlDialog`, (s: TreeSelection, selections?: [TreeSelection], pid?: string) =>
@@ -150,6 +152,20 @@ export class IvyProjectExplorer {
       return;
     }
     logErrorMessage('Import BPMN Process: no valid Axon Ivy Project selected.');
+  }
+
+  public async importMarketProduct(selection: TreeSelection) {
+    const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
+    if (!uri) {
+      logErrorMessage('Import Market Product: no valid Axon Ivy Project selected.');
+      return;
+    }
+    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
+    if (projectPath) {
+      await importMarketProduct(projectPath);
+      return;
+    }
+    logErrorMessage('Import Market Product: no valid Axon Ivy Project selected.');
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {
