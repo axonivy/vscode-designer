@@ -1,4 +1,4 @@
-import { ThemeProvider } from '@axonivy/ui-components';
+import { HotkeysProvider, ThemeProvider } from '@axonivy/ui-components';
 import { ClientContextProvider, ClientJsonRpc, QueryProvider, VariableEditor, initQueryClient } from '@axonivy/variable-editor';
 import '@axonivy/variable-editor/lib/editor.css';
 import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
@@ -25,7 +25,9 @@ export async function start({ file }: InitializeConnection) {
       <ThemeProvider disabled={true}>
         <ClientContextProvider client={client}>
           <QueryProvider client={queryClient}>
-            <VariableEditor context={{ app: '', pmv: '', file }} />
+            <HotkeysProvider initiallyActiveScopes={['global']}>
+              <VariableEditor context={{ app: '', pmv: '', file }} />
+            </HotkeysProvider>
           </QueryProvider>
         </ClientContextProvider>
       </ThemeProvider>

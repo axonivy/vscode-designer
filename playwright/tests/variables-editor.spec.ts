@@ -26,3 +26,20 @@ test('Read, write and open help', async ({ page }) => {
   const helpLink = await browserView.input().inputValue();
   expect(helpLink).toMatch(/^https:\/\/developer\.axonivy\.com.*configuration\/variables\.html$/);
 });
+
+test('Not possible to open multiple dialogs using shortcut', async ({ page }) => {
+  const editor = new VariablesEditor(page);
+  await editor.hasDeployProjectStatusMessage();
+  await editor.openEditorFile();
+  await editor.isTabVisible();
+  await editor.isViewVisible();
+
+  await editor.page.keyboard.press('a');
+
+  const addDialog = editor.viewFrameLocator().getByRole('dialog', { name: 'Add Variable' });
+  await addDialog.focus();
+  await editor.page.keyboard.press('i');
+
+  await expect(addDialog).toBeVisible();
+  await expect(editor.viewFrameLocator().getByRole('dialog', { name: 'Import Variable' })).toBeHidden();
+});
