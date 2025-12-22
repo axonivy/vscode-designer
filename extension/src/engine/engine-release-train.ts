@@ -1,10 +1,13 @@
 import * as vscode from 'vscode';
 import { config } from '../base/configurations';
-import { extensionVersion } from '../version/extension-version';
+import { ExtensionVersion, extensionVersion } from '../version/extension-version';
 import { ReleaseTrainValidator } from './release-train-validator';
 
 export const PREVIEW_TRAINS = ['nightly-13.2'];
-export const stableTrains = (major: number) => [`${major}`, `nightly-${major}`];
+export const stableTrains = (version: ExtensionVersion) => [
+  `${version.major}.${version.minor}`,
+  `nightly-${version.major}.${version.minor}`
+];
 
 export const engineReleaseTrain = () => {
   const train = config.engineReleaseTrain();
@@ -26,7 +29,7 @@ export const switchEngineReleaseTrain = async (reason?: string) => {
   const currentTrain = config.engineReleaseTrain();
   const items = extensionVersion.isPreview
     ? PREVIEW_TRAINS.map(train => toItem(train, currentTrain))
-    : stableTrains(extensionVersion.major).map(train => toItem(train, currentTrain));
+    : stableTrains(extensionVersion).map(train => toItem(train, currentTrain));
   let selectedTrain = (
     await vscode.window.showQuickPick([...items, { label: 'Enter custom value' }], {
       ignoreFocusOut: true,

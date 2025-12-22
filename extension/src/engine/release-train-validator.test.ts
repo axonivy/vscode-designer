@@ -70,8 +70,8 @@ test('preview train', async () => {
 
 test('lts train', async () => {
   const customValidator = new ReleaseTrainValidator({ major: 14, minor: 0, patch: 10, isPreview: false });
-  expect((await customValidator.validate('nightly-14')).valid).toBeTruthy();
-  expect((await customValidator.validate('14')).valid).toBeTruthy();
+  expect((await customValidator.validate('nightly-14.0')).valid).toBeTruthy();
+  expect((await customValidator.validate('14.0')).valid).toBeTruthy();
   expect((await customValidator.validate('14.0.0')).valid).toBeTruthy();
   expect((await customValidator.validate('14.0.999')).valid).toBeTruthy();
 
@@ -79,11 +79,11 @@ test('lts train', async () => {
     valid: false,
     reason: "Invalid release train tag or engine directory '14.b'"
   });
-  expect((await customValidator.validate('14.0')).valid).toBeFalsy();
   expect((await customValidator.validate('14.0.0.')).valid).toBeFalsy();
+  expect((await customValidator.validate('14')).valid).toBeFalsy();
   expect((await customValidator.validate('14.1')).valid).toBeFalsy();
   expect((await customValidator.validate('14.')).valid).toBeFalsy();
-  expect((await customValidator.validate('nightly-14.0')).valid).toBeFalsy();
+  expect((await customValidator.validate('nightly-14')).valid).toBeFalsy();
   expect((await customValidator.validate('dev')).valid).toBeFalsy();
   expect((await customValidator.validate('nightly')).valid).toBeFalsy();
   expect((await customValidator.validate('sprint')).valid).toBeFalsy();
