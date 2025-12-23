@@ -21,6 +21,17 @@ const collectProductJson = async (projectDir: string): Promise<ProductInstallPar
   }
   const fileData = await vscode.workspace.fs.readFile(productInstaller[0]);
   const decoder = new TextDecoder('utf-8');
-  const productJson = decoder.decode(fileData);
+  let productJson = decoder.decode(fileData);
+
+  if (productJson.includes('${version}')) {
+    const userVersion = await vscode.window.showInputBox({
+      prompt: 'Enter a concrete version to use instead of dynamic ${version} in product.json',
+      placeHolder: '14.0.0-SNAPSHOT'
+    });
+    if (userVersion) {
+      productJson = productJson.replace(/\$\{version\}/g, userVersion);
+    }
+  }
+
   return { productJson, dependentProjectPath: projectDir };
 };
