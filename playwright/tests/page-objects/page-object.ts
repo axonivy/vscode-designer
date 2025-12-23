@@ -69,6 +69,10 @@ export class PageObject {
     return this.page.locator('div.quick-input-box');
   }
 
+  quickInputList(): Locator {
+    return this.page.locator('div.quick-input-list');
+  }
+
   async saveAllFiles() {
     const dirtyLocator = this.page.locator('div.dirty');
     if (await dirtyLocator.isHidden()) {
