@@ -6,7 +6,7 @@ import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { importMarketProduct } from './import-market';
+import { importMarketProduct } from '../market/import-market';
 import { importNewProcess } from './import-process';
 import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
 import { addNewDataClass } from './new-data-class';
