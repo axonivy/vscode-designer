@@ -10,6 +10,7 @@ import {
   DataClassInit,
   ImportProcessBody,
   NewProjectParams,
+  ProductInstallParams,
   buildProjects,
   convertProject,
   createDataClass,
@@ -21,6 +22,7 @@ import {
   deployProjects,
   findOrCreatePmv,
   importProcess,
+  installMarketProduct,
   projects,
   refreshProjectStatuses,
   stopBpmEngine
@@ -40,8 +42,10 @@ const options = { headers, paramsSerializer: { indexes: null } };
 export class IvyEngineApi {
   private readonly _devContextPath: Promise<string>;
   private readonly baseURL: Promise<string>;
+  private readonly engineURL: string;
 
   constructor(engineUrl: string) {
+    this.engineURL = new URL('api', engineUrl).toString();
     this._devContextPath = this.createWorkspace(engineUrl)
       .then(ws => ws.baseUrl)
       .catch(handleAxiosError);
@@ -112,6 +116,20 @@ export class IvyEngineApi {
     const baseURL = await this.baseURL;
     return vscode.window.withProgress(progressOptions('Import BPMN Process'), async () => {
       return importProcess(params, { baseURL, ...options })
+        .then(res => res.data)
+        .catch(handleAxiosError);
+    });
+  }
+
+  public async installMarketProduct(params: ProductInstallParams) {
+    const baseURL = this.engineURL;
+    const workspaces = vscode.workspace.workspaceFolders;
+    const workspace = workspaces?.at(0);
+    if (!workspaces || !workspace) {
+      throw new Error('No workspace available');
+    }
+    return vscode.window.withProgress(progressOptions('Import Market Product'), async () => {
+      return installMarketProduct(workspace.name.toLowerCase(), params, { baseURL, ...options })
         .then(res => res.data)
         .catch(handleAxiosError);
     });

@@ -19,7 +19,7 @@ import { NewUserDialogParams } from '../project-explorer/new-user-dialog';
 import { extensionVersion } from '../version/extension-version';
 import { RuntimeLogViewProvider } from '../views/runtimelog-view';
 import { IvyEngineApi } from './api/engine-api';
-import { DataClassInit, ImportProcessBody, NewProjectParams } from './api/generated/client';
+import { DataClassInit, ImportProcessBody, NewProjectParams, ProductInstallParams } from './api/generated/client';
 import { MavenBuilder } from './build/maven';
 import { IvyDiagnostics } from './diagnostics';
 import { EngineDownloader } from './engine-downloader';
@@ -183,6 +183,10 @@ export class IvyEngineManager {
 
   public async createProcessFromBpmn(input: ImportProcessBody) {
     await this.ivyEngineApi?.createProcessFromBpmn(input);
+  }
+
+  public async installMarketProduct(input: ProductInstallParams) {
+    await this.ivyEngineApi?.installMarketProduct(input);
   }
 
   public async createUserDialog(newUserDialogParams: NewUserDialogParams) {
