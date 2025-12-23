@@ -1,7 +1,7 @@
 {
   "name": "@axonivy/vscode-webview-process-editor",
   "private": true,
-  "version": "13.2.0",
+  "version": "13.2.1",
   "description": "VSCode extension webview for the Axon Ivy (GLSP-based) process editor",
   "license": "(EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0)",
   "keywords": [
@@ -20,20 +20,20 @@
     "@axonivy/process-editor-inscription": "~13.2.0-next.1939.cdead72e",
     "@axonivy/process-editor-inscription-view": "~13.2.0-next.1939.cdead72e",
     "@axonivy/process-editor-protocol": "~13.2.0-next.1939.cdead72e",
-    "@axonivy/vscode-webview-common": "workspace:~13.2.0-next",
+    "@axonivy/vscode-webview-common": "workspace:~13.2.1",
+    "@codingame/monaco-vscode-extension-api": "^23.1.1",
     "@eclipse-glsp/client": "2.5.0",
     "@eclipse-glsp/vscode-integration": "2.5.0",
     "@eclipse-glsp/vscode-integration-webview": "2.5.0",
     "inversify": "6.2.2",
-    "vscode-messenger-webview": "0.4.5",
-    "vscode-messenger-common": "0.4.5",
-    "@codingame/monaco-vscode-extension-api": "^23.1.1",
+    "monaco-editor": "npm:@codingame/monaco-vscode-editor-api",
     "vscode": "npm:@codingame/monaco-vscode-extension-api",
-    "monaco-editor": "npm:@codingame/monaco-vscode-editor-api"
+    "vscode-messenger-common": "0.4.5",
+    "vscode-messenger-webview": "0.4.5"
   },
   "devDependencies": {
-    "@vscode/codicons": "0.0.44",
     "@axonivy/monaco-vite-plugin": "~13.2.0-next.1939.cdead72e",
+    "@vscode/codicons": "0.0.44",
     "path-browserify": "1.0.1"
   },
   "type": "module",
