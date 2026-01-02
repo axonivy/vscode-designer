@@ -100,8 +100,13 @@ export class FileExplorer extends ExplorerView {
     await this.executeCommand('Axon Ivy: Import BPMN Process', bpmnXml);
   }
 
-  async installProduct(productJson: string) {
-    await this.executeCommand('Axon Ivy: Install Market Product', productJson);
+  async installLocalProduct(productJson: string) {
+    await this.executeCommand('Axon Ivy: Install Local Market Product', productJson);
+  }
+
+  async installProduct(productId: string) {
+    await this.executeCommand('Axon Ivy: Install Market Product');
+    await this.provideUserInput(productId);
   }
 
   async addUserDialog(dialogName: string, namespace: string, kind: 'Html Dialog (JSF)' | 'Offline Dialog (JSF)' | 'Dialog Form') {

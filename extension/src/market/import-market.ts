@@ -2,16 +2,17 @@ import * as vscode from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { ProductInstallParams } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
+import { fetchInstaller, Product, searchMarketProduct } from './market-client';
 import { MarketProduct, MavenProjectInstaller } from './market-product';
 
-export const importMarketProduct = async (projectDir: string) => {
-  const input = await collectProductJson(projectDir);
+export const importMarketProductFile = async (projectDir: string) => {
+  const input = await collectLocalProductJson(projectDir);
   if (input) {
     await IvyEngineManager.instance.installMarketProduct(input);
   }
 };
 
-const collectProductJson = async (projectDir: string): Promise<ProductInstallParams> => {
+const collectLocalProductJson = async (projectDir: string): Promise<ProductInstallParams> => {
   let productJson = await readProductJsonFromFile();
   productJson = await replaceDynamicVersion(productJson);
   productJson = await selectProjects(productJson);
@@ -31,6 +32,44 @@ async function readProductJsonFromFile() {
   const decoder = new TextDecoder('utf-8');
   const productJson = decoder.decode(fileData);
   return productJson;
+}
+
+export const importMarketProduct = async (projectDir: string) => {
+  const input = await searchProduct(projectDir);
+  if (input) {
+    await IvyEngineManager.instance.installMarketProduct(input);
+  }
+};
+
+const searchProduct = async (projectDir: string): Promise<ProductInstallParams> => {
+  const products = await searchMarketProduct();
+  const productId = await selectProduct(products);
+  if (!productId) {
+    return Promise.reject(new Error('No product selected'));
+  }
+  let productJson = await fetchInstaller(productId);
+  productJson = await replaceDynamicVersion(productJson);
+  productJson = await selectProjects(productJson);
+  return { productJson, dependentProjectPath: projectDir };
+};
+
+async function selectProduct(products: Product[]) {
+  const items = products.map(product => ({
+    label: product.name,
+    description: product.id,
+    detail: product.description,
+    iconPath: vscode.Uri.parse(product.logoUrl)
+  }));
+  const selected = await vscode.window.showQuickPick(items, {
+    placeHolder: 'Select a Product to install',
+    canPickMany: false,
+    matchOnDetail: true,
+    matchOnDescription: true
+  });
+  if (!selected || !selected.description) {
+    return '';
+  }
+  return selected.description;
 }
 
 async function replaceDynamicVersion(productJson: string) {

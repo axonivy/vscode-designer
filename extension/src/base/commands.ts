@@ -34,6 +34,7 @@ type ProjectViewCommand =
   | 'ivyProjects.addCallableSubProcess'
   | 'ivyProjects.addWebServiceProcess'
   | 'ivyProjects.importBpmnProcess'
+  | 'ivyProjects.installLocalMarketProduct'
   | 'ivyProjects.installMarketProduct'
   | 'ivyProjects.addNewProject'
   | 'ivyProjects.addNewHtmlDialog'
