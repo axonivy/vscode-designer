@@ -12,6 +12,13 @@ export const importMarketProduct = async (projectDir: string) => {
 };
 
 const collectProductJson = async (projectDir: string): Promise<ProductInstallParams> => {
+  let productJson = await readProductJsonFromFile();
+  productJson = await replaceDynamicVersion(productJson);
+  productJson = await selectProjects(productJson);
+  return { productJson, dependentProjectPath: projectDir };
+};
+
+async function readProductJsonFromFile() {
   const productInstaller = await vscode.window.showOpenDialog({
     canSelectMany: false,
     openLabel: 'Select a product.json file to Import'
@@ -22,13 +29,9 @@ const collectProductJson = async (projectDir: string): Promise<ProductInstallPar
   }
   const fileData = await vscode.workspace.fs.readFile(productInstaller[0]);
   const decoder = new TextDecoder('utf-8');
-  let productJson = decoder.decode(fileData);
-
-  productJson = await replaceDynamicVersion(productJson);
-  productJson = await selectProjects(productJson);
-
-  return { productJson, dependentProjectPath: projectDir };
-};
+  const productJson = decoder.decode(fileData);
+  return productJson;
+}
 
 async function replaceDynamicVersion(productJson: string) {
   if (productJson.includes('${version}')) {
