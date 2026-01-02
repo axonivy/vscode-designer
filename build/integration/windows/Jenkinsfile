@@ -53,7 +53,7 @@ pipeline {
       }
     }
 
-    stage('Protocol') {
+    stage('Protocol:OpenAPI') {
       when {
         expression { isReleasingBranch() }
       }
@@ -69,6 +69,35 @@ pipeline {
           }
           withChecks('Integration Protocol ESLint') {
             recordIssues enabledForFailure: true, publishAllIssues: true, aggregatingResults: true, tools: [esLint(id: 'latest', pattern: 'extension/**/eslint.xml')], qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+          }
+        }
+      }
+    }
+
+    stage('Protocol:Market') {
+      when {
+        expression { isReleasingBranch() }
+      }
+      steps {
+        script {
+          nodejs(nodeJSInstallationName: '24.11.0') {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+              def branchName = env.BRANCH_NAME.replace("/", "%252F")
+              bat 'pnpm install --no-frozen-lockfile'
+              bat 'pnpm run market:generate clean'
+              bat '''
+                set artifacts=https://jenkins.ivyteam.io/job/core_json-schema/job/'''+branchName+'''/lastSuccessfulBuild/artifact
+                set devSchema=%artifacts%/workspace/ch.ivyteam.ivy.market.schema/target/schema/market/*/product.json/*zip*/schema.zip
+                curl -o schema.zip %devSchema%'
+              '''
+              bat 'powershell -Command "Expand-Archive -Path schema.zip -DestinationPath . -Force"'
+              bat 'move 10.0.0\\product.json marketProduct.json'
+              bat 'pnpm run market:generate %cd%\\marketProduct.json'
+              bat 'pnpm run type && pnpm run lint:ci'
+            }
+            withChecks('Integration Protocol ESLint') {
+              recordIssues enabledForFailure: true, publishAllIssues: true, aggregatingResults: true, tools: [esLint(id: 'latest', pattern: 'packages/**/eslint.xml,integrations/**/eslint.xml')], qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+            }
           }
         }
       }
