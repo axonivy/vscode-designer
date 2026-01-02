@@ -15,6 +15,7 @@
     "openapi": "pnpm run openapi:download && pnpm run openapi:codegen",
     "openapi:download": "mvn clean validate",
     "openapi:codegen": "orval",
+    "market:generate": "pnpm run --filter vscode-designer-13 generate:market",
     "clean": "pnpm run -r clean",
     "lint": "eslint",
     "lint:ci": "eslint -o eslint.xml -f checkstyle",
