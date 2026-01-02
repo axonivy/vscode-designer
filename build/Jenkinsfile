@@ -25,6 +25,7 @@ pipeline {
           catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
             sh 'pnpm run update:axonivy:next'
             sh 'pnpm install --no-frozen-lockfile'
+            sh 'pnpm run generate:market'
             sh 'pnpm run build:production'
             sh 'pnpm run type'
             sh 'pnpm run lint:ci'
