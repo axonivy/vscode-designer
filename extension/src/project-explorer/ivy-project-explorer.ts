@@ -156,31 +156,23 @@ export class IvyProjectExplorer {
   }
 
   public async installLocalMarketProduct(selection: TreeSelection) {
+    await importMarketProductFile(() => this.resolveProject(selection));
+  }
+
+  private async resolveProject(selection: TreeSelection) {
     const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
     if (!uri) {
-      logErrorMessage('Install Local Market Product: no valid Axon Ivy Project selected.');
-      return;
+      throw new Error('No valid Axon Ivy Project selected.');
     }
     const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (projectPath) {
-      await importMarketProductFile(projectPath);
-      return;
+    if (!projectPath) {
+      throw new Error('No valid Axon Ivy Project selected.');
     }
-    logErrorMessage('Install Local Market Product: no valid Axon Ivy Project selected.');
+    return projectPath;
   }
 
   public async installMarketProduct(selection: TreeSelection) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
-    if (!uri) {
-      logErrorMessage('Install Market Product: no valid Axon Ivy Project selected.');
-      return;
-    }
-    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (projectPath) {
-      await importMarketProduct(projectPath);
-      return;
-    }
-    logErrorMessage('Install Market Product: no valid Axon Ivy Project selected.');
+    await importMarketProduct(() => this.resolveProject(selection));
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {

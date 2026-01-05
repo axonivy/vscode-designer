@@ -5,7 +5,7 @@ import { IvyEngineManager } from '../engine/engine-manager';
 import { availableVersions, fetchInstaller, Product, searchMarketProduct } from './market-client';
 import { MarketProduct, MavenProjectInstaller } from './market-product';
 
-export const importMarketProductFile = async (projectDir: string) => {
+export const importMarketProductFile = async (projectDir: () => Promise<string>) => {
   try {
     const input = await collectLocalProductJson(projectDir);
     await IvyEngineManager.instance.installMarketProduct(input);
@@ -14,12 +14,12 @@ export const importMarketProductFile = async (projectDir: string) => {
   }
 };
 
-const collectLocalProductJson = async (projectDir: string): Promise<ProductInstallParams> => {
+const collectLocalProductJson = async (projectDir: () => Promise<string>): Promise<ProductInstallParams> => {
   let productJson = await readProductJsonFromFile();
   productJson = await replaceDynamicVersion(productJson);
   const product = parseProduct(productJson);
   productJson = await selectProjects(product);
-  return { productJson, dependentProjectPath: projectDir };
+  return { productJson, dependentProjectPath: await projectDir() };
 };
 
 async function readProductJsonFromFile() {
@@ -36,7 +36,7 @@ async function readProductJsonFromFile() {
   return productJson;
 }
 
-export const importMarketProduct = async (projectDir: string) => {
+export const importMarketProduct = async (projectDir: () => Promise<string>) => {
   try {
     const input = await searchProduct(projectDir);
     await IvyEngineManager.instance.installMarketProduct(input);
@@ -45,7 +45,7 @@ export const importMarketProduct = async (projectDir: string) => {
   }
 };
 
-const searchProduct = async (projectDir: string): Promise<ProductInstallParams> => {
+const searchProduct = async (projectDir: () => Promise<string>): Promise<ProductInstallParams> => {
   const products = await searchMarketProduct();
   const productId = await selectProduct(products);
   const versions = await availableVersions(productId);
@@ -53,7 +53,7 @@ const searchProduct = async (projectDir: string): Promise<ProductInstallParams> 
   let productJson = await fetchInstaller(productId, version);
   const product = parseProduct(productJson);
   productJson = await selectProjects(product);
-  return { productJson, dependentProjectPath: projectDir };
+  return { productJson, dependentProjectPath: await projectDir() };
 };
 
 async function selectVersion(versions: string[]) {
