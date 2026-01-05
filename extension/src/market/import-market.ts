@@ -6,16 +6,19 @@ import { availableVersions, fetchInstaller, Product, searchMarketProduct } from 
 import { MarketProduct, MavenProjectInstaller } from './market-product';
 
 export const importMarketProductFile = async (projectDir: string) => {
-  const input = await collectLocalProductJson(projectDir);
-  if (input) {
+  try {
+    const input = await collectLocalProductJson(projectDir);
     await IvyEngineManager.instance.installMarketProduct(input);
+  } catch (err) {
+    logErrorMessage('Market installation failed: ' + (err instanceof Error ? err.message : err));
   }
 };
 
 const collectLocalProductJson = async (projectDir: string): Promise<ProductInstallParams> => {
   let productJson = await readProductJsonFromFile();
   productJson = await replaceDynamicVersion(productJson);
-  productJson = await selectProjects(productJson);
+  const product = parseProduct(productJson);
+  productJson = await selectProjects(product);
   return { productJson, dependentProjectPath: projectDir };
 };
 
@@ -25,8 +28,7 @@ async function readProductJsonFromFile() {
     openLabel: 'Select a product.json file to Import'
   });
   if (!productInstaller || productInstaller.length === 0 || !productInstaller[0]) {
-    logErrorMessage('Cannot pick product.json file.');
-    return Promise.reject(new Error('product.json file not selected'));
+    throw new Error('Cannot pick product.json file.');
   }
   const fileData = await vscode.workspace.fs.readFile(productInstaller[0]);
   const decoder = new TextDecoder('utf-8');
@@ -35,22 +37,22 @@ async function readProductJsonFromFile() {
 }
 
 export const importMarketProduct = async (projectDir: string) => {
-  const input = await searchProduct(projectDir);
-  if (input) {
+  try {
+    const input = await searchProduct(projectDir);
     await IvyEngineManager.instance.installMarketProduct(input);
+  } catch (err) {
+    logErrorMessage('Import from Market failed: ' + (err instanceof Error ? err.message : err));
   }
 };
 
 const searchProduct = async (projectDir: string): Promise<ProductInstallParams> => {
   const products = await searchMarketProduct();
   const productId = await selectProduct(products);
-  if (!productId) {
-    return Promise.reject(new Error('No product selected'));
-  }
   const versions = await availableVersions(productId);
   const version = await selectVersion(versions);
   let productJson = await fetchInstaller(productId, version);
-  productJson = await selectProjects(productJson);
+  const product = parseProduct(productJson);
+  productJson = await selectProjects(product);
   return { productJson, dependentProjectPath: projectDir };
 };
 
@@ -60,7 +62,7 @@ async function selectVersion(versions: string[]) {
     canPickMany: false
   });
   if (!selected) {
-    return '';
+    throw new Error('No version selected by user');
   }
   return selected;
 }
@@ -79,7 +81,7 @@ async function selectProduct(products: Product[]) {
     matchOnDescription: true
   });
   if (!selected || !selected.description) {
-    return '';
+    throw new Error('No product selected by user');
   }
   return selected.description;
 }
@@ -90,37 +92,47 @@ async function replaceDynamicVersion(productJson: string) {
       prompt: 'Enter a concrete version to use instead of dynamic ${version} in product.json',
       placeHolder: '14.0.0-SNAPSHOT'
     });
-    if (userVersion) {
-      productJson = productJson.replace(/\$\{version\}/g, userVersion);
+    if (!userVersion) {
+      throw new Error('No version provided for ${version}');
     }
+    productJson = productJson.replace(/\$\{version\}/g, userVersion);
   }
   return productJson;
 }
 
-async function selectProjects(productJson: string) {
+function parseProduct(productJson: string) {
+  let product: MarketProduct | undefined = undefined;
   try {
-    let product: MarketProduct | undefined = undefined;
     product = JSON.parse(productJson);
-    for (const installer of product?.installers ?? []) {
-      if (installer.id === 'maven-import') {
-        const data = installer.data as MavenProjectInstaller;
-        const projectItems = data.projects.map(project => ({
-          label: `${project.artifactId} (${project.groupId})`,
-          picked: typeof project.importInWorkspace !== 'boolean' ? true : project.importInWorkspace
-        }));
-        const selected = await vscode.window.showQuickPick(projectItems, {
-          canPickMany: true,
-          placeHolder: 'Select projects to import'
-        });
-        data.projects.forEach((project, idx) => {
-          const label = projectItems[idx]?.label ?? '';
-          project.importInWorkspace = Array.isArray(selected) && label !== '' && selected.some(item => item.label === label);
-        });
-      }
-    }
-    productJson = JSON.stringify(product);
   } catch (e) {
-    logErrorMessage('Failed to parse product.json as JSON: ' + (e instanceof Error ? e.message : e));
+    throw new Error('Failed to parse product.json as JSON: ' + (e instanceof Error ? e.message : e));
   }
-  return productJson;
+  if (product === undefined || product.installers === undefined) {
+    throw new Error('Invalid product.json: No installers found.');
+  }
+  return product;
+}
+
+async function selectProjects(product: MarketProduct) {
+  for (const installer of product?.installers ?? []) {
+    if (installer.id === 'maven-import') {
+      const data = installer.data as MavenProjectInstaller;
+      const projectItems = data.projects.map(project => ({
+        label: `${project.artifactId} (${project.groupId})`,
+        picked: typeof project.importInWorkspace !== 'boolean' ? true : project.importInWorkspace
+      }));
+      const selected = await vscode.window.showQuickPick(projectItems, {
+        canPickMany: true,
+        placeHolder: 'Select projects to import'
+      });
+      if (!selected) {
+        throw new Error('No projects selected by user');
+      }
+      data.projects.forEach((project, idx) => {
+        const label = projectItems[idx]?.label ?? '';
+        project.importInWorkspace = Array.isArray(selected) && label !== '' && selected.some(item => item.label === label);
+      });
+    }
+  }
+  return JSON.stringify(product);
 }
