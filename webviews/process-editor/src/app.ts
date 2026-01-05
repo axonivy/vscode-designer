@@ -16,6 +16,7 @@ import { MonacoEditorUtil } from '@axonivy/process-editor-inscription-view';
 import { type ContainerConfiguration, navigationModule } from '@eclipse-glsp/client';
 import { GLSPStarter } from '@eclipse-glsp/vscode-integration-webview';
 import { Container } from 'inversify';
+import { Worker } from 'monaco-languageclient/workerFactory';
 import type { NotificationType } from 'vscode-messenger-common';
 import { Messenger } from 'vscode-messenger-webview';
 import noopContextMenuServiceModule from './context-menu/di.config';
@@ -91,7 +92,7 @@ async function initMonaco(): Promise<unknown> {
     class BlobWorker extends Worker {
       constructor(name: string, url = URL.createObjectURL(blob)) {
         super(url, { name, type: 'module' });
-        this.addEventListener('error', () => URL.revokeObjectURL(url));
+        // this.addEventListener('error', () => URL.revokeObjectURL(url));
       }
     }
     return MonacoEditorUtil.configureMonaco({
