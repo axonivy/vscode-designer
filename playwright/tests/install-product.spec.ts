@@ -15,6 +15,7 @@ test.describe('Market Product installation', () => {
   test('Install product from Market website', async () => {
     await explorer.selectNode('resources');
     await explorer.installProduct('connectivity-demo');
+    await explorer.provideUserInput('14.0.0-SNAPSHOT');
     await explorer.provideUserInput('connectivity-demos');
     await explorer.executeCommand('Refresh Explorer');
     await explorer.selectNode('connectivity-demos');

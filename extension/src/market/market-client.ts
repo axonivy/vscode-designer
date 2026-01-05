@@ -30,29 +30,34 @@ export async function searchMarketProduct() {
   }
 }
 
-export async function fetchInstaller(productId: string) {
-  const detailUri = `${marketApi}/product-details/${productId}/json?designerVersion=14.0.0`;
-  return await fetch(detailUri)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`);
+export async function availableVersions(productId: string) {
+  const versionUri = `${marketApi}/product-details/${productId}/versions?isShowDevVersion=true&designerVersion=14.0.0`;
+  try {
+    const response = await fetch(versionUri);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`);
+    }
+    const json = await response.json();
+    if (Array.isArray(json)) {
+      return json.map((entry: { version: string }) => entry.version);
+    }
+  } catch (error) {
+    logErrorMessage('Error fetching product versions: ' + (error instanceof Error ? error.message : String(error)));
+  }
+  return [];
+}
+
+export async function fetchInstaller(productId: string, version: string) {
+  try {
+    const installUri = `${marketApi}/product-details/${productId}/${version}/json?designerVersion=14.0.0`;
+    return fetch(installUri).then(installer => {
+      if (!installer.ok) {
+        throw new Error(`Failed to fetch: ${installer.status} ${installer.statusText}`);
       }
-      return response.json();
-    })
-    .then(json => {
-      return json.newestReleaseVersion as string;
-    })
-    .then(version => {
-      const installUri = `${marketApi}/product-details/${productId}/${version}/json?designerVersion=14.0.0`;
-      return fetch(installUri).then(installer => {
-        if (!installer.ok) {
-          throw new Error(`Failed to fetch: ${installer.status} ${installer.statusText}`);
-        }
-        return installer.text();
-      });
-    })
-    .catch(error => {
-      logErrorMessage('Error fetching installer JSON: ' + (error instanceof Error ? error.message : String(error)));
-      return '';
+      return installer.text();
     });
+  } catch (error) {
+    logErrorMessage('Error fetching installer JSON: ' + (error instanceof Error ? error.message : String(error)));
+    return '';
+  }
 }

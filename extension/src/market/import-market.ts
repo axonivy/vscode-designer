@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { ProductInstallParams } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { fetchInstaller, Product, searchMarketProduct } from './market-client';
+import { availableVersions, fetchInstaller, Product, searchMarketProduct } from './market-client';
 import { MarketProduct, MavenProjectInstaller } from './market-product';
 
 export const importMarketProductFile = async (projectDir: string) => {
@@ -47,11 +47,23 @@ const searchProduct = async (projectDir: string): Promise<ProductInstallParams> 
   if (!productId) {
     return Promise.reject(new Error('No product selected'));
   }
-  let productJson = await fetchInstaller(productId);
-  productJson = await replaceDynamicVersion(productJson);
+  const versions = await availableVersions(productId);
+  const version = await selectVersion(versions);
+  let productJson = await fetchInstaller(productId, version);
   productJson = await selectProjects(productJson);
   return { productJson, dependentProjectPath: projectDir };
 };
+
+async function selectVersion(versions: string[]) {
+  const selected = await vscode.window.showQuickPick(versions, {
+    placeHolder: 'Select a version to install',
+    canPickMany: false
+  });
+  if (!selected) {
+    return '';
+  }
+  return selected;
+}
 
 async function selectProduct(products: Product[]) {
   const items = products.map(product => ({
