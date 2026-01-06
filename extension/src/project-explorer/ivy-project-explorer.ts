@@ -6,7 +6,7 @@ import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { importMarketProduct } from '../market/import-market';
+import { importMarketProduct, importMarketProductFile } from '../market/import-market';
 import { importNewProcess } from './import-process';
 import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
 import { addNewDataClass } from './new-data-class';
@@ -63,7 +63,8 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.addCallableSubProcess`, (s: TreeSelection) => this.addProcess(s, 'Callable Sub Process'));
     registerCmd(`${VIEW_ID}.addWebServiceProcess`, (s: TreeSelection) => this.addProcess(s, 'Web Service Process'));
     registerCmd(`${VIEW_ID}.importBpmnProcess`, (s: TreeSelection) => this.importBpmnProcess(s));
-    registerCmd(`${VIEW_ID}.installMarketProduct`, (s: TreeSelection) => this.importMarketProduct(s));
+    registerCmd(`${VIEW_ID}.installLocalMarketProduct`, (s: TreeSelection) => this.installLocalMarketProduct(s));
+    registerCmd(`${VIEW_ID}.installMarketProduct`, (s: TreeSelection) => this.installMarketProduct(s));
 
     registerCmd(`${VIEW_ID}.addNewProject`, (s: TreeSelection) => addNewProject(s));
     registerCmd(`${VIEW_ID}.addNewHtmlDialog`, (s: TreeSelection, selections?: [TreeSelection], pid?: string) =>
@@ -154,18 +155,24 @@ export class IvyProjectExplorer {
     logErrorMessage('Import BPMN Process: no valid Axon Ivy Project selected.');
   }
 
-  public async importMarketProduct(selection: TreeSelection) {
+  public async installLocalMarketProduct(selection: TreeSelection) {
+    await importMarketProductFile(() => this.resolveProject(selection));
+  }
+
+  private async resolveProject(selection: TreeSelection) {
     const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
     if (!uri) {
-      logErrorMessage('Import Market Product: no valid Axon Ivy Project selected.');
-      return;
+      throw new Error('No valid Axon Ivy Project selected.');
     }
     const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (projectPath) {
-      await importMarketProduct(projectPath);
-      return;
+    if (!projectPath) {
+      throw new Error('No valid Axon Ivy Project selected.');
     }
-    logErrorMessage('Import Market Product: no valid Axon Ivy Project selected.');
+    return projectPath;
+  }
+
+  public async installMarketProduct(selection: TreeSelection) {
+    await importMarketProduct(() => this.resolveProject(selection));
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {
