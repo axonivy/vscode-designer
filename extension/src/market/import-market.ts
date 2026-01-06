@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { ProductInstallParams } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
+import { MarketProduct, MavenProjectInstaller } from './generated/market-product';
 import { availableVersions, fetchInstaller, Product, searchMarketProduct } from './market-client';
-import { MarketProduct, MavenProjectInstaller } from './market-product';
 
 export const importMarketProductFile = async (projectDir: () => Promise<string>) => {
   try {
