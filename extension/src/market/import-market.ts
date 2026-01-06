@@ -89,7 +89,8 @@ async function selectProduct(products: Product[]) {
 async function replaceDynamicVersion(productJson: string) {
   if (productJson.includes('${version}')) {
     const userVersion = await vscode.window.showInputBox({
-      prompt: 'Enter a concrete version to use instead of dynamic ${version} in product.json',
+      title: 'Resolve dynamic ${version} in product.json',
+      prompt: 'Enter a Maven version, which you made locally available by running `mvn clean install` from your product workspace.',
       placeHolder: '14.0.0-SNAPSHOT'
     });
     if (!userVersion) {
