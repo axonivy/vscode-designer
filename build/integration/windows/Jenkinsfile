@@ -27,7 +27,7 @@ pipeline {
     stage('Cleanup globalStorage') {
       steps {
         script {
-          dir('C:\\Users\\locadmin\\AppData\\Roaming\\Code\\User\\globalStorage') {
+          dir("${env.USERPROFILE}\\AppData\\Roaming\\Code\\User\\globalStorage") {
             deleteDir()
           }
         }
