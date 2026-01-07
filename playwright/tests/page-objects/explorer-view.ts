@@ -73,7 +73,7 @@ export class FileExplorer extends ExplorerView {
 
   async addFolder(name: string) {
     await this.executeCommand('File: New Folder');
-    await this.typeText(name);
+    await this.page.locator('div.explorer-item-edited').getByRole('textbox').fill(name);
     await this.page.keyboard.press('Enter');
   }
 
