@@ -24,6 +24,16 @@ pipeline {
   }
 
   stages {
+    stage('Cleanup globalStorage') {
+      steps {
+        script {
+          dir("${env.USERPROFILE}\\AppData\\Roaming\\Code\\User\\globalStorage") {
+            deleteDir()
+          }
+        }
+      }
+    }
+
     stage('Build') {
       steps {
         nodejs(nodeJSInstallationName: '24.11.0') {
