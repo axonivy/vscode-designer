@@ -14,7 +14,7 @@ export interface Entry {
   command?: vscode.Command;
 }
 
-export const IVY_RPOJECT_FILE_PATTERN = '**/.project';
+export const IVY_RPOJECT_FILE_PATTERN = '**/.settings/ch.ivyteam.ivy.designer.prefs';
 const IVY_PROJECT_CONTEXT_VALUE = 'ivyProject';
 
 export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry> {
@@ -42,23 +42,11 @@ export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry
   }
 
   private async findIvyProjects(): Promise<string[]> {
-    const ivyProjectFiles = await vscode.workspace.findFiles(IVY_RPOJECT_FILE_PATTERN, this.excludePattern, this.maxResults);
-    const ivyProjectFilesWihtInclude = await Promise.all(
-      ivyProjectFiles.map(async uri => ({
-        uri: uri,
-        include: await this.containsIvyProjectNature(uri)
-      }))
-    );
-    return ivyProjectFilesWihtInclude
-      .filter(e => e.include)
-      .map(e => path.dirname(e.uri.fsPath))
+    return (await vscode.workspace.findFiles(IVY_RPOJECT_FILE_PATTERN, this.excludePattern, this.maxResults))
+      .map(u => u.fsPath)
+      .map(p => path.dirname(p))
+      .map(p => path.dirname(p))
       .sort();
-  }
-
-  private async containsIvyProjectNature(uri: vscode.Uri): Promise<boolean> {
-    const bytes = await vscode.workspace.fs.readFile(uri);
-    const content = Buffer.from(bytes).toString('utf8');
-    return content.includes('<nature>ch.ivyteam.ivy.project.IvyProjectNature</nature>');
   }
 
   async hasIvyProjects(): Promise<boolean> {
