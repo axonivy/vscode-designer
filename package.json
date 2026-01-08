@@ -13,7 +13,7 @@
     "build:production": "pnpm run -r build:production",
     "engine:download": "node --experimental-strip-types scripts/download-engine.mts",
     "openapi": "pnpm run openapi:download && pnpm run openapi:codegen",
-    "openapi:download": "mvn clean validate",
+    "openapi:download": "mvn clean validate && curl -o target/market/openapi.json https://market.axonivy.com/marketplace-service/api-docs/api --create-dirs",
     "openapi:codegen": "orval",
     "market:generate": "pnpm run --filter vscode-designer-13 generate:market",
     "clean": "pnpm run -r clean",
