@@ -7,10 +7,8 @@ export class DatabaseEditor extends Editor {
 
   constructor(page: Page, editorFile = 'databases.yaml') {
     super(editorFile, page);
-    this.toolbar = this.viewFrameLocator().locator('.database-editor-main-toolbar');
-    this.importButton = this.viewFrameLocator()
-      .getByRole('button')
-      .getByText(/.*Generate/g);
+    this.toolbar = this.viewFrameLocator().locator('.database-editor-toolbar');
+    this.importButton = this.viewFrameLocator().getByLabel('Generate');
   }
 
   override async isViewVisible() {
