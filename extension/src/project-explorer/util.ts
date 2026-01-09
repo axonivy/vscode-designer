@@ -1,18 +1,19 @@
+import { XMLParser } from 'fast-xml-parser';
 import path from 'path';
 import * as vscode from 'vscode';
 
-const namespaceKey = '\\:DEFAULT_NAMESPACE=';
-
 const defaultNamespaceOf = (projecDir: string) => {
-  const designerPrefs = vscode.Uri.joinPath(vscode.Uri.file(projecDir), '.settings', 'ch.ivyteam.ivy.designer.prefs');
+  const designerPrefs = vscode.Uri.joinPath(vscode.Uri.file(projecDir), 'pom.xml');
   return vscode.workspace.fs.readFile(designerPrefs).then(
     content => {
-      const nameSpaceLine =
-        content
-          .toString()
-          .split(/\r?\n/)
-          .find(e => e.includes(namespaceKey)) ?? '';
-      return nameSpaceLine.substring(nameSpaceLine.indexOf(namespaceKey) + namespaceKey.length);
+      const pom = new XMLParser().parse(content);
+      if (pom.project && pom.project.artifactId && pom.project.groupId) {
+        if ((pom.project.artifactId as string).toLocaleLowerCase() === (pom.project.groupId as string).toLocaleLowerCase()) {
+          return pom.project.artifactId;
+        }
+        return `${pom.project.groupId}.${pom.project.artifactId}`;
+      }
+      return '';
     },
     () => ''
   );
@@ -48,7 +49,7 @@ const getDirectory = (filePath: string, target: ResourceDirectoryTarget) => {
   return directory;
 };
 
-const resolveDefaultNamespace = async (projectDir: string, target: ResourceDirectoryTarget) => {
+export const resolveDefaultNamespace = async (projectDir: string, target: ResourceDirectoryTarget) => {
   const defaultNamespace = await defaultNamespaceOf(projectDir);
   return target === 'processes' ? defaultNamespace.replaceAll('.', '/') : defaultNamespace;
 };
