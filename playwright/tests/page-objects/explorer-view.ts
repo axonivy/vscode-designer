@@ -85,7 +85,6 @@ export class FileExplorer extends ExplorerView {
     await this.provideUserInput(projectName);
     await this.provideUserInput();
     await this.provideUserInput();
-    await this.provideUserInput();
     await this.hasNode(rootFolder + path.sep + projectName);
   }
 
