@@ -56,22 +56,5 @@ const collectNewProjectParams = async (selectedUri: vscode.Uri) => {
   if (!projectId) {
     return;
   }
-  const defaultNamespace = await vscode.window.showInputBox({
-    title: 'Default Namespace',
-    value: name === groupId && name === projectId ? name.replaceAll('-', '.') : `${groupId}.${projectId}`.replaceAll('-', '.'),
-    validateInput: validateNamespace,
-    ignoreFocusOut: true
-  });
-  if (!defaultNamespace) {
-    return;
-  }
-  return { path: projectPath, name, groupId, projectId, defaultNamespace };
-};
-
-const validateNamespace = (value: string) => {
-  const pattern = /^\w+(\.\w+)*$/;
-  if (pattern.test(value)) {
-    return;
-  }
-  return 'Invalid namespace.';
+  return { path: projectPath, name, groupId, projectId };
 };

@@ -16,6 +16,7 @@ import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { NewProcessParams } from '../project-explorer/new-process';
 import { NewUserDialogParams } from '../project-explorer/new-user-dialog';
+import { resolveDefaultNamespace } from '../project-explorer/util';
 import { extensionVersion } from '../version/extension-version';
 import { RuntimeLogViewProvider } from '../views/runtimelog-view';
 import { IvyEngineApi } from './api/engine-api';
@@ -204,12 +205,12 @@ export class IvyEngineManager {
     const path = newProjectParams.path;
     this.ivyEngineApi
       ?.createProject(newProjectParams)
-      .then(() =>
+      .then(async () =>
         this.createAndOpenProcess({
           name: 'BusinessProcess',
           kind: 'Business Process',
           path,
-          namespace: newProjectParams.defaultNamespace.replaceAll('.', '/')
+          namespace: await resolveDefaultNamespace(path, 'processes')
         })
       )
       .then(() => setStatusBarMessage('Finished: Create new Project'));
