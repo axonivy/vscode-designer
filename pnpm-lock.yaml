@@ -78,7 +78,7 @@ importers:
         version: 19.2.3(@types/react@19.2.7)
       '@vitejs/plugin-react':
         specifier: 5.1.2
-        version: 5.1.2(vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))
+        version: 5.1.2(vite@7.3.1(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))
       adm-zip:
         specifier: 0.5.16
         version: 0.5.16
@@ -116,11 +116,11 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
       vite:
-        specifier: 7.3.0
-        version: 7.3.0(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)
+        specifier: 7.3.1
+        version: 7.3.1(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)
       vite-tsconfig-paths:
         specifier: 6.0.3
-        version: 6.0.3(typescript@5.9.3)(vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))
+        version: 6.0.3(typescript@5.9.3)(vite@7.3.1(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))
 
   extension:
     dependencies:
@@ -197,8 +197,8 @@ importers:
         specifier: 3.5.0
         version: 3.5.0
       ws:
-        specifier: 8.18.3
-        version: 8.18.3
+        specifier: 8.19.0
+        version: 8.19.0
     devDependencies:
       '@types/vscode':
         specifier: 1.98.0
@@ -343,13 +343,13 @@ importers:
         version: 6.2.2(reflect-metadata@0.2.2)
       monaco-editor:
         specifier: npm:@codingame/monaco-vscode-editor-api
-        version: '@codingame/monaco-vscode-editor-api@24.2.0'
+        version: '@codingame/monaco-vscode-editor-api@24.3.0'
       monaco-languageclient:
         specifier: ^10
         version: 10.5.0
       vscode:
         specifier: npm:@codingame/monaco-vscode-extension-api
-        version: '@codingame/monaco-vscode-extension-api@24.2.0'
+        version: '@codingame/monaco-vscode-extension-api@24.3.0'
       vscode-messenger-common:
         specifier: 0.4.5
         version: 0.4.5
@@ -359,7 +359,7 @@ importers:
     devDependencies:
       '@axonivy/monaco-vite-plugin':
         specifier: ~14.0.0-next.1970.28ec8260
-        version: 14.0.0-next.1974.86667ae1(vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))
+        version: 14.0.0-next.1974.86667ae1(vite@7.3.1(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))
       '@vscode/codicons':
         specifier: 0.0.44
         version: 0.0.44
@@ -763,6 +763,9 @@ packages:
   '@codingame/monaco-vscode-editor-api@24.2.0':
     resolution: {integrity: sha512-btwnwatbKuhxCyY6n9gBJkGcRGhZrJTzhoPnbW/fyC4O9yXX4WxwiAQzJdYpn/0YDlehcczgAWftXiCrMcCNYA==}
 
+  '@codingame/monaco-vscode-editor-api@24.3.0':
+    resolution: {integrity: sha512-W+jguLUI4exsIRe8iQ3i+SNhHsCgO9NvY0zFsxOhTiMhAADK7hEehd0CLnKbfoZt8XEbr/XQ0S3wISRFlQQlOQ==}
+
   '@codingame/monaco-vscode-editor-service-override@24.2.0':
     resolution: {integrity: sha512-1mSHWHSHWO0SzhugmhyBJzfgqe+nUzCpmyeehk38P0XPFuhc66exwWslPbBWVGHqMYuiN3yS/5YQ0VDbnYwqWA==}
 
@@ -771,6 +774,9 @@ packages:
 
   '@codingame/monaco-vscode-extension-api@24.2.0':
     resolution: {integrity: sha512-NiPXvGwIIQua4m3cUjL4JaGZms5lMCJqpHYSW5MbyHVdFKxE0Ns18ihk5sMuCj7lSuci24okWyklH+XZkiI1/g==}
+
+  '@codingame/monaco-vscode-extension-api@24.3.0':
+    resolution: {integrity: sha512-RykrxXwwngF7xR0dtiUhqRTKqLOnDwCKvcLvh7lLIYT1CertvzhRojoyAX/klR1z3klInLL6ycrQJ88Ykd3w+A==}
 
   '@codingame/monaco-vscode-extensions-service-override@24.2.0':
     resolution: {integrity: sha512-PZynlQlVatpaWDpaDqH3LvgiuwTzw3EJEIs+c4fU4+3zMJPQMehzJ28HOUXfTjmd877x4atx41l0n4gMWhiufg==}
@@ -6676,8 +6682,8 @@ packages:
       vite:
         optional: true
 
-  vite@7.3.0:
-    resolution: {integrity: sha512-dZwN5L1VlUBewiP6H9s2+B3e3Jg96D0vzN+Ry73sOefebhYr9f94wwkMNN/9ouoU8pV1BqA1d1zGk8928cx0rg==}
+  vite@7.3.1:
+    resolution: {integrity: sha512-w+N7Hifpc3gRjZ63vYBXA56dvvRlNWRczTdmCBBa+CotUzAPf5b7YMdMR/8CQoeYE5LX3W4wj6RYTgonm1b9DA==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -6933,8 +6939,8 @@ packages:
     resolution: {integrity: sha512-uMQTubF/vcu+Wd0b5BGtDmiXePd/+44hUWQz2nZPbs92/BnxRo74tqs+hqDo12RLiEd+CXFKUwxvvIZvtt34Jw==}
     engines: {node: '>=18'}
 
-  ws@8.18.3:
-    resolution: {integrity: sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==}
+  ws@8.19.0:
+    resolution: {integrity: sha512-blAT2mjOEIi0ZzruJfIhb3nps74PRWTCz1IjglWEEpQl5XS/UNama6u2/rjFkDDouqr4L67ry+1aGIALViWjDg==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -7164,9 +7170,9 @@ snapshots:
 
   '@axonivy/log-view-protocol@14.0.0-next.303.08f29e9': {}
 
-  '@axonivy/monaco-vite-plugin@14.0.0-next.1974.86667ae1(vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))':
+  '@axonivy/monaco-vite-plugin@14.0.0-next.1974.86667ae1(vite@7.3.1(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))':
     dependencies:
-      vite: 7.3.0(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)
+      vite: 7.3.1(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)
 
   '@axonivy/prettier-config@14.0.0-next.973.1b0d966':
     dependencies:
@@ -7543,6 +7549,10 @@ snapshots:
     dependencies:
       '@codingame/monaco-vscode-api': 24.2.0
 
+  '@codingame/monaco-vscode-editor-api@24.3.0':
+    dependencies:
+      '@codingame/monaco-vscode-api': 24.2.0
+
   '@codingame/monaco-vscode-editor-service-override@24.2.0':
     dependencies:
       '@codingame/monaco-vscode-api': 24.2.0
@@ -7552,6 +7562,11 @@ snapshots:
       '@codingame/monaco-vscode-api': 24.2.0
 
   '@codingame/monaco-vscode-extension-api@24.2.0':
+    dependencies:
+      '@codingame/monaco-vscode-api': 24.2.0
+      '@codingame/monaco-vscode-extensions-service-override': 24.2.0
+
+  '@codingame/monaco-vscode-extension-api@24.3.0':
     dependencies:
       '@codingame/monaco-vscode-api': 24.2.0
       '@codingame/monaco-vscode-extensions-service-override': 24.2.0
@@ -7795,7 +7810,7 @@ snapshots:
       '@eclipse-glsp/protocol': 2.5.0(inversify@6.2.2(reflect-metadata@0.2.2))
       vscode-jsonrpc: 8.2.0
       vscode-messenger: 0.4.5
-      ws: 8.18.3
+      ws: 8.19.0
     transitivePeerDependencies:
       - bufferutil
       - inversify
@@ -10930,7 +10945,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitejs/plugin-react@5.1.2(vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))':
+  '@vitejs/plugin-react@5.1.2(vite@7.3.1(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))':
     dependencies:
       '@babel/core': 7.28.5
       '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.28.5)
@@ -10938,7 +10953,7 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-beta.53
       '@types/babel__core': 7.20.5
       react-refresh: 0.18.0
-      vite: 7.3.0(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)
+      vite: 7.3.1(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -10951,13 +10966,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.0.3
 
-  '@vitest/mocker@4.0.16(vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))':
+  '@vitest/mocker@4.0.16(vite@7.3.1(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))':
     dependencies:
       '@vitest/spy': 4.0.16
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 7.3.0(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)
+      vite: 7.3.1(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)
 
   '@vitest/pretty-format@4.0.16':
     dependencies:
@@ -14604,18 +14619,18 @@ snapshots:
 
   version-range@4.15.0: {}
 
-  vite-tsconfig-paths@6.0.3(typescript@5.9.3)(vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)):
+  vite-tsconfig-paths@6.0.3(typescript@5.9.3)(vite@7.3.1(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)):
     dependencies:
       debug: 4.4.3
       globrex: 0.1.2
       tsconfck: 3.1.6(typescript@5.9.3)
     optionalDependencies:
-      vite: 7.3.0(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)
+      vite: 7.3.1(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2):
+  vite@7.3.1(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2):
     dependencies:
       esbuild: 0.27.2
       fdir: 6.5.0(picomatch@4.0.3)
@@ -14633,7 +14648,7 @@ snapshots:
   vitest@4.0.16(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.16
-      '@vitest/mocker': 4.0.16(vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))
+      '@vitest/mocker': 4.0.16(vite@7.3.1(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))
       '@vitest/pretty-format': 4.0.16
       '@vitest/runner': 4.0.16
       '@vitest/snapshot': 4.0.16
@@ -14650,7 +14665,7 @@ snapshots:
       tinyexec: 1.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.0.3
-      vite: 7.3.0(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)
+      vite: 7.3.1(@types/node@24.10.4)(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 24.10.4
@@ -14911,7 +14926,7 @@ snapshots:
       type-fest: 4.41.0
       write-json-file: 6.0.0
 
-  ws@8.18.3: {}
+  ws@8.19.0: {}
 
   wsl-utils@0.1.0:
     dependencies:
