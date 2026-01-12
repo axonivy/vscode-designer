@@ -7,7 +7,7 @@ import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider'
 import { InitializeConnectionRequest, isAction, WebviewReadyNotification } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 
-const ConfigWebSocketMessage: NotificationType<unknown> = { method: 'cmsWebSocketMessage' };
+const CmsWebSocketMessage: NotificationType<unknown> = { method: 'cmsWebSocketMessage' };
 
 export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webviewPanel: vscode.WebviewPanel, file: string) => {
   const messageParticipant = messenger.registerWebviewPanel(webviewPanel);
@@ -24,7 +24,7 @@ export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webv
 
 class CmsEditorWebSocketForwarder extends WebSocketForwarder {
   constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant) {
-    super(websocketUrl, 'ivy-cms-lsp', messenger, messageParticipant, ConfigWebSocketMessage);
+    super(websocketUrl, 'ivy-cms-lsp', messenger, messageParticipant, CmsWebSocketMessage);
   }
 
   protected override handleClientMessage(message: unknown) {

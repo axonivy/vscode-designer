@@ -1,6 +1,6 @@
+import { App, ClientContextProvider, QueryProvider, RoleClientJsonRpc, initQueryClient } from '@axonivy/role-editor';
+import '@axonivy/role-editor/lib/editor.css';
 import { HotkeysProvider, ThemeProvider } from '@axonivy/ui-components';
-import { ClientContextProvider, ClientJsonRpc, QueryProvider, VariableEditor, initQueryClient } from '@axonivy/variable-editor';
-import '@axonivy/variable-editor/lib/editor.css';
 import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
 import '@axonivy/vscode-webview-common/css/colors.css';
 import * as React from 'react';
@@ -12,8 +12,8 @@ declare function acquireVsCodeApi(): VsCodeApi;
 const messenger = new Messenger(acquireVsCodeApi());
 
 export async function start({ file }: InitializeConnection) {
-  const connection = toConnection(messenger, 'variableWebSocketMessage');
-  const client = await ClientJsonRpc.startClient(connection);
+  const connection = toConnection(messenger, 'roleWebSocketMessage');
+  const client = await RoleClientJsonRpc.startClient(connection);
   const queryClient = initQueryClient();
   const rootElement = document.getElementById('root');
   if (!rootElement) {
@@ -26,7 +26,7 @@ export async function start({ file }: InitializeConnection) {
         <ClientContextProvider client={client}>
           <QueryProvider client={queryClient}>
             <HotkeysProvider initiallyActiveScopes={['global']}>
-              <VariableEditor context={{ app: '', pmv: '', file }} />
+              <App context={{ app: '', pmv: '', file }} />
             </HotkeysProvider>
           </QueryProvider>
         </ClientContextProvider>

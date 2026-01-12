@@ -15,8 +15,9 @@ test('Read, write and open help', async ({ page }) => {
   const newValue = 'newTestValue';
   await editor.selectFirstRow();
   await editor.updateValue(newValue);
-  await page.waitForTimeout(300);
+  await editor.isDirty();
   await editor.saveAllFiles();
+  await editor.isNotDirty();
   await editor.executeCommand('View: Reopen Editor With Text Editor');
   await expect(editor.editorContent()).toContainText(`originalKey: ${newValue}`);
 
