@@ -5,10 +5,10 @@ import { OutputView } from './page-objects/output-view';
 import { ProblemsView } from './page-objects/problems-view';
 import { wait } from './utils/timeout';
 
-const PREF_PREFIX = 'ch.ivyteam.ivy.project.preferences\\:PROJECT_VERSION=';
+const PREF_PREFIX = 'version=';
 
 test('Convert project', async ({ page }) => {
-  const editor = new Editor('ch.ivyteam.ivy.designer.prefs', page);
+  const editor = new Editor('.ivyproject', page);
   await editor.hasDeployProjectStatusMessage();
   await editor.openEditorFile();
   const editorContent = editor.editorContent();
