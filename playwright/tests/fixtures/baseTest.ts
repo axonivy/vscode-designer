@@ -1,4 +1,4 @@
-import { _electron, test as base, chromium, type Page } from '@playwright/test';
+import { _electron, test as base, chromium, expect, type Page } from '@playwright/test';
 import { downloadAndUnzipVSCode } from '@vscode/test-electron/out/download';
 import fs from 'fs';
 import os from 'os';
@@ -69,9 +69,18 @@ const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<
 };
 
 const initialize = async (page: Page) => {
-  const fileExplorer = new FileExplorer(page);
-  await fileExplorer.hasIvyStatusBarIcon();
-  await fileExplorer.closeAllTabs();
+  await expect(async () => {
+    await installJavaPack(page);
+    await expect(page.locator('div.statusbar-item:has-text("Axon Ivy")')).toBeVisible({ timeout: 500 });
+  }).toPass();
+  await new FileExplorer(page).closeAllTabs();
+};
+
+const installJavaPack = async (page: Page) => {
+  const notification = page.locator('div.notification-list-item');
+  if (await notification.getByText("because it depends on the 'Extension Pack for Java' extension").isVisible()) {
+    await notification.getByRole('button', { name: 'Install and Reload' }).click();
+  }
 };
 
 const createTmpWorkspace = async (workspace: string) => {
