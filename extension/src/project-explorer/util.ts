@@ -7,11 +7,8 @@ const defaultNamespaceOf = (projecDir: string) => {
   return vscode.workspace.fs.readFile(designerPrefs).then(
     content => {
       const pom = new XMLParser().parse(content);
-      if (pom.project && pom.project.artifactId && pom.project.groupId) {
-        if ((pom.project.artifactId as string).toLocaleLowerCase() === (pom.project.groupId as string).toLocaleLowerCase()) {
-          return pom.project.artifactId;
-        }
-        return `${pom.project.groupId}.${pom.project.artifactId}`;
+      if (pom.project && pom.project.groupId) {
+        return `${pom.project.groupId}`;
       }
       return '';
     },
