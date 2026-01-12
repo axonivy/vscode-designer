@@ -1,4 +1,4 @@
-import type { VariablesActionArgs } from '@axonivy/variable-editor-protocol';
+import type { RoleActionArgs } from '@axonivy/role-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
@@ -8,7 +8,7 @@ import { updateTextDocumentContent } from '../content-writer';
 import { hasEditorFileContent, InitializeConnectionRequest, isAction, WebviewReadyNotification } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 
-const VariableWebSocketMessage: NotificationType<unknown> = { method: 'variableWebSocketMessage' };
+const RoleWebSocketMessage: NotificationType<unknown> = { method: 'roleWebSocketMessage' };
 
 export const setupCommunication = (
   websocketUrl: URL,
@@ -18,7 +18,7 @@ export const setupCommunication = (
 ) => {
   const messageParticipant = messenger.registerWebviewPanel(webviewPanel);
   const toDispose = new DisposableCollection(
-    new VariableEditorWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
+    new RoleEditorWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
     messenger.onNotification(
       WebviewReadyNotification,
       () => messenger.sendNotification(InitializeConnectionRequest, messageParticipant, { file: document.fileName }),
@@ -28,13 +28,13 @@ export const setupCommunication = (
   webviewPanel.onDidDispose(() => toDispose.dispose());
 };
 
-class VariableEditorWebSocketForwarder extends WebSocketForwarder {
+class RoleEditorWebSocketForwarder extends WebSocketForwarder {
   constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, readonly document: vscode.TextDocument) {
-    super(websocketUrl, 'ivy-variables-lsp', messenger, messageParticipant, VariableWebSocketMessage);
+    super(websocketUrl, 'ivy-role-lsp', messenger, messageParticipant, RoleWebSocketMessage);
   }
 
   protected override handleClientMessage(message: unknown) {
-    if (isAction<VariablesActionArgs>(message) && message.params.actionId === 'openUrl') {
+    if (isAction<RoleActionArgs>(message) && message.params.actionId === 'openUrl') {
       IvyBrowserViewProvider.instance.open(message.params.payload);
     }
     super.handleClientMessage(message);

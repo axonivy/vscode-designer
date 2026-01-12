@@ -14,7 +14,8 @@ export const initMessenger = (messenger: Messenger, start: (init: InitializeConn
 };
 
 type Method =
-  | 'configWebSocketMessage'
+  | 'variableWebSocketMessage'
+  | 'roleWebSocketMessage'
   | 'cmsWebSocketMessage'
   | 'databaseWebSocketMessage'
   | 'dataclassWebSocketMessage'

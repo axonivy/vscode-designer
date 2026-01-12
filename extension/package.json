@@ -29,16 +29,17 @@
   },
   "main": "./dist/extension.js",
   "dependencies": {
-    "@axonivy/cms-editor-protocol": "~14.0.0-next.604.d8bc24d",
-    "@axonivy/database-editor-protocol": "~14.0.0-next.144.ceb4358",
-    "@axonivy/dataclass-editor-protocol": "~14.0.0-next.767.7f67be6",
-    "@axonivy/form-editor-protocol": "~14.0.0-next.1059.72cfdf7",
-    "@axonivy/jsonrpc": "~14.0.0-next.969.b2664cb",
-    "@axonivy/log-view-core": "~14.0.0-next.299.08b592d",
-    "@axonivy/log-view-protocol": "~14.0.0-next.299.08b592d",
-    "@axonivy/process-editor-inscription-protocol": "~14.0.0-next.1970.28ec8260",
-    "@axonivy/process-editor-protocol": "~14.0.0-next.1970.28ec8260",
-    "@axonivy/variable-editor-protocol": "~14.0.0-next.903.08189c7",
+    "@axonivy/cms-editor-protocol": "~14.0.0-next.613.57052c3",
+    "@axonivy/database-editor-protocol": "~14.0.0-next.152.072b70e",
+    "@axonivy/dataclass-editor-protocol": "~14.0.0-next.775.6e171a9",
+    "@axonivy/form-editor-protocol": "~14.0.0-next.1073.ee4ae3f",
+    "@axonivy/jsonrpc": "~14.0.0-next.975.2016b35",
+    "@axonivy/log-view-core": "~14.0.0-next.305.3827ecd",
+    "@axonivy/log-view-protocol": "~14.0.0-next.305.3827ecd",
+    "@axonivy/process-editor-inscription-protocol": "~14.0.0-next.1976.17cdae84",
+    "@axonivy/process-editor-protocol": "~14.0.0-next.1976.17cdae84",
+    "@axonivy/role-editor-protocol": "~14.0.0-next.29.603bf07",
+    "@axonivy/variable-editor-protocol": "~14.0.0-next.911.072fc45",
     "@codingame/monaco-vscode-editor-api": "^23.1.1",
     "@codingame/monaco-vscode-textmate-service-override": "^23.1.1",
     "@eclipse-glsp/protocol": "2.5.0",
@@ -82,6 +83,15 @@
         "selector": [
           {
             "filenamePattern": "variables.yaml"
+          }
+        ]
+      },
+      {
+        "viewType": "ivy.roleEditor",
+        "displayName": "Axon Ivy Roles Editor",
+        "selector": [
+          {
+            "filenamePattern": "roles.yaml"
           }
         ]
       },

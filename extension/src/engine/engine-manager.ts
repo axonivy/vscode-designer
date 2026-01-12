@@ -11,6 +11,7 @@ import { DatabaseEditorProvider } from '../editors/database-editor/database-edit
 import DataClassEditorProvider from '../editors/dataclass-editor/dataclass-editor-provider';
 import FormEditorProvider from '../editors/form-editor/form-editor-provider';
 import ProcessEditorProvider from '../editors/process-editor/process-editor-provider';
+import { RoleEditorProvider } from '../editors/role-editor/role-editor-provider';
 import { VariableEditorProvider } from '../editors/variable-editor/variable-editor-provider';
 import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language-client';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
@@ -112,6 +113,7 @@ export class IvyEngineManager {
     CmsEditorProvider.register(this.context, websocketUrl);
     DatabaseEditorProvider.register(this.context, websocketUrl);
     DataClassEditorProvider.register(this.context, websocketUrl);
+    RoleEditorProvider.register(this.context, websocketUrl);
 
     RuntimeLogViewProvider(websocketUrl);
     WebIdeWebSocketProvider(websocketUrl);
