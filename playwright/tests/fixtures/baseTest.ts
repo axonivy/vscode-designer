@@ -69,7 +69,9 @@ const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<
     test.info().attachments.push({ name: 'screenshot', path: tracePath, contentType: 'image/png' });
   }
   await electronApp.close();
-  await fs.promises.rm(tmpWorkspace, { recursive: true });
+  if (!process.env.CI) {
+    await fs.promises.rm(tmpWorkspace, { recursive: true });
+  }
 };
 
 const initialize = async (page: Page) => {
