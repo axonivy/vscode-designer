@@ -39,8 +39,10 @@ export class ProblemsView extends View {
     await this.hasMaker(message, 'error', pid);
   }
 
-  async hasNoMarker() {
-    const marker = this.viewLocator.locator('div.monaco-tl-row');
+  async hasNoMarker(message?: string) {
+    const marker = message
+      ? this.viewLocator.locator(`div.monaco-tl-row:has-text("${message}")`)
+      : this.viewLocator.locator('div.monaco-tl-row');
     await expect(marker).not.toBeAttached();
     await expect(this.viewLocator).toContainText('No problems have been detected in the workspace.');
   }

@@ -32,5 +32,5 @@ test('Convert project', async ({ page }) => {
   await expect(editorContent).toContainText(PREF_PREFIX);
   await expect(editorContent).not.toContainText(`${PREF_PREFIX}100000`);
   await problemsView.show();
-  await problemsView.hasNoMarker();
+  await problemsView.hasNoMarker('Project is outdated and needs to be converted.');
 });
