@@ -1,5 +1,6 @@
 import { _electron, test as base, chromium, expect, type Page } from '@playwright/test';
-import { downloadAndUnzipVSCode } from '@vscode/test-electron/out/download';
+import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath } from '@vscode/test-electron';
+import { execSync } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -37,6 +38,8 @@ const runBrowserTest = async (workspace: string, take: (r: Page) => Promise<void
 
 const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<void>) => {
   const vscodePath = await downloadAndUnzipVSCode(downloadVersion);
+  const [cliPath] = resolveCliArgsFromVSCodeExecutablePath(vscodePath);
+  execSync(`"${cliPath}" --install-extension vscjava.vscode-java-pack`);
   const tmpWorkspace = await createTmpWorkspace(workspace);
   const electronApp = await _electron.launch({
     executablePath: vscodePath,
@@ -47,6 +50,7 @@ const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<
       '--skip-welcome',
       '--skip-release-notes',
       '--disable-workspace-trust',
+      '--install-extension=vscjava.vscode-java-pack',
       `--extensionDevelopmentPath=${path.resolve(__dirname, '../../../extension/')}`,
       tmpWorkspace
     ]
@@ -69,18 +73,8 @@ const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<
 };
 
 const initialize = async (page: Page) => {
-  await expect(async () => {
-    await installJavaPack(page);
-    await expect(page.locator('div.statusbar-item:has-text("Axon Ivy")')).toBeVisible({ timeout: 500 });
-  }).toPass();
+  await expect(page.locator('div.statusbar-item:has-text("Axon Ivy")')).toBeVisible();
   await new FileExplorer(page).closeAllTabs();
-};
-
-const installJavaPack = async (page: Page) => {
-  const notification = page.locator('div.notification-list-item');
-  if (await notification.getByText("because it depends on the 'Extension Pack for Java' extension").isVisible()) {
-    await notification.getByRole('button', { name: 'Install and Reload' }).click();
-  }
 };
 
 const createTmpWorkspace = async (workspace: string) => {
