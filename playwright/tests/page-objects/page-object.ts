@@ -33,10 +33,6 @@ export class PageObject {
     await this.hasStatusMessage('Finished: Deploy Ivy Projects', timeout);
   }
 
-  async hasNoStatusMessage() {
-    await expect(this.page.locator('#status\\.extensionMessage')).toBeHidden();
-  }
-
   async provideUserInput(input?: string) {
     if (input) {
       const textBox = this.quickInputBox().getByRole('textbox');

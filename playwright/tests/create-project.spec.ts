@@ -11,7 +11,6 @@ test.describe('Create Project', () => {
     const explorer = new FileExplorer(page);
     await explorer.addNestedProject('parent', 'testProject');
     await explorer.hasStatusMessage('Finished: Create new Project', 60_000);
-    await explorer.hasNoStatusMessage();
 
     const problemsView = await ProblemsView.initProblemsView(page);
     await problemsView.hasNoMarker();

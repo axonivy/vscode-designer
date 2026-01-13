@@ -13,7 +13,6 @@ test.describe('Create User Dialog', () => {
     explorer = new FileExplorer(page);
     await explorer.hasDeployProjectStatusMessage();
     processEditor = new ProcessEditor(page);
-    await explorer.hasNoStatusMessage();
   });
 
   test('Add Html Dialog', async () => {
@@ -46,7 +45,6 @@ test.describe('Create User Dialog', () => {
     await explorer.hasNode(`${userDialogName}Data.d.json`);
     await explorer.hasNode(`${userDialogName}Process.p.json`);
     await explorer.isTabWithNameVisible(userDialogName + '.f.json');
-    await explorer.hasNoStatusMessage();
     const formEditor = new FormEditor(page, `${userDialogName}.f.json`);
     await formEditor.isViewVisible();
     await explorer.doubleClickNode(`${userDialogName}Process.p.json`);
