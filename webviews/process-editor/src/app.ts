@@ -6,7 +6,6 @@ import '../css/diagram.css';
 import {
   IVY_ACCESSIBILITY_MODULES,
   createIvyDiagramContainer,
-  ivyBreakpointModule,
   ivyOpenDataClassModule,
   ivyOpenFormModule,
   ivyStandaloneCopyPasteModule
@@ -37,7 +36,7 @@ class IvyGLSPStarter extends GLSPStarter {
       'sprotty',
       noopContextMenuServiceModule,
       ...containerConfiguration,
-      ivyBreakpointModule,
+      // ivyBreakpointModule,
       ivyStartActionModule,
       ivyInscriptionModule,
       ivyStartupDiagramModule,
