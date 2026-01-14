@@ -44,6 +44,8 @@ export class ProblemsView extends View {
       ? this.viewLocator.locator(`div.monaco-tl-row:has-text("${message}")`)
       : this.viewLocator.locator('div.monaco-tl-row');
     await expect(marker).not.toBeAttached();
-    await expect(this.viewLocator).toContainText('No problems have been detected in the workspace.');
+    if (!message) {
+      await expect(this.viewLocator).toContainText('No problems have been detected in the workspace.');
+    }
   }
 }
