@@ -1,5 +1,7 @@
 import { _electron, test as base, chromium, type Page } from '@playwright/test';
+import { resolveCliArgsFromVSCodeExecutablePath } from '@vscode/test-electron';
 import { downloadAndUnzipVSCode } from '@vscode/test-electron/out/download';
+import { execSync } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -37,6 +39,12 @@ const runBrowserTest = async (workspace: string, take: (r: Page) => Promise<void
 
 const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<void>) => {
   const vscodePath = await downloadAndUnzipVSCode(downloadVersion);
+  const [cliPath] = resolveCliArgsFromVSCodeExecutablePath(vscodePath);
+  try {
+    execSync(`"${cliPath}" --uninstall-extension vscjava.vscode-java-pack`);
+  } catch {
+    // ignore if extension is not installed
+  }
   const tmpWorkspace = await createTmpWorkspace(workspace);
   const electronApp = await _electron.launch({
     executablePath: vscodePath,
