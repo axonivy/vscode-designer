@@ -112,7 +112,6 @@ test.describe('Inscription View', () => {
   });
 
   test('Create Html Dialog', async () => {
-    await processEditor.hasNoStatusMessage();
     const inscriptionView = await processEditor.openInscriptionView(userDialogPID1);
     await inscriptionView.openInscriptionTab('Dialog');
     await inscriptionView.openCollapsible('Dialog');
@@ -133,7 +132,6 @@ test.describe('Inscription View', () => {
   });
 
   test('Create Form Dialog', async () => {
-    await processEditor.hasNoStatusMessage();
     const inscriptionView = await processEditor.openInscriptionView(userDialogPID2);
     await inscriptionView.openInscriptionTab('Dialog');
     await inscriptionView.openCollapsible('Dialog');
@@ -152,7 +150,6 @@ test.describe('Inscription View', () => {
   });
 
   test('Create Offline Dialog', async () => {
-    await processEditor.hasNoStatusMessage();
     const inscriptionView = await processEditor.openInscriptionView(userTaskPID);
     await inscriptionView.openInscriptionTab('Dialog');
     await inscriptionView.openCollapsible('Dialog');

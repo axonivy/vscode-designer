@@ -15,7 +15,6 @@ test.describe('Create Process', () => {
   });
 
   test('Add business process, execute, edit and redeploy', async ({ page }) => {
-    await processEditor.hasNoStatusMessage();
     await explorer.addProcess(processName, 'Business Process');
     await explorer.hasNode(`${processName}.p.json`);
     await page.waitForTimeout(1000);

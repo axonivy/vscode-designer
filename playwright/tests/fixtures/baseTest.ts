@@ -1,5 +1,6 @@
-import { _electron, test as base, chromium, type Page } from '@playwright/test';
-import { downloadAndUnzipVSCode } from '@vscode/test-electron/out/download';
+import { _electron, test as base, chromium, expect, type Page } from '@playwright/test';
+import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath } from '@vscode/test-electron';
+import { execSync } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -37,6 +38,8 @@ const runBrowserTest = async (workspace: string, take: (r: Page) => Promise<void
 
 const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<void>) => {
   const vscodePath = await downloadAndUnzipVSCode(downloadVersion);
+  const [cliPath] = resolveCliArgsFromVSCodeExecutablePath(vscodePath);
+  execSync(`"${cliPath}" --install-extension vscjava.vscode-java-pack`);
   const tmpWorkspace = await createTmpWorkspace(workspace);
   const electronApp = await _electron.launch({
     executablePath: vscodePath,
@@ -52,7 +55,6 @@ const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<
     ]
   });
   const page = await electronApp.firstWindow();
-  await page.setViewportSize({ width: 1920, height: 1080 });
   await page.context().tracing.start({ screenshots: true, snapshots: true, title: test.info().title });
   await initialize(page);
   await take(page);
@@ -65,13 +67,14 @@ const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<
     test.info().attachments.push({ name: 'screenshot', path: tracePath, contentType: 'image/png' });
   }
   await electronApp.close();
-  await fs.promises.rm(tmpWorkspace, { recursive: true });
+  if (!process.env.CI) {
+    await fs.promises.rm(tmpWorkspace, { recursive: true });
+  }
 };
 
 const initialize = async (page: Page) => {
-  const fileExplorer = new FileExplorer(page);
-  await fileExplorer.hasIvyStatusBarIcon();
-  await fileExplorer.closeAllTabs();
+  await expect(page.locator('div.statusbar-item:has-text("Axon Ivy")')).toBeVisible();
+  await new FileExplorer(page).closeAllTabs();
 };
 
 const createTmpWorkspace = async (workspace: string) => {

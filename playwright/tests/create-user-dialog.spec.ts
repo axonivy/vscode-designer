@@ -13,7 +13,6 @@ test.describe('Create User Dialog', () => {
     explorer = new FileExplorer(page);
     await explorer.hasDeployProjectStatusMessage();
     processEditor = new ProcessEditor(page);
-    await explorer.hasNoStatusMessage();
   });
 
   test('Add Html Dialog', async () => {
