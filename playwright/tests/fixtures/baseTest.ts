@@ -50,7 +50,6 @@ const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<
       '--skip-welcome',
       '--skip-release-notes',
       '--disable-workspace-trust',
-      '--install-extension=vscjava.vscode-java-pack',
       `--extensionDevelopmentPath=${path.resolve(__dirname, '../../../extension/')}`,
       tmpWorkspace
     ]
