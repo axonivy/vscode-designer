@@ -11,7 +11,7 @@ pipeline {
 
   triggers {
     cron '@midnight'
-    upstream(upstreamProjects: "core_product-engine/${java.net.URLEncoder.encode(env.BRANCH_NAME, 'UTF-8')},process-editor-client/${java.net.URLEncoder.encode(env.BRANCH_NAME, 'UTF-8')}", threshold: hudson.model.Result.UNSTABLE)
+    upstream(upstreamProjects: "core_product/${java.net.URLEncoder.encode(env.BRANCH_NAME, 'UTF-8')},process-editor-client/${java.net.URLEncoder.encode(env.BRANCH_NAME, 'UTF-8')}", threshold: hudson.model.Result.UNSTABLE)
   }
 
   parameters {
