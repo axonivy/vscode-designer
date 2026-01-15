@@ -63,7 +63,7 @@ export class IvyEngineApi {
     if (workspaces.length > 1) {
       throw new Error('Too many workspaces available, only one workspace is supported');
     }
-    const workspaceInit = { name: workspace.name, path: workspace.uri.fsPath };
+    const workspaceInit = { name: workspace.name, path: workspace.uri.fsPath, neo: false };
     return await vscode.window.withProgress(progressOptions('Create workspace'), async () => {
       return (await createWorkspace(workspaceInit, { baseURL, ...options })).data;
     });
