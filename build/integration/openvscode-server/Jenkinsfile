@@ -11,7 +11,7 @@ pipeline {
   }
 
   parameters {
-    string(name: 'engineDownloadUrl', defaultValue: 'https://jenkins.ivyteam.io/job/core_product-engine/job/master/lastSuccessfulBuild/artifact/workspace/ch.ivyteam.ivy.server.product/target/products/*_Slim_*.zip/*zip*/products.zip', description: 'engine that will be packaged')
+    string(name: 'engineDownloadUrl', defaultValue: 'https://jenkins.ivyteam.io/job/core_product/job/master/lastSuccessfulBuild/artifact/workspace/ch.ivyteam.ivy.server.product/target/products/*_Slim_*.zip/*zip*/products.zip', description: 'engine that will be packaged')
     string(name: 'openvscodeVersion', defaultValue: 'v1.103.1', description: 'openvscode version that will be used')
   }
 
