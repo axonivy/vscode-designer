@@ -9,7 +9,6 @@ export const config = {
   engineUrl: () => configs().get<string>('axonivy.engine.url'),
   projectExcludePattern: () => configs().get<string>('axonivy.project.excludePattern'),
   projectMaximumNumber: () => configs().get<number>('axonivy.project.maximumNumber'),
-  projectUseMavenBuilder: () => configs().get<boolean>('axonivy.project.useMavenBuilder'),
   processAnimationAnimate: () => configs().get<boolean>('axonivy.process.animation.animate'),
   processAnimationSpeed: () => configs().get<number>('axonivy.process.animation.speed'),
   processAnimationMode: () => configs().get<AnimationFollowMode>('axonivy.process.animation.mode'),
