@@ -81,7 +81,10 @@ export class IvyProjectExplorer {
   }
 
   private defineFileWatchers() {
-    vscode.workspace.createFileSystemWatcher(IVY_RPOJECT_FILE_PATTERN, false, true, true).onDidCreate(async () => await this.refresh());
+    vscode.workspace.createFileSystemWatcher(IVY_RPOJECT_FILE_PATTERN, false, true, true).onDidCreate(async () => {
+      await executeCommand('java.project.import.command');
+      await this.refresh();
+    });
     vscode.workspace.createFileSystemWatcher('**/*', true, true, false).onDidDelete(e => {
       if (e.path.includes('/target/')) {
         return;
