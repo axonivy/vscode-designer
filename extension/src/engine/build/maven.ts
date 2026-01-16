@@ -38,7 +38,7 @@ export class MavenBuilder {
 
   private buildCommand(engineDir?: string) {
     const ivyEngineDirectory = engineDir ? `-Divy.engine.directory="${engineDir}" ` : '';
-    return `mvn package --batch-mode -Dmaven.test.skip=true ${ivyEngineDirectory}-Dstyle.color=never`;
+    return `mvn package --batch-mode -Divy.script.validation.skip=true -Dmaven.test.skip=true ${ivyEngineDirectory}-Dstyle.color=never`;
   }
 
   async buildProjects() {
