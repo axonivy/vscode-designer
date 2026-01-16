@@ -1,11 +1,7 @@
 import * as vscode from 'vscode';
-import { ProcessInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
+import { validateNamespace } from './new-process';
 import { resolveNamespaceFromPath, validateArtifactName } from './util';
-
-export type ProcessKind = 'Business Process' | 'Callable Sub Process' | 'Web Service Process' | '';
-
-export type NewProcessParams = ProcessInit;
 
 export const addNewCaseMap = async (selectedUri: vscode.Uri, projectDir: string) => {
   const input = await collectNewCaseMapParams(selectedUri, projectDir);
@@ -45,12 +41,4 @@ const collectNamespace = async (selectedUri: vscode.Uri, projectDir: string) => 
     ignoreFocusOut: true,
     validateInput: validateNamespace
   });
-};
-
-export const validateNamespace = (value: string, errorMessage = 'Invalid namespace.') => {
-  const pattern = /^(\w+(\/\w+)*(-\w+)*)?$/;
-  if (pattern.test(value)) {
-    return;
-  }
-  return errorMessage;
 };

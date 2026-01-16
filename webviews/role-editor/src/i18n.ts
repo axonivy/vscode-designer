@@ -8,8 +8,8 @@ export const initTranslation = () => {
     debug: true,
     supportedLngs: ['en'],
     fallbackLng: 'en',
-    ns: ['casemap-editor'],
-    defaultNS: 'casemap-editor',
-    resources: { en: { 'casemap-editor': enMessages } }
+    ns: ['role-editor'],
+    defaultNS: 'role-editor',
+    resources: { en: { 'role-editor': enMessages } }
   });
 };
