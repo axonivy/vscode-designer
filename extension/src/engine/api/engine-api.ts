@@ -7,12 +7,14 @@ import { NewUserDialogParams } from '../../project-explorer/new-user-dialog';
 import { handleProjectConversionLog } from '../project-conversion-log';
 import { handleAxiosError } from './axios-error-handler';
 import {
+  CaseMapInit,
   DataClassInit,
   ImportProcessBody,
   NewProjectParams,
   ProductInstallParams,
   buildProjects,
   convertProject,
+  createCaseMap,
   createDataClass,
   createHd,
   createPmvAndProjectFiles,
@@ -155,6 +157,15 @@ export class IvyEngineApi {
     const baseURL = await this.baseURL;
     return vscode.window.withProgress(progressOptions('Create new Data Class'), async () => {
       return createDataClass(params, { baseURL, ...options })
+        .then(res => res.data)
+        .catch(handleAxiosError);
+    });
+  }
+
+  public async createCaseMap(params: CaseMapInit) {
+    const baseURL = await this.baseURL;
+    return vscode.window.withProgress(progressOptions('Create new Case Map'), async () => {
+      return createCaseMap(params, { baseURL, ...options })
         .then(res => res.data)
         .catch(handleAxiosError);
     });

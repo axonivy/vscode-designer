@@ -64,6 +64,8 @@ export interface ProductModel {
   type?: string;
   /** Tags of product */
   tags?: string[];
+  /** Extension folder directory in market repository */
+  marketDirectory?: string;
   _links?: Links;
 }
 
@@ -103,6 +105,8 @@ export interface ProductDetailModel {
   type?: string;
   /** Tags of product */
   tags?: string[];
+  /** Extension folder directory in market repository */
+  marketDirectory?: string;
   /** Product vendor */
   vendor?: string;
   /** Product vendor url */
@@ -919,6 +923,10 @@ export const downloadZipArtifact = async (id: string,
 
 
 
+/**
+ * Get all product versions by product id
+ * @summary Get product versions by product id
+ */
 export type findProductVersionsByIdResponse200 = {
   data: MavenArtifactVersionModel[]
   status: 200
@@ -1107,6 +1115,10 @@ export const getLatestArtifactDownloadUrl = async (id: string,
 
 
 
+/**
+ * Sync latest releases from GitHub for all products
+ * @summary Sync latest releases from GitHub for all products
+ */
 export type syncLatestReleasesForProductsResponse200 = {
   data: void
   status: 200

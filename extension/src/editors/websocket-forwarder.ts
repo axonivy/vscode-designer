@@ -10,6 +10,7 @@ type Endpoint =
   | 'ivy-form-lsp'
   | 'ivy-variables-lsp'
   | 'ivy-data-class-lsp'
+  | 'ivy-case-map-lsp'
   | 'ivy-cms-lsp'
   | 'ivy-database-lsp'
   | 'ivy-role-lsp';
