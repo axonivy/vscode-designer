@@ -49,15 +49,33 @@ export interface EngineInfo {
   minimumSupportedMobileAppVersion?: string;
 }
 
-export interface ConfigurationIdentifier {
+export interface CaseMapBean {
+  name: string;
+  caseMapIdentifier: CaseMapIdentifier;
   path: string;
+}
+
+export interface CaseMapIdentifier {
   project: ProjectIdentifier;
+  name: string;
 }
 
 export interface ProjectIdentifier {
   app: string;
   pmv: string;
   isIar?: boolean;
+}
+
+export interface CaseMapInit {
+  name: string;
+  namespace: string;
+  project?: ProjectIdentifier;
+  projectDir?: string;
+}
+
+export interface ConfigurationIdentifier {
+  path: string;
+  project: ProjectIdentifier;
 }
 
 export interface ConfigurationBean {
@@ -341,6 +359,15 @@ export type ImportProjectsBody = {
   file?: Blob;
   dependentProject?: Blob;
 };
+
+export const createCaseMap = <TData = AxiosResponse<CaseMapBean>>(
+    caseMapInit: CaseMapInit, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `/web-ide/casemap`,
+      caseMapInit,options
+    );
+  }
 
 export const configurations = <TData = AxiosResponse<ConfigurationIdentifier[]>>(
      options?: AxiosRequestConfig
@@ -678,6 +705,7 @@ export const installMarketProduct = <TData = AxiosResponse<MarketInstallResult>>
     );
   }
 
+export type CreateCaseMapResult = AxiosResponse<CaseMapBean>
 export type ConfigurationsResult = AxiosResponse<ConfigurationIdentifier[]>
 export type ReadConfigResult = AxiosResponse<ConfigurationBean>
 export type WriteConfigResult = AxiosResponse<ConfigurationBean>

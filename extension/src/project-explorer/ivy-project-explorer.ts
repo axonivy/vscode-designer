@@ -9,6 +9,7 @@ import { IvyEngineManager } from '../engine/engine-manager';
 import { importMarketProduct, importMarketProductFile } from '../market/import-market';
 import { importNewProcess } from './import-process';
 import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
+import { addNewCaseMap } from './new-case-map';
 import { addNewDataClass } from './new-data-class';
 import { ProcessKind, addNewProcess } from './new-process';
 import { addNewProject } from './new-project';
@@ -77,6 +78,7 @@ export class IvyProjectExplorer {
       this.addUserDialog(s, 'JSFOffline', pid)
     );
     registerCmd(`${VIEW_ID}.addNewDataClass`, (s: TreeSelection) => this.addDataClass(s));
+    registerCmd(`${VIEW_ID}.addNewCaseMap`, (s: TreeSelection) => this.addCaseMap(s));
     registerCmd(`${VIEW_ID}.convertProject`, (s: TreeSelection) => this.convertProject(s));
   }
 
@@ -142,6 +144,20 @@ export class IvyProjectExplorer {
       return;
     }
     logErrorMessage('Add Process: no valid Axon Ivy Project selected.');
+  }
+
+  private async addCaseMap(selection: TreeSelection) {
+    const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
+    if (!uri) {
+      logErrorMessage('Add Case Map: no valid Axon Ivy Project selected.');
+      return;
+    }
+    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
+    if (projectPath) {
+      await addNewCaseMap(uri, projectPath);
+      return;
+    }
+    logErrorMessage('Add Case Map: no valid Axon Ivy Project selected.');
   }
 
   public async importBpmnProcess(selection: TreeSelection) {
