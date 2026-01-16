@@ -14,6 +14,7 @@ export type Command =
   | EngineCommand
   | ProjectViewCommand
   | ViewCommand
+  | JavaCommand
   | 'yaml-variables-editor.new'
   | 'yaml-roles-editor.new'
   | 'ivy.addDevContainer';
@@ -54,3 +55,4 @@ type ViewCommand =
   | 'ivyBrowserView.openDatabaseEditor'
   | 'ivyPanelView.openRuntimeLog'
   | 'ivyPanelView.openWelcomePage';
+type JavaCommand = 'java.project.import.command';
