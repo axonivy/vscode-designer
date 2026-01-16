@@ -22,6 +22,7 @@ import { extensionVersion } from '../version/extension-version';
 import { RuntimeLogViewProvider } from '../views/runtimelog-view';
 import { IvyEngineApi } from './api/engine-api';
 import { DataClassInit, ImportProcessBody, NewProjectParams, ProductInstallParams } from './api/generated/client';
+import { MavenBuilder } from './build/maven';
 import { IvyDiagnostics } from './diagnostics';
 import { EngineDownloader } from './engine-downloader';
 import { engineDirFromGlobalState, engineReleaseTrain, switchEngineReleaseTrain, updateGlobalStateEngineDir } from './engine-release-train';
@@ -33,12 +34,14 @@ import { WebIdeWebSocketProvider } from './ws-client';
 export class IvyEngineManager {
   private static _instance: IvyEngineManager;
 
+  private readonly mavenBuilder: MavenBuilder;
   private readonly engineRunner: EngineRunner;
   private ivyEngineApi?: IvyEngineApi;
   private started = false;
 
   private constructor(readonly context: vscode.ExtensionContext) {
     const engineDir = this.resolveEngineDir();
+    this.mavenBuilder = new MavenBuilder(engineDir);
     this.engineRunner = new EngineRunner(engineDir);
   }
 
@@ -142,11 +145,19 @@ export class IvyEngineManager {
   }
 
   public async buildProjects() {
+    if (config.projectUseMavenBuilder()) {
+      await this.mavenBuilder.buildProjects();
+      return;
+    }
     const ivyProjectDirectories = await this.ivyProjectDirectories();
     await this.ivyEngineApi?.buildProjects(ivyProjectDirectories);
   }
 
   public async buildProject(ivyProjectDirectory: string) {
+    if (config.projectUseMavenBuilder()) {
+      await this.mavenBuilder.buildProject(ivyProjectDirectory);
+      return;
+    }
     await this.ivyEngineApi?.buildProjects([ivyProjectDirectory]);
   }
 
@@ -204,7 +215,6 @@ export class IvyEngineManager {
           namespace: await resolveDefaultNamespace(path, 'processes')
         })
       )
-      .then(() => executeCommand('java.project.import.command'))
       .then(() => setStatusBarMessage('Finished: Create new Project'));
   }
 
