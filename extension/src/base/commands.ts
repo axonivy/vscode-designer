@@ -42,6 +42,7 @@ type ProjectViewCommand =
   | 'ivyProjects.addNewFormDialog'
   | 'ivyProjects.addNewOfflineDialog'
   | 'ivyProjects.addNewDataClass'
+  | 'ivyProjects.addNewCaseMap'
   | 'ivyProjects.stopBpmEngine'
   | 'ivyProjects.convertProject';
 type ViewCommand =

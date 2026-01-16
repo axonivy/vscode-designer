@@ -6,6 +6,7 @@ import { askToReloadWindow } from '../base/reload-window';
 import { setStatusBarMessage } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
 import { IvyBrowserViewProvider } from '../browser/ivy-browser-view-provider';
+import { CaseMapEditorProvider } from '../editors/casemap-editor/casemap-editor-provider';
 import { CmsEditorProvider } from '../editors/cms-editor/cms-editor-provider';
 import { DatabaseEditorProvider } from '../editors/database-editor/database-editor-provider';
 import DataClassEditorProvider from '../editors/dataclass-editor/dataclass-editor-provider';
@@ -21,7 +22,7 @@ import { resolveDefaultNamespace } from '../project-explorer/util';
 import { extensionVersion } from '../version/extension-version';
 import { RuntimeLogViewProvider } from '../views/runtimelog-view';
 import { IvyEngineApi } from './api/engine-api';
-import { DataClassInit, ImportProcessBody, NewProjectParams, ProductInstallParams } from './api/generated/client';
+import { CaseMapInit, DataClassInit, ImportProcessBody, NewProjectParams, ProductInstallParams } from './api/generated/client';
 import { MavenBuilder } from './build/maven';
 import { IvyDiagnostics } from './diagnostics';
 import { EngineDownloader } from './engine-downloader';
@@ -114,6 +115,7 @@ export class IvyEngineManager {
     DatabaseEditorProvider.register(this.context, websocketUrl);
     DataClassEditorProvider.register(this.context, websocketUrl);
     RoleEditorProvider.register(this.context, websocketUrl);
+    CaseMapEditorProvider.register(this.context, websocketUrl);
 
     RuntimeLogViewProvider(websocketUrl);
     WebIdeWebSocketProvider(websocketUrl);
@@ -223,6 +225,14 @@ export class IvyEngineManager {
     if (dataClassBean && params.projectDir) {
       const dataClassUri = vscode.Uri.joinPath(vscode.Uri.file(params.projectDir), dataClassBean.path);
       executeCommand('vscode.open', dataClassUri);
+    }
+  }
+
+  public async createCaseMap(params: CaseMapInit) {
+    const caseMapBean = await this.ivyEngineApi?.createCaseMap(params);
+    if (caseMapBean && params.projectDir) {
+      const caseMapUri = vscode.Uri.joinPath(vscode.Uri.file(params.projectDir), caseMapBean.path);
+      executeCommand('vscode.open', caseMapUri);
     }
   }
 

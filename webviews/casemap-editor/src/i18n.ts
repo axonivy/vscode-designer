@@ -1,4 +1,4 @@
-import { enMessages } from '@axonivy/role-editor';
+import { enTranslation } from '@axonivy/case-map-editor';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
@@ -8,8 +8,8 @@ export const initTranslation = () => {
     debug: true,
     supportedLngs: ['en'],
     fallbackLng: 'en',
-    ns: ['casemap-editor'],
-    defaultNS: 'casemap-editor',
-    resources: { en: { 'casemap-editor': enMessages } }
+    ns: ['case-map-editor'],
+    defaultNS: 'case-map-editor',
+    resources: { en: { 'case-map-editor': enTranslation } }
   });
 };
