@@ -88,8 +88,7 @@ export class IvyProjectExplorer {
       await this.refresh();
     });
     vscode.workspace.createFileSystemWatcher('**/*', true, true, false).onDidDelete(async e => {
-      const stat = await vscode.workspace.fs.stat(e);
-      if (stat.type !== vscode.FileType.Directory || e.path.includes('/target/')) {
+      if (e.path.includes('/target/')) {
         return;
       }
       await this.deleteProjectOnEngine(e.fsPath);
