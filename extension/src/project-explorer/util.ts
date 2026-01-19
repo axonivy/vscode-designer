@@ -47,7 +47,7 @@ const getDirectory = (filePath: string, target: ResourceDirectoryTarget) => {
 };
 
 export const resolveDefaultNamespace = async (projectDir: string, target: ResourceDirectoryTarget) => {
-  const defaultNamespace = await defaultNamespaceOf(projectDir);
+  const defaultNamespace = (await defaultNamespaceOf(projectDir)).replaceAll('-', '.');
   return target === 'processes' ? defaultNamespace.replaceAll('.', '/') : defaultNamespace;
 };
 
