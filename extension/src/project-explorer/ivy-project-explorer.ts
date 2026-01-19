@@ -87,13 +87,11 @@ export class IvyProjectExplorer {
       await executeCommand('java.project.import.command');
       await this.refresh();
     });
-    vscode.workspace.createFileSystemWatcher('**/*', true, true, false).onDidDelete(e => {
+    vscode.workspace.createFileSystemWatcher('**/*', true, true, false).onDidDelete(async e => {
       if (e.path.includes('/target/')) {
         return;
       }
-      this.getIvyProjects()
-        .then(projects => this.deleteProjectOnEngine(e, projects))
-        .then(() => this.refresh());
+      await this.deleteProjectOnEngine(e.fsPath);
     });
     vscode.workspace
       .createFileSystemWatcher('**/{cms,config,webContent}/**/*', true, false, true)
@@ -103,11 +101,12 @@ export class IvyProjectExplorer {
       .onDidChange(e => this.runEngineAction((d: string) => IvyEngineManager.instance.deployProject(d), e));
   }
 
-  private deleteProjectOnEngine(uri: vscode.Uri, ivyProjects: string[]) {
-    const filePath = uri.fsPath;
+  private async deleteProjectOnEngine(projectToBeDeleted: string) {
+    const ivyProjects = await this.getIvyProjects();
     for (const project of ivyProjects) {
-      if (project === filePath || project.startsWith(uri.fsPath + path.sep)) {
-        IvyEngineManager.instance.deleteProject(project);
+      if (project === projectToBeDeleted) {
+        await IvyEngineManager.instance.deleteProject(project);
+        await this.refresh();
       }
     }
   }
