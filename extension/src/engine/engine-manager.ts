@@ -104,10 +104,10 @@ export class IvyEngineManager {
     const engineUrl = await this.resolveEngineUrl();
     this.ivyEngineApi = new IvyEngineApi(engineUrl.toString());
     let devContextPath = await this.ivyEngineApi.devContextPath;
+    IvyBrowserViewProvider.register(this.context, engineUrl, devContextPath);
     devContextPath += devContextPath.endsWith('/') ? '' : '/';
     await this.initExistingProjects();
     const websocketUrl = new URL(devContextPath, toWebSocketUrl(engineUrl));
-    IvyBrowserViewProvider.register(this.context, engineUrl, devContextPath);
     ProcessEditorProvider.register(this.context, websocketUrl);
     FormEditorProvider.register(this.context, websocketUrl);
     VariableEditorProvider.register(this.context, websocketUrl);
