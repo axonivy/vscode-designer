@@ -6,6 +6,7 @@ import { minimalProjectWorkspacePath, multiProjectWorkspacePath } from './worksp
 
 test.describe('Project Explorer', () => {
   test.use({ workspace: multiProjectWorkspacePath });
+
   test('Projects are visible', async ({ page }) => {
     const explorer = new ProjectExplorerView(page);
     await explorer.openView();
@@ -61,6 +62,7 @@ test.describe('CMS entry', () => {
 
   test.describe('Context menu', () => {
     test.use({ workspace: minimalProjectWorkspacePath });
+
     test('New Resource', async ({ page }) => {
       const explorer = new ProjectExplorerView(page);
       await explorer.hasDeployProjectStatusMessage();

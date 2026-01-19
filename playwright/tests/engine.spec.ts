@@ -6,6 +6,7 @@ import { embeddedEngineWorkspace, noEngineWorkspacePath, noProjectWorkspacePath 
 
 test.describe('Engine embeddedEngineWorkspace', () => {
   test.use({ workspace: embeddedEngineWorkspace });
+
   test('check if embedded engine has started', async ({ page }) => {
     const outputview = new OutputView(page);
     await outputview.isTabVisible();
@@ -17,6 +18,7 @@ test.describe('Engine embeddedEngineWorkspace', () => {
 
 test.describe('Engine noProjectWorkspacePath', () => {
   test.use({ workspace: noProjectWorkspacePath });
+
   test('check default engine settings', async ({ page }) => {
     const settingsView = new SettingsView(page);
     await settingsView.openDefaultSettings();
@@ -50,6 +52,7 @@ test.describe('Engine noProjectWorkspacePath', () => {
 
 test.describe('Engine noEngineWorkspacePath', () => {
   test.use({ workspace: noEngineWorkspacePath });
+
   test('ensure that embedded engine is not started due to settings', async ({ page }) => {
     const settingsView = new SettingsView(page);
     await settingsView.isExplorerActionItemChecked();
