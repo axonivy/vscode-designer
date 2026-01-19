@@ -1,0 +1,19 @@
+{
+  "name": "@axonivy/vscode-webview-casemap-editor",
+  "version": "14.0.0",
+  "private": true,
+  "dependencies": {
+    "@axonivy/ui-components": "~14.0.0-next.985.6f2a62c",
+    "@axonivy/case-map-editor": "~14.0.0-next.128.c9e35e1",
+    "@axonivy/vscode-webview-common": "workspace:~14.0.0-next",
+    "vscode-messenger-webview": "0.4.5"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "vite build --mode development --emptyOutDir",
+    "build:production": "vite build --emptyOutDir",
+    "clean": "rimraf dist lib",
+    "type": "tsc --noEmit",
+    "watch": "vite build --mode development --watch --emptyOutDir"
+  }
+}

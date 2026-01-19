@@ -1,0 +1,15 @@
+{
+  "uuid" : "0ba81402-dad8-4349-ace3-92a1eca0077b",
+  "id" : "case_map",
+  "name" : "Case Map",
+  "stages" : [ {
+    "id" : "1",
+    "name" : "Approval",
+    "icon" : "css:fa fa-check",
+    "processes" : [ {
+      "id" : "2",
+      "name" : "Approve Level 1",
+      "processToExecute" : "prebuiltProject:190EEC366DECC66A/start.ivp"
+    } ]
+  } ]
+}

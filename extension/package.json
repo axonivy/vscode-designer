@@ -32,6 +32,7 @@
     "@axonivy/cms-editor-protocol": "~14.0.0-next.623.b4ee4ea",
     "@axonivy/database-editor-protocol": "~14.0.0-next.167.957490c",
     "@axonivy/dataclass-editor-protocol": "~14.0.0-next.787.b3d2859",
+    "@axonivy/case-map-editor-protocol": "~14.0.0-next.128.c9e35e1",
     "@axonivy/form-editor-protocol": "~14.0.0-next.1088.a1971a6",
     "@axonivy/jsonrpc": "~14.0.0-next.985.6f2a62c",
     "@axonivy/log-view-core": "~14.0.0-next.313.3515581",
@@ -90,6 +91,15 @@
         "selector": [
           {
             "filenamePattern": "variables.yaml"
+          }
+        ]
+      },
+      {
+        "viewType": "ivy.casemapEditor",
+        "displayName": "Axon Ivy Case Map Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.icm"
           }
         ]
       },
@@ -337,6 +347,11 @@
         "category": "Axon Ivy"
       },
       {
+        "command": "ivyProjects.addNewCaseMap",
+        "title": "New Case Map",
+        "category": "Axon Ivy"
+      },
+      {
         "command": "ivy.addDevContainer",
         "title": "Add Dev Container",
         "category": "Axon Ivy"
@@ -571,6 +586,10 @@
         {
           "command": "ivyProjects.addNewDataClass",
           "group": "3_new@1"
+        },
+        {
+          "command": "ivyProjects.addNewCaseMap",
+          "group": "4_new@1"
         }
       ],
       "explorer.new": [
@@ -610,8 +629,13 @@
           "when": "ivy:hasIvyProjects"
         },
         {
+          "command": "ivyProjects.addNewCaseMap",
+          "group": "4_new@1",
+          "when": "ivy:hasIvyProjects"
+        },
+        {
           "command": "ivyProjects.addNewProject",
-          "group": "4_new@1"
+          "group": "5_new@1"
         }
       ],
       "explorer.run": [
