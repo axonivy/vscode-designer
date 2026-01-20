@@ -17,7 +17,8 @@ export type Command =
   | JavaCommand
   | 'yaml-variables-editor.new'
   | 'yaml-roles-editor.new'
-  | 'ivy.addDevContainer';
+  | 'ivy.addDevContainer'
+  | 'ivy.showStatusBarQuickPick';
 type VSCodeCommand = 'setContext' | 'vscode.open' | 'copyFilePath';
 type EngineCommand =
   | 'engine.deployProjects'
