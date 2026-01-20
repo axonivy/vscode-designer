@@ -4,7 +4,7 @@ import { Messenger, MessengerDiagnostic } from 'vscode-messenger';
 import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
 import { askToReloadWindow } from './base/reload-window';
-import { setStatusBarIcon } from './base/status-bar';
+import { setStatusBarIcon, showStatusBarQuickPick } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
 import { IvyDiagnostics } from './engine/diagnostics';
@@ -29,6 +29,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Messen
   registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));
   registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
   registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
+  registerCommand('ivy.showStatusBarQuickPick', context, () => showStatusBarQuickPick());
 
   IvyProjectExplorer.init(context);
   IvyDiagnostics.init(context);

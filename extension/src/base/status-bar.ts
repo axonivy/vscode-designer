@@ -1,18 +1,23 @@
 import * as vscode from 'vscode';
+import { executeCommand } from './commands';
 
-export function setStatusBarMessage(text: string) {
+export const setStatusBarMessage = (text: string) => {
   vscode.window.setStatusBarMessage(text, 5_000);
-}
+};
 
-export function setStatusBarIcon() {
+export const setStatusBarIcon = () => {
   const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
   item.text = '$(type-hierarchy) Axon Ivy';
-  if (vscode.workspace.workspaceFolders) {
-    item.command = {
-      command: 'ivyProjects.addNewProject',
-      arguments: vscode.workspace.workspaceFolders[0] !== undefined ? [vscode.workspace.workspaceFolders[0].uri] : [],
-      title: 'Add new Project'
-    };
-  }
+  item.command = 'ivy.showStatusBarQuickPick';
   item.show();
-}
+};
+
+export const showStatusBarQuickPick = () => {
+  vscode.window.showQuickPick(['Deactivate Animation', 'Activate Animation'], { ignoreFocusOut: true }).then(selection => {
+    if (selection === 'Deactivate Animation') {
+      executeCommand('engine.deactivateAnimation');
+    } else if (selection === 'Activate Animation') {
+      executeCommand('engine.activateAnimation');
+    }
+  });
+};
