@@ -255,6 +255,10 @@ export class IvyEngineManager {
     return await this.ivyEngineApi?.refreshProjectStatuses();
   }
 
+  public async invalidateClassLoader(ivyProjectDirectory: string) {
+    await this.ivyEngineApi?.invalidateClassLoader(ivyProjectDirectory);
+  }
+
   public async projects() {
     return this.ivyEngineApi?.projects();
   }
