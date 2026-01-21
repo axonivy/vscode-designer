@@ -200,11 +200,10 @@ export class IvyEngineApi {
 
   public async invalidateClassLoader(projectDir: string) {
     const baseURL = await this.baseURL;
-    return vscode.window.withProgress(progressOptions(`Invalidate class loader for ${projectDir}`), async () => {
-      return invalidateClassLoader({ projectDir }, { baseURL, ...options })
-        .then(res => res.data)
-        .catch(handleAxiosError);
+    await vscode.window.withProgress(progressOptions(`Invalidate class loader for ${projectDir}`), async () => {
+      await invalidateClassLoader({ projectDir }, { baseURL, ...options }).catch(handleAxiosError);
     });
+    setStatusBarMessage('Finished: Invalidate class loader');
   }
 
   public async projects() {
