@@ -18,7 +18,7 @@ test('Compile java and invalidate class loader', async ({ page }) => {
   await expect(javaEditor.editorContent()).toContainText('public class TestClass');
   const runMethod = 'public static void run(){}';
 
-  await javaEditor.goToLineColumn(3, 1);
+  await javaEditor.goToLineColumn(5, 1);
   await javaEditor.typeText(runMethod);
   await expect(javaEditor.editorContent()).toContainText(runMethod);
   await javaEditor.saveAllFiles();
