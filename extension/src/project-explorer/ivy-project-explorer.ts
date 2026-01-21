@@ -107,13 +107,13 @@ export class IvyProjectExplorer {
       if (e.path.endsWith('roles.yaml')) {
         return;
       }
-      this.runEngineActionForUri((d: string) => IvyEngineManager.instance.deployProject(d), e, true);
+      this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.deployProject(d), 'deploy', e);
     });
     const pomWatcher = vscode.workspace.createFileSystemWatcher('**/pom.xml', true, false, true);
-    pomWatcher.onDidChange(e => this.runEngineActionForUri((d: string) => IvyEngineManager.instance.deployProject(d), e, true));
+    pomWatcher.onDidChange(e => this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.deployProject(d), 'deploy', e));
     const targetWatcher = vscode.workspace.createFileSystemWatcher('**/target/classes/**/*.*');
     const invalidateClassLoader = (uri: vscode.Uri) =>
-      this.runEngineActionForUri((d: string) => IvyEngineManager.instance.invalidateClassLoader(d), uri, true);
+      this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.invalidateClassLoader(d), 'invalidate', uri);
     targetWatcher.onDidChange(invalidateClassLoader);
     targetWatcher.onDidCreate(invalidateClassLoader);
     targetWatcher.onDidDelete(invalidateClassLoader);
@@ -148,15 +148,24 @@ export class IvyProjectExplorer {
     this.runEngineActionForUri(action, uri);
   }
 
-  private async runEngineActionForUri(action: (projectDir: string) => Promise<void>, uri?: vscode.Uri, debounce = false) {
+  private async runEngineActionForUri(action: (projectDir: string) => Promise<void>, uri?: vscode.Uri) {
     const project = await treeUriToProjectPath(uri, this.getIvyProjects());
     if (!project) {
       return;
     }
-    if (debounce) {
-      return debouncedAction(() => action(project), project, 1_000)();
-    }
     action(project);
+  }
+
+  private async runEngineActionDebounced(
+    action: (projectDir: string) => Promise<void>,
+    actionKey: 'deploy' | 'invalidate',
+    uri?: vscode.Uri
+  ) {
+    const project = await treeUriToProjectPath(uri, this.getIvyProjects());
+    if (!project) {
+      return;
+    }
+    return debouncedAction(() => action(project), `${project}:actionKey:${actionKey}`, 1_000)();
   }
 
   public async addProcess(selection: TreeSelection, kind: ProcessKind, pid?: string) {
