@@ -10,8 +10,7 @@ export class XhtmlEditor extends Editor {
   }
 
   async expectCompletionAtLineColumn(completion: string, line: number, column: number) {
-    await this.executeCommand('Go to Line/Column...', `:${line}:${column}`);
-    await expect(this.page.locator('a.statusbar-item-label').getByText(`Ln ${line}, Col ${column}`)).toBeVisible();
+    await this.goToLineColumn(line, column);
     await this.executeCommand('Trigger Suggest');
     await expect(this.complitions.getByText(completion)).toBeVisible();
   }

@@ -25,6 +25,7 @@ import {
   findOrCreatePmv,
   importProcess,
   installMarketProduct,
+  invalidateClassLoader,
   projects,
   refreshProjectStatuses,
   stopBpmEngine
@@ -195,6 +196,14 @@ export class IvyEngineApi {
         .then(res => res.data)
         .catch(handleAxiosError);
     });
+  }
+
+  public async invalidateClassLoader(projectDir: string) {
+    const baseURL = await this.baseURL;
+    await vscode.window.withProgress(progressOptions(`Invalidate class loader for ${projectDir}`), async () => {
+      await invalidateClassLoader({ projectDir }, { baseURL, ...options }).catch(handleAxiosError);
+    });
+    setStatusBarMessage('Finished: Invalidate class loader');
   }
 
   public async projects() {

@@ -31,11 +31,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<Messen
   registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
   registerCommand('ivy.showStatusBarQuickPick', context, () => showStatusBarQuickPick());
 
-  IvyProjectExplorer.init(context);
   IvyDiagnostics.init(context);
   setStatusBarIcon();
   conditionalWelcomePage(context);
 
+  await IvyProjectExplorer.init(context);
   return messenger.diagnosticApi();
 }
 

@@ -31,4 +31,9 @@ export class Editor extends View {
   editorContent() {
     return this.page.locator('div.editor-container');
   }
+
+  async goToLineColumn(line: number, column: number) {
+    await this.executeCommand('Go to Line/Column...', `:${line}:${column}`);
+    await expect(this.page.locator('a.statusbar-item-label').getByText(`Ln ${line}, Col ${column}`)).toBeVisible();
+  }
 }

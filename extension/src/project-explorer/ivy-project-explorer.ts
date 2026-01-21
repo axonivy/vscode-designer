@@ -1,6 +1,7 @@
 import path from 'path';
 import * as vscode from 'vscode';
 import { Command, executeCommand, registerCommand } from '../base/commands';
+import { debouncedAction } from '../base/debounce';
 import { getIvyProject } from '../base/ivyProjectSelection';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
@@ -27,8 +28,6 @@ export class IvyProjectExplorer {
     this.treeDataProvider = new IvyProjectTreeDataProvider();
     this.treeView = vscode.window.createTreeView(VIEW_ID, { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
     context.subscriptions.push(this.treeView);
-    this.registerCommands(context);
-    this.defineFileWatchers();
     this.treeView.onDidChangeVisibility((event: vscode.TreeViewVisibilityChangeEvent) => {
       if (event.visible) {
         const activeProjectCmsEditor = CmsEditorRegistry.findActive();
@@ -37,16 +36,24 @@ export class IvyProjectExplorer {
         }
       }
     });
-    this.hasIvyProjects().then(hasIvyProjects =>
-      this.setProjectExplorerActivationCondition(hasIvyProjects).then(() => this.activateEngineExtension(hasIvyProjects))
-    );
   }
 
-  static init(context: vscode.ExtensionContext) {
-    if (!IvyProjectExplorer._instance) {
-      IvyProjectExplorer._instance = new IvyProjectExplorer(context);
+  static async init(context: vscode.ExtensionContext) {
+    if (IvyProjectExplorer._instance) {
+      return IvyProjectExplorer._instance;
     }
-    return IvyProjectExplorer._instance;
+    IvyProjectExplorer._instance = new IvyProjectExplorer(context);
+    await IvyProjectExplorer._instance.activateEngineIfNeeded();
+    IvyProjectExplorer._instance.registerCommands(context);
+    IvyProjectExplorer._instance.defineFileWatchers(context);
+  }
+
+  private async activateEngineIfNeeded() {
+    const hasIvyProjects = await this.hasIvyProjects();
+    await this.setProjectExplorerActivationCondition(hasIvyProjects);
+    if (hasIvyProjects) {
+      await IvyEngineManager.instance.start();
+    }
   }
 
   private registerCommands(context: vscode.ExtensionContext) {
@@ -82,23 +89,41 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.convertProject`, (s: TreeSelection) => this.convertProject(s));
   }
 
-  private defineFileWatchers() {
-    vscode.workspace.createFileSystemWatcher(IVY_RPOJECT_FILE_PATTERN, false, true, true).onDidCreate(async () => {
+  private defineFileWatchers(context: vscode.ExtensionContext) {
+    const ivyProjectFileWatcher = vscode.workspace.createFileSystemWatcher(IVY_RPOJECT_FILE_PATTERN, false, true, true);
+    ivyProjectFileWatcher.onDidCreate(async () => {
       await executeCommand('java.project.import.command');
       await this.refresh();
     });
-    vscode.workspace.createFileSystemWatcher('**/*', true, true, false).onDidDelete(async e => {
+    const deleteProjectWatcher = vscode.workspace.createFileSystemWatcher('**/*', true, true, false);
+    deleteProjectWatcher.onDidDelete(async e => {
       if (e.path.includes('/target/')) {
         return;
       }
       await this.deleteProjectOnEngine(e.fsPath);
     });
-    vscode.workspace
-      .createFileSystemWatcher('**/{cms,config,webContent}/**/*', true, false, true)
-      .onDidChange(e => this.runEngineAction((d: string) => IvyEngineManager.instance.deployProject(d), e));
-    vscode.workspace
-      .createFileSystemWatcher('**/pom.xml', true, false, true)
-      .onDidChange(e => this.runEngineAction((d: string) => IvyEngineManager.instance.deployProject(d), e));
+    const deployProject = (uri: vscode.Uri) =>
+      this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.deployProject(d), 'deploy', uri);
+    const webContentWatcher = vscode.workspace.createFileSystemWatcher('**/webContent/**/*');
+    webContentWatcher.onDidChange(deployProject);
+    webContentWatcher.onDidDelete(deployProject);
+    webContentWatcher.onDidCreate(deployProject);
+    const configWatcher = vscode.workspace.createFileSystemWatcher(
+      '**/config/{custom-fields.yaml,overrides.any,persistence.xml,rest-clients.yaml,users.xml,webservice-clients.yaml}',
+      true,
+      false,
+      true
+    );
+    configWatcher.onDidChange(deployProject);
+    const pomWatcher = vscode.workspace.createFileSystemWatcher('**/pom.xml', true, false, true);
+    pomWatcher.onDidChange(deployProject);
+    const targetWatcher = vscode.workspace.createFileSystemWatcher('**/target/classes/**/*.*');
+    const invalidateClassLoader = (uri: vscode.Uri) =>
+      this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.invalidateClassLoader(d), 'invalidate', uri);
+    targetWatcher.onDidChange(invalidateClassLoader);
+    targetWatcher.onDidCreate(invalidateClassLoader);
+    targetWatcher.onDidDelete(invalidateClassLoader);
+    context.subscriptions.push(ivyProjectFileWatcher, deleteProjectWatcher, webContentWatcher, configWatcher, pomWatcher, targetWatcher);
   }
 
   private async deleteProjectOnEngine(projectToBeDeleted: string) {
@@ -117,9 +142,7 @@ export class IvyProjectExplorer {
 
   private async refresh() {
     this.treeDataProvider.refresh();
-    const hasIvyProjects = await this.hasIvyProjects();
-    await this.setProjectExplorerActivationCondition(hasIvyProjects);
-    await this.activateEngineExtension(hasIvyProjects);
+    await this.activateEngineIfNeeded();
     await IvyDiagnostics.instance.refresh(true);
   }
 
@@ -128,7 +151,27 @@ export class IvyProjectExplorer {
     if (!uri) {
       uri = await getIvyProject(this);
     }
-    treeUriToProjectPath(uri, this.getIvyProjects()).then(selectionPath => (selectionPath ? action(selectionPath) : {}));
+    this.runEngineActionForUri(action, uri);
+  }
+
+  private async runEngineActionForUri(action: (projectDir: string) => Promise<void>, uri?: vscode.Uri) {
+    const project = await treeUriToProjectPath(uri, this.getIvyProjects());
+    if (!project) {
+      return;
+    }
+    action(project);
+  }
+
+  private async runEngineActionDebounced(
+    action: (projectDir: string) => Promise<void>,
+    actionKey: 'deploy' | 'invalidate',
+    uri?: vscode.Uri
+  ) {
+    const project = await treeUriToProjectPath(uri, this.getIvyProjects());
+    if (!project) {
+      return;
+    }
+    return debouncedAction(() => action(project), `${project}:actionKey:${actionKey}`, 1_000)();
   }
 
   public async addProcess(selection: TreeSelection, kind: ProcessKind, pid?: string) {
@@ -223,12 +266,6 @@ export class IvyProjectExplorer {
 
   public async setProjectExplorerActivationCondition(hasIvyProjects: boolean) {
     await executeCommand('setContext', 'ivy:hasIvyProjects', hasIvyProjects);
-  }
-
-  private async activateEngineExtension(hasIvyProjects: boolean) {
-    if (hasIvyProjects) {
-      await IvyEngineManager.instance.start();
-    }
   }
 
   public async selectCmsEntry(projectPath: string) {
