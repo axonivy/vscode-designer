@@ -102,22 +102,28 @@ export class IvyProjectExplorer {
       }
       await this.deleteProjectOnEngine(e.fsPath);
     });
-    const configWatcher = vscode.workspace.createFileSystemWatcher('**/{config,webContent}/**/*', true, false, true);
-    configWatcher.onDidChange(e => {
-      if (e.path.endsWith('roles.yaml')) {
-        return;
-      }
-      this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.deployProject(d), 'deploy', e);
-    });
+    const deployProject = (uri: vscode.Uri) =>
+      this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.deployProject(d), 'deploy', uri);
+    const webContentWatcher = vscode.workspace.createFileSystemWatcher('**/webContent/**/*');
+    webContentWatcher.onDidChange(deployProject);
+    webContentWatcher.onDidDelete(deployProject);
+    webContentWatcher.onDidCreate(deployProject);
+    const configWatcher = vscode.workspace.createFileSystemWatcher(
+      '**/config/{custom-fields.yaml,overrides.any,persistence.xml,rest-clients.yaml,users.xml,webservice-clients.yaml}',
+      true,
+      false,
+      true
+    );
+    configWatcher.onDidChange(deployProject);
     const pomWatcher = vscode.workspace.createFileSystemWatcher('**/pom.xml', true, false, true);
-    pomWatcher.onDidChange(e => this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.deployProject(d), 'deploy', e));
+    pomWatcher.onDidChange(deployProject);
     const targetWatcher = vscode.workspace.createFileSystemWatcher('**/target/classes/**/*.*');
     const invalidateClassLoader = (uri: vscode.Uri) =>
       this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.invalidateClassLoader(d), 'invalidate', uri);
     targetWatcher.onDidChange(invalidateClassLoader);
     targetWatcher.onDidCreate(invalidateClassLoader);
     targetWatcher.onDidDelete(invalidateClassLoader);
-    context.subscriptions.push(ivyProjectFileWatcher, deleteProjectWatcher, configWatcher, pomWatcher, targetWatcher);
+    context.subscriptions.push(ivyProjectFileWatcher, deleteProjectWatcher, webContentWatcher, configWatcher, pomWatcher, targetWatcher);
   }
 
   private async deleteProjectOnEngine(projectToBeDeleted: string) {
