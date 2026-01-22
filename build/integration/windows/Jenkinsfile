@@ -17,6 +17,10 @@ pipeline {
     cron '@midnight'
   }
 
+  parameters {
+    string(name: 'engineDownloadUrl', defaultValue: 'https://jenkins.ivyteam.io/job/core_product/job/master/lastSuccessfulBuild/artifact/workspace/ch.ivyteam.ivy.server.product/target/products/*_Slim_*.zip/*zip*/products.zip', description: 'engine that will be packaged')
+  }
+
   environment {
     JAVA_OPTS_IVY_SYSTEM = '-Ddev.mode=true -Divy.engine.testheadless=true'
     CI = 'true'
@@ -40,7 +44,7 @@ pipeline {
           bat 'pnpm run update:axonivy:next'
           bat 'pnpm install --no-frozen-lockfile'
           bat 'pnpm run build:production'
-          bat 'pnpm run engine:download'
+          bat "pnpm run engine:download ${params.engineDownloadUrl}"
         }
       }
     }

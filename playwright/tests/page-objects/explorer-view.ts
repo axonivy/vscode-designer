@@ -3,7 +3,10 @@ import path from 'path';
 import { View, type ViewData } from './view';
 
 export abstract class ExplorerView extends View {
-  constructor(private viewName: string, page: Page) {
+  constructor(
+    private viewName: string,
+    page: Page
+  ) {
     const data: ViewData = {
       tabSelector: `div.pane-header:has-text("${viewName}")`,
       viewSelector: ''
@@ -45,6 +48,11 @@ export abstract class ExplorerView extends View {
 
   async selectNode(name: string) {
     await this.viewLocator.getByText(name).click();
+    await this.isSelected(name);
+  }
+
+  async selectNodeExact(name: string) {
+    await this.viewLocator.getByText(name, { exact: true }).click();
     await this.isSelected(name);
   }
 

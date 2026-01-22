@@ -2,8 +2,7 @@ import { expect, test } from './fixtures/baseTest';
 import { FileExplorer } from './page-objects/explorer-view';
 import { ProcessEditor } from './page-objects/process-editor';
 
-// eslint-disable-next-line playwright/no-skipped-test
-test.describe.skip('Market Product installation', () => {
+test.describe('Market Product installation', () => {
   let explorer: FileExplorer;
 
   test.beforeEach(async ({ page }) => {
@@ -17,9 +16,9 @@ test.describe.skip('Market Product installation', () => {
     await explorer.selectNode('resources');
     await explorer.installProduct('connectivity-demo');
     await explorer.provideUserInput('14.0.0-SNAPSHOT');
-    await explorer.provideUserInput('connectivity-demos');
+    await explorer.provideUserInput('connectivity-demos$');
     await explorer.executeCommand('Refresh Explorer');
-    await explorer.selectNode('connectivity-demos');
+    await explorer.selectNodeExact('connectivity-demos');
     await explorer.selectNode('pom.xml');
   });
 
