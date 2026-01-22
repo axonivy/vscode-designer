@@ -16,9 +16,9 @@ test.describe('Market Product installation', () => {
     await explorer.selectNode('resources');
     await explorer.installProduct('connectivity-demo');
     await explorer.provideUserInput('14.0.0-SNAPSHOT');
-    await explorer.provideUserInput('connectivity-demos');
+    await explorer.provideUserInput('connectivity-demos$');
     await explorer.executeCommand('Refresh Explorer');
-    await explorer.selectNode('connectivity-demos');
+    await explorer.selectNodeExact('connectivity-demos');
     await explorer.selectNode('pom.xml');
   });
 
