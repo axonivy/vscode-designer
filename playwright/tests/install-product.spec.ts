@@ -2,8 +2,7 @@ import { expect, test } from './fixtures/baseTest';
 import { FileExplorer } from './page-objects/explorer-view';
 import { ProcessEditor } from './page-objects/process-editor';
 
-// eslint-disable-next-line playwright/no-skipped-test
-test.describe.skip('Market Product installation', () => {
+test.describe('Market Product installation', () => {
   let explorer: FileExplorer;
 
   test.beforeEach(async ({ page }) => {
