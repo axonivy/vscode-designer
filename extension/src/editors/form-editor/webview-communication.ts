@@ -3,7 +3,6 @@ import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
-import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
 import { updateTextDocumentContent } from '../content-writer';
 import { hasEditorFileContent, InitializeConnectionRequest, isAction, WebviewReadyNotification } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
@@ -47,7 +46,7 @@ class FormEditorWebSocketForwarder extends WebSocketForwarder {
       } else if (message.params.actionId === 'openDataClass') {
         vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(`${path}Data.d.json`));
       } else if (message.params.actionId === 'openUrl') {
-        IvyBrowserViewProvider.instance.open(message.params.payload);
+        vscode.env.openExternal(vscode.Uri.parse(message.params.payload));
       }
     }
     super.handleClientMessage(message);

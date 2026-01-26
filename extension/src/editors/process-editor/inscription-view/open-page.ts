@@ -4,7 +4,6 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { executeCommand } from '../../../base/commands';
 import { logInformationMessage } from '../../../base/logging-util';
-import { IvyBrowserViewProvider } from '../../../browser/ivy-browser-view-provider';
 import { IvyProjectExplorer } from '../../../project-explorer/ivy-project-explorer';
 import { InscriptionActionHandler } from './action-handlers';
 
@@ -13,7 +12,7 @@ export class OpenPageActionHandler implements InscriptionActionHandler {
   async handle(actionArgs: InscriptionActionArgs): Promise<void> {
     const path = actionArgs.payload.toString();
     if (isUrl(path)) {
-      openUrlInIntegratedBrowser(path);
+      openUrlInExternalBrowser(path);
     } else {
       openInExplorer(await getValideFilePath(path));
     }
@@ -35,8 +34,8 @@ async function getValideFilePath(pathString: string) {
   return null;
 }
 
-async function openUrlInIntegratedBrowser(absolutePath: string) {
-  await IvyBrowserViewProvider.instance.open(absolutePath);
+async function openUrlInExternalBrowser(absolutePath: string) {
+  await vscode.env.openExternal(vscode.Uri.parse(absolutePath));
 }
 
 function openInExplorer(absolutePath: string | null) {

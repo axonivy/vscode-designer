@@ -3,7 +3,6 @@ import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
-import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
 import { updateTextDocumentContent } from '../content-writer';
 import { hasEditorFileContent, InitializeConnectionRequest, isAction, WebviewReadyNotification } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
@@ -29,13 +28,18 @@ export const setupCommunication = (
 };
 
 class RoleEditorWebSocketForwarder extends WebSocketForwarder {
-  constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, readonly document: vscode.TextDocument) {
+  constructor(
+    websocketUrl: URL,
+    messenger: Messenger,
+    messageParticipant: MessageParticipant,
+    readonly document: vscode.TextDocument
+  ) {
     super(websocketUrl, 'ivy-role-lsp', messenger, messageParticipant, RoleWebSocketMessage);
   }
 
   protected override handleClientMessage(message: unknown) {
     if (isAction<RoleActionArgs>(message) && message.params.actionId === 'openUrl') {
-      IvyBrowserViewProvider.instance.open(message.params.payload);
+      vscode.env.openExternal(vscode.Uri.parse(message.params.payload));
     }
     super.handleClientMessage(message);
   }
