@@ -23,5 +23,5 @@ test('Read, write and open help', async ({ page }) => {
   const browserView = new BrowserView(page);
   await editor.viewFrameLocator().getByRole('button', { name: /Help/ }).click();
   const helpLink = await browserView.input().inputValue();
-  expect(helpLink).toMatch(/^https:\/\/developer\.axonivy\.com.*configuration\/roles\.html$/);
+  expect(helpLink).toMatch(/^https:\/\/developer\.axonivy\.com.*configuration\/roles-users\.html$/);
 });
