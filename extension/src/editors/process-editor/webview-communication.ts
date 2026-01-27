@@ -5,7 +5,7 @@ import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType, RequestType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
 import { JavaCompletion } from '../java-completion';
-import { isAllTypesSearchRequest, isSearchResult, toJavaType } from '../notification-helper';
+import { isAllTypesSearchRequest, isSearchResult } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 import { SendInscriptionNotification, handleActionLocal } from './inscription-view/action-handlers';
 
@@ -84,8 +84,7 @@ class InscriptionWebSocketForwarder extends WebSocketForwarder {
   protected override async handleServerMessage(message: string) {
     const obj = JSON.parse(message);
     if (this.currentTypeSearch?.type && isSearchResult(obj, this.currentTypeSearch.id)) {
-      const completions = await this.javaCompletion.types(this.currentTypeSearch.type);
-      const javaTypes = completions.map(item => toJavaType(item));
+      const javaTypes = await this.javaCompletion.types(this.currentTypeSearch.type);
       obj.result.push(...javaTypes);
       message = JSON.stringify(obj);
     }

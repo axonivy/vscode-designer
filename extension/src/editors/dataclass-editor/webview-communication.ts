@@ -13,7 +13,6 @@ import {
   isAllTypesSearchRequest,
   isSearchResult,
   noUnknownAction,
-  toJavaType,
   WebviewReadyNotification
 } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
@@ -81,8 +80,7 @@ class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
     if (hasEditorFileContent(obj)) {
       await updateTextDocumentContent(this.document, obj.result);
     } else if (this.currentTypeSearch?.type && isSearchResult(obj, this.currentTypeSearch.id)) {
-      const completions = await this.javaCompletion.types(this.currentTypeSearch.type);
-      const javaTypes = completions.map(item => toJavaType(item));
+      const javaTypes = await this.javaCompletion.types(this.currentTypeSearch.type);
       obj.result.push(...javaTypes);
       message = JSON.stringify(obj);
     }

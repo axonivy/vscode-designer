@@ -20,8 +20,16 @@ export class JavaCompletion {
       javaFile,
       new vscode.Position(0, 12 + toBeCompleted.length)
     );
-    return completionList.items
+    const slicedCompletions = completionList.items
       .filter(item => item.kind === vscode.CompletionItemKind.Class || item.kind === vscode.CompletionItemKind.Interface)
       .slice(0, this.itemResolveCount);
+    return slicedCompletions.map(item => this.toJavaType(item));
   }
+
+  toJavaType = (item: vscode.CompletionItem) => {
+    const simpleName = typeof item.label === 'string' ? item.label : (item.label.label ?? '');
+    const packageName = typeof item.label === 'string' ? '' : (item.label.description ?? '');
+    const fullQualifiedName = item.detail ?? '';
+    return { simpleName, packageName, fullQualifiedName };
+  };
 }
