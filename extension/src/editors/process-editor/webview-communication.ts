@@ -1,10 +1,11 @@
-import { JavaType, TypeSearchRequest } from '@axonivy/process-editor-inscription-protocol';
+import { TypeSearchRequest } from '@axonivy/process-editor-inscription-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType, RequestType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
 import { JavaCompletion } from '../java-completion';
+import { isAllTypesSearchRequest, isSearchResult, toJavaType } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 import { SendInscriptionNotification, handleActionLocal } from './inscription-view/action-handlers';
 
@@ -58,7 +59,7 @@ const vsCodeThemeToMonacoTheme = (theme: vscode.ColorTheme) => {
 class InscriptionWebSocketForwarder extends WebSocketForwarder {
   private readonly sendInscriptionNotification: SendInscriptionNotification;
 
-  lastSearch: { search: string; id: number } | undefined;
+  currentTypeSearch: { type: string; id: number } | undefined;
 
   readonly javaCompletion: JavaCompletion;
 
@@ -74,55 +75,20 @@ class InscriptionWebSocketForwarder extends WebSocketForwarder {
     if (handled) {
       return;
     }
-    if (this.isAllTypesSearchRequest(message)) {
-      this.lastSearch = { search: message.params.type, id: message.id };
+    if (isAllTypesSearchRequest<TypeSearchRequest>(message)) {
+      this.currentTypeSearch = { type: message.params.type, id: message.id };
     }
     super.handleClientMessage(message);
   }
 
   protected override async handleServerMessage(message: string) {
     const obj = JSON.parse(message);
-    if (this.isSearchResult(obj)) {
-      const searchString = this.lastSearch?.search ?? '';
-      const completions = await this.javaCompletion.types(searchString);
-      console.log(completions.length);
-      const javaTypes = completions.map(item => this.toJavaType(item));
+    if (this.currentTypeSearch?.type && isSearchResult(obj, this.currentTypeSearch.id)) {
+      const completions = await this.javaCompletion.types(this.currentTypeSearch.type);
+      const javaTypes = completions.map(item => toJavaType(item));
       obj.result.push(...javaTypes);
       message = JSON.stringify(obj);
     }
     super.handleServerMessage(message);
   }
-
-  isAllTypesSearchRequest = (obj: unknown): obj is { method: string; params: TypeSearchRequest; id: number } => {
-    return (
-      typeof obj === 'object' &&
-      obj !== null &&
-      'method' in obj &&
-      obj.method === 'meta/scripting/allTypes' &&
-      'params' in obj &&
-      typeof obj.params === 'object' &&
-      obj.params !== null &&
-      'id' in obj &&
-      typeof obj.id === 'number'
-    );
-  };
-
-  isSearchResult = (obj: unknown): obj is { result: JavaType[]; id: number } => {
-    return (
-      typeof obj === 'object' &&
-      obj !== null &&
-      'result' in obj &&
-      typeof obj.result === 'object' &&
-      obj.result !== null &&
-      'id' in obj &&
-      obj.id === this.lastSearch?.id
-    );
-  };
-
-  toJavaType = (item: vscode.CompletionItem): JavaType => {
-    const simpleName = typeof item.label === 'string' ? item.label : (item.label.label ?? '');
-    const packageName = typeof item.label === 'string' ? '' : (item.label.description ?? '');
-    const fullQualifiedName = item.detail ?? '';
-    return { simpleName, packageName, fullQualifiedName };
-  };
 }

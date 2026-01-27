@@ -1,4 +1,4 @@
-import { DataActionArgs, DataClassTypeSearchRequest, JavaType } from '@axonivy/dataclass-editor-protocol';
+import { DataActionArgs, DataClassTypeSearchRequest } from '@axonivy/dataclass-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
@@ -10,7 +10,10 @@ import {
   hasEditorFileContent,
   InitializeConnectionRequest,
   isAction,
+  isAllTypesSearchRequest,
+  isSearchResult,
   noUnknownAction,
+  toJavaType,
   WebviewReadyNotification
 } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
@@ -36,7 +39,7 @@ export const setupCommunication = (
 };
 
 class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
-  lastSearch: { search: string; id: number } | undefined;
+  currentTypeSearch: { type: string; id: number } | undefined;
 
   readonly javaCompletion: JavaCompletion;
 
@@ -67,9 +70,8 @@ class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
         default:
           noUnknownAction(message.params.actionId);
       }
-    }
-    if (this.isAllTypesSearchRequest(message)) {
-      this.lastSearch = { search: message.params.type, id: message.id };
+    } else if (isAllTypesSearchRequest<DataClassTypeSearchRequest>(message)) {
+      this.currentTypeSearch = { type: message.params.type, id: message.id };
     }
     super.handleClientMessage(message);
   }
@@ -79,48 +81,12 @@ class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
     if (hasEditorFileContent(obj)) {
       updateTextDocumentContent(this.document, obj.result).then(() => super.handleServerMessage(message));
       return;
-    }
-    if (this.isSearchResult(obj)) {
-      const searchString = this.lastSearch?.search ?? '';
-      const completions = await this.javaCompletion.types(searchString);
-      console.log(completions.length);
-      const javaTypes = completions.map(item => this.toJavaType(item));
+    } else if (this.currentTypeSearch?.type && isSearchResult(obj, this.currentTypeSearch.id)) {
+      const completions = await this.javaCompletion.types(this.currentTypeSearch.type);
+      const javaTypes = completions.map(item => toJavaType(item));
       obj.result.push(...javaTypes);
       message = JSON.stringify(obj);
     }
     super.handleServerMessage(message);
   }
-
-  isAllTypesSearchRequest = (obj: unknown): obj is { method: string; params: DataClassTypeSearchRequest; id: number } => {
-    return (
-      typeof obj === 'object' &&
-      obj !== null &&
-      'method' in obj &&
-      obj.method === 'meta/scripting/allTypes' &&
-      'params' in obj &&
-      typeof obj.params === 'object' &&
-      obj.params !== null &&
-      'id' in obj &&
-      typeof obj.id === 'number'
-    );
-  };
-
-  isSearchResult = (obj: unknown): obj is { result: JavaType[]; id: number } => {
-    return (
-      typeof obj === 'object' &&
-      obj !== null &&
-      'result' in obj &&
-      typeof obj.result === 'object' &&
-      obj.result !== null &&
-      'id' in obj &&
-      obj.id === this.lastSearch?.id
-    );
-  };
-
-  toJavaType = (item: vscode.CompletionItem): JavaType => {
-    const simpleName = typeof item.label === 'string' ? item.label : (item.label.label ?? '');
-    const packageName = typeof item.label === 'string' ? '' : (item.label.description ?? '');
-    const fullQualifiedName = item.detail ?? '';
-    return { simpleName, packageName, fullQualifiedName };
-  };
 }
