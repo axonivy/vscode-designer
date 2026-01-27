@@ -265,6 +265,10 @@ export class IvyEngineManager {
     return this.ivyEngineApi?.projects();
   }
 
+  get engineApi() {
+    return this.ivyEngineApi;
+  }
+
   async ivyProjectDirectories() {
     return IvyProjectExplorer.instance.getIvyProjects();
   }

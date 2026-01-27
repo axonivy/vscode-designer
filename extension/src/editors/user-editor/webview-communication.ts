@@ -5,7 +5,13 @@ import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
 import { updateTextDocumentContent } from '../content-writer';
-import { hasEditorFileContent, InitializeConnectionRequest, isAction, WebviewReadyNotification } from '../notification-helper';
+import {
+  hasEditorFileContent,
+  InitializeConnectionRequest,
+  isAction,
+  noUnknownAction,
+  WebviewReadyNotification
+} from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 
 const UserWebSocketMessage: NotificationType<unknown> = { method: 'userWebSocketMessage' };
@@ -39,8 +45,14 @@ class UserEditorWebSocketForwarder extends WebSocketForwarder {
   }
 
   protected override handleClientMessage(message: unknown) {
-    if (isAction<UserActionArgs>(message) && message.params.actionId === 'openUrl') {
-      IvyBrowserViewProvider.instance.open(message.params.payload);
+    if (isAction<UserActionArgs>(message)) {
+      switch (message.params.actionId) {
+        case 'openUrl':
+          IvyBrowserViewProvider.instance.open(message.params.payload);
+          break;
+        default:
+          noUnknownAction(message.params.actionId);
+      }
     }
     super.handleClientMessage(message);
   }
