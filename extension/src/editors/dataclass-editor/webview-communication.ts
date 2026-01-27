@@ -79,8 +79,7 @@ class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
   protected override async handleServerMessage(message: string) {
     const obj = JSON.parse(message);
     if (hasEditorFileContent(obj)) {
-      updateTextDocumentContent(this.document, obj.result).then(() => super.handleServerMessage(message));
-      return;
+      await updateTextDocumentContent(this.document, obj.result);
     } else if (this.currentTypeSearch?.type && isSearchResult(obj, this.currentTypeSearch.id)) {
       const completions = await this.javaCompletion.types(this.currentTypeSearch.type);
       const javaTypes = completions.map(item => toJavaType(item));
