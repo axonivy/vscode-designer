@@ -1,5 +1,6 @@
 import { EditorFileContent } from '@axonivy/dataclass-editor-protocol';
 import { NotificationType } from 'vscode-messenger-common';
+import { logErrorMessage } from '../base/logging-util';
 
 export const WebviewReadyNotification: NotificationType<void> = { method: 'ready' };
 export const InitializeConnectionRequest: NotificationType<{ file: string }> = { method: 'initializeConnection' };
@@ -26,3 +27,5 @@ export const hasEditorFileContent = (obj: unknown): obj is { jsonrpc: string; id
     typeof obj.result.content === 'string'
   );
 };
+
+export const noUnknownAction = (action: never) => logErrorMessage(`Unknown action: ${action}`);

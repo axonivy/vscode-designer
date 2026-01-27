@@ -1,25 +1,38 @@
 import { InscriptionActionArgs, InscriptionNotificationTypes } from '@axonivy/process-editor-inscription-protocol';
-import { isAction } from '../../notification-helper';
-import { NewProcessActionHandler } from './new-process';
-import { NewHtmlDialogActionHandler } from './new-user-dialog';
-import { OpenPageActionHandler } from './open-page';
-
-const ActionHandlers = [new NewProcessActionHandler(), new NewHtmlDialogActionHandler(), new OpenPageActionHandler()];
+import { isAction, noUnknownAction } from '../../notification-helper';
+import { handleNewProcess } from './new-process';
+import { handleNewHtmlDialog } from './new-user-dialog';
+import { handleOpenPage } from './open-page';
 
 export type SendInscriptionNotification = (type: keyof InscriptionNotificationTypes) => void;
 
-export interface InscriptionActionHandler {
-  actionId: InscriptionActionArgs['actionId'];
-  handle(actionArgs: InscriptionActionArgs, sendInscriptionNotification: SendInscriptionNotification): Promise<void>;
-}
-
 export const handleActionLocal = (msg: unknown, sendInscriptionNotification: SendInscriptionNotification) => {
   if (isAction<InscriptionActionArgs>(msg)) {
-    const handler = ActionHandlers.find(handler => handler.actionId === msg.params.actionId);
-    if (handler) {
-      handler.handle(msg.params, sendInscriptionNotification);
-      return true;
+    switch (msg.params.actionId) {
+      case 'openPage':
+        handleOpenPage(msg.params);
+        break;
+      case 'newProcess':
+        handleNewProcess(msg.params, sendInscriptionNotification);
+        break;
+      case 'newHtmlDialog':
+        handleNewHtmlDialog(msg.params, sendInscriptionNotification);
+        break;
+      case 'openUrl':
+      case 'newWebServiceClient':
+      case 'openConfig':
+      case 'openCustomField':
+      case 'openEndPage':
+      case 'newProgram':
+      case 'newRestClient':
+      case 'openOrCreateCmsCategory':
+      case 'openProgram':
+        // TODO: check this actions, if we need to handle them here
+        break;
+      default:
+        noUnknownAction(msg.params.actionId);
     }
+    return true;
   }
   return false;
 };

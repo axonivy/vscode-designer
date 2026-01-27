@@ -6,19 +6,15 @@ import { executeCommand } from '../../../base/commands';
 import { logInformationMessage } from '../../../base/logging-util';
 import { IvyBrowserViewProvider } from '../../../browser/ivy-browser-view-provider';
 import { IvyProjectExplorer } from '../../../project-explorer/ivy-project-explorer';
-import { InscriptionActionHandler } from './action-handlers';
 
-export class OpenPageActionHandler implements InscriptionActionHandler {
-  actionId = 'openPage' as const;
-  async handle(actionArgs: InscriptionActionArgs): Promise<void> {
-    const path = actionArgs.payload.toString();
-    if (isUrl(path)) {
-      openUrlInIntegratedBrowser(path);
-    } else {
-      openInExplorer(await getValideFilePath(path));
-    }
+export const handleOpenPage = async (actionArgs: InscriptionActionArgs) => {
+  const path = actionArgs.payload.toString();
+  if (isUrl(path)) {
+    openUrlInIntegratedBrowser(path);
+  } else {
+    openInExplorer(await getValideFilePath(path));
   }
-}
+};
 
 function isUrl(absolutePath: string) {
   return /^https?:\/\//i.test(absolutePath);

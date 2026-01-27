@@ -5,7 +5,13 @@ import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
 import { updateTextDocumentContent } from '../content-writer';
-import { hasEditorFileContent, InitializeConnectionRequest, isAction, WebviewReadyNotification } from '../notification-helper';
+import {
+  hasEditorFileContent,
+  InitializeConnectionRequest,
+  isAction,
+  noUnknownAction,
+  WebviewReadyNotification
+} from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 
 const DataClassWebSocketMessage: NotificationType<unknown> = { method: 'dataclassWebSocketMessage' };
@@ -39,8 +45,22 @@ class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
   }
 
   protected override handleClientMessage(message: unknown) {
-    if (isAction<DataActionArgs>(message) && message.params.actionId === 'openUrl') {
-      IvyBrowserViewProvider.instance.open(message.params.payload);
+    if (isAction<DataActionArgs>(message)) {
+      const file = this.document.uri.path;
+      const path = file.substring(0, file.lastIndexOf('Data.d.json'));
+      switch (message.params.actionId) {
+        case 'openUrl':
+          IvyBrowserViewProvider.instance.open(message.params.payload);
+          break;
+        case 'openProcess':
+          vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(`${path}Process.p.json`));
+          break;
+        case 'openForm':
+          vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(`${path}.f.json`));
+          break;
+        default:
+          noUnknownAction(message.params.actionId);
+      }
     }
     super.handleClientMessage(message);
   }

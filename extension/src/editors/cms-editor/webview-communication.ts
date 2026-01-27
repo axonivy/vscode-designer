@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
-import { InitializeConnectionRequest, isAction, WebviewReadyNotification } from '../notification-helper';
+import { InitializeConnectionRequest, isAction, noUnknownAction, WebviewReadyNotification } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 
 const CmsWebSocketMessage: NotificationType<unknown> = { method: 'cmsWebSocketMessage' };
@@ -28,8 +28,14 @@ class CmsEditorWebSocketForwarder extends WebSocketForwarder {
   }
 
   protected override handleClientMessage(message: unknown) {
-    if (isAction<CmsActionArgs>(message) && message.params.actionId === 'openUrl') {
-      IvyBrowserViewProvider.instance.openEngineRelativeUrl(message.params.payload);
+    if (isAction<CmsActionArgs>(message)) {
+      switch (message.params.actionId) {
+        case 'openUrl':
+          IvyBrowserViewProvider.instance.open(message.params.payload);
+          break;
+        default:
+          noUnknownAction(message.params.actionId);
+      }
     }
     super.handleClientMessage(message);
   }

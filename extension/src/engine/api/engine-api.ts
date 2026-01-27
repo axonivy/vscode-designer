@@ -13,6 +13,7 @@ import {
   NewProjectParams,
   ProductInstallParams,
   buildProjects,
+  componentForm,
   convertProject,
   createCaseMap,
   createDataClass,
@@ -204,6 +205,15 @@ export class IvyEngineApi {
       await invalidateClassLoader({ projectDir }, { baseURL, ...options }).catch(handleAxiosError);
     });
     setStatusBarMessage('Finished: Invalidate class loader');
+  }
+
+  public async getComponentForm(componentId: string, app: string, pmv: string) {
+    const baseURL = await this.baseURL;
+    return vscode.window.withProgress(progressOptions('Get Component Form'), async () => {
+      return componentForm({ componentId, app, pmv }, { baseURL, ...options })
+        .then(res => res.data)
+        .catch(handleAxiosError);
+    });
   }
 
   public async projects() {

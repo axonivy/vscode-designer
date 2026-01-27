@@ -4,8 +4,15 @@ import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
+import { IvyEngineManager } from '../../engine/engine-manager';
 import { updateTextDocumentContent } from '../content-writer';
-import { hasEditorFileContent, InitializeConnectionRequest, isAction, WebviewReadyNotification } from '../notification-helper';
+import {
+  hasEditorFileContent,
+  InitializeConnectionRequest,
+  isAction,
+  noUnknownAction,
+  WebviewReadyNotification
+} from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 
 const FormWebSocketMessage: NotificationType<unknown> = { method: 'formWebSocketMessage' };
@@ -42,12 +49,21 @@ class FormEditorWebSocketForwarder extends WebSocketForwarder {
     if (isAction<FormActionArgs>(message)) {
       const file = this.document.uri.path;
       const path = file.substring(0, file.lastIndexOf('.f.json'));
-      if (message.params.actionId === 'openProcess') {
-        vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(`${path}Process.p.json`));
-      } else if (message.params.actionId === 'openDataClass') {
-        vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(`${path}Data.d.json`));
-      } else if (message.params.actionId === 'openUrl') {
-        IvyBrowserViewProvider.instance.open(message.params.payload);
+      switch (message.params.actionId) {
+        case 'openUrl':
+          IvyBrowserViewProvider.instance.open(message.params.payload);
+          break;
+        case 'openProcess':
+          vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(`${path}Process.p.json`));
+          break;
+        case 'openDataClass':
+          vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(`${path}Data.d.json`));
+          break;
+        case 'openComponent':
+          openComponent(message.params);
+          break;
+        default:
+          noUnknownAction(message.params.actionId);
       }
     }
     super.handleClientMessage(message);
@@ -62,3 +78,9 @@ class FormEditorWebSocketForwarder extends WebSocketForwarder {
     }
   }
 }
+
+const openComponent = async (action: FormActionArgs) => {
+  IvyEngineManager.instance.engineApi?.getComponentForm(action.payload, action.context.app, action.context.pmv).then(form => {
+    vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(form.uri ?? ''));
+  });
+};
