@@ -47,7 +47,7 @@ class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
     readonly document: vscode.TextDocument
   ) {
     super(websocketUrl, 'ivy-data-class-lsp', messenger, messageParticipant, DataClassWebSocketMessage);
-    this.javaCompletion = new JavaCompletion(document, 'data-class');
+    this.javaCompletion = new JavaCompletion(document.uri, 'data-class');
   }
 
   protected override handleClientMessage(message: unknown) {
@@ -68,7 +68,7 @@ class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
           noUnknownAction(message.params.actionId);
       }
     }
-    if (this.allTypesSearch(message)) {
+    if (this.isAllTypesSearchRequest(message)) {
       this.lastSearch = { search: message.params.type, id: message.id };
     }
     super.handleClientMessage(message);
@@ -91,7 +91,7 @@ class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
     super.handleServerMessage(message);
   }
 
-  allTypesSearch = (obj: unknown): obj is { method: string; params: DataClassTypeSearchRequest; id: number } => {
+  isAllTypesSearchRequest = (obj: unknown): obj is { method: string; params: DataClassTypeSearchRequest; id: number } => {
     return (
       typeof obj === 'object' &&
       obj !== null &&

@@ -6,8 +6,8 @@ export class JavaCompletion {
   readonly dummyJavaFile: Promise<vscode.Uri>;
   readonly itemResolveCount = 50;
 
-  constructor(document: vscode.TextDocument, id: string) {
-    this.dummyJavaFile = treeUriToProjectPath(document.uri, IvyProjectExplorer.instance.getIvyProjects()).then(project =>
+  constructor(documentUri: vscode.Uri, id: string) {
+    this.dummyJavaFile = treeUriToProjectPath(documentUri, IvyProjectExplorer.instance.getIvyProjects()).then(project =>
       vscode.Uri.joinPath(vscode.Uri.file(project ?? ''), 'target', 'completion', `${id}.java`)
     );
   }
