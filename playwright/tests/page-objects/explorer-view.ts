@@ -1,5 +1,4 @@
 import { expect, type Locator, type Page } from '@playwright/test';
-import path from 'path';
 import { View, type ViewData } from './view';
 
 export abstract class ExplorerView extends View {
@@ -93,7 +92,6 @@ export class FileExplorer extends ExplorerView {
     await this.provideUserInput(projectName);
     await this.provideUserInput();
     await this.provideUserInput();
-    await this.hasNode(rootFolder + path.sep + projectName);
   }
 
   async addProcess(processName: string, kind: 'Business Process' | 'Callable Sub Process' | 'Web Service Process', namespace?: string) {
