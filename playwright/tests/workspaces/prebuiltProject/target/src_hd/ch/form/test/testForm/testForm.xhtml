@@ -4,24 +4,21 @@
   xmlns:pe="http://primefaces.org/ui/extensions">
 <h:body>
   <ui:composition template="/ivy-form/layouts/form.xhtml">
-    <ui:define name="title">7be1d241-f693-453c-ac24-63483cfcc443</ui:define>
+    <ui:define name="title"></ui:define>
     <ui:define name="content">
-
       <h:body class="body-hd #{ivyFreyaTheme.mode}">
         <h:form id="form">
           <h:panelGroup layout="block" styleClass="i-flex i-gap i-flex-col">
-      
-            <h:outputText value="This is my test" styleClass=""  />
-            <h:panelGroup layout="block" styleClass="i-flex i-gap i-flex-col ui-fluid " >
+            <h:outputText value="This is my test" styleClass="" />
+            <h:panelGroup layout="block" styleClass="i-flex i-gap i-flex-col ui-fluid ">
               <p:outputLabel id="input2-label" for="input2" value="" />
-              <p:inputText id="input2" value="" ></p:inputText>
-              
+              <p:inputText id="input2" value="">
+                <p:ajax event="change" />
+              </p:inputText>
             </h:panelGroup>
-      
           </h:panelGroup>
         </h:form>
       </h:body>
-      
     </ui:define>
   </ui:composition>
 </h:body>

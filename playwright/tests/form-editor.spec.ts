@@ -37,6 +37,33 @@ test.describe('Form Editor', () => {
     await xhtmlEditor.revertAndCloseEditor();
   });
 
+  test('Extract component and jump', async ({ page }) => {
+    await editor.locatorFor('.block-input').click();
+    await editor.quickBar.getByRole('button', { name: /Add new Component/ }).click();
+    await editor.quickBarMenu.getByRole('textbox').fill('Layout');
+    await editor.quickBarMenu.locator('.ui-palette-item', { hasText: 'Layout' }).click();
+    await page.keyboard.press('Escape');
+    const layout = editor.locatorFor('.draggable:has(>.block-layout)');
+    await expect(layout).toBeVisible();
+
+    await layout.click();
+    await editor.quickBar.getByRole('button', { name: /Extract/ }).click();
+    const extractDialog = editor.viewFrameLocator().getByRole('dialog');
+    await expect(extractDialog).toBeVisible();
+    await extractDialog.getByLabel('Name', { exact: true }).fill('TestComponent');
+    await extractDialog.getByRole('button', { name: 'Extract' }).click();
+    await expect(extractDialog).toBeHidden();
+    await expect(layout).toBeHidden();
+    const composite = editor.locatorFor('.block-composite');
+    await expect(composite).toBeVisible();
+
+    await composite.click();
+    await editor.quickBar.getByRole('button', { name: /Open Component/ }).click();
+    const componentEditor = new FormEditor(page, 'TestComponent.f.json');
+    await componentEditor.isTabVisible();
+    await expect(componentEditor.locatorFor('.draggable:has(>.block-layout)')).toBeVisible();
+  });
+
   test('Open Help', async ({ page }) => {
     const browserView = new BrowserView(page);
     await editor.locatorFor('.block-input').dblclick();
