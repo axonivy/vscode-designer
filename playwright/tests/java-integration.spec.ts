@@ -24,6 +24,7 @@ test('Compile java and invalidate class loader', async ({ page }) => {
   await javaEditor.saveAllFiles();
   await javaEditor.hasStatusMessage('Finished: Invalidate class loader');
 
+  await processEditor.openEditorFile();
   const start = processEditor.locatorForPID('19BE060A6564078E-f0');
   const end = processEditor.locatorForPID('19BE060A6564078E-f1');
   await processEditor.startProcessAndAssertExecuted(start, end);
