@@ -1,14 +1,17 @@
-import { DataActionArgs } from '@axonivy/dataclass-editor-protocol';
+import { DataActionArgs, DataClassTypeSearchRequest } from '@axonivy/dataclass-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
 import { updateTextDocumentContent } from '../content-writer';
+import { JavaCompletion } from '../java-completion';
 import {
   hasEditorFileContent,
   InitializeConnectionRequest,
   isAction,
+  isAllTypesSearchRequest,
+  isSearchResult,
   noUnknownAction,
   WebviewReadyNotification
 } from '../notification-helper';
@@ -35,6 +38,10 @@ export const setupCommunication = (
 };
 
 class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
+  currentTypeSearch: { type: string; id: number } | undefined;
+
+  readonly javaCompletion: JavaCompletion;
+
   constructor(
     websocketUrl: URL,
     messenger: Messenger,
@@ -42,6 +49,7 @@ class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
     readonly document: vscode.TextDocument
   ) {
     super(websocketUrl, 'ivy-data-class-lsp', messenger, messageParticipant, DataClassWebSocketMessage);
+    this.javaCompletion = new JavaCompletion(document.uri, 'data-class');
   }
 
   protected override handleClientMessage(message: unknown) {
@@ -61,16 +69,21 @@ class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
         default:
           noUnknownAction(message.params.actionId);
       }
+    } else if (isAllTypesSearchRequest<DataClassTypeSearchRequest>(message)) {
+      this.currentTypeSearch = { type: message.params.type, id: message.id };
     }
     super.handleClientMessage(message);
   }
 
-  protected override handleServerMessage(message: string) {
+  protected override async handleServerMessage(message: string) {
     const obj = JSON.parse(message);
     if (hasEditorFileContent(obj)) {
-      updateTextDocumentContent(this.document, obj.result).then(() => super.handleServerMessage(message));
-    } else {
-      super.handleServerMessage(message);
+      await updateTextDocumentContent(this.document, obj.result);
+    } else if (this.currentTypeSearch?.type && isSearchResult(obj, this.currentTypeSearch.id)) {
+      const javaTypes = await this.javaCompletion.types(this.currentTypeSearch.type);
+      obj.result.push(...javaTypes);
+      message = JSON.stringify(obj);
     }
+    super.handleServerMessage(message);
   }
 }

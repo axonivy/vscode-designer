@@ -29,7 +29,13 @@ export default class ProcessEditorProvider extends GlspEditorProvider {
     clientId: string
   ): Promise<void> {
     const client = this.glspVscodeConnector['clientMap'].get(clientId);
-    setupCommunication(this.websocketUrl, this.glspVscodeConnector.messenger, webviewPanel, client?.webviewEndpoint.messageParticipant);
+    setupCommunication(
+      this.websocketUrl,
+      this.glspVscodeConnector.messenger,
+      webviewPanel,
+      _document,
+      client?.webviewEndpoint.messageParticipant
+    );
     webviewPanel.webview.options = { enableScripts: true };
     webviewPanel.webview.html = createWebViewContent(this.extensionContext, webviewPanel.webview, 'process-editor');
   }

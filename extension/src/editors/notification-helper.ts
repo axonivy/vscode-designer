@@ -29,3 +29,32 @@ export const hasEditorFileContent = (obj: unknown): obj is { jsonrpc: string; id
 };
 
 export const noUnknownAction = (action: never) => logErrorMessage(`Unknown action: ${action}`);
+
+export const isAllTypesSearchRequest = <T>(obj: unknown): obj is { method: string; params: T; id: number } => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'method' in obj &&
+    obj.method === 'meta/scripting/allTypes' &&
+    'params' in obj &&
+    typeof obj.params === 'object' &&
+    obj.params !== null &&
+    'id' in obj &&
+    typeof obj.id === 'number'
+  );
+};
+
+export const isSearchResult = <T>(obj: unknown, id?: number): obj is { result: T[]; id: number } => {
+  if (!id) {
+    return false;
+  }
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'result' in obj &&
+    typeof obj.result === 'object' &&
+    obj.result !== null &&
+    'id' in obj &&
+    obj.id === id
+  );
+};

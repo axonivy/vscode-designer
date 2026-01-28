@@ -1,8 +1,11 @@
+import { TypeSearchRequest } from '@axonivy/process-editor-inscription-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType, RequestType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
+import { JavaCompletion } from '../java-completion';
+import { isAllTypesSearchRequest, isSearchResult } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 import { SendInscriptionNotification, handleActionLocal } from './inscription-view/action-handlers';
 
@@ -18,13 +21,14 @@ export const setupCommunication = (
   websocketUrl: URL,
   messenger: Messenger,
   webviewPanel: vscode.WebviewPanel,
+  document: vscode.CustomDocument,
   messageParticipant?: MessageParticipant
 ) => {
   if (messageParticipant === undefined) {
     return;
   }
   const toDispose = new DisposableCollection(
-    new InscriptionWebSocketForwarder(websocketUrl, messenger, messageParticipant),
+    new InscriptionWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
     new WebSocketForwarder(websocketUrl, 'ivy-script-lsp', messenger, messageParticipant, IvyScriptWebSocketMessage),
     messenger.onNotification(WebviewConnectionReadyNotification, () => handleWebviewReadyNotification(messenger, messageParticipant), {
       sender: messageParticipant
@@ -55,10 +59,15 @@ const vsCodeThemeToMonacoTheme = (theme: vscode.ColorTheme) => {
 class InscriptionWebSocketForwarder extends WebSocketForwarder {
   private readonly sendInscriptionNotification: SendInscriptionNotification;
 
-  constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant) {
+  currentTypeSearch: { type: string; id: number } | undefined;
+
+  readonly javaCompletion: JavaCompletion;
+
+  constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: vscode.CustomDocument) {
     super(websocketUrl, 'ivy-inscription-lsp', messenger, messageParticipant, InscriptionWebSocketMessage);
     this.sendInscriptionNotification = (type: string) =>
       this.messenger.sendNotification(this.notificationType, this.messageParticipant, JSON.stringify({ method: type }));
+    this.javaCompletion = new JavaCompletion(document.uri, 'inscription');
   }
 
   protected override handleClientMessage(message: unknown) {
@@ -66,6 +75,19 @@ class InscriptionWebSocketForwarder extends WebSocketForwarder {
     if (handled) {
       return;
     }
+    if (isAllTypesSearchRequest<TypeSearchRequest>(message)) {
+      this.currentTypeSearch = { type: message.params.type, id: message.id };
+    }
     super.handleClientMessage(message);
+  }
+
+  protected override async handleServerMessage(message: string) {
+    const obj = JSON.parse(message);
+    if (this.currentTypeSearch?.type && isSearchResult(obj, this.currentTypeSearch.id)) {
+      const javaTypes = await this.javaCompletion.types(this.currentTypeSearch.type);
+      obj.result.push(...javaTypes);
+      message = JSON.stringify(obj);
+    }
+    super.handleServerMessage(message);
   }
 }
