@@ -80,7 +80,7 @@ class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
     if (hasEditorFileContent(obj)) {
       await updateTextDocumentContent(this.document, obj.result);
     } else if (this.currentTypeSearch?.type && isSearchResult(obj, this.currentTypeSearch.id)) {
-      const javaTypes = await this.javaCompletion.types(this.currentTypeSearch.type);
+      const javaTypes = await this.javaCompletion.javaTypes(this.currentTypeSearch.type);
       obj.result.push(...javaTypes);
       message = JSON.stringify(obj);
     }
