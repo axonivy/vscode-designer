@@ -1,8 +1,13 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
+import type { Command } from '../base/commands';
 import { config } from '../base/configurations';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyProjectExplorer } from './ivy-project-explorer';
+
+interface IvyCommand extends vscode.Command {
+  command: Command;
+}
 
 export interface Entry {
   uri: vscode.Uri;
@@ -11,7 +16,7 @@ export interface Entry {
   contextValue?: string;
   parent?: Entry;
   collapsibleState?: vscode.TreeItemCollapsibleState;
-  command?: vscode.Command;
+  command?: IvyCommand;
 }
 
 export const IVY_RPOJECT_FILE_PATTERN = '**/.ivyproject';
@@ -112,13 +117,18 @@ export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry
   }
 
   private cmsEntry(element: Entry) {
-    const entry: Entry = { uri: vscode.Uri.joinPath(element.uri, 'cms'), type: vscode.FileType.File, parent: element };
-    entry.collapsibleState = vscode.TreeItemCollapsibleState.None;
-    entry.iconPath = {
-      light: vscode.Uri.file(path.join(__dirname, '..', 'assets', 'light', 'cms.svg')),
-      dark: vscode.Uri.file(path.join(__dirname, '..', 'assets', 'dark', 'cms.svg'))
+    const uri = vscode.Uri.joinPath(element.uri, 'cms');
+    const entry: Entry = {
+      uri,
+      type: vscode.FileType.File,
+      parent: element,
+      collapsibleState: vscode.TreeItemCollapsibleState.None,
+      iconPath: {
+        light: vscode.Uri.file(path.join(__dirname, '..', 'assets', 'light', 'cms.svg')),
+        dark: vscode.Uri.file(path.join(__dirname, '..', 'assets', 'dark', 'cms.svg'))
+      },
+      command: { command: 'ivyEditor.openCmsEditor', title: 'Open CMS Editor', arguments: [uri] }
     };
-    entry.command = { command: 'ivyBrowserView.openCmsEditor', title: 'Open CMS Editor', arguments: [entry.uri] };
     this.cacheEntry(entry);
     if (CmsEditorRegistry.find(element.uri.fsPath)?.active) {
       IvyProjectExplorer.instance.selectEntry(entry);

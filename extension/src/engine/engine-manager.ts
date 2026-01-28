@@ -8,13 +8,16 @@ import { toWebSocketUrl } from '../base/url-util';
 import { IvyBrowserViewProvider } from '../browser/ivy-browser-view-provider';
 import { CaseMapEditorProvider } from '../editors/casemap-editor/casemap-editor-provider';
 import { CmsEditorProvider } from '../editors/cms-editor/cms-editor-provider';
+import { CustomFieldEditorProvider } from '../editors/custom-field-editor/custom-field-editor-provider';
 import { DatabaseEditorProvider } from '../editors/database-editor/database-editor-provider';
 import DataClassEditorProvider from '../editors/dataclass-editor/dataclass-editor-provider';
 import FormEditorProvider from '../editors/form-editor/form-editor-provider';
 import ProcessEditorProvider from '../editors/process-editor/process-editor-provider';
+import { RestClientEditorProvider } from '../editors/restclient-editor/restclient-editor-provider';
 import { RoleEditorProvider } from '../editors/role-editor/role-editor-provider';
 import { UserEditorProvider } from '../editors/user-editor/user-editor-provider';
 import { VariableEditorProvider } from '../editors/variable-editor/variable-editor-provider';
+import { WebServiceEditorProvider } from '../editors/webservice-editor/webservice-editor-provider';
 import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language-client';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { NewProcessParams } from '../project-explorer/new-process';
@@ -118,6 +121,9 @@ export class IvyEngineManager {
     RoleEditorProvider.register(this.context, websocketUrl);
     UserEditorProvider.register(this.context, websocketUrl);
     CaseMapEditorProvider.register(this.context, websocketUrl);
+    RestClientEditorProvider.register(this.context);
+    WebServiceEditorProvider.register(this.context);
+    CustomFieldEditorProvider.register(this.context);
 
     RuntimeLogViewProvider(websocketUrl);
     WebIdeWebSocketProvider(websocketUrl);

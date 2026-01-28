@@ -15,8 +15,8 @@ export type Command =
   | ProjectViewCommand
   | ViewCommand
   | JavaCommand
-  | 'yaml-variables-editor.new'
-  | 'yaml-roles-editor.new'
+  | ConfigEditorCommand
+  | EditorCommand
   | 'ivy.addDevContainer'
   | 'ivy.showStatusBarQuickPick';
 type VSCodeCommand = 'setContext' | 'vscode.open' | 'copyFilePath';
@@ -53,8 +53,15 @@ type ViewCommand =
   | 'ivyBrowserView.openDevWfUi'
   | 'ivyBrowserView.openEngineCockpit'
   | 'ivyBrowserView.openNEO'
-  | 'ivyBrowserView.openCmsEditor'
-  | 'ivyBrowserView.openDatabaseEditor'
   | 'ivyPanelView.openRuntimeLog'
   | 'ivyPanelView.openWelcomePage';
+export type ConfigEditorCommand =
+  | 'ivyEditor.openVariableEditor'
+  | 'ivyEditor.openRoleEditor'
+  | 'ivyEditor.openUserEditor'
+  | 'ivyEditor.openDatabaseEditor'
+  | 'ivyEditor.openWebServiceEditor'
+  | 'ivyEditor.openRestClientEditor'
+  | 'ivyEditor.openCustomFieldEditor';
+export type EditorCommand = 'ivyEditor.openCmsEditor';
 type JavaCommand = 'java.project.import.command';
