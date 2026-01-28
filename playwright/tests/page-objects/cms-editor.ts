@@ -23,4 +23,29 @@ export class CmsEditor extends Editor {
     const field = this.viewFrameLocator().locator('td span').first();
     await expect(field).toHaveText(contentObject);
   }
+
+  rowByName(name: string) {
+    return new CmsEditorRow(this, name);
+  }
+}
+
+export class CmsEditorRow {
+  readonly row: Locator;
+
+  constructor(
+    readonly editor: CmsEditor,
+    readonly name: string
+  ) {
+    this.row = editor.viewFrameLocator().locator('.ui-table-row:not(.ui-message-row)').filter({ hasText: name });
+  }
+
+  async openInscription() {
+    await this.row.click();
+    await this.expectSelected();
+    return this.editor.viewFrameLocator().locator('.cms-editor-detail-panel');
+  }
+
+  async expectSelected() {
+    await expect(this.row).toHaveAttribute('data-state', 'selected');
+  }
 }
