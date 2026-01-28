@@ -1,3 +1,4 @@
+import path from 'path';
 import { test } from './fixtures/baseTest';
 import { FileExplorer } from './page-objects/explorer-view';
 import { ProblemsView } from './page-objects/problems-view';
@@ -11,7 +12,7 @@ test.describe('Create Project', () => {
     const explorer = new FileExplorer(page);
     await explorer.addNestedProject('parent', 'testProject');
     await explorer.hasStatusMessage('Finished: Create new Project', 60_000);
-    await explorer.hasNode('parent/testProject');
+    await explorer.hasNode(`parent${path.sep}testProject`);
     await explorer.hasNoStatusMessage();
 
     const problemsView = await ProblemsView.initProblemsView(page);
