@@ -4,7 +4,8 @@ import { treeUriToProjectPath } from '../project-explorer/tree-selection';
 
 export class JavaCompletion {
   readonly dummyJavaFile: Promise<vscode.Uri>;
-  readonly itemResolveCount = 50;
+  static readonly ITEM_RESOLVE_COUNT = 50;
+  static readonly DUMMY_CLASS_NAME = 'Dummy';
 
   constructor(documentUri: vscode.Uri, id: string) {
     this.dummyJavaFile = treeUriToProjectPath(documentUri, IvyProjectExplorer.instance.getIvyProjects()).then(project =>
@@ -12,18 +13,22 @@ export class JavaCompletion {
     );
   }
 
-  public async types(toBeCompleted: string) {
+  public async completionItems(toBeCompleted: string) {
     const javaFile = await this.dummyJavaFile;
-    await vscode.workspace.fs.writeFile(javaFile, Buffer.from(`class Dummy{${toBeCompleted}}`));
+    await vscode.workspace.fs.writeFile(javaFile, Buffer.from(`private class ${JavaCompletion.DUMMY_CLASS_NAME}{${toBeCompleted}}`));
     const completionList = await vscode.commands.executeCommand<vscode.CompletionList>(
       'vscode.executeCompletionItemProvider',
       javaFile,
-      new vscode.Position(0, 12 + toBeCompleted.length)
+      new vscode.Position(0, 20 + toBeCompleted.length)
     );
-    const slicedCompletions = completionList.items
+    return completionList.items
       .filter(item => item.kind === vscode.CompletionItemKind.Class || item.kind === vscode.CompletionItemKind.Interface)
-      .slice(0, this.itemResolveCount);
-    return slicedCompletions.map(item => this.toJavaType(item));
+      .filter(item => item.detail !== JavaCompletion.DUMMY_CLASS_NAME)
+      .slice(0, JavaCompletion.ITEM_RESOLVE_COUNT);
+  }
+
+  public async javaTypes(toBeCompleted: string) {
+    return (await this.completionItems(toBeCompleted)).map(item => this.toJavaType(item));
   }
 
   toJavaType = (item: vscode.CompletionItem) => {
