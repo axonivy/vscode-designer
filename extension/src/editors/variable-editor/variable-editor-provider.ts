@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { messenger } from '../..';
+import { registerOpenConfigEditorCmd } from '../command-helper';
 import { createWebViewContent } from '../webview-helper';
-import { registerNewVariablesFileCmd } from './new-variable-file-cmd';
 import { setupCommunication } from './webview-communication';
 
 export class VariableEditorProvider implements vscode.CustomTextEditorProvider {
@@ -13,7 +13,7 @@ export class VariableEditorProvider implements vscode.CustomTextEditorProvider {
   ) {}
 
   static register(context: vscode.ExtensionContext, websocketUrl: URL) {
-    registerNewVariablesFileCmd(context);
+    registerOpenConfigEditorCmd('ivyEditor.openVariableEditor', context, 'variables.yaml');
     const provider = new VariableEditorProvider(context, websocketUrl);
     const providerRegistration = vscode.window.registerCustomEditorProvider(VariableEditorProvider.viewType, provider);
     return providerRegistration;

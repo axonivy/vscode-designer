@@ -23,7 +23,7 @@ export default class ProcessEditorProvider extends GlspEditorProvider {
   }
 
   async setUpWebview(
-    _document: vscode.CustomDocument,
+    document: vscode.CustomDocument,
     webviewPanel: vscode.WebviewPanel,
     _token: vscode.CancellationToken,
     clientId: string
@@ -33,7 +33,7 @@ export default class ProcessEditorProvider extends GlspEditorProvider {
       this.websocketUrl,
       this.glspVscodeConnector.messenger,
       webviewPanel,
-      _document,
+      document,
       client?.webviewEndpoint.messageParticipant
     );
     webviewPanel.webview.options = { enableScripts: true };
