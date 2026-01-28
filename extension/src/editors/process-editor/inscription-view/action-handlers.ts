@@ -18,13 +18,15 @@ export const handleActionLocal = (msg: unknown, sendInscriptionNotification: Sen
       case 'newHtmlDialog':
         handleNewHtmlDialog(msg.params, sendInscriptionNotification);
         break;
-      case 'openUrl':
       case 'newWebServiceClient':
-      case 'openConfig':
+      case 'openWsConfig':
+      case 'newRestClient':
+      case 'openRestConfig':
+      case 'newDatabaseConfig':
+      case 'openDatabaseConfig':
       case 'openCustomField':
       case 'openEndPage':
       case 'newProgram':
-      case 'newRestClient':
       case 'openOrCreateCmsCategory':
       case 'openProgram':
         // TODO: check this actions, if we need to handle them here
