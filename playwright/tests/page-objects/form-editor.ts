@@ -19,4 +19,12 @@ export class FormEditor extends Editor {
   get toolbar() {
     return this.viewFrameLocator().locator('.toolbar');
   }
+
+  get quickBar() {
+    return this.viewFrameLocator().locator('.quickbar');
+  }
+
+  get quickBarMenu() {
+    return this.viewFrameLocator().locator('.quickbar-menu');
+  }
 }
