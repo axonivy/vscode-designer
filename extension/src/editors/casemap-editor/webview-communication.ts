@@ -1,9 +1,17 @@
+import type { CaseMapActionArgs } from '@axonivy/case-map-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
+import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
 import { updateTextDocumentContent } from '../content-writer';
-import { hasEditorFileContent, InitializeConnectionRequest, WebviewReadyNotification } from '../notification-helper';
+import {
+  hasEditorFileContent,
+  InitializeConnectionRequest,
+  isAction,
+  noUnknownAction,
+  WebviewReadyNotification
+} from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 
 const CaseMapWebSocketMessage: NotificationType<unknown> = { method: 'caseMapWebSocketMessage' };
@@ -34,6 +42,19 @@ class CaseMapEditorWebSocketForwarder extends WebSocketForwarder {
     readonly document: vscode.TextDocument
   ) {
     super(websocketUrl, 'ivy-case-map-lsp', messenger, messageParticipant, CaseMapWebSocketMessage);
+  }
+  
+  protected override handleClientMessage(message: unknown) {
+    if (isAction<CaseMapActionArgs>(message)) {
+      switch (message.params.actionId) {
+        case 'openUrl':
+          IvyBrowserViewProvider.instance.open(message.params.payload);
+          break;
+        default:
+          noUnknownAction(message.params.actionId);
+      }
+    }
+    super.handleClientMessage(message);
   }
 
   protected override handleServerMessage(message: string) {
