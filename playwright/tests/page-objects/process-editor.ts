@@ -76,8 +76,8 @@ export class ProcessEditor extends Editor {
     await expect(element).toHaveClass(/error/);
   }
 
-  async hasNoValidationMarker(element: Locator, timeout?: number) {
-    await expect(element).not.toHaveClass(/warning/, { timeout });
-    await expect(element).not.toHaveClass(/error/, { timeout });
+  async hasNoValidationMarker(element: Locator) {
+    await expect(element).not.toHaveClass(/warning/);
+    await expect(element).not.toHaveClass(/error/);
   }
 }
