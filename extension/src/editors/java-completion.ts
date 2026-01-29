@@ -13,13 +13,15 @@ export class JavaCompletion {
     );
   }
 
-  public async completionItems(toBeCompleted: string) {
+  public async completionItems(toBeCompleted: string, itemResolveCount?: number) {
     const javaFile = await this.dummyJavaFile;
     await vscode.workspace.fs.writeFile(javaFile, Buffer.from(`private class ${JavaCompletion.DUMMY_CLASS_NAME}{${toBeCompleted}}`));
     const completionList = await vscode.commands.executeCommand<vscode.CompletionList>(
       'vscode.executeCompletionItemProvider',
       javaFile,
-      new vscode.Position(0, 20 + toBeCompleted.length)
+      new vscode.Position(0, 20 + toBeCompleted.length),
+      undefined,
+      itemResolveCount // resolve javadoc for count items - large number will slow down completion
     );
     return completionList.items
       .filter(item => item.kind === vscode.CompletionItemKind.Class || item.kind === vscode.CompletionItemKind.Interface)

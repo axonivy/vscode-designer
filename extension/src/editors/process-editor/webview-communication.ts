@@ -12,6 +12,7 @@ import {
   DidChangeTextDocumentParams,
   DidOpenTextDocumentNotification,
   DidOpenTextDocumentParams,
+  MarkupContent,
   Position,
   Range,
   TextEdit
@@ -179,7 +180,7 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
       currentTextLine.lastIndexOf('=')
     );
     const toBeCompleted = currentTextLine.substring(completionStartingIndex);
-    this.currentCompletion = { id, completionItems: this.javaCompletion.completionItems(toBeCompleted), document };
+    this.currentCompletion = { id, completionItems: this.javaCompletion.completionItems(toBeCompleted, 10), document };
   };
 
   hasMethodAndParams = (message: unknown): message is { method: string; params: object; id?: number } => {
@@ -217,6 +218,7 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     lspItem.filterText = item.filterText;
     lspItem.tags = item.tags?.map(() => CompletionItemTag.Deprecated);
     lspItem.labelDetails = label;
+    lspItem.documentation = this.toDocumentation(item.documentation);
     if (STANDARD_TYPES.includes(item.detail ?? '')) {
       return lspItem;
     }
@@ -237,6 +239,16 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
       return { label: item.label };
     }
     return item.label;
+  };
+
+  toDocumentation = (documentation?: string | vscode.MarkdownString) => {
+    if (!documentation) {
+      return;
+    }
+    if (typeof documentation === 'string') {
+      return documentation;
+    }
+    return { value: documentation.value, kind: 'markdown' } satisfies MarkupContent;
   };
 }
 
