@@ -1,4 +1,6 @@
 import { InscriptionActionArgs, InscriptionNotificationTypes } from '@axonivy/process-editor-inscription-protocol';
+import { executeCommand } from '../../../base/commands';
+import { logWarningMessage } from '../../../base/logging-util';
 import { isAction, noUnknownAction } from '../../notification-helper';
 import { handleNewProcess } from './new-process';
 import { handleNewHtmlDialog } from './new-user-dialog';
@@ -18,18 +20,28 @@ export const handleActionLocal = (msg: unknown, sendInscriptionNotification: Sen
       case 'newHtmlDialog':
         handleNewHtmlDialog(msg.params, sendInscriptionNotification);
         break;
-      case 'newWebServiceClient':
-      case 'openWsConfig':
-      case 'newRestClient':
       case 'openRestConfig':
-      case 'newDatabaseConfig':
+      case 'newRestClient':
+        executeCommand('ivyEditor.openRestClientEditor');
+        break;
+      case 'openWsConfig':
+      case 'newWebServiceClient':
+        executeCommand('ivyEditor.openWebServiceEditor');
+        break;
       case 'openDatabaseConfig':
+      case 'newDatabaseConfig':
+        executeCommand('ivyEditor.openDatabaseEditor');
+        break;
       case 'openCustomField':
+        executeCommand('ivyEditor.openCustomFieldEditor');
+        break;
+      case 'openOrCreateCmsCategory':
+        executeCommand('ivyEditor.openCmsEditor');
+        break;
       case 'openEndPage':
       case 'newProgram':
-      case 'openOrCreateCmsCategory':
       case 'openProgram':
-        // TODO: check this actions, if we need to handle them here
+        logWarningMessage(`Action '${msg.params.actionId}' is not yet implemented.`);
         break;
       default:
         noUnknownAction(msg.params.actionId);

@@ -170,19 +170,43 @@
     ],
     "commands": [
       {
-        "command": "yaml-variables-editor.new",
-        "title": "Create a new Variables file",
-        "category": "Ivy Variables Editor",
-        "icon": "$(add)"
+        "command": "ivyEditor.openVariableEditor",
+        "title": "Open Variable Editor",
+        "category": "Axon Ivy"
       },
       {
-        "command": "ivyBrowserView.openCmsEditor",
+        "command": "ivyEditor.openCmsEditor",
         "title": "Open CMS Editor",
         "category": "Axon Ivy"
       },
       {
-        "command": "ivyBrowserView.openDatabaseEditor",
+        "command": "ivyEditor.openDatabaseEditor",
         "title": "Open Database Editor",
+        "category": "Axon Ivy"
+      },
+      {
+        "command": "ivyEditor.openRoleEditor",
+        "title": "Open Role Editor",
+        "category": "Axon Ivy"
+      },
+      {
+        "command": "ivyEditor.openUserEditor",
+        "title": "Open User Editor",
+        "category": "Axon Ivy"
+      },
+      {
+        "command": "ivyEditor.openRestClientEditor",
+        "title": "Open Rest Client Editor",
+        "category": "Axon Ivy"
+      },
+      {
+        "command": "ivyEditor.openWebServiceEditor",
+        "title": "Open Web Service Editor",
+        "category": "Axon Ivy"
+      },
+      {
+        "command": "ivyEditor.openCustomFieldEditor",
+        "title": "Open Custom Field Editor",
         "category": "Axon Ivy"
       },
       {

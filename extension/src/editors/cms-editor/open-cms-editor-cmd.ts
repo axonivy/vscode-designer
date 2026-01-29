@@ -1,33 +1,21 @@
 import * as vscode from 'vscode';
 import { messenger } from '../..';
 import { registerCommand } from '../../base/commands';
-import { getIvyProject } from '../../base/ivyProjectSelection';
 import { logErrorMessage } from '../../base/logging-util';
-import { IvyProjectExplorer } from '../../project-explorer/ivy-project-explorer';
-import { TreeSelection, treeSelectionToUri, treeUriToProjectPath } from '../../project-explorer/tree-selection';
+import { TreeSelection } from '../../project-explorer/tree-selection';
+import { openEditorCmdProjectPath } from '../command-helper';
 import { createWebViewContent } from '../webview-helper';
 import { CmsEditorRegistry } from './cms-editor-registry';
 import { setupCommunication } from './webview-communication';
 
 export const registerOpenCmsEditorCmd = (context: vscode.ExtensionContext, websocketUrl: URL) => {
-  registerCommand('ivyBrowserView.openCmsEditor', context, async (selection: TreeSelection) => {
-    let projectPath: string | undefined;
-    try {
-      const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(IvyProjectExplorer.instance));
-      if (!uri) {
-        logErrorMessage('Open CMS Editor: no valid Axon Ivy Project selected.');
-        return;
-      }
-      projectPath = await treeUriToProjectPath(uri, IvyProjectExplorer.instance.getIvyProjects());
-    } catch (error) {
-      showError(error instanceof Error ? error.message : String(error));
-      return;
-    }
+  const command = 'ivyEditor.openCmsEditor';
+  registerCommand('ivyEditor.openCmsEditor', context, async (selection: TreeSelection) => {
+    const projectPath = await openEditorCmdProjectPath(command, selection);
     if (!projectPath) {
-      showError('No valid Axon Ivy Project selected.');
+      logErrorMessage(`${command}: No valid Axon Ivy Project selected.`);
       return;
     }
-
     if (revealExistingPanel(projectPath)) {
       return;
     }
@@ -59,8 +47,4 @@ export const setupWebviewPanel = (
   setupCommunication(websocketUrl, messenger, webviewPanel, projectPath);
   webviewPanel.webview.options = { enableScripts: true };
   webviewPanel.webview.html = createWebViewContent(context, webviewPanel.webview, 'cms-editor');
-};
-
-const showError = (message: string) => {
-  logErrorMessage(`Open CMS Editor: ${message}`);
 };

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { messenger } from '../..';
+import { registerOpenConfigEditorCmd } from '../command-helper';
 import { createWebViewContent } from '../webview-helper';
-import { registerOpenDatabaseEditorCmd } from './open-database-editor-cmd';
 import { setupCommunication } from './webview-communication';
 
 export class DatabaseEditorProvider implements vscode.CustomTextEditorProvider {
@@ -13,7 +13,7 @@ export class DatabaseEditorProvider implements vscode.CustomTextEditorProvider {
   ) {}
 
   static register(context: vscode.ExtensionContext, websocketUrl: URL) {
-    registerOpenDatabaseEditorCmd(context, websocketUrl);
+    registerOpenConfigEditorCmd('ivyEditor.openDatabaseEditor', context, 'databases.yaml');
     const provider = new DatabaseEditorProvider(context, websocketUrl);
     return vscode.window.registerCustomEditorProvider(DatabaseEditorProvider.viewType, provider);
   }
