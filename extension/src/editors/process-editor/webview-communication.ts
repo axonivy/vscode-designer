@@ -212,7 +212,7 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
   toLspCompletItem = (item: vscode.CompletionItem, document: TextDocument): CompletionItem => {
     const label = this.toLabel(item);
     const lspItem = CompletionItem.create(label.label);
-    lspItem.kind = vscode.CompletionItemKind.Class === item.kind ? CompletionItemKind.Class : CompletionItemKind.Interface;
+    lspItem.kind = this.toKind(item.kind);
     lspItem.detail = item.detail;
     lspItem.sortText = item.sortText;
     lspItem.filterText = item.filterText;
@@ -240,6 +240,19 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     }
     return item.label;
   };
+
+  toKind(kind?: vscode.CompletionItemKind) {
+    switch (kind) {
+      case vscode.CompletionItemKind.Class:
+        return CompletionItemKind.Class;
+      case vscode.CompletionItemKind.Interface:
+        return CompletionItemKind.Interface;
+      case vscode.CompletionItemKind.Enum:
+        return CompletionItemKind.Enum;
+      default:
+        return undefined;
+    }
+  }
 
   toDocumentation = (documentation?: string | vscode.MarkdownString) => {
     if (!documentation) {

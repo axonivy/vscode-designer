@@ -24,7 +24,12 @@ export class JavaCompletion {
       itemResolveCount // resolve javadoc for count items - large number will slow down completion
     );
     return completionList.items
-      .filter(item => item.kind === vscode.CompletionItemKind.Class || item.kind === vscode.CompletionItemKind.Interface)
+      .filter(
+        item =>
+          item.kind === vscode.CompletionItemKind.Class ||
+          item.kind === vscode.CompletionItemKind.Interface ||
+          item.kind === vscode.CompletionItemKind.Enum
+      )
       .filter(item => item.detail !== JavaCompletion.DUMMY_CLASS_NAME)
       .slice(0, JavaCompletion.ITEM_RESOLVE_COUNT);
   }
