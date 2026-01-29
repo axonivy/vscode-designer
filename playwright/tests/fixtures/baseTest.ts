@@ -55,6 +55,9 @@ const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<
     ]
   });
   const page = await electronApp.firstWindow();
+  if (process.env.CI) {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+  }
   await page.context().tracing.start({ screenshots: true, snapshots: true, title: test.info().title });
   await initialize(page);
   await take(page);
