@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-const outputChannel = vscode.window.createOutputChannel('Axon Ivy Extension Log', { log: true });
+const outputChannel = vscode.window.createOutputChannel('Axon Ivy Extension', { log: true });
 
 export const logErrorMessage = (message: string, ...items: Array<string>) => {
   outputChannel.error(message, ...items);

@@ -3,13 +3,13 @@ import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
-import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
 import { updateTextDocumentContent } from '../content-writer';
 import {
   hasEditorFileContent,
   InitializeConnectionRequest,
   isAction,
   noUnknownAction,
+  openUrlExternally,
   WebviewReadyNotification
 } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
@@ -48,7 +48,7 @@ class RoleEditorWebSocketForwarder extends WebSocketForwarder {
     if (isAction<RoleActionArgs>(message)) {
       switch (message.params.actionId) {
         case 'openUrl':
-          IvyBrowserViewProvider.instance.open(message.params.payload);
+          openUrlExternally(message.params.payload);
           break;
         default:
           noUnknownAction(message.params.actionId);

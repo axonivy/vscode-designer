@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import { test } from './fixtures/baseTest';
-import { BrowserView } from './page-objects/browser-view';
+import { OutputView } from './page-objects/output-view';
 import { RoleEditor } from './page-objects/role-editor';
 
 test('Read, write and open help', async ({ page }) => {
@@ -18,10 +18,16 @@ test('Read, write and open help', async ({ page }) => {
   await editor.isNotDirty();
   await editor.executeCommand('View: Reopen Editor With Text Editor');
   await expect(editor.editorContent()).toContainText('Name: my new display name');
+});
 
-  await editor.executeCommand('View: Reopen Editor With...', 'Axon Ivy Role Editor');
-  const browserView = new BrowserView(page);
+test('Open Help', async ({ page }) => {
+  const editor = new RoleEditor(page);
+  await editor.openEditorFile();
+  const outputView = new OutputView(page);
+  await outputView.openLog('Axon Ivy Extension');
+
   await editor.viewFrameLocator().getByRole('button', { name: /Help/ }).click();
-  const helpLink = await browserView.input().inputValue();
-  expect(helpLink).toMatch(/^https:\/\/developer\.axonivy\.com.*configuration\/roles-users\.html$/);
+  await page.keyboard.press('Escape');
+  await outputView.expectLogEntry('Opening URL externally');
+  await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*configuration\/roles-users\.html/);
 });

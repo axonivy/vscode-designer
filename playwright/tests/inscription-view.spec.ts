@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import { test } from './fixtures/baseTest';
-import { BrowserView } from './page-objects/browser-view';
+import { OutputView } from './page-objects/output-view';
 import { ProcessEditor } from './page-objects/process-editor';
 import { wait } from './utils/timeout';
 
@@ -68,10 +68,14 @@ test.describe('Inscription View', () => {
   });
 
   test('OpenPage-Action in Browers - Open Help', async ({ page }) => {
-    const browserView = new BrowserView(page);
     const inscriptionView = await processEditor.openInscriptionView(userDialogPID1);
+    const outputView = new OutputView(page);
+    await outputView.openLog('Axon Ivy Extension');
+
     await inscriptionView.clickButton('Open Help');
-    expect((await browserView.input().inputValue()).toString()).toMatch(/^https:\/\/developer\.axonivy\.com.*process-elements\/user-dialog\.html$/);
+    await page.keyboard.press('Escape');
+    await outputView.expectLogEntry('Opening URL externally');
+    await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*process-elements\/user-dialog\.html/);
   });
 
   test('Monaco Editor completion', async () => {

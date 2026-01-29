@@ -1,10 +1,10 @@
 import { expect } from '@playwright/test';
 import { test } from './fixtures/baseTest';
-import { BrowserView } from './page-objects/browser-view';
 import { CaseMapEditor } from './page-objects/case-map-editor';
+import { OutputView } from './page-objects/output-view';
 
 test.describe('Case Map Editor', () => {
-  test('Read, write and help', async ({ page }) => {
+  test('Read, write', async ({ page }) => {
     const editor = new CaseMapEditor(page);
     await editor.hasDeployProjectStatusMessage();
     await editor.openEditorFile();
@@ -17,14 +17,20 @@ test.describe('Case Map Editor', () => {
     await editor.isDirty();
     await editor.saveAllFiles();
     await editor.isNotDirty();
+
     await editor.executeCommand('View: Reopen Editor With Text Editor');
     await expect(editor.editorContent()).toContainText('"name" : "my new name"');
+  });
 
-    await editor.executeCommand('View: Reopen Editor With...', 'Axon Ivy Case Map Editor');
+  test('Open help', async ({ page }) => {
+    const editor = new CaseMapEditor(page);
+    await editor.openEditorFile();
+    const outputView = new OutputView(page);
+    await outputView.openLog('Axon Ivy Extension');
     await editor.stages.first().dblclick({ position: { x: 10, y: 10 } });
-    const browserView = new BrowserView(page);
-    await editor.viewFrameLocator().getByRole('button', { name: /Help/ }).click();
-    const helpLink = await browserView.input().inputValue();
-    expect(helpLink).toMatch(/^https:\/\/developer\.axonivy\.com.*process-modeling\/casemap\.html$/);
+    await editor.helpButton.click();
+    await page.keyboard.press('Escape');
+    await outputView.expectLogEntry('Opening URL externally');
+    await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*process-modeling\/casemap\.html/);
   });
 });

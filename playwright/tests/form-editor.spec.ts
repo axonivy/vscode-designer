@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 import { test } from './fixtures/baseTest';
 import { BrowserView } from './page-objects/browser-view';
 import { FormEditor } from './page-objects/form-editor';
+import { OutputView } from './page-objects/output-view';
 
 test.describe('Form Editor', () => {
   let editor: FormEditor;
@@ -65,11 +66,16 @@ test.describe('Form Editor', () => {
   });
 
   test('Open Help', async ({ page }) => {
-    const browserView = new BrowserView(page);
     await editor.locatorFor('.block-input').dblclick();
+
     const inscriptionView = editor.locatorFor('#properties');
+    const outputView = new OutputView(page);
+    await outputView.openLog('Axon Ivy Extension');
+
     await inscriptionView.getByRole('button', { name: /Help/ }).click();
-    expect((await browserView.input().inputValue()).toString()).toMatch(/^https:\/\/developer\.axonivy\.com.*user-dialogs\/form-editor\.html$/);
+    await page.keyboard.press('Escape');
+    await outputView.expectLogEntry('Opening URL externally');
+    await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*user-dialogs\/form-editor\.html/);
   });
 
   test('Preview', async ({ page }) => {

@@ -1,9 +1,9 @@
 import { expect } from '@playwright/test';
 import { test } from './fixtures/baseTest';
-import { BrowserView } from './page-objects/browser-view';
 import { CmsEditor } from './page-objects/cms-editor';
 import { Editor } from './page-objects/editor';
 import { FileExplorer, ProjectExplorerView } from './page-objects/explorer-view';
+import { OutputView } from './page-objects/output-view';
 
 test('Open by command', async ({ page }) => {
   const editor = new CmsEditor(page);
@@ -14,22 +14,30 @@ test('Open by command', async ({ page }) => {
   await editor.hasContentObject('/contentObject');
 });
 
-test('Open by file and open help and open text file', async ({ page }) => {
+test('Open by file and open text file', async ({ page }) => {
   const editor = new CmsEditor(page);
   await editor.hasDeployProjectStatusMessage();
   await editor.openEditorFile();
   await editor.isViewVisible();
   await editor.hasContentObject('/contentObject');
 
-  await editor.help.click();
-  const browserView = new BrowserView(page);
-  await expect(browserView.input()).toHaveValue(/^https:\/\/developer\.axonivy\.com.*cms\/cms-editor.html$/);
-
   const detail = await editor.rowByName('/File/Text').openInscription();
   await detail.getByRole('button', { name: 'Open File' }).click();
   const fileEditor = new Editor('Text_en.txt', page);
   await fileEditor.isTabVisible();
   await expect(fileEditor.editorContent()).toContainText(`This is a content object file`);
+});
+
+test('Open help', async ({ page }) => {
+  const editor = new CmsEditor(page);
+  await editor.openEditorFile();
+  const outputView = new OutputView(page);
+  await outputView.openLog('Axon Ivy Extension');
+  await editor.help.click();
+
+  await page.keyboard.press('Escape');
+  await outputView.expectLogEntry('Opening URL externally');
+  await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*cms\/cms-editor.html/);
 });
 
 test('Reuse and reveal existing panel', async ({ page }) => {
