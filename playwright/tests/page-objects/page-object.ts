@@ -44,7 +44,6 @@ export class PageObject {
       await expect(textBox).toHaveValue(input);
     }
     await this.quickInputBox().click({ delay: 100 });
-    await this.page.waitForTimeout(500);
     await this.quickInputBox().press('Enter', { delay: 100 });
   }
 
