@@ -81,4 +81,12 @@ export class PageObject {
       await expect(dirtyLocator).toBeHidden();
     }).toPass();
   }
+
+  async activateExpensiveJavaStandardMode() {
+    const statusBarItem = (text: string) => this.page.locator(`div.statusbar-item:has-text("${text}")`);
+    await statusBarItem('Java: Lightweight Mode').click();
+    await expect(statusBarItem('Java: Importing Maven')).toBeVisible();
+    await expect(statusBarItem('Java: Ready')).toBeVisible();
+    await expect(statusBarItem('Finished: Invalidate class loader')).toBeVisible();
+  }
 }

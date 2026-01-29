@@ -26,15 +26,19 @@ export class InscriptionView extends PageObject {
   }
 
   async openCollapsible(name: string) {
-    const collapsible = this.parent.locator(`.ui-collapsible:has-text("${name}")`);
-    await this.open(collapsible);
+    await this.openOrCloseCollapsible(name, true);
   }
 
-  private async open(locator: Locator) {
-    if ((await locator.getAttribute('data-state')) === 'closed') {
-      await locator.click();
+  async closeCollapsible(name: string) {
+    await this.openOrCloseCollapsible(name, false);
+  }
+
+  private async openOrCloseCollapsible(name: string, openIt: boolean) {
+    const collapsible = this.parent.locator(`.ui-collapsible-trigger:has-text("${name}")`);
+    if ((await collapsible.getAttribute('data-state')) === (openIt ? 'closed' : 'open')) {
+      await collapsible.click();
     }
-    await expect(locator).toHaveAttribute('data-state', 'open');
+    await expect(collapsible).toHaveAttribute('data-state', openIt ? 'open' : 'closed');
   }
 
   inputFieldFor(label: string): Locator {
