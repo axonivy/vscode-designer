@@ -42,8 +42,6 @@
     "@axonivy/role-editor-protocol": "~14.0.0-next.80.72808e0",
     "@axonivy/user-editor-protocol": "~14.0.0-next.33.6cf597d",
     "@axonivy/variable-editor-protocol": "~14.0.0-next.940.bb9d495",
-    "@codingame/monaco-vscode-editor-api": "^23.1.1",
-    "@codingame/monaco-vscode-textmate-service-override": "^23.1.1",
     "@eclipse-glsp/protocol": "2.5.0",
     "@eclipse-glsp/vscode-integration": "2.5.0",
     "axios": "1.13.2",
@@ -68,6 +66,9 @@
     "webpack": "5.104.1",
     "webpack-cli": "6.0.1",
     "json-schema-to-typescript": "^15.0.4"
+  },
+  "peerDependencies": {
+    "@codingame/monaco-vscode-editor-api": "*"
   },
   "activationEvents": [
     "onStartupFinished"

@@ -31,6 +31,9 @@ const WebviewConnectionReadyNotification: NotificationType<void> = { method: 'co
 const InitializeConnectionRequest: RequestType<void, void> = { method: 'initializeConnection' };
 const StartProcessRequest: RequestType<string, Promise<void>> = { method: 'startProcess' };
 
+// Save document notification - allow webview to trigger save when Monaco captures Cmd+S
+const SaveDocumentNotification: NotificationType<void> = { method: 'document/save' };
+
 const InscriptionWebSocketMessage: NotificationType<unknown> = { method: 'inscriptionWebSocketMessage' };
 const IvyScriptWebSocketMessage: NotificationType<unknown> = { method: 'ivyScriptWebSocketMessage' };
 
@@ -50,12 +53,16 @@ export const setupCommunication = (
     messenger.onNotification(WebviewConnectionReadyNotification, () => handleWebviewReadyNotification(messenger, messageParticipant), {
       sender: messageParticipant
     }),
-    messenger.onRequest<string, Promise<void>>(
-      StartProcessRequest,
-      startUri => IvyBrowserViewProvider.instance.openEngineRelativeUrl(startUri),
-      {
-        sender: messageParticipant
-      }
+    messenger.onRequest(StartProcessRequest, startUri => IvyBrowserViewProvider.instance.openEngineRelativeUrl(startUri), {
+      sender: messageParticipant
+    }),
+    // Save document handler - triggered when Monaco captures Cmd+S in webview
+    messenger.onNotification(
+      SaveDocumentNotification,
+      () => {
+        vscode.commands.executeCommand('workbench.action.files.save');
+      },
+      { sender: messageParticipant }
     ),
     vscode.window.onDidChangeActiveColorTheme(theme =>
       messenger.sendNotification(ColorThemeChangedNotification, messageParticipant, vsCodeThemeToMonacoTheme(theme))

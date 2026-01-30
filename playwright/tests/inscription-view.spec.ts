@@ -119,6 +119,35 @@ test.describe('Inscription View', () => {
     await expect(monacoEditor).toHaveText('ch.ivyteam.ivy.security.ISecurityContext.current()');
   });
 
+  test('Monaco Editor shortcuts', async ({ page }) => {
+    const inscriptionView = await processEditor.openInscriptionView(userDialogPID1);
+    await inscriptionView.openInscriptionTab('Output');
+    await inscriptionView.openCollapsible('Code');
+    const monacoEditor = inscriptionView.monacoEditor();
+    await expect(monacoEditor).toBeVisible();
+
+    await monacoEditor.click();
+    await expect(monacoEditor).toHaveText('');
+    await page.keyboard.type('hi');
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.press('ControlOrMeta+c');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ControlOrMeta+v');
+    await expect(monacoEditor).toHaveText('hihi');
+
+    await processEditor.isDirty();
+    await page.keyboard.press('ControlOrMeta+s');
+    await processEditor.isNotDirty();
+
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.press('Delete');
+    await expect(monacoEditor).toHaveText('');
+
+    await processEditor.isDirty();
+    await page.keyboard.press('ControlOrMeta+s');
+    await processEditor.isNotDirty();
+  });
+
   test('Create new Sub Process', async () => {
     const inscriptionView = await processEditor.openInscriptionView('15254DCE818AD7A2-f5');
     await inscriptionView.openInscriptionTab('Process');
