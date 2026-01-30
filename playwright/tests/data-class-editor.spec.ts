@@ -34,4 +34,31 @@ test.describe('Data Class Editor', () => {
     await javaEditor.isTabVisible();
     await expect(javaEditor.editorContent()).toContainText(`  private java.lang.String ${attributeName};`);
   });
+
+  test('Type completion with JDT language server', async ({ page }) => {
+    const editor = new DataClassEditor(page);
+    await editor.hasDeployProjectStatusMessage();
+    await editor.openEditorFile();
+    await editor.isViewVisible();
+
+    await editor.activateExpensiveJavaStandardMode();
+
+    await editor
+      .viewFrameLocator()
+      .getByRole('button', { name: /Add Attribute/ })
+      .click();
+    const dialog = editor.viewFrameLocator().getByRole('dialog');
+    await dialog.getByRole('textbox', { name: 'Name' }).fill('testTask');
+    await dialog.getByRole('button', { name: 'Browser' }).click();
+    await dialog.getByRole('checkbox', { name: 'Search over all types' }).check();
+    await dialog.getByRole('textbox').fill('ITask');
+    await dialog.getByRole('table').getByRole('row', { name: 'ITask ch.ivyteam.ivy.workflow' }).click();
+    await dialog.getByRole('button', { name: 'Apply' }).click();
+    await expect(dialog.getByRole('textbox', { name: 'Type' })).toHaveValue('ch.ivyteam.ivy.workflow.ITask');
+    await dialog.getByRole('button', { name: 'Create Attribute' }).click();
+
+    await editor.isDirty();
+    await editor.saveAllFiles();
+    await editor.isNotDirty();
+  });
 });
