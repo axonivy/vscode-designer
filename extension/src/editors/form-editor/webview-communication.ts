@@ -52,7 +52,10 @@ class FormEditorWebSocketForwarder extends WebSocketForwarder {
       const path = file.substring(0, file.lastIndexOf('.f.json'));
       switch (message.params.actionId) {
         case 'openUrl':
-          this.openUrl(message.params.payload);
+          openUrlExternally(message.params.payload);
+          break;
+        case 'openPreview':
+          IvyBrowserViewProvider.instance.open(message.params.payload);
           break;
         case 'openProcess':
           vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(`${path}Process.p.json`));
@@ -68,14 +71,6 @@ class FormEditorWebSocketForwarder extends WebSocketForwarder {
       }
     }
     super.handleClientMessage(message);
-  }
-
-  protected openUrl(url: string) {
-    if (url.includes('localhost')) {
-      IvyBrowserViewProvider.instance.open(url);
-    } else {
-      openUrlExternally(url);
-    }
   }
 
   protected override handleServerMessage(message: string) {
