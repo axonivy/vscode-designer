@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import { NotificationType, RequestType } from 'vscode-messenger-common';
 import { extensionVersion } from '../../version/extension-version';
+import { openUrlExternally } from '../notification-helper';
 import { createWebViewContent } from '../webview-helper';
 
 let messenger: Messenger | undefined;
@@ -77,9 +78,7 @@ const initializeMessenger = (context: vscode.ExtensionContext) => {
     return messenger;
   }
   messenger = new Messenger();
-  messenger.onNotification(openUrlType, (url: string) => {
-    vscode.env.openExternal(vscode.Uri.parse(url));
-  });
+  messenger.onNotification(openUrlType, openUrlExternally);
   messenger.onNotification(commandType, command => {
     vscode.commands.executeCommand(command);
   });

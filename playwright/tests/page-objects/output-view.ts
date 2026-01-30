@@ -1,4 +1,4 @@
-import { type Page, expect } from '@playwright/test';
+import { type Locator, type Page, expect } from '@playwright/test';
 import { View, type ViewData } from './view';
 
 const outputViewData: ViewData = {
@@ -7,8 +7,16 @@ const outputViewData: ViewData = {
 };
 
 export class OutputView extends View {
+  readonly sourceSelection: Locator;
+  readonly logEntries: Locator;
   constructor(page: Page) {
     super(outputViewData, page);
+    this.sourceSelection = page.getByRole('toolbar', { name: 'Output actions', includeHidden: false }).locator('select');
+    this.logEntries = page.getByRole('presentation').locator('.view-lines');
+  }
+
+  async open() {
+    await this.executeCommand('Output: Focus on Output View');
   }
 
   async checkIfEngineStarted() {
@@ -16,5 +24,15 @@ export class OutputView extends View {
     await expect(async () => {
       await expect(this.viewLocator).toContainText(expectedText);
     }).toPass();
+  }
+
+  async openLog(name: string) {
+    await this.open();
+    await this.sourceSelection.click();
+    await this.sourceSelection.selectOption({ label: name });
+  }
+
+  async expectLogEntry(entry: string | RegExp) {
+    await expect(this.logEntries).toContainText(entry);
   }
 }

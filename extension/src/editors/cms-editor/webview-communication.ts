@@ -3,8 +3,13 @@ import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
-import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
-import { InitializeConnectionRequest, isAction, noUnknownAction, WebviewReadyNotification } from '../notification-helper';
+import {
+  InitializeConnectionRequest,
+  isAction,
+  noUnknownAction,
+  openUrlExternally,
+  WebviewReadyNotification
+} from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 
 const CmsWebSocketMessage: NotificationType<unknown> = { method: 'cmsWebSocketMessage' };
@@ -37,7 +42,7 @@ class CmsEditorWebSocketForwarder extends WebSocketForwarder {
       const actionId = message.params.actionId;
       switch (actionId) {
         case 'openUrl':
-          IvyBrowserViewProvider.instance.open(message.params.url);
+          openUrlExternally(message.params.url);
           break;
         case 'openFile':
           openCmsFile(this.projectPath, message.params.url, message.params.co);

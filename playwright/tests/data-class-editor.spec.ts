@@ -1,19 +1,15 @@
 import { expect } from '@playwright/test';
 import { test } from './fixtures/baseTest';
-import { BrowserView } from './page-objects/browser-view';
 import { DataClassEditor } from './page-objects/data-class-editor';
 import { Editor } from './page-objects/editor';
+import { OutputView } from './page-objects/output-view';
 
 test.describe('Data Class Editor', () => {
-  test('Open help and add attribute', async ({ page }) => {
+  test('Add attribute', async ({ page }) => {
     const editor = new DataClassEditor(page);
     await editor.hasDeployProjectStatusMessage();
     await editor.openEditorFile();
     await editor.isViewVisible();
-
-    await editor.viewFrameLocator().getByRole('button', { name: /Help/ }).click();
-    const browserView = new BrowserView(page);
-    expect((await browserView.input().inputValue()).toString()).toMatch(/^https:\/\/developer\.axonivy\.com.*data-classes\/data-classes.html#data-class-editor$/);
 
     await editor
       .viewFrameLocator()
@@ -60,5 +56,17 @@ test.describe('Data Class Editor', () => {
     await editor.isDirty();
     await editor.saveAllFiles();
     await editor.isNotDirty();
+  });
+
+  test('Open help', async ({ page }) => {
+    const editor = new DataClassEditor(page);
+    const outputView = new OutputView(page);
+    await editor.openEditorFile();
+    await outputView.openLog('Axon Ivy Extension');
+
+    await editor.viewFrameLocator().getByRole('button', { name: /Help/ }).click();
+    await page.keyboard.press('Escape');
+    await outputView.expectLogEntry('Opening URL externally');
+    await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*data-classes\/data-classes.html#data-class-editor/);
   });
 });

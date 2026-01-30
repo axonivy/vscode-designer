@@ -4,13 +4,13 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { executeCommand } from '../../../base/commands';
 import { logInformationMessage } from '../../../base/logging-util';
-import { IvyBrowserViewProvider } from '../../../browser/ivy-browser-view-provider';
 import { IvyProjectExplorer } from '../../../project-explorer/ivy-project-explorer';
+import { openUrlExternally } from '../../notification-helper';
 
 export const handleOpenPage = async (actionArgs: InscriptionActionArgs) => {
   const path = actionArgs.payload.toString();
   if (isUrl(path)) {
-    openUrlInIntegratedBrowser(path);
+    openUrlExternally(path);
   } else {
     openInExplorer(await getValideFilePath(path));
   }
@@ -29,10 +29,6 @@ async function getValideFilePath(pathString: string) {
     return path.join(projectFolder, pathString);
   }
   return null;
-}
-
-async function openUrlInIntegratedBrowser(absolutePath: string) {
-  await IvyBrowserViewProvider.instance.open(absolutePath);
 }
 
 function openInExplorer(absolutePath: string | null) {

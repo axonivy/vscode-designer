@@ -1,6 +1,7 @@
 import { EditorFileContent } from '@axonivy/dataclass-editor-protocol';
+import * as vscode from 'vscode';
 import { NotificationType } from 'vscode-messenger-common';
-import { logErrorMessage } from '../base/logging-util';
+import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 
 export const WebviewReadyNotification: NotificationType<void> = { method: 'ready' };
 export const InitializeConnectionRequest: NotificationType<{ file: string }> = { method: 'initializeConnection' };
@@ -57,4 +58,9 @@ export const isSearchResult = <T>(obj: unknown, id?: number): obj is { result: T
     'id' in obj &&
     obj.id === id
   );
+};
+
+export const openUrlExternally = (url: string) => {
+  logInformationMessage(`Opening URL externally: ${url}`);
+  vscode.env.openExternal(vscode.Uri.parse(url));
 };
