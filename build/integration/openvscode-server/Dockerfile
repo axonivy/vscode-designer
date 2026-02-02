@@ -1,8 +1,8 @@
-FROM mcr.microsoft.com/playwright:v1.58.0
+FROM mcr.microsoft.com/playwright:v1.58.1
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN npm install -g pnpm@10.28.1
+RUN npm install -g pnpm@10.28.2
 
 RUN apt-get update &&\
   apt-get install software-properties-common -y &&\
