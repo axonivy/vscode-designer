@@ -139,6 +139,12 @@ test.describe('Inscription View', () => {
     await page.keyboard.press('ControlOrMeta+v');
     await expect(monacoEditor).toHaveText('hihi');
 
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.press('ControlOrMeta+x');
+    await expect(monacoEditor).toBeEmpty();
+    await page.keyboard.press('ControlOrMeta+v');
+    await expect(monacoEditor).toHaveText('hihi');
+
     await processEditor.isDirty();
     await page.keyboard.press('ControlOrMeta+s');
     await processEditor.isNotDirty();
