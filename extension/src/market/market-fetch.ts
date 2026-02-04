@@ -1,4 +1,4 @@
-const MARKET_URL = 'https://market.axonivy.com/marketplace-service';
+const MARKET_URL = 'http://localhost:8081/marketplace-stable';
 
 const getUrl = (contextUrl: string): string => {
   const base = MARKET_URL;
