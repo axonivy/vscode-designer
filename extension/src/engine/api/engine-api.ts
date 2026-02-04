@@ -12,6 +12,7 @@ import {
   ImportProcessBody,
   NewProjectParams,
   ProductInstallParams,
+  WorkspaceBean,
   buildProjects,
   componentForm,
   convertProject,
@@ -44,16 +45,14 @@ const headers = { 'X-Requested-By': 'web-ide' };
 const options = { headers, paramsSerializer: { indexes: null } };
 
 export class IvyEngineApi {
-  private readonly _devContextPath: Promise<string>;
+  private readonly workspace: Promise<WorkspaceBean>;
   private readonly baseURL: Promise<string>;
   private readonly engineURL: string;
 
   constructor(engineUrl: string) {
     this.engineURL = new URL('api', engineUrl).toString();
-    this._devContextPath = this.createWorkspace(engineUrl)
-      .then(ws => ws.baseUrl)
-      .catch(handleAxiosError);
-    this.baseURL = this.devContextPath.then(devContextPath => new URL(path.join(devContextPath, 'api'), engineUrl).toString());
+    this.workspace = this.createWorkspace(engineUrl).catch(handleAxiosError);
+    this.baseURL = this.workspace.then(workspace => new URL(path.join(workspace.baseUrl, 'api'), engineUrl).toString());
   }
 
   private async createWorkspace(engineUrl: string) {
@@ -127,13 +126,8 @@ export class IvyEngineApi {
 
   public async installMarketProduct(params: ProductInstallParams) {
     const baseURL = this.engineURL;
-    const workspaces = vscode.workspace.workspaceFolders;
-    const workspace = workspaces?.at(0);
-    if (!workspaces || !workspace) {
-      throw new Error('No workspace available');
-    }
     return vscode.window.withProgress(progressOptions('Import Market Product'), async () => {
-      return installMarketProduct(workspace.name.toLowerCase(), params, { baseURL, ...options })
+      return installMarketProduct((await this.workspace).id, params, { baseURL, ...options })
         .then(res => res.data)
         .catch(handleAxiosError);
     });
@@ -222,6 +216,6 @@ export class IvyEngineApi {
   }
 
   public get devContextPath(): Promise<string> {
-    return this._devContextPath;
+    return this.workspace.then(ws => ws.baseUrl);
   }
 }

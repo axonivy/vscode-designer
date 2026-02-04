@@ -198,7 +198,6 @@ export interface ProjectParams {
 
 export interface WorkspaceBean {
   id: string;
-  name: string;
   baseUrl: string;
   running: boolean;
 }
