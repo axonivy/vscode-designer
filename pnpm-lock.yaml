@@ -370,13 +370,13 @@ importers:
         version: 6.2.2(reflect-metadata@0.2.2)
       monaco-editor:
         specifier: npm:@codingame/monaco-vscode-editor-api
-        version: '@codingame/monaco-vscode-editor-api@25.1.1'
+        version: '@codingame/monaco-vscode-editor-api@25.1.2'
       monaco-languageclient:
         specifier: ^10
         version: 10.6.0
       vscode:
         specifier: npm:@codingame/monaco-vscode-extension-api
-        version: '@codingame/monaco-vscode-extension-api@25.1.1'
+        version: '@codingame/monaco-vscode-extension-api@25.1.2'
       vscode-messenger-common:
         specifier: 0.4.5
         version: 0.4.5
@@ -516,8 +516,8 @@ packages:
     peerDependencies:
       openapi-types: '>=7'
 
-  '@asyncapi/specs@6.10.0':
-    resolution: {integrity: sha512-vB5oKLsdrLUORIZ5BXortZTlVyGWWMC1Nud/0LtgxQ3Yn2738HigAD6EVqScvpPsDUI/bcLVsYEXN4dtXQHVng==}
+  '@asyncapi/specs@6.11.1':
+    resolution: {integrity: sha512-A3WBLqAKGoJ2+6FWFtpjBlCQ1oFCcs4GxF7zsIGvNqp/klGUHjlA3aAcZ9XMMpLGE8zPeYDz2x9FmO6DSuKraQ==}
 
   '@axonivy/case-map-editor-protocol@14.0.0-next.158.8b9c318':
     resolution: {integrity: sha512-uh0RVp+dC1cGDyxkKBHieRDDWoOJEyKOI2VUaIZnG6OgDVmdtkKoEJe4a5oYw8WPgiMfer9zPfMN/fBsOb+FdA==}
@@ -916,8 +916,8 @@ packages:
   '@codingame/monaco-vscode-editor-api@25.0.0':
     resolution: {integrity: sha512-uiY06RTWFo2WZdh6OybkLlDhuG+8LlkjUDpr9/wW55uucqHo4X8fx4XKEtD98cscC+6FKQkbG2yyUiOJ/npHOw==}
 
-  '@codingame/monaco-vscode-editor-api@25.1.1':
-    resolution: {integrity: sha512-wQE3MhkjOR+5wwZ9h0UXgkIQcJidWYfwPO7J61RAghgN4saH+wPdxTxEOC1seLLodgfstMXwt2YHHC4Ih1nOKw==}
+  '@codingame/monaco-vscode-editor-api@25.1.2':
+    resolution: {integrity: sha512-dVXoBLRN8vyFHsLY6iYISaNetZ3ispXLut0qL+jvN0e0CEFkUv1F/3EAE7myptrJSS/N1AptrRIxATT3lwFP+Q==}
 
   '@codingame/monaco-vscode-editor-service-override@25.0.0':
     resolution: {integrity: sha512-AtQKS+Z4BD/p5BJwR/+YDwzZz15tOz6uE7m7j5YV9EBXqNiwUbOuowfnByW4WoFYy6DOyyBl13SRc4UB038ASA==}
@@ -928,8 +928,8 @@ packages:
   '@codingame/monaco-vscode-extension-api@25.0.0':
     resolution: {integrity: sha512-zY4S0Gp+lF/VwGn6UNkSo1TsfeXndbxPTAGCAlttvgnQV6FCLI/L3AedNv2RVVON/vxvamSoQR39A6hZzSw0SA==}
 
-  '@codingame/monaco-vscode-extension-api@25.1.1':
-    resolution: {integrity: sha512-KmRB1NM/VZ8VxBRu48h/1IXcy3j3L/tcHRT5HPl4LE+5J5qsZ3IVcSKxF+yUjMzIrBUIaE7thSJ+PDGCieSTbw==}
+  '@codingame/monaco-vscode-extension-api@25.1.2':
+    resolution: {integrity: sha512-SJW/YOhjo+9MXEyzMwQMUWdJVR3Llc6pTq5JQqs6Y30v73gTrpLqtzbd9FNdCuQR8S6bUk5ScH8GL4QrVuL5FA==}
 
   '@codingame/monaco-vscode-extensions-service-override@25.0.0':
     resolution: {integrity: sha512-ybzRizvOZ/BxTa2f0CpF644JoBlA/bJOEPmJPEvRRoFdVlZ4hla3UHJSzUUUPJcs7oQY+3ApzzDe76oC2G+4ww==}
@@ -1504,8 +1504,8 @@ packages:
     resolution: {integrity: sha512-AoFbSarOqFBYH+1TZ9Ahkm2IWYSi5v0pBk88fpV+5b3qGJukypX8PwvCWADjuyIccKg48/F73a6hTTkBzDQ2UA==}
     engines: {node: '>=16.0.0'}
 
-  '@ibm-cloud/openapi-ruleset@1.33.5':
-    resolution: {integrity: sha512-oT8USsTulFAA8FiBN0lA2rJqQI2lIt+HP2pdakGQXo3EviL2vqJTgpSCRwjl6mLJL158f1BVcdQUOEFGxomK3w==}
+  '@ibm-cloud/openapi-ruleset@1.33.6':
+    resolution: {integrity: sha512-q3FnXqiQkSrC7HuLn3u+cMMmAHUvIRFdLCbBSnJCuJPWa+OYoA8gDgtw9KXGkOklwxToXEwmjRBIfeQDoCxt2w==}
     engines: {node: '>=16.0.0'}
 
   '@inquirer/ansi@1.0.2':
@@ -3241,8 +3241,8 @@ packages:
     resolution: {integrity: sha512-lyIc6JUlUA8Ve5ELywPC8I2Sdnh1zc1zmbYgVarhXIp9YeAB0ReeqmGEOWNtlHkbP2DAA1AL65Wfn2ncjK/jtQ==}
     engines: {node: '>=8'}
 
-  '@stoplight/spectral-core@1.20.0':
-    resolution: {integrity: sha512-5hBP81nCC1zn1hJXL/uxPNRKNcB+/pEIHgCjPRpl/w/qy9yC9ver04tw1W0l/PMiv0UeB5dYgozXVQ4j5a6QQQ==}
+  '@stoplight/spectral-core@1.21.0':
+    resolution: {integrity: sha512-oj4e/FrDLUhBRocIW+lRMKlJ/q/rDZw61HkLbTFsdMd+f/FTkli2xHNB1YC6n1mrMKjjvy7XlUuFkC7XxtgbWw==}
     engines: {node: ^16.20 || ^18.18 || >= 20.17}
 
   '@stoplight/spectral-formats@1.8.2':
@@ -4755,6 +4755,7 @@ packages:
   glob@11.1.0:
     resolution: {integrity: sha512-vuNwKSaKiqm7g0THUBu2x7ckSs3XJLXE+2ssL7/MfTGPLLcrJQ/4Uq1CjPTtO5cCIiRxqvN6Twy1qOwhL0Xjcw==}
     engines: {node: 20 || >=22}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   glob@13.0.0:
@@ -5361,6 +5362,9 @@ packages:
 
   lodash@4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+
+  lodash@4.17.23:
+    resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
 
   log-symbols@6.0.0:
     resolution: {integrity: sha512-i24m8rpwhmPIS4zscNzK6MSEhk0DUWa/8iYQWxhffV8jkI4Phvs3F+quL5xvS0gdQR0FyTCMMH33Y78dDTzzIw==}
@@ -7214,7 +7218,7 @@ snapshots:
       call-me-maybe: 1.0.2
       openapi-types: 12.1.3
 
-  '@asyncapi/specs@6.10.0':
+  '@asyncapi/specs@6.11.1':
     dependencies:
       '@types/json-schema': 7.0.15
 
@@ -7796,7 +7800,7 @@ snapshots:
     dependencies:
       '@codingame/monaco-vscode-api': 25.0.0
 
-  '@codingame/monaco-vscode-editor-api@25.1.1':
+  '@codingame/monaco-vscode-editor-api@25.1.2':
     dependencies:
       '@codingame/monaco-vscode-api': 25.0.0
 
@@ -7813,7 +7817,7 @@ snapshots:
       '@codingame/monaco-vscode-api': 25.0.0
       '@codingame/monaco-vscode-extensions-service-override': 25.0.0
 
-  '@codingame/monaco-vscode-extension-api@25.1.1':
+  '@codingame/monaco-vscode-extension-api@25.1.2':
     dependencies:
       '@codingame/monaco-vscode-api': 25.0.0
       '@codingame/monaco-vscode-extensions-service-override': 25.0.0
@@ -8331,7 +8335,7 @@ snapshots:
 
   '@ibm-cloud/openapi-ruleset-utilities@1.9.0': {}
 
-  '@ibm-cloud/openapi-ruleset@1.33.5(encoding@0.1.13)':
+  '@ibm-cloud/openapi-ruleset@1.33.6(encoding@0.1.13)':
     dependencies:
       '@ibm-cloud/openapi-ruleset-utilities': 1.9.0
       '@stoplight/spectral-formats': 1.8.2(encoding@0.1.13)
@@ -8340,7 +8344,7 @@ snapshots:
       chalk: 4.1.2
       inflected: 2.1.0
       jsonschema: 1.5.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       loglevel: 1.9.2
       loglevel-plugin-prefix: 0.8.4
       minimatch: 6.2.0
@@ -8898,8 +8902,8 @@ snapshots:
   '@orval/core@7.21.0(encoding@0.1.13)(openapi-types@12.1.3)(typescript@5.9.3)':
     dependencies:
       '@apidevtools/swagger-parser': 12.1.0(openapi-types@12.1.3)
-      '@ibm-cloud/openapi-ruleset': 1.33.5(encoding@0.1.13)
-      '@stoplight/spectral-core': 1.20.0(encoding@0.1.13)
+      '@ibm-cloud/openapi-ruleset': 1.33.6(encoding@0.1.13)
+      '@stoplight/spectral-core': 1.21.0(encoding@0.1.13)
       acorn: 8.15.0
       chalk: 4.1.2
       compare-versions: 6.1.1
@@ -10680,7 +10684,7 @@ snapshots:
       dependency-graph: 0.11.0
       fast-memoize: 2.5.2
       immer: 9.0.21
-      lodash: 4.17.21
+      lodash: 4.17.23
       tslib: 2.8.1
       urijs: 1.19.11
 
@@ -10690,14 +10694,14 @@ snapshots:
       '@stoplight/path': 1.3.2
       '@stoplight/types': 13.20.0
       jsonc-parser: 2.2.1
-      lodash: 4.17.21
+      lodash: 4.17.23
       safe-stable-stringify: 1.1.1
 
   '@stoplight/ordered-object-literal@1.0.5': {}
 
   '@stoplight/path@1.3.2': {}
 
-  '@stoplight/spectral-core@1.20.0(encoding@0.1.13)':
+  '@stoplight/spectral-core@1.21.0(encoding@0.1.13)':
     dependencies:
       '@stoplight/better-ajv-errors': 1.0.3(ajv@8.17.1)
       '@stoplight/json': 3.21.7
@@ -10713,7 +10717,7 @@ snapshots:
       ajv-formats: 2.1.1(ajv@8.17.1)
       es-aggregate-error: 1.0.14
       jsonpath-plus: 10.3.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       lodash.topath: 4.5.2
       minimatch: 3.1.2
       nimma: 0.2.3
@@ -10726,7 +10730,7 @@ snapshots:
   '@stoplight/spectral-formats@1.8.2(encoding@0.1.13)':
     dependencies:
       '@stoplight/json': 3.21.7
-      '@stoplight/spectral-core': 1.20.0(encoding@0.1.13)
+      '@stoplight/spectral-core': 1.21.0(encoding@0.1.13)
       '@types/json-schema': 7.0.15
       tslib: 2.8.1
     transitivePeerDependencies:
@@ -10736,14 +10740,14 @@ snapshots:
     dependencies:
       '@stoplight/better-ajv-errors': 1.0.3(ajv@8.17.1)
       '@stoplight/json': 3.21.7
-      '@stoplight/spectral-core': 1.20.0(encoding@0.1.13)
+      '@stoplight/spectral-core': 1.21.0(encoding@0.1.13)
       '@stoplight/spectral-formats': 1.8.2(encoding@0.1.13)
       '@stoplight/spectral-runtime': 1.1.4(encoding@0.1.13)
       ajv: 8.17.1
       ajv-draft-04: 1.0.0(ajv@8.17.1)
       ajv-errors: 3.0.0(ajv@8.17.1)
       ajv-formats: 2.1.1(ajv@8.17.1)
-      lodash: 4.17.21
+      lodash: 4.17.23
       tslib: 2.8.1
     transitivePeerDependencies:
       - encoding
@@ -10767,10 +10771,10 @@ snapshots:
 
   '@stoplight/spectral-rulesets@1.22.0(encoding@0.1.13)':
     dependencies:
-      '@asyncapi/specs': 6.10.0
+      '@asyncapi/specs': 6.11.1
       '@stoplight/better-ajv-errors': 1.0.3(ajv@8.17.1)
       '@stoplight/json': 3.21.7
-      '@stoplight/spectral-core': 1.20.0(encoding@0.1.13)
+      '@stoplight/spectral-core': 1.21.0(encoding@0.1.13)
       '@stoplight/spectral-formats': 1.8.2(encoding@0.1.13)
       '@stoplight/spectral-functions': 1.10.1(encoding@0.1.13)
       '@stoplight/spectral-runtime': 1.1.4(encoding@0.1.13)
@@ -10780,7 +10784,7 @@ snapshots:
       ajv-formats: 2.1.1(ajv@8.17.1)
       json-schema-traverse: 1.0.0
       leven: 3.1.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       tslib: 2.8.1
     transitivePeerDependencies:
       - encoding
@@ -10791,7 +10795,7 @@ snapshots:
       '@stoplight/path': 1.3.2
       '@stoplight/types': 13.20.0
       abort-controller: 3.0.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       node-fetch: 2.7.0(encoding@0.1.13)
       tslib: 2.8.1
     transitivePeerDependencies:
@@ -10929,7 +10933,7 @@ snapshots:
       chalk: 4.1.2
       debug: 4.4.3
       js-yaml: 4.1.1
-      lodash: 4.17.21
+      lodash: 4.17.23
       pluralize: 2.0.0
       string-width: 4.2.3
       strip-ansi: 6.0.1
@@ -12187,7 +12191,7 @@ snapshots:
 
   eslint-plugin-i18next@6.1.3:
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       requireindex: 1.1.0
 
   eslint-plugin-playwright@2.5.1(eslint@9.39.2(jiti@2.6.1)):
@@ -13021,7 +13025,7 @@ snapshots:
       '@types/lodash': 4.17.23
       is-glob: 4.0.3
       js-yaml: 4.1.1
-      lodash: 4.17.21
+      lodash: 4.17.23
       minimist: 1.2.8
       prettier: 3.8.1
       tinyglobby: 0.2.15
@@ -13164,6 +13168,8 @@ snapshots:
   lodash.uniqwith@4.5.0: {}
 
   lodash@4.17.21: {}
+
+  lodash@4.17.23: {}
 
   log-symbols@6.0.0:
     dependencies:
