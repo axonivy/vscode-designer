@@ -1,7 +1,7 @@
 import { App, ClientContextProvider, QueryProvider, initQueryClient } from '@axonivy/form-editor';
 import { FormClientJsonRpc } from '@axonivy/form-editor-core';
 import '@axonivy/form-editor/lib/editor.css';
-import { HotkeysProvider, ThemeProvider } from '@axonivy/ui-components';
+import { HotkeysProvider, ThemeProvider, Toaster } from '@axonivy/ui-components';
 import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
 import '@axonivy/vscode-webview-common/css/colors.css';
 import * as React from 'react';
@@ -32,6 +32,7 @@ export async function start({ file }: InitializeConnection): Promise<void> {
           <QueryProvider client={queryClient}>
             <HotkeysProvider initiallyActiveScopes={['global']}>
               <App context={context} />
+              <Toaster closeButton={true} />
             </HotkeysProvider>
           </QueryProvider>
         </ClientContextProvider>

@@ -1,4 +1,4 @@
-import { ThemeProvider } from '@axonivy/ui-components';
+import { ThemeProvider, Toaster } from '@axonivy/ui-components';
 import '@axonivy/vscode-webview-common/css/colors.css';
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -27,6 +27,7 @@ export async function start() {
       <ThemeProvider disabled={true}>
         <VscodeMessengerProvider messenger={messenger}>
           <WelcomePage />
+          <Toaster closeButton={true} />
         </VscodeMessengerProvider>
       </ThemeProvider>
     </React.StrictMode>
