@@ -14,7 +14,8 @@ type Endpoint =
   | 'ivy-cms-lsp'
   | 'ivy-database-lsp'
   | 'ivy-role-lsp'
-  | 'ivy-user-lsp';
+  | 'ivy-user-lsp'
+  | 'ivy-restclient-lsp';
 
 export class WebSocketForwarder implements vscode.Disposable {
   readonly toDispose = new DisposableCollection();
