@@ -1,4 +1,4 @@
-import { HotkeysProvider, ThemeProvider } from '@axonivy/ui-components';
+import { HotkeysProvider, ThemeProvider, Toaster } from '@axonivy/ui-components';
 import { App, ClientContextProvider, QueryProvider, UserClientJsonRpc, initQueryClient } from '@axonivy/user-editor';
 import '@axonivy/user-editor/lib/editor.css';
 import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
@@ -27,6 +27,7 @@ export async function start({ file }: InitializeConnection) {
           <QueryProvider client={queryClient}>
             <HotkeysProvider initiallyActiveScopes={['global']}>
               <App context={{ app: '', pmv: '', file }} />
+              <Toaster closeButton={true} />
             </HotkeysProvider>
           </QueryProvider>
         </ClientContextProvider>
