@@ -29,20 +29,20 @@
   },
   "main": "./dist/extension.js",
   "dependencies": {
-    "@axonivy/cms-editor-protocol": "~14.0.0-next.651.2ec6f35",
+    "@axonivy/cms-editor-protocol": "~14.0.0-next.655.86ecdf0",
     "@axonivy/database-editor-protocol": "~14.0.0-next.252.70fa2f6",
-    "@axonivy/dataclass-editor-protocol": "~14.0.0-next.804.1b9ea83",
+    "@axonivy/dataclass-editor-protocol": "~14.0.0-next.808.8919817",
     "@axonivy/case-map-editor-protocol": "~14.0.0-next.158.8b9c318",
-    "@axonivy/form-editor-protocol": "~14.0.0-next.1116.a4884df",
-    "@axonivy/jsonrpc": "~14.0.0-next.992.e1774a3",
-    "@axonivy/log-view-core": "~14.0.0-next.330.3791e8f",
-    "@axonivy/log-view-protocol": "~14.0.0-next.330.3791e8f",
-    "@axonivy/process-editor-inscription-protocol": "~14.0.0-next.2031.2642f3db",
-    "@axonivy/process-editor-protocol": "~14.0.0-next.2031.2642f3db",
-    "@axonivy/role-editor-protocol": "~14.0.0-next.86.e847dd2",
-    "@axonivy/user-editor-protocol": "~14.0.0-next.41.cd7f00e",
+    "@axonivy/form-editor-protocol": "~14.0.0-next.1120.f9e2770",
+    "@axonivy/jsonrpc": "~14.0.0-next.999.00590d5",
+    "@axonivy/log-view-core": "~14.0.0-next.334.83c25da",
+    "@axonivy/log-view-protocol": "~14.0.0-next.334.83c25da",
+    "@axonivy/process-editor-inscription-protocol": "~14.0.0-next.2038.130863d5",
+    "@axonivy/process-editor-protocol": "~14.0.0-next.2038.130863d5",
+    "@axonivy/role-editor-protocol": "~14.0.0-next.90.a9b664b",
+    "@axonivy/user-editor-protocol": "~14.0.0-next.45.8a72289",
     "@axonivy/restclient-editor-protocol": "~14.0.0-next.8.ac5a84f",
-    "@axonivy/variable-editor-protocol": "~14.0.0-next.942.f9faadc",
+    "@axonivy/variable-editor-protocol": "~14.0.0-next.946.2d310a0",
     "@eclipse-glsp/protocol": "2.5.0",
     "@eclipse-glsp/vscode-integration": "2.5.0",
     "axios": "1.13.4",
@@ -67,9 +67,6 @@
     "webpack": "5.104.1",
     "webpack-cli": "6.0.1",
     "json-schema-to-typescript": "^15.0.4"
-  },
-  "peerDependencies": {
-    "@codingame/monaco-vscode-editor-api": "*"
   },
   "activationEvents": [
     "onStartupFinished"
