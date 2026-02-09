@@ -28,13 +28,12 @@ export class ProcessEditor extends Editor {
     return this.graphLocator().locator(type);
   }
 
-  async openInscriptionView(pid?: string) {
-    if (pid) {
-      await this.locatorForPID(pid).dblclick();
-    } else {
+  async openInscriptionView(pid: string) {
+    await this.locatorForPID(pid).click();
+    const view = this.inscriptionView();
+    if (await view.parent.isHidden()) {
       await this.viewFrameLocator().locator('#btn_inscription_toggle').click();
     }
-    const view = this.inscriptionView();
     await view.assertViewVisible();
     return view;
   }
