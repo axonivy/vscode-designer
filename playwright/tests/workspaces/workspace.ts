@@ -7,3 +7,4 @@ export const multiProjectWorkspacePath = path.resolve(__dirname, './multiProject
 export const empty = path.resolve(__dirname, './empty');
 export const embeddedEngineWorkspace = path.resolve(__dirname, './embeddedEngine');
 export const minimalProjectWorkspacePath = path.resolve(__dirname, './minimalProject');
+export const outdatedProjectWorkspacePath = path.resolve(__dirname, './outdatedProject');
