@@ -282,7 +282,7 @@ export class IvyProjectExplorer {
   }
 
   private async convertProject(selection: TreeSelection) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
+    const uri = await treeSelectionToUri(selection);
     const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
     const projects = IvyDiagnostics.instance.projectsToBeConverted();
     const quickPick = vscode.window.createQuickPick();

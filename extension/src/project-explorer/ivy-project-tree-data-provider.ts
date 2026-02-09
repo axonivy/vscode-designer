@@ -19,7 +19,7 @@ export interface Entry {
   command?: IvyCommand;
 }
 
-export const IVY_RPOJECT_FILE_PATTERN = '**/.ivyproject';
+export const IVY_RPOJECT_FILE_PATTERN = '**/{.ivyproject,.settings/ch.ivyteam.ivy.designer.prefs}';
 const IVY_PROJECT_CONTEXT_VALUE = 'ivyProject';
 
 export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry> {
@@ -49,7 +49,13 @@ export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry
   private async findIvyProjects(): Promise<string[]> {
     return (await vscode.workspace.findFiles(IVY_RPOJECT_FILE_PATTERN, this.excludePattern, this.maxResults))
       .map(u => u.fsPath)
-      .map(p => path.dirname(p))
+      .map(p => {
+        const parentDir = path.dirname(p);
+        if (path.basename(p) === 'ch.ivyteam.ivy.designer.prefs') {
+          return path.dirname(parentDir);
+        }
+        return parentDir;
+      })
       .sort();
   }
 
