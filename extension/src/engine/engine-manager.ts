@@ -143,6 +143,9 @@ export class IvyEngineManager {
 
   private async initExistingProjects() {
     const ivyProjectDirectories = await this.ivyProjectDirectories();
+    if (ivyProjectDirectories.length === 0) {
+      return;
+    }
     for (const projectDir of ivyProjectDirectories) {
       await this.ivyEngineApi?.initExistingProject(projectDir);
     }

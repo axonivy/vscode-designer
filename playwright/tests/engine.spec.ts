@@ -4,10 +4,10 @@ import { OutputView } from './page-objects/output-view';
 import { SettingsView } from './page-objects/settings-view';
 import { embeddedEngineWorkspace, noEngineWorkspacePath, noProjectWorkspacePath } from './workspaces/workspace';
 
-test.describe('Engine embeddedEngineWorkspace', () => {
+test.describe('Engine run by extension', () => {
   test.use({ workspace: embeddedEngineWorkspace });
 
-  test('check if embedded engine has started', async ({ page }) => {
+  test('check if extension can download and start engine', async ({ page }) => {
     const outputview = new OutputView(page);
     await outputview.isTabVisible();
     await outputview.isChecked();
@@ -19,7 +19,7 @@ test.describe('Engine embeddedEngineWorkspace', () => {
 test.describe('Engine noProjectWorkspacePath', () => {
   test.use({ workspace: noProjectWorkspacePath });
 
-  test('check default engine settings', async ({ page }) => {
+  test('check default engine settings and ensure engine is not started due to missing project file', async ({ page }) => {
     const settingsView = new SettingsView(page);
     await settingsView.openDefaultSettings();
     await settingsView.containsSetting('"axonivy.engine.runByExtension": true');
@@ -29,10 +29,7 @@ test.describe('Engine noProjectWorkspacePath', () => {
     await settingsView.containsSetting('"axonivy.process.animation.animate": true');
     await settingsView.containsSetting('"axonivy.process.animation.mode": "all"');
     await settingsView.containsSetting('"axonivy.process.animation.speed": 50');
-  });
 
-  test('ensure that embedded engine is not started due to missing project file', async ({ page }) => {
-    const settingsView = new SettingsView(page);
     await settingsView.openWorkspaceSettings();
     await settingsView.containsSetting('"axonivy.engine.runByExtension": true');
     const outputview = new OutputView(page);
@@ -53,7 +50,7 @@ test.describe('Engine noProjectWorkspacePath', () => {
 test.describe('Engine noEngineWorkspacePath', () => {
   test.use({ workspace: noEngineWorkspacePath });
 
-  test('ensure that embedded engine is not started due to settings', async ({ page }) => {
+  test('ensure that engine is not started due to settings', async ({ page }) => {
     const settingsView = new SettingsView(page);
     await settingsView.isExplorerActionItemChecked();
     await settingsView.openWorkspaceSettings();
