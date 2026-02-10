@@ -176,8 +176,8 @@ importers:
         specifier: 2.5.0
         version: 2.5.0(inversify@6.2.2(reflect-metadata@0.2.2))
       axios:
-        specifier: 1.13.4
-        version: 1.13.4
+        specifier: 1.13.5
+        version: 1.13.5
       dom-serializer:
         specifier: 2.0.0
         version: 2.0.0
@@ -370,13 +370,13 @@ importers:
         version: 6.2.2(reflect-metadata@0.2.2)
       monaco-editor:
         specifier: npm:@codingame/monaco-vscode-editor-api
-        version: '@codingame/monaco-vscode-editor-api@25.1.2'
+        version: '@codingame/monaco-vscode-editor-api@26.0.0'
       monaco-languageclient:
         specifier: ^10
-        version: 10.6.0
+        version: 10.7.0
       vscode:
         specifier: npm:@codingame/monaco-vscode-extension-api
-        version: '@codingame/monaco-vscode-extension-api@25.1.2'
+        version: '@codingame/monaco-vscode-extension-api@26.0.0'
       vscode-messenger-common:
         specifier: 0.4.5
         version: 0.4.5
@@ -897,6 +897,9 @@ packages:
   '@codingame/monaco-vscode-editor-api@25.1.2':
     resolution: {integrity: sha512-dVXoBLRN8vyFHsLY6iYISaNetZ3ispXLut0qL+jvN0e0CEFkUv1F/3EAE7myptrJSS/N1AptrRIxATT3lwFP+Q==}
 
+  '@codingame/monaco-vscode-editor-api@26.0.0':
+    resolution: {integrity: sha512-XU9jeIGBajzIjquxbbbO2oFmx9qc+znIzUQlymbs5WnevpKNE4R0lFKJ+Rr36/JF/TmFW1a3fU2PVxB8TXdyLA==}
+
   '@codingame/monaco-vscode-editor-service-override@25.1.2':
     resolution: {integrity: sha512-EadvDCyWdgxOPmaIvbcVVDNjTUYuKdjYWwKbPbbcTs9t4z1/DjdE7mV3ZdT6aGh5m6zkEEUOi143l27Y5eRt+Q==}
 
@@ -905,6 +908,9 @@ packages:
 
   '@codingame/monaco-vscode-extension-api@25.1.2':
     resolution: {integrity: sha512-SJW/YOhjo+9MXEyzMwQMUWdJVR3Llc6pTq5JQqs6Y30v73gTrpLqtzbd9FNdCuQR8S6bUk5ScH8GL4QrVuL5FA==}
+
+  '@codingame/monaco-vscode-extension-api@26.0.0':
+    resolution: {integrity: sha512-pwU0tjhKpr/p06W+KbJfSfWAe0TFSB8TnPQxU/JWV2JSMzEpPK4xFVAIoSkRJHj4dhcHrqV7lz/stlEPg2iWQA==}
 
   '@codingame/monaco-vscode-extensions-service-override@25.1.2':
     resolution: {integrity: sha512-rTTZW2biPxcg+JumhVf2L+38C5ptvNNxiJlwz39VfXFEh6qOHtAsIMy7vIXa0uGg5/y8DNp0SnOQJP/RKhLYZA==}
@@ -3665,8 +3671,8 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  axios@1.13.4:
-    resolution: {integrity: sha512-1wVkUaAO6WyaYtCkcYCOx12ZgpGf9Zif+qXa4n+oYzK558YryKqiL6UWwd5DqiH3VRW0GYhTZQ/vlgJrCoNQlg==}
+  axios@1.13.5:
+    resolution: {integrity: sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==}
 
   azure-devops-node-api@12.5.0:
     resolution: {integrity: sha512-R5eFskGvOm3U/GzeAuxRkUsAl0hrAwGgWn6zAd2KrZmrEhWZVqLew4OOupbQlXUuojUzpGtq62SmdhJ06N88og==}
@@ -5197,10 +5203,6 @@ packages:
 
   mkdirp-classic@0.5.3:
     resolution: {integrity: sha512-gKLcREMhtuZRwRAfqP3RFW+TK4JqApVBtOIftVgjuABpAtpxhPGaDcfvbhNvD0B8iD1oUr/txX35NjcaY6Ns/A==}
-
-  monaco-languageclient@10.6.0:
-    resolution: {integrity: sha512-wrrZo6jz10XA5i0uVGP32C7MvHU5Qsqa3h7LnTuPoKtwBLteYBHdyrqHTYqW0Rme4LLJRhMDqbvkvAn06PYWkw==}
-    engines: {node: '>=20.10.0', npm: '>=10.2.3'}
 
   monaco-languageclient@10.7.0:
     resolution: {integrity: sha512-oA5cOFixkF4bspVL2zMSn48LvlNR/Cu3vJ8MCVam3PdjobSULGgHtOASuZIi3FgWK42X1z8/6hrG0LCjvNu1Hw==}
@@ -7350,6 +7352,10 @@ snapshots:
     dependencies:
       '@codingame/monaco-vscode-api': 25.1.2
 
+  '@codingame/monaco-vscode-editor-api@26.0.0':
+    dependencies:
+      '@codingame/monaco-vscode-api': 25.1.2
+
   '@codingame/monaco-vscode-editor-service-override@25.1.2':
     dependencies:
       '@codingame/monaco-vscode-api': 25.1.2
@@ -7359,6 +7365,11 @@ snapshots:
       '@codingame/monaco-vscode-api': 25.1.2
 
   '@codingame/monaco-vscode-extension-api@25.1.2':
+    dependencies:
+      '@codingame/monaco-vscode-api': 25.1.2
+      '@codingame/monaco-vscode-extensions-service-override': 25.1.2
+
+  '@codingame/monaco-vscode-extension-api@26.0.0':
     dependencies:
       '@codingame/monaco-vscode-api': 25.1.2
       '@codingame/monaco-vscode-extensions-service-override': 25.1.2
@@ -10814,7 +10825,7 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  axios@1.13.4:
+  axios@1.13.5:
     dependencies:
       follow-redirects: 1.15.11
       form-data: 4.0.5
@@ -12508,43 +12519,6 @@ snapshots:
 
   mkdirp-classic@0.5.3:
     optional: true
-
-  monaco-languageclient@10.6.0:
-    dependencies:
-      '@codingame/monaco-vscode-api': 25.1.2
-      '@codingame/monaco-vscode-configuration-service-override': 25.1.2
-      '@codingame/monaco-vscode-editor-api': 25.1.2
-      '@codingame/monaco-vscode-editor-service-override': 25.1.2
-      '@codingame/monaco-vscode-extension-api': 25.1.2
-      '@codingame/monaco-vscode-extensions-service-override': 25.1.2
-      '@codingame/monaco-vscode-language-pack-cs': 25.1.2
-      '@codingame/monaco-vscode-language-pack-de': 25.1.2
-      '@codingame/monaco-vscode-language-pack-es': 25.1.2
-      '@codingame/monaco-vscode-language-pack-fr': 25.1.2
-      '@codingame/monaco-vscode-language-pack-it': 25.1.2
-      '@codingame/monaco-vscode-language-pack-ja': 25.1.2
-      '@codingame/monaco-vscode-language-pack-ko': 25.1.2
-      '@codingame/monaco-vscode-language-pack-pl': 25.1.2
-      '@codingame/monaco-vscode-language-pack-pt-br': 25.1.2
-      '@codingame/monaco-vscode-language-pack-qps-ploc': 25.1.2
-      '@codingame/monaco-vscode-language-pack-ru': 25.1.2
-      '@codingame/monaco-vscode-language-pack-tr': 25.1.2
-      '@codingame/monaco-vscode-language-pack-zh-hans': 25.1.2
-      '@codingame/monaco-vscode-language-pack-zh-hant': 25.1.2
-      '@codingame/monaco-vscode-languages-service-override': 25.1.2
-      '@codingame/monaco-vscode-localization-service-override': 25.1.2
-      '@codingame/monaco-vscode-log-service-override': 25.1.2
-      '@codingame/monaco-vscode-model-service-override': 25.1.2
-      '@codingame/monaco-vscode-monarch-service-override': 25.1.2
-      '@codingame/monaco-vscode-textmate-service-override': 25.1.2
-      '@codingame/monaco-vscode-theme-defaults-default-extension': 25.1.2
-      '@codingame/monaco-vscode-theme-service-override': 25.1.2
-      '@codingame/monaco-vscode-views-service-override': 25.1.2
-      '@codingame/monaco-vscode-workbench-service-override': 25.1.2
-      vscode: '@codingame/monaco-vscode-extension-api@25.1.2'
-      vscode-languageclient: 9.0.1
-      vscode-languageserver-protocol: 3.17.5
-      vscode-ws-jsonrpc: 3.5.0
 
   monaco-languageclient@10.7.0:
     dependencies:
