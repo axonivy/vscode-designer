@@ -15,7 +15,7 @@
     "openapi": "pnpm run openapi:download && pnpm run openapi:codegen",
     "openapi:download": "mvn clean validate && curl -o target/market/openapi.json https://market.axonivy.com/marketplace-service/api-docs/api --create-dirs",
     "openapi:codegen": "orval",
-    "market:generate": "pnpm run --filter vscode-designer-13 generate:market",
+    "market:generate": "pnpm run --filter vscode-designer-14 generate:market",
     "clean": "pnpm run -r clean",
     "lint": "eslint",
     "lint:ci": "eslint -o eslint.xml -f checkstyle",
