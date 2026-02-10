@@ -1,4 +1,11 @@
-import { findProductJsonContent, findProducts, findProductVersionsById, ProductModel } from './generated/market-client';
+import {
+  findProductJsonContent,
+  findProducts,
+  findProductVersionsById,
+  MavenArtifactVersionModel,
+  PagedModelProductModel,
+  ProductModel
+} from './generated/market-client';
 
 export type Product = {
   id: string;
@@ -11,8 +18,9 @@ export const MARKET_URL = 'https://market.axonivy.com/marketplace-service';
 
 export async function searchMarketProduct(): Promise<Product[]> {
   const response = await findProducts({ isRESTClient: true, page: 0, size: 200, type: 'all', sort: [], language: 'en' });
+  const data = response.data as PagedModelProductModel;
   return (
-    response.data._embedded?.products?.map((product: ProductModel) => ({
+    data._embedded?.products?.map((product: ProductModel) => ({
       id: product.id || '',
       name: product.names?.en || 'Unnamed Product',
       description: product.shortDescriptions?.en || '',
@@ -23,7 +31,8 @@ export async function searchMarketProduct(): Promise<Product[]> {
 
 export async function availableVersions(productId: string) {
   const response = await findProductVersionsById(productId, { isShowDevVersion: true });
-  return response.data.map(v => v.version || '') || [];
+  const data = response.data as unknown as MavenArtifactVersionModel[];
+  return data.map(v => v.version || '') || [];
 }
 
 export async function fetchInstaller(productId: string, version: string) {
