@@ -41,7 +41,7 @@ test.describe('Engine noProjectWorkspacePath', () => {
     await settingsView.openWorkspaceSettings();
     await settingsView.doesNotContainSetting('"axonivy.engine.releaseTrain":');
     await settingsView.executeCommand('Axon Ivy: Switch Engine Release Train');
-    await settingsView.page.locator('div.quick-input-list').locator('div.monaco-icon-label-container').filter({ hasText: 'nightly' }).first().click();
+    await settingsView.selectItemFromQuickPick('nightly');
     await settingsView.containsSetting('"axonivy.engine.releaseTrain": "nightly');
     await expect(page.locator('div.quick-input-widget')).toContainText('Engine release train switched - reload window to apply new settings and restart the engine');
   });

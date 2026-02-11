@@ -90,4 +90,10 @@ export class PageObject {
     await expect(statusBarItem('Java: Ready')).toBeVisible();
     await expect(statusBarItem('Finished: Invalidate class loader')).toBeVisible();
   }
+
+  async selectItemFromQuickPick(label: string) {
+    const item = this.page.locator('div.quick-input-list').locator('div.monaco-icon-label-container', { hasText: label });
+    await item.click();
+    await expect(item).toBeHidden();
+  }
 }
