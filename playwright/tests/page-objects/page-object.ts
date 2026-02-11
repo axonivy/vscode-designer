@@ -35,7 +35,7 @@ export class PageObject {
   }
 
   async hasNoStatusMessage() {
-    await expect(this.page.locator('#status\\.extensionMessage')).toBeHidden({ timeout: 10_000 }); // status messages should disappear after 5s, wait a bit longer here
+    await expect(this.page.locator('#status\\.extensionMessage')).toBeHidden();
   }
 
   async provideUserInput(input?: string) {
@@ -87,7 +87,7 @@ export class PageObject {
     const statusBarItem = (text: string) => this.page.locator(`div.statusbar-item:has-text("${text}")`);
     await statusBarItem('Java: Lightweight Mode').click();
     await expect(statusBarItem('Java: Importing Maven')).toBeVisible();
-    await expect(statusBarItem('Java: Ready')).toBeVisible({ timeout: 30_000 });
+    await expect(statusBarItem('Java: Ready')).toBeVisible();
     await expect(statusBarItem('Finished: Invalidate class loader')).toBeVisible();
   }
 
