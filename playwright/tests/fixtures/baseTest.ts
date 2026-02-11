@@ -76,7 +76,7 @@ const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<
 };
 
 const initialize = async (page: Page) => {
-  await expect(page.locator('div.statusbar-item:has-text("Axon Ivy")')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('div.statusbar-item:has-text("Axon Ivy")')).toBeVisible({ timeout: 10_000 }); // VS Code startup takes a while, wait a bit longer here
   await new FileExplorer(page).closeAllTabs();
 };
 

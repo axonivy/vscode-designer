@@ -35,7 +35,7 @@ export class PageObject {
   }
 
   async hasNoStatusMessage() {
-    await expect(this.page.locator('#status\\.extensionMessage')).toBeHidden({ timeout: 10_000 });
+    await expect(this.page.locator('#status\\.extensionMessage')).toBeHidden({ timeout: 10_000 }); // status messages should disappear after 5s, wait a bit longer here
   }
 
   async provideUserInput(input?: string) {
