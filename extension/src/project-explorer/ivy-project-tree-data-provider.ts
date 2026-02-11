@@ -22,6 +22,15 @@ export interface Entry {
 export const IVY_RPOJECT_FILE_PATTERN = '**/{.ivyproject,.settings/ch.ivyteam.ivy.designer.prefs}';
 const IVY_PROJECT_CONTEXT_VALUE = 'ivyProject';
 
+export const projectFileToProjectPath = (projectFile: vscode.Uri) => {
+  const projectFilePath = projectFile.fsPath;
+  const parentDir = path.dirname(projectFilePath);
+  if (path.basename(projectFilePath) === 'ch.ivyteam.ivy.designer.prefs') {
+    return path.dirname(parentDir);
+  }
+  return parentDir;
+};
+
 export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry> {
   private ivyProjects: Promise<string[]>;
   private _onDidChangeTreeData = new vscode.EventEmitter<Entry | undefined | null>();
@@ -48,14 +57,7 @@ export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry
 
   private async findIvyProjects(): Promise<string[]> {
     return (await vscode.workspace.findFiles(IVY_RPOJECT_FILE_PATTERN, this.excludePattern, this.maxResults))
-      .map(u => u.fsPath)
-      .map(p => {
-        const parentDir = path.dirname(p);
-        if (path.basename(p) === 'ch.ivyteam.ivy.designer.prefs') {
-          return path.dirname(parentDir);
-        }
-        return parentDir;
-      })
+      .map(projectFileToProjectPath)
       .sort();
   }
 

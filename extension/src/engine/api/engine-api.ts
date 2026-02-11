@@ -72,7 +72,7 @@ export class IvyEngineApi {
     });
   }
 
-  public async initExistingProject(projectDir: string) {
+  public async findOrCreatePmv(projectDir: string) {
     const name = path.basename(projectDir);
     const params = { name, path: projectDir };
     const baseURL = await this.baseURL;

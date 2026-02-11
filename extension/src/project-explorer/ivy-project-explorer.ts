@@ -9,7 +9,7 @@ import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { importMarketProduct, importMarketProductFile } from '../market/import-market';
 import { importNewProcess } from './import-process';
-import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
+import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, projectFileToProjectPath } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
 import { addNewDataClass } from './new-data-class';
 import { ProcessKind, addNewProcess } from './new-process';
@@ -91,9 +91,20 @@ export class IvyProjectExplorer {
 
   private defineFileWatchers(context: vscode.ExtensionContext) {
     const ivyProjectFileWatcher = vscode.workspace.createFileSystemWatcher(IVY_RPOJECT_FILE_PATTERN, false, true, true);
-    ivyProjectFileWatcher.onDidCreate(async () => {
-      await executeCommand('java.project.import.command');
+    ivyProjectFileWatcher.onDidCreate(async projectFile => {
+      try {
+        await executeCommand('java.project.import.command'); // fails if running java extension in Lightweight mode
+      } catch (e) {
+        logErrorMessage(`Failed to run java project import ${projectFile} error: ${e}`);
+      }
       await this.refresh();
+      await IvyEngineManager.instance.projects().then(async deployedProjects => {
+        if (!deployedProjects?.find(p => projectFile.fsPath.startsWith(p.projectDirectory))) {
+          await IvyEngineManager.instance
+            .initProjects([projectFileToProjectPath(projectFile)])
+            .then(async () => await IvyDiagnostics.instance.refresh());
+        }
+      });
     });
     const deleteProjectWatcher = vscode.workspace.createFileSystemWatcher('**/*', true, true, false);
     deleteProjectWatcher.onDidDelete(async e => {
