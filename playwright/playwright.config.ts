@@ -10,8 +10,5 @@ export default defineConfig({
   },
   testDir: './tests',
   workers: 1,
-  retries: 0,
-  timeout: 60_000,
-  expect: { timeout: 30_000 },
   reporter: process.env.CI ? [['junit', { outputFile: 'report.xml' }], ['list']] : 'html'
 });
