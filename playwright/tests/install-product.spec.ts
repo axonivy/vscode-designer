@@ -1,15 +1,12 @@
 import { expect, test } from './fixtures/baseTest';
 import { FileExplorer } from './page-objects/explorer-view';
-import { ProcessEditor } from './page-objects/process-editor';
 
 test.describe('Market Product installation', () => {
   let explorer: FileExplorer;
 
   test.beforeEach(async ({ page }) => {
-    const processEditor = new ProcessEditor(page);
-    await processEditor.hasDeployProjectStatusMessage();
     explorer = new FileExplorer(page);
-    await explorer.selectNode('processes');
+    await explorer.hasDeployProjectStatusMessage();
   });
 
   test('Install product from Market website', async () => {
