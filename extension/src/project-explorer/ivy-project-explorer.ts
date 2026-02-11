@@ -127,7 +127,6 @@ export class IvyProjectExplorer {
     const ivyProjects = await this.getIvyProjects();
     for (const project of ivyProjects) {
       if (project === projectToBeDeleted) {
-        await IvyEngineManager.instance.deleteProject(project);
         await this.refresh();
       }
     }
@@ -149,20 +148,19 @@ export class IvyProjectExplorer {
     let deployedProjects = await IvyEngineManager.instance.projects();
 
     for (const detectedProject of detectedProjects) {
-      const deployProject = deployedProjects?.find(p => p.projectDirectory.startsWith(detectedProject));
-      deployedProjects = deployedProjects?.filter(p => p !== deployProject);
-      if (deployProject === undefined) {
+      const deployedAndDetectedProject = deployedProjects?.find(p => p.projectDirectory.startsWith(detectedProject));
+      deployedProjects = deployedProjects?.filter(p => p !== deployedAndDetectedProject);
+      if (deployedAndDetectedProject === undefined) {
         await IvyEngineManager.instance.initProjects([detectedProject]);
-        try {
-          await executeCommand('java.project.import.command'); // fails if running java extension in Lightweight mode
-        } catch (e) {
-          logErrorMessage(`Failed to run java project import, error: ${e}`);
-        }
       }
     }
     for (const projectToBeDeleted of deployedProjects ?? []) {
       await IvyEngineManager.instance.deleteProject(projectToBeDeleted.projectDirectory);
     }
+    if (deployedProjects && deployedProjects.length > 0) {
+      await executeCommand('java.clean.workspace'); // if project was deleted java workspace should be cleaned
+    }
+    await executeCommand('java.project.import.command');
   }
 
   private async runEngineAction(action: (projectDir: string) => Promise<void>, selection: TreeSelection) {
