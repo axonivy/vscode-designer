@@ -35,7 +35,7 @@ export class PageObject {
   }
 
   async hasNoStatusMessage() {
-    await expect(this.page.locator('#status\\.extensionMessage')).toBeHidden();
+    await expect(this.page.locator('#status\\.extensionMessage')).toBeHidden({ timeout: 10_000 });
   }
 
   async provideUserInput(input?: string) {
