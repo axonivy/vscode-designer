@@ -9,7 +9,7 @@ import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { importMarketProduct, importMarketProductFile } from '../market/import-market';
 import { importNewProcess } from './import-process';
-import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, projectFileToProjectPath } from './ivy-project-tree-data-provider';
+import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
 import { addNewDataClass } from './new-data-class';
 import { ProcessKind, addNewProcess } from './new-process';
@@ -91,21 +91,7 @@ export class IvyProjectExplorer {
 
   private defineFileWatchers(context: vscode.ExtensionContext) {
     const ivyProjectFileWatcher = vscode.workspace.createFileSystemWatcher(IVY_RPOJECT_FILE_PATTERN, false, true, true);
-    ivyProjectFileWatcher.onDidCreate(async projectFile => {
-      try {
-        await executeCommand('java.project.import.command'); // fails if running java extension in Lightweight mode
-      } catch (e) {
-        logErrorMessage(`Failed to run java project import ${projectFile} error: ${e}`);
-      }
-      await this.refresh();
-      await IvyEngineManager.instance.projects().then(async deployedProjects => {
-        if (!deployedProjects?.find(p => projectFile.fsPath.startsWith(p.projectDirectory))) {
-          await IvyEngineManager.instance
-            .initProjects([projectFileToProjectPath(projectFile)])
-            .then(async () => await IvyDiagnostics.instance.refresh());
-        }
-      });
-    });
+    ivyProjectFileWatcher.onDidCreate(async () => await this.refresh());
     const deleteProjectWatcher = vscode.workspace.createFileSystemWatcher('**/*', true, true, false);
     deleteProjectWatcher.onDidDelete(async e => {
       if (e.path.includes('/target/')) {
@@ -154,7 +140,29 @@ export class IvyProjectExplorer {
   private async refresh() {
     this.treeDataProvider.refresh();
     await this.activateEngineIfNeeded();
+    await this.syncProjects();
     await IvyDiagnostics.instance.refresh(true);
+  }
+
+  private async syncProjects() {
+    const detectedProjects = await this.getIvyProjects();
+    let deployedProjects = await IvyEngineManager.instance.projects();
+
+    for (const detectedProject of detectedProjects) {
+      const deployProject = deployedProjects?.find(p => p.projectDirectory.startsWith(detectedProject));
+      deployedProjects = deployedProjects?.filter(p => p !== deployProject);
+      if (deployProject === undefined) {
+        await IvyEngineManager.instance.initProjects([detectedProject]);
+        try {
+          await executeCommand('java.project.import.command'); // fails if running java extension in Lightweight mode
+        } catch (e) {
+          logErrorMessage(`Failed to run java project import, error: ${e}`);
+        }
+      }
+    }
+    for (const projectToBeDeleted of deployedProjects ?? []) {
+      await IvyEngineManager.instance.deleteProject(projectToBeDeleted.projectDirectory);
+    }
   }
 
   private async runEngineAction(action: (projectDir: string) => Promise<void>, selection: TreeSelection) {
