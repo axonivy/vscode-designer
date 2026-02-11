@@ -42,9 +42,7 @@ test.describe('Inscription View', () => {
     await expect(element).toHaveText('Enter Request');
 
     const newDisplayName = 'a new display name for this test';
-    await inputField.clear();
     await inputField.fill(newDisplayName);
-    await inputField.blur();
     await expect(inputField).toHaveText(newDisplayName);
     await expect(element).toHaveText(newDisplayName);
   });
