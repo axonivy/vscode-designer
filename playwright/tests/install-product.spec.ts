@@ -1,11 +1,14 @@
 import { expect, test } from './fixtures/baseTest';
 import { FileExplorer } from './page-objects/explorer-view';
+import { ProcessEditor } from './page-objects/process-editor';
 
 test.describe('Market Product installation', () => {
   let explorer: FileExplorer;
+  let processEditor: ProcessEditor;
 
   test.beforeEach(async ({ page }) => {
     explorer = new FileExplorer(page);
+    processEditor = new ProcessEditor(page, 'personService.p.json');
     await explorer.hasDeployProjectStatusMessage();
   });
 
@@ -16,7 +19,7 @@ test.describe('Market Product installation', () => {
     await explorer.provideUserInput('connectivity-demos$');
     await explorer.executeCommand('Refresh Explorer');
     await explorer.selectNodeExact('connectivity-demos');
-    await explorer.selectNode('pom.xml');
+    await processEditor.openEditorFile();
   });
 
   test('Install local product.json', async () => {
@@ -26,7 +29,7 @@ test.describe('Market Product installation', () => {
     await explorer.provideUserInput(); // confirm projects
     await explorer.executeCommand('Refresh Explorer');
     await explorer.selectNode('connectivity-demos');
-    await explorer.selectNode('pom.xml');
+    await processEditor.openEditorFile();
   });
 
   test('Install local product.json with dynamic version', async () => {
@@ -44,6 +47,6 @@ test.describe('Market Product installation', () => {
     await explorer.provideUserInput(); // confirm projects
     await explorer.executeCommand('Refresh Explorer');
     await explorer.selectNode('connectivity-demos');
-    await explorer.selectNode('pom.xml');
+    await processEditor.openEditorFile();
   });
 });
