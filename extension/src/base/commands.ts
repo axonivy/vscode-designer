@@ -64,4 +64,4 @@ export type ConfigEditorCommand =
   | 'ivyEditor.openRestClientEditor'
   | 'ivyEditor.openCustomFieldEditor';
 export type EditorCommand = 'ivyEditor.openCmsEditor';
-type JavaCommand = 'java.project.import.command';
+type JavaCommand = 'java.project.import.command' | 'java.clean.workspace';

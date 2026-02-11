@@ -91,10 +91,7 @@ export class IvyProjectExplorer {
 
   private defineFileWatchers(context: vscode.ExtensionContext) {
     const ivyProjectFileWatcher = vscode.workspace.createFileSystemWatcher(IVY_RPOJECT_FILE_PATTERN, false, true, true);
-    ivyProjectFileWatcher.onDidCreate(async () => {
-      await executeCommand('java.project.import.command');
-      await this.refresh();
-    });
+    ivyProjectFileWatcher.onDidCreate(async () => await this.refresh());
     const deleteProjectWatcher = vscode.workspace.createFileSystemWatcher('**/*', true, true, false);
     deleteProjectWatcher.onDidDelete(async e => {
       if (e.path.includes('/target/')) {
@@ -130,7 +127,6 @@ export class IvyProjectExplorer {
     const ivyProjects = await this.getIvyProjects();
     for (const project of ivyProjects) {
       if (project === projectToBeDeleted) {
-        await IvyEngineManager.instance.deleteProject(project);
         await this.refresh();
       }
     }
@@ -143,7 +139,28 @@ export class IvyProjectExplorer {
   private async refresh() {
     this.treeDataProvider.refresh();
     await this.activateEngineIfNeeded();
+    await this.syncProjects();
     await IvyDiagnostics.instance.refresh(true);
+  }
+
+  private async syncProjects() {
+    const detectedProjects = await this.getIvyProjects();
+    let deployedProjects = await IvyEngineManager.instance.projects();
+
+    for (const detectedProject of detectedProjects) {
+      const deployedAndDetectedProject = deployedProjects?.find(p => p.projectDirectory.startsWith(detectedProject));
+      deployedProjects = deployedProjects?.filter(p => p !== deployedAndDetectedProject);
+      if (deployedAndDetectedProject === undefined) {
+        await IvyEngineManager.instance.initProjects([detectedProject]);
+      }
+    }
+    for (const projectToBeDeleted of deployedProjects ?? []) {
+      await IvyEngineManager.instance.deleteProject(projectToBeDeleted.projectDirectory);
+    }
+    if (deployedProjects && deployedProjects.length > 0) {
+      await executeCommand('java.clean.workspace'); // if project was deleted java workspace should be cleaned
+    }
+    await executeCommand('java.project.import.command');
   }
 
   private async runEngineAction(action: (projectDir: string) => Promise<void>, selection: TreeSelection) {
