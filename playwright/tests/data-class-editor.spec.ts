@@ -32,6 +32,7 @@ test.describe('Data Class Editor', () => {
   });
 
   test('Type completion with JDT language server', async ({ page }) => {
+    test.setTimeout(60_000); // slow test due to java activation
     const editor = new DataClassEditor(page);
     await editor.hasDeployProjectStatusMessage();
     await editor.openEditorFile();

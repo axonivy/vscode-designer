@@ -97,6 +97,7 @@ test.describe('Inscription View', () => {
   });
 
   test('Monaco Editor completion with JDT language server', async () => {
+    test.setTimeout(60_000); // slow test due to java activation
     await processEditor.activateExpensiveJavaStandardMode();
 
     // Code Editor - import expected
