@@ -61,14 +61,6 @@ const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<
   await page.context().tracing.start({ screenshots: true, snapshots: true, title: test.info().title });
   await initialize(page);
   await take(page);
-  if (test.info().status === 'failed') {
-    const tracePath = test.info().outputPath('trace.zip');
-    const screenshotPath = test.info().outputPath('screenshot.png');
-    await page.context().tracing.stop({ path: tracePath });
-    await page.screenshot({ path: screenshotPath });
-    test.info().attachments.push({ name: 'trace', path: tracePath, contentType: 'application/zip' });
-    test.info().attachments.push({ name: 'screenshot', path: tracePath, contentType: 'image/png' });
-  }
   await electronApp.close();
   if (!process.env.CI) {
     await fs.promises.rm(tmpWorkspace, { recursive: true });
