@@ -42,9 +42,7 @@ test.describe('Inscription View', () => {
     await expect(element).toHaveText('Enter Request');
 
     const newDisplayName = 'a new display name for this test';
-    await inputField.clear();
     await inputField.fill(newDisplayName);
-    await inputField.blur();
     await expect(inputField).toHaveText(newDisplayName);
     await expect(element).toHaveText(newDisplayName);
   });
@@ -79,7 +77,6 @@ test.describe('Inscription View', () => {
   });
 
   test('Monaco Editor completion', async () => {
-    await processEditor.executeCommand('View: Toggle Panel Visibility');
     const inscriptionView = await processEditor.openInscriptionView(userDialogPID1);
     await inscriptionView.openInscriptionTab('Output');
     await inscriptionView.openCollapsible('Code');
@@ -100,6 +97,7 @@ test.describe('Inscription View', () => {
   });
 
   test('Monaco Editor completion with JDT language server', async () => {
+    test.setTimeout(60_000); // slow test due to java activation
     await processEditor.activateExpensiveJavaStandardMode();
 
     // Code Editor - import expected

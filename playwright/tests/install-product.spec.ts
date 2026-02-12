@@ -4,12 +4,12 @@ import { ProcessEditor } from './page-objects/process-editor';
 
 test.describe('Market Product installation', () => {
   let explorer: FileExplorer;
+  let processEditor: ProcessEditor;
 
   test.beforeEach(async ({ page }) => {
-    const processEditor = new ProcessEditor(page);
-    await processEditor.hasDeployProjectStatusMessage();
     explorer = new FileExplorer(page);
-    await explorer.selectNode('processes');
+    processEditor = new ProcessEditor(page, 'personService.p.json');
+    await explorer.hasDeployProjectStatusMessage();
   });
 
   test('Install product from Market website', async () => {
@@ -19,23 +19,23 @@ test.describe('Market Product installation', () => {
     await explorer.provideUserInput('connectivity-demos$');
     await explorer.executeCommand('Refresh Explorer');
     await explorer.selectNodeExact('connectivity-demos');
-    await explorer.selectNode('pom.xml');
+    await processEditor.openEditorFile();
   });
 
   test('Install local product.json', async () => {
     await explorer.selectNode('resources');
     await explorer.selectNode('product.json');
-    await explorer.installLocalProduct('resources/product.json');
+    await explorer.installLocalProduct('product.json');
     await explorer.provideUserInput(); // confirm projects
     await explorer.executeCommand('Refresh Explorer');
     await explorer.selectNode('connectivity-demos');
-    await explorer.selectNode('pom.xml');
+    await processEditor.openEditorFile();
   });
 
   test('Install local product.json with dynamic version', async () => {
     await explorer.selectNode('resources');
     await explorer.selectNode('product-dynamic.json');
-    await explorer.installLocalProduct('resources/product-dynamic.json');
+    await explorer.installLocalProduct('product-dynamic.json');
     await explorer.provideUserInput('14.0.0-SNAPSHOT');
 
     const projects = explorer.quickInputList();
@@ -47,6 +47,6 @@ test.describe('Market Product installation', () => {
     await explorer.provideUserInput(); // confirm projects
     await explorer.executeCommand('Refresh Explorer');
     await explorer.selectNode('connectivity-demos');
-    await explorer.selectNode('pom.xml');
+    await processEditor.openEditorFile();
   });
 });

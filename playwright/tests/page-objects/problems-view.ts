@@ -13,6 +13,9 @@ export class ProblemsView extends View {
 
   static async initProblemsView(page: Page) {
     const problemsView = new ProblemsView(page);
+    if (await problemsView.tabLocator.isHidden()) {
+      await page.locator('#status\\.problems').click();
+    }
     await problemsView.show();
     return problemsView;
   }
