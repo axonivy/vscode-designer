@@ -1,13 +1,12 @@
 import { type Locator, type Page, expect } from '@playwright/test';
-import { getCtrlOrMeta } from '../utils/keyboard';
 
 export class PageObject {
   constructor(readonly page: Page) {}
 
   async executeCommand(command: string, ...userInputs: Array<string>) {
-    await expect(this.page.locator('div.command-center')).toBeAttached();
+    await expect(this.commandCenter()).toBeAttached();
     await expect(async () => {
-      await this.page.keyboard.press(`${getCtrlOrMeta()}+Shift+KeyP`);
+      await this.commandCenter().click();
       await this.quickInputBox()
         .locator('input.input')
         .fill('>' + command, { timeout: 100 });
@@ -95,5 +94,9 @@ export class PageObject {
     const item = this.page.locator('div.quick-input-list').locator('div.monaco-icon-label-container', { hasText: label });
     await item.click();
     await expect(item).toBeHidden();
+  }
+
+  commandCenter() {
+    return this.page.locator('div.command-center');
   }
 }

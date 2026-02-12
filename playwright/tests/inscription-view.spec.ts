@@ -77,7 +77,6 @@ test.describe('Inscription View', () => {
   });
 
   test('Monaco Editor completion', async () => {
-    await processEditor.executeCommand('View: Toggle Panel Visibility');
     const inscriptionView = await processEditor.openInscriptionView(userDialogPID1);
     await inscriptionView.openInscriptionTab('Output');
     await inscriptionView.openCollapsible('Code');
