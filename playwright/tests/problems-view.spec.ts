@@ -10,7 +10,6 @@ test.describe('Problems View', () => {
     await processEditor.hasDeployProjectStatusMessage();
     await processEditor.openEditorFile();
     await processEditor.isViewVisible();
-    await processEditor.executeCommand('View: Focus into Panel');
   });
 
   test('Check existing warning and error', async ({ page }) => {

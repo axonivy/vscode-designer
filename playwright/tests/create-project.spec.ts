@@ -15,7 +15,6 @@ test.describe('Create Project', () => {
     await explorer.hasNode(`parent${path.sep}testProject`);
     await explorer.hasNoStatusMessage();
 
-    await explorer.executeCommand('View: Toggle Panel Visibility');
     const problemsView = await ProblemsView.initProblemsView(page);
     await problemsView.hasNoMarker();
 

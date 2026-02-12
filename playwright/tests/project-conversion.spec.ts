@@ -13,7 +13,6 @@ test.describe('Project Conversion', () => {
     await editor.hasDeployProjectStatusMessage();
     await editor.openEditorFile();
     await expect(editor.editorContent()).toContainText(`PROJECT_VERSION=120001`);
-    await editor.executeCommand('View: Focus into Panel');
     const problemsView = await ProblemsView.initProblemsView(page);
     await problemsView.hasError('Project is outdated and needs to be converted.');
     await editor.executeCommand('Axon Ivy: Convert Project');
