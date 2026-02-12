@@ -92,7 +92,7 @@ export class IvyProjectExplorer {
   private defineFileWatchers(context: vscode.ExtensionContext) {
     const ivyProjectFileWatcher = vscode.workspace.createFileSystemWatcher(IVY_RPOJECT_FILE_PATTERN, false, true, true);
     ivyProjectFileWatcher.onDidCreate(async projectFile => {
-      if (await isIvyProject(projectFile)) {
+      if (isIvyProject(projectFile)) {
         await this.refresh();
       }
     });
@@ -154,10 +154,6 @@ export class IvyProjectExplorer {
     const deployedProjects = (await IvyEngineManager.instance.projects())?.map(p => p.projectDirectory).map(appendMissingPathSeparator);
     const projectsToBeDeployed = detectedProjects.filter(p => !deployedProjects?.includes(p));
     const projectsToBeDeleted = deployedProjects?.filter(p => !detectedProjects.includes(p));
-
-    console.log('*sync projects:', detectedProjects, deployedProjects);
-    console.log('*sync to deploy:', projectsToBeDeployed);
-    console.log('*sync to delete:', projectsToBeDeleted);
 
     await IvyEngineManager.instance.initProjects(projectsToBeDeployed);
     for (const projectToBeDeleted of projectsToBeDeleted ?? []) {
@@ -308,7 +304,7 @@ export class IvyProjectExplorer {
 
   private async convertProject(selection: TreeSelection) {
     const uri = await treeSelectionToUri(selection);
-    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
+    const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
     const projects = IvyDiagnostics.instance.projectsToBeConverted();
     const quickPick = vscode.window.createQuickPick();
     quickPick.title = 'Select Axon Ivy projects to be converted';

@@ -1,3 +1,4 @@
+import fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import type { Command } from '../base/commands';
@@ -22,14 +23,14 @@ export interface Entry {
 export const IVY_RPOJECT_FILE_PATTERN = '**/{.ivyproject,.project}';
 const IVY_PROJECT_CONTEXT_VALUE = 'ivyProject';
 
-export const isIvyProject = async (projectFile: vscode.Uri) => {
+export const isIvyProject = (projectFile: vscode.Uri) => {
   const projectFilePath = projectFile.fsPath;
   try {
-    if (path.basename(projectFilePath) === '.ivyProject') {
+    if (path.basename(projectFilePath) === '.ivyproject') {
       return true;
     }
-    const byteArray = await vscode.workspace.fs.readFile(projectFile);
-    return new TextDecoder().decode(byteArray).includes('<nature>ch.ivyteam.ivy.project.IvyProjectNature</nature>');
+    const content = fs.readFileSync(projectFile.fsPath, 'utf8');
+    return content.includes('<nature>ch.ivyteam.ivy.project.IvyProjectNature</nature>');
   } catch {
     return false;
   }
@@ -61,7 +62,7 @@ export class IvyProjectTreeDataProvider implements vscode.TreeDataProvider<Entry
 
   private async findIvyProjects(): Promise<string[]> {
     return (await vscode.workspace.findFiles(IVY_RPOJECT_FILE_PATTERN, this.excludePattern, this.maxResults))
-      .filter(async p => await isIvyProject(p))
+      .filter(p => isIvyProject(p))
       .map(p => path.dirname(p.fsPath))
       .sort();
   }
