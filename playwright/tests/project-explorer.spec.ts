@@ -15,7 +15,7 @@ test.describe('Project Explorer', () => {
     await explorer.hasNode('ivy-project-2');
     await explorer.hasNoNode('ivy-project-3');
     await explorer.hasNoNode('no-ivy-project');
-    await explorer.hasNoNode('excluded');
+    await explorer.hasNoNode('exclude-me');
   });
 });
 

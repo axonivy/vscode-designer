@@ -9,7 +9,7 @@ import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { importMarketProduct, importMarketProductFile } from '../market/import-market';
 import { importNewProcess } from './import-process';
-import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
+import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
 import { addNewDataClass } from './new-data-class';
 import { ProcessKind, addNewProcess } from './new-process';
@@ -91,7 +91,11 @@ export class IvyProjectExplorer {
 
   private defineFileWatchers(context: vscode.ExtensionContext) {
     const ivyProjectFileWatcher = vscode.workspace.createFileSystemWatcher(IVY_RPOJECT_FILE_PATTERN, false, true, true);
-    ivyProjectFileWatcher.onDidCreate(async () => await this.refresh());
+    ivyProjectFileWatcher.onDidCreate(async projectFile => {
+      if (isIvyProject(projectFile)) {
+        await this.refresh();
+      }
+    });
     const deleteProjectWatcher = vscode.workspace.createFileSystemWatcher('**/*', true, true, false);
     deleteProjectWatcher.onDidDelete(async e => {
       if (e.path.includes('/target/')) {
@@ -128,6 +132,7 @@ export class IvyProjectExplorer {
     for (const project of ivyProjects) {
       if (project === projectToBeDeleted) {
         await this.refresh();
+        return;
       }
     }
   }
@@ -144,23 +149,22 @@ export class IvyProjectExplorer {
   }
 
   private async syncProjects() {
-    const detectedProjects = await this.getIvyProjects();
-    let deployedProjects = await IvyEngineManager.instance.projects();
+    const appendMissingPathSeparator = (p: string) => (p.endsWith(path.sep) ? p : `${p}${path.sep}`);
+    const detectedProjects = (await this.getIvyProjects()).map(appendMissingPathSeparator);
+    const deployedProjects = (await IvyEngineManager.instance.projects())?.map(p => p.projectDirectory).map(appendMissingPathSeparator);
+    const projectsToBeDeployed = detectedProjects.filter(p => !deployedProjects?.includes(p));
+    const projectsToBeDeleted = deployedProjects?.filter(p => !detectedProjects.includes(p));
 
-    for (const detectedProject of detectedProjects) {
-      const deployedAndDetectedProject = deployedProjects?.find(p => p.projectDirectory.startsWith(detectedProject));
-      deployedProjects = deployedProjects?.filter(p => p !== deployedAndDetectedProject);
-      if (deployedAndDetectedProject === undefined) {
-        await IvyEngineManager.instance.initProjects([detectedProject]);
-      }
+    await IvyEngineManager.instance.initProjects(projectsToBeDeployed);
+    for (const projectToBeDeleted of projectsToBeDeleted ?? []) {
+      await IvyEngineManager.instance.deleteProject(projectToBeDeleted);
     }
-    for (const projectToBeDeleted of deployedProjects ?? []) {
-      await IvyEngineManager.instance.deleteProject(projectToBeDeleted.projectDirectory);
-    }
-    if (deployedProjects && deployedProjects.length > 0) {
+    if (projectsToBeDeleted && projectsToBeDeleted.length > 0) {
       await executeCommand('java.clean.workspace'); // if project was deleted java workspace should be cleaned
     }
-    await executeCommand('java.project.import.command');
+    if (projectsToBeDeployed.length > 0) {
+      await executeCommand('java.project.import.command');
+    }
   }
 
   private async runEngineAction(action: (projectDir: string) => Promise<void>, selection: TreeSelection) {
@@ -300,7 +304,7 @@ export class IvyProjectExplorer {
 
   private async convertProject(selection: TreeSelection) {
     const uri = await treeSelectionToUri(selection);
-    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
+    const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
     const projects = IvyDiagnostics.instance.projectsToBeConverted();
     const quickPick = vscode.window.createQuickPick();
     quickPick.title = 'Select Axon Ivy projects to be converted';

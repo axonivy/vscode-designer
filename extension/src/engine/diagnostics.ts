@@ -26,9 +26,9 @@ export class IvyDiagnostics {
       ? await IvyEngineManager.instance.refreshProjectStatuses()
       : await IvyEngineManager.instance.projects();
     projects
-      ?.filter(p => p.errorMessage)
+      ?.filter(p => p && p.errorMessage)
       .forEach(project => {
-        const uri = vscode.Uri.joinPath(vscode.Uri.parse(project.projectDirectory), 'pom.xml');
+        const uri = vscode.Uri.joinPath(vscode.Uri.file(project.projectDirectory), 'pom.xml');
         const diagnostic = new vscode.Diagnostic(new vscode.Range(0, 0, 0, 0), project.errorMessage, vscode.DiagnosticSeverity.Error);
         diagnostic.source = DIAGNOSTIC_SOURCE;
         this.diagnostics.set(uri, [diagnostic]);
