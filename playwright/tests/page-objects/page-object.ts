@@ -7,7 +7,7 @@ export class PageObject {
   async executeCommand(command: string, ...userInputs: Array<string>) {
     await expect(this.page.locator('div.command-center')).toBeAttached();
     await expect(async () => {
-      this.page.keyboard.press(`${getCtrlOrMeta()}+Shift+KeyP`);
+      await this.page.keyboard.press(`${getCtrlOrMeta()}+Shift+KeyP`);
       await this.quickInputBox()
         .locator('input.input')
         .fill('>' + command, { timeout: 100 });
