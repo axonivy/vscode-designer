@@ -33,7 +33,8 @@ export class Editor extends View {
   }
 
   async goToLineColumn(line: number, column: number) {
-    await this.executeCommand('Go to Line/Column...', `:${line}:${column}`);
+    await this.page.locator('#status\\.editor\\.selection').click();
+    await this.provideUserInput(`:${line}:${column}`);
     await expect(this.page.locator('a.statusbar-item-label').getByText(`Ln ${line}, Col ${column}`)).toBeVisible();
   }
 }
