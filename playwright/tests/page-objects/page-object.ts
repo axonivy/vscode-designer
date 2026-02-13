@@ -43,6 +43,8 @@ export class PageObject {
       const textBox = this.quickInputBox().getByRole('textbox');
       await textBox.fill(input);
       await expect(textBox).toHaveValue(input);
+      await textBox.press('Enter', { delay: 100 });
+      return;
     }
     await this.quickInputBox().click({ delay: 100 });
     await this.quickInputBox().press('Enter', { delay: 100 });
