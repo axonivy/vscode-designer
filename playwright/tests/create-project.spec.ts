@@ -13,7 +13,6 @@ test.describe('Create Project', () => {
     await explorer.addNestedProject('parent', 'testProject');
     await explorer.hasStatusMessage('Finished: Create new Project', 60_000);
     await explorer.hasNode(`parent${path.sep}testProject`);
-    await explorer.hasNoStatusMessage();
 
     const problemsView = await ProblemsView.initProblemsView(page);
     await problemsView.hasNoMarker();

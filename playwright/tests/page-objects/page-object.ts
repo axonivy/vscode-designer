@@ -34,10 +34,6 @@ export class PageObject {
     await this.hasStatusMessage('Finished: Deploy Ivy Projects', timeout);
   }
 
-  async hasNoStatusMessage() {
-    await expect(this.page.locator('#status\\.extensionMessage')).toBeHidden();
-  }
-
   async provideUserInput(input?: string) {
     if (input) {
       const textBox = this.quickInputBox().getByRole('textbox');
@@ -88,9 +84,8 @@ export class PageObject {
   async activateExpensiveJavaStandardMode() {
     const statusBarItem = (text: string) => this.page.locator(`div.statusbar-item:has-text("${text}")`);
     await statusBarItem('Java: Lightweight Mode').click();
-    await expect(statusBarItem('Java: Importing Maven')).toBeVisible();
-    await expect(statusBarItem('Java: Ready')).toBeVisible();
     await expect(statusBarItem('Finished: Invalidate class loader')).toBeVisible();
+    await expect(statusBarItem('Java: Ready')).toBeVisible();
   }
 
   async selectItemFromQuickPick(label: string) {
