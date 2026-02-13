@@ -12,7 +12,7 @@ export class OutputView extends View {
   constructor(page: Page) {
     super(outputViewData, page);
     this.sourceSelection = page.getByRole('toolbar', { name: 'Output actions', includeHidden: false }).locator('select');
-    this.logEntries = page.getByRole('presentation').locator('.view-lines');
+    this.logEntries = page.locator('div.output-view').locator('.view-lines');
   }
 
   async open() {
