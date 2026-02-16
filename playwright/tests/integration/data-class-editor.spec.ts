@@ -1,8 +1,8 @@
 import { expect } from '@playwright/test';
-import { test } from './fixtures/baseTest';
-import { DataClassEditor } from './page-objects/data-class-editor';
-import { Editor } from './page-objects/editor';
-import { OutputView } from './page-objects/output-view';
+import { test } from '../fixtures/baseTest';
+import { DataClassEditor } from '../page-objects/data-class-editor';
+import { Editor } from '../page-objects/editor';
+import { OutputView } from '../page-objects/output-view';
 
 test.describe('Data Class Editor', () => {
   test('Add attribute', async ({ page }) => {

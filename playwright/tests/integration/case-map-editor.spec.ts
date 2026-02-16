@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
-import { test } from './fixtures/baseTest';
-import { CaseMapEditor } from './page-objects/case-map-editor';
-import { OutputView } from './page-objects/output-view';
+import { test } from '../fixtures/baseTest';
+import { CaseMapEditor } from '../page-objects/case-map-editor';
+import { OutputView } from '../page-objects/output-view';
 
 test.describe('Case Map Editor', () => {
   test('Read, write', async ({ page }) => {

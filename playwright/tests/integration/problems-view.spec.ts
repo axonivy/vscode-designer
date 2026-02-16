@@ -1,6 +1,6 @@
-import { test } from './fixtures/baseTest';
-import { ProblemsView } from './page-objects/problems-view';
-import { ProcessEditor } from './page-objects/process-editor';
+import { test } from '../fixtures/baseTest';
+import { ProblemsView } from '../page-objects/problems-view';
+import { ProcessEditor } from '../page-objects/process-editor';
 
 test.describe('Problems View', () => {
   let processEditor: ProcessEditor;

@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
-import { test } from './fixtures/baseTest';
-import { ProcessEditor } from './page-objects/process-editor';
+import { test } from '../fixtures/baseTest';
+import { ProcessEditor } from '../page-objects/process-editor';
 
 test.describe('Runtime Log', () => {
   test('Runtime Log view output channel', async ({ page }) => {

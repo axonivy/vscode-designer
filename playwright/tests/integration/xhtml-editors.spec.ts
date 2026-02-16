@@ -1,5 +1,5 @@
-import { test } from './fixtures/baseTest';
-import { XhtmlEditor } from './page-objects/xhtml-editor';
+import { test } from '../fixtures/baseTest';
+import { XhtmlEditor } from '../page-objects/xhtml-editor';
 
 test('xhtml completions', async ({ page }) => {
   const editor = new XhtmlEditor(page);

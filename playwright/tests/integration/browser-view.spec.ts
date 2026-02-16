@@ -1,5 +1,5 @@
-import { expect, test } from './fixtures/baseTest';
-import { BrowserView } from './page-objects/browser-view';
+import { expect, test } from '../fixtures/baseTest';
+import { BrowserView } from '../page-objects/browser-view';
 
 test.describe('Browser View', () => {
   let browserView: BrowserView;

@@ -1,8 +1,8 @@
 import { expect } from '@playwright/test';
-import { test } from './fixtures/baseTest';
-import { DataClassEditor } from './page-objects/data-class-editor';
-import { Editor } from './page-objects/editor';
-import { FileExplorer } from './page-objects/explorer-view';
+import { test } from '../fixtures/baseTest';
+import { DataClassEditor } from '../page-objects/data-class-editor';
+import { Editor } from '../page-objects/editor';
+import { FileExplorer } from '../page-objects/explorer-view';
 
 test.describe('Create Data Class', () => {
   test('Add new Data Class', async ({ page }) => {

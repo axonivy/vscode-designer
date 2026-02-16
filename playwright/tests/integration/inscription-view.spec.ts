@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
-import { test } from './fixtures/baseTest';
-import { OutputView } from './page-objects/output-view';
-import { ProcessEditor } from './page-objects/process-editor';
+import { test } from '../fixtures/baseTest';
+import { OutputView } from '../page-objects/output-view';
+import { ProcessEditor } from '../page-objects/process-editor';
 
 const userDialogPID1 = '15254DCE818AD7A2-f3';
 const userDialogPID2 = '15254DCE818AD7A2-f14';

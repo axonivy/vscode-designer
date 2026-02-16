@@ -1,7 +1,7 @@
-import { test } from './fixtures/baseTest';
-import { DatabaseEditor } from './page-objects/database-editor';
-import { FileExplorer } from './page-objects/explorer-view';
-import { OutputView } from './page-objects/output-view';
+import { test } from '../fixtures/baseTest';
+import { DatabaseEditor } from '../page-objects/database-editor';
+import { FileExplorer } from '../page-objects/explorer-view';
+import { OutputView } from '../page-objects/output-view';
 
 test('Open by command', async ({ page }) => {
   const editor = new DatabaseEditor(page);

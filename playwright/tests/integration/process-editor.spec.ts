@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
-import { test } from './fixtures/baseTest';
-import { ProcessEditor } from './page-objects/process-editor';
-import { getCtrlOrMeta } from './utils/keyboard';
+import { test } from '../fixtures/baseTest';
+import { ProcessEditor } from '../page-objects/process-editor';
+import { getCtrlOrMeta } from '../utils/keyboard';
 
 const userDialogPID = '15254DCE818AD7A2-f3';
 

@@ -1,9 +1,9 @@
 import { expect } from '@playwright/test';
-import { test } from './fixtures/baseTest';
-import { CmsEditor } from './page-objects/cms-editor';
-import { Editor } from './page-objects/editor';
-import { FileExplorer, ProjectExplorerView } from './page-objects/explorer-view';
-import { OutputView } from './page-objects/output-view';
+import { test } from '../fixtures/baseTest';
+import { CmsEditor } from '../page-objects/cms-editor';
+import { Editor } from '../page-objects/editor';
+import { FileExplorer, ProjectExplorerView } from '../page-objects/explorer-view';
+import { OutputView } from '../page-objects/output-view';
 
 test('Open by command', async ({ page }) => {
   const editor = new CmsEditor(page);

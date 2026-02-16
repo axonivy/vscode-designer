@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
-import { test } from './fixtures/baseTest';
-import { OutputView } from './page-objects/output-view';
-import { UserEditor } from './page-objects/user-editor';
+import { test } from '../fixtures/baseTest';
+import { OutputView } from '../page-objects/output-view';
+import { UserEditor } from '../page-objects/user-editor';
 
 test('Read, write', async ({ page }) => {
   const editor = new UserEditor(page);

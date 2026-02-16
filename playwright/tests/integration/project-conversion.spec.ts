@@ -1,9 +1,9 @@
 import { expect } from '@playwright/test';
-import { test } from './fixtures/baseTest';
-import { Editor } from './page-objects/editor';
-import { OutputView } from './page-objects/output-view';
-import { ProblemsView } from './page-objects/problems-view';
-import { outdatedProjectWorkspacePath } from './workspaces/workspace';
+import { test } from '../fixtures/baseTest';
+import { Editor } from '../page-objects/editor';
+import { OutputView } from '../page-objects/output-view';
+import { ProblemsView } from '../page-objects/problems-view';
+import { outdatedProjectWorkspacePath } from '../workspaces/workspace';
 
 test.describe('Project Conversion', () => {
   test.use({ workspace: outdatedProjectWorkspacePath });

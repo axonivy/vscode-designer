@@ -1,5 +1,5 @@
-import { expect, test } from './fixtures/baseTest';
-import { WelcomePage } from './page-objects/welcome-page';
+import { expect, test } from '../fixtures/baseTest';
+import { WelcomePage } from '../page-objects/welcome-page';
 
 test.describe('Welcome Page', () => {
   test.use({ closeAllTabsOnInit: false });

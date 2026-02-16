@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
-import { test } from './fixtures/baseTest';
-import { OutputView } from './page-objects/output-view';
-import { RestClientEditor } from './page-objects/restclient-editor';
+import { test } from '../fixtures/baseTest';
+import { OutputView } from '../page-objects/output-view';
+import { RestClientEditor } from '../page-objects/restclient-editor';
 
 test('Read, write', async ({ page }) => {
   const editor = new RestClientEditor(page);

@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
-import { test } from './fixtures/baseTest';
-import { OutputView } from './page-objects/output-view';
-import { RoleEditor } from './page-objects/role-editor';
+import { test } from '../fixtures/baseTest';
+import { OutputView } from '../page-objects/output-view';
+import { RoleEditor } from '../page-objects/role-editor';
 
 test('Read, write and open help', async ({ page }) => {
   const editor = new RoleEditor(page);

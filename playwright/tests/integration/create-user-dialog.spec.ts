@@ -1,8 +1,8 @@
 import { expect } from '@playwright/test';
-import { test } from './fixtures/baseTest';
-import { FileExplorer } from './page-objects/explorer-view';
-import { FormEditor } from './page-objects/form-editor';
-import { ProcessEditor } from './page-objects/process-editor';
+import { test } from '../fixtures/baseTest';
+import { FileExplorer } from '../page-objects/explorer-view';
+import { FormEditor } from '../page-objects/form-editor';
+import { ProcessEditor } from '../page-objects/process-editor';
 
 test.describe('Create User Dialog', () => {
   let explorer: FileExplorer;

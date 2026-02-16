@@ -1,6 +1,6 @@
-import { expect, test } from './fixtures/baseTest';
-import { Editor } from './page-objects/editor';
-import { ProcessEditor } from './page-objects/process-editor';
+import { expect, test } from '../fixtures/baseTest';
+import { Editor } from '../page-objects/editor';
+import { ProcessEditor } from '../page-objects/process-editor';
 
 test('Compile java and invalidate class loader', async ({ page }) => {
   test.setTimeout(60_000); // slow test due to java activation

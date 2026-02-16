@@ -1,5 +1,5 @@
-import { test } from './fixtures/baseTest';
-import { FileExplorer } from './page-objects/explorer-view';
+import { test } from '../fixtures/baseTest';
+import { FileExplorer } from '../page-objects/explorer-view';
 
 test('Import BPMN Process', async ({ page }) => {
   const explorer = new FileExplorer(page);

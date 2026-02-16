@@ -1,8 +1,8 @@
-import { test } from './fixtures/baseTest';
-import { CmsEditor } from './page-objects/cms-editor';
-import { FileExplorer, ProjectExplorerView } from './page-objects/explorer-view';
-import { ProcessEditor } from './page-objects/process-editor';
-import { minimalProjectWorkspacePath, multiProjectWorkspacePath } from './workspaces/workspace';
+import { test } from '../fixtures/baseTest';
+import { CmsEditor } from '../page-objects/cms-editor';
+import { FileExplorer, ProjectExplorerView } from '../page-objects/explorer-view';
+import { ProcessEditor } from '../page-objects/process-editor';
+import { minimalProjectWorkspacePath, multiProjectWorkspacePath } from '../workspaces/workspace';
 
 test.describe('Project Explorer', () => {
   test.use({ workspace: multiProjectWorkspacePath });

@@ -1,8 +1,8 @@
 import { expect } from '@playwright/test';
-import { test } from './fixtures/baseTest';
-import { BrowserView } from './page-objects/browser-view';
-import { FormEditor } from './page-objects/form-editor';
-import { OutputView } from './page-objects/output-view';
+import { test } from '../fixtures/baseTest';
+import { BrowserView } from '../page-objects/browser-view';
+import { FormEditor } from '../page-objects/form-editor';
+import { OutputView } from '../page-objects/output-view';
 
 test.describe('Form Editor', () => {
   let editor: FormEditor;
