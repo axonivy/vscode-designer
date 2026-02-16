@@ -90,9 +90,7 @@ export class FileExplorer extends ExplorerView {
     await this.selectNode(rootFolder);
     await this.executeCommand('Axon Ivy: New Project');
     await this.provideUserInput(projectName);
-    await this.page.waitForTimeout(500);
     await this.provideUserInput();
-    await this.page.waitForTimeout(500);
     await this.provideUserInput();
   }
 
