@@ -118,13 +118,24 @@ export class IvyProjectExplorer {
     configWatcher.onDidChange(deployProject);
     const pomWatcher = vscode.workspace.createFileSystemWatcher('**/pom.xml', true, false, true);
     pomWatcher.onDidChange(deployProject);
+    const m2eDepsWatcher = vscode.workspace.createFileSystemWatcher('**/target/m2e.deps', false, false, true);
+    m2eDepsWatcher.onDidCreate(deployProject);
+    m2eDepsWatcher.onDidChange(deployProject);
     const targetWatcher = vscode.workspace.createFileSystemWatcher('**/target/classes/**/*.*');
     const invalidateClassLoader = (uri: vscode.Uri) =>
       this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.invalidateClassLoader(d), 'invalidate', uri);
     targetWatcher.onDidChange(invalidateClassLoader);
     targetWatcher.onDidCreate(invalidateClassLoader);
     targetWatcher.onDidDelete(invalidateClassLoader);
-    context.subscriptions.push(ivyProjectFileWatcher, deleteProjectWatcher, webContentWatcher, configWatcher, pomWatcher, targetWatcher);
+    context.subscriptions.push(
+      ivyProjectFileWatcher,
+      deleteProjectWatcher,
+      webContentWatcher,
+      configWatcher,
+      pomWatcher,
+      m2eDepsWatcher,
+      targetWatcher
+    );
   }
 
   private async deleteProjectOnEngine(projectToBeDeleted: string) {
