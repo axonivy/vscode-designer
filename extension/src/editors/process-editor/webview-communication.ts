@@ -184,7 +184,8 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     const completionStartingIndex = Math.max(
       currentTextLine.lastIndexOf(';'),
       currentTextLine.lastIndexOf(' '),
-      currentTextLine.lastIndexOf('=')
+      currentTextLine.lastIndexOf('='),
+      currentTextLine.lastIndexOf('(')
     );
     const toBeCompleted = currentTextLine.substring(completionStartingIndex);
     this.currentCompletion = { id, completionItems: this.javaCompletion.completionItems(toBeCompleted, 10), document };
