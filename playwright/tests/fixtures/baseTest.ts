@@ -11,24 +11,25 @@ export { expect } from '@playwright/test';
 
 export const runInBrowser = process.env.RUN_IN_BROWSER ? true : false;
 
-export const test = base.extend<{ workspace: string; page: Page }>({
+export const test = base.extend<{ workspace: string; closeAllTabsOnInit: boolean; page: Page }>({
   workspace: prebuiltWorkspacePath,
-  page: async ({ workspace }, take) => {
+  closeAllTabsOnInit: true,
+  page: async ({ workspace, closeAllTabsOnInit }, take) => {
     if (runInBrowser) {
-      await runBrowserTest(workspace, take);
+      await runBrowserTest(workspace, closeAllTabsOnInit, take);
     } else {
-      await runElectronAppTest(workspace, take);
+      await runElectronAppTest(workspace, closeAllTabsOnInit, take);
     }
   }
 });
 
-const runBrowserTest = async (workspace: string, take: (r: Page) => Promise<void>) => {
+const runBrowserTest = async (workspace: string, closeAllTabsOnInit: boolean, take: (r: Page) => Promise<void>) => {
   const browser = await chromium.launch({ args: ['--disable-web-security'] }); // disable-web-security because of https://chromestatus.com/feature/5152728072060928
   const page = await browser.newPage();
   await page.setViewportSize({ width: 1920, height: 1080 });
   const tmpWorkspace = await createTmpWorkspace(workspace);
   await page.goto(`http://localhost:3000/?folder=${tmpWorkspace}`);
-  await initialize(page);
+  await initialize(page, closeAllTabsOnInit);
   await take(page);
   // this goto closes WebSocket connections
   await page.goto('about:blank');
@@ -36,7 +37,7 @@ const runBrowserTest = async (workspace: string, take: (r: Page) => Promise<void
   await fs.promises.rm(tmpWorkspace, { recursive: true });
 };
 
-const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<void>) => {
+const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean, take: (r: Page) => Promise<void>) => {
   const vscodePath = await downloadAndUnzipVSCode(downloadVersion);
   const [cliPath] = resolveCliArgsFromVSCodeExecutablePath(vscodePath);
   execSync(`"${cliPath}" --install-extension vscjava.vscode-java-pack`);
@@ -59,7 +60,7 @@ const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<
     await page.setViewportSize({ width: 1920, height: 1080 });
   }
   await page.context().tracing.start({ screenshots: true, snapshots: true, title: test.info().title });
-  await initialize(page);
+  await initialize(page, closeAllTabsOnInit);
   await take(page);
   await electronApp.close();
   if (!process.env.CI) {
@@ -67,9 +68,11 @@ const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<
   }
 };
 
-const initialize = async (page: Page) => {
+const initialize = async (page: Page, closeAllTabsOnInit: boolean) => {
   await expect(page.locator('div.statusbar-item:has-text("Axon Ivy")')).toBeVisible();
-  await new FileExplorer(page).closeAllTabs();
+  if (closeAllTabsOnInit) {
+    await new FileExplorer(page).closeAllTabs();
+  }
 };
 
 const createTmpWorkspace = async (workspace: string) => {
