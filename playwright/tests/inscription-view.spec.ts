@@ -2,7 +2,6 @@ import { expect } from '@playwright/test';
 import { test } from './fixtures/baseTest';
 import { OutputView } from './page-objects/output-view';
 import { ProcessEditor } from './page-objects/process-editor';
-import { wait } from './utils/timeout';
 
 const userDialogPID1 = '15254DCE818AD7A2-f3';
 const userDialogPID2 = '15254DCE818AD7A2-f14';
@@ -56,9 +55,7 @@ test.describe('Inscription View', () => {
 
     const firstRowURLCell = inscriptionView.cellInsideTable(0, 1);
     await firstRowURLCell.locator('input').fill('pom.xml');
-    await wait(page);
     await inscriptionView.cellInsideTable(0, 0).click();
-    await wait(page);
     await inscriptionView.clickButton('Open URL');
     const activeTabElement = page.locator('.tab.active');
     await expect(activeTabElement).toHaveAttribute('data-resource-name', 'pom.xml');

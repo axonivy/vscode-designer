@@ -14,21 +14,19 @@ test.describe('Create Process', () => {
     processEditor = new ProcessEditor(page, `${processName}.p.json`);
   });
 
-  test('Add business process, execute, edit and redeploy', async ({ page }) => {
+  test('Add business process, execute, edit and redeploy', async () => {
     await explorer.addProcess(processName, 'Business Process');
     await explorer.hasNode(`${processName}.p.json`);
-    await page.waitForTimeout(1000);
     const start = processEditor.locatorForElementType('g.start\\:requestStart');
     const end = processEditor.locatorForElementType('g.end\\:taskEnd');
     await processEditor.startProcessAndAssertExecuted(start, end);
 
     await processEditor.appendActivity(start, 'Script');
     await processEditor.isDirty();
-    await page.waitForTimeout(1000);
     await processEditor.saveAllFiles();
-    await page.waitForTimeout(3000);
     const script = processEditor.locatorForElementType('g.script');
     await expect(script).toHaveClass(/selected/);
+    await expect(start).not.toHaveClass(/executed/);
     await processEditor.startProcessAndAssertExecuted(start, script);
   });
 
