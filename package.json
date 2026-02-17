@@ -26,7 +26,7 @@
     "sbom": "pnpm dlx @cyclonedx/cdxgen -t pnpm",
     "test": "pnpm run -r test",
     "test:ci": "pnpm run -r test:ci",
-    "test:playwright": "pnpm run --filter @axonivy/vscode-designer-playwright ui-tests --project=integration",
+    "test:playwright": "pnpm run --filter @axonivy/vscode-designer-playwright ui-tests",
     "test:playwright:browser": "RUN_IN_BROWSER=true pnpm run test:playwright",
     "test:playwright:download:vscode": "pnpm run --filter @axonivy/vscode-designer-playwright download:vscode",
     "type": "pnpm run -r type",
