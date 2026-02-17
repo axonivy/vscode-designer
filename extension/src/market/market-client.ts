@@ -17,7 +17,7 @@ export type Product = {
 export const MARKET_URL = 'https://market.axonivy.com/marketplace-service';
 
 export async function searchMarketProduct(): Promise<Product[]> {
-  const response = await findProducts({ isRESTClient: true, page: 0, size: 200, type: 'all', sort: [], language: 'en' });
+  const response = await findProducts({ page: 0, size: 200, type: 'all', sort: [], language: 'en' });
   const data = response.data as PagedModelProductModel;
   return (
     data._embedded?.products?.map((product: ProductModel) => ({
@@ -35,7 +35,7 @@ export async function availableVersions(productId: string) {
   return data.map(v => v.version || '') || [];
 }
 
-export async function fetchInstaller(productId: string, version: string) {
-  const response = await findProductJsonContent(productId, version);
+export async function fetchInstaller(productId: string, productVersion: string) {
+  const response = await findProductJsonContent(productId, { productVersion });
   return JSON.stringify(response.data);
 }
