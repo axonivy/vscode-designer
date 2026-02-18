@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
-import { test } from './fixtures/baseTest';
-import { OutputView } from './page-objects/output-view';
-import { PersistenceEditor } from './page-objects/persistence-editor';
+import { test } from '../fixtures/baseTest';
+import { OutputView } from '../page-objects/output-view';
+import { PersistenceEditor } from '../page-objects/persistence-editor';
 
 test('Read, write', async ({ page }) => {
   const editor = new PersistenceEditor(page);
