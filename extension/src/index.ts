@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { Messenger, MessengerDiagnostic } from 'vscode-messenger';
 import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
+import { validateAndSyncJavaVersion } from './base/java-version-validation';
 import { askToReloadWindow } from './base/reload-window';
 import { setStatusBarIcon, showStatusBarQuickPick } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
@@ -17,6 +18,7 @@ let ivyEngineManager: IvyEngineManager;
 export const messenger = new Messenger({ ignoreHiddenViews: false });
 
 export async function activate(context: vscode.ExtensionContext): Promise<MessengerDiagnostic> {
+  await validateAndSyncJavaVersion();
   resolveExtensionVersion(context);
   ivyEngineManager = IvyEngineManager.init(context);
   registerCommand('engine.deployProjects', context, () => ivyEngineManager.deployProjects());
