@@ -12,6 +12,7 @@ import { CustomFieldEditorProvider } from '../editors/custom-field-editor/custom
 import { DatabaseEditorProvider } from '../editors/database-editor/database-editor-provider';
 import DataClassEditorProvider from '../editors/dataclass-editor/dataclass-editor-provider';
 import FormEditorProvider from '../editors/form-editor/form-editor-provider';
+import { PersistenceEditorProvider } from '../editors/persistence-editor/persistence-editor-provider';
 import ProcessEditorProvider from '../editors/process-editor/process-editor-provider';
 import { RestClientEditorProvider } from '../editors/restclient-editor/restclient-editor-provider';
 import { RoleEditorProvider } from '../editors/role-editor/role-editor-provider';
@@ -119,6 +120,7 @@ export class IvyEngineManager {
     DatabaseEditorProvider.register(this.context, websocketUrl);
     DataClassEditorProvider.register(this.context, websocketUrl);
     RoleEditorProvider.register(this.context, websocketUrl);
+    PersistenceEditorProvider.register(this.context, websocketUrl);
     UserEditorProvider.register(this.context, websocketUrl);
     CaseMapEditorProvider.register(this.context, websocketUrl);
     RestClientEditorProvider.register(this.context, websocketUrl);

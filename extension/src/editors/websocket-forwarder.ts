@@ -14,6 +14,7 @@ type Endpoint =
   | 'ivy-cms-lsp'
   | 'ivy-database-lsp'
   | 'ivy-role-lsp'
+  | 'ivy-persistence-lsp'
   | 'ivy-user-lsp'
   | 'ivy-restclient-lsp';
 

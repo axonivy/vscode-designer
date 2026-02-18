@@ -29,20 +29,21 @@
   },
   "main": "./dist/extension.js",
   "dependencies": {
-    "@axonivy/cms-editor-protocol": "~14.0.0-next.657.a4591db",
-    "@axonivy/database-editor-protocol": "~14.0.0-next.260.6c2a392",
-    "@axonivy/dataclass-editor-protocol": "~14.0.0-next.810.77f1051",
-    "@axonivy/case-map-editor-protocol": "~14.0.0-next.160.31ebc7c",
-    "@axonivy/form-editor-protocol": "~14.0.0-next.1122.0fa91dd",
-    "@axonivy/jsonrpc": "~14.0.0-next.1005.12e787a",
-    "@axonivy/log-view-core": "~14.0.0-next.336.7027b63",
-    "@axonivy/log-view-protocol": "~14.0.0-next.336.7027b63",
-    "@axonivy/process-editor-inscription-protocol": "~14.0.0-next.2042.88175b16",
-    "@axonivy/process-editor-protocol": "~14.0.0-next.2042.88175b16",
-    "@axonivy/role-editor-protocol": "~14.0.0-next.92.a504a6b",
-    "@axonivy/user-editor-protocol": "~14.0.0-next.47.41f3c32",
-    "@axonivy/restclient-editor-protocol": "~14.0.0-next.14.24b9f8b",
-    "@axonivy/variable-editor-protocol": "~14.0.0-next.948.aa34ca8",
+    "@axonivy/cms-editor-protocol": "~14.0.0-next.663.57c24a6",
+    "@axonivy/database-editor-protocol": "~14.0.0-next.262.95eb9d4",
+    "@axonivy/dataclass-editor-protocol": "~14.0.0-next.812.ed2b810",
+    "@axonivy/case-map-editor-protocol": "~14.0.0-next.170.eef9219",
+    "@axonivy/form-editor-protocol": "~14.0.0-next.1126.68e8874",
+    "@axonivy/jsonrpc": "~14.0.0-next.1011.e9ae6be",
+    "@axonivy/log-view-core": "~14.0.0-next.338.77629eb",
+    "@axonivy/log-view-protocol": "~14.0.0-next.338.77629eb",
+    "@axonivy/process-editor-inscription-protocol": "~14.0.0-next.2044.0edf7ab9",
+    "@axonivy/process-editor-protocol": "~14.0.0-next.2044.0edf7ab9",
+    "@axonivy/role-editor-protocol": "~14.0.0-next.94.3c9d763",
+    "@axonivy/user-editor-protocol": "~14.0.0-next.49.ae42719",
+    "@axonivy/persistence-editor-protocol": "14.0.0-next.8.4d345a4",
+    "@axonivy/restclient-editor-protocol": "~14.0.0-next.18.847e95c",
+    "@axonivy/variable-editor-protocol": "~14.0.0-next.952.8f2f09f",
     "@eclipse-glsp/protocol": "2.5.0",
     "@eclipse-glsp/vscode-integration": "2.5.0",
     "axios": "1.13.5",
@@ -121,6 +122,15 @@
         "selector": [
           {
             "filenamePattern": "roles.yaml"
+          }
+        ]
+      },
+      {
+        "viewType": "ivy.persistenceEditor",
+        "displayName": "Axon Ivy Persistence Editor",
+        "selector": [
+          {
+            "filenamePattern": "persistence.xml"
           }
         ]
       },

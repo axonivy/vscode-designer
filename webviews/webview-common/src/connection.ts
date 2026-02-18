@@ -17,6 +17,7 @@ type Method =
   | 'variableWebSocketMessage'
   | 'roleWebSocketMessage'
   | 'userWebSocketMessage'
+  | 'persistenceWebSocketMessage'
   | 'restClientWebSocketMessage'
   | 'caseMapWebSocketMessage'
   | 'cmsWebSocketMessage'

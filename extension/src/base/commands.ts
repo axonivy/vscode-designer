@@ -59,6 +59,7 @@ export type ConfigEditorCommand =
   | 'ivyEditor.openVariableEditor'
   | 'ivyEditor.openRoleEditor'
   | 'ivyEditor.openUserEditor'
+  | 'ivyEditor.openPersistenceEditor'
   | 'ivyEditor.openDatabaseEditor'
   | 'ivyEditor.openWebServiceEditor'
   | 'ivyEditor.openRestClientEditor'
