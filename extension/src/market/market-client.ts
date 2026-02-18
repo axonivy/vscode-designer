@@ -14,8 +14,6 @@ export type Product = {
   logoUrl: string;
 };
 
-export const MARKET_URL = 'https://market.axonivy.com/marketplace-service';
-
 export async function searchMarketProduct(): Promise<Product[]> {
   const response = await findProducts({ page: 0, size: 200, type: 'all', sort: [], language: 'en' });
   const data = response.data as PagedModelProductModel;

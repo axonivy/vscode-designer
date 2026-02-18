@@ -1,12 +1,12 @@
-const MARKET_URL = 'https://market.axonivy.com/marketplace-service';
+const MARKET_URL = 'https://market.axonivy.com/stable';
 
 const getUrl = (contextUrl: string): string => {
   const base = MARKET_URL;
   const apiPrefix = '/api';
   if (contextUrl.startsWith(apiPrefix)) {
-    return `${base}${contextUrl} `;
+    return `${base}${contextUrl}`;
   }
-  return `${base}${apiPrefix}${contextUrl} `;
+  return `${base}${apiPrefix}${contextUrl}`;
 };
 
 const getBody = <T>(c: Response | Request): Promise<T> => {
