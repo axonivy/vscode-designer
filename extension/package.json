@@ -86,6 +86,14 @@
       "workbench.editorAssociations": {
         "{git,gitlens}:/**/{*.p.json,*.d.json,*.f.json,cms_*.yaml,variables.yaml}": "default"
       },
+      "json.schemaDownload.trustedDomains": {
+        "https://schemastore.azurewebsites.net/": true,
+        "https://raw.githubusercontent.com/": true,
+        "https://www.schemastore.org/": true,
+        "https://json.schemastore.org/": true,
+        "https://json-schema.org/": true,
+        "https://json-schema.axonivy.com/": true
+      },
       "html.suggest.html5": false
     },
     "customEditors": [
