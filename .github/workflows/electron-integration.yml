@@ -9,7 +9,6 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     env:
-      IVY_JAVA_HOME: $JAVA_HOME
       CI: true
       RUN_STABLE_VERSION: true
       JAVA_OPTS_IVY_SYSTEM: '-Ddev.mode=true -Divy.engine.testheadless=true'
