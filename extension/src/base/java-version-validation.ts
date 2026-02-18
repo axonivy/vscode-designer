@@ -6,18 +6,24 @@ import { logErrorMessage, logInformationMessage } from './logging-util';
 const EXPECTED_JAVA_VERSION = '25';
 
 export const validateAndSyncJavaVersion = async () => {
-  const javaHome = process.env.IVY_JAVA_HOME ?? process.env.JAVA_HOME;
-  if (!javaHome) {
-    const message = `JAVA_HOME is not set. Please set JAVA_HOME or IVY_JAVA_HOME environment variable to a valid Java ${EXPECTED_JAVA_VERSION} installation path.`;
+  let javaHome = process.env.IVY_JAVA_HOME ?? process.env.JAVA_HOME;
+  const jdtJavaHome = vscode.workspace.getConfiguration().get<string>('java.jdt.ls.java.home');
+  if (!javaHome && !jdtJavaHome) {
+    const message = `No Java found.
+    Either set env variable JAVA_HOME to valid Java ${EXPECTED_JAVA_VERSION} installation path,
+    or configure VS Code setting 'java.jdt.ls.java.home'.`;
     logErrorMessage(message);
     throw new Error(message);
+  }
+  if (!javaHome && jdtJavaHome) {
+    javaHome = jdtJavaHome;
+    process.env.IVY_JAVA_HOME = javaHome; // will be used for engine start
   }
   if (!isValidJavaVersion(javaHome)) {
     const message = `Wrong Java version detected under ${javaHome}. Expected Java ${EXPECTED_JAVA_VERSION}.`;
     logErrorMessage(message);
     throw new Error(message);
   }
-  const jdtJavaHome = vscode.workspace.getConfiguration().get<string>('java.jdt.ls.java.home');
   if (jdtJavaHome === javaHome) {
     return;
   }
@@ -28,7 +34,10 @@ export const validateAndSyncJavaVersion = async () => {
   }
 };
 
-const isValidJavaVersion = (javaHome: string) => {
+const isValidJavaVersion = (javaHome?: string) => {
+  if (!javaHome) {
+    return false;
+  }
   const releasePath = path.join(javaHome, 'release');
   try {
     const releaseContent = fs.readFileSync(releasePath, 'utf8');

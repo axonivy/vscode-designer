@@ -33,7 +33,9 @@ test('Undefined JAVA_HOME and IVY_JAVA_HOME', async () => {
   vi.stubEnv('JAVA_HOME', undefined);
   vi.stubEnv('IVY_JAVA_HOME', undefined);
   await expect(validateAndSyncJavaVersion()).rejects.toThrow(
-    'JAVA_HOME is not set. Please set JAVA_HOME or IVY_JAVA_HOME environment variable to a valid Java 25 installation path.'
+    `No Java found.
+    Either set env variable JAVA_HOME to valid Java 25 installation path,
+    or configure VS Code setting 'java.jdt.ls.java.home'.`
   );
 });
 
