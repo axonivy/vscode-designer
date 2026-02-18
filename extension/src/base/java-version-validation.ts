@@ -24,12 +24,11 @@ export const validateAndSyncJavaVersion = async () => {
   if (!jdtJavaHome || !isValidJavaVersion(jdtJavaHome)) {
     logInformationMessage("Updating 'java.jdt.ls.java.home' to match JAVA_HOME and restarting extension host...");
     await vscode.workspace.getConfiguration().update('java.jdt.ls.java.home', javaHome, vscode.ConfigurationTarget.Global);
-    await vscode.commands.executeCommand('workbench.action.restartExtensionHost');
+    await vscode.commands.executeCommand('workbench.action.reloadWindow');
   }
 };
 
 const isValidJavaVersion = (javaHome: string) => {
-  console.log(`Checking Java version under: ${javaHome}`);
   const releasePath = path.join(javaHome, 'release');
   try {
     const releaseContent = fs.readFileSync(releasePath, 'utf8');
