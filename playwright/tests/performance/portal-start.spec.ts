@@ -1,16 +1,7 @@
 import { expect, test } from '../fixtures/baseTest';
 import { BrowserView } from '../page-objects/browser-view';
 import { ProcessEditor } from '../page-objects/process-editor';
-import { embeddedEngineWorkspace, portalPerformanceWorkspacePath } from '../workspaces/workspace';
-
-test.describe('Ensure engine downloaded', () => {
-  test.use({ workspace: embeddedEngineWorkspace });
-
-  test('Dummy test to ensure engine is loaded', async ({ page }) => {
-    const processEditor = new ProcessEditor(page, 'PortalStart.p.json');
-    await processEditor.hasDeployProjectStatusMessage();
-  });
-});
+import { portalPerformanceWorkspacePath } from '../workspaces/workspace';
 
 test.describe('Portal performance', () => {
   test.use({ workspace: portalPerformanceWorkspacePath });
