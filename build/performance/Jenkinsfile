@@ -4,7 +4,7 @@ pipeline {
   }
 
   tools {
-    jdk 'temurin-jdk-21.0.6.7'
+    jdk 'temurin-jdk-25.0.2.10'
     maven '3.9'
   }
 
@@ -48,6 +48,7 @@ pipeline {
           bat 'start AxonIvyEngine/bin/AxonIvyEngine.exe'
           bat 'pnpm run test:playwright:download:vscode'
           bat 'git clone https://github.com/axonivy-market/portal.git playwright/tests/workspaces/portalPerformance/portal'
+          bat 'git -C playwright/tests/workspaces/portalPerformance/portal checkout project-conversion-lmu'
         }
       }
     }
@@ -56,12 +57,11 @@ pipeline {
       steps {
         nodejs(nodeJSInstallationName: '24.11.0') {
           catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-            bat 'pnpm run test:playwright'
-            bat 'start AxonIvyEngine/bin/AxonIvyEngine.exe stop'
+            bat 'pnpm run test:playwright:performance'
           }
+          bat 'start AxonIvyEngine/bin/AxonIvyEngine.exe stop'
           archiveArtifacts artifacts: '**/playwright/test-results/**', allowEmptyArchive: true
-          archiveArtifacts artifacts: '**/playwright/playwright-videos/**', allowEmptyArchive: true
-          withChecks('WebTests') {
+          withChecks('Performance Tests') {
             junit testDataPublishers: [[$class: 'StabilityTestDataPublisher']], testResults: '**/node_modules/**/report.xml'
           }
         }

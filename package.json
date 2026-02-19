@@ -29,6 +29,7 @@
     "test:playwright": "pnpm run --filter @axonivy/vscode-designer-playwright ui-tests",
     "test:playwright:browser": "RUN_IN_BROWSER=true pnpm run test:playwright",
     "test:playwright:download:vscode": "pnpm run --filter @axonivy/vscode-designer-playwright download:vscode",
+    "test:playwright:performance": "pnpm run --filter @axonivy/vscode-designer-playwright ui-performance-tests",
     "type": "pnpm run -r type",
     "update:axonivy:next": "npx --yes npm-check-updates @axonivy* -ws -t semver -u",
     "raise:version": "lerna version --allow-peer-dependencies-update --no-git-tag-version --no-push --ignore-scripts --exact --yes",

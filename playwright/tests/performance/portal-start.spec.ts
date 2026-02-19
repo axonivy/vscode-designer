@@ -3,7 +3,7 @@ import { BrowserView } from '../page-objects/browser-view';
 import { ProcessEditor } from '../page-objects/process-editor';
 import { portalPerformanceWorkspacePath } from '../workspaces/workspace';
 
-test('Dummy test to ensure vscode setup (java version set)', async ({ page }) => {
+test('Dummy test to ensure that java version is validated', async ({ page }) => {
   await new ProcessEditor(page).hasDeployProjectStatusMessage();
 });
 
@@ -14,6 +14,7 @@ test.describe('Portal performance', () => {
     await expect(page.locator('#status\\.problems')).not.toHaveAttribute('aria-label', 'No Problems');
     await expect(page.locator('div.statusbar-item:has-text("Java: Ready")')).toBeVisible();
     const processEditor = new ProcessEditor(page, 'PortalStart.p.json');
+    await processEditor.hasStatusMessage('Finished: Invalidate class loader');
     await processEditor.openEditorFile();
     const start = processEditor.locatorForPID('1549F58C18A6C562-f28');
     await processEditor.startProcessAndAssertExecuted(start, start);
