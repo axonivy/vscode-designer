@@ -20,6 +20,7 @@ test.describe('Portal performance', () => {
     await page.waitForTimeout(1_000);
     const processEditor = new ProcessEditor(page, 'PortalStart.p.json');
     await processEditor.hasStatusMessage('Finished: Invalidate class loader');
+    await processEditor.executeCommand('View: Hide Panel');
     await processEditor.openEditorFile();
     const start = processEditor.locatorForPID('1549F58C18A6C562-f28');
     await processEditor.startProcessAndAssertExecuted(start, start);
