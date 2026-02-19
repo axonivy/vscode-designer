@@ -3,10 +3,6 @@ import { BrowserView } from '../page-objects/browser-view';
 import { ProcessEditor } from '../page-objects/process-editor';
 import { portalPerformanceWorkspacePath } from '../workspaces/workspace';
 
-test('Dummy test to ensure that java version is validated', async ({ page }) => {
-  await new ProcessEditor(page).hasDeployProjectStatusMessage();
-});
-
 test.describe('Portal performance', () => {
   test.use({ workspace: portalPerformanceWorkspacePath });
 
