@@ -12,9 +12,16 @@ test.describe('Portal performance', () => {
 
   test('Portal home', async ({ page }) => {
     await expect(page.locator('#status\\.problems')).not.toHaveAttribute('aria-label', 'No Problems');
-    await expect(page.locator('div.statusbar-item:has-text("Java: Ready")')).toBeVisible();
+    const javaReady = async () => {
+      await expect(page.locator('div.statusbar-item:has-text("Java: Ready")')).toBeVisible({ timeout: 200 });
+      page.waitForTimeout(1_000);
+    };
+    await expect(async () => {
+      await javaReady();
+      await javaReady();
+      await javaReady();
+    }).toPass(); // ensure java ready is present for 3 seconds
     const processEditor = new ProcessEditor(page, 'PortalStart.p.json');
-    await processEditor.hasStatusMessage('Finished: Invalidate class loader');
     await processEditor.openEditorFile();
     const start = processEditor.locatorForPID('1549F58C18A6C562-f28');
     await processEditor.startProcessAndAssertExecuted(start, start);

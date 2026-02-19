@@ -14,6 +14,6 @@ export default defineConfig({
   reporter: process.env.CI ? [['junit', { outputFile: 'report.xml' }], ['list']] : 'html',
   projects: [
     { name: 'integration', testDir: './tests/integration' },
-    { name: 'performance', testDir: './tests/performance', timeout: 180_000, expect: { timeout: 60_000 } }
+    { name: 'performance', testDir: './tests/performance', timeout: 120_000, expect: { timeout: 60_000 } }
   ]
 });
