@@ -7,8 +7,13 @@ test.describe('Portal performance', () => {
   test.use({ workspace: portalPerformanceWorkspacePath });
 
   test('Portal home', async ({ page }) => {
-    await expect(page.locator('#status\\.problems')).not.toHaveAttribute('aria-label', 'No Problems');
-    await page.waitForTimeout(1_000);
+    await expect(async () => {
+      const javaReady = async () => await expect(page.locator('div.statusbar-item:has-text("Java: Ready")')).toBeVisible({ timeout: 200 });
+      for (let i = 0; i < 10; i++) {
+        await javaReady();
+        await page.waitForTimeout(500);
+      }
+    }).toPass();
     const processEditor = new ProcessEditor(page, 'PortalStart.p.json');
     await processEditor.hasStatusMessage('Finished: Invalidate class loader');
     await processEditor.executeCommand('View: Hide Panel');
