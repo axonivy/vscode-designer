@@ -6,9 +6,13 @@ import { logErrorMessage, logInformationMessage } from './logging-util';
 const EXPECTED_JAVA_VERSION = '25';
 
 export const validateAndSyncJavaVersion = async () => {
-  const javaHome = process.env.IVY_JAVA_HOME ?? process.env.JAVA_HOME;
+  let javaHome = process.env.IVY_JAVA_HOME;
+  let isValidJavaHome = isValidJavaVersion(javaHome);
+  if (!isValidJavaHome) {
+    javaHome = process.env.JAVA_HOME;
+    isValidJavaHome = isValidJavaVersion(javaHome);
+  }
   const jdtJavaHome = vscode.workspace.getConfiguration().get<string>('java.jdt.ls.java.home');
-  const isValidJavaHome = isValidJavaVersion(javaHome);
   const isValidJdtJavaHome = isValidJavaVersion(jdtJavaHome);
   if (!isValidJavaHome && !isValidJdtJavaHome) {
     const message = `No valid Java found under JAVA_HOME=${javaHome} or java.jdt.ls.java.home=${jdtJavaHome}.
