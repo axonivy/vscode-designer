@@ -43,7 +43,7 @@ export class ProcessEditor extends Editor {
   }
 
   async startProcessAndAssertExecuted(startEvent: Locator, executedElement: Locator) {
-    await startEvent.click();
+    await startEvent.locator('circle').click();
     await expect(startEvent).toHaveClass(/selected/);
     const playButton = this.viewFrameLocator().locator('i.ivy.ivy-play').first();
     await playButton.click();

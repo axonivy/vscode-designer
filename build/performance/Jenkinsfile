@@ -1,0 +1,71 @@
+pipeline {
+  agent {
+    label 'windows-vscode'
+  }
+
+  tools {
+    jdk 'temurin-jdk-25.0.2.10'
+    maven '3.9'
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '60', artifactNumToKeepStr: '2'))
+    disableConcurrentBuilds()
+  }
+
+  triggers {
+    cron '@midnight'
+  }
+
+  environment {
+    CI = 'true'
+    RUN_STABLE_VERSION = 'true'
+  }
+
+  stages {
+    stage('Cleanup globalStorage') {
+      steps {
+        script {
+          dir("${env.USERPROFILE}\\AppData\\Roaming\\Code\\User\\globalStorage") {
+            deleteDir()
+          }
+        }
+      }
+    }
+
+    stage('Build') {
+      steps {
+        nodejs(nodeJSInstallationName: '24.11.0') {
+          bat 'pnpm run update:axonivy:next'
+          bat 'pnpm install --no-frozen-lockfile'
+          bat 'pnpm run build:production'
+          bat 'pnpm run test:playwright:download:vscode'
+          bat 'git clone https://github.com/axonivy-market/portal.git playwright/tests/workspaces/portalPerformance/portal || exit /b 0'
+          bat 'git -C playwright/tests/workspaces/portalPerformance/portal checkout project-conversion-lmu'
+        }
+      }
+    }
+
+    stage('Playwright Performance Tests') {
+      steps {
+        nodejs(nodeJSInstallationName: '24.11.0') {
+          catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+            bat 'pnpm run test:playwright:performance'
+          }
+          archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
+          withChecks('Performance Tests') {
+            junit testDataPublishers: [[$class: 'StabilityTestDataPublisher']], testResults: 'node_modules/**/report.xml'
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+        cleanWs()
+      }
+    }
+  }
+}
