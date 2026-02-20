@@ -9,7 +9,8 @@ This extension can be used locally or in a [Dev Container](https://code.visualst
 
 ### Local usage
 
-Make sure that **Java SE 21** and **Maven 3** are installed on your machine.
+Make sure that **Java SE 25** and **Maven 3** are installed on your machine.
+You may want to use Java SE 25 provided by your operating system or install [Eclipse Temurin](https://adoptium.net/).
 
 The first time the extension is launched, an Axon Ivy Engine is automatically downloaded in the background. The download is displayed in the lower right corner.
 Advanced users may wish to specify the Axon Ivy Engine release train. To do so, execute the command **Axon Ivy: Switch Engine release train**.
