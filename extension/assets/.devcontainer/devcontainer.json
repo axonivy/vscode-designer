@@ -1,10 +1,12 @@
 {
   "name": "Axon Ivy",
-  "image": "mcr.microsoft.com/devcontainers/base:bookworm",
-  "forwardPorts": [8080],
+  "image": "mcr.microsoft.com/devcontainers/base:trixie",
+  "forwardPorts": [
+    8080
+  ],
   "features": {
     "ghcr.io/devcontainers/features/java:1": {
-      "version": "21",
+      "version": "25",
       "installMaven": "true",
       "jdkDistro": "tem"
     },
@@ -14,7 +16,9 @@
   },
   "customizations": {
     "vscode": {
-      "extensions": ["axonivy.vscode-designer-14"],
+      "extensions": [
+        "axonivy.vscode-designer-14"
+      ],
       "settings": {
         "axonivy.engine.releaseTrain": "/usr/lib/axonivy-engine"
       }
