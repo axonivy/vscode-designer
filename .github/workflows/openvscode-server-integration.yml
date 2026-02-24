@@ -12,7 +12,7 @@ jobs:
       CI: true
       RUN_IN_BROWSER: true
       JAVA_OPTS_IVY_SYSTEM: '-Ddev.mode=true -Divy.engine.testheadless=true'
-      OPEN_VSCODE_VERSION: v1.106.3
+      OPEN_VSCODE_VERSION: v1.109.5
     steps:
       - name: Checkout
         uses: actions/checkout@v6
