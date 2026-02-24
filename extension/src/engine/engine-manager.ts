@@ -124,7 +124,7 @@ export class IvyEngineManager {
     UserEditorProvider.register(this.context, websocketUrl);
     CaseMapEditorProvider.register(this.context, websocketUrl);
     RestClientEditorProvider.register(this.context, websocketUrl);
-    WebServiceEditorProvider.register(this.context);
+    WebServiceEditorProvider.register(this.context, websocketUrl);
     CustomFieldEditorProvider.register(this.context);
 
     RuntimeLogViewProvider(websocketUrl);

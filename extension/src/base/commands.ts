@@ -61,7 +61,7 @@ export type ConfigEditorCommand =
   | 'ivyEditor.openUserEditor'
   | 'ivyEditor.openPersistenceEditor'
   | 'ivyEditor.openDatabaseEditor'
-  | 'ivyEditor.openWebServiceEditor'
+  | 'ivyEditor.openWebServiceClientEditor'
   | 'ivyEditor.openRestClientEditor'
   | 'ivyEditor.openCustomFieldEditor';
 export type EditorCommand = 'ivyEditor.openCmsEditor';

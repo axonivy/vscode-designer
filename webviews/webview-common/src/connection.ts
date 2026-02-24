@@ -19,6 +19,7 @@ type Method =
   | 'userWebSocketMessage'
   | 'persistenceWebSocketMessage'
   | 'restClientWebSocketMessage'
+  | 'webServiceClientWebSocketMessage'
   | 'caseMapWebSocketMessage'
   | 'cmsWebSocketMessage'
   | 'databaseWebSocketMessage'

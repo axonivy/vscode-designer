@@ -29,21 +29,22 @@
   },
   "main": "./dist/extension.js",
   "dependencies": {
-    "@axonivy/cms-editor-protocol": "~14.0.0-next.663.57c24a6",
-    "@axonivy/database-editor-protocol": "~14.0.0-next.262.95eb9d4",
-    "@axonivy/dataclass-editor-protocol": "~14.0.0-next.812.ed2b810",
-    "@axonivy/case-map-editor-protocol": "~14.0.0-next.170.eef9219",
-    "@axonivy/form-editor-protocol": "~14.0.0-next.1126.68e8874",
-    "@axonivy/jsonrpc": "~14.0.0-next.1011.e9ae6be",
-    "@axonivy/log-view-core": "~14.0.0-next.338.77629eb",
-    "@axonivy/log-view-protocol": "~14.0.0-next.338.77629eb",
-    "@axonivy/process-editor-inscription-protocol": "~14.0.0-next.2044.0edf7ab9",
-    "@axonivy/process-editor-protocol": "~14.0.0-next.2044.0edf7ab9",
-    "@axonivy/role-editor-protocol": "~14.0.0-next.94.3c9d763",
-    "@axonivy/user-editor-protocol": "~14.0.0-next.49.ae42719",
+    "@axonivy/cms-editor-protocol": "~14.0.0-next.671.ad21aba",
+    "@axonivy/database-editor-protocol": "~14.0.0-next.270.b7d2319",
+    "@axonivy/dataclass-editor-protocol": "~14.0.0-next.820.e119813",
+    "@axonivy/case-map-editor-protocol": "~14.0.0-next.184.098d14f",
+    "@axonivy/form-editor-protocol": "~14.0.0-next.1134.7807245",
+    "@axonivy/jsonrpc": "~14.0.0-next.1025.e139fb9",
+    "@axonivy/log-view-core": "~14.0.0-next.344.3004ce5",
+    "@axonivy/log-view-protocol": "~14.0.0-next.344.3004ce5",
+    "@axonivy/process-editor-inscription-protocol": "~14.0.0-next.2054.b83efe75",
+    "@axonivy/process-editor-protocol": "~14.0.0-next.2054.b83efe75",
+    "@axonivy/role-editor-protocol": "~14.0.0-next.104.88bef53",
+    "@axonivy/user-editor-protocol": "~14.0.0-next.59.10c1473",
     "@axonivy/persistence-editor-protocol": "14.0.0-next.8.4d345a4",
-    "@axonivy/restclient-editor-protocol": "~14.0.0-next.18.847e95c",
-    "@axonivy/variable-editor-protocol": "~14.0.0-next.952.8f2f09f",
+    "@axonivy/restclient-editor-protocol": "~14.0.0-next.34.8c182d4",
+    "@axonivy/webservice-editor-protocol": "~14.0.0-next.6.c06c7d8",
+    "@axonivy/variable-editor-protocol": "~14.0.0-next.960.4a69c12",
     "@eclipse-glsp/protocol": "2.5.0",
     "@eclipse-glsp/vscode-integration": "2.5.0",
     "axios": "1.13.5",
@@ -153,6 +154,15 @@
         ]
       },
       {
+        "viewType": "ivy.webServiceClientEditor",
+        "displayName": "Axon Ivy Web Service Client Editor",
+        "selector": [
+          {
+            "filenamePattern": "webservice-clients.yaml"
+          }
+        ]
+      },
+      {
         "viewType": "ivy.cmsEditor",
         "displayName": "Axon Ivy CMS Editor",
         "selector": [
@@ -230,8 +240,8 @@
         "category": "Axon Ivy"
       },
       {
-        "command": "ivyEditor.openWebServiceEditor",
-        "title": "Open Web Service Editor",
+        "command": "ivyEditor.openWebServiceClientEditor",
+        "title": "Open Web Service Client Editor",
         "category": "Axon Ivy"
       },
       {
