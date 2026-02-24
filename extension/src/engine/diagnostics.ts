@@ -1,8 +1,11 @@
+import fs from 'fs';
 import * as vscode from 'vscode';
 import { IvyEngineManager } from './engine-manager';
 
 const DIAGNOSTIC_SOURCE = 'Axon Ivy';
 const CONVERSION_MESSAGE_PREFIX = 'Project is outdated and needs to be converted';
+const IVY_PROJECT_FILE = '.ivyproject';
+const POM_FILE = 'pom.xml';
 export class IvyDiagnostics {
   private static _instance: IvyDiagnostics;
 
@@ -12,9 +15,13 @@ export class IvyDiagnostics {
     if (!IvyDiagnostics._instance) {
       const diagnostics = vscode.languages.createDiagnosticCollection(DIAGNOSTIC_SOURCE);
       IvyDiagnostics._instance = new IvyDiagnostics(diagnostics);
-      const codeActionProvider = vscode.languages.registerCodeActionsProvider({ pattern: '**/pom.xml' }, new ConvertProjectQuickFix(), {
-        providedCodeActionKinds: [vscode.CodeActionKind.QuickFix]
-      });
+      const codeActionProvider = vscode.languages.registerCodeActionsProvider(
+        { pattern: `**/{${POM_FILE},${IVY_PROJECT_FILE}}` },
+        new ConvertProjectQuickFix(),
+        {
+          providedCodeActionKinds: [vscode.CodeActionKind.QuickFix]
+        }
+      );
       context.subscriptions.push(diagnostics, codeActionProvider);
     }
     return IvyDiagnostics._instance;
@@ -28,8 +35,11 @@ export class IvyDiagnostics {
     projects
       ?.filter(p => p && p.errorMessage)
       .forEach(project => {
-        const uri = vscode.Uri.joinPath(vscode.Uri.file(project.projectDirectory), 'pom.xml');
-        const diagnostic = new vscode.Diagnostic(new vscode.Range(0, 0, 0, 0), project.errorMessage, vscode.DiagnosticSeverity.Error);
+        let uri = vscode.Uri.joinPath(vscode.Uri.file(project.projectDirectory), IVY_PROJECT_FILE);
+        if (!fs.existsSync(uri.fsPath)) {
+          uri = vscode.Uri.joinPath(vscode.Uri.file(project.projectDirectory), POM_FILE);
+        }
+        const diagnostic = new vscode.Diagnostic(new vscode.Range(1, 0, 1, 0), project.errorMessage, vscode.DiagnosticSeverity.Error);
         diagnostic.source = DIAGNOSTIC_SOURCE;
         this.diagnostics.set(uri, [diagnostic]);
       });
