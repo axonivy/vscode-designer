@@ -10,7 +10,11 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
 
   private view?: vscode.WebviewView;
 
-  private constructor(readonly extensionUri: vscode.Uri, readonly engineUrl: URL, readonly devContextPath: string) {}
+  private constructor(
+    readonly extensionUri: vscode.Uri,
+    readonly engineUrl: URL,
+    readonly devContextPath: string
+  ) {}
 
   private static init(context: vscode.ExtensionContext, engineUrl: URL, devContextPath: string) {
     if (!IvyBrowserViewProvider._instance) {
@@ -35,9 +39,11 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
 
   private static resolveCodespacesEngineHost(engineUrl: URL): URL {
     if (process.env.CODESPACES === 'true') {
+      const codespaceEngineUrl = new URL(engineUrl.toString());
       const codespaceEngineHost = `${process.env.CODESPACE_NAME}-${engineUrl.port}.${process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}`;
-      engineUrl.host = codespaceEngineHost;
-      engineUrl.port = '';
+      codespaceEngineUrl.host = codespaceEngineHost;
+      codespaceEngineUrl.port = '';
+      return codespaceEngineUrl;
     }
     return engineUrl;
   }
