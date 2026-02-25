@@ -13,7 +13,7 @@ export class PersistenceEditorProvider implements vscode.CustomTextEditorProvide
   ) {}
 
   static register(context: vscode.ExtensionContext, websocketUrl: URL) {
-    registerOpenConfigEditorCmd('ivyEditor.openPersistenceEditor', context, 'persistence.xml');
+    registerOpenConfigEditorCmd('ivyEditor.openPersistenceEditor', context, 'persistence.yaml');
     const provider = new PersistenceEditorProvider(context, websocketUrl);
     const providerRegistration = vscode.window.registerCustomEditorProvider(PersistenceEditorProvider.viewType, provider);
     return providerRegistration;

@@ -17,7 +17,7 @@ test('Read, write', async ({ page }) => {
   await editor.saveAllFiles();
   await editor.isNotDirty();
   await editor.executeCommand('View: Reopen Editor With Text Editor');
-  await expect(editor.editorContent()).toContainText('name="myCoolPU"');
+  await expect(editor.editorContent()).toContainText('myCoolPU:');
 });
 
 test('Open Help', async ({ page }) => {
