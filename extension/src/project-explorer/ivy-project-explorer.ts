@@ -110,7 +110,7 @@ export class IvyProjectExplorer {
     webContentWatcher.onDidDelete(deployProject);
     webContentWatcher.onDidCreate(deployProject);
     const configWatcher = vscode.workspace.createFileSystemWatcher(
-      '**/config/{custom-fields.yaml,overrides.any,persistence.xml,webservice-clients.yaml}',
+      '**/config/{custom-fields.yaml,overrides.any,persistence.yaml,webservice-clients.yaml}',
       true,
       false,
       true
