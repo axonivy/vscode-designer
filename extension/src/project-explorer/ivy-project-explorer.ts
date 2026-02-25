@@ -109,12 +109,7 @@ export class IvyProjectExplorer {
     webContentWatcher.onDidChange(deployProject);
     webContentWatcher.onDidDelete(deployProject);
     webContentWatcher.onDidCreate(deployProject);
-    const configWatcher = vscode.workspace.createFileSystemWatcher(
-      '**/config/{custom-fields.yaml,overrides.any,persistence.xml,webservice-clients.yaml}',
-      true,
-      false,
-      true
-    );
+    const configWatcher = vscode.workspace.createFileSystemWatcher('**/config/{custom-fields.yaml,overrides.any}', true, false, true);
     configWatcher.onDidChange(deployProject);
     const pomWatcher = vscode.workspace.createFileSystemWatcher('**/pom.xml', true, false, true);
     pomWatcher.onDidChange(deployProject);

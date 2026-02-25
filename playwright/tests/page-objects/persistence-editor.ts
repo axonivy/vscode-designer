@@ -5,7 +5,7 @@ export class PersistenceEditor extends Editor {
   rows: Locator;
   detail: Locator;
 
-  constructor(page: Page, editorFile = 'persistence.xml') {
+  constructor(page: Page, editorFile = 'persistence.yaml') {
     super(editorFile, page);
     this.rows = this.viewFrameLocator().locator('tbody > tr');
     this.detail = this.viewFrameLocator().locator('.persistence-editor-detail-panel');
