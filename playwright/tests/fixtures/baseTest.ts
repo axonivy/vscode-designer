@@ -62,7 +62,8 @@ const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean
   await page.context().tracing.start({ screenshots: true, snapshots: true, title: test.info().title });
   await initialize(page, closeAllTabsOnInit);
   await take(page);
-  await electronApp.close();
+  await page.goto('about:blank'); // this goto closes WebSocket connections
+  await page.close();
   if (!process.env.CI) {
     await fs.promises.rm(tmpWorkspace, { recursive: true });
   }
