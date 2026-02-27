@@ -45,6 +45,12 @@ test('Valid JAVA_HOME', async () => {
   await expect(validateAndSyncJavaVersion()).resolves.toBeUndefined();
 });
 
+test('Valid openjdk JAVA_HOME', async () => {
+  vi.stubEnv('JAVA_HOME', testDir('openjdk25'));
+  vi.stubEnv('IVY_JAVA_HOME', undefined);
+  await expect(validateAndSyncJavaVersion()).resolves.toBeUndefined();
+});
+
 test('Valid IVY_JAVA_HOME', async () => {
   vi.stubEnv('JAVA_HOME', testDir('java21'));
   vi.stubEnv('IVY_JAVA_HOME', testDir('java25'));

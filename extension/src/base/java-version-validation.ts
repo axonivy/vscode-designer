@@ -36,7 +36,7 @@ const isValidJavaVersion = (javaHome?: string) => {
   try {
     const releaseContent = fs.readFileSync(releasePath, 'utf8');
     const javaVersion = releaseContent.split('\n').find(line => line.startsWith('JAVA_VERSION='));
-    return javaVersion?.startsWith(`JAVA_VERSION="${EXPECTED_JAVA_VERSION}.`);
+    return javaVersion?.startsWith(`JAVA_VERSION="${EXPECTED_JAVA_VERSION}`);
   } catch {
     return false;
   }
