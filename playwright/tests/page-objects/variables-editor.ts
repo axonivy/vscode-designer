@@ -7,7 +7,7 @@ export class VariablesEditor extends Editor {
   }
 
   override async isViewVisible() {
-    const header = this.viewFrameLocator().locator('.variables-editor-main-toolbar:has-text("Variables")');
+    const header = this.viewFrameLocator().locator('#variable-editor-main .ui-toolbar:has-text("Variables")');
     await expect(header).toBeVisible();
   }
 
