@@ -8,10 +8,10 @@ export class WebServiceClientEditor extends Editor {
   constructor(page: Page, editorFile = 'webservice-clients.yaml') {
     super(editorFile, page);
     this.rows = this.viewFrameLocator().locator('tbody > tr');
-    this.detail = this.viewFrameLocator().locator('.webservice-editor-detail-content');
+    this.detail = this.viewFrameLocator().locator('#webservice-editor-detail');
   }
 
   override async isViewVisible() {
-    await expect(this.viewFrameLocator().locator('.webservice-editor-main-panel')).toContainText('Web Services');
+    await expect(this.viewFrameLocator().locator('#webservice-editor-main .ui-toolbar')).toContainText('Web Services');
   }
 }
