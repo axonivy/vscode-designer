@@ -8,11 +8,11 @@ export class RoleEditor extends Editor {
   constructor(page: Page, editorFile = 'roles.yaml') {
     super(editorFile, page);
     this.rows = this.viewFrameLocator().locator('tbody > tr');
-    this.detail = this.viewFrameLocator().locator('.role-editor-detail-panel');
+    this.detail = this.viewFrameLocator().locator('#role-editor-detail');
   }
 
   override async isViewVisible() {
-    const header = this.viewFrameLocator().locator('.role-editor-main-toolbar:has-text("Roles")');
+    const header = this.viewFrameLocator().locator('#role-editor-main .ui-toolbar:has-text("Roles")');
     await expect(header).toBeVisible();
   }
 }

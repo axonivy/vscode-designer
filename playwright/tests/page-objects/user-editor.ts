@@ -8,11 +8,11 @@ export class UserEditor extends Editor {
   constructor(page: Page, editorFile = 'users.yaml') {
     super(editorFile, page);
     this.rows = this.viewFrameLocator().locator('tbody > tr');
-    this.detail = this.viewFrameLocator().locator('.user-editor-detail-panel');
+    this.detail = this.viewFrameLocator().locator('#user-editor-detail');
   }
 
   override async isViewVisible() {
-    const header = this.viewFrameLocator().locator('.user-editor-main-toolbar:has-text("Users")');
+    const header = this.viewFrameLocator().locator('#user-editor-main .ui-toolbar:has-text("Users")');
     await expect(header).toBeVisible();
   }
 }
