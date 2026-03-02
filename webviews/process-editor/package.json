@@ -16,26 +16,24 @@
     "url": "https://github.com/axonivy/process-editor"
   },
   "dependencies": {
-    "@axonivy/process-editor": "14.0.0-next.2058.d21dd250",
-    "@axonivy/process-editor-inscription": "14.0.0-next.2058.d21dd250",
-    "@axonivy/process-editor-inscription-view": "14.0.0-next.2058.d21dd250",
-    "@axonivy/process-editor-protocol": "14.0.0-next.2058.d21dd250",
+    "@axonivy/process-editor": "~14.0.0-next.2067.664dca6c",
+    "@axonivy/process-editor-inscription": "~14.0.0-next.2067.664dca6c",
+    "@axonivy/process-editor-inscription-view": "~14.0.0-next.2067.664dca6c",
+    "@axonivy/process-editor-protocol": "~14.0.0-next.2067.664dca6c",
     "@axonivy/vscode-webview-common": "workspace:~14.0.0-next",
-    "@codingame/monaco-vscode-extension-api": "^23.1.1",
-    "@eclipse-glsp/client": "2.5.0",
-    "@eclipse-glsp/vscode-integration": "2.5.0",
-    "@eclipse-glsp/vscode-integration-webview": "2.5.0",
+    "@eclipse-glsp/client": "2.6.0",
+    "@eclipse-glsp/vscode-integration": "2.6.0",
+    "@eclipse-glsp/vscode-integration-webview": "2.6.0",
     "inversify": "6.2.2",
-    "monaco-editor": "npm:@codingame/monaco-vscode-editor-api",
-    "vscode": "npm:@codingame/monaco-vscode-extension-api",
     "vscode-messenger-common": "0.4.5",
     "vscode-messenger-webview": "0.4.5"
   },
   "peerDependencies": {
-    "monaco-languageclient": "^10"
+    "@monaco-editor/react": "^4.7",
+    "@hediet/json-rpc": "^0.5"
   },
   "devDependencies": {
-    "@axonivy/monaco-vite-plugin": "14.0.0-next.2058.d21dd250",
+    "@axonivy/monaco-vite-plugin": "~14.0.0-next.2067.664dca6c",
     "@vscode/codicons": "0.0.44",
     "path-browserify": "1.0.1"
   },

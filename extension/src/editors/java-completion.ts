@@ -6,6 +6,7 @@ export class JavaCompletion {
   readonly dummyJavaFile: Promise<vscode.Uri>;
   static readonly ITEM_RESOLVE_COUNT = 50;
   static readonly DUMMY_CLASS_NAME = 'Dummy';
+  static readonly DUMMY_CONTENT_OFFSET = `private class ${JavaCompletion.DUMMY_CLASS_NAME}{`.length;
 
   constructor(documentUri: vscode.Uri, id: string) {
     this.dummyJavaFile = treeUriToProjectPath(documentUri, IvyProjectExplorer.instance.getIvyProjects()).then(project =>
@@ -19,7 +20,7 @@ export class JavaCompletion {
     const completionList = await vscode.commands.executeCommand<vscode.CompletionList>(
       'vscode.executeCompletionItemProvider',
       javaFile,
-      new vscode.Position(0, 20 + toBeCompleted.length),
+      new vscode.Position(0, JavaCompletion.DUMMY_CONTENT_OFFSET + toBeCompleted.length),
       undefined,
       itemResolveCount // resolve javadoc for count items - large number will slow down completion
     );

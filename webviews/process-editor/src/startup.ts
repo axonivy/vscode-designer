@@ -1,10 +1,16 @@
-import { EnableToolPaletteAction, GLSPActionDispatcher, IDiagramStartup, ShowGridAction, TYPES } from '@eclipse-glsp/client';
+import {
+  EnableToolPaletteAction,
+  GLSPActionDispatcher,
+  IDiagramStartup,
+  RequestTypeHintsAction,
+  ShowGridAction,
+  TYPES
+} from '@eclipse-glsp/client';
 import { ContainerModule, inject, injectable } from 'inversify';
 
 import { EnableInscriptionAction } from '@axonivy/process-editor-inscription';
 import { EnableViewportAction, UpdatePaletteItems } from '@axonivy/process-editor-protocol';
 import { toConnection } from '@axonivy/vscode-webview-common';
-import { RequestTypeHintsAction } from '@eclipse-glsp/vscode-integration';
 import { HOST_EXTENSION, type NotificationType, type RequestType } from 'vscode-messenger-common';
 import { Messenger } from 'vscode-messenger-webview';
 import './index.css';

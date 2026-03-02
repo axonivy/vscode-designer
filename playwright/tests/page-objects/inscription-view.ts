@@ -63,10 +63,10 @@ export class InscriptionView extends PageObject {
   }
 
   async writeToMonacoEditorWithCompletion(input: string, expectedCompletion: string) {
-    await this.typeText(input);
+    await this.page.keyboard.insertText(input);
     const contentAssist = this.monacoContentAssist();
     await expect(contentAssist).toBeVisible();
-    await contentAssist.getByText(expectedCompletion, { exact: true }).locator('span.highlight').click();
+    await contentAssist.getByText(expectedCompletion).first().locator('span.highlight').click();
     await expect(contentAssist).toBeHidden();
   }
 

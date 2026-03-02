@@ -20,6 +20,15 @@ export default defineConfig(() => ({
     outDir: '../../extension/dist/webviews/process-editor',
     chunkSizeWarningLimit: 5000
   },
+  // By default Vite adds a content hash to worker filenames. Drop it so the extension can locate the worker by fixed path.
+  // Webviews only allow loading workers via blob: or data: URLs, so the extension needs to find and serve the file.
+  worker: {
+    rollupOptions: {
+      output: {
+        entryFileNames: 'assets/[name].js'
+      }
+    }
+  },
   server: {
     port: 3000,
     open: false,

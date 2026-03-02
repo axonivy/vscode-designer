@@ -42,5 +42,7 @@ export function findRootHtml(appPath: vscode.Uri, manifest: ViteManifest): vscod
 }
 
 export function findEditorWorker(rootPath: vscode.Uri): vscode.Uri | undefined {
-  return vscode.Uri.joinPath(rootPath, 'assets', 'monaco-workers', 'editor.js');
+  // Only some webviews (e.g. process-editor) bundle a Monaco worker, so we check existence before returning.
+  const workerPath = vscode.Uri.joinPath(rootPath, 'assets', 'editor.worker.js');
+  return fs.existsSync(workerPath.fsPath) ? workerPath : undefined;
 }

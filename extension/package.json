@@ -37,16 +37,16 @@
     "@axonivy/jsonrpc": "~14.0.0-next.1041.c7f3379",
     "@axonivy/log-view-core": "~14.0.0-next.353.f8fa93b",
     "@axonivy/log-view-protocol": "~14.0.0-next.353.f8fa93b",
-    "@axonivy/process-editor-inscription-protocol": "14.0.0-next.2058.d21dd250",
-    "@axonivy/process-editor-protocol": "14.0.0-next.2058.d21dd250",
+    "@axonivy/process-editor-inscription-protocol": "~14.0.0-next.2067.664dca6c",
+    "@axonivy/process-editor-protocol": "~14.0.0-next.2067.664dca6c",
     "@axonivy/role-editor-protocol": "~14.0.0-next.110.7e68235",
     "@axonivy/user-editor-protocol": "~14.0.0-next.65.07b339d",
     "@axonivy/persistence-editor-protocol": "~14.0.0-next.30.5b92038",
     "@axonivy/restclient-editor-protocol": "~14.0.0-next.44.e366f9d",
     "@axonivy/webservice-editor-protocol": "~14.0.0-next.20.c2ddcca",
     "@axonivy/variable-editor-protocol": "~14.0.0-next.968.4aa2163",
-    "@eclipse-glsp/protocol": "2.5.0",
-    "@eclipse-glsp/vscode-integration": "2.5.0",
+    "@eclipse-glsp/protocol": "2.6.0",
+    "@eclipse-glsp/vscode-integration": "2.6.0",
     "axios": "1.13.5",
     "dom-serializer": "2.0.0",
     "domhandler": "5.0.3",
@@ -69,9 +69,6 @@
     "webpack": "5.105.3",
     "webpack-cli": "6.0.1",
     "json-schema-to-typescript": "^15.0.4"
-  },
-  "peerDependencies": {
-    "@codingame/monaco-vscode-editor-api": "*"
   },
   "activationEvents": [
     "onStartupFinished"
