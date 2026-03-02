@@ -8,11 +8,11 @@ export class PersistenceEditor extends Editor {
   constructor(page: Page, editorFile = 'persistence.yaml') {
     super(editorFile, page);
     this.rows = this.viewFrameLocator().locator('tbody > tr');
-    this.detail = this.viewFrameLocator().locator('.persistence-editor-detail-panel');
+    this.detail = this.viewFrameLocator().locator('#persistence-editor-detail');
   }
 
   override async isViewVisible() {
-    const header = this.viewFrameLocator().locator('.persistence-editor-main-toolbar:has-text("Persistence Units")');
+    const header = this.viewFrameLocator().locator('#persistence-editor-main .ui-toolbar:has-text("Persistence Units")');
     await expect(header).toBeVisible();
   }
 }
