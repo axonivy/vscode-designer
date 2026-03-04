@@ -305,6 +305,9 @@ export class IvyProjectExplorer {
   }
 
   public async selectEntry(entry?: Entry) {
+    if (!entry) {
+      return;
+    }
     this.treeView.reveal(entry, { select: true, expand: true });
   }
 

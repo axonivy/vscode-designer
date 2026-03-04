@@ -119,7 +119,15 @@ class InscriptionWebSocketForwarder extends WebSocketForwarder {
 class IvyScriptWebSocketForwarder extends WebSocketForwarder {
   private readonly documents = new Map<string, TextDocument>();
 
-  private currentCompletion: { id: number; completionItems: Promise<vscode.CompletionItem[]>; document: TextDocument } | undefined;
+  private currentCompletion:
+    | {
+        id: number;
+        completionItems: Promise<vscode.CompletionItem[]>;
+        document: TextDocument;
+        position: Position;
+        completionStartCharacter: number;
+      }
+    | undefined;
   readonly javaCompletion: JavaCompletion;
 
   constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: vscode.CustomDocument) {
@@ -145,12 +153,15 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
 
   protected override async handleServerMessage(message: string) {
     if (this.currentCompletion) {
-      const { id, completionItems, document } = this.currentCompletion;
+      const { id, completionItems, document, position, completionStartCharacter } = this.currentCompletion;
       const obj = JSON.parse(message);
       if (this.isCompletionResult(obj, id)) {
-        const lspCompletionItems = (await completionItems).map(item => this.toLspCompletItem(item, document));
+        const lspCompletionItems = (await completionItems).map(item =>
+          this.toLspCompletItem(item, document, { line: position.line, completionStartCharacter })
+        );
         obj.result.items.push(...lspCompletionItems);
         message = JSON.stringify(obj);
+        this.currentCompletion = undefined;
       }
     }
     super.handleServerMessage(message);
@@ -173,7 +184,7 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
   };
 
   handleCompletionRequest = (params: CompletionParams, id?: number) => {
-    if (!id) {
+    if (id === undefined) {
       return;
     }
     const document = this.documents.get(params.textDocument.uri);
@@ -185,10 +196,18 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
       currentTextLine.lastIndexOf(';'),
       currentTextLine.lastIndexOf(' '),
       currentTextLine.lastIndexOf('='),
-      currentTextLine.lastIndexOf('(')
+      currentTextLine.lastIndexOf('('),
+      currentTextLine.lastIndexOf('.')
     );
-    const toBeCompleted = currentTextLine.substring(completionStartingIndex);
-    this.currentCompletion = { id, completionItems: this.javaCompletion.completionItems(toBeCompleted, 10), document };
+    const completionStartCharacter = Math.max(completionStartingIndex + 1, 0);
+    const toBeCompleted = currentTextLine.substring(completionStartCharacter);
+    this.currentCompletion = {
+      id,
+      completionItems: this.javaCompletion.completionItems(toBeCompleted, 10),
+      document,
+      position: params.position,
+      completionStartCharacter
+    };
   };
 
   hasMethodAndParams = (message: unknown): message is { method: string; params: object; id?: number } => {
@@ -217,9 +236,14 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     );
   };
 
-  toLspCompletItem = (item: vscode.CompletionItem, document: TextDocument): CompletionItem => {
+  toLspCompletItem = (
+    item: vscode.CompletionItem,
+    document: TextDocument,
+    completionContext: { line: number; completionStartCharacter: number }
+  ): CompletionItem => {
     const label = this.toLabel(item);
     const lspItem = CompletionItem.create(label.label);
+    const insertText = this.resolveInsertText(item, document, label.label);
     lspItem.kind = this.toKind(item.kind);
     lspItem.detail = item.detail;
     lspItem.sortText = item.sortText;
@@ -227,6 +251,10 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     lspItem.tags = item.tags?.map(() => CompletionItemTag.Deprecated);
     lspItem.labelDetails = label;
     lspItem.documentation = this.toDocumentation(item.documentation);
+    const textEdit = this.toTextEdit(item, insertText, completionContext);
+    if (textEdit) {
+      lspItem.textEdit = textEdit;
+    }
     if (STANDARD_TYPES.includes(item.detail ?? '')) {
       return lspItem;
     }
@@ -235,11 +263,56 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
       if (!document.getText().includes(importStatement)) {
         lspItem.additionalTextEdits = [TextEdit.insert(Position.create(0, 0), `${importStatement}\n`)];
       }
-    } else if (item.detail && item.detail.length > 0) {
+    } else if (!textEdit && item.detail && item.detail.length > 0) {
       // full qualified name as insert text
       lspItem.insertText = item.detail;
+    } else if (!textEdit && insertText && insertText.length > 0) {
+      lspItem.insertText = insertText;
     }
     return lspItem;
+  };
+
+  resolveInsertText = (item: vscode.CompletionItem, document: TextDocument, defaultText: string): string => {
+    if (!document.uri.endsWith('.code/') && item.detail && item.detail.length > 0 && !STANDARD_TYPES.includes(item.detail)) {
+      return item.detail;
+    }
+    if (typeof item.insertText === 'string') {
+      return item.insertText;
+    }
+    if (item.insertText instanceof vscode.SnippetString) {
+      return item.insertText.value;
+    }
+    return defaultText;
+  };
+
+  toTextEdit = (
+    item: vscode.CompletionItem,
+    newText: string,
+    completionContext: { line: number; completionStartCharacter: number }
+  ): CompletionItem['textEdit'] => {
+    if (!item.range) {
+      return undefined;
+    }
+    if ('inserting' in item.range && 'replacing' in item.range) {
+      return {
+        newText,
+        insert: this.toDocumentRange(item.range.inserting, completionContext),
+        replace: this.toDocumentRange(item.range.replacing, completionContext)
+      };
+    }
+    return TextEdit.replace(this.toDocumentRange(item.range, completionContext), newText);
+  };
+
+  toDocumentRange = (range: vscode.Range, completionContext: { line: number; completionStartCharacter: number }): Range => {
+    return Range.create(this.toDocumentPosition(range.start, completionContext), this.toDocumentPosition(range.end, completionContext));
+  };
+
+  toDocumentPosition = (position: vscode.Position, completionContext: { line: number; completionStartCharacter: number }): Position => {
+    const line = completionContext.line + position.line;
+    const shiftedCharacter =
+      position.line === 0 ? Math.max(position.character - JavaCompletion.DUMMY_CONTENT_OFFSET, 0) : position.character;
+    const character = position.line === 0 ? completionContext.completionStartCharacter + shiftedCharacter : shiftedCharacter;
+    return Position.create(line, character);
   };
 
   toLabel = (item: vscode.CompletionItem) => {
