@@ -7,7 +7,7 @@ export class CmsEditor extends Editor {
 
   constructor(page: Page, editorFile = 'cms_en.yaml') {
     super(editorFile, page);
-    this.toolbar = this.viewFrameLocator().locator('.cms-editor-main-toolbar');
+    this.toolbar = this.viewFrameLocator().locator('#cms-editor-main .ui-toolbar');
     this.help = this.viewFrameLocator().getByRole('button', { name: /Help/ });
   }
 
@@ -42,7 +42,7 @@ export class CmsEditorRow {
   async openInscription() {
     await this.row.click();
     await this.expectSelected();
-    return this.editor.viewFrameLocator().locator('.cms-editor-detail-panel');
+    return this.editor.viewFrameLocator().locator('#cms-editor-detail');
   }
 
   async expectSelected() {
