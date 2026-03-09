@@ -9,5 +9,6 @@
     "moduleResolution": "node"
   },
   "include": ["src"],
+  "exclude": ["**/*.test.ts"],
   "types": ["node", "vscode"]
 }

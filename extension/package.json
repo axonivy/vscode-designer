@@ -16,8 +16,8 @@
     "vscode": "^1.98.0"
   },
   "scripts": {
-    "build": "webpack --mode=development",
-    "build:production": "webpack --mode=production",
+    "build": "node esbuild.js",
+    "build:production": "node esbuild.js --production",
     "clean": "rimraf lib dist *.tsbuildinfo",
     "generate:market": "node ./schemaCodegen.cjs",
     "package": "bash -c 'vsce package --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version:0:4}.$(date \"+%Y%m%d%H\")'",
@@ -25,7 +25,7 @@
     "test": "vitest",
     "test:ci": "vitest run",
     "type": "tsc --noEmit",
-    "watch": "webpack --watch --mode development"
+    "watch": "node esbuild.js --watch"
   },
   "main": "./dist/extension.js",
   "dependencies": {
@@ -65,9 +65,8 @@
     "@types/vscode-webview": "1.57.5",
     "@types/ws": "8.18.1",
     "@vscode/vsce": "3.7.1",
+    "esbuild": "0.27.3",
     "vitest": "4.0.18",
-    "webpack": "5.105.4",
-    "webpack-cli": "6.0.1",
     "json-schema-to-typescript": "^15.0.4"
   },
   "activationEvents": [
