@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
 import { IWebSocket, WebSocketMessageReader, WebSocketMessageWriter } from 'vscode-ws-jsonrpc';
 import { WebSocket } from 'ws';
+import { logErrorMessage } from '../base/logging-util';
 import { animationSettings, handleOpenProcessEditor, openEditor } from './animation';
 import { WebIdeClientJsonRpc } from './api/jsonrpc';
 
 export const WebIdeWebSocketProvider = (webSocketUrl: URL) => {
-  const webIdeWebSocket = new WebSocket(new URL('ivy-web-ide-lsp', webSocketUrl));
+  const webIdeWebSocket = createWebSocket(new URL('ivy-web-ide-lsp', webSocketUrl));
   webIdeWebSocket.onopen = () => {
     const connection = toSocketConnection(webIdeWebSocket);
     WebIdeClientJsonRpc.startClient(connection).then(client => {
@@ -26,6 +27,16 @@ export const toSocketConnection = (webSocket: WebSocket) => {
   const reader = new WebSocketMessageReader(socket);
   const writer = new WebSocketMessageWriter(socket);
   return { reader, writer };
+};
+
+export const createWebSocket = (url: URL) => {
+  const webSocket = new WebSocket(url);
+  webSocket.onclose = event => {
+    if (event.code !== 1000) {
+      logErrorMessage(`WebSocket connection to ${url} closed abnormally (code: ${event.code}, reason: ${event.reason})`);
+    }
+  };
+  return webSocket;
 };
 
 const toSocket = (webSocket: WebSocket): IWebSocket => {
