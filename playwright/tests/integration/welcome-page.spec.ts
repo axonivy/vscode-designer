@@ -8,18 +8,18 @@ test.describe('Welcome Page', () => {
     const welcomePage = new WelcomePage(page);
     await welcomePage.hasDeployProjectStatusMessage();
     await welcomePage.isViewVisible();
-    await expect(welcomePage.showWelcomePage).toBeChecked();
+    await expect(welcomePage.showPageCheckbox).toBeChecked();
 
-    await welcomePage.showWelcomePage.uncheck();
-    await expect(welcomePage.showWelcomePage).not.toBeChecked();
+    await welcomePage.showPageCheckbox.uncheck();
+    await expect(welcomePage.showPageCheckbox).not.toBeChecked();
     await welcomePage.closeAllTabs();
     await welcomePage.executeCommand('Axon Ivy: Open Welcome Page');
-    await expect(welcomePage.showWelcomePage).not.toBeChecked();
+    await expect(welcomePage.showPageCheckbox).not.toBeChecked();
 
-    await welcomePage.showWelcomePage.check();
-    await expect(welcomePage.showWelcomePage).toBeChecked();
+    await welcomePage.showPageCheckbox.check();
+    await expect(welcomePage.showPageCheckbox).toBeChecked();
     await welcomePage.closeAllTabs();
     await welcomePage.executeCommand('Axon Ivy: Open Welcome Page');
-    await expect(welcomePage.showWelcomePage).toBeChecked();
+    await expect(welcomePage.showPageCheckbox).toBeChecked();
   });
 });
