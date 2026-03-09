@@ -14,6 +14,8 @@ preferWorkspacePackages: true
 patchedDependencies:
   monaco-editor: patches/monaco-editor.patch
 
+allowUnusedPatches: true
+
 publicHoistPattern:
   - eslint
 

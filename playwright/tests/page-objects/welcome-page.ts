@@ -7,10 +7,10 @@ const welcomePageViewData: ViewData = {
 };
 
 export class WelcomePage extends View {
-  readonly showWelcomePage: Locator;
+  readonly showPageCheckbox: Locator;
 
   constructor(page: Page) {
     super(welcomePageViewData, page);
-    this.showWelcomePage = this.viewFrameLocator().getByRole('checkbox', { name: 'Show welcome page on extension activation' });
+    this.showPageCheckbox = this.viewFrameLocator().getByRole('checkbox', { name: 'Show welcome page on extension activation' });
   }
 }
