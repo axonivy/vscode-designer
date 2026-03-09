@@ -1,11 +1,10 @@
 import * as vscode from 'vscode';
 import { LanguageClient, type LanguageClientOptions, type StreamInfo } from 'vscode-languageclient/node';
-import { WebSocket } from 'ws';
-import { toSocketConnection } from '../../engine/ws-client';
+import { createWebSocket, toSocketConnection } from '../../engine/ws-client';
 
 export const XhtmlLanguageClientProvider = async (webSocketUrl: URL) => {
   const serverOptions = (): Promise<StreamInfo> => {
-    const webSocket = new WebSocket(new URL('ivy-xhtml-lsp', webSocketUrl));
+    const webSocket = createWebSocket(new URL('ivy-xhtml-lsp', webSocketUrl));
     return new Promise((resolve, reject) => {
       webSocket.onopen = () => {
         const connection = toSocketConnection(webSocket);

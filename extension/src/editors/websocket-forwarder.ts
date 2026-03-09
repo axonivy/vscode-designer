@@ -3,6 +3,7 @@ import vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { WebSocket } from 'ws';
+import { createWebSocket } from '../engine/ws-client';
 
 type Endpoint =
   | 'ivy-inscription-lsp'
@@ -30,7 +31,7 @@ export class WebSocketForwarder implements vscode.Disposable {
     readonly messageParticipant: MessageParticipant,
     readonly notificationType: NotificationType<unknown>
   ) {
-    this.webSocket = new WebSocket(new URL(websocketEndpoint, websocketUrl));
+    this.webSocket = createWebSocket(new URL(websocketEndpoint, websocketUrl));
     this.webSocket.onopen = () => this.initialize();
   }
 
