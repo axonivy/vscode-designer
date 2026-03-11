@@ -210,9 +210,9 @@ export class IvyEngineApi {
     });
   }
 
-  public async projects() {
+  public async projects(withDependencies = false) {
     const baseURL = await this.baseURL;
-    return (await projects({}, { baseURL, ...options })).data;
+    return (await projects({ withDependencies }, { baseURL, ...options })).data;
   }
 
   public get devContextPath(): Promise<string> {

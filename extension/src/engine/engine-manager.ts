@@ -276,8 +276,8 @@ export class IvyEngineManager {
     await this.ivyEngineApi?.invalidateClassLoader(ivyProjectDirectory);
   }
 
-  public async projects() {
-    return this.ivyEngineApi?.projects();
+  public async projects(withDependencies = false) {
+    return this.ivyEngineApi?.projects(withDependencies);
   }
 
   get engineApi() {

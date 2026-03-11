@@ -425,7 +425,7 @@
       },
       {
         "command": "ivyProjects.addDependency",
-        "title": "Add Dependency",
+        "title": "Add Ivy Dependency",
         "category": "Axon Ivy",
         "enablement": "ivy:hasIvyProjects"
       },
@@ -562,6 +562,11 @@
         {
           "submenu": "workflow.editor.title",
           "group": "bookmarks"
+        },
+        {
+          "command": "ivyProjects.addDependency",
+          "when": "resourceFilename == pom.xml",
+          "group": "navigation"
         }
       ],
       "workflow.editor.title": [
