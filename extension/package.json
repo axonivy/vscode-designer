@@ -93,7 +93,8 @@
         "https://json-schema.org/": true,
         "https://json-schema.axonivy.com/": true
       },
-      "html.suggest.html5": false
+      "html.suggest.html5": false,
+      "java.configuration.updateBuildConfiguration": "automatic"
     },
     "customEditors": [
       {
@@ -421,6 +422,12 @@
         "command": "ivyProjects.addNewCaseMap",
         "title": "New Case Map",
         "category": "Axon Ivy"
+      },
+      {
+        "command": "ivyProjects.addDependency",
+        "title": "Add Dependency",
+        "category": "Axon Ivy",
+        "enablement": "ivy:hasIvyProjects"
       },
       {
         "command": "ivy.addDevContainer",

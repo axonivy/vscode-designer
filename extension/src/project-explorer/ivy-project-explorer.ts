@@ -2,12 +2,13 @@ import path from 'path';
 import * as vscode from 'vscode';
 import { Command, executeCommand, registerCommand } from '../base/commands';
 import { debouncedAction } from '../base/debounce';
-import { getIvyProject } from '../base/ivyProjectSelection';
+import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { importMarketProduct, importMarketProductFile } from '../market/import-market';
+import { addDependencyHandler } from './add-dependency';
 import { importNewProcess } from './import-process';
 import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
@@ -87,6 +88,7 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.addNewDataClass`, (s: TreeSelection) => this.addDataClass(s));
     registerCmd(`${VIEW_ID}.addNewCaseMap`, (s: TreeSelection) => this.addCaseMap(s));
     registerCmd(`${VIEW_ID}.convertProject`, (s: TreeSelection) => this.convertProject(s));
+    registerCmd(`${VIEW_ID}.addDependency`, addDependencyHandler);
   }
 
   private defineFileWatchers(context: vscode.ExtensionContext) {
@@ -176,7 +178,7 @@ export class IvyProjectExplorer {
   private async runEngineAction(action: (projectDir: string) => Promise<void>, selection: TreeSelection) {
     let uri = await treeSelectionToUri(selection);
     if (!uri) {
-      uri = await getIvyProject(this);
+      uri = await selectIvyProjectDialog();
     }
     this.runEngineActionForUri(action, uri);
   }
@@ -202,7 +204,7 @@ export class IvyProjectExplorer {
   }
 
   public async addProcess(selection: TreeSelection, kind: ProcessKind, pid?: string) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
+    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
     if (!uri) {
       logErrorMessage('Add Process: no valid Axon Ivy Project selected.');
       return;
@@ -216,7 +218,7 @@ export class IvyProjectExplorer {
   }
 
   private async addCaseMap(selection: TreeSelection) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
+    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
     if (!uri) {
       logErrorMessage('Add Case Map: no valid Axon Ivy Project selected.');
       return;
@@ -230,7 +232,7 @@ export class IvyProjectExplorer {
   }
 
   public async importBpmnProcess(selection: TreeSelection) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
+    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
     if (!uri) {
       logErrorMessage('Import BPMN Process: no valid Axon Ivy Project selected.');
       return;
@@ -248,7 +250,7 @@ export class IvyProjectExplorer {
   }
 
   private async resolveProject(selection: TreeSelection) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
+    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
     if (!uri) {
       throw new Error('No valid Axon Ivy Project selected.');
     }
@@ -264,7 +266,7 @@ export class IvyProjectExplorer {
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
+    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
     if (!uri) {
       logInformationMessage('Add User Dialog: no valid Axon Ivy Project selected.');
       return;
@@ -278,7 +280,7 @@ export class IvyProjectExplorer {
   }
 
   private async addDataClass(selection: TreeSelection) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(this));
+    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
     if (!uri) {
       logInformationMessage('Add Data Class: no valid Axon Ivy Project selected.');
       return;
