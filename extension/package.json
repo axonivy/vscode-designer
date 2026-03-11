@@ -741,6 +741,11 @@
           "command": "ivyProjects.stopBpmEngine",
           "group": "run@4",
           "when": "ivy:hasIvyProjects"
+        },
+        {
+          "command": "ivyProjects.addDependency",
+          "group": "run@5",
+          "when": "ivy:hasIvyProjects"
         }
       ]
     },

@@ -226,6 +226,7 @@ export class IvyEngineManager {
     const path = newProjectParams.path;
     this.ivyEngineApi
       ?.createProject(newProjectParams)
+      .then(() => executeCommand('java.project.import.command'))
       .then(async () =>
         this.createAndOpenProcess({
           name: 'BusinessProcess',
