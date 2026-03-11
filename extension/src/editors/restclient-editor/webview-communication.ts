@@ -48,7 +48,9 @@ class RestClientWebSocketForwarder extends WebSocketForwarder {
     if (isAction<RestClientActionArgs>(message)) {
       switch (message.params.actionId) {
         case 'openUrl':
-          openUrlExternally(message.params.payload);
+          openUrlExternally(message.params.payload as string);
+          break;
+        case 'generateOpenApiClient':
           break;
         default:
           noUnknownAction(message.params.actionId);
