@@ -1,16 +1,10 @@
-**/*.ts
-**/tsconfig.json
-
-.gitignore
-webpack.config.js
-eslint.xml
-schemaCodegen.cjs
-
 assets/readme
+node_modules/
+src/
+!src/**/*.css
 
-**/node_modules
-
-lib/
-
-**/release-train-validator-test
-**/java-version-validation-test
+esbuild.mts
+report.xml
+schemaCodegen.cjs
+tsconfig.json
+vitest.config.js

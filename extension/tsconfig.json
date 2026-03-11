@@ -1,13 +1,13 @@
 {
   "extends": "@axonivy/ts-config/base",
   "compilerOptions": {
-    "rootDir": "src",
+    "rootDir": ".",
     "outDir": "lib",
     "resolveJsonModule": true,
-    "module": "commonjs",
     "verbatimModuleSyntax": false,
     "moduleResolution": "node"
   },
   "include": ["src"],
+  "files": ["esbuild.mts"],
   "types": ["node", "vscode"]
 }

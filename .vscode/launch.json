@@ -10,9 +10,9 @@
         "--extensionDevelopmentPath=${workspaceFolder}/extension",
         "${env:CONTAINER_WORKSPACE}"
       ],
-      "outFiles": ["${workspaceFolder}/extension/dist/**/*.js"],
+      "outFiles": ["${workspaceFolder}/extension/dist/extension.js"],
       "sourceMaps": true,
-      "preLaunchTask": "Watch"
+      "preLaunchTask": "watch extension"
     }
   ]
 }

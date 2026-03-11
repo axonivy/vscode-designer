@@ -11,7 +11,7 @@
     "preinstall": "npx only-allow pnpm",
     "build": "pnpm run -r build",
     "build:production": "pnpm run -r build:production",
-    "engine:download": "node --experimental-strip-types scripts/download-engine.mts",
+    "engine:download": "node scripts/download-engine.mts",
     "openapi": "pnpm run openapi:download && pnpm run openapi:codegen",
     "openapi:download": "mvn clean validate && curl -o target/market/openapi.json https://market.axonivy.com/stable/v3/api-docs --create-dirs",
     "openapi:codegen": "orval",

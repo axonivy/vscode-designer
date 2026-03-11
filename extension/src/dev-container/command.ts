@@ -1,4 +1,4 @@
-import vscode from 'vscode';
+import * as vscode from 'vscode';
 
 export async function addDevContainer(extensionUri: vscode.Uri) {
   const ws = await vscode.window.showWorkspaceFolderPick();

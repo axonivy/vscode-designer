@@ -6,6 +6,7 @@ import { config } from '../base/configurations';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyProjectExplorer } from './ivy-project-explorer';
 
+const __dirname = import.meta.dirname;
 interface IvyCommand extends vscode.Command {
   command: Command;
 }

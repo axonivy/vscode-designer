@@ -21,7 +21,12 @@ pnpm run openapi
 
 ## Debugging the extension
 
-Make sure that all packages are installed, i.e. run `pnpm install`. Building and packaging are not needed. Simply start the `Run Extension` launch config, which will also activate the watch mode.
+Make sure that:
+
+- all packages are installed, i.e. run `pnpm install`
+- webviews are built, i.e. run `pnpm build`
+
+Then simply start the `Run Extension` launch config, which will also activate the watch mode for the extension. If you want to watch webviews, manually run the watch script for the webview you want to watch.
 
 ## Connect to another Ivy Engine
 
