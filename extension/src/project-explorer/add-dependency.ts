@@ -1,3 +1,4 @@
+import path from 'path';
 import * as vscode from 'vscode';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { logErrorMessage } from '../base/logging-util';
@@ -20,7 +21,9 @@ export const addDependencyHandler = async (uri: TreeSelection) => {
   }
   const pomPath = vscode.Uri.joinPath(vscode.Uri.file(targetProject), 'pom.xml').fsPath;
   const projectBeans = await IvyEngineManager.instance.projects(true);
-  const targetProjectBean = projectBeans?.find(p => pomPath.startsWith(p.projectDirectory));
+  const targetProjectBean = projectBeans?.find(p =>
+    pomPath.startsWith(p.projectDirectory.endsWith(path.sep) ? p.projectDirectory : p.projectDirectory + path.sep)
+  );
   if (!targetProjectBean) {
     logErrorMessage(`No project bean found for selected project ${targetProject}. Cannot add dependency.`);
     return;
