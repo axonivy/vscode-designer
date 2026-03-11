@@ -22,8 +22,7 @@ export default config.defineConfig(
       '**/generated/client*',
       '**/market/generated/*',
       '**/browser/media/*',
-      '**/monaco-workers/*',
-      '**/esbuild.js'
+      '**/monaco-workers/*'
     ]
   },
   {

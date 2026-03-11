@@ -6,6 +6,7 @@
   "description": "This extension gives you all the tools you need to design, automate and optimize workflows from simple tasks to complex enterprise processes.",
   "publisher": "axonivy",
   "author": "Axon Ivy AG",
+  "type": "module",
   "homepage": "https://developer.axonivy.com/",
   "repository": {
     "url": "https://github.com/axonivy/vscode-designer"
@@ -16,8 +17,8 @@
     "vscode": "^1.98.0"
   },
   "scripts": {
-    "build": "node esbuild.js",
-    "build:production": "node esbuild.js --production",
+    "build": "node esbuild.mts",
+    "build:production": "node esbuild.mts --production",
     "clean": "rimraf lib dist *.tsbuildinfo",
     "generate:market": "node ./schemaCodegen.cjs",
     "package": "bash -c 'vsce package --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version:0:4}.$(date \"+%Y%m%d%H\")'",
@@ -25,7 +26,7 @@
     "test": "vitest",
     "test:ci": "vitest run",
     "type": "tsc --noEmit",
-    "watch": "node esbuild.js --watch"
+    "watch": "node esbuild.mts --watch"
   },
   "main": "./dist/extension.js",
   "dependencies": {

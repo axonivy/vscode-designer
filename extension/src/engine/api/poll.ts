@@ -1,5 +1,5 @@
 import axios from 'axios';
-import vscode from 'vscode';
+import * as vscode from 'vscode';
 
 export async function pollWithProgress(url: string, title: string) {
   const options = {

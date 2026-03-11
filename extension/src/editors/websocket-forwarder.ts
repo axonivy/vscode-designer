@@ -1,5 +1,5 @@
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
-import vscode from 'vscode';
+import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { WebSocket } from 'ws';
