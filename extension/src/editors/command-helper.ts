@@ -18,7 +18,7 @@ export const registerOpenConfigEditorCmd = (command: ConfigEditorCommand, contex
 
 export const openEditorCmdProjectPath = async (command: ConfigEditorCommand | EditorCommand, selection: TreeSelection) => {
   try {
-    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog(IvyProjectExplorer.instance));
+    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
     if (!uri) {
       logErrorMessage(`${command}: No valid Axon Ivy Project selected.`);
       return;
