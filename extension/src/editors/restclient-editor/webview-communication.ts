@@ -1,5 +1,6 @@
-import type { RestClientActionArgs } from '@axonivy/restclient-editor-protocol';
+import type { OpenApiGeneratorConfig, RestClientActionArgs } from '@axonivy/restclient-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
@@ -51,6 +52,7 @@ class RestClientWebSocketForwarder extends WebSocketForwarder {
           openUrlExternally(message.params.payload as string);
           break;
         case 'generateOpenApiClient':
+          generateClient(message.params.payload as string, this.document);
           break;
         default:
           noUnknownAction(message.params.actionId);
@@ -67,4 +69,23 @@ class RestClientWebSocketForwarder extends WebSocketForwarder {
       super.handleServerMessage(message);
     }
   }
+}
+
+function generateClient(payRaw: string, document: vscode.TextDocument) {
+  const projectPath = path.dirname(path.dirname(document.uri.fsPath));
+  const openapi = JSON.parse(payRaw) as OpenApiGeneratorConfig;
+  const outputDir = `src_generated/rest/${openapi.clientName}`;
+  const terminal = vscode.window.createTerminal({ name: 'Generate OpenAPI Client', cwd: projectPath });
+
+  const command = `mvn com.axonivy.ivy.tool.rest:openapi-codegen:generate-openapi-client\
+    -Divy.generate.openapi.client.spec=${shellQuote(openapi.spec)}\
+    -Divy.generate.openapi.client.output=${shellQuote(outputDir)}\
+    -Divy.generate.openapi.client.package=${shellQuote(openapi.namespace)}`;
+
+  terminal.show();
+  terminal.sendText(command);
+}
+
+function shellQuote(value: string): string {
+  return `'${value.replace(/'/g, `'"'"'`)}'`;
 }
