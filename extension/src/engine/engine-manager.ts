@@ -228,7 +228,7 @@ export class IvyEngineManager {
       ?.createProject(newProjectParams)
       .then(() => executeCommand('java.project.import.command'))
       .catch(() => {
-        logWarningMessage(`Java extension could not import project, no Java support is expected.`);
+        logWarningMessage('Java extension could not import project. Java support will not be available.');
       })
       .then(async () =>
         this.createAndOpenProcess({
