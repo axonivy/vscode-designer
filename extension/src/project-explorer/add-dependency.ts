@@ -30,7 +30,8 @@ export const addDependencyHandler = async (uri: TreeSelection) => {
   }
   const possibleDeps = projectBeans
     ?.filter(p => p !== targetProjectBean)
-    .filter(p => targetProjectBean.dependencies.find(d => d.app === p.id.app && d.pmv === p.id.pmv) === undefined);
+    .filter(p => targetProjectBean.dependencies.find(d => d.app === p.id.app && d.pmv === p.id.pmv) === undefined)
+    .filter(p => isNotCircular(targetProjectBean, projectBeans, p));
   if (possibleDeps === undefined || possibleDeps.length === 0) {
     logErrorMessage('No other projects found to add as dependency.');
     return;
@@ -46,6 +47,21 @@ export const addDependencyHandler = async (uri: TreeSelection) => {
     version: newDependency.version === targetProjectBean.version ? '${project.version}' : newDependency.version,
     packaging: 'iar'
   });
+};
+
+const isNotCircular = (targetProjectBean: ProjectBean, projectBeans: ProjectBean[], possibleDependency: ProjectBean) => {
+  const dependencyProjectBeans = possibleDependency.dependencies
+    .map(d => projectBeans?.find(p => p.id.app === d.app && p.id.pmv === d.pmv))
+    .filter(p => p !== undefined);
+  if (dependencyProjectBeans.includes(targetProjectBean)) {
+    return false;
+  }
+  for (const b of dependencyProjectBeans) {
+    if (!isNotCircular(targetProjectBean, projectBeans, b)) {
+      return false;
+    }
+  }
+  return true;
 };
 
 const showDependencyPick = async (projects: ProjectBean[]) => {
