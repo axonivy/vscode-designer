@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-import { Converter } from 'vscode-languageclient/lib/common/codeConverter';
-import { ExecuteCommandParams, LanguageClient } from 'vscode-languageclient/node';
+import { Code2ProtocolConverter, ExecuteCommandParams, LanguageClient } from 'vscode-languageclient/node';
 import * as lsprot from 'vscode-languageserver-protocol';
 
 export async function onExecuteClientCommand(languageClient: LanguageClient, params: ExecuteCommandParams): Promise<unknown> {
@@ -17,14 +16,14 @@ export async function onExecuteClientCommand(languageClient: LanguageClient, par
   return undefined;
 }
 
-function asDocumentSymbols(converter: Converter, msg: unknown): lsprot.DocumentSymbol[] {
+function asDocumentSymbols(converter: Code2ProtocolConverter, msg: unknown): lsprot.DocumentSymbol[] {
   if (msg == null || msg == undefined || !Array.isArray(msg) || msg.length === 0) {
     return [];
   }
   return msg.map(item => asDocumentSymbol(converter, item));
 }
 
-function asDocumentSymbol(converter: Converter, symbol: vscode.DocumentSymbol): lsprot.DocumentSymbol {
+function asDocumentSymbol(converter: Code2ProtocolConverter, symbol: vscode.DocumentSymbol): lsprot.DocumentSymbol {
   //const range = client.code2ProtocolConverter.asRange(symbol.range);
   const sym = {
     name: symbol.name,
@@ -40,7 +39,7 @@ function asDocumentSymbol(converter: Converter, symbol: vscode.DocumentSymbol): 
   return sym;
 }
 
-function asWorkspaceSymbols(converter: Converter, msg: unknown): lsprot.WorkspaceSymbol[] {
+function asWorkspaceSymbols(converter: Code2ProtocolConverter, msg: unknown): lsprot.WorkspaceSymbol[] {
   if (msg == null || msg == undefined || !Array.isArray(msg) || msg.length === 0) {
     return [];
   }
