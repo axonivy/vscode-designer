@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { registerCommand, type ConfigEditorCommand, type EditorCommand } from '../base/commands';
-import { getIvyProject } from '../base/ivyProjectSelection';
+import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { logErrorMessage } from '../base/logging-util';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { treeSelectionToUri, treeUriToProjectPath, type TreeSelection } from '../project-explorer/tree-selection';
@@ -18,7 +18,7 @@ export const registerOpenConfigEditorCmd = (command: ConfigEditorCommand, contex
 
 export const openEditorCmdProjectPath = async (command: ConfigEditorCommand | EditorCommand, selection: TreeSelection) => {
   try {
-    const uri = (await treeSelectionToUri(selection)) ?? (await getIvyProject(IvyProjectExplorer.instance));
+    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
     if (!uri) {
       logErrorMessage(`${command}: No valid Axon Ivy Project selected.`);
       return;

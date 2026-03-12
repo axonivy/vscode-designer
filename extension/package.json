@@ -93,7 +93,8 @@
         "https://json-schema.org/": true,
         "https://json-schema.axonivy.com/": true
       },
-      "html.suggest.html5": false
+      "html.suggest.html5": false,
+      "java.configuration.updateBuildConfiguration": "automatic"
     },
     "customEditors": [
       {
@@ -423,6 +424,13 @@
         "category": "Axon Ivy"
       },
       {
+        "command": "ivyProjects.addDependency",
+        "title": "Add Ivy Dependency",
+        "category": "Axon Ivy",
+        "icon": "$(add)",
+        "enablement": "ivy:hasIvyProjects"
+      },
+      {
         "command": "ivy.addDevContainer",
         "title": "Add Dev Container",
         "category": "Axon Ivy"
@@ -555,6 +563,11 @@
         {
           "submenu": "workflow.editor.title",
           "group": "bookmarks"
+        },
+        {
+          "command": "ivyProjects.addDependency",
+          "when": "resourceFilename == pom.xml",
+          "group": "navigation"
         }
       ],
       "workflow.editor.title": [
@@ -728,6 +741,11 @@
         {
           "command": "ivyProjects.stopBpmEngine",
           "group": "run@4",
+          "when": "ivy:hasIvyProjects"
+        },
+        {
+          "command": "ivyProjects.addDependency",
+          "group": "run@5",
           "when": "ivy:hasIvyProjects"
         }
       ]

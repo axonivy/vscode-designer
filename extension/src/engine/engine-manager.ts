@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
-import { logErrorMessage } from '../base/logging-util';
+import { logErrorMessage, logWarningMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { setStatusBarMessage } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
@@ -226,6 +226,10 @@ export class IvyEngineManager {
     const path = newProjectParams.path;
     this.ivyEngineApi
       ?.createProject(newProjectParams)
+      .then(() => executeCommand('java.project.import.command'))
+      .catch(() => {
+        logWarningMessage(`Java extension could not import project, no Java support is expected.`);
+      })
       .then(async () =>
         this.createAndOpenProcess({
           name: 'BusinessProcess',
@@ -276,8 +280,8 @@ export class IvyEngineManager {
     await this.ivyEngineApi?.invalidateClassLoader(ivyProjectDirectory);
   }
 
-  public async projects() {
-    return this.ivyEngineApi?.projects();
+  public async projects(withDependencies = false) {
+    return this.ivyEngineApi?.projects(withDependencies);
   }
 
   get engineApi() {

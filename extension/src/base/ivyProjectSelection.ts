@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { logErrorMessage } from './logging-util';
 
-export const getIvyProject = async (projectExplorer: IvyProjectExplorer) => {
-  const projects = await projectExplorer.getIvyProjects();
+export const selectIvyProjectDialog = async (dialogTitle?: string) => {
+  const projects = await IvyProjectExplorer.instance.getIvyProjects();
   let uri: string | undefined;
 
   if (!projects || projects.length === 0) {
@@ -12,13 +12,13 @@ export const getIvyProject = async (projectExplorer: IvyProjectExplorer) => {
   } else if (projects.length === 1) {
     uri = projects[0];
   } else {
-    uri = await showIvyProjectPick(projects);
+    uri = await showIvyProjectPick(projects, dialogTitle);
   }
 
   return uri ? vscode.Uri.file(uri) : undefined;
 };
 
-const showIvyProjectPick = async (projects: Array<string>) => {
+const showIvyProjectPick = async (projects: Array<string>, dialogTitle?: string) => {
   const items = projects.map(project => ({
     label: project.substring(project.lastIndexOf('/') + 1),
     description: project,
@@ -26,7 +26,8 @@ const showIvyProjectPick = async (projects: Array<string>) => {
   }));
 
   const selected = await vscode.window.showQuickPick(items, {
-    placeHolder: 'Select an ivy-project'
+    title: dialogTitle,
+    placeHolder: 'Select an Ivy Project'
   });
 
   if (!selected) {
