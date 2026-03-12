@@ -1,13 +1,20 @@
 import path from 'path';
 import * as vscode from 'vscode';
+import { registerCommand } from '../base/commands';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { logErrorMessage } from '../base/logging-util';
 import { ProjectBean } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { IvyProjectExplorer } from './ivy-project-explorer';
-import { TreeSelection, treeUriToProjectPath } from './tree-selection';
+import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
+import { treeUriToProjectPath } from '../project-explorer/tree-selection';
+import { registerPomCodeLensProvider } from './pom-code-lens-provider';
 
-export const addDependencyHandler = async (uri: TreeSelection) => {
+export const registerAddDependencyHandler = (context: vscode.ExtensionContext) => {
+  registerCommand('ivyProjects.addDependency', context, addDependencyHandler);
+  registerPomCodeLensProvider(context);
+};
+
+const addDependencyHandler = async (uri: vscode.Uri) => {
   let targetProject: string | undefined;
   if (uri instanceof vscode.Uri) {
     targetProject = await treeUriToProjectPath(uri, IvyProjectExplorer.instance.getIvyProjects());

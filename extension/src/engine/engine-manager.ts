@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
-import { logErrorMessage } from '../base/logging-util';
+import { logErrorMessage, logWarningMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { setStatusBarMessage } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
@@ -228,7 +228,7 @@ export class IvyEngineManager {
       ?.createProject(newProjectParams)
       .then(() => executeCommand('java.project.import.command'))
       .catch(() => {
-        // error if Java Mode LightWeight is set - ignore it
+        logWarningMessage(`Java extension could not import project, no Java support is expected.`);
       })
       .then(async () =>
         this.createAndOpenProcess({

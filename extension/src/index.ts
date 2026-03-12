@@ -10,8 +10,8 @@ import { addDevContainer } from './dev-container/command';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
 import { IvyDiagnostics } from './engine/diagnostics';
 import { IvyEngineManager } from './engine/engine-manager';
+import { registerAddDependencyHandler } from './maven/add-dependency';
 import { IvyProjectExplorer } from './project-explorer/ivy-project-explorer';
-import { registerPomCodeLensProvider } from './project-explorer/pom-code-lens-provider';
 import { resolveExtensionVersion } from './version/extension-version';
 import { showRuntimeLog } from './views/runtimelog-view';
 
@@ -37,9 +37,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<Messen
   IvyDiagnostics.init(context);
   setStatusBarIcon();
   conditionalWelcomePage(context);
-  registerPomCodeLensProvider(context);
 
   await IvyProjectExplorer.init(context);
+  registerAddDependencyHandler(context);
   return messenger.diagnosticApi();
 }
 
