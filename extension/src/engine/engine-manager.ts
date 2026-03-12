@@ -227,6 +227,9 @@ export class IvyEngineManager {
     this.ivyEngineApi
       ?.createProject(newProjectParams)
       .then(() => executeCommand('java.project.import.command'))
+      .catch(() => {
+        // error if Java Mode LightWeight is set - ignore it
+      })
       .then(async () =>
         this.createAndOpenProcess({
           name: 'BusinessProcess',

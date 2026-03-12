@@ -171,7 +171,11 @@ export class IvyProjectExplorer {
       await executeCommand('java.clean.workspace'); // if project was deleted java workspace should be cleaned
     }
     if (projectsToBeDeployed.length > 0) {
-      await executeCommand('java.project.import.command');
+      try {
+        await executeCommand('java.project.import.command');
+      } catch {
+        // error if Java Mode LightWeight is set - ignore it
+      }
     }
   }
 
