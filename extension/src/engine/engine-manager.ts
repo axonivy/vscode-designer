@@ -28,7 +28,6 @@ import { extensionVersion } from '../version/extension-version';
 import { RuntimeLogViewProvider } from '../views/runtimelog-view';
 import { IvyEngineApi } from './api/engine-api';
 import { CaseMapInit, DataClassInit, ImportProcessBody, NewProjectParams, ProductInstallParams } from './api/generated/client';
-import { MavenBuilder } from './build/maven';
 import { IvyDiagnostics } from './diagnostics';
 import { EngineDownloader } from './engine-downloader';
 import { engineDirFromGlobalState, engineReleaseTrain, switchEngineReleaseTrain, updateGlobalStateEngineDir } from './engine-release-train';
@@ -40,14 +39,12 @@ import { WebIdeWebSocketProvider } from './ws-client';
 export class IvyEngineManager {
   private static _instance: IvyEngineManager;
 
-  private readonly mavenBuilder: MavenBuilder;
   private readonly engineRunner: EngineRunner;
   private ivyEngineApi?: IvyEngineApi;
   private started = false;
 
   private constructor(readonly context: vscode.ExtensionContext) {
     const engineDir = this.resolveEngineDir();
-    this.mavenBuilder = new MavenBuilder(engineDir);
     this.engineRunner = new EngineRunner(engineDir);
   }
 
@@ -163,35 +160,7 @@ export class IvyEngineManager {
     await this.ivyEngineApi?.deployProjects(ivyProjectDirectories);
   }
 
-  public async buildProjects() {
-    if (config.projectUseMavenBuilder()) {
-      await this.mavenBuilder.buildProjects();
-      return;
-    }
-    const ivyProjectDirectories = await this.ivyProjectDirectories();
-    await this.ivyEngineApi?.buildProjects(ivyProjectDirectories);
-  }
-
-  public async buildProject(ivyProjectDirectory: string) {
-    if (config.projectUseMavenBuilder()) {
-      await this.mavenBuilder.buildProject(ivyProjectDirectory);
-      return;
-    }
-    await this.ivyEngineApi?.buildProjects([ivyProjectDirectory]);
-  }
-
   public async deployProject(ivyProjectDirectory: string) {
-    await this.ivyEngineApi?.deployProjects([ivyProjectDirectory]);
-  }
-
-  public async buildAndDeployProjects() {
-    const ivyProjectDirectories = await this.ivyProjectDirectories();
-    await this.buildProjects();
-    await this.ivyEngineApi?.deployProjects(ivyProjectDirectories);
-  }
-
-  public async buildAndDeployProject(ivyProjectDirectory: string) {
-    await this.buildProject(ivyProjectDirectory);
     await this.ivyEngineApi?.deployProjects([ivyProjectDirectory]);
   }
 

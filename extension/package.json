@@ -309,12 +309,6 @@
         "icon": "$(refresh)"
       },
       {
-        "command": "engine.buildProjects",
-        "title": "Build all Projects",
-        "category": "Axon Ivy",
-        "icon": "$(tools)"
-      },
-      {
         "command": "engine.deployProjects",
         "title": "Deploy all Projects",
         "category": "Axon Ivy",
@@ -356,12 +350,6 @@
         "command": "ivyProjects.convertProject",
         "title": "Convert Project",
         "category": "Axon Ivy"
-      },
-      {
-        "command": "engine.buildAndDeployProjects",
-        "title": "Build and Deploy all Projects",
-        "category": "Axon Ivy",
-        "icon": "$(tools)"
       },
       {
         "command": "ivyProjects.addBusinessProcess",
@@ -486,12 +474,6 @@
             "markdownDescription": "Maximum number of Axon Ivy projects that will be detected.",
             "order": 2100
           },
-          "axonivy.project.useMavenBuilder": {
-            "type": "boolean",
-            "default": true,
-            "markdownDescription": "Configure whether Maven Builder is used for building Axon Ivy Projects.",
-            "order": 2200
-          },
           "axonivy.process.animation.animate": {
             "type": "boolean",
             "default": true,
@@ -604,17 +586,8 @@
           "group": "navigation@3"
         },
         {
-          "command": "engine.buildProjects",
-          "when": "view == ivyProjects || view == workbench.explorer.fileView"
-        },
-        {
           "command": "engine.deployProjects",
           "when": "view == ivyProjects || view == workbench.explorer.fileView"
-        },
-        {
-          "command": "engine.buildAndDeployProjects",
-          "when": "view == ivyProjects || view == workbench.explorer.fileView",
-          "group": "navigation@2"
         }
       ],
       "explorer/context": [
