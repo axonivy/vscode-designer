@@ -19,7 +19,7 @@
       <ic:ch.xhtml.test.AddressComponent startMethod="start" label="asdf" />
       <br />
       <div class="command-btns">
-        <p:commandLink id="cancel" actionListener="#{ivyWorkflowView.cancel()}" process="@this" value="Cancel" />
+        <p:commandLink id="cancel" actionListener="#{ivyWorkflowView.cancel()}" process="@this" value="#{ivy.cm.co('/Labels/Cancel')}" />
         <p:commandButton id="proceed" actionListener="#{logic.close}" value="Proceed" update="form" icon="pi pi-check" />
       </div>
     </h:form>
