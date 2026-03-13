@@ -11,6 +11,11 @@ export class DataClassEditor extends Editor {
     await expect(this.toolbar).toContainText('Data Class -');
   }
 
+  async isEntityViewVisible() {
+    await this.isTabVisible();
+    await expect(this.toolbar).toContainText('Entity Class -');
+  }
+
   get toolbar() {
     return this.viewFrameLocator().locator('#dataclass-editor-main .ui-toolbar');
   }

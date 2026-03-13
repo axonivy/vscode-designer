@@ -249,6 +249,14 @@ export class IvyEngineManager {
     }
   }
 
+  public async createEntityClass(params: DataClassInit) {
+    const dataClassBean = await this.ivyEngineApi?.createEntityClass(params);
+    if (dataClassBean && params.projectDir) {
+      const dataClassUri = vscode.Uri.joinPath(vscode.Uri.file(params.projectDir), dataClassBean.path);
+      executeCommand('vscode.open', dataClassUri);
+    }
+  }
+
   public async createCaseMap(params: CaseMapInit) {
     const caseMapBean = await this.ivyEngineApi?.createCaseMap(params);
     if (caseMapBean && params.projectDir) {

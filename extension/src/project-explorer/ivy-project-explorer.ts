@@ -11,7 +11,7 @@ import { importMarketProduct, importMarketProductFile } from '../market/import-m
 import { importNewProcess } from './import-process';
 import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
-import { addNewDataClass } from './new-data-class';
+import { addNewDataClass, addNewEntityClass } from './new-data-class';
 import { ProcessKind, addNewProcess } from './new-process';
 import { addNewProject } from './new-project';
 import { DialogType, addNewUserDialog } from './new-user-dialog';
@@ -85,6 +85,7 @@ export class IvyProjectExplorer {
       this.addUserDialog(s, 'JSFOffline', pid)
     );
     registerCmd(`${VIEW_ID}.addNewDataClass`, (s: TreeSelection) => this.addDataClass(s));
+    registerCmd(`${VIEW_ID}.addNewEntityClass`, (s: TreeSelection) => this.addEntityClass(s));
     registerCmd(`${VIEW_ID}.addNewCaseMap`, (s: TreeSelection) => this.addCaseMap(s));
     registerCmd(`${VIEW_ID}.convertProject`, (s: TreeSelection) => this.convertProject(s));
   }
@@ -293,6 +294,20 @@ export class IvyProjectExplorer {
       return;
     }
     logInformationMessage('Add Data Class: no valid Axon Ivy Project selected.');
+  }
+
+  private async addEntityClass(selection: TreeSelection) {
+    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
+    if (!uri) {
+      logInformationMessage('Add Entity Class: no valid Axon Ivy Project selected.');
+      return;
+    }
+    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
+    if (projectPath) {
+      await addNewEntityClass(uri, projectPath);
+      return;
+    }
+    logInformationMessage('Add Entity Class: no valid Axon Ivy Project selected.');
   }
 
   public async setProjectExplorerActivationCondition(hasIvyProjects: boolean) {

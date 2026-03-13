@@ -133,6 +133,13 @@ export class FileExplorer extends ExplorerView {
     await this.provideUserInput(dataClass);
     await this.provideUserInput(namespace);
   }
+
+  async addEntityClass(entityClass: string, namespace: string) {
+    await this.selectNode('config');
+    await this.executeCommand('Axon Ivy: New Entity Class');
+    await this.provideUserInput(entityClass);
+    await this.provideUserInput(namespace);
+  }
 }
 
 export class ProjectExplorerView extends ExplorerView {
