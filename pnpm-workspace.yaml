@@ -3,18 +3,21 @@ packages:
   - playwright
   - extension
 
+allowUnusedPatches: true
+
 ignoredBuiltDependencies:
   - '@swc/core'
   - '@vscode/vsce-sign'
   - esbuild
   - keytar
 
-preferWorkspacePackages: true
+overrides:
+  dompurify@>=3.1.3 <=3.3.1: '>=3.3.2'
 
 patchedDependencies:
   monaco-editor: patches/monaco-editor.patch
 
-allowUnusedPatches: true
+preferWorkspacePackages: true
 
 publicHoistPattern:
   - eslint
