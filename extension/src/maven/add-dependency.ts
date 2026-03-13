@@ -73,7 +73,7 @@ const showDependencyPick = async (projects: ProjectBean[]) => {
     project: project
   }));
   const selected = await vscode.window.showQuickPick(items, {
-    placeHolder: projects.length > 0 ? 'Select an Ivy Dependency' : 'No Ivy Dependencies left to add'
+    placeHolder: projects.length > 0 ? 'Select an Ivy Project Dependency' : 'No Ivy Project Dependencies left to add'
   });
   return selected?.project;
 };

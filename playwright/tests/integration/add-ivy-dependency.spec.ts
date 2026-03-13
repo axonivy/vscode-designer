@@ -7,7 +7,7 @@ import { multiProjectWorkspacePath } from '../workspaces/workspace';
 test.describe(() => {
   test.use({ workspace: multiProjectWorkspacePath });
 
-  test('Add Ivy Dependency', async ({ page }) => {
+  test('Add Ivy Project Dependency', async ({ page }) => {
     const explorer = new FileExplorer(page);
     await explorer.hasDeployProjectStatusMessage();
     await explorer.selectNode('ivy-project-1');
@@ -18,7 +18,7 @@ test.describe(() => {
       /<dependencies>\s*<dependency>\s*<groupId>com\.axonivy\.ivy\.api<\/groupId>\s*<artifactId>ivy-api<\/artifactId>\s*<\/dependency>\s*<\/dependencies>/
     );
 
-    await page.locator('div.editor-actions').getByLabel('Add Ivy Dependency').click();
+    await page.locator('div.editor-actions').getByLabel('Add Ivy Project Dependency').click();
     await page.locator('div.quick-input-widget').getByLabel('connector').click();
 
     await expect(editor.editorContent()).toContainText(

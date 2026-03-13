@@ -11,7 +11,7 @@ class PomCodeLensProvider implements vscode.CodeLensProvider {
     const range = new vscode.Range(pos, pos);
     return [
       new vscode.CodeLens(range, {
-        title: '$(add) Add Ivy Dependency',
+        title: '$(add) Add Ivy Project Dependency',
         command: 'ivyProjects.addDependency',
         arguments: [document.uri]
       })
