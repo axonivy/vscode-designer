@@ -77,10 +77,13 @@ function generateClient(payRaw: string, document: vscode.TextDocument) {
   const outputDir = `src_generated/rest/${openapi.clientName}`;
   const terminal = vscode.window.createTerminal({ name: 'Generate OpenAPI Client', cwd: projectPath });
 
-  const command = `mvn com.axonivy.ivy.tool.rest:openapi-codegen:generate-openapi-client\
-    -Divy.generate.openapi.client.spec=${shellQuote(openapi.spec)}\
-    -Divy.generate.openapi.client.output=${shellQuote(outputDir)}\
-    -Divy.generate.openapi.client.package=${shellQuote(openapi.namespace)}`;
+  const command = [
+    'mvn com.axonivy.ivy.tool.rest:openapi-codegen:generate-openapi-client',
+    `-Divy.generate.openapi.client.spec=${shellQuote(openapi.spec)}`,
+    `-Divy.generate.openapi.client.output=${shellQuote(outputDir)}`,
+    `-Divy.generate.openapi.client.package=${shellQuote(openapi.namespace)}`,
+    `-Divy.generate.openapi.client.resolveFully=${openapi.resolveFully}`
+  ].join('\\\n ');
 
   terminal.show();
   terminal.sendText(command);
