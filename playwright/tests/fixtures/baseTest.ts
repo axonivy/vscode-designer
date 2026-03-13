@@ -34,7 +34,7 @@ const runBrowserTest = async (workspace: string, closeAllTabsOnInit: boolean, ta
   // this goto closes WebSocket connections
   await page.goto('about:blank');
   await browser.close();
-  await fs.promises.rm(tmpWorkspace, { recursive: true });
+  await removeTmpWorkspace(tmpWorkspace);
 };
 
 const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean, take: (r: Page) => Promise<void>) => {
@@ -64,7 +64,7 @@ const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean
   await take(page);
   await electronApp.close();
   if (!process.env.CI) {
-    await fs.promises.rm(tmpWorkspace, { recursive: true });
+    await removeTmpWorkspace(tmpWorkspace);
   }
 };
 
@@ -79,4 +79,8 @@ const createTmpWorkspace = async (workspace: string) => {
   const tmpDir = await fs.promises.realpath(await fs.promises.mkdtemp(path.join(os.tmpdir(), 'playwrightTestWorkspace')));
   await fs.promises.cp(workspace, tmpDir, { recursive: true });
   return tmpDir;
+};
+
+const removeTmpWorkspace = async (workspace: string) => {
+  await fs.promises.rm(workspace, { recursive: true, force: true, maxRetries: 3, retryDelay: 1000 });
 };
