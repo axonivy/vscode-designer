@@ -420,6 +420,11 @@
         "category": "Axon Ivy"
       },
       {
+        "command": "ivyProjects.addNewEntityClass",
+        "title": "New Entity Class",
+        "category": "Axon Ivy"
+      },
+      {
         "command": "ivyProjects.addNewCaseMap",
         "title": "New Case Map",
         "category": "Axon Ivy"
@@ -673,6 +678,10 @@
           "group": "3_new@1"
         },
         {
+          "command": "ivyProjects.addNewEntityClass",
+          "group": "3_new@2"
+        },
+        {
           "command": "ivyProjects.addNewCaseMap",
           "group": "4_new@1"
         }
@@ -711,6 +720,11 @@
         {
           "command": "ivyProjects.addNewDataClass",
           "group": "3_new@1",
+          "when": "ivy:hasIvyProjects"
+        },
+        {
+          "command": "ivyProjects.addNewEntityClass",
+          "group": "3_new@2",
           "when": "ivy:hasIvyProjects"
         },
         {

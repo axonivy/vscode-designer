@@ -18,6 +18,7 @@ import {
   convertProject,
   createCaseMap,
   createDataClass,
+  createEntityClass,
   createHd,
   createPmvAndProjectFiles,
   createProcess,
@@ -153,6 +154,15 @@ export class IvyEngineApi {
     const baseURL = await this.baseURL;
     return vscode.window.withProgress(progressOptions('Create new Data Class'), async () => {
       return createDataClass(params, { baseURL, ...options })
+        .then(res => res.data)
+        .catch(handleAxiosError);
+    });
+  }
+
+  public async createEntityClass(params: DataClassInit) {
+    const baseURL = await this.baseURL;
+    return vscode.window.withProgress(progressOptions('Create new Entity Class'), async () => {
+      return createEntityClass(params, { baseURL, ...options })
         .then(res => res.data)
         .catch(handleAxiosError);
     });
