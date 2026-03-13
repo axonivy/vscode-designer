@@ -325,21 +325,10 @@
         "category": "Axon Ivy"
       },
       {
-        "command": "ivyProjects.buildProject",
-        "title": "Build Project",
-        "category": "Axon Ivy",
-        "icon": "$(tools)"
-      },
-      {
         "command": "ivyProjects.deployProject",
         "title": "Deploy Project",
         "category": "Axon Ivy",
         "icon": "$(cloud-upload)"
-      },
-      {
-        "command": "ivyProjects.buildAndDeployProject",
-        "title": "Build and Deploy Project",
-        "category": "Axon Ivy"
       },
       {
         "command": "ivyProjects.stopBpmEngine",
@@ -602,18 +591,9 @@
       ],
       "view/item/context": [
         {
-          "command": "ivyProjects.buildProject",
-          "when": "view == ivyProjects && viewItem == ivyProject",
-          "group": "inline"
-        },
-        {
           "command": "ivyProjects.deployProject",
           "when": "view == ivyProjects && viewItem == ivyProject",
           "group": "inline"
-        },
-        {
-          "command": "ivyProjects.buildAndDeployProject",
-          "when": "view == ivyProjects"
         },
         {
           "submenu": "ivyProjects.new",
@@ -711,16 +691,6 @@
         }
       ],
       "explorer.run": [
-        {
-          "command": "ivyProjects.buildAndDeployProject",
-          "group": "run@3",
-          "when": "ivy:hasIvyProjects"
-        },
-        {
-          "command": "ivyProjects.buildProject",
-          "group": "run@1",
-          "when": "ivy:hasIvyProjects"
-        },
         {
           "command": "ivyProjects.deployProject",
           "group": "run@2",
