@@ -39,11 +39,7 @@ const addDependencyHandler = async (uri: vscode.Uri) => {
     ?.filter(p => p !== targetProjectBean)
     .filter(p => targetProjectBean.dependencies.find(d => d.app === p.id.app && d.pmv === p.id.pmv) === undefined)
     .filter(p => isNotCircular(targetProjectBean, projectBeans, p));
-  if (possibleDeps === undefined || possibleDeps.length === 0) {
-    logErrorMessage('No other projects found to add as dependency.');
-    return;
-  }
-  const newDependency = await showDependencyPick(possibleDeps);
+  const newDependency = await showDependencyPick(possibleDeps ?? []);
   if (!newDependency) {
     return;
   }
@@ -77,7 +73,7 @@ const showDependencyPick = async (projects: ProjectBean[]) => {
     project: project
   }));
   const selected = await vscode.window.showQuickPick(items, {
-    placeHolder: 'Select an Ivy Dependency'
+    placeHolder: projects.length > 0 ? 'Select an Ivy Dependency' : 'No Ivy Dependencies left to add'
   });
   return selected?.project;
 };
