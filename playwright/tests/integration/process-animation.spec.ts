@@ -35,5 +35,10 @@ test.describe('Process Animation', () => {
     await processEditor.startProcessAndAssertExecuted(start, callSub);
     await processEditor.page.waitForTimeout(1_000); // to ensure no jump
     await expect(callSub).toBeVisible();
+
+    const executionBadge = start.locator('.execution');
+    await expect(executionBadge).toBeVisible();
+    await executionBadge.click();
+    await expect(processEditor.viewFrameLocator().locator('.history-ui-container .ui-popover-content')).toContainText(`History of '191A2645F90CDC61-f0'`);
   });
 });
