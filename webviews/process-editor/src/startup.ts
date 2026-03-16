@@ -9,7 +9,7 @@ import {
 import { ContainerModule, inject, injectable } from 'inversify';
 
 import { EnableInscriptionAction } from '@axonivy/process-editor-inscription';
-import { EnableViewportAction, UpdatePaletteItems } from '@axonivy/process-editor-protocol';
+import { EnableHistoryAction, EnableViewportAction, UpdatePaletteItems } from '@axonivy/process-editor-protocol';
 import { toConnection } from '@axonivy/vscode-webview-common';
 import { HOST_EXTENSION, type NotificationType, type RequestType } from 'vscode-messenger-common';
 import { Messenger } from 'vscode-messenger-webview';
@@ -36,6 +36,7 @@ export class StandaloneDiagramStartup implements IDiagramStartup {
     this.actionDispatcher.dispatch(ShowGridAction.create({ show: true }));
     this.messenger.onRequest(InitializeConnectionRequest, () => this.initConnection());
     this.messenger.sendNotification(WebviewConnectionReadyNotification, HOST_EXTENSION);
+    this.actionDispatcher.dispatch(EnableHistoryAction.create());
 
     // Setup clipboard handler for Monaco editors in webview
     setupPasteShortcutHandler();
