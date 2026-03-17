@@ -1,4 +1,6 @@
 import { expect } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
 import { test } from '../fixtures/baseTest';
 import { OutputView } from '../page-objects/output-view';
 import { RestClientEditor } from '../page-objects/restclient-editor';
@@ -21,7 +23,7 @@ test.describe('REST Client Editor', () => {
     await expect(editor.editorContent()).toContainText('#my cool description');
   });
 
-  test('OpenAPI codegen', async ({ page }) => {
+  test('OpenAPI codegen', async ({ page, runtimeWorkspace }) => {
     const editor = new RestClientEditor(page);
     await editor.hasDeployProjectStatusMessage();
     await editor.openEditorFile();
@@ -35,8 +37,8 @@ test.describe('REST Client Editor', () => {
     await generator.click();
 
     await expect(page.getByRole('textbox', { name: /Generate OpenAPI Client/i })).toBeVisible();
-    await expect(page.locator('div.terminal-wrapper.active')).toContainText('mvn com.axonivy.ivy.tool.rest:openapi-codegen:generate-openapi-client');
-    await expect(page.locator('div.terminal-wrapper.active')).toContainText('[INFO] BUILD SUCCESS', { timeout: 30000 });
+    const generatedClientFile = path.join(runtimeWorkspace, 'src_generated/rest/openApiService/io/swagger/petstore/client/Pet.java');
+    await expect.poll(async () => fs.existsSync(generatedClientFile), { timeout: 60000 }).toBe(true);
   });
 
   test('Open Help', async ({ page }) => {
