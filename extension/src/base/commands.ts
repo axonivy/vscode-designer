@@ -22,17 +22,13 @@ export type Command =
 type VSCodeCommand = 'setContext' | 'vscode.open' | 'copyFilePath';
 type EngineCommand =
   | 'engine.deployProjects'
-  | 'engine.buildProjects'
-  | 'engine.buildAndDeployProjects'
   | 'engine.switchEngineReleaseTrain'
   | 'engine.deactivateAnimation'
   | 'engine.activateAnimation'
   | 'engine.restart';
 type ProjectViewCommand =
   | 'ivyProjects.refreshEntry'
-  | 'ivyProjects.buildProject'
   | 'ivyProjects.deployProject'
-  | 'ivyProjects.buildAndDeployProject'
   | 'ivyProjects.addBusinessProcess'
   | 'ivyProjects.addCallableSubProcess'
   | 'ivyProjects.addWebServiceProcess'

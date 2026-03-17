@@ -13,7 +13,6 @@ import {
   NewProjectParams,
   ProductInstallParams,
   WorkspaceBean,
-  buildProjects,
   componentForm,
   convertProject,
   createCaseMap,
@@ -98,13 +97,6 @@ export class IvyEngineApi {
       );
     });
     setStatusBarMessage('Finished: Stop BPM Engine');
-  }
-
-  public async buildProjects(ivyProjectDirectories: string[]) {
-    const baseURL = await this.baseURL;
-    await vscode.window.withProgress(progressOptions('Build Projects'), async () => {
-      await buildProjects(ivyProjectDirectories, { baseURL, ...options }).catch(handleAxiosError);
-    });
   }
 
   public async createProcess(newProcessParams: NewProcessParams) {

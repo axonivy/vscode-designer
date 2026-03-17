@@ -309,12 +309,6 @@
         "icon": "$(refresh)"
       },
       {
-        "command": "engine.buildProjects",
-        "title": "Build all Projects",
-        "category": "Axon Ivy",
-        "icon": "$(tools)"
-      },
-      {
         "command": "engine.deployProjects",
         "title": "Deploy all Projects",
         "category": "Axon Ivy",
@@ -331,21 +325,10 @@
         "category": "Axon Ivy"
       },
       {
-        "command": "ivyProjects.buildProject",
-        "title": "Build Project",
-        "category": "Axon Ivy",
-        "icon": "$(tools)"
-      },
-      {
         "command": "ivyProjects.deployProject",
         "title": "Deploy Project",
         "category": "Axon Ivy",
         "icon": "$(cloud-upload)"
-      },
-      {
-        "command": "ivyProjects.buildAndDeployProject",
-        "title": "Build and Deploy Project",
-        "category": "Axon Ivy"
       },
       {
         "command": "ivyProjects.stopBpmEngine",
@@ -356,12 +339,6 @@
         "command": "ivyProjects.convertProject",
         "title": "Convert Project",
         "category": "Axon Ivy"
-      },
-      {
-        "command": "engine.buildAndDeployProjects",
-        "title": "Build and Deploy all Projects",
-        "category": "Axon Ivy",
-        "icon": "$(tools)"
       },
       {
         "command": "ivyProjects.addBusinessProcess",
@@ -486,12 +463,6 @@
             "markdownDescription": "Maximum number of Axon Ivy projects that will be detected.",
             "order": 2100
           },
-          "axonivy.project.useMavenBuilder": {
-            "type": "boolean",
-            "default": true,
-            "markdownDescription": "Configure whether Maven Builder is used for building Axon Ivy Projects.",
-            "order": 2200
-          },
           "axonivy.process.animation.animate": {
             "type": "boolean",
             "default": true,
@@ -604,17 +575,8 @@
           "group": "navigation@3"
         },
         {
-          "command": "engine.buildProjects",
-          "when": "view == ivyProjects || view == workbench.explorer.fileView"
-        },
-        {
           "command": "engine.deployProjects",
           "when": "view == ivyProjects || view == workbench.explorer.fileView"
-        },
-        {
-          "command": "engine.buildAndDeployProjects",
-          "when": "view == ivyProjects || view == workbench.explorer.fileView",
-          "group": "navigation@2"
         }
       ],
       "explorer/context": [
@@ -629,18 +591,9 @@
       ],
       "view/item/context": [
         {
-          "command": "ivyProjects.buildProject",
-          "when": "view == ivyProjects && viewItem == ivyProject",
-          "group": "inline"
-        },
-        {
           "command": "ivyProjects.deployProject",
           "when": "view == ivyProjects && viewItem == ivyProject",
           "group": "inline"
-        },
-        {
-          "command": "ivyProjects.buildAndDeployProject",
-          "when": "view == ivyProjects"
         },
         {
           "submenu": "ivyProjects.new",
@@ -738,16 +691,6 @@
         }
       ],
       "explorer.run": [
-        {
-          "command": "ivyProjects.buildAndDeployProject",
-          "group": "run@3",
-          "when": "ivy:hasIvyProjects"
-        },
-        {
-          "command": "ivyProjects.buildProject",
-          "group": "run@1",
-          "when": "ivy:hasIvyProjects"
-        },
         {
           "command": "ivyProjects.deployProject",
           "group": "run@2",

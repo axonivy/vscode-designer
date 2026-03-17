@@ -23,8 +23,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<Messen
   resolveExtensionVersion(context);
   ivyEngineManager = IvyEngineManager.init(context);
   registerCommand('engine.deployProjects', context, () => ivyEngineManager.deployProjects());
-  registerCommand('engine.buildProjects', context, () => ivyEngineManager.buildProjects());
-  registerCommand('engine.buildAndDeployProjects', context, () => ivyEngineManager.buildAndDeployProjects());
   registerCommand('engine.switchEngineReleaseTrain', context, () => ivyEngineManager.switchEngineReleaseTrain());
   registerCommand('engine.activateAnimation', context, async () => await config.setProcessAnimationAnimate(true));
   registerCommand('engine.deactivateAnimation', context, async () => await config.setProcessAnimationAnimate(false));
