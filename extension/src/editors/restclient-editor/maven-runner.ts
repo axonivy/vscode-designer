@@ -1,49 +1,43 @@
 import { exec } from 'child_process';
 import * as vscode from 'vscode';
 
-export class MavenCommandRunner {
-  private readonly outputChannel: vscode.OutputChannel;
+const outputChannel = vscode.window.createOutputChannel('Axon Ivy Codegen');
 
-  constructor() {
-    this.outputChannel = vscode.window.createOutputChannel('Axon Ivy Codegen');
-  }
+export async function runMavenCommand(ivyProjectDir: string, command: string) {
+  const childProcess = exec(`${command} -Dstyle.color=never`, { cwd: ivyProjectDir });
+  outputChannel.show(true);
+  outputChannel.appendLine(`Running command: ${command}`);
 
-  async run(ivyProjectDir: string, command: string) {
-    const childProcess = exec(`${command} -Dstyle.color=never`, { cwd: ivyProjectDir });
-    this.outputChannel.show(true);
-    this.outputChannel.appendLine(`Running command: ${command}`);
+  if (childProcess.stdout) {
+    childProcess.stdout.setEncoding('utf-8');
 
-    if (childProcess.stdout) {
-      childProcess.stdout.setEncoding('utf-8');
-
-      childProcess.stdout.on('data', (data: string) => {
-        this.outputChannel.append(data);
-      });
-    }
-
-    if (childProcess.stderr) {
-      childProcess.stderr.setEncoding('utf-8');
-
-      childProcess.stderr.on('data', (data: string) => {
-        this.outputChannel.append(data);
-      });
-    }
-
-    await new Promise<void>((resolve, reject) => {
-      childProcess.on('error', (error: Error) => {
-        this.outputChannel.appendLine(`Command failed to start: ${error.message}`);
-        reject(error);
-      });
-
-      childProcess.on('exit', (code, signal) => {
-        if (code === 0) {
-          resolve();
-          return;
-        }
-        const error = new Error(`Maven command failed with exit code ${code}${signal ? ` and signal ${signal}` : ''}.`);
-        this.outputChannel.appendLine(error.message);
-        reject(error);
-      });
+    childProcess.stdout.on('data', (data: string) => {
+      outputChannel.append(data);
     });
   }
+
+  if (childProcess.stderr) {
+    childProcess.stderr.setEncoding('utf-8');
+
+    childProcess.stderr.on('data', (data: string) => {
+      outputChannel.append(data);
+    });
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    childProcess.on('error', (error: Error) => {
+      outputChannel.appendLine(`Command failed to start: ${error.message}`);
+      reject(error);
+    });
+
+    childProcess.on('exit', (code, signal) => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+      const error = new Error(`Maven command failed with exit code ${code}${signal ? ` and signal ${signal}` : ''}.`);
+      outputChannel.appendLine(error.message);
+      reject(error);
+    });
+  });
 }
