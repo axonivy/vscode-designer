@@ -26,7 +26,7 @@ test.describe('REST Client Editor', () => {
     await expect(editor.editorContent()).toContainText('#my cool description');
   });
 
-  test('OpenAPI codegen', async ({ page }) => {
+  test('OpenAPI codegen', async () => {
     await editor.hasDeployProjectStatusMessage();
     await editor.openEditorFile();
     await editor.isTabVisible();
@@ -38,8 +38,8 @@ test.describe('REST Client Editor', () => {
     await generator.isEnabled();
     await generator.click();
 
-    const successToast = page
-      .locator('div.notification-toast-container')
+    const successToast = editor
+      .toasts()
       .filter({ hasText: /openApiService OpenAPI client generation succeeded/i })
       .first();
     await expect(successToast).toBeVisible();

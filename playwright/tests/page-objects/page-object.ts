@@ -68,6 +68,10 @@ export class PageObject {
     return this.page.locator('div.quick-input-list');
   }
 
+  toasts(): Locator {
+    return this.page.locator('div.notification-toast-container');
+  }
+
   async saveAllFiles() {
     const dirtyLocator = this.page.locator('div.dirty');
     if (await dirtyLocator.isHidden()) {
