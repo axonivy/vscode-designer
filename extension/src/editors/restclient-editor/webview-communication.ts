@@ -14,7 +14,7 @@ import {
   WebviewReadyNotification
 } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
-import { MavenBuilder } from './maven';
+import { MavenCommandRunner } from './maven-runner';
 
 const RestClientWebSocketMessage: NotificationType<unknown> = { method: 'restClientWebSocketMessage' };
 
@@ -53,7 +53,7 @@ class RestClientWebSocketForwarder extends WebSocketForwarder {
           openUrlExternally(message.params.payload as string);
           break;
         case 'generateOpenApiClient':
-          void generateClient(message.params.payload as string, this.document);
+          generateClient(message.params.payload as string, this.document);
           break;
         default:
           noUnknownAction(message.params.actionId);
@@ -86,7 +86,7 @@ async function generateClient(payRaw: string, document: vscode.TextDocument) {
   ].join(' ');
 
   try {
-    await new MavenBuilder().buildProject(projectPath, command);
+    await new MavenCommandRunner().run(projectPath, command);
     vscode.window.showInformationMessage(`${openapi.clientName} OpenAPI client generation succeeded`);
   } catch (error) {
     const message = error instanceof Error ? error.message : `${error}`;

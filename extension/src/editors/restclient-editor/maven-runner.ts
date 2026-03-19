@@ -1,30 +1,30 @@
 import { exec } from 'child_process';
 import * as vscode from 'vscode';
 
-export class MavenBuilder {
+export class MavenCommandRunner {
   private readonly outputChannel: vscode.OutputChannel;
 
   constructor() {
     this.outputChannel = vscode.window.createOutputChannel('Axon Ivy Codegen');
   }
 
-  async buildProject(ivyProjectDir: string, command: string) {
+  async run(ivyProjectDir: string, command: string) {
     const childProcess = exec(`${command} -Dstyle.color=never`, { cwd: ivyProjectDir });
     this.outputChannel.show(true);
     this.outputChannel.appendLine(`Running command: ${command}`);
 
     if (childProcess.stdout) {
       childProcess.stdout.setEncoding('utf-8');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      childProcess.stdout.on('data', (data: any) => {
+
+      childProcess.stdout.on('data', (data: string) => {
         this.outputChannel.append(data);
       });
     }
 
     if (childProcess.stderr) {
       childProcess.stderr.setEncoding('utf-8');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      childProcess.stderr.on('data', (data: any) => {
+
+      childProcess.stderr.on('data', (data: string) => {
         this.outputChannel.append(data);
       });
     }
