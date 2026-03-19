@@ -14,6 +14,7 @@ import {
   WebviewReadyNotification
 } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
+import { BuildSourcePathHelper } from './build-source-path-helper';
 import { runMavenCommand } from './maven-runner';
 
 const RestClientWebSocketMessage: NotificationType<unknown> = { method: 'restClientWebSocketMessage' };
@@ -88,6 +89,11 @@ async function generateClient(payRaw: string, document: vscode.TextDocument) {
   try {
     await runMavenCommand(projectPath, command);
     vscode.window.showInformationMessage(`${openapi.clientName} OpenAPI client generation succeeded`);
+
+    const sourcePathAdded = await new BuildSourcePathHelper().ensureGeneratedSourcePath(projectPath, openapi.clientName);
+    if (sourcePathAdded) {
+      vscode.window.showInformationMessage(`Added ${openapi.clientName} client source path to pom.xml.`);
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : `${error}`;
     vscode.window.showErrorMessage(`OpenAPI client generation failed: ${message}`);
