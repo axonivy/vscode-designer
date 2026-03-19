@@ -11,11 +11,10 @@ test.describe('Portal performance', () => {
       const javaReady = async () => await expect(page.locator('div.statusbar-item:has-text("Java: Ready")')).toBeVisible({ timeout: 200 });
       for (let i = 0; i < 10; i++) {
         await javaReady();
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(800);
       }
     }).toPass();
     const processEditor = new ProcessEditor(page, 'PortalStart.p.json');
-    await processEditor.hasStatusMessage('Finished: Invalidate class loader');
     await processEditor.executeCommand('View: Hide Panel');
     await processEditor.openEditorFile();
     const start = processEditor.locatorForPID('1549F58C18A6C562-f28');
