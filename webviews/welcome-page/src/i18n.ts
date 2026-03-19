@@ -5,7 +5,8 @@ import enTranslation from './translation/welcome-page/en.json';
 export const initTranslation = () => {
   if (i18n.isInitializing || i18n.isInitialized) return;
   i18n.use(initReactI18next).init({
-    debug: true,
+    debug: false,
+    showSupportNotice: false,
     supportedLngs: ['en'],
     fallbackLng: 'en',
     ns: ['welcome-page'],
