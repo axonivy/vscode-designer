@@ -14,6 +14,7 @@ import {
   WebviewReadyNotification
 } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
+import { runMavenCommand } from './maven-runner';
 
 const RestClientWebSocketMessage: NotificationType<unknown> = { method: 'restClientWebSocketMessage' };
 
@@ -71,24 +72,24 @@ class RestClientWebSocketForwarder extends WebSocketForwarder {
   }
 }
 
-function generateClient(payRaw: string, document: vscode.TextDocument) {
+async function generateClient(payRaw: string, document: vscode.TextDocument) {
   const projectPath = path.dirname(path.dirname(document.uri.fsPath));
   const openapi = JSON.parse(payRaw) as OpenApiGeneratorConfig;
   const outputDir = `src_generated/rest/${openapi.clientName}`;
-  const terminal = vscode.window.createTerminal({ name: 'Generate OpenAPI Client', cwd: projectPath });
 
   const command = [
-    'mvn com.axonivy.ivy.tool.rest:openapi-codegen:generate-openapi-client',
-    `-Divy.generate.openapi.client.spec=${shellQuote(openapi.spec)}`,
-    `-Divy.generate.openapi.client.output=${shellQuote(outputDir)}`,
-    `-Divy.generate.openapi.client.namespace=${shellQuote(openapi.namespace)}`,
-    `-Divy.generate.openapi.client.resolveFully=${openapi.resolveFully}`
-  ].join('\\\n ');
+    'mvn com.axonivy.ivy.tool.rest:openapi-codegen:generate-openapi-client -ntp',
+    `"-Divy.generate.openapi.client.spec=${openapi.spec}"`,
+    `"-Divy.generate.openapi.client.output=${outputDir}"`,
+    `"-Divy.generate.openapi.client.namespace=${openapi.namespace}"`,
+    `"-Divy.generate.openapi.client.resolveFully=${openapi.resolveFully}"`
+  ].join(' ');
 
-  terminal.show();
-  terminal.sendText(command);
-}
-
-function shellQuote(value: string): string {
-  return `'${value.replace(/'/g, `'"'"'`)}'`;
+  try {
+    await runMavenCommand(projectPath, command);
+    vscode.window.showInformationMessage(`${openapi.clientName} OpenAPI client generation succeeded`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : `${error}`;
+    vscode.window.showErrorMessage(`OpenAPI client generation failed: ${message}`);
+  }
 }
