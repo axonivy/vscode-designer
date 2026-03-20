@@ -1,13 +1,11 @@
 import { defineConfig } from 'vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig(() => ({
-  plugins: [tsconfigPaths()],
   build: {
     manifest: 'build.manifest.json',
     outDir: '../../extension/dist/webviews/browser',
     chunkSizeWarningLimit: 5000,
-    rollupOptions: {
+    rolldownOptions: {
       input: 'src/index.ts'
     }
   },

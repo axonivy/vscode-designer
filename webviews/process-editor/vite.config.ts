@@ -1,10 +1,8 @@
 import monacoConfigPlugin from '@axonivy/monaco-vite-plugin';
 import { defineConfig } from 'vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig(() => ({
   plugins: [
-    tsconfigPaths(),
     monacoConfigPlugin({
       ignorePackages: [
         'vscode-messenger-webview',
@@ -20,10 +18,15 @@ export default defineConfig(() => ({
     outDir: '../../extension/dist/webviews/process-editor',
     chunkSizeWarningLimit: 5000
   },
+  css: {
+    lightningcss: {
+      errorRecovery: true
+    }
+  },
   // By default Vite adds a content hash to worker filenames. Drop it so the extension can locate the worker by fixed path.
   // Webviews only allow loading workers via blob: or data: URLs, so the extension needs to find and serve the file.
   worker: {
-    rollupOptions: {
+    rolldownOptions: {
       output: {
         entryFileNames: 'assets/[name].js'
       }
@@ -36,6 +39,5 @@ export default defineConfig(() => ({
       return sourcePath.includes('node_modules') && !sourcePath.includes('@eclipse-glsp') && !sourcePath.includes('@axonivy');
     }
   },
-  resolve: { alias: { path: 'path-browserify' } },
   base: './'
 }));
