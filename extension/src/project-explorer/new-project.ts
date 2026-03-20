@@ -7,7 +7,7 @@ import { validateArtifactName, validateDotSeparatedName } from './util';
 
 export const addNewProject = async (selection: TreeSelection) => {
   const treeSelectionUri = await treeSelectionToUri(selection);
-  const selectedUri = (await isDirectory(treeSelectionUri)) ? treeSelectionUri : vscode.workspace.workspaceFolders?.at(0)?.uri;
+  const selectedUri = (await isDirectory(treeSelectionUri)) ? treeSelectionUri : await getWorkspaceFolder();
   if (!selectedUri) {
     logInformationMessage('No valid directory selected');
     return;
@@ -17,6 +17,14 @@ export const addNewProject = async (selection: TreeSelection) => {
   if (input) {
     await IvyEngineManager.instance.createProject(input);
   }
+};
+
+const getWorkspaceFolder = async () => {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (workspaceFolders?.length === 1 && workspaceFolders[0]) {
+    return workspaceFolders[0].uri;
+  }
+  return await vscode.window.showWorkspaceFolderPick().then(folder => folder?.uri);
 };
 
 const isDirectory = async (uri?: vscode.Uri) => {
