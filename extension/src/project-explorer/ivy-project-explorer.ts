@@ -46,6 +46,9 @@ export class IvyProjectExplorer {
     await IvyProjectExplorer._instance.activateEngineIfNeeded();
     IvyProjectExplorer._instance.registerCommands(context);
     IvyProjectExplorer._instance.defineFileWatchers(context);
+    vscode.workspace.onDidChangeWorkspaceFolders(async () => {
+      await IvyProjectExplorer._instance.refresh();
+    });
   }
 
   private async activateEngineIfNeeded() {
