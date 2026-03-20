@@ -9,10 +9,6 @@ export const downloadEngine = async (url: string, rootDir: string, logger: (mess
   }
   const zipName = path.basename(response.url);
   const enginePath = engineDir ? path.join(rootDir, engineDir) : path.join(rootDir, zipName.replace('.zip', ''));
-  if (fs.existsSync(enginePath)) {
-    logger(`Engine does already exist under '${enginePath}'`);
-    return enginePath;
-  }
   fs.mkdirSync(path.dirname(enginePath), { recursive: true });
   const zipPath = path.join(rootDir, zipName);
   logger(`Download engine from '${url}' to '${zipPath}'`);
