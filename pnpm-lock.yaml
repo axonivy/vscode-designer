@@ -123,7 +123,7 @@ importers:
         version: 14.0.0-next.2111.25a207d0
       '@axonivy/process-editor-protocol':
         specifier: ~14.0.0-next.2111.25a207d0
-        version: 14.0.0-next.2111.25a207d0(inversify@6.2.2(reflect-metadata@0.2.2))
+        version: 14.0.0-next.2111.25a207d0(inversify@8.1.0(reflect-metadata@0.2.2))
       '@axonivy/restclient-editor-protocol':
         specifier: ~14.0.0-next.87.5a24e4b
         version: 14.0.0-next.87.5a24e4b
@@ -141,10 +141,10 @@ importers:
         version: 14.0.0-next.47.961fd0f
       '@eclipse-glsp/protocol':
         specifier: 2.6.0
-        version: 2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))
+        version: 2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))
       '@eclipse-glsp/vscode-integration':
         specifier: 2.6.0
-        version: 2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))
+        version: 2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))
       axios:
         specifier: 1.13.6
         version: 1.13.6
@@ -325,28 +325,28 @@ importers:
     dependencies:
       '@axonivy/process-editor':
         specifier: ~14.0.0-next.2111.25a207d0
-        version: 14.0.0-next.2111.25a207d0(@axonivy/ui-components@14.0.0-next.1075.750b9e7(@axonivy/ui-icons@14.0.0-next.1075.750b9e7)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@axonivy/ui-icons@14.0.0-next.1075.750b9e7)(@tanstack/react-query-devtools@5.91.3(@tanstack/react-query@5.90.21(react@19.2.4))(react@19.2.4))(@tanstack/react-query@5.90.21(react@19.2.4))(@tanstack/react-table@8.21.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(i18next@25.10.4(typescript@5.9.3))(inversify@6.2.2(reflect-metadata@0.2.2))(react-dom@19.2.4(react@19.2.4))(react-i18next@16.6.1(i18next@25.10.4(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(react@19.2.4)(reflect-metadata@0.2.2)(snabbdom@3.5.1)
+        version: 14.0.0-next.2111.25a207d0(@axonivy/ui-components@14.0.0-next.1075.750b9e7(@axonivy/ui-icons@14.0.0-next.1075.750b9e7)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@axonivy/ui-icons@14.0.0-next.1075.750b9e7)(@tanstack/react-query-devtools@5.91.3(@tanstack/react-query@5.90.21(react@19.2.4))(react@19.2.4))(@tanstack/react-query@5.90.21(react@19.2.4))(@tanstack/react-table@8.21.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(i18next@25.10.4(typescript@5.9.3))(inversify@8.1.0(reflect-metadata@0.2.2))(react-dom@19.2.4(react@19.2.4))(react-i18next@16.6.1(i18next@25.10.4(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(react@19.2.4)(reflect-metadata@0.2.2)(snabbdom@3.5.1)
       '@axonivy/process-editor-inscription':
         specifier: ~14.0.0-next.2111.25a207d0
-        version: 14.0.0-next.2111.25a207d0(f3389b344674db956bdd7d15703025bd)
+        version: 14.0.0-next.2111.25a207d0(61338a5d7307e2ba6828aaf900b0b397)
       '@axonivy/process-editor-inscription-view':
         specifier: ~14.0.0-next.2111.25a207d0
         version: 14.0.0-next.2111.25a207d0(efee6cbbc4b2128a83d523afe2e69863)
       '@axonivy/process-editor-protocol':
         specifier: ~14.0.0-next.2111.25a207d0
-        version: 14.0.0-next.2111.25a207d0(inversify@6.2.2(reflect-metadata@0.2.2))
+        version: 14.0.0-next.2111.25a207d0(inversify@8.1.0(reflect-metadata@0.2.2))
       '@axonivy/vscode-webview-common':
         specifier: workspace:~14.0.0-next
         version: link:../webview-common
       '@eclipse-glsp/client':
         specifier: 2.6.0
-        version: 2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)
+        version: 2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)
       '@eclipse-glsp/vscode-integration':
         specifier: 2.6.0
-        version: 2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))
+        version: 2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))
       '@eclipse-glsp/vscode-integration-webview':
         specifier: 2.6.0
-        version: 2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)
+        version: 2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)
       '@hediet/json-rpc':
         specifier: ^0.5
         version: 0.5.0
@@ -354,8 +354,8 @@ importers:
         specifier: ^4.7
         version: 4.7.0(monaco-editor@0.55.1(patch_hash=899da2f303ca4825b0017a43537473be707dba57c101f26ff4a9aea957f2351f))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       inversify:
-        specifier: 6.2.2
-        version: 6.2.2(reflect-metadata@0.2.2)
+        specifier: 8.1.0
+        version: 8.1.0(reflect-metadata@0.2.2)
       vscode-messenger-common:
         specifier: 0.4.5
         version: 0.4.5
@@ -1414,13 +1414,35 @@ packages:
   '@inversifyjs/common@1.4.0':
     resolution: {integrity: sha512-qfRJ/3iOlCL/VfJq8+4o5X4oA14cZSBbpAmHsYj8EsIit1xDndoOl0xKOyglKtQD4u4gdNVxMHx4RWARk/I4QA==}
 
+  '@inversifyjs/common@2.0.1':
+    resolution: {integrity: sha512-pJAR4IAcT2jkYfZ9bD9XhtUDBLJRr8QOiSjb+2XyaHru6DLvu0VD2Id2iP7+tVRKkEe3XFUwDUEdKxcYlF699Q==}
+
+  '@inversifyjs/container@2.0.1':
+    resolution: {integrity: sha512-xoZU4Mha5Vo+U04xWUnD01QbpQMNoIh0nUEFlb965E3rIneUbsYYiXeLUoKl57BjXjErsOL0q8o3mXi1si8rBA==}
+    peerDependencies:
+      reflect-metadata: ~0.2.2
+
   '@inversifyjs/core@1.3.5':
     resolution: {integrity: sha512-B4MFXabhNTAmrfgB+yeD6wd/GIvmvWC6IQ8Rh/j2C3Ix69kmqwz9pr8Jt3E+Nho9aEHOQCZaGmrALgtqRd+oEQ==}
+
+  '@inversifyjs/core@10.0.1':
+    resolution: {integrity: sha512-z+DHdTbHFETivPLPRgowz9wWhHA4FNYqQnKhPyDCz7zX9H/PIDcK4gZIF1YNaf5Uc2bd1nehSlVgfaTzVbb0AA==}
+
+  '@inversifyjs/plugin@0.3.1':
+    resolution: {integrity: sha512-ByklTw731fydBCTMwMpkmwm+lv0U+JWm9NEqRsz3n5KzAC5Om2XtLjqzEC2w+8Ote3gVC3Qxsx6YmG9XLIZpvg==}
+
+  '@inversifyjs/prototype-utils@0.2.1':
+    resolution: {integrity: sha512-53cVE3cw+RxnSkGlg+jOFNSox2owJF9Fv3HgFKe4f+4aPullscltIiio88QRkx2Sc5yo3VlqPsXQFGw2CVJZnw==}
 
   '@inversifyjs/reflect-metadata-utils@0.2.4':
     resolution: {integrity: sha512-u95rV3lKfG+NT2Uy/5vNzoDujos8vN8O18SSA5UyhxsGYd4GLQn/eUsGXfOsfa7m34eKrDelTKRUX1m/BcNX5w==}
     peerDependencies:
       reflect-metadata: 0.2.2
+
+  '@inversifyjs/reflect-metadata-utils@1.5.0':
+    resolution: {integrity: sha512-NpJVbRbuQ6Ao2vO+aw96un3oHDFCwXI0+pplsFt0Jh0gyR8DWk4m7ml/GBNMjdbeKVW/QgJ2S6NGXjk042uwqg==}
+    peerDependencies:
+      reflect-metadata: ~0.2.2
 
   '@isaacs/cliui@9.0.0':
     resolution: {integrity: sha512-AokJm4tuBHillT+FpMtxQ60n8ObyXBatq7jD2/JA9dxbDDokKQm8KMht5ibGzLVU9IJDIKK4TPKgMHEYMn3lMg==}
@@ -4529,6 +4551,9 @@ packages:
     peerDependencies:
       reflect-metadata: ~0.2.2
 
+  inversify@8.1.0:
+    resolution: {integrity: sha512-LeMjL2MKHM0E8UmKo2ilRvdxG3o0pLZPYFjkaHwcjcFIrhzBGetphNkaWJ6YaM78uC1gK9v45i1R7CkCJDvG4Q==}
+
   ip-address@10.1.0:
     resolution: {integrity: sha512-XXADHxXmvT9+CRxhXg56LJovE+bmWnEWB78LB83VZTprKTmaC5QfruXocxzTZ2Kl0DNwKuBdlIhjL8LeY8Sf8Q==}
     engines: {node: '>= 12'}
@@ -6747,18 +6772,18 @@ snapshots:
     transitivePeerDependencies:
       - react-dom
 
-  '@axonivy/process-editor-inscription@14.0.0-next.2111.25a207d0(f3389b344674db956bdd7d15703025bd)':
+  '@axonivy/process-editor-inscription@14.0.0-next.2111.25a207d0(61338a5d7307e2ba6828aaf900b0b397)':
     dependencies:
       '@axonivy/jsonrpc': 14.0.0-next.1075.750b9e7
-      '@axonivy/process-editor': 14.0.0-next.2111.25a207d0(@axonivy/ui-components@14.0.0-next.1075.750b9e7(@axonivy/ui-icons@14.0.0-next.1075.750b9e7)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@axonivy/ui-icons@14.0.0-next.1075.750b9e7)(@tanstack/react-query-devtools@5.91.3(@tanstack/react-query@5.90.21(react@19.2.4))(react@19.2.4))(@tanstack/react-query@5.90.21(react@19.2.4))(@tanstack/react-table@8.21.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(i18next@25.10.4(typescript@5.9.3))(inversify@6.2.2(reflect-metadata@0.2.2))(react-dom@19.2.4(react@19.2.4))(react-i18next@16.6.1(i18next@25.10.4(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(react@19.2.4)(reflect-metadata@0.2.2)(snabbdom@3.5.1)
+      '@axonivy/process-editor': 14.0.0-next.2111.25a207d0(@axonivy/ui-components@14.0.0-next.1075.750b9e7(@axonivy/ui-icons@14.0.0-next.1075.750b9e7)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@axonivy/ui-icons@14.0.0-next.1075.750b9e7)(@tanstack/react-query-devtools@5.91.3(@tanstack/react-query@5.90.21(react@19.2.4))(react@19.2.4))(@tanstack/react-query@5.90.21(react@19.2.4))(@tanstack/react-table@8.21.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(i18next@25.10.4(typescript@5.9.3))(inversify@8.1.0(reflect-metadata@0.2.2))(react-dom@19.2.4(react@19.2.4))(react-i18next@16.6.1(i18next@25.10.4(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(react@19.2.4)(reflect-metadata@0.2.2)(snabbdom@3.5.1)
       '@axonivy/process-editor-inscription-core': 14.0.0-next.2111.25a207d0(@axonivy/jsonrpc@14.0.0-next.1075.750b9e7)
       '@axonivy/process-editor-inscription-protocol': 14.0.0-next.2111.25a207d0
       '@axonivy/process-editor-inscription-view': 14.0.0-next.2111.25a207d0(efee6cbbc4b2128a83d523afe2e69863)
-      '@axonivy/process-editor-protocol': 14.0.0-next.2111.25a207d0(inversify@6.2.2(reflect-metadata@0.2.2))
+      '@axonivy/process-editor-protocol': 14.0.0-next.2111.25a207d0(inversify@8.1.0(reflect-metadata@0.2.2))
       '@axonivy/ui-icons': 14.0.0-next.1075.750b9e7
-      '@eclipse-glsp/client': 2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)
+      '@eclipse-glsp/client': 2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)
       i18next: 25.10.4(typescript@5.9.3)
-      inversify: 6.2.2(reflect-metadata@0.2.2)
+      inversify: 8.1.0(reflect-metadata@0.2.2)
       react: 19.2.4
       react-aria: 3.47.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
     transitivePeerDependencies:
@@ -6774,23 +6799,23 @@ snapshots:
       - reflect-metadata
       - snabbdom
 
-  '@axonivy/process-editor-protocol@14.0.0-next.2111.25a207d0(inversify@6.2.2(reflect-metadata@0.2.2))':
+  '@axonivy/process-editor-protocol@14.0.0-next.2111.25a207d0(inversify@8.1.0(reflect-metadata@0.2.2))':
     dependencies:
-      '@eclipse-glsp/protocol': 2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))
+      '@eclipse-glsp/protocol': 2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))
     transitivePeerDependencies:
       - inversify
 
-  '@axonivy/process-editor@14.0.0-next.2111.25a207d0(@axonivy/ui-components@14.0.0-next.1075.750b9e7(@axonivy/ui-icons@14.0.0-next.1075.750b9e7)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@axonivy/ui-icons@14.0.0-next.1075.750b9e7)(@tanstack/react-query-devtools@5.91.3(@tanstack/react-query@5.90.21(react@19.2.4))(react@19.2.4))(@tanstack/react-query@5.90.21(react@19.2.4))(@tanstack/react-table@8.21.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(i18next@25.10.4(typescript@5.9.3))(inversify@6.2.2(reflect-metadata@0.2.2))(react-dom@19.2.4(react@19.2.4))(react-i18next@16.6.1(i18next@25.10.4(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(react@19.2.4)(reflect-metadata@0.2.2)(snabbdom@3.5.1)':
+  '@axonivy/process-editor@14.0.0-next.2111.25a207d0(@axonivy/ui-components@14.0.0-next.1075.750b9e7(@axonivy/ui-icons@14.0.0-next.1075.750b9e7)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@axonivy/ui-icons@14.0.0-next.1075.750b9e7)(@tanstack/react-query-devtools@5.91.3(@tanstack/react-query@5.90.21(react@19.2.4))(react@19.2.4))(@tanstack/react-query@5.90.21(react@19.2.4))(@tanstack/react-table@8.21.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(i18next@25.10.4(typescript@5.9.3))(inversify@8.1.0(reflect-metadata@0.2.2))(react-dom@19.2.4(react@19.2.4))(react-i18next@16.6.1(i18next@25.10.4(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(react@19.2.4)(reflect-metadata@0.2.2)(snabbdom@3.5.1)':
     dependencies:
-      '@axonivy/process-editor-protocol': 14.0.0-next.2111.25a207d0(inversify@6.2.2(reflect-metadata@0.2.2))
+      '@axonivy/process-editor-protocol': 14.0.0-next.2111.25a207d0(inversify@8.1.0(reflect-metadata@0.2.2))
       '@axonivy/ui-components': 14.0.0-next.1075.750b9e7(@axonivy/ui-icons@14.0.0-next.1075.750b9e7)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@axonivy/ui-icons': 14.0.0-next.1075.750b9e7
-      '@eclipse-glsp/client': 2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)
+      '@eclipse-glsp/client': 2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)
       '@tanstack/react-query': 5.90.21(react@19.2.4)
       '@tanstack/react-query-devtools': 5.91.3(@tanstack/react-query@5.90.21(react@19.2.4))(react@19.2.4)
       '@tanstack/react-table': 8.21.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       i18next: 25.10.4(typescript@5.9.3)
-      inversify: 6.2.2(reflect-metadata@0.2.2)
+      inversify: 8.1.0(reflect-metadata@0.2.2)
       marked: 17.0.4
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
@@ -7183,30 +7208,30 @@ snapshots:
       react: 19.2.4
       tslib: 2.8.1
 
-  '@eclipse-glsp/client@2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)':
+  '@eclipse-glsp/client@2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)':
     dependencies:
-      '@eclipse-glsp/sprotty': 2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)
+      '@eclipse-glsp/sprotty': 2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)
       autocompleter: 9.3.2
       file-saver: 2.0.5
-      inversify: 6.2.2(reflect-metadata@0.2.2)
+      inversify: 8.1.0(reflect-metadata@0.2.2)
       lodash: 4.17.23
       snabbdom: 3.5.1
       vscode-jsonrpc: 8.2.0
     transitivePeerDependencies:
       - reflect-metadata
 
-  '@eclipse-glsp/protocol@2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))':
+  '@eclipse-glsp/protocol@2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))':
     dependencies:
-      inversify: 6.2.2(reflect-metadata@0.2.2)
+      inversify: 8.1.0(reflect-metadata@0.2.2)
       sprotty-protocol: 1.4.0
       uuid: 10.0.0
       vscode-jsonrpc: 8.2.0
 
-  '@eclipse-glsp/sprotty@2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)':
+  '@eclipse-glsp/sprotty@2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)':
     dependencies:
-      '@eclipse-glsp/protocol': 2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))
+      '@eclipse-glsp/protocol': 2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))
       autocompleter: 9.3.2
-      inversify: 6.2.2(reflect-metadata@0.2.2)
+      inversify: 8.1.0(reflect-metadata@0.2.2)
       snabbdom: 3.5.1
       sprotty: 1.4.0(reflect-metadata@0.2.2)
       sprotty-protocol: 1.4.0
@@ -7214,18 +7239,18 @@ snapshots:
     transitivePeerDependencies:
       - reflect-metadata
 
-  '@eclipse-glsp/vscode-integration-webview@2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)':
+  '@eclipse-glsp/vscode-integration-webview@2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)':
     dependencies:
-      '@eclipse-glsp/client': 2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)
+      '@eclipse-glsp/client': 2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))(reflect-metadata@0.2.2)
       vscode-jsonrpc: 8.2.0
       vscode-messenger-webview: 0.4.5
     transitivePeerDependencies:
       - inversify
       - reflect-metadata
 
-  '@eclipse-glsp/vscode-integration@2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))':
+  '@eclipse-glsp/vscode-integration@2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))':
     dependencies:
-      '@eclipse-glsp/protocol': 2.6.0(inversify@6.2.2(reflect-metadata@0.2.2))
+      '@eclipse-glsp/protocol': 2.6.0(inversify@8.1.0(reflect-metadata@0.2.2))
       vscode-jsonrpc: 8.2.0
       vscode-messenger: 0.4.5
       ws: 8.19.0
@@ -7631,6 +7656,16 @@ snapshots:
 
   '@inversifyjs/common@1.4.0': {}
 
+  '@inversifyjs/common@2.0.1': {}
+
+  '@inversifyjs/container@2.0.1(reflect-metadata@0.2.2)':
+    dependencies:
+      '@inversifyjs/common': 2.0.1
+      '@inversifyjs/core': 10.0.1(reflect-metadata@0.2.2)
+      '@inversifyjs/plugin': 0.3.1
+      '@inversifyjs/reflect-metadata-utils': 1.5.0(reflect-metadata@0.2.2)
+      reflect-metadata: 0.2.2
+
   '@inversifyjs/core@1.3.5(reflect-metadata@0.2.2)':
     dependencies:
       '@inversifyjs/common': 1.4.0
@@ -7638,7 +7673,25 @@ snapshots:
     transitivePeerDependencies:
       - reflect-metadata
 
+  '@inversifyjs/core@10.0.1(reflect-metadata@0.2.2)':
+    dependencies:
+      '@inversifyjs/common': 2.0.1
+      '@inversifyjs/prototype-utils': 0.2.1
+      '@inversifyjs/reflect-metadata-utils': 1.5.0(reflect-metadata@0.2.2)
+    transitivePeerDependencies:
+      - reflect-metadata
+
+  '@inversifyjs/plugin@0.3.1': {}
+
+  '@inversifyjs/prototype-utils@0.2.1':
+    dependencies:
+      '@inversifyjs/common': 2.0.1
+
   '@inversifyjs/reflect-metadata-utils@0.2.4(reflect-metadata@0.2.2)':
+    dependencies:
+      reflect-metadata: 0.2.2
+
+  '@inversifyjs/reflect-metadata-utils@1.5.0(reflect-metadata@0.2.2)':
     dependencies:
       reflect-metadata: 0.2.2
 
@@ -11628,6 +11681,14 @@ snapshots:
       '@inversifyjs/common': 1.4.0
       '@inversifyjs/core': 1.3.5(reflect-metadata@0.2.2)
       reflect-metadata: 0.2.2
+
+  inversify@8.1.0(reflect-metadata@0.2.2):
+    dependencies:
+      '@inversifyjs/common': 2.0.1
+      '@inversifyjs/container': 2.0.1(reflect-metadata@0.2.2)
+      '@inversifyjs/core': 10.0.1(reflect-metadata@0.2.2)
+    transitivePeerDependencies:
+      - reflect-metadata
 
   ip-address@10.1.0: {}
 
