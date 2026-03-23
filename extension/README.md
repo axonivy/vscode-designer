@@ -36,10 +36,3 @@ See how it works:
 
 See how it works:
 ![Add Project](extension/assets/readme/add-project.gif)
-
-### With existing project
-
-When you open an existing project for the first time, e.g. [demo-projects](https://github.com/axonivy/demo-projects), initially run **Build and Deploy all Projects** command.
-
-See how it works:
-![Build and Deploy](extension/assets/readme/build-and-deploy.gif)
