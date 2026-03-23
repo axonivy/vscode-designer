@@ -9,3 +9,4 @@ export const embeddedEngineWorkspace = path.resolve(__dirname, './embeddedEngine
 export const minimalProjectWorkspacePath = path.resolve(__dirname, './minimalProject');
 export const outdatedProjectWorkspacePath = path.resolve(__dirname, './outdatedProject');
 export const portalPerformanceWorkspacePath = path.resolve(__dirname, './portalPerformance');
+export const multiRootWorkspacePath = path.resolve(__dirname, './multiProject/multiRootWorkspace.code-workspace');
