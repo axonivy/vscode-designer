@@ -28,13 +28,14 @@ const runBrowserTest = async (workspace: string, closeAllTabsOnInit: boolean, ta
   const page = await browser.newPage();
   await page.setViewportSize({ width: 1920, height: 1080 });
   const tmpWorkspace = await createTmpWorkspace(workspace);
-  await page.goto(`http://localhost:3000/?folder=${tmpWorkspace}`);
+  const queryParam = tmpWorkspace.tmpWsCofig ? `workspace=${tmpWorkspace.tmpWsCofig}` : `folder=${tmpWorkspace.tmpWorkspace}`;
+  await page.goto(`http://localhost:3000/?${queryParam}`);
   await initialize(page, closeAllTabsOnInit);
   await take(page);
   // this goto closes WebSocket connections
   await page.goto('about:blank');
   await browser.close();
-  await removeTmpWorkspace(tmpWorkspace);
+  await removeTmpWorkspace(tmpWorkspace.tmpWorkspace);
 };
 
 const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean, take: (r: Page) => Promise<void>) => {
@@ -52,7 +53,7 @@ const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean
       '--skip-release-notes',
       '--disable-workspace-trust',
       `--extensionDevelopmentPath=${path.resolve(__dirname, '../../../extension/')}`,
-      tmpWorkspace
+      tmpWorkspace.tmpWsCofig ?? tmpWorkspace.tmpWorkspace
     ]
   });
   const page = await electronApp.firstWindow();
@@ -64,7 +65,7 @@ const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean
   await take(page);
   await electronApp.close();
   if (!process.env.CI) {
-    await removeTmpWorkspace(tmpWorkspace);
+    await removeTmpWorkspace(tmpWorkspace.tmpWorkspace);
   }
 };
 
@@ -76,9 +77,15 @@ const initialize = async (page: Page, closeAllTabsOnInit: boolean) => {
 };
 
 const createTmpWorkspace = async (workspace: string) => {
-  const tmpDir = await fs.promises.realpath(await fs.promises.mkdtemp(path.join(os.tmpdir(), 'playwrightTestWorkspace')));
-  await fs.promises.cp(workspace, tmpDir, { recursive: true });
-  return tmpDir;
+  let wsConfig: string | undefined;
+  if (fs.statSync(workspace).isFile()) {
+    wsConfig = path.basename(workspace);
+    workspace = path.dirname(workspace);
+  }
+  const tmpWorkspace = await fs.promises.realpath(await fs.promises.mkdtemp(path.join(os.tmpdir(), 'playwrightTestWorkspace')));
+  await fs.promises.cp(workspace, tmpWorkspace, { recursive: true });
+  const tmpWsCofig = wsConfig ? path.join(tmpWorkspace, wsConfig) : undefined;
+  return { tmpWorkspace, tmpWsCofig };
 };
 
 const removeTmpWorkspace = async (workspace: string) => {

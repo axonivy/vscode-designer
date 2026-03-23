@@ -2,7 +2,7 @@ import { test } from '../fixtures/baseTest';
 import { CmsEditor } from '../page-objects/cms-editor';
 import { FileExplorer, ProjectExplorerView } from '../page-objects/explorer-view';
 import { ProcessEditor } from '../page-objects/process-editor';
-import { minimalProjectWorkspacePath, multiProjectWorkspacePath } from '../workspaces/workspace';
+import { minimalProjectWorkspacePath, multiProjectWorkspacePath, multiRootWorkspacePath } from '../workspaces/workspace';
 
 test.describe('Project Explorer', () => {
   test.use({ workspace: multiProjectWorkspacePath });
@@ -73,5 +73,18 @@ test.describe('CMS entry', () => {
       await explorer.provideUserInput('TestNamespace');
       await new ProcessEditor(page, 'TestProcess.p.json').isViewVisible();
     });
+  });
+});
+
+test.describe('Multi root workspace', () => {
+  test.use({ workspace: multiRootWorkspacePath });
+
+  test('Projects from workspace config are shown', async ({ page }) => {
+    const explorer = new ProjectExplorerView(page);
+    await explorer.openView();
+
+    await explorer.hasNode('ivy-project-1');
+    await explorer.hasNode('connector');
+    await explorer.hasNoNode('ivy-project-2');
   });
 });
