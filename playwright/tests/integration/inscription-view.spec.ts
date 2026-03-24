@@ -89,8 +89,8 @@ test.describe('Inscription View', () => {
     await expect(monacoEditor).toHaveText('');
     await inscriptionView.writeToMonacoEditorWithCompletion('iv', 'ivy');
     await inscriptionView.writeToMonacoEditorWithCompletion('.l', 'log');
-    await inscriptionView.writeToMonacoEditorWithCompletion('.de', 'debug(Object message)');
-    await expect(monacoEditor).toHaveText('ivy.log.debug(message)');
+    await inscriptionView.writeToMonacoEditorWithCompletion('.de', 'debug(Object message,Throwable t)');
+    await expect(monacoEditor).toHaveText('ivy.log.debug(message, t)');
   });
 
   test('Monaco Editor completion with JDT language server', async () => {
@@ -111,7 +111,7 @@ test.describe('Inscription View', () => {
     await expect(monacoEditor).toBeHidden();
 
     // One liner - no import expected but fully qualified type
-    await inscriptionView.parent.locator('div.script-input').click();
+    await inscriptionView.parent.locator('div.script-input').focus();
     await expect(monacoEditor).toHaveText('');
     await inscriptionView.writeToMonacoEditorWithCompletion('ISecurityCont', 'ISecurityContext');
     await inscriptionView.writeToMonacoEditorWithCompletion('.cur', 'current()');
