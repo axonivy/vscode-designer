@@ -4,7 +4,6 @@ import { treeUriToProjectPath } from '../project-explorer/tree-selection';
 
 export class JavaCompletion {
   readonly dummyJavaFile: Promise<vscode.Uri>;
-  static readonly ITEM_RESOLVE_COUNT = 50;
   static readonly DUMMY_CLASS_NAME = 'Dummy';
   static readonly DUMMY_CONTENT_OFFSET = `private class ${JavaCompletion.DUMMY_CLASS_NAME}{`.length;
 
@@ -31,8 +30,7 @@ export class JavaCompletion {
           item.kind === vscode.CompletionItemKind.Interface ||
           item.kind === vscode.CompletionItemKind.Enum
       )
-      .filter(item => item.detail !== JavaCompletion.DUMMY_CLASS_NAME)
-      .slice(0, JavaCompletion.ITEM_RESOLVE_COUNT);
+      .filter(item => item.detail !== JavaCompletion.DUMMY_CLASS_NAME);
   }
 
   public async javaTypes(toBeCompleted: string) {

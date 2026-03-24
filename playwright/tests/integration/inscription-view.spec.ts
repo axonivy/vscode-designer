@@ -89,8 +89,8 @@ test.describe('Inscription View', () => {
     await expect(monacoEditor).toHaveText('');
     await inscriptionView.writeToMonacoEditorWithCompletion('iv', 'ivy');
     await inscriptionView.writeToMonacoEditorWithCompletion('.l', 'log');
-    await inscriptionView.writeToMonacoEditorWithCompletion('.de', 'debug(Object message)');
-    await expect(monacoEditor).toHaveText('ivy.log.debug(message)');
+    await inscriptionView.writeToMonacoEditorWithCompletion('.de', 'debug(Object message,Throwable t)');
+    await expect(monacoEditor).toHaveText('ivy.log.debug(message, t)');
   });
 
   test('Monaco Editor completion with JDT language server', async () => {
