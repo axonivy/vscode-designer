@@ -111,7 +111,7 @@ test.describe('Inscription View', () => {
     await expect(monacoEditor).toBeHidden();
 
     // One liner - no import expected but fully qualified type
-    await inscriptionView.parent.locator('div.script-input').click();
+    await inscriptionView.parent.locator('div.script-input').focus();
     await expect(monacoEditor).toHaveText('');
     await inscriptionView.writeToMonacoEditorWithCompletion('ISecurityCont', 'ISecurityContext');
     await inscriptionView.writeToMonacoEditorWithCompletion('.cur', 'current()');
