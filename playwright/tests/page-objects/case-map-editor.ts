@@ -7,7 +7,7 @@ export class CaseMapEditor extends Editor {
   detail: Locator;
   helpButton: Locator;
 
-  constructor(page: Page, editorFile = 'CaseMap.icm') {
+  constructor(page: Page, editorFile = 'CaseMap.m.json') {
     super(editorFile, page);
     this.main = this.viewFrameLocator().locator('#case-map-editor-main');
     this.stages = this.main.locator('[data-element-type="stage"]');
