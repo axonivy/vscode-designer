@@ -2,19 +2,21 @@ import { type Locator, type Page, expect } from '@playwright/test';
 import { Editor } from './editor';
 
 export class CaseMapEditor extends Editor {
+  main: Locator;
   stages: Locator;
   detail: Locator;
   helpButton: Locator;
 
   constructor(page: Page, editorFile = 'CaseMap.icm') {
     super(editorFile, page);
-    this.stages = this.viewFrameLocator().locator('.stage-tile');
-    this.detail = this.viewFrameLocator().locator('.case-map-editor-detail-panel');
-    this.helpButton = this.viewFrameLocator().getByRole('button', { name: 'Open Help' });
+    this.main = this.viewFrameLocator().locator('#case-map-editor-main');
+    this.stages = this.main.locator('[data-element-type="stage"]');
+    this.detail = this.viewFrameLocator().locator('#case-map-editor-detail');
+    this.helpButton = this.detail.getByRole('button', { name: 'Open Help' });
   }
 
   override async isViewVisible() {
-    const header = this.viewFrameLocator().locator('.case-map-editor-main-toolbar:has-text("Case Map")');
+    const header = this.main.locator('.ui-toolbar:has-text("Case Map")');
     await expect(header).toBeVisible();
   }
 }
