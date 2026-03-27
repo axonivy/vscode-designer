@@ -25,7 +25,7 @@ export const resolveNamespaceFromPath = async (selectedUri: vscode.Uri, projectD
   } catch {
     return resolveDefaultNamespace(projectDir, target);
   }
-  const selectedPath = fileStat.type === vscode.FileType.File ? getDirectory(selectedUri.path, target) : selectedUri.path;
+  const selectedPath = fileStat.type === vscode.FileType.File ? getDirectory(selectedUri.fsPath, target) : selectedUri.fsPath;
   const targetDir = path.join(projectDir, target);
   if (!selectedPath.includes(targetDir)) {
     return resolveDefaultNamespace(projectDir, target);
