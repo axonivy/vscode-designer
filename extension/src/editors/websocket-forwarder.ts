@@ -2,7 +2,6 @@ import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
-import { WebSocket } from 'ws';
 import { createWebSocket } from '../engine/ws-client';
 
 type Endpoint =
@@ -41,7 +40,7 @@ export class WebSocketForwarder implements vscode.Disposable {
         sender: this.messageParticipant
       })
     );
-    this.webSocket.on('message', msg => this.handleServerMessage(msg.toString()));
+    this.webSocket.onmessage = event => this.handleServerMessage(event.data);
   }
 
   protected handleServerMessage(message: string) {
