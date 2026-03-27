@@ -24,8 +24,19 @@ export const RuntimeLogViewProvider = (webSocketUrl: URL) => {
 };
 
 const logMessage = (entry: RuntimeLogEntry) => {
-  const logMessage = `[${entry.project}] ${entry.message}`;
-  return entry.stacktrace ? `${logMessage} ${entry.stacktrace}` : logMessage;
+  let logMessage = `[${entry.project}] [${entry.category}]`;
+  if (entry.processElement) {
+    logMessage += ` [${entry.processElement}]`;
+  }
+  if (entry.userDialogId) {
+    logMessage += ` [${entry.userDialogId}]`;
+  }
+  logMessage += ` ${entry.message}`;
+  if (entry.throwableInformationMsg) {
+    logMessage += `
+    ${entry.throwableInformationMsg}`;
+  }
+  return logMessage;
 };
 
 const logByLevel = (entry: RuntimeLogEntry): void => {
