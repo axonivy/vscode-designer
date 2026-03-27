@@ -19,6 +19,7 @@ test.describe('Project Conversion', () => {
     const quickPick = page.locator('div.quick-input-widget');
     await quickPick.getByRole('button').getByText('OK').click();
     const output = new OutputView(page);
+    await output.viewLocator.evaluate(el => (el.scrollTop = el.scrollHeight));
     await expect(output.viewLocator).toContainText('[info] Finished conversion of project playwrightTestWorkspace');
 
     editor = new Editor('.ivyproject', page);
