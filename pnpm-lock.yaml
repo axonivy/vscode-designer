@@ -188,9 +188,6 @@ importers:
       '@types/vscode-webview':
         specifier: 1.57.5
         version: 1.57.5
-      '@types/ws':
-        specifier: 8.18.1
-        version: 8.18.1
       '@vscode/vsce':
         specifier: 3.7.1
         version: 3.7.1
@@ -3129,9 +3126,6 @@ packages:
 
   '@types/vscode@1.98.0':
     resolution: {integrity: sha512-+KuiWhpbKBaG2egF+51KjbGWatTH5BbmWQjSLMDCssb4xF8FJnW4nGH4nuAdOOfMbpD0QlHtI+C3tPq+DoKElg==}
-
-  '@types/ws@8.18.1':
-    resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
 
   '@typescript-eslint/eslint-plugin@8.57.1':
     resolution: {integrity: sha512-Gn3aqnvNl4NGc6x3/Bqk1AOn0thyTU9bqDRhiRnUWezgvr2OnhYCWCgC8zXXRVqBsIL1pSDt7T9nJUe0oM0kDQ==}
@@ -9930,10 +9924,6 @@ snapshots:
   '@types/vscode-webview@1.57.5': {}
 
   '@types/vscode@1.98.0': {}
-
-  '@types/ws@8.18.1':
-    dependencies:
-      '@types/node': 24.12.0
 
   '@typescript-eslint/eslint-plugin@8.57.1(@typescript-eslint/parser@8.57.1(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
