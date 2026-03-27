@@ -32,7 +32,7 @@ const logMessage = (entry: RuntimeLogEntry) => {
     logMessage += ` [${entry.userDialogId}]`;
   }
   logMessage += ` ${entry.message}`;
-  if (entry.throwableInformationMsg) {
+  if (entry.throwableInformationMsg && entry.throwableInformationMsg !== '<StackTrace is not available>') {
     logMessage += `
     ${entry.throwableInformationMsg}`;
   }
