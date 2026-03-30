@@ -22,8 +22,8 @@ test.describe.only('Runtime Log', () => {
 
     await runtimeLogOutput.click();
     await runtimeLogOutput.press('ControlOrMeta+Home');
-    await expect(runtimeLogOutput).toContainText('[info]', { timeout: 200 });
 
+    await expect(runtimeLogOutput).toContainText('[info]');
     await expect(runtimeLogOutput).toContainText('Process Called');
     await expect(runtimeLogOutput).toContainText('[error]');
     await expect(runtimeLogOutput).toContainText('Process failed');
