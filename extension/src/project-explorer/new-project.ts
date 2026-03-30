@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { logInformationMessage } from '../base/logging-util';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { TreeSelection, treeSelectionToUri } from './tree-selection';
-import { validateArtifactName, validateDotSeparatedName } from './util';
+import { validateArtifactName, validateDotSeparatedName } from './utils/util';
 
 export const addNewProject = async (selection: TreeSelection) => {
   const treeSelectionUri = await treeSelectionToUri(selection);

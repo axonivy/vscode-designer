@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { validateNamespace } from './new-process';
-import { resolveNamespaceFromPath, validateArtifactName } from './util';
+import { resolveNamespaceFromPath, validateArtifactName, validateNamespace } from './utils/util';
 
 export const addNewCaseMap = async (selectedUri: vscode.Uri, projectDir: string) => {
   const input = await collectNewCaseMapParams(selectedUri, projectDir);

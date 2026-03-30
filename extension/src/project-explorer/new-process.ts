@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ProcessInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { resolveNamespaceFromPath, validateArtifactName } from './util';
+import { resolveNamespaceFromPath, validateArtifactName, validateNamespace } from './utils/util';
 
 export type ProcessKind = 'Business Process' | 'Callable Sub Process' | 'Web Service Process' | '';
 
@@ -45,12 +45,4 @@ const collectNamespace = async (selectedUri: vscode.Uri, projectDir: string) => 
     ignoreFocusOut: true,
     validateInput: validateNamespace
   });
-};
-
-export const validateNamespace = (value: string, errorMessage = 'Invalid namespace.') => {
-  const pattern = /^(\w+(\/\w+)*(-\w+)*)?$/;
-  if (pattern.test(value)) {
-    return;
-  }
-  return errorMessage;
 };

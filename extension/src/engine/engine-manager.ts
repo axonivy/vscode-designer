@@ -23,7 +23,7 @@ import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { NewProcessParams } from '../project-explorer/new-process';
 import { NewUserDialogParams } from '../project-explorer/new-user-dialog';
-import { resolveDefaultNamespace } from '../project-explorer/util';
+import { resolveDefaultNamespace } from '../project-explorer/utils/util';
 import { extensionVersion } from '../version/extension-version';
 import { RuntimeLogViewProvider } from '../views/runtimelog-view';
 import { IvyEngineApi } from './api/engine-api';
