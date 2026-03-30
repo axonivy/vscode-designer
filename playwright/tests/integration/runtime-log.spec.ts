@@ -21,7 +21,7 @@ test.describe.only('Runtime Log', () => {
     const runtimeLogOutput = page.getByRole('document', { name: 'Runtime Log - Output' }).getByRole('code');
 
     await expect(runtimeLogOutput).toContainText('at org.');
-    await runtimeLogOutput.press('Control+Home');
+    await runtimeLogOutput.press('Control+ArrowUp');
     // await runtimeLogOutput.press('PageUp');
 
     await expect(runtimeLogOutput).toContainText('[info]');
