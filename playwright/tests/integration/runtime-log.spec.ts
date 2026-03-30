@@ -22,8 +22,11 @@ test.describe.only('Runtime Log', () => {
 
     await expect(async () => {
       await runtimeLogOutput.click();
-      await runtimeLogOutput.press('ControlOrMeta+Home');
-      await runtimeLogOutput.press('ControlOrMeta+ArrowUp');
+      if (process.platform === 'win32') {
+        await runtimeLogOutput.press('ControlOrMeta+Home');
+      } else {
+        await runtimeLogOutput.press('ControlOrMeta+ArrowUp');
+      }
       await expect(runtimeLogOutput).toContainText('[info]', { timeout: 200 });
     }).toPass();
 
