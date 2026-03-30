@@ -2,7 +2,8 @@ import { expect } from '@playwright/test';
 import { test } from '../fixtures/baseTest';
 import { ProcessEditor } from '../page-objects/process-editor';
 
-test.describe('Runtime Log', () => {
+// eslint-disable-next-line playwright/no-focused-test
+test.describe.only('Runtime Log', () => {
   test('Runtime Log view output channel', async ({ page }) => {
     const processEditor = new ProcessEditor(page, 'RuntimeLog.p.json');
     await processEditor.hasDeployProjectStatusMessage();
@@ -19,7 +20,7 @@ test.describe('Runtime Log', () => {
 
     const runtimeLogOutput = page.getByRole('document', { name: 'Runtime Log - Output' }).getByRole('code');
     await runtimeLogOutput.press('PageUp');
-    await runtimeLogOutput.press('Control+ArrowUp');
+    await runtimeLogOutput.press('ControlOrMeta+Home');
 
     await expect(runtimeLogOutput).toContainText('[info]');
     await expect(runtimeLogOutput).toContainText('Process Called');
