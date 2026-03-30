@@ -19,8 +19,8 @@ test.describe.only('Runtime Log', () => {
     await processEditor.executeCommand('Axon Ivy: Open Axon Ivy Runtime Log');
 
     const runtimeLogOutput = page.getByRole('document', { name: 'Runtime Log - Output' }).getByRole('code');
-    await runtimeLogOutput.focus();
     await runtimeLogOutput.press('PageUp');
+    await runtimeLogOutput.focus();
     await runtimeLogOutput.press('Control+Home');
 
     await expect(runtimeLogOutput).toContainText('[info]');
