@@ -20,15 +20,9 @@ test.describe.only('Runtime Log', () => {
 
     const runtimeLogOutput = page.getByRole('document', { name: 'Runtime Log - Output' }).getByRole('code');
 
-    await expect(async () => {
-      await runtimeLogOutput.click();
-      if (process.platform === 'win32') {
-        await runtimeLogOutput.press('ControlOrMeta+Home');
-      } else {
-        await runtimeLogOutput.press('ControlOrMeta+ArrowUp');
-      }
-      await expect(runtimeLogOutput).toContainText('[info]', { timeout: 200 });
-    }).toPass();
+    await runtimeLogOutput.click();
+    await runtimeLogOutput.press('ControlOrMeta+Home');
+    await expect(runtimeLogOutput).toContainText('[info]', { timeout: 200 });
 
     await expect(runtimeLogOutput).toContainText('Process Called');
     await expect(runtimeLogOutput).toContainText('[error]');
