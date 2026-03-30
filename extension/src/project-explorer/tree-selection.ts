@@ -16,16 +16,17 @@ export async function treeUriToProjectPath(uri: vscode.Uri | undefined, ivyProje
 }
 
 export async function treeSelectionToUri(selection: TreeSelection): Promise<vscode.Uri | undefined> {
-  if (!selection) {
-    return selectionFromExplorer();
-  }
+  // if (!selection) {
+  //   return selectionFromExplorer();
+  // }
   if (selection instanceof vscode.Uri) {
     return selection;
   }
-  return selection.uri;
+  return selection?.uri;
 }
 
 // no api available yet, see https://github.com/microsoft/vscode/issues/3553
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function selectionFromExplorer(): Promise<vscode.Uri | undefined> {
   const originalClipboard = await vscode.env.clipboard.readText();
   await executeCommand('copyFilePath');
