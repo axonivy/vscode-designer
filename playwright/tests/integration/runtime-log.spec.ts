@@ -2,8 +2,7 @@ import { expect } from '@playwright/test';
 import { test } from '../fixtures/baseTest';
 import { ProcessEditor } from '../page-objects/process-editor';
 
-// eslint-disable-next-line playwright/no-focused-test
-test.describe.only('Runtime Log', () => {
+test.describe('Runtime Log', () => {
   test('Runtime Log view output channel', async ({ page }) => {
     const processEditor = new ProcessEditor(page, 'RuntimeLog.p.json');
     await processEditor.hasDeployProjectStatusMessage();
