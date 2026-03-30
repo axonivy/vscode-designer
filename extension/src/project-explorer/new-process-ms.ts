@@ -88,7 +88,8 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
 
   await new MultiStepInput<NewProcessState>().stepThrough(steps, newProcessData);
 
-  if (newProcessData.projectSelection && newProcessData.name && newProcessData.namespace) {
+  // namespace can be empty, but project selection and name are required
+  if (newProcessData.projectSelection && newProcessData.name) {
     const createProcessInput: NewProcessParams = {
       name: newProcessData.name,
       namespace: newProcessData.namespace,
