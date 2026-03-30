@@ -6,9 +6,10 @@
     "security:minimumReleaseAgeNpm"
   ],
   "lockFileMaintenance": {
-    "enabled": true
+    "enabled": true,
+    "ignoreDeps": ["typescript"]
   },
-  "postUpdateOptions": ["npmDedupe"],
+  "postUpdateOptions": ["pnpmDedupe"],
   "packageRules": [
     {
       "matchBaseBranches": ["release/*", "master"],
