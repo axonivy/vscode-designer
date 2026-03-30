@@ -19,9 +19,13 @@ test.describe('Runtime Log', () => {
 
     const runtimeLogOutput = page.getByRole('document', { name: 'Runtime Log - Output' }).getByRole('code');
 
+    await runtimeLogOutput.click();
+    await runtimeLogOutput.press('ControlOrMeta+Home');
+
     await expect(runtimeLogOutput).toContainText('[info]');
     await expect(runtimeLogOutput).toContainText('Process Called');
     await expect(runtimeLogOutput).toContainText('[error]');
     await expect(runtimeLogOutput).toContainText('Process failed');
+    await expect(runtimeLogOutput).toContainText('java.lang.RuntimeException');
   });
 });
