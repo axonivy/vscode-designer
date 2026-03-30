@@ -1,7 +1,6 @@
 import { expect } from '@playwright/test';
 import { test } from '../fixtures/baseTest';
 import { ProcessEditor } from '../page-objects/process-editor';
-import { getCtrlOrMeta } from '../utils/keyboard';
 
 const userDialogPID = '15254DCE818AD7A2-f3';
 
@@ -41,7 +40,7 @@ test.describe('Process Editor', () => {
 
     await start.click();
     await processEditor.typeText('l');
-    await processEditor.page.keyboard.press(`${getCtrlOrMeta()}+KeyA`);
+    await processEditor.page.keyboard.press('ControlOrMeta+KeyA');
     await processEditor.typeText('a new test label');
     await start.click();
     await expect(start).not.toHaveText(initialName);

@@ -1,5 +1,4 @@
 import { type Locator, type Page, expect } from '@playwright/test';
-import { getCtrlOrMeta } from '../utils/keyboard';
 
 export class PageObject {
   constructor(readonly page: Page) {}
@@ -7,7 +6,7 @@ export class PageObject {
   async executeCommand(command: string, ...userInputs: Array<string>) {
     await expect(this.page.locator('div.command-center')).toBeAttached();
     await expect(async () => {
-      await this.page.keyboard.press(`${getCtrlOrMeta()}+Shift+KeyP`);
+      await this.page.keyboard.press('ControlOrMeta+Shift+KeyP');
       await this.quickInputBox()
         .locator('input.input')
         .fill('>' + command, { timeout: 100 });

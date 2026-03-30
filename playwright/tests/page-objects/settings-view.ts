@@ -1,5 +1,4 @@
 import { type Page, expect } from '@playwright/test';
-import { getCtrlOrMeta } from '../utils/keyboard';
 import { View, type ViewData } from './view';
 
 const settingsViewData: ViewData = {
@@ -33,7 +32,7 @@ export class SettingsView extends View {
   async search(text: string) {
     await expect(this.viewLocator).toBeVisible();
     await this.viewLocator.click();
-    await this.page.keyboard.press(getCtrlOrMeta() + '+KeyF');
+    await this.page.keyboard.press('ControlOrMeta+KeyF');
     await this.page.keyboard.insertText(text);
   }
 }
