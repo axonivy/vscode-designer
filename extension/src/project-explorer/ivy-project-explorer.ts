@@ -12,7 +12,8 @@ import { importNewProcess } from './import-process';
 import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
 import { addNewDataClass, addNewEntityClass } from './new-data-class';
-import { ProcessKind, addNewProcess } from './new-process';
+import { ProcessKind } from './new-process';
+import { addNewProcess } from './new-process-ms';
 import { addNewProject } from './new-project';
 import { DialogType, addNewUserDialog } from './new-user-dialog';
 import { TreeSelection, treeSelectionToUri, treeUriToProjectPath } from './tree-selection';
@@ -201,17 +202,19 @@ export class IvyProjectExplorer {
   }
 
   public async addProcess(selection: TreeSelection, kind: ProcessKind, pid?: string) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
-    if (!uri) {
-      logErrorMessage('Add Process: no valid Axon Ivy Project selected.');
-      return;
-    }
-    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (projectPath) {
-      await addNewProcess(uri, projectPath, kind, pid);
-      return;
-    }
-    logErrorMessage('Add Process: no valid Axon Ivy Project selected.');
+    // const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
+    // if (!uri) {
+    //   logErrorMessage('Add Process: no valid Axon Ivy Project selected.');
+    //   return;
+    // }
+    // const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
+    // if (projectPath) {
+    //   await addNewProcess(uri, projectPath, kind, pid);
+    //   return;
+    // }
+    // logErrorMessage('Add Process: no valid Axon Ivy Project selected.');
+
+    await addNewProcess(kind, pid);
   }
 
   private async addCaseMap(selection: TreeSelection) {
