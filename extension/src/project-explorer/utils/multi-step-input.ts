@@ -1,5 +1,4 @@
 import { Disposable, QuickInput, QuickInputButtons, QuickPickItem, window } from 'vscode';
-import { logInformationMessage } from '../../base/logging-util';
 import { ValidationFunction } from './util';
 
 export interface MSStateBase {
@@ -21,7 +20,7 @@ export type InputStep<T extends MSStateBase> = {
 interface TextInputParameters {
   title: string;
   titleSuffix?: string;
-  step: number;
+  currentStep: number;
   totalSteps: number;
   value?: string;
   prompt?: string;
@@ -34,7 +33,7 @@ interface TextInputParameters {
 interface QuickPickParameters<P extends QuickPickItem> {
   title: string;
   titleSuffix?: string;
-  step: number;
+  currentStep: number;
   totalSteps: number;
   items: P[];
   activeItem?: P;
@@ -45,36 +44,32 @@ interface QuickPickParameters<P extends QuickPickItem> {
 
 export class MultiStepInput<T extends MSStateBase> {
   private current?: QuickInput;
-  private currentSteps: InputStep<T>[] = [];
-
+  private currentStep: InputStep<T> | undefined;
   async stepThrough(steps: InputStep<T>[], state: T) {
-    let stepIndex = 0;
-    let step = steps[stepIndex];
-    if (!step) {
+    if (steps.length === 0) {
       return;
     }
-    while (step) {
-      this.currentSteps.push(step);
+    let stepIndex = 0;
+    this.currentStep = steps[stepIndex];
+    while (this.currentStep) {
       if (this.current) {
         this.current.enabled = false;
         this.current.busy = true;
       }
       try {
-        await step(this, state);
-        if (step.execCounter !== undefined) {
-          step.execCounter++;
+        await this.currentStep(this, state);
+        if (this.currentStep.execCounter !== undefined) {
+          this.currentStep.execCounter++;
         }
         stepIndex++;
-        state.currentStep++;
-        step = steps[stepIndex];
+        state.currentStep = stepIndex + 1;
+        this.currentStep = steps[stepIndex];
       } catch (err) {
-        if (err === InputFlowAction.back) {
+        if (err == InputFlowAction.back) {
           stepIndex = Math.max(0, stepIndex - 1);
-          state.currentStep--;
-          this.currentSteps.pop();
-          step = steps[stepIndex];
-        } else if (err === InputFlowAction.cancel) {
-          logInformationMessage('MultiStepInput: User cancelled the input flow');
+          state.currentStep = stepIndex + 1;
+          this.currentStep = steps[stepIndex];
+        } else if (err == InputFlowAction.cancel) {
           return;
         } else {
           throw err;
@@ -89,7 +84,7 @@ export class MultiStepInput<T extends MSStateBase> {
   async showTextInput({
     title,
     titleSuffix,
-    step,
+    currentStep,
     totalSteps,
     value,
     prompt,
@@ -103,13 +98,13 @@ export class MultiStepInput<T extends MSStateBase> {
     const p = new Promise<string>((resolve, reject) => {
       const input = window.createInputBox();
       input.title = title + (titleSuffix ?? '');
-      input.step = step;
+      input.step = currentStep;
       input.totalSteps = totalSteps;
       input.value = value ?? '';
       input.prompt = prompt ?? '';
       input.placeholder = placeholder ?? '';
       input.ignoreFocusOut = ignoreFocusOut ?? true;
-      input.buttons = this.currentSteps.length > 1 && step > 1 ? [QuickInputButtons.Back] : [];
+      input.buttons = currentStep > 1 ? [QuickInputButtons.Back] : [];
       disposables.push(
         input.onDidTriggerButton(item => {
           if (item === QuickInputButtons.Back) {
@@ -158,7 +153,7 @@ export class MultiStepInput<T extends MSStateBase> {
   async showQuickPick<T extends QuickPickItem>({
     title,
     titleSuffix,
-    step,
+    currentStep,
     totalSteps,
     activeItem,
     items,
@@ -170,7 +165,7 @@ export class MultiStepInput<T extends MSStateBase> {
     const p = new Promise<T>((resolve, reject) => {
       const input = window.createQuickPick<T>();
       input.title = title + (titleSuffix ?? '');
-      input.step = step;
+      input.step = currentStep;
       input.totalSteps = totalSteps;
       input.ignoreFocusOut = ignoreFocusOut ?? true;
       input.placeholder = placeholder ?? '';
@@ -180,7 +175,7 @@ export class MultiStepInput<T extends MSStateBase> {
         input.selectedItems = [activeItem];
         input.value = activeItem.label;
       }
-      input.buttons = this.currentSteps.length > 1 && step > 1 ? [QuickInputButtons.Back] : [];
+      input.buttons = currentStep > 1 ? [QuickInputButtons.Back] : [];
       disposables.push(
         input.onDidTriggerButton(item => {
           if (item === QuickInputButtons.Back) {

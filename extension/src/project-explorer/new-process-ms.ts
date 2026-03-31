@@ -46,7 +46,7 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
         title: state.dialogTitle,
         titleSuffix: ' - Choose project',
         placeholder: 'Select one of the available projects',
-        step: state.currentStep,
+        currentStep: state.currentStep,
         totalSteps: state.totalSteps,
         activeItem: state.projectSelection,
         items: projects.map(project => {
@@ -66,7 +66,7 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
       title: state.dialogTitle,
       titleSuffix: ' - Choose process name',
       placeholder: 'Enter a name. Allowed characters: a-z, A-Z, 0-9, -, _',
-      step: state.currentStep,
+      currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.name,
       validationFunction: validateArtifactName
@@ -82,7 +82,7 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
       title: state.dialogTitle,
       titleSuffix: ' - Choose process namespace',
       placeholder: 'Enter Namespace separated by "/"',
-      step: state.currentStep,
+      currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.namespace,
       validationFunction: validateNamespace
