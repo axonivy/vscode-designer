@@ -66,9 +66,9 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.refreshEntry`, () => this.refresh());
     registerCmd(`${VIEW_ID}.deployProject`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.deployProject(d), s));
     registerCmd(`${VIEW_ID}.stopBpmEngine`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.stopBpmEngine(d), s));
-    registerCmd(`${VIEW_ID}.addBusinessProcess`, () => this.addProcess('Business Process'));
-    registerCmd(`${VIEW_ID}.addCallableSubProcess`, () => this.addProcess('Callable Sub Process'));
-    registerCmd(`${VIEW_ID}.addWebServiceProcess`, () => this.addProcess('Web Service Process'));
+    registerCmd(`${VIEW_ID}.addBusinessProcess`, (s: TreeSelection) => this.addProcess(s, 'Business Process'));
+    registerCmd(`${VIEW_ID}.addCallableSubProcess`, (s: TreeSelection) => this.addProcess(s, 'Callable Sub Process'));
+    registerCmd(`${VIEW_ID}.addWebServiceProcess`, (s: TreeSelection) => this.addProcess(s, 'Web Service Process'));
     registerCmd(`${VIEW_ID}.importBpmnProcess`, (s: TreeSelection) => this.importBpmnProcess(s));
     registerCmd(`${VIEW_ID}.installLocalMarketProduct`, (s: TreeSelection) => this.installLocalMarketProduct(s));
     registerCmd(`${VIEW_ID}.installMarketProduct`, (s: TreeSelection) => this.installMarketProduct(s));
@@ -200,8 +200,10 @@ export class IvyProjectExplorer {
     return debouncedAction(() => action(project), `${project}:actionKey:${actionKey}`, 1_000)();
   }
 
-  public async addProcess(kind: ProcessKind, pid?: string) {
-    await addNewProcess(kind, pid);
+  public async addProcess(selection: TreeSelection, kind: ProcessKind, pid?: string) {
+    const uri = await treeSelectionToUri(selection);
+    const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
+    await addNewProcess(kind, pid, uri, projectPath);
   }
 
   private async addCaseMap(selection: TreeSelection) {

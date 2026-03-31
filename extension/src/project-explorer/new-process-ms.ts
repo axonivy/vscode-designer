@@ -1,10 +1,10 @@
-import { QuickPickItem } from 'vscode';
+import { QuickPickItem, Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { ProcessInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { IvyProjectExplorer } from './ivy-project-explorer';
 import { InputStep, MSStateBase, MultiStepInput } from './utils/multi-step-input';
-import { validateArtifactName, validateNamespace } from './utils/util';
+import { resolveNamespaceFromPath, validateArtifactName, validateNamespace } from './utils/util';
 
 export type ProcessKind = 'Business Process' | 'Callable Sub Process' | 'Web Service Process' | '';
 
@@ -20,32 +20,44 @@ interface NewProcessState extends MSStateBase {
   projectSelection: ProjectSelection;
   name: string;
   namespace: string;
+  namespaceFromPath?: string;
+  projectSelectionFromPath?: ProjectSelection;
 }
 
-export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?: string) => {
+export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?: string, uri?: Uri, projectPath?: string) => {
   // Step 1 - Pick the project to create the process in, based on available projects in the workspace
-  const projects: string[] = await IvyProjectExplorer.instance.getIvyProjects();
+  // If supplied, use preselected URI and project path for project and namespace
+  const projectSelectionFromPath = projectPath
+    ? { label: projectPath.substring(projectPath.lastIndexOf('/') + 1), description: projectPath, path: projectPath }
+    : undefined;
+  const namespaceFromPath = projectPath && uri ? await resolveNamespaceFromPath(uri, projectPath, 'processes') : undefined;
 
+  const projects: string[] = await IvyProjectExplorer.instance.getIvyProjects();
   if (!projects || projects.length === 0) {
     logErrorMessage('No ivy-projects are open in the workspace.');
     return;
   }
 
   const stepProject: InputStep<NewProcessState> = async (input: MultiStepInput<NewProcessState>, state: NewProcessState) => {
-    state.projectSelection = await input.showQuickPick({
-      title: state.dialogTitle,
-      titleSuffix: ' - Choose project',
-      placeholder: 'Select one of the available projects',
-      step: state.currentStep,
-      totalSteps: state.totalSteps,
-      items: projects.map(project => {
-        return {
-          label: project.substring(project.lastIndexOf('/') + 1),
-          description: project,
-          path: project
-        };
-      })
-    });
+    if (state.projectSelectionFromPath && stepProject.execCounter !== undefined && stepProject.execCounter === 0) {
+      state.projectSelection = state.projectSelectionFromPath;
+    } else {
+      state.projectSelection = await input.showQuickPick({
+        title: state.dialogTitle,
+        titleSuffix: ' - Choose project',
+        placeholder: 'Select one of the available projects',
+        step: state.currentStep,
+        totalSteps: state.totalSteps,
+        activeItem: state.projectSelection,
+        items: projects.map(project => {
+          return {
+            label: project.substring(project.lastIndexOf('/') + 1),
+            description: project,
+            path: project
+          };
+        })
+      });
+    }
   };
 
   // Step 2 - Enter the name of the process to be created
@@ -63,6 +75,9 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
 
   // Step 3 - Enter the namespace of the process to be created
   const stepNamespace: InputStep<NewProcessState> = async (input: MultiStepInput<NewProcessState>, state: NewProcessState) => {
+    if (state.namespaceFromPath) {
+      state.namespace = state.namespaceFromPath;
+    }
     state.namespace = await input.showTextInput({
       title: state.dialogTitle,
       titleSuffix: ' - Choose process namespace',
@@ -74,8 +89,9 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
     });
   };
 
-  // Define step order
+  // Define step order, set execution counter for steps that might have defaults and set value automatically
   const steps: InputStep<NewProcessState>[] = [stepProject, stepName, stepNamespace];
+  stepProject.execCounter = 0;
 
   const newProcessData: NewProcessState = {
     dialogTitle: `Add New ${kind}`,
@@ -83,7 +99,9 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
     totalSteps: steps.length,
     name: '',
     namespace: '',
-    projectSelection: {} as ProjectSelection
+    namespaceFromPath: namespaceFromPath,
+    projectSelection: {} as ProjectSelection,
+    projectSelectionFromPath: projectSelectionFromPath
   };
 
   await new MultiStepInput<NewProcessState>().stepThrough(steps, newProcessData);

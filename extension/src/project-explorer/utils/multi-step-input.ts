@@ -13,7 +13,10 @@ const enum InputFlowAction {
   cancel
 }
 
-export type InputStep<T extends MSStateBase> = (input: MultiStepInput<T>, state: T) => Thenable<InputStep<T>> | Promise<void>;
+export type InputStep<T extends MSStateBase> = {
+  execCounter?: number;
+  (input: MultiStepInput<T>, state: T): Thenable<InputStep<T>> | Promise<void>;
+};
 
 interface TextInputParameters {
   title: string;
@@ -47,6 +50,9 @@ export class MultiStepInput<T extends MSStateBase> {
   async stepThrough(steps: InputStep<T>[], state: T) {
     let stepIndex = 0;
     let step = steps[stepIndex];
+    if (!step) {
+      return;
+    }
     while (step) {
       this.currentSteps.push(step);
       if (this.current) {
@@ -55,14 +61,17 @@ export class MultiStepInput<T extends MSStateBase> {
       }
       try {
         await step(this, state);
+        if (step.execCounter !== undefined) {
+          step.execCounter++;
+        }
         stepIndex++;
-        step = steps[stepIndex];
         state.currentStep++;
+        step = steps[stepIndex];
       } catch (err) {
         if (err === InputFlowAction.back) {
+          stepIndex = Math.max(0, stepIndex - 1);
           state.currentStep--;
           this.currentSteps.pop();
-          stepIndex = Math.max(0, stepIndex - 1);
           step = steps[stepIndex];
         } else if (err === InputFlowAction.cancel) {
           logInformationMessage('MultiStepInput: User cancelled the input flow');
@@ -100,7 +109,7 @@ export class MultiStepInput<T extends MSStateBase> {
       input.prompt = prompt ?? '';
       input.placeholder = placeholder ?? '';
       input.ignoreFocusOut = ignoreFocusOut ?? true;
-      input.buttons = this.currentSteps.length > 1 ? [QuickInputButtons.Back] : [];
+      input.buttons = this.currentSteps.length > 1 && step > 1 ? [QuickInputButtons.Back] : [];
       disposables.push(
         input.onDidTriggerButton(item => {
           if (item === QuickInputButtons.Back) {
@@ -171,7 +180,7 @@ export class MultiStepInput<T extends MSStateBase> {
         input.selectedItems = [activeItem];
         input.value = activeItem.label;
       }
-      input.buttons = this.currentSteps.length > 1 ? [QuickInputButtons.Back] : [];
+      input.buttons = this.currentSteps.length > 1 && step > 1 ? [QuickInputButtons.Back] : [];
       disposables.push(
         input.onDidTriggerButton(item => {
           if (item === QuickInputButtons.Back) {
