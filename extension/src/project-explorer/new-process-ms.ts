@@ -17,7 +17,7 @@ interface ProjectSelection extends QuickPickItem {
 }
 
 interface NewProcessState extends MSStateBase {
-  projectSelection: ProjectSelection | undefined;
+  projectSelection: ProjectSelection;
   name: string;
   namespace: string;
 }
@@ -83,12 +83,11 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
     totalSteps: steps.length,
     name: '',
     namespace: '',
-    projectSelection: undefined
+    projectSelection: {} as ProjectSelection
   };
 
   await new MultiStepInput<NewProcessState>().stepThrough(steps, newProcessData);
 
-  // namespace can be empty, but project selection and name are required
   if (newProcessData.projectSelection && newProcessData.name) {
     const createProcessInput: NewProcessParams = {
       name: newProcessData.name,

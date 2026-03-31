@@ -2,11 +2,10 @@ import { Disposable, QuickInput, QuickInputButtons, QuickPickItem, window } from
 import { logInformationMessage } from '../../base/logging-util';
 import { ValidationFunction } from './util';
 
-export interface MSStateBase<P extends QuickPickItem = QuickPickItem> {
+export interface MSStateBase {
   dialogTitle: string;
   currentStep: number;
   totalSteps: number;
-  [key: string]: string | number | P | undefined;
 }
 
 const enum InputFlowAction {
@@ -14,8 +13,7 @@ const enum InputFlowAction {
   cancel
 }
 
-// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-export type InputStep<T extends MSStateBase> = (input: MultiStepInput<T>, state: T) => Thenable<InputStep<T> | void>;
+export type InputStep<T extends MSStateBase> = (input: MultiStepInput<T>, state: T) => Thenable<InputStep<T>> | Promise<void>;
 
 interface TextInputParameters {
   title: string;
@@ -44,14 +42,13 @@ interface QuickPickParameters<P extends QuickPickItem> {
 
 export class MultiStepInput<T extends MSStateBase> {
   private current?: QuickInput;
-  private steps: InputStep<T>[] = [];
+  private currentSteps: InputStep<T>[] = [];
 
   async stepThrough(steps: InputStep<T>[], state: T) {
     let stepIndex = 0;
-    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-    let step: InputStep<T> | void = steps[stepIndex];
+    let step = steps[stepIndex];
     while (step) {
-      this.steps.push(step);
+      this.currentSteps.push(step);
       if (this.current) {
         this.current.enabled = false;
         this.current.busy = true;
@@ -64,7 +61,7 @@ export class MultiStepInput<T extends MSStateBase> {
       } catch (err) {
         if (err === InputFlowAction.back) {
           state.currentStep--;
-          this.steps.pop();
+          this.currentSteps.pop();
           stepIndex = Math.max(0, stepIndex - 1);
           step = steps[stepIndex];
         } else if (err === InputFlowAction.cancel) {
@@ -94,7 +91,6 @@ export class MultiStepInput<T extends MSStateBase> {
   }: TextInputParameters): Promise<string> {
     const disposables: Disposable[] = [];
 
-    // Create the Promise that is resolved/rejected based on the event listeners
     const p = new Promise<string>((resolve, reject) => {
       const input = window.createInputBox();
       input.title = title + (titleSuffix ?? '');
@@ -104,10 +100,9 @@ export class MultiStepInput<T extends MSStateBase> {
       input.prompt = prompt ?? '';
       input.placeholder = placeholder ?? '';
       input.ignoreFocusOut = ignoreFocusOut ?? true;
-      input.buttons = this.steps.length > 1 ? [QuickInputButtons.Back] : [];
+      input.buttons = this.currentSteps.length > 1 ? [QuickInputButtons.Back] : [];
       disposables.push(
         input.onDidTriggerButton(item => {
-          // If the back button is pressed. No other buttons are expected.
           if (item === QuickInputButtons.Back) {
             onBack?.(input.value);
             reject(InputFlowAction.back);
@@ -116,7 +111,6 @@ export class MultiStepInput<T extends MSStateBase> {
         input.onDidAccept(async () => {
           input.enabled = false;
           input.busy = true;
-          // If validationFunction is not provided, consider the input valid
           const validationResult = validationFunction ? validationFunction(input.value) : '';
           if (validationResult) {
             input.validationMessage = validationResult;
@@ -164,7 +158,6 @@ export class MultiStepInput<T extends MSStateBase> {
   }: QuickPickParameters<T>): Promise<T> {
     const disposables: Disposable[] = [];
 
-    // Create the Promise that is resolved/rejected based on the event listeners
     const p = new Promise<T>((resolve, reject) => {
       const input = window.createQuickPick<T>();
       input.title = title + (titleSuffix ?? '');
@@ -178,21 +171,18 @@ export class MultiStepInput<T extends MSStateBase> {
         input.selectedItems = [activeItem];
         input.value = activeItem.label;
       }
-      input.buttons = this.steps.length > 1 ? [QuickInputButtons.Back] : [];
+      input.buttons = this.currentSteps.length > 1 ? [QuickInputButtons.Back] : [];
       disposables.push(
         input.onDidTriggerButton(item => {
-          // If the back button is pressed. No other buttons are expected.
           if (item === QuickInputButtons.Back) {
             reject(InputFlowAction.back);
           }
         }),
         input.onDidChangeSelection(items => {
-          if (items.length === 0) {
-            throw new Error('No item selected, but onDidChangeSelection was triggered');
-          } else {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
+          if (items.length === 1 && items[0]) {
             resolve(items[0]);
+          } else {
+            throw new Error('No item selected, but onDidChangeSelection was triggered');
           }
         }),
         input.onDidHide(() => {
