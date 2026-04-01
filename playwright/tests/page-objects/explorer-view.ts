@@ -91,11 +91,14 @@ export class FileExplorer extends ExplorerView {
     const menu = this.page.getByRole('menu');
     await menu.getByRole('menuitem', { name: 'Axon Ivy New...' }).hover();
 
-    const item = menu.getByRole('menuitem', { name: 'New Project' });
-    await item.waitFor({ state: 'visible' });
-    await item.click();
+    // const item = menu.getByRole('menuitem', { name: 'New Project' });
+    // await item.waitFor({ state: 'visible' });
+    // await item.click();
 
-    // await menu.getByRole('menuitem', { name: 'New Project' }).click();
+    const newProject = menu.getByRole('menuitem', { name: 'New Project' });
+    await expect(newProject).toBeVisible();
+    await newProject.click();
+    await expect(newProject).toBeHidden();
 
     await this.provideUserInput(projectName);
     await this.provideUserInput();

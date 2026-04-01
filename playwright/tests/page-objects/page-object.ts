@@ -35,10 +35,13 @@ export class PageObject {
 
   async provideUserInput(input?: string) {
     if (input) {
-      const quickInputBox = this.quickInputBox();
+      const textBox = this.quickInputBox().getByRole('textbox');
+
+      // const quickInputBox = this.quickInputBox();
       // await expect(quickInputBox).toBeVisible();
-      const textBox = quickInputBox.getByRole('textbox');
-      await expect(textBox).toBeVisible();
+      // const textBox = quickInputBox.getByRole('textbox');
+      // await expect(textBox).toBeVisible();
+
       await textBox.fill(input);
       await expect(textBox).toHaveValue(input);
       await textBox.press('Enter', { delay: 100 });
