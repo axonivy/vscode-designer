@@ -12,7 +12,7 @@ import { importNewProcess } from './import-process';
 import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
 import { addNewDataClass, addNewEntityClass } from './new-data-class';
-import { ProcessKind, addNewProcess } from './new-process-ms';
+import { ProcessKind, addNewProcess } from './new-process';
 import { addNewProject } from './new-project';
 import { DialogType, addNewUserDialog } from './new-user-dialog';
 import { TreeSelection, treeSelectionToUri, treeUriToProjectPath } from './tree-selection';
