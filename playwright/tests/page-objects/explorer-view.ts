@@ -99,6 +99,7 @@ export class FileExplorer extends ExplorerView {
   async addProcess(processName: string, kind: 'Business Process' | 'Callable Sub Process' | 'Web Service Process', namespace?: string) {
     await this.selectNode('config');
     await this.executeCommand('Axon Ivy: New ' + kind);
+    await this.selectNthVisibleItemFromQuickPick(0);
     await this.provideUserInput(processName);
     await this.provideUserInput(namespace);
   }
