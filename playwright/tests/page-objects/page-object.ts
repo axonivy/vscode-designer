@@ -36,7 +36,7 @@ export class PageObject {
   async provideUserInput(input?: string) {
     if (input) {
       const quickInputBox = this.quickInputBox();
-      await expect(quickInputBox).toBeVisible();
+      // await expect(quickInputBox).toBeVisible();
       const textBox = quickInputBox.getByRole('textbox');
       await expect(textBox).toBeVisible();
       await textBox.fill(input);
