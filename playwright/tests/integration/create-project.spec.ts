@@ -5,7 +5,8 @@ import { ProblemsView } from '../page-objects/problems-view';
 import { ProcessEditor } from '../page-objects/process-editor';
 import { empty } from '../workspaces/workspace';
 
-test.describe('Create Project', () => {
+// eslint-disable-next-line playwright/no-focused-test
+test.describe.only('Create Project', () => {
   test.use({ workspace: empty });
 
   test('Add Project and execute init Process', async ({ page }) => {
