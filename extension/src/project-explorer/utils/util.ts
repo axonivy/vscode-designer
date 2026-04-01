@@ -74,7 +74,7 @@ export const validateDotSeparatedName: ValidationFunction = (
   }
   return errorMessage;
 };
-export const validateNamespace = (
+export const validateNamespace: ValidationFunction = (
   value: string,
   errorMessage = 'Enter Namespace separated by "/". Only letters, numbers, underscores, and hyphens are allowed. No hyphen except for last group'
 ) => {
