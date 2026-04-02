@@ -4,8 +4,7 @@
     "rootDir": ".",
     "outDir": "lib",
     "resolveJsonModule": true,
-    "verbatimModuleSyntax": false,
-    "moduleResolution": "node"
+    "module": "commonjs"
   },
   "include": ["src"],
   "files": ["esbuild.mts"],
