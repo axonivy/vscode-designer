@@ -56,13 +56,20 @@ export const validateArtifactName = (value: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return 'Invalid name.';
+  return 'Only letters, numbers, underscores, and hyphens are allowed. No trailing whitespaces.';
 };
 
-export const validateDotSeparatedName = (value: string, errorMessage = 'Invalid namespace.') => {
+export const validateDotSeparatedName = (value: string) => {
   const pattern = /^\w+(\.\w+)*(-\w+)*$/;
   if (pattern.test(value)) {
     return;
   }
-  return errorMessage;
+  return 'Enter Namespace separated by ".". Only letters, numbers, underscores, and hyphens are allowed. No hyphen except for last group';
+};
+export const validateNamespace = (value: string) => {
+  const pattern = /^(\w+(\/\w+)*(-\w+)*)?$/;
+  if (pattern.test(value)) {
+    return;
+  }
+  return 'Enter Namespace separated by "/". Only letters, numbers, underscores, and hyphens are allowed. No hyphen except for last group';
 };

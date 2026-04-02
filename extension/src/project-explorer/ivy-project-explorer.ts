@@ -201,17 +201,9 @@ export class IvyProjectExplorer {
   }
 
   public async addProcess(selection: TreeSelection, kind: ProcessKind, pid?: string) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
-    if (!uri) {
-      logErrorMessage('Add Process: no valid Axon Ivy Project selected.');
-      return;
-    }
-    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (projectPath) {
-      await addNewProcess(uri, projectPath, kind, pid);
-      return;
-    }
-    logErrorMessage('Add Process: no valid Axon Ivy Project selected.');
+    const uri = await treeSelectionToUri(selection);
+    const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
+    await addNewProcess(kind, pid, uri, projectPath);
   }
 
   private async addCaseMap(selection: TreeSelection) {

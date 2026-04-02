@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { logInformationMessage } from '../base/logging-util';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { TreeSelection, treeSelectionToUri } from './tree-selection';
-import { validateArtifactName, validateDotSeparatedName } from './util';
+import { validateArtifactName, validateDotSeparatedName } from './utils/util';
 
 export const addNewProject = async (selection: TreeSelection) => {
   const treeSelectionUri = await treeSelectionToUri(selection);
@@ -49,7 +49,7 @@ const collectNewProjectParams = async (selectedUri: vscode.Uri) => {
   const groupId = await vscode.window.showInputBox({
     title: 'Group Id',
     value: name,
-    validateInput: value => validateDotSeparatedName(value, 'Invalid id.'),
+    validateInput: value => validateDotSeparatedName(value),
     ignoreFocusOut: true
   });
   if (!groupId) {
@@ -58,7 +58,7 @@ const collectNewProjectParams = async (selectedUri: vscode.Uri) => {
   const projectId = await vscode.window.showInputBox({
     title: 'Project Id',
     value: name,
-    validateInput: value => validateDotSeparatedName(value, 'Invalid id.'),
+    validateInput: value => validateDotSeparatedName(value),
     ignoreFocusOut: true
   });
   if (!projectId) {

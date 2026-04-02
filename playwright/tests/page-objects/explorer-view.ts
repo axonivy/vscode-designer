@@ -87,8 +87,14 @@ export class FileExplorer extends ExplorerView {
   async addNestedProject(rootFolder: string, projectName: string) {
     await this.viewLocator.click();
     await this.addFolder(rootFolder);
-    await this.selectNode(rootFolder);
-    await this.executeCommand('Axon Ivy: New Project');
+    await this.viewLocator.getByText(rootFolder).click({ button: 'right' });
+    const menu = this.page.getByRole('menu');
+    await menu.getByRole('menuitem', { name: 'Axon Ivy New...' }).hover();
+    const newProject = menu.getByRole('menuitem', { name: 'New Project' });
+    await expect(newProject).toBeVisible();
+    await newProject.click();
+    await expect(newProject).toBeHidden();
+
     await this.provideUserInput(projectName);
     await this.provideUserInput();
     await this.provideUserInput();
@@ -97,6 +103,7 @@ export class FileExplorer extends ExplorerView {
   async addProcess(processName: string, kind: 'Business Process' | 'Callable Sub Process' | 'Web Service Process', namespace?: string) {
     await this.selectNode('config');
     await this.executeCommand('Axon Ivy: New ' + kind);
+    await this.selectNthVisibleItemFromQuickPick(0);
     await this.provideUserInput(processName);
     await this.provideUserInput(namespace);
   }

@@ -96,4 +96,10 @@ export class PageObject {
     await item.click();
     await expect(item).toBeHidden();
   }
+
+  async selectNthVisibleItemFromQuickPick(n: number) {
+    const item = this.page.locator('div.quick-input-list').locator('div.monaco-icon-label-container:visible').nth(n);
+    await item.click();
+    await expect(item).toBeHidden();
+  }
 }

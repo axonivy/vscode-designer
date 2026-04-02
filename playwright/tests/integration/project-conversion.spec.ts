@@ -15,12 +15,15 @@ test.describe('Project Conversion', () => {
     await expect(editor.editorContent()).toContainText(`PROJECT_VERSION=120001`);
     const problemsView = await ProblemsView.initProblemsView(page);
     await problemsView.hasError('Project is outdated and needs to be converted.');
+
     await editor.executeCommand('Axon Ivy: Convert Project');
     const quickPick = page.locator('div.quick-input-widget');
+    const firstQuickPickItem = quickPick.locator('div.quick-input-list-entry').first();
+    await firstQuickPickItem.click();
     await quickPick.getByRole('button').getByText('OK').click();
+
     const output = new OutputView(page);
     await expect(output.viewLocator).toContainText('[info] Finished conversion of project playwrightTestWorkspace');
-
     editor = new Editor('.ivyproject', page);
     await editor.openEditorFile();
     await expect(editor.editorContent()).toContainText('version=');
