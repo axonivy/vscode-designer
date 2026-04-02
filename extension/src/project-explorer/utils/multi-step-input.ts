@@ -185,7 +185,7 @@ export class MultiStepInput<T extends MSStateBase> {
           if (items.length === 1 && items[0]) {
             resolve(items[0]);
           } else {
-            throw new Error('No item selected, but onDidChangeSelection was triggered');
+            return;
           }
         }),
         input.onDidHide(() => {
