@@ -5,8 +5,7 @@ import { OutputView } from '../page-objects/output-view';
 import { ProblemsView } from '../page-objects/problems-view';
 import { outdatedProjectWorkspacePath } from '../workspaces/workspace';
 
-// eslint-disable-next-line playwright/no-focused-test
-test.describe.only('Project Conversion', () => {
+test.describe('Project Conversion', () => {
   test.use({ workspace: outdatedProjectWorkspacePath });
 
   test('Convert project', async ({ page }) => {
