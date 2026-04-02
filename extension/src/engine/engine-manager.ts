@@ -1,4 +1,5 @@
-import * as vscode from 'vscode';
+import type { ExtensionContext } from 'vscode';
+import { Uri } from 'vscode';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
 import { logErrorMessage, logWarningMessage } from '../base/logging-util';
@@ -43,12 +44,12 @@ export class IvyEngineManager {
   private ivyEngineApi?: IvyEngineApi;
   private started = false;
 
-  private constructor(readonly context: vscode.ExtensionContext) {
+  private constructor(readonly context: ExtensionContext) {
     const engineDir = this.resolveEngineDir();
     this.engineRunner = new EngineRunner(engineDir);
   }
 
-  static init(context: vscode.ExtensionContext) {
+  static init(context: ExtensionContext) {
     if (!IvyEngineManager._instance) {
       IvyEngineManager._instance = new IvyEngineManager(context);
     }
@@ -183,7 +184,7 @@ export class IvyEngineManager {
   public async createUserDialog(newUserDialogParams: NewUserDialogParams) {
     const hdBean = await this.ivyEngineApi?.createUserDialog(newUserDialogParams);
     if (hdBean?.uri) {
-      executeCommand('vscode.open', vscode.Uri.parse(hdBean.uri));
+      executeCommand('vscode.open', Uri.parse(hdBean.uri));
     }
   }
 
@@ -213,7 +214,7 @@ export class IvyEngineManager {
   public async createDataClass(params: DataClassInit) {
     const dataClassBean = await this.ivyEngineApi?.createDataClass(params);
     if (dataClassBean && params.projectDir) {
-      const dataClassUri = vscode.Uri.joinPath(vscode.Uri.file(params.projectDir), dataClassBean.path);
+      const dataClassUri = Uri.joinPath(Uri.file(params.projectDir), dataClassBean.path);
       executeCommand('vscode.open', dataClassUri);
     }
   }
@@ -221,7 +222,7 @@ export class IvyEngineManager {
   public async createEntityClass(params: DataClassInit) {
     const dataClassBean = await this.ivyEngineApi?.createEntityClass(params);
     if (dataClassBean && params.projectDir) {
-      const dataClassUri = vscode.Uri.joinPath(vscode.Uri.file(params.projectDir), dataClassBean.path);
+      const dataClassUri = Uri.joinPath(Uri.file(params.projectDir), dataClassBean.path);
       executeCommand('vscode.open', dataClassUri);
     }
   }
@@ -229,7 +230,7 @@ export class IvyEngineManager {
   public async createCaseMap(params: CaseMapInit) {
     const caseMapBean = await this.ivyEngineApi?.createCaseMap(params);
     if (caseMapBean && params.projectDir) {
-      const caseMapUri = vscode.Uri.joinPath(vscode.Uri.file(params.projectDir), caseMapBean.path);
+      const caseMapUri = Uri.joinPath(Uri.file(params.projectDir), caseMapBean.path);
       executeCommand('vscode.open', caseMapUri);
     }
   }
@@ -237,7 +238,7 @@ export class IvyEngineManager {
   private async createAndOpenProcess(newProcessParams: NewProcessParams) {
     const processBean = await this.ivyEngineApi?.createProcess(newProcessParams);
     if (processBean?.uri) {
-      executeCommand('vscode.open', vscode.Uri.parse(processBean.uri));
+      executeCommand('vscode.open', Uri.parse(processBean.uri));
     }
   }
 

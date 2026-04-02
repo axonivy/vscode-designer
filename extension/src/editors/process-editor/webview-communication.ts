@@ -1,6 +1,17 @@
 import type { TypeSearchRequest } from '@axonivy/process-editor-inscription-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
-import * as vscode from 'vscode';
+import type { ColorTheme, CustomDocument, WebviewPanel } from 'vscode';
+import {
+  ColorThemeKind,
+  commands,
+  MarkdownString,
+  SnippetString,
+  CompletionItem as VSCodeCompletionItem,
+  CompletionItemKind as VSCodeCompletionItemKind,
+  Position as VSCodePosition,
+  Range as VSCodeRange,
+  window
+} from 'vscode';
 import {
   CompletionItem,
   CompletionItemKind,
@@ -40,8 +51,8 @@ const IvyScriptWebSocketMessage: NotificationType<unknown> = { method: 'ivyScrip
 export const setupCommunication = (
   websocketUrl: URL,
   messenger: Messenger,
-  webviewPanel: vscode.WebviewPanel,
-  document: vscode.CustomDocument,
+  webviewPanel: WebviewPanel,
+  document: CustomDocument,
   messageParticipant?: MessageParticipant
 ) => {
   if (messageParticipant === undefined) {
@@ -60,11 +71,11 @@ export const setupCommunication = (
     messenger.onNotification(
       SaveDocumentNotification,
       () => {
-        vscode.commands.executeCommand('workbench.action.files.save');
+        commands.executeCommand('workbench.action.files.save');
       },
       { sender: messageParticipant }
     ),
-    vscode.window.onDidChangeActiveColorTheme(theme =>
+    window.onDidChangeActiveColorTheme(theme =>
       messenger.sendNotification(ColorThemeChangedNotification, messageParticipant, vsCodeThemeToMonacoTheme(theme))
     )
   );
@@ -73,11 +84,11 @@ export const setupCommunication = (
 
 const handleWebviewReadyNotification = async (messenger: Messenger, messageParticipant: MessageParticipant) => {
   await messenger.sendRequest(InitializeConnectionRequest, messageParticipant);
-  messenger.sendNotification(ColorThemeChangedNotification, messageParticipant, vsCodeThemeToMonacoTheme(vscode.window.activeColorTheme));
+  messenger.sendNotification(ColorThemeChangedNotification, messageParticipant, vsCodeThemeToMonacoTheme(window.activeColorTheme));
 };
 
-const vsCodeThemeToMonacoTheme = (theme: vscode.ColorTheme) => {
-  return theme.kind === vscode.ColorThemeKind.Dark || theme.kind === vscode.ColorThemeKind.HighContrast ? 'dark' : 'light';
+const vsCodeThemeToMonacoTheme = (theme: ColorTheme) => {
+  return theme.kind === ColorThemeKind.Dark || theme.kind === ColorThemeKind.HighContrast ? 'dark' : 'light';
 };
 
 class InscriptionWebSocketForwarder extends WebSocketForwarder {
@@ -87,7 +98,7 @@ class InscriptionWebSocketForwarder extends WebSocketForwarder {
 
   readonly javaCompletion: JavaCompletion;
 
-  constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: vscode.CustomDocument) {
+  constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: CustomDocument) {
     super(websocketUrl, 'ivy-inscription-lsp', messenger, messageParticipant, InscriptionWebSocketMessage);
     this.sendInscriptionNotification = (type: string) =>
       this.messenger.sendNotification(this.notificationType, this.messageParticipant, JSON.stringify({ method: type }));
@@ -122,7 +133,7 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
   private currentCompletion:
     | {
         id: number;
-        completionItems: Promise<vscode.CompletionItem[]>;
+        completionItems: Promise<VSCodeCompletionItem[]>;
         document: TextDocument;
         position: Position;
         completionStartCharacter: number;
@@ -130,7 +141,7 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     | undefined;
   readonly javaCompletion: JavaCompletion;
 
-  constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: vscode.CustomDocument) {
+  constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: CustomDocument) {
     super(websocketUrl, 'ivy-script-lsp', messenger, messageParticipant, IvyScriptWebSocketMessage);
     this.javaCompletion = new JavaCompletion(document.uri, 'ivy-script');
   }
@@ -237,7 +248,7 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
   };
 
   toLspCompletItem = (
-    item: vscode.CompletionItem,
+    item: VSCodeCompletionItem,
     document: TextDocument,
     completionContext: { line: number; completionStartCharacter: number }
   ): CompletionItem => {
@@ -272,21 +283,21 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     return lspItem;
   };
 
-  resolveInsertText = (item: vscode.CompletionItem, document: TextDocument, defaultText: string): string => {
+  resolveInsertText = (item: VSCodeCompletionItem, document: TextDocument, defaultText: string): string => {
     if (!document.uri.endsWith('.code/') && item.detail && item.detail.length > 0 && !STANDARD_TYPES.includes(item.detail)) {
       return item.detail;
     }
     if (typeof item.insertText === 'string') {
       return item.insertText;
     }
-    if (item.insertText instanceof vscode.SnippetString) {
+    if (item.insertText instanceof SnippetString) {
       return item.insertText.value;
     }
     return defaultText;
   };
 
   toTextEdit = (
-    item: vscode.CompletionItem,
+    item: VSCodeCompletionItem,
     newText: string,
     completionContext: { line: number; completionStartCharacter: number }
   ): CompletionItem['textEdit'] => {
@@ -303,11 +314,11 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     return TextEdit.replace(this.toDocumentRange(item.range, completionContext), newText);
   };
 
-  toDocumentRange = (range: vscode.Range, completionContext: { line: number; completionStartCharacter: number }): Range => {
+  toDocumentRange = (range: VSCodeRange, completionContext: { line: number; completionStartCharacter: number }): Range => {
     return Range.create(this.toDocumentPosition(range.start, completionContext), this.toDocumentPosition(range.end, completionContext));
   };
 
-  toDocumentPosition = (position: vscode.Position, completionContext: { line: number; completionStartCharacter: number }): Position => {
+  toDocumentPosition = (position: VSCodePosition, completionContext: { line: number; completionStartCharacter: number }): Position => {
     const line = completionContext.line + position.line;
     const shiftedCharacter =
       position.line === 0 ? Math.max(position.character - JavaCompletion.DUMMY_CONTENT_OFFSET, 0) : position.character;
@@ -315,27 +326,27 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     return Position.create(line, character);
   };
 
-  toLabel = (item: vscode.CompletionItem) => {
+  toLabel = (item: VSCodeCompletionItem) => {
     if (typeof item.label === 'string') {
       return { label: item.label };
     }
     return item.label;
   };
 
-  toKind(kind?: vscode.CompletionItemKind) {
+  toKind(kind?: VSCodeCompletionItemKind) {
     switch (kind) {
-      case vscode.CompletionItemKind.Class:
+      case VSCodeCompletionItemKind.Class:
         return CompletionItemKind.Class;
-      case vscode.CompletionItemKind.Interface:
+      case VSCodeCompletionItemKind.Interface:
         return CompletionItemKind.Interface;
-      case vscode.CompletionItemKind.Enum:
+      case VSCodeCompletionItemKind.Enum:
         return CompletionItemKind.Enum;
       default:
         return undefined;
     }
   }
 
-  toDocumentation = (documentation?: string | vscode.MarkdownString) => {
+  toDocumentation = (documentation?: string | MarkdownString) => {
     if (!documentation) {
       return;
     }

@@ -1,12 +1,12 @@
 import type { InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
-import * as vscode from 'vscode';
+import { TabInputCustom, window } from 'vscode';
 import { IvyProjectExplorer } from '../../../project-explorer/ivy-project-explorer';
 import { dialogTypes, type DialogType } from '../../../project-explorer/new-user-dialog';
 import type { SendInscriptionNotification } from './action-handlers';
 
 export const handleNewHtmlDialog = async (actionArgs: InscriptionActionArgs, sendInscriptionNotification: SendInscriptionNotification) => {
-  const tabInput = vscode.window.tabGroups.activeTabGroup.activeTab?.input;
-  if (!(tabInput instanceof vscode.TabInputCustom)) {
+  const tabInput = window.tabGroups.activeTabGroup.activeTab?.input;
+  if (!(tabInput instanceof TabInputCustom)) {
     return;
   }
   const dialogType = await collectDialogType();
@@ -19,7 +19,7 @@ export const handleNewHtmlDialog = async (actionArgs: InscriptionActionArgs, sen
 };
 
 const collectDialogType = () =>
-  vscode.window.showQuickPick(dialogTypes, {
+  window.showQuickPick(dialogTypes, {
     title: 'Select Dialog Type',
     ignoreFocusOut: true
   }) as Promise<DialogType | undefined>;

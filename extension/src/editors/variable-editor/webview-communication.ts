@@ -1,6 +1,6 @@
 import type { VariablesActionArgs } from '@axonivy/variable-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
-import * as vscode from 'vscode';
+import type { TextDocument, WebviewPanel } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { updateTextDocumentContent } from '../content-writer';
@@ -16,12 +16,7 @@ import { WebSocketForwarder } from '../websocket-forwarder';
 
 const VariableWebSocketMessage: NotificationType<unknown> = { method: 'variableWebSocketMessage' };
 
-export const setupCommunication = (
-  websocketUrl: URL,
-  messenger: Messenger,
-  webviewPanel: vscode.WebviewPanel,
-  document: vscode.TextDocument
-) => {
+export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webviewPanel: WebviewPanel, document: TextDocument) => {
   const messageParticipant = messenger.registerWebviewPanel(webviewPanel);
   const toDispose = new DisposableCollection(
     new VariableEditorWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
@@ -39,7 +34,7 @@ class VariableEditorWebSocketForwarder extends WebSocketForwarder {
     websocketUrl: URL,
     messenger: Messenger,
     messageParticipant: MessageParticipant,
-    readonly document: vscode.TextDocument
+    readonly document: TextDocument
   ) {
     super(websocketUrl, 'ivy-variables-lsp', messenger, messageParticipant, VariableWebSocketMessage);
   }

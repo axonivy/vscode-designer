@@ -2,17 +2,18 @@ import { render } from 'dom-serializer';
 import { Element, Text } from 'domhandler';
 import fs from 'fs';
 import { DomUtils, parseDocument } from 'htmlparser2';
-import * as vscode from 'vscode';
+import type { ExtensionContext, Webview } from 'vscode';
+import { Uri } from 'vscode';
 import { findEditorWorker, findRootEntry, findRootHtml, parseBuildManifest, type ViteManifestEntry } from './build-manifest';
 
 export const createWebViewContent = (
-  context: vscode.ExtensionContext,
-  webview: vscode.Webview,
+  context: ExtensionContext,
+  webview: Webview,
   webviewPath: string,
-  customAsset?: (nonce: string, rootEntry: ViteManifestEntry, rootPath: vscode.Uri) => Element
+  customAsset?: (nonce: string, rootEntry: ViteManifestEntry, rootPath: Uri) => Element
 ) => {
   const nonce = createNonce();
-  const rootPath = vscode.Uri.joinPath(context.extensionUri, 'dist', 'webviews', webviewPath);
+  const rootPath = Uri.joinPath(context.extensionUri, 'dist', 'webviews', webviewPath);
   // const pathOf = (path: string) => vscode.Uri.joinPath(rootPath, path);
 
   const manifest = parseBuildManifest(rootPath);
@@ -33,7 +34,7 @@ export const createWebViewContent = (
 
   // index root script, we skip other scripts as they are loaded dynamically within the application
   const indexScript = new Element('script', {
-    src: webview.asWebviewUri(vscode.Uri.joinPath(rootPath, findRootEntry(manifest).chunk.file)).toString(),
+    src: webview.asWebviewUri(Uri.joinPath(rootPath, findRootEntry(manifest).chunk.file)).toString(),
     type: 'module',
     async: 'true',
     nonce: nonce
@@ -42,7 +43,7 @@ export const createWebViewContent = (
 
   // CSS files
   const webviewCssUris =
-    findRootEntry(manifest).chunk.css?.map(relativePath => webview.asWebviewUri(vscode.Uri.joinPath(rootPath, relativePath))) ?? [];
+    findRootEntry(manifest).chunk.css?.map(relativePath => webview.asWebviewUri(Uri.joinPath(rootPath, relativePath))) ?? [];
   for (const cssUri of webviewCssUris) {
     const styleLink = new Element('link', {
       href: cssUri.toString(),

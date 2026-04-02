@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import { window, workspace } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { ImportProcessBody } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -11,7 +11,7 @@ export const importNewProcess = async (projectDir: string) => {
 };
 
 const collectImportBpmnProcessParams = async (projectDir: string): Promise<ImportProcessBody> => {
-  const bpmnXmlFile = await vscode.window.showOpenDialog({
+  const bpmnXmlFile = await window.showOpenDialog({
     canSelectMany: false,
     openLabel: 'Select BPMN XML File to Import'
   });
@@ -19,7 +19,7 @@ const collectImportBpmnProcessParams = async (projectDir: string): Promise<Impor
     logErrorMessage('Cannot pick BPMN or XML file.');
     return Promise.reject(new Error('BPMN or XML file not selected'));
   }
-  const fileData = await vscode.workspace.fs.readFile(bpmnXmlFile[0]);
+  const fileData = await workspace.fs.readFile(bpmnXmlFile[0]);
   const regularArray = new Uint8Array(fileData);
   const fileName = bpmnXmlFile[0].fsPath.split('/').pop();
   const fileObj = new File([regularArray.buffer], fileName ? fileName : 'bpmn.xml', { type: 'application/xml' });

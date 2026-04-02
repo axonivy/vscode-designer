@@ -12,28 +12,29 @@ import {
   type SelectionState,
   type SetMarkersAction
 } from '@eclipse-glsp/vscode-integration';
-import * as vscode from 'vscode';
+import type { CustomDocument, StatusBarItem } from 'vscode';
+import { Diagnostic, DiagnosticSeverity, EventEmitter, Range, Uri, commands, window } from 'vscode';
 import { logErrorMessage, logInformationMessage, logWarningMessage } from '../../base/logging-util';
 import type { SelectedElement } from '../../base/process-editor-connector';
 import ProcessEditorProvider from './process-editor-provider';
 
 type IvyGlspClient = GlspVscodeClient & { app: string; pmv: string };
 const severityMap = new Map([
-  ['info', vscode.DiagnosticSeverity.Information],
-  ['warning', vscode.DiagnosticSeverity.Warning],
-  ['error', vscode.DiagnosticSeverity.Error]
+  ['info', DiagnosticSeverity.Information],
+  ['warning', DiagnosticSeverity.Warning],
+  ['error', DiagnosticSeverity.Error]
 ]);
 
-export class ProcessVscodeConnector<D extends vscode.CustomDocument = vscode.CustomDocument> extends GlspVscodeConnector {
-  private readonly emitter = new vscode.EventEmitter<SelectedElement>();
+export class ProcessVscodeConnector<D extends CustomDocument = CustomDocument> extends GlspVscodeConnector {
+  private readonly emitter = new EventEmitter<SelectedElement>();
   private readonly onSelectedElementUpdate = this.emitter.event;
-  protected readonly onDidChangeActiveGlspEditorEventEmitter = new vscode.EventEmitter<{ client: GlspVscodeClient<D> }>();
-  private readonly modelLoading: vscode.StatusBarItem;
+  protected readonly onDidChangeActiveGlspEditorEventEmitter = new EventEmitter<{ client: GlspVscodeClient<D> }>();
+  private readonly modelLoading: StatusBarItem;
 
   constructor(options: GlspVscodeConnectorOptions) {
     super(options);
     this.onSelectionUpdate(selection => this.selectionChange(selection));
-    this.modelLoading = vscode.window.createStatusBarItem();
+    this.modelLoading = window.createStatusBarItem();
     this.modelLoading.text = '$(loading~spin) Model loading';
   }
 
@@ -93,7 +94,7 @@ export class ProcessVscodeConnector<D extends vscode.CustomDocument = vscode.Cus
       if (absolutePath.endsWith('.p.json')) {
         this.openWithProcessEditor(absolutePath);
       } else {
-        vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(absolutePath));
+        commands.executeCommand('vscode.open', Uri.parse(absolutePath));
       }
       return { processedMessage: undefined, messageChanged: true };
     }
@@ -101,7 +102,7 @@ export class ProcessVscodeConnector<D extends vscode.CustomDocument = vscode.Cus
   }
 
   private openWithProcessEditor(absolutePath: string) {
-    vscode.commands.executeCommand('vscode.openWith', vscode.Uri.parse(absolutePath), ProcessEditorProvider.viewType);
+    commands.executeCommand('vscode.openWith', Uri.parse(absolutePath), ProcessEditorProvider.viewType);
   }
 
   protected override processMessage(message: unknown, origin: MessageOrigin): MessageProcessingResult {
@@ -150,7 +151,7 @@ export class ProcessVscodeConnector<D extends vscode.CustomDocument = vscode.Cus
   ): MessageProcessingResult {
     if (client) {
       const updatedDiagnostics = message.action.markers.map(marker => {
-        const diagnostic = new vscode.Diagnostic(new vscode.Range(0, 0, 0, 0), marker.description, severityMap.get(marker.kind));
+        const diagnostic = new Diagnostic(new Range(0, 0, 0, 0), marker.description, severityMap.get(marker.kind));
         diagnostic.source = marker.elementId;
         return diagnostic;
       });

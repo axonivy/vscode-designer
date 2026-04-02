@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import * as vscode from 'vscode';
+import type { ExtensionContext } from 'vscode';
 import { Messenger, type MessengerDiagnostic } from 'vscode-messenger';
 import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
@@ -18,7 +18,7 @@ import { showRuntimeLog } from './views/runtimelog-view';
 let ivyEngineManager: IvyEngineManager;
 export const messenger = new Messenger({ ignoreHiddenViews: false });
 
-export async function activate(context: vscode.ExtensionContext): Promise<MessengerDiagnostic> {
+export async function activate(context: ExtensionContext): Promise<MessengerDiagnostic> {
   await validateAndSyncJavaVersion();
   resolveExtensionVersion(context);
   ivyEngineManager = IvyEngineManager.init(context);

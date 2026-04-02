@@ -1,5 +1,5 @@
 import type { EditorFileContent } from '@axonivy/dataclass-editor-protocol';
-import * as vscode from 'vscode';
+import { Uri, env } from 'vscode';
 import type { NotificationType } from 'vscode-messenger-common';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 
@@ -62,5 +62,5 @@ export const isSearchResult = <T>(obj: unknown, id?: number): obj is { result: T
 
 export const openUrlExternally = (url: string) => {
   logInformationMessage(`Opening URL externally: ${url}`);
-  vscode.env.openExternal(vscode.Uri.parse(url));
+  env.openExternal(Uri.parse(url));
 };

@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import { Uri, window, workspace } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { ProductInstallParams } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -23,14 +23,14 @@ const collectLocalProductJson = async (projectDir: () => Promise<string>): Promi
 };
 
 async function readProductJsonFromFile() {
-  const productInstaller = await vscode.window.showOpenDialog({
+  const productInstaller = await window.showOpenDialog({
     canSelectMany: false,
     openLabel: 'Select a product.json file to Import'
   });
   if (!productInstaller || productInstaller.length === 0 || !productInstaller[0]) {
     throw new Error('Cannot pick product.json file.');
   }
-  const fileData = await vscode.workspace.fs.readFile(productInstaller[0]);
+  const fileData = await workspace.fs.readFile(productInstaller[0]);
   const decoder = new TextDecoder('utf-8');
   const productJson = decoder.decode(fileData);
   return productJson;
@@ -57,7 +57,7 @@ const searchProduct = async (projectDir: () => Promise<string>): Promise<Product
 };
 
 async function selectVersion(versions: string[]) {
-  const selected = await vscode.window.showQuickPick(versions, {
+  const selected = await window.showQuickPick(versions, {
     placeHolder: 'Select a version to install',
     canPickMany: false
   });
@@ -72,9 +72,9 @@ async function selectProduct(products: Product[]) {
     label: product.name,
     description: product.id,
     detail: product.description,
-    iconPath: vscode.Uri.parse(product.logoUrl)
+    iconPath: Uri.parse(product.logoUrl)
   }));
-  const selected = await vscode.window.showQuickPick(items, {
+  const selected = await window.showQuickPick(items, {
     placeHolder: 'Select a Product to install',
     canPickMany: false,
     matchOnDetail: true,
@@ -88,7 +88,7 @@ async function selectProduct(products: Product[]) {
 
 async function replaceDynamicVersion(productJson: string) {
   if (productJson.includes('${version}')) {
-    const userVersion = await vscode.window.showInputBox({
+    const userVersion = await window.showInputBox({
       title: 'Resolve dynamic ${version} in product.json',
       prompt: 'Enter a Maven version, which you made locally available by running `mvn clean install` from your product workspace.',
       placeHolder: '14.0.0-SNAPSHOT'
@@ -122,7 +122,7 @@ async function selectProjects(product: MarketProduct) {
         label: `${project.artifactId} (${project.groupId})`,
         picked: typeof project.importInWorkspace !== 'boolean' ? true : project.importInWorkspace
       }));
-      const selected = await vscode.window.showQuickPick(projectItems, {
+      const selected = await window.showQuickPick(projectItems, {
         canPickMany: true,
         placeHolder: 'Select projects to import'
       });

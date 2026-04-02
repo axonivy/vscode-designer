@@ -1,15 +1,15 @@
-import * as vscode from 'vscode';
+import { Uri, window } from 'vscode';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { resolveNamespaceFromPath, validateArtifactName, validateDotSeparatedName } from './utils/util';
 
-export const addNewDataClass = async (selectedUri: vscode.Uri, projectDir: string) => {
+export const addNewDataClass = async (selectedUri: Uri, projectDir: string) => {
   const input = await collectNewDataClassParams(selectedUri, projectDir);
   if (input) {
     await IvyEngineManager.instance.createDataClass(input);
   }
 };
 
-export const addNewEntityClass = async (selectedUri: vscode.Uri, projectDir: string) => {
+export const addNewEntityClass = async (selectedUri: Uri, projectDir: string) => {
   const input = await collectNewDataClassParams(selectedUri, projectDir, 'Entity Class');
   if (input) {
     await IvyEngineManager.instance.createEntityClass(input);
@@ -17,11 +17,11 @@ export const addNewEntityClass = async (selectedUri: vscode.Uri, projectDir: str
 };
 
 const collectNewDataClassParams = async (
-  selectedUri: vscode.Uri,
+  selectedUri: Uri,
   projectDir: string,
   type: 'Data Class' | 'Entity Class' = 'Data Class'
 ) => {
-  const name = await vscode.window.showInputBox({
+  const name = await window.showInputBox({
     title: `${type} Name`,
     placeHolder: 'Enter a name',
     ignoreFocusOut: true,
@@ -37,9 +37,9 @@ const collectNewDataClassParams = async (
   return { name: `${namespace}.${name}`, projectDir };
 };
 
-const collectNamespace = async (selectedUri: vscode.Uri, projectDir: string, type: 'Data Class' | 'Entity Class') => {
+const collectNamespace = async (selectedUri: Uri, projectDir: string, type: 'Data Class' | 'Entity Class') => {
   const namespace = await resolveNamespaceFromPath(selectedUri, projectDir, 'dataclasses');
-  return vscode.window.showInputBox({
+  return window.showInputBox({
     title: `${type} Namespace`,
     value: namespace,
     valueSelection: [namespace.length, -1],

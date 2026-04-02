@@ -1,5 +1,6 @@
 import Parser from 'rss-parser';
-import * as vscode from 'vscode';
+import type { ExtensionContext, WebviewPanel } from 'vscode';
+import { ViewColumn, commands, window } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { NotificationType, RequestType } from 'vscode-messenger-common';
 import { extensionVersion } from '../../version/extension-version';
@@ -7,7 +8,7 @@ import { openUrlExternally } from '../notification-helper';
 import { createWebViewContent } from '../webview-helper';
 
 let messenger: Messenger | undefined;
-let currentPanel: vscode.WebviewPanel | undefined;
+let currentPanel: WebviewPanel | undefined;
 
 const openUrlType: NotificationType<string> = { method: 'openUrl' };
 const commandType: NotificationType<string> = { method: 'executeCommand' };
@@ -18,19 +19,19 @@ const newsFeedType: NotificationType<NewsFeed> = { method: 'newsFeed' };
 
 export const showWelcomePageKey = 'showWelcomePage';
 
-export const conditionalWelcomePage = async (context: vscode.ExtensionContext) => {
+export const conditionalWelcomePage = async (context: ExtensionContext) => {
   if (showWelcomePageState(context)) {
     showWelcomePage(context);
   }
 };
 
-export const showWelcomePage = async (context: vscode.ExtensionContext) => {
+export const showWelcomePage = async (context: ExtensionContext) => {
   if (currentPanel) {
     currentPanel.reveal();
     return;
   }
 
-  const panel = vscode.window.createWebviewPanel('ivy.welcomePage', 'Axon Ivy PRO Designer', vscode.ViewColumn.One, {
+  const panel = window.createWebviewPanel('ivy.welcomePage', 'Axon Ivy PRO Designer', ViewColumn.One, {
     enableScripts: true,
     retainContextWhenHidden: true
   });
@@ -69,18 +70,18 @@ const parseFeed = async () => {
   return (await parser.parseURL('https://www.axonivy.com/blog/rss.xml')) as NewsFeed;
 };
 
-const showWelcomePageState = (context: vscode.ExtensionContext) => {
+const showWelcomePageState = (context: ExtensionContext) => {
   return context.workspaceState.get<boolean>(showWelcomePageKey, true);
 };
 
-const initializeMessenger = (context: vscode.ExtensionContext) => {
+const initializeMessenger = (context: ExtensionContext) => {
   if (messenger) {
     return messenger;
   }
   messenger = new Messenger();
   messenger.onNotification(openUrlType, openUrlExternally);
   messenger.onNotification(commandType, command => {
-    vscode.commands.executeCommand(command);
+    commands.executeCommand(command);
   });
   messenger.onRequest(toggleShowWelcomePageType, () => {
     const newShowWelcomePageState = !showWelcomePageState(context);

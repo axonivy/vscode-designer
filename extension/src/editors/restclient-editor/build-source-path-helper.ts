@@ -1,5 +1,5 @@
 import { XMLBuilder, XMLParser } from 'fast-xml-parser';
-import * as vscode from 'vscode';
+import { Uri, workspace } from 'vscode';
 
 const BUILD_HELPER_GROUP_ID = 'org.codehaus.mojo';
 const BUILD_HELPER_ARTIFACT_ID = 'build-helper-maven-plugin';
@@ -64,8 +64,8 @@ export class BuildSourcePathHelper {
   });
 
   async ensureGeneratedSourcePath(projectPath: string, clientName: string): Promise<boolean> {
-    const pomUri = vscode.Uri.joinPath(vscode.Uri.file(projectPath), 'pom.xml');
-    const pomXml = new TextDecoder().decode(await vscode.workspace.fs.readFile(pomUri));
+    const pomUri = Uri.joinPath(Uri.file(projectPath), 'pom.xml');
+    const pomXml = new TextDecoder().decode(await workspace.fs.readFile(pomUri));
     const pom = this.parser.parse(pomXml) as PomDocument;
     if (!pom.project) {
       return false;
@@ -86,7 +86,7 @@ export class BuildSourcePathHelper {
     pluginsContainer.plugin = plugins;
 
     const updatedPomXml = this.builder.build(pom);
-    await vscode.workspace.fs.writeFile(pomUri, new TextEncoder().encode(`${updatedPomXml}\n`));
+    await workspace.fs.writeFile(pomUri, new TextEncoder().encode(`${updatedPomXml}\n`));
     return true;
   }
 

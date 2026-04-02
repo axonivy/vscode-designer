@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import { workspace } from 'vscode';
 import {
   LanguageClient,
   RequestType,
@@ -27,7 +27,7 @@ export const XhtmlLanguageClientProvider = async (webSocketUrl: URL) => {
     documentSelector: [{ language: 'html', scheme: 'file', pattern: '**/*.xhtml' }],
 
     synchronize: {
-      fileEvents: vscode.workspace.createFileSystemWatcher('**/*.xhtml')
+      fileEvents: workspace.createFileSystemWatcher('**/*.xhtml')
     }
   };
 

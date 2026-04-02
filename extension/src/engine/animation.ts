@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import { TabInputCustom, Uri, window } from 'vscode';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
 import type { ProcessBean } from './api/generated/client';
@@ -43,14 +43,14 @@ export const openEditor = async (editor: { uri?: string }) => {
   if (!editor.uri) {
     return false;
   }
-  await executeCommand('vscode.open', vscode.Uri.parse(editor.uri));
+  await executeCommand('vscode.open', Uri.parse(editor.uri));
   return true;
 };
 
 const isCurrentProcess = (process: ProcessBean) => {
-  const tabInput = vscode.window.tabGroups.activeTabGroup.activeTab?.input;
-  if (tabInput instanceof vscode.TabInputCustom && process.uri) {
-    return tabInput.uri.fsPath === vscode.Uri.parse(process.uri).fsPath;
+  const tabInput = window.tabGroups.activeTabGroup.activeTab?.input;
+  if (tabInput instanceof TabInputCustom && process.uri) {
+    return tabInput.uri.fsPath === Uri.parse(process.uri).fsPath;
   }
   return false;
 };
@@ -59,10 +59,10 @@ const isOpenProcesses = (process: ProcessBean) => {
   if (!process.uri) {
     return false;
   }
-  const processUri = vscode.Uri.parse(process.uri);
+  const processUri = Uri.parse(process.uri);
   return (
-    vscode.window.tabGroups.all
-      .flatMap(tabGroup => tabGroup.tabs.flatMap(tabs => tabs.input as { uri: vscode.Uri }))
+    window.tabGroups.all
+      .flatMap(tabGroup => tabGroup.tabs.flatMap(tabs => tabs.input as { uri: Uri }))
       .filter(input => input && input.uri)
       .filter(input => input.uri.fsPath === processUri.fsPath).length > 0
   );

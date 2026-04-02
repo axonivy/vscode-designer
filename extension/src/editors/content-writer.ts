@@ -1,8 +1,9 @@
 import type { EditorFileContent } from '@axonivy/dataclass-editor-protocol';
-import * as vscode from 'vscode';
+import type { TextDocument } from 'vscode';
+import { Position, Range, WorkspaceEdit, workspace } from 'vscode';
 
-export const updateTextDocumentContent = async (document: vscode.TextDocument, { content }: EditorFileContent) => {
-  const workspaceEdit = new vscode.WorkspaceEdit();
-  workspaceEdit.replace(document.uri, new vscode.Range(new vscode.Position(0, 0), new vscode.Position(document.lineCount + 1, 0)), content);
-  await vscode.workspace.applyEdit(workspaceEdit);
+export const updateTextDocumentContent = async (document: TextDocument, { content }: EditorFileContent) => {
+  const workspaceEdit = new WorkspaceEdit();
+  workspaceEdit.replace(document.uri, new Range(new Position(0, 0), new Position(document.lineCount + 1, 0)), content);
+  await workspace.applyEdit(workspaceEdit);
 };

@@ -1,6 +1,6 @@
 import type { CaseMapActionArgs } from '@axonivy/case-map-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
-import * as vscode from 'vscode';
+import type { TextDocument, WebviewPanel } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { updateTextDocumentContent } from '../content-writer';
@@ -16,12 +16,7 @@ import { WebSocketForwarder } from '../websocket-forwarder';
 
 const CaseMapWebSocketMessage: NotificationType<unknown> = { method: 'caseMapWebSocketMessage' };
 
-export const setupCommunication = (
-  websocketUrl: URL,
-  messenger: Messenger,
-  webviewPanel: vscode.WebviewPanel,
-  document: vscode.TextDocument
-) => {
+export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webviewPanel: WebviewPanel, document: TextDocument) => {
   const messageParticipant = messenger.registerWebviewPanel(webviewPanel);
   const toDispose = new DisposableCollection(
     new CaseMapEditorWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
@@ -39,7 +34,7 @@ class CaseMapEditorWebSocketForwarder extends WebSocketForwarder {
     websocketUrl: URL,
     messenger: Messenger,
     messageParticipant: MessageParticipant,
-    readonly document: vscode.TextDocument
+    readonly document: TextDocument
   ) {
     super(websocketUrl, 'ivy-case-map-lsp', messenger, messageParticipant, CaseMapWebSocketMessage);
   }

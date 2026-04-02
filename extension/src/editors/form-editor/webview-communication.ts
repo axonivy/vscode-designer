@@ -1,6 +1,7 @@
 import type { FormActionArgs } from '@axonivy/form-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
-import * as vscode from 'vscode';
+import type { TextDocument, WebviewPanel } from 'vscode';
+import { commands, Uri } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
@@ -18,12 +19,7 @@ import { WebSocketForwarder } from '../websocket-forwarder';
 
 const FormWebSocketMessage: NotificationType<unknown> = { method: 'formWebSocketMessage' };
 
-export const setupCommunication = (
-  websocketUrl: URL,
-  messenger: Messenger,
-  webviewPanel: vscode.WebviewPanel,
-  document: vscode.TextDocument
-) => {
+export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webviewPanel: WebviewPanel, document: TextDocument) => {
   const messageParticipant = messenger.registerWebviewPanel(webviewPanel);
   const toDispose = new DisposableCollection(
     new FormEditorWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
@@ -41,7 +37,7 @@ class FormEditorWebSocketForwarder extends WebSocketForwarder {
     websocketUrl: URL,
     messenger: Messenger,
     messageParticipant: MessageParticipant,
-    readonly document: vscode.TextDocument
+    readonly document: TextDocument
   ) {
     super(websocketUrl, 'ivy-form-lsp', messenger, messageParticipant, FormWebSocketMessage);
   }
@@ -58,10 +54,10 @@ class FormEditorWebSocketForwarder extends WebSocketForwarder {
           IvyBrowserViewProvider.instance.open(message.params.payload);
           break;
         case 'openProcess':
-          vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(`${path}Process.p.json`));
+          commands.executeCommand('vscode.open', Uri.parse(`${path}Process.p.json`));
           break;
         case 'openDataClass':
-          vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(`${path}Data.d.json`));
+          commands.executeCommand('vscode.open', Uri.parse(`${path}Data.d.json`));
           break;
         case 'openComponent':
           openComponent(message.params);
@@ -85,6 +81,6 @@ class FormEditorWebSocketForwarder extends WebSocketForwarder {
 
 const openComponent = async (action: FormActionArgs) => {
   IvyEngineManager.instance.engineApi?.getComponentForm(action.payload, action.context.app, action.context.pmv).then(form => {
-    vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(form.uri ?? ''));
+    commands.executeCommand('vscode.open', Uri.parse(form.uri ?? ''));
   });
 };

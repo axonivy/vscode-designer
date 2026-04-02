@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import { Uri, window } from 'vscode';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { logErrorMessage } from './logging-util';
 
@@ -15,7 +15,7 @@ export const selectIvyProjectDialog = async (dialogTitle?: string) => {
     uri = await showIvyProjectPick(projects, dialogTitle);
   }
 
-  return uri ? vscode.Uri.file(uri) : undefined;
+  return uri ? Uri.file(uri) : undefined;
 };
 
 const showIvyProjectPick = async (projects: Array<string>, dialogTitle?: string) => {
@@ -25,7 +25,7 @@ const showIvyProjectPick = async (projects: Array<string>, dialogTitle?: string)
     uri: project
   }));
 
-  const selected = await vscode.window.showQuickPick(items, {
+  const selected = await window.showQuickPick(items, {
     title: dialogTitle,
     placeHolder: 'Select an Ivy Project'
   });

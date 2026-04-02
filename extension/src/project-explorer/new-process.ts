@@ -1,5 +1,6 @@
 import path from 'path';
-import { type QuickPickItem, Uri } from 'vscode';
+import type { QuickPickItem } from 'vscode';
+import { Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { ProcessInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';

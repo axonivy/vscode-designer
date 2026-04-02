@@ -1,7 +1,8 @@
 import type { OpenApiGeneratorConfig, RestClientActionArgs } from '@axonivy/restclient-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as path from 'path';
-import * as vscode from 'vscode';
+import type { TextDocument, WebviewPanel } from 'vscode';
+import { window } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { updateTextDocumentContent } from '../content-writer';
@@ -19,12 +20,7 @@ import { runMavenCommand } from './maven-runner';
 
 const RestClientWebSocketMessage: NotificationType<unknown> = { method: 'restClientWebSocketMessage' };
 
-export const setupCommunication = (
-  websocketUrl: URL,
-  messenger: Messenger,
-  webviewPanel: vscode.WebviewPanel,
-  document: vscode.TextDocument
-) => {
+export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webviewPanel: WebviewPanel, document: TextDocument) => {
   const messageParticipant = messenger.registerWebviewPanel(webviewPanel);
   const toDispose = new DisposableCollection(
     new RestClientWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
@@ -42,7 +38,7 @@ class RestClientWebSocketForwarder extends WebSocketForwarder {
     websocketUrl: URL,
     messenger: Messenger,
     messageParticipant: MessageParticipant,
-    readonly document: vscode.TextDocument
+    readonly document: TextDocument
   ) {
     super(websocketUrl, 'ivy-restclient-lsp', messenger, messageParticipant, RestClientWebSocketMessage);
   }
@@ -73,7 +69,7 @@ class RestClientWebSocketForwarder extends WebSocketForwarder {
   }
 }
 
-async function generateClient(payRaw: string, document: vscode.TextDocument) {
+async function generateClient(payRaw: string, document: TextDocument) {
   const projectPath = path.dirname(path.dirname(document.uri.fsPath));
   const openapi = JSON.parse(payRaw) as OpenApiGeneratorConfig;
   const outputDir = `src_generated/rest/${openapi.clientName}`;
@@ -88,14 +84,14 @@ async function generateClient(payRaw: string, document: vscode.TextDocument) {
 
   try {
     await runMavenCommand(projectPath, command);
-    vscode.window.showInformationMessage(`${openapi.clientName} OpenAPI client generation succeeded`);
+    window.showInformationMessage(`${openapi.clientName} OpenAPI client generation succeeded`);
 
     const sourcePathAdded = await new BuildSourcePathHelper().ensureGeneratedSourcePath(projectPath, openapi.clientName);
     if (sourcePathAdded) {
-      vscode.window.showInformationMessage(`Added ${openapi.clientName} client source path to pom.xml.`);
+      window.showInformationMessage(`Added ${openapi.clientName} client source path to pom.xml.`);
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : `${error}`;
-    vscode.window.showErrorMessage(`OpenAPI client generation failed: ${message}`);
+    window.showErrorMessage(`OpenAPI client generation failed: ${message}`);
   }
 }

@@ -1,6 +1,7 @@
 import type { CmsActionArgs } from '@axonivy/cms-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
-import * as vscode from 'vscode';
+import type { WebviewPanel } from 'vscode';
+import { commands, Uri } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import {
@@ -14,7 +15,7 @@ import { WebSocketForwarder } from '../websocket-forwarder';
 
 const CmsWebSocketMessage: NotificationType<unknown> = { method: 'cmsWebSocketMessage' };
 
-export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webviewPanel: vscode.WebviewPanel, projectPath: string) => {
+export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webviewPanel: WebviewPanel, projectPath: string) => {
   const messageParticipant = messenger.registerWebviewPanel(webviewPanel);
   const toDispose = new DisposableCollection(
     new CmsEditorWebSocketForwarder(websocketUrl, messenger, messageParticipant, projectPath),
@@ -57,6 +58,6 @@ class CmsEditorWebSocketForwarder extends WebSocketForwarder {
 
 const openCmsFile = async (projectPath: string, url: string, co: string) => {
   const coUri = url.substring(url.lastIndexOf(co));
-  const fileUri = vscode.Uri.joinPath(vscode.Uri.file(projectPath), 'cms', coUri);
-  vscode.commands.executeCommand('vscode.open', fileUri);
+  const fileUri = Uri.joinPath(Uri.file(projectPath), 'cms', coUri);
+  commands.executeCommand('vscode.open', fileUri);
 };

@@ -1,5 +1,6 @@
 import path from 'path';
-import * as vscode from 'vscode';
+import type { ExtensionContext } from 'vscode';
+import { Uri, commands, window } from 'vscode';
 import { registerCommand } from '../base/commands';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { logErrorMessage } from '../base/logging-util';
@@ -9,14 +10,14 @@ import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { treeUriToProjectPath } from '../project-explorer/tree-selection';
 import { registerPomCodeLensProvider } from './pom-code-lens-provider';
 
-export const registerAddDependencyHandler = (context: vscode.ExtensionContext) => {
+export const registerAddDependencyHandler = (context: ExtensionContext) => {
   registerCommand('ivyProjects.addDependency', context, addDependencyHandler);
   registerPomCodeLensProvider(context);
 };
 
-const addDependencyHandler = async (uri: vscode.Uri) => {
+const addDependencyHandler = async (uri: Uri) => {
   let targetProject: string | undefined;
-  if (uri instanceof vscode.Uri) {
+  if (uri instanceof Uri) {
     targetProject = await treeUriToProjectPath(uri, IvyProjectExplorer.instance.getIvyProjects());
   }
   if (targetProject === undefined) {
@@ -26,7 +27,7 @@ const addDependencyHandler = async (uri: vscode.Uri) => {
     logErrorMessage('No project selected. Cannot add dependency.');
     return;
   }
-  const pomPath = vscode.Uri.joinPath(vscode.Uri.file(targetProject), 'pom.xml').fsPath;
+  const pomPath = Uri.joinPath(Uri.file(targetProject), 'pom.xml').fsPath;
   const projectBeans = await IvyEngineManager.instance.projects(true);
   const targetProjectBean = projectBeans?.find(p =>
     pomPath.startsWith(p.projectDirectory.endsWith(path.sep) ? p.projectDirectory : p.projectDirectory + path.sep)
@@ -43,7 +44,7 @@ const addDependencyHandler = async (uri: vscode.Uri) => {
   if (!newDependency) {
     return;
   }
-  vscode.commands.executeCommand('maven.project.addDependency', {
+  commands.executeCommand('maven.project.addDependency', {
     pomPath,
     groupId: newDependency.groupId,
     artifactId: newDependency.artifactId,
@@ -72,7 +73,7 @@ const showDependencyPick = async (projects: ProjectBean[]) => {
     label: project.id.pmv,
     project: project
   }));
-  const selected = await vscode.window.showQuickPick(items, {
+  const selected = await window.showQuickPick(items, {
     placeHolder: projects.length > 0 ? 'Select an Ivy Project Dependency' : 'No Ivy Project Dependencies left to add'
   });
   return selected?.project;
