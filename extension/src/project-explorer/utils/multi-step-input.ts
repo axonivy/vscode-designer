@@ -1,5 +1,4 @@
 import { Disposable, QuickInput, QuickInputButtons, QuickPickItem, window } from 'vscode';
-import { ValidationFunction } from './util';
 
 export interface MSStateBase {
   dialogTitle: string;
@@ -25,7 +24,7 @@ interface TextInputParameters {
   value?: string;
   prompt?: string;
   placeholder?: string;
-  validationFunction?: ValidationFunction;
+  validationFunction?: (value: string) => string | undefined;
   onBack?: (typedValue: string) => void;
   ignoreFocusOut?: boolean;
 }

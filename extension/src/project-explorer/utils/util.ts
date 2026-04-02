@@ -2,8 +2,6 @@ import { XMLParser } from 'fast-xml-parser';
 import path from 'path';
 import * as vscode from 'vscode';
 
-export type ValidationFunction = (input: string, errorMessage?: string) => string | undefined;
-
 const defaultNamespaceOf = (projecDir: string) => {
   const designerPrefs = vscode.Uri.joinPath(vscode.Uri.file(projecDir), 'pom.xml');
   return vscode.workspace.fs.readFile(designerPrefs).then(
@@ -53,34 +51,25 @@ export const resolveDefaultNamespace = async (projectDir: string, target: Resour
   return target === 'processes' ? defaultNamespace.replaceAll('.', '/') : defaultNamespace;
 };
 
-export const validateArtifactName: ValidationFunction = (
-  value: string,
-  errorMessage = 'Only letters, numbers, underscores, and hyphens are allowed. No trailing whitespaces.'
-) => {
+export const validateArtifactName = (value: string) => {
   const pattern = /^[\w-]+$/;
   if (pattern.test(value)) {
     return;
   }
-  return errorMessage;
+  return 'Only letters, numbers, underscores, and hyphens are allowed. No trailing whitespaces.';
 };
 
-export const validateDotSeparatedName: ValidationFunction = (
-  value: string,
-  errorMessage = 'Enter Namespace separated by ".". Only letters, numbers, underscores, and hyphens are allowed. No hyphen except for last group'
-) => {
+export const validateDotSeparatedName = (value: string) => {
   const pattern = /^\w+(\.\w+)*(-\w+)*$/;
   if (pattern.test(value)) {
     return;
   }
-  return errorMessage;
+  return 'Enter Namespace separated by ".". Only letters, numbers, underscores, and hyphens are allowed. No hyphen except for last group';
 };
-export const validateNamespace: ValidationFunction = (
-  value: string,
-  errorMessage = 'Enter Namespace separated by "/". Only letters, numbers, underscores, and hyphens are allowed. No hyphen except for last group'
-) => {
+export const validateNamespace = (value: string) => {
   const pattern = /^(\w+(\/\w+)*(-\w+)*)?$/;
   if (pattern.test(value)) {
     return;
   }
-  return errorMessage;
+  return 'Enter Namespace separated by "/". Only letters, numbers, underscores, and hyphens are allowed. No hyphen except for last group';
 };
