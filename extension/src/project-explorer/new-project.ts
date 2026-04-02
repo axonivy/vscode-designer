@@ -49,7 +49,7 @@ const collectNewProjectParams = async (selectedUri: vscode.Uri) => {
   const groupId = await vscode.window.showInputBox({
     title: 'Group Id',
     value: name,
-    validateInput: value => validateDotSeparatedName(value, 'Invalid id.'),
+    validateInput: value => validateDotSeparatedName(value),
     ignoreFocusOut: true
   });
   if (!groupId) {
@@ -58,7 +58,7 @@ const collectNewProjectParams = async (selectedUri: vscode.Uri) => {
   const projectId = await vscode.window.showInputBox({
     title: 'Project Id',
     value: name,
-    validateInput: value => validateDotSeparatedName(value, 'Invalid id.'),
+    validateInput: value => validateDotSeparatedName(value),
     ignoreFocusOut: true
   });
   if (!projectId) {
