@@ -52,7 +52,7 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
         activeItem: state.projectSelection,
         items: projects.map(project => {
           return {
-            label: project.substring(project.lastIndexOf('/') + 1),
+            label: project.substring(project.lastIndexOf(path.sep) + 1),
             description: project,
             path: project
           };
