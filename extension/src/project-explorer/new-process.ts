@@ -1,3 +1,4 @@
+import path from 'path';
 import { QuickPickItem, Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { ProcessInit } from '../engine/api/generated/client';
@@ -28,7 +29,7 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
   // Step 1 - Pick the project to create the process in, based on available projects in the workspace
   // If supplied, use preselected URI and project path for project and namespace
   const projectSelectionFromPath = projectPath
-    ? { label: projectPath.substring(projectPath.lastIndexOf('/') + 1), description: projectPath, path: projectPath }
+    ? { label: projectPath.substring(projectPath.lastIndexOf(path.sep) + 1), description: projectPath, path: projectPath }
     : undefined;
   const namespaceFromPath = projectPath && uri ? await resolveNamespaceFromPath(uri, projectPath, 'processes') : undefined;
 
