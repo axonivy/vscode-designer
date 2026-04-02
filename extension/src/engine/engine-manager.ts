@@ -21,13 +21,13 @@ import { VariableEditorProvider } from '../editors/variable-editor/variable-edit
 import { WebServiceEditorProvider } from '../editors/webservice-editor/webservice-editor-provider';
 import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language-client';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
-import { NewProcessParams } from '../project-explorer/new-process';
-import { NewUserDialogParams } from '../project-explorer/new-user-dialog';
+import type { NewProcessParams } from '../project-explorer/new-process';
+import type { NewUserDialogParams } from '../project-explorer/new-user-dialog';
 import { resolveDefaultNamespace } from '../project-explorer/utils/util';
 import { extensionVersion } from '../version/extension-version';
 import { RuntimeLogViewProvider } from '../views/runtimelog-view';
 import { IvyEngineApi } from './api/engine-api';
-import { CaseMapInit, DataClassInit, ImportProcessBody, NewProjectParams, ProductInstallParams } from './api/generated/client';
+import type { CaseMapInit, DataClassInit, ImportProcessBody, NewProjectParams, ProductInstallParams } from './api/generated/client';
 import { IvyDiagnostics } from './diagnostics';
 import { EngineDownloader } from './engine-downloader';
 import { engineDirFromGlobalState, engineReleaseTrain, switchEngineReleaseTrain, updateGlobalStateEngineDir } from './engine-release-train';

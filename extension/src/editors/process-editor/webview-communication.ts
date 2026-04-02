@@ -1,30 +1,30 @@
-import { TypeSearchRequest } from '@axonivy/process-editor-inscription-protocol';
+import type { TypeSearchRequest } from '@axonivy/process-editor-inscription-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import {
   CompletionItem,
   CompletionItemKind,
   CompletionItemTag,
-  CompletionList,
-  CompletionParams,
+  type CompletionList,
+  type CompletionParams,
   CompletionRequest,
   DidChangeTextDocumentNotification,
-  DidChangeTextDocumentParams,
+  type DidChangeTextDocumentParams,
   DidOpenTextDocumentNotification,
-  DidOpenTextDocumentParams,
-  MarkupContent,
+  type DidOpenTextDocumentParams,
+  type MarkupContent,
   Position,
   Range,
   TextEdit
 } from 'vscode-languageclient';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Messenger } from 'vscode-messenger';
-import { MessageParticipant, NotificationType, RequestType } from 'vscode-messenger-common';
+import type { MessageParticipant, NotificationType, RequestType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
 import { JavaCompletion } from '../java-completion';
 import { isAllTypesSearchRequest, isSearchResult } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
-import { SendInscriptionNotification, handleActionLocal } from './inscription-view/action-handlers';
+import { handleActionLocal, type SendInscriptionNotification } from './inscription-view/action-handlers';
 
 const ColorThemeChangedNotification: NotificationType<'dark' | 'light'> = { method: 'colorThemeChanged' };
 const WebviewConnectionReadyNotification: NotificationType<void> = { method: 'connectionReady' };

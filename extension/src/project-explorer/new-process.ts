@@ -1,10 +1,10 @@
 import path from 'path';
-import { QuickPickItem, Uri } from 'vscode';
+import { type QuickPickItem, Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
-import { ProcessInit } from '../engine/api/generated/client';
+import type { ProcessInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { IvyProjectExplorer } from './ivy-project-explorer';
-import { InputStep, MSStateBase, MultiStepInput } from './utils/multi-step-input';
+import { type InputStep, type MSStateBase, MultiStepInput } from './utils/multi-step-input';
 import { resolveNamespaceFromPath, validateArtifactName, validateNamespace } from './utils/util';
 
 export type ProcessKind = 'Business Process' | 'Callable Sub Process' | 'Web Service Process' | '';

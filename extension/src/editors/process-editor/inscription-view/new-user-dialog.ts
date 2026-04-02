@@ -1,8 +1,8 @@
-import { InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
+import type { InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
 import * as vscode from 'vscode';
 import { IvyProjectExplorer } from '../../../project-explorer/ivy-project-explorer';
-import { DialogType, dialogTypes } from '../../../project-explorer/new-user-dialog';
-import { SendInscriptionNotification } from './action-handlers';
+import { dialogTypes, type DialogType } from '../../../project-explorer/new-user-dialog';
+import type { SendInscriptionNotification } from './action-handlers';
 
 export const handleNewHtmlDialog = async (actionArgs: InscriptionActionArgs, sendInscriptionNotification: SendInscriptionNotification) => {
   const tabInput = vscode.window.tabGroups.activeTabGroup.activeTab?.input;

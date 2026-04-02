@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { HdInit } from '../engine/api/generated/client';
+import type { HdInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { resolveNamespaceFromPath, validateArtifactName, validateDotSeparatedName } from './utils/util';
 

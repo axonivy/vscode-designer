@@ -1,7 +1,7 @@
 import Parser from 'rss-parser';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
-import { NotificationType, RequestType } from 'vscode-messenger-common';
+import type { NotificationType, RequestType } from 'vscode-messenger-common';
 import { extensionVersion } from '../../version/extension-version';
 import { openUrlExternally } from '../notification-helper';
 import { createWebViewContent } from '../webview-helper';

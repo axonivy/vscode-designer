@@ -1,8 +1,8 @@
-import { FormActionArgs } from '@axonivy/form-editor-protocol';
+import type { FormActionArgs } from '@axonivy/form-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
-import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
+import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
 import { IvyEngineManager } from '../../engine/engine-manager';
 import { updateTextDocumentContent } from '../content-writer';

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { IWebSocket, WebSocketMessageReader, WebSocketMessageWriter } from 'vscode-ws-jsonrpc';
+import { WebSocketMessageReader, WebSocketMessageWriter, type IWebSocket } from 'vscode-ws-jsonrpc';
 import { logErrorMessage } from '../base/logging-util';
 import { animationSettings, handleOpenProcessEditor, openEditor } from './animation';
 import { WebIdeClientJsonRpc } from './api/jsonrpc';

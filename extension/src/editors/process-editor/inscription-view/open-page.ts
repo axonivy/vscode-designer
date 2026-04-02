@@ -1,4 +1,4 @@
-import { InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
+import type { InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';

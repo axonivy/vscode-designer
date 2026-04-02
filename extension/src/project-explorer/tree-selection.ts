@@ -1,7 +1,7 @@
 import path from 'path';
 import * as vscode from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
-import { Entry } from './ivy-project-tree-data-provider';
+import type { Entry } from './ivy-project-tree-data-provider';
 
 export type TreeSelection = Entry | vscode.Uri | undefined;
 

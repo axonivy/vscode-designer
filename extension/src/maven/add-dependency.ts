@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { registerCommand } from '../base/commands';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { logErrorMessage } from '../base/logging-util';
-import { ProjectBean } from '../engine/api/generated/client';
+import type { ProjectBean } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { treeUriToProjectPath } from '../project-explorer/tree-selection';

@@ -1,6 +1,6 @@
 import path from 'path';
 import * as vscode from 'vscode';
-import { Command, executeCommand, registerCommand } from '../base/commands';
+import { executeCommand, registerCommand, type Command } from '../base/commands';
 import { debouncedAction } from '../base/debounce';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { logErrorMessage, logInformationMessage, logWarningMessage } from '../base/logging-util';
@@ -9,13 +9,13 @@ import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { importMarketProduct, importMarketProductFile } from '../market/import-market';
 import { importNewProcess } from './import-process';
-import { Entry, IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject } from './ivy-project-tree-data-provider';
+import { IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject, type Entry } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
 import { addNewDataClass, addNewEntityClass } from './new-data-class';
-import { ProcessKind, addNewProcess } from './new-process';
+import { addNewProcess, type ProcessKind } from './new-process';
 import { addNewProject } from './new-project';
-import { DialogType, addNewUserDialog } from './new-user-dialog';
-import { TreeSelection, treeSelectionToUri, treeUriToProjectPath } from './tree-selection';
+import { addNewUserDialog, type DialogType } from './new-user-dialog';
+import { treeSelectionToUri, treeUriToProjectPath, type TreeSelection } from './tree-selection';
 
 export const VIEW_ID = 'ivyProjects';
 

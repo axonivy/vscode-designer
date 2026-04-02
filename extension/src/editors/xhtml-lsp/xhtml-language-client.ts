@@ -1,5 +1,11 @@
 import * as vscode from 'vscode';
-import { ExecuteCommandParams, LanguageClient, RequestType, type LanguageClientOptions, type StreamInfo } from 'vscode-languageclient/node';
+import {
+  LanguageClient,
+  RequestType,
+  type ExecuteCommandParams,
+  type LanguageClientOptions,
+  type StreamInfo
+} from 'vscode-languageclient/node';
 import { createWebSocket, toSocketConnection } from '../../engine/ws-client';
 import { onExecuteClientCommand } from './client-commands';
 

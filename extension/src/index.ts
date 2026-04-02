@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import * as vscode from 'vscode';
-import { Messenger, MessengerDiagnostic } from 'vscode-messenger';
+import { Messenger, type MessengerDiagnostic } from 'vscode-messenger';
 import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
 import { validateAndSyncJavaVersion } from './base/java-version-validation';

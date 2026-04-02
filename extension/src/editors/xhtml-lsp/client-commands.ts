@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Code2ProtocolConverter, ExecuteCommandParams, LanguageClient } from 'vscode-languageclient/node';
+import { LanguageClient, type Code2ProtocolConverter, type ExecuteCommandParams } from 'vscode-languageclient/node';
 import * as lsprot from 'vscode-languageserver-protocol';
 
 export const onExecuteClientCommand = async (languageClient: LanguageClient, params: ExecuteCommandParams) => {

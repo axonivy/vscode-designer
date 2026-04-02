@@ -1,6 +1,6 @@
-import { EditorFileContent } from '@axonivy/dataclass-editor-protocol';
+import type { EditorFileContent } from '@axonivy/dataclass-editor-protocol';
 import * as vscode from 'vscode';
-import { NotificationType } from 'vscode-messenger-common';
+import type { NotificationType } from 'vscode-messenger-common';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 
 export const WebviewReadyNotification: NotificationType<void> = { method: 'ready' };

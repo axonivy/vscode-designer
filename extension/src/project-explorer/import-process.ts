@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
-import { ImportProcessBody } from '../engine/api/generated/client';
+import type { ImportProcessBody } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 
 export const importNewProcess = async (projectDir: string) => {

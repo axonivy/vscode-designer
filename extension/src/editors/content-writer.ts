@@ -1,4 +1,4 @@
-import { EditorFileContent } from '@axonivy/dataclass-editor-protocol';
+import type { EditorFileContent } from '@axonivy/dataclass-editor-protocol';
 import * as vscode from 'vscode';
 
 export const updateTextDocumentContent = async (document: vscode.TextDocument, { content }: EditorFileContent) => {

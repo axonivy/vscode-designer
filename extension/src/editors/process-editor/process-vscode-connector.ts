@@ -1,20 +1,20 @@
 import { SetModelAction } from '@eclipse-glsp/protocol';
 import {
   ActionMessage,
-  GModelRootSchema,
-  GlspVscodeClient,
   GlspVscodeConnector,
-  GlspVscodeConnectorOptions,
-  MessageAction,
-  MessageOrigin,
-  MessageProcessingResult,
-  NavigateToExternalTargetAction,
-  SelectionState,
-  SetMarkersAction
+  type GModelRootSchema,
+  type GlspVscodeClient,
+  type GlspVscodeConnectorOptions,
+  type MessageAction,
+  type MessageOrigin,
+  type MessageProcessingResult,
+  type NavigateToExternalTargetAction,
+  type SelectionState,
+  type SetMarkersAction
 } from '@eclipse-glsp/vscode-integration';
 import * as vscode from 'vscode';
 import { logErrorMessage, logInformationMessage, logWarningMessage } from '../../base/logging-util';
-import { SelectedElement } from '../../base/process-editor-connector';
+import type { SelectedElement } from '../../base/process-editor-connector';
 import ProcessEditorProvider from './process-editor-provider';
 
 type IvyGlspClient = GlspVscodeClient & { app: string; pmv: string };

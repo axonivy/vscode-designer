@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { AnimationFollowMode } from '../engine/animation';
+import type { AnimationFollowMode } from '../engine/animation';
 
 const configs = () => vscode.workspace.getConfiguration();
 

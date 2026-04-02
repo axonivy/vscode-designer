@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { messenger } from '../..';
 import { registerCommand } from '../../base/commands';
 import { logErrorMessage } from '../../base/logging-util';
-import { TreeSelection } from '../../project-explorer/tree-selection';
+import type { TreeSelection } from '../../project-explorer/tree-selection';
 import { openEditorCmdProjectPath } from '../command-helper';
 import { createWebViewContent } from '../webview-helper';
 import { CmsEditorRegistry } from './cms-editor-registry';

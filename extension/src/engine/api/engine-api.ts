@@ -2,17 +2,17 @@ import { IncomingMessage } from 'http';
 import path from 'path';
 import * as vscode from 'vscode';
 import { setStatusBarMessage } from '../../base/status-bar';
-import { NewProcessParams } from '../../project-explorer/new-process';
-import { NewUserDialogParams } from '../../project-explorer/new-user-dialog';
+import type { NewProcessParams } from '../../project-explorer/new-process';
+import type { NewUserDialogParams } from '../../project-explorer/new-user-dialog';
 import { handleProjectConversionLog } from '../project-conversion-log';
 import { handleAxiosError } from './axios-error-handler';
 import {
-  CaseMapInit,
-  DataClassInit,
-  ImportProcessBody,
-  NewProjectParams,
-  ProductInstallParams,
-  WorkspaceBean,
+  type CaseMapInit,
+  type DataClassInit,
+  type ImportProcessBody,
+  type NewProjectParams,
+  type ProductInstallParams,
+  type WorkspaceBean,
   componentForm,
   convertProject,
   createCaseMap,

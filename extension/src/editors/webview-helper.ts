@@ -3,7 +3,7 @@ import { Element, Text } from 'domhandler';
 import fs from 'fs';
 import { DomUtils, parseDocument } from 'htmlparser2';
 import * as vscode from 'vscode';
-import { ViteManifestEntry, findEditorWorker, findRootEntry, findRootHtml, parseBuildManifest } from './build-manifest';
+import { findEditorWorker, findRootEntry, findRootHtml, parseBuildManifest, type ViteManifestEntry } from './build-manifest';
 
 export const createWebViewContent = (
   context: vscode.ExtensionContext,
