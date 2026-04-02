@@ -1,5 +1,5 @@
-import * as vscode from 'vscode';
-import { HdInit } from '../engine/api/generated/client';
+import { Uri, window } from 'vscode';
+import type { HdInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { resolveNamespaceFromPath, validateArtifactName, validateDotSeparatedName } from './utils/util';
 
@@ -21,14 +21,14 @@ type Template = (typeof templates)[number];
 
 export type NewUserDialogParams = HdInit;
 
-export const addNewUserDialog = async (selectedUri: vscode.Uri, projectDir: string, type: DialogType, pid?: string) => {
+export const addNewUserDialog = async (selectedUri: Uri, projectDir: string, type: DialogType, pid?: string) => {
   const input = await collectNewUserDialogParams(selectedUri, type, projectDir);
   if (input) {
     await IvyEngineManager.instance.createUserDialog({ pid, ...input });
   }
 };
 
-const collectNewUserDialogParams = async (selectedUri: vscode.Uri, type: DialogType, projectDir: string) => {
+const collectNewUserDialogParams = async (selectedUri: Uri, type: DialogType, projectDir: string) => {
   const name = await collectName();
   if (!name) {
     return;
@@ -58,7 +58,7 @@ const collectNewUserDialogParams = async (selectedUri: vscode.Uri, type: DialogT
 };
 
 const collectName = async () => {
-  return vscode.window.showInputBox({
+  return window.showInputBox({
     title: 'User Dialog Name',
     placeHolder: 'Enter a name',
     ignoreFocusOut: true,
@@ -66,9 +66,9 @@ const collectName = async () => {
   });
 };
 
-const collectNamespace = async (selectedUri: vscode.Uri, projectDir: string) => {
+const collectNamespace = async (selectedUri: Uri, projectDir: string) => {
   const namespace = await resolveNamespaceFromPath(selectedUri, projectDir, 'src_hd');
-  return vscode.window.showInputBox({
+  return window.showInputBox({
     title: 'User Dialog Namespace',
     value: namespace,
     valueSelection: [namespace.length, -1],
@@ -78,7 +78,7 @@ const collectNamespace = async (selectedUri: vscode.Uri, projectDir: string) => 
 };
 
 const collectLayout = async () => {
-  return (await vscode.window.showQuickPick(
+  return (await window.showQuickPick(
     layouts.filter(t => t !== 'Page'),
     {
       title: 'Select Layout',
@@ -88,7 +88,7 @@ const collectLayout = async () => {
 };
 
 const collectTemplate = async () => {
-  return (await vscode.window.showQuickPick(templates, {
+  return (await window.showQuickPick(templates, {
     title: 'Select Template',
     ignoreFocusOut: true
   })) as Template;

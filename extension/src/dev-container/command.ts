@@ -1,13 +1,13 @@
-import * as vscode from 'vscode';
+import { Uri, window, workspace } from 'vscode';
 
-export async function addDevContainer(extensionUri: vscode.Uri) {
-  const ws = await vscode.window.showWorkspaceFolderPick();
+export async function addDevContainer(extensionUri: Uri) {
+  const ws = await window.showWorkspaceFolderPick();
   if (!ws) {
     return;
   }
-  await vscode.workspace.fs.copy(
-    vscode.Uri.joinPath(extensionUri, 'assets', '.devcontainer'),
-    vscode.Uri.joinPath(ws.uri, '.devcontainer'),
+  await workspace.fs.copy(
+    Uri.joinPath(extensionUri, 'assets', '.devcontainer'),
+    Uri.joinPath(ws.uri, '.devcontainer'),
     { overwrite: false }
   );
 }

@@ -1,9 +1,9 @@
-import * as vscode from 'vscode';
+import type { ExtensionContext } from 'vscode';
 
 export type ExtensionVersion = { major: number; minor: number; patch: number; isPreview: boolean };
 export let extensionVersion: ExtensionVersion;
 
-export const resolveExtensionVersion = (context: vscode.ExtensionContext) => {
+export const resolveExtensionVersion = (context: ExtensionContext) => {
   const isPreview = context.extension.packageJSON.preview === true;
   const rawVersion = context.extension.packageJSON.version;
   if (rawVersion == undefined || typeof rawVersion !== 'string') {

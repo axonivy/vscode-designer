@@ -1,13 +1,13 @@
 import axios from 'axios';
-import * as vscode from 'vscode';
+import { ProgressLocation, window } from 'vscode';
 
 export async function pollWithProgress(url: string, title: string) {
   const options = {
-    location: vscode.ProgressLocation.Notification,
+    location: ProgressLocation.Notification,
     cancellable: true,
     title
   };
-  await vscode.window.withProgress(options, async (progress, token) => {
+  await window.withProgress(options, async (progress, token) => {
     progress.report({ message: url });
     while (!token.isCancellationRequested) {
       const status = await axios

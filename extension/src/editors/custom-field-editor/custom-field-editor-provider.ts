@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import type { ExtensionContext } from 'vscode';
 import { registerOpenConfigEditorCmd } from '../command-helper';
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
@@ -7,7 +7,7 @@ export class CustomFieldEditorProvider {
 
   private constructor() {}
 
-  static register(context: vscode.ExtensionContext) {
+  static register(context: ExtensionContext) {
     registerOpenConfigEditorCmd('ivyEditor.openCustomFieldEditor', context, 'customfields.yaml');
   }
 }

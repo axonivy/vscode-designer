@@ -1,9 +1,10 @@
 import { LogClientJsonRpc } from '@axonivy/log-view-core';
-import { RuntimeLogEntry } from '@axonivy/log-view-protocol';
-import * as vscode from 'vscode';
+import type { RuntimeLogEntry } from '@axonivy/log-view-protocol';
+import type { LogOutputChannel } from 'vscode';
+import { window } from 'vscode';
 import { createWebSocket, toSocketConnection } from '../engine/ws-client';
 
-const outputChannel: vscode.LogOutputChannel = vscode.window.createOutputChannel('Axon Ivy Runtime Log', { log: true });
+const outputChannel: LogOutputChannel = window.createOutputChannel('Axon Ivy Runtime Log', { log: true });
 
 export const RuntimeLogViewProvider = (webSocketUrl: URL) => {
   const runtimeLogWebSocket = createWebSocket(new URL('ivy-runtime-log-lsp', webSocketUrl));

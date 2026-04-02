@@ -1,4 +1,5 @@
-import { Disposable, QuickInput, QuickInputButtons, QuickPickItem, window } from 'vscode';
+import type { QuickInput, QuickPickItem } from 'vscode';
+import { Disposable, QuickInputButtons, window } from 'vscode';
 
 export interface MSStateBase {
   dialogTitle: string;

@@ -1,6 +1,6 @@
 import type { Disposable } from '@axonivy/jsonrpc';
-import { ProcessBean, type HdBean } from './generated/client';
-import { AnimationSettings } from './jsonrpc';
+import type { HdBean, ProcessBean } from './generated/client';
+import type { AnimationSettings } from './jsonrpc';
 
 export class Callback<T, R = void> implements Disposable {
   private callback?: (e: T) => R;

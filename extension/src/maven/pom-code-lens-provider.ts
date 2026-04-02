@@ -1,16 +1,17 @@
-import * as vscode from 'vscode';
+import type { CodeLensProvider, ExtensionContext, TextDocument } from 'vscode';
+import { CodeLens, Range, languages } from 'vscode';
 
-class PomCodeLensProvider implements vscode.CodeLensProvider {
-  provideCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
+class PomCodeLensProvider implements CodeLensProvider {
+  provideCodeLenses(document: TextDocument): CodeLens[] {
     const text = document.getText();
     const match = text.match(/<dependencies>/);
     if (!match || match.index === undefined) {
       return [];
     }
     const pos = document.positionAt(match.index);
-    const range = new vscode.Range(pos, pos);
+    const range = new Range(pos, pos);
     return [
-      new vscode.CodeLens(range, {
+      new CodeLens(range, {
         title: '$(add) Add Ivy Project Dependency',
         command: 'ivyProjects.addDependency',
         arguments: [document.uri]
@@ -19,6 +20,6 @@ class PomCodeLensProvider implements vscode.CodeLensProvider {
   }
 }
 
-export const registerPomCodeLensProvider = (context: vscode.ExtensionContext) => {
-  context.subscriptions.push(vscode.languages.registerCodeLensProvider({ pattern: '**/pom.xml' }, new PomCodeLensProvider()));
+export const registerPomCodeLensProvider = (context: ExtensionContext) => {
+  context.subscriptions.push(languages.registerCodeLensProvider({ pattern: '**/pom.xml' }, new PomCodeLensProvider()));
 };

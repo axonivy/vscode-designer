@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import * as vscode from 'vscode';
+import type { ExtensionContext } from 'vscode';
+import { ProgressLocation, Uri, window } from 'vscode';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { downloadEngine } from './download';
@@ -10,12 +11,12 @@ import { outputChannel } from './output-channel';
 export class EngineDownloader {
   private readonly globalEngieStoragePath: string;
 
-  constructor(readonly context: vscode.ExtensionContext) {
-    this.globalEngieStoragePath = vscode.Uri.joinPath(context.globalStorageUri, 'engines').fsPath;
+  constructor(readonly context: ExtensionContext) {
+    this.globalEngieStoragePath = Uri.joinPath(context.globalStorageUri, 'engines').fsPath;
   }
   loadReleaseTrain = async (releaseTrain: string) => {
-    return await vscode.window.withProgress(
-      { location: vscode.ProgressLocation.Notification, title: 'Downloading Axon Ivy Engine', cancellable: false },
+    return await window.withProgress(
+      { location: ProgressLocation.Notification, title: 'Downloading Axon Ivy Engine', cancellable: false },
       async progress => {
         const logger = (message: string) => {
           progress.report({ message });

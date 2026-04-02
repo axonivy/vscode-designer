@@ -1,4 +1,5 @@
-import { commands, ExtensionContext } from 'vscode';
+import type { ExtensionContext } from 'vscode';
+import { commands } from 'vscode';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function executeCommand(command: Command, ...rest: any[]) {

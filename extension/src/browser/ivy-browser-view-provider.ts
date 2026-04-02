@@ -1,33 +1,34 @@
-import * as vscode from 'vscode';
+import { Uri, env, l10n, window } from 'vscode';
+import type { ExtensionContext, Webview, WebviewView, WebviewViewProvider } from 'vscode';
 import { executeCommand, registerCommand } from '../base/commands';
 import { logErrorMessage } from '../base/logging-util';
 import { findRootEntry, parseBuildManifest } from '../editors/build-manifest';
 
-export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
+export class IvyBrowserViewProvider implements WebviewViewProvider {
   private static _instance: IvyBrowserViewProvider;
   public static readonly viewType = 'ivyBrowserView';
   private url = '';
 
-  private view?: vscode.WebviewView;
+  private view?: WebviewView;
 
   private constructor(
-    readonly extensionUri: vscode.Uri,
+    readonly extensionUri: Uri,
     readonly engineUrl: URL,
     readonly devContextPath: string
   ) {}
 
-  private static init(context: vscode.ExtensionContext, engineUrl: URL, devContextPath: string) {
+  private static init(context: ExtensionContext, engineUrl: URL, devContextPath: string) {
     if (!IvyBrowserViewProvider._instance) {
       IvyBrowserViewProvider._instance = new IvyBrowserViewProvider(context.extensionUri, engineUrl, devContextPath);
     }
     return IvyBrowserViewProvider._instance;
   }
 
-  public static register(context: vscode.ExtensionContext, engineUrl: URL, devContextPath: string) {
+  public static register(context: ExtensionContext, engineUrl: URL, devContextPath: string) {
     const resolvedEngineUrl = this.resolveCodespacesEngineHost(engineUrl);
     const provider = IvyBrowserViewProvider.init(context, resolvedEngineUrl, devContextPath);
     context.subscriptions.push(
-      vscode.window.registerWebviewViewProvider(IvyBrowserViewProvider.viewType, provider, {
+      window.registerWebviewViewProvider(IvyBrowserViewProvider.viewType, provider, {
         webviewOptions: { retainContextWhenHidden: true }
       })
     );
@@ -48,7 +49,7 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
     return engineUrl;
   }
 
-  resolveWebviewView(webviewView: vscode.WebviewView) {
+  resolveWebviewView(webviewView: WebviewView) {
     this.view = webviewView;
     webviewView.webview.options = { enableForms: true, enableScripts: true };
     webviewView.webview.html = this.getWebviewContent(webviewView.webview);
@@ -57,8 +58,8 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
       switch (e.type) {
         case 'openExternal':
           try {
-            const url = vscode.Uri.parse(e.url);
-            vscode.env.openExternal(url);
+            const url = Uri.parse(e.url);
+            env.openExternal(url);
           } catch {
             logErrorMessage(`Couldn't open uri '${e.url}' in external browser.`);
           }
@@ -75,8 +76,8 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
   }
 
   async openEngineRelativeUrlExternally(input: string) {
-    const uri = vscode.Uri.parse(this.toEngineUrl(input));
-    vscode.env.openExternal(uri);
+    const uri = Uri.parse(this.toEngineUrl(input));
+    env.openExternal(uri);
   }
 
   toEngineUrl = (input: string) => new URL(input, this.engineUrl).toString();
@@ -84,7 +85,7 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
   async open(url?: string) {
     if (!url) {
       url =
-        (await vscode.window.showInputBox({
+        (await window.showInputBox({
           prompt: 'Enter url',
           value: 'https://dev.axonivy.com/'
         })) ?? '';
@@ -104,11 +105,11 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
     executeCommand(`${IvyBrowserViewProvider.viewType}.focus`);
   }
 
-  private getWebviewContent(webview: vscode.Webview) {
+  private getWebviewContent(webview: Webview) {
     const browserCss = this.extensionResourceUrl(webview, 'src', 'browser', 'media', 'browser.css');
     const root = this.extensionResourceUrl(webview, 'dist', 'webviews', 'browser');
     const manifest = parseBuildManifest(root);
-    const mainJs = vscode.Uri.joinPath(root, findRootEntry(manifest).chunk.file ?? '');
+    const mainJs = Uri.joinPath(root, findRootEntry(manifest).chunk.file ?? '');
     const nonce = getNonce();
     return `<!DOCTYPE html>
     <html>
@@ -127,19 +128,19 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
       <header class="header">
         <nav class="controls">
           <button
-            title="${vscode.l10n.t('Back')}"
+            title="${l10n.t('Back')}"
             class="back-button icon">
             <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M7 3.093l-5 5V8.8l5 5 .707-.707-4.146-4.147H14v-1H3.56L7.708 3.8 7 3.093z"/></svg>
           </button>
 
           <button
-            title="${vscode.l10n.t('Forward')}"
+            title="${l10n.t('Forward')}"
             class="forward-button icon">
             <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M9 13.887l5-5V8.18l-5-5-.707.707 4.146 4.147H2v1h10.44L8.292 13.18l.707.707z"/></svg>
           </button>
 
           <button
-            title="${vscode.l10n.t('Reload')}"
+            title="${l10n.t('Reload')}"
             class="reload-button icon">
             <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M4.681 3H2V2h3.5l.5.5V6H5V4a5 5 0 1 0 4.53-.761l.302-.954A6 6 0 1 1 4.681 3z"/></svg>
           </button>
@@ -149,11 +150,11 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
 
         <nav class="controls">
           <button
-            title="${vscode.l10n.t('Open Home')}"
+            title="${l10n.t('Open Home')}"
             class="open-home-button icon">
             <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M8.36 1.37l6.36 5.8-.71.71L13 6.964v6.526l-.5.5h-3l-.5-.5v-3.5H7v3.5l-.5.5h-3l-.5-.5V6.972L2 7.88l-.71-.71 6.35-5.8h.72zM4 6.063v6.927h2v-3.5l.5-.5h3l.5.5v3.5h2V6.057L8 2.43 4 6.063z"/></svg>          </button>
           <button
-            title="${vscode.l10n.t('Open in browser')}"
+            title="${l10n.t('Open in browser')}"
             class="open-external-button icon">
             <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M1.5 1H6v1H2v12h12v-4h1v4.5l-.5.5h-13l-.5-.5v-13l.5-.5z"/><path d="M15 1.5V8h-1V2.707L7.243 9.465l-.707-.708L13.293 2H8V1h6.5l.5.5z"/></svg>
           </button>
@@ -167,8 +168,8 @@ export class IvyBrowserViewProvider implements vscode.WebviewViewProvider {
     </html>`;
   }
 
-  private extensionResourceUrl(webview: vscode.Webview, ...pathSegments: string[]): vscode.Uri {
-    return webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, ...pathSegments));
+  private extensionResourceUrl(webview: Webview, ...pathSegments: string[]): Uri {
+    return webview.asWebviewUri(Uri.joinPath(this.extensionUri, ...pathSegments));
   }
 
   public static get instance() {

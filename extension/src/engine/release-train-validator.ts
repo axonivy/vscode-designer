@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { ExtensionVersion } from '../version/extension-version';
+import type { ExtensionVersion } from '../version/extension-version';
 import { PREVIEW_TRAINS, stableTrains } from './engine-release-train';
 
 const MIN_PATCH_VERSION = 0; // to be maintained manually

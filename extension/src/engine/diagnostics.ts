@@ -1,5 +1,6 @@
 import fs from 'fs';
-import * as vscode from 'vscode';
+import type { CodeActionContext, CodeActionProvider, DiagnosticCollection, ExtensionContext, Selection, TextDocument } from 'vscode';
+import { CodeAction, CodeActionKind, Diagnostic, DiagnosticSeverity, Range, Uri, languages } from 'vscode';
 import { IvyEngineManager } from './engine-manager';
 
 const DIAGNOSTIC_SOURCE = 'Axon Ivy';
@@ -9,17 +10,17 @@ const POM_FILE = 'pom.xml';
 export class IvyDiagnostics {
   private static _instance: IvyDiagnostics;
 
-  private constructor(private diagnostics: vscode.DiagnosticCollection) {}
+  private constructor(private diagnostics: DiagnosticCollection) {}
 
-  static init(context: vscode.ExtensionContext) {
+  static init(context: ExtensionContext) {
     if (!IvyDiagnostics._instance) {
-      const diagnostics = vscode.languages.createDiagnosticCollection(DIAGNOSTIC_SOURCE);
+      const diagnostics = languages.createDiagnosticCollection(DIAGNOSTIC_SOURCE);
       IvyDiagnostics._instance = new IvyDiagnostics(diagnostics);
-      const codeActionProvider = vscode.languages.registerCodeActionsProvider(
+      const codeActionProvider = languages.registerCodeActionsProvider(
         { pattern: `**/{${POM_FILE},${IVY_PROJECT_FILE}}` },
         new ConvertProjectQuickFix(),
         {
-          providedCodeActionKinds: [vscode.CodeActionKind.QuickFix]
+          providedCodeActionKinds: [CodeActionKind.QuickFix]
         }
       );
       context.subscriptions.push(diagnostics, codeActionProvider);
@@ -35,11 +36,11 @@ export class IvyDiagnostics {
     projects
       ?.filter(p => p && p.errorMessage)
       .forEach(project => {
-        let uri = vscode.Uri.joinPath(vscode.Uri.file(project.projectDirectory), IVY_PROJECT_FILE);
+        let uri = Uri.joinPath(Uri.file(project.projectDirectory), IVY_PROJECT_FILE);
         if (!fs.existsSync(uri.fsPath)) {
-          uri = vscode.Uri.joinPath(vscode.Uri.file(project.projectDirectory), POM_FILE);
+          uri = Uri.joinPath(Uri.file(project.projectDirectory), POM_FILE);
         }
-        const diagnostic = new vscode.Diagnostic(new vscode.Range(1, 0, 1, 0), project.errorMessage, vscode.DiagnosticSeverity.Error);
+        const diagnostic = new Diagnostic(new Range(1, 0, 1, 0), project.errorMessage, DiagnosticSeverity.Error);
         diagnostic.source = DIAGNOSTIC_SOURCE;
         this.diagnostics.set(uri, [diagnostic]);
       });
@@ -63,8 +64,8 @@ export class IvyDiagnostics {
   }
 }
 
-export class ConvertProjectQuickFix implements vscode.CodeActionProvider {
-  provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext) {
+export class ConvertProjectQuickFix implements CodeActionProvider {
+  provideCodeActions(document: TextDocument, range: Range | Selection, context: CodeActionContext) {
     if (context.diagnostics.length !== 1) {
       return [];
     }
@@ -73,7 +74,7 @@ export class ConvertProjectQuickFix implements vscode.CodeActionProvider {
       return [];
     }
     const title = 'Axon Ivy: Convert Project';
-    const action = new vscode.CodeAction(title, vscode.CodeActionKind.QuickFix);
+    const action = new CodeAction(title, CodeActionKind.QuickFix);
     action.isPreferred = true;
     action.command = {
       command: 'ivyProjects.convertProject',
