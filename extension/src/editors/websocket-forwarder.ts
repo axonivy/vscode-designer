@@ -1,7 +1,7 @@
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
-import * as vscode from 'vscode';
+import type { Disposable } from 'vscode';
 import { Messenger } from 'vscode-messenger';
-import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
+import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { createWebSocket } from '../engine/ws-client';
 
 type Endpoint =
@@ -19,7 +19,7 @@ type Endpoint =
   | 'ivy-restclient-lsp'
   | 'ivy-webservice-lsp';
 
-export class WebSocketForwarder implements vscode.Disposable {
+export class WebSocketForwarder implements Disposable {
   readonly toDispose = new DisposableCollection();
   readonly webSocket: WebSocket;
 

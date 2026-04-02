@@ -1,14 +1,15 @@
-import * as vscode from 'vscode';
+import type { ExtensionContext, WebviewPanel } from 'vscode';
+import { ViewColumn, window } from 'vscode';
 import { messenger } from '../..';
 import { registerCommand } from '../../base/commands';
 import { logErrorMessage } from '../../base/logging-util';
-import { TreeSelection } from '../../project-explorer/tree-selection';
+import type { TreeSelection } from '../../project-explorer/tree-selection';
 import { openEditorCmdProjectPath } from '../command-helper';
 import { createWebViewContent } from '../webview-helper';
 import { CmsEditorRegistry } from './cms-editor-registry';
 import { setupCommunication } from './webview-communication';
 
-export const registerOpenCmsEditorCmd = (context: vscode.ExtensionContext, websocketUrl: URL) => {
+export const registerOpenCmsEditorCmd = (context: ExtensionContext, websocketUrl: URL) => {
   const command = 'ivyEditor.openCmsEditor';
   registerCommand('ivyEditor.openCmsEditor', context, async (selection: TreeSelection) => {
     const projectPath = await openEditorCmdProjectPath(command, selection);
@@ -19,7 +20,7 @@ export const registerOpenCmsEditorCmd = (context: vscode.ExtensionContext, webso
     if (revealExistingPanel(projectPath)) {
       return;
     }
-    const webviewPanel = vscode.window.createWebviewPanel('cms-editor', `CMS`, vscode.ViewColumn.One);
+    const webviewPanel = window.createWebviewPanel('cms-editor', `CMS`, ViewColumn.One);
     setupWebviewPanel(context, websocketUrl, projectPath, webviewPanel);
   });
 };
@@ -33,12 +34,7 @@ export const revealExistingPanel = (projectPath: string) => {
   return true;
 };
 
-export const setupWebviewPanel = (
-  context: vscode.ExtensionContext,
-  websocketUrl: URL,
-  projectPath: string,
-  webviewPanel: vscode.WebviewPanel
-) => {
+export const setupWebviewPanel = (context: ExtensionContext, websocketUrl: URL, projectPath: string, webviewPanel: WebviewPanel) => {
   CmsEditorRegistry.register(projectPath, webviewPanel);
 
   const projectName = projectPath.split('/').pop();

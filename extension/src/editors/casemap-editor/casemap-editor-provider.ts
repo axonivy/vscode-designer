@@ -1,20 +1,24 @@
-import * as vscode from 'vscode';
+import type { CustomTextEditorProvider, ExtensionContext, TextDocument, WebviewPanel } from 'vscode';
+import { window } from 'vscode';
 import { messenger } from '../..';
 import { createWebViewContent } from '../webview-helper';
 import { setupCommunication } from './webview-communication';
 
-export class CaseMapEditorProvider implements vscode.CustomTextEditorProvider {
+export class CaseMapEditorProvider implements CustomTextEditorProvider {
   static readonly viewType = 'ivy.casemapEditor';
 
-  private constructor(readonly context: vscode.ExtensionContext, readonly websocketUrl: URL) {}
+  private constructor(
+    readonly context: ExtensionContext,
+    readonly websocketUrl: URL
+  ) {}
 
-  static register(context: vscode.ExtensionContext, websocketUrl: URL) {
+  static register(context: ExtensionContext, websocketUrl: URL) {
     const provider = new CaseMapEditorProvider(context, websocketUrl);
-    const providerRegistration = vscode.window.registerCustomEditorProvider(CaseMapEditorProvider.viewType, provider);
+    const providerRegistration = window.registerCustomEditorProvider(CaseMapEditorProvider.viewType, provider);
     return providerRegistration;
   }
 
-  resolveCustomTextEditor(document: vscode.TextDocument, webviewPanel: vscode.WebviewPanel) {
+  resolveCustomTextEditor(document: TextDocument, webviewPanel: WebviewPanel) {
     setupCommunication(this.websocketUrl, messenger, webviewPanel, document);
     webviewPanel.webview.options = { enableScripts: true };
     webviewPanel.webview.html = createWebViewContent(this.context, webviewPanel.webview, 'casemap-editor');

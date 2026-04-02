@@ -1,7 +1,7 @@
-import { InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
+import type { InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as vscode from 'vscode';
+import { Uri, window } from 'vscode';
 import { executeCommand } from '../../../base/commands';
 import { logInformationMessage } from '../../../base/logging-util';
 import { IvyProjectExplorer } from '../../../project-explorer/ivy-project-explorer';
@@ -33,14 +33,14 @@ async function getValideFilePath(pathString: string) {
 
 function openInExplorer(absolutePath: string | null) {
   if (absolutePath) {
-    executeCommand('vscode.open', vscode.Uri.file(absolutePath));
+    executeCommand('vscode.open', Uri.file(absolutePath));
   } else {
     logInformationMessage('The entered url is not valid.');
   }
 }
 
 async function getProjectFolder() {
-  const tabInput = vscode.window.tabGroups.activeTabGroup.activeTab?.input as { uri: vscode.Uri };
+  const tabInput = window.tabGroups.activeTabGroup.activeTab?.input as { uri: Uri };
   const path = tabInput.uri.fsPath.toString();
   return IvyProjectExplorer.instance.getIvyProjects().then(projects => projects.find(ivyProject => path.startsWith(ivyProject)));
 }

@@ -1,15 +1,15 @@
-import * as vscode from 'vscode';
+import { Uri, window } from 'vscode';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { resolveNamespaceFromPath, validateArtifactName, validateNamespace } from './utils/util';
 
-export const addNewCaseMap = async (selectedUri: vscode.Uri, projectDir: string) => {
+export const addNewCaseMap = async (selectedUri: Uri, projectDir: string) => {
   const input = await collectNewCaseMapParams(selectedUri, projectDir);
   if (input) {
     await IvyEngineManager.instance.createCaseMap(input);
   }
 };
 
-const collectNewCaseMapParams = async (selectedUri: vscode.Uri, projectDir: string) => {
+const collectNewCaseMapParams = async (selectedUri: Uri, projectDir: string) => {
   const name = await collectName();
   if (!name) {
     return;
@@ -22,7 +22,7 @@ const collectNewCaseMapParams = async (selectedUri: vscode.Uri, projectDir: stri
 };
 
 const collectName = async () => {
-  return vscode.window.showInputBox({
+  return window.showInputBox({
     title: 'Case Map Name',
     placeHolder: 'Enter a name',
     ignoreFocusOut: true,
@@ -30,9 +30,9 @@ const collectName = async () => {
   });
 };
 
-const collectNamespace = async (selectedUri: vscode.Uri, projectDir: string) => {
+const collectNamespace = async (selectedUri: Uri, projectDir: string) => {
   const namespace = await resolveNamespaceFromPath(selectedUri, projectDir, 'processes');
-  return vscode.window.showInputBox({
+  return window.showInputBox({
     title: 'Case Map Namespace',
     value: namespace,
     prompt: 'Enter Namespace separated by "/"',

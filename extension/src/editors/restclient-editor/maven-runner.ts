@@ -1,7 +1,7 @@
 import { exec } from 'child_process';
-import * as vscode from 'vscode';
+import { window } from 'vscode';
 
-const outputChannel = vscode.window.createOutputChannel('Axon Ivy Codegen');
+const outputChannel = window.createOutputChannel('Axon Ivy Codegen');
 
 export async function runMavenCommand(ivyProjectDir: string, command: string) {
   const childProcess = exec(`${command} -Dstyle.color=never`, { cwd: ivyProjectDir });

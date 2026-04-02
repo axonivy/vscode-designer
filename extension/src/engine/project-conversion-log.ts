@@ -1,10 +1,11 @@
 import { IncomingMessage } from 'http';
-import * as vscode from 'vscode';
+import type { LogOutputChannel } from 'vscode';
+import { window } from 'vscode';
 
 type LogEntry = { severity: string; message: string };
 
 export const handleProjectConversionLog = (message: IncomingMessage) => {
-  const output = vscode.window.createOutputChannel('Axon Ivy Project Conversion', { log: true });
+  const output = window.createOutputChannel('Axon Ivy Project Conversion', { log: true });
   output.show();
   return new Promise<void>(resolve => {
     message.on('data', chunk => {
@@ -23,7 +24,7 @@ export const handleProjectConversionLog = (message: IncomingMessage) => {
   });
 };
 
-const append = (entry: LogEntry, output: vscode.LogOutputChannel) => {
+const append = (entry: LogEntry, output: LogOutputChannel) => {
   const severity = entry.severity.toUpperCase();
   switch (severity) {
     case 'ERROR':

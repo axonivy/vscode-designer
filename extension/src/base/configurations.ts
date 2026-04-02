@@ -1,7 +1,7 @@
-import * as vscode from 'vscode';
-import { AnimationFollowMode } from '../engine/animation';
+import { workspace } from 'vscode';
+import type { AnimationFollowMode } from '../engine/animation';
 
-const configs = () => vscode.workspace.getConfiguration();
+const configs = () => workspace.getConfiguration();
 
 export const config = {
   engineRunByExtension: () => configs().get<boolean>('axonivy.engine.runByExtension'),

@@ -4,7 +4,8 @@ import {
   SocketGlspVscodeServer,
   configureDefaultCommands
 } from '@eclipse-glsp/vscode-integration';
-import * as vscode from 'vscode';
+import type { CancellationToken, CustomDocument, ExtensionContext, WebviewPanel } from 'vscode';
+import { window } from 'vscode';
 import { messenger } from '../..';
 import { createWebViewContent } from '../webview-helper';
 import { ProcessVscodeConnector } from './process-vscode-connector';
@@ -15,19 +16,14 @@ export default class ProcessEditorProvider extends GlspEditorProvider {
   static readonly viewType = 'ivy.glspDiagram';
 
   private constructor(
-    protected readonly extensionContext: vscode.ExtensionContext,
+    protected readonly extensionContext: ExtensionContext,
     protected override readonly glspVscodeConnector: GlspVscodeConnector,
     readonly websocketUrl: URL
   ) {
     super(glspVscodeConnector);
   }
 
-  async setUpWebview(
-    document: vscode.CustomDocument,
-    webviewPanel: vscode.WebviewPanel,
-    _token: vscode.CancellationToken,
-    clientId: string
-  ): Promise<void> {
+  async setUpWebview(document: CustomDocument, webviewPanel: WebviewPanel, _token: CancellationToken, clientId: string): Promise<void> {
     const client = this.glspVscodeConnector['clientMap'].get(clientId);
     setupCommunication(
       this.websocketUrl,
@@ -40,7 +36,7 @@ export default class ProcessEditorProvider extends GlspEditorProvider {
     webviewPanel.webview.html = createWebViewContent(this.extensionContext, webviewPanel.webview, 'process-editor');
   }
 
-  static register(context: vscode.ExtensionContext, websocketUrl: URL) {
+  static register(context: ExtensionContext, websocketUrl: URL) {
     const workflowServer = new SocketGlspVscodeServer({
       clientId: 'ivy-glsp-web-ide-process-editor',
       clientName: 'ivy-glsp-web-ide-process-editor',
@@ -56,7 +52,7 @@ export default class ProcessEditorProvider extends GlspEditorProvider {
       logging: true
     });
 
-    const customEditorProvider = vscode.window.registerCustomEditorProvider(
+    const customEditorProvider = window.registerCustomEditorProvider(
       ProcessEditorProvider.viewType,
       new ProcessEditorProvider(context, ivyVscodeConnector, websocketUrl),
       {

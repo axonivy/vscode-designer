@@ -1,19 +1,20 @@
-import * as vscode from 'vscode';
-import { Code2ProtocolConverter, ExecuteCommandParams, LanguageClient } from 'vscode-languageclient/node';
+import { DocumentSymbol, commands } from 'vscode';
+
+import { LanguageClient, type Code2ProtocolConverter, type ExecuteCommandParams } from 'vscode-languageclient/node';
 import * as lsprot from 'vscode-languageserver-protocol';
 
 export const onExecuteClientCommand = async (languageClient: LanguageClient, params: ExecuteCommandParams) => {
   const args = params.arguments ?? [];
   if (params.command === 'vscode.executeDocumentSymbolProvider') {
     args[0] = languageClient.protocol2CodeConverter.asUri(args[0]);
-    const msg = await vscode.commands.executeCommand(params.command, ...args);
+    const msg = await commands.executeCommand(params.command, ...args);
     return asDocumentSymbols(languageClient.code2ProtocolConverter, msg);
   }
   if (params.command === 'vscode.executeWorkspaceSymbolProvider') {
-    const msg = await vscode.commands.executeCommand(params.command, ...args);
+    const msg = await commands.executeCommand(params.command, ...args);
     return asWorkspaceSymbols(languageClient.code2ProtocolConverter, msg);
   }
-  return vscode.commands.executeCommand(params.command, ...args);
+  return commands.executeCommand(params.command, ...args);
 };
 
 const asDocumentSymbols = (converter: Code2ProtocolConverter, msg: unknown): lsprot.DocumentSymbol[] => {
@@ -23,7 +24,7 @@ const asDocumentSymbols = (converter: Code2ProtocolConverter, msg: unknown): lsp
   return msg.map(item => asDocumentSymbol(converter, item));
 };
 
-const asDocumentSymbol = (converter: Code2ProtocolConverter, symbol: vscode.DocumentSymbol): lsprot.DocumentSymbol => {
+const asDocumentSymbol = (converter: Code2ProtocolConverter, symbol: DocumentSymbol): lsprot.DocumentSymbol => {
   return {
     name: symbol.name,
     detail: symbol.detail,

@@ -1,8 +1,8 @@
 import type { PersistenceActionArgs } from '@axonivy/persistence-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
-import * as vscode from 'vscode';
+import type { TextDocument, WebviewPanel } from 'vscode';
 import { Messenger } from 'vscode-messenger';
-import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
+import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { updateTextDocumentContent } from '../content-writer';
 import {
   hasEditorFileContent,
@@ -16,12 +16,7 @@ import { WebSocketForwarder } from '../websocket-forwarder';
 
 const PersistenceWebSocketMessage: NotificationType<unknown> = { method: 'persistenceWebSocketMessage' };
 
-export const setupCommunication = (
-  websocketUrl: URL,
-  messenger: Messenger,
-  webviewPanel: vscode.WebviewPanel,
-  document: vscode.TextDocument
-) => {
+export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webviewPanel: WebviewPanel, document: TextDocument) => {
   const messageParticipant = messenger.registerWebviewPanel(webviewPanel);
   const toDispose = new DisposableCollection(
     new PersistenceEditorWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
@@ -39,7 +34,7 @@ class PersistenceEditorWebSocketForwarder extends WebSocketForwarder {
     websocketUrl: URL,
     messenger: Messenger,
     messageParticipant: MessageParticipant,
-    readonly document: vscode.TextDocument
+    readonly document: TextDocument
   ) {
     super(websocketUrl, 'ivy-persistence-lsp', messenger, messageParticipant, PersistenceWebSocketMessage);
   }

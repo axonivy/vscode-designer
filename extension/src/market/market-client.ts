@@ -2,9 +2,9 @@ import {
   findProductJsonContent,
   findProducts,
   findProductVersionsById,
-  MavenArtifactVersionModel,
-  PagedModelProductModel,
-  ProductModel
+  type MavenArtifactVersionModel,
+  type PagedModelProductModel,
+  type ProductModel
 } from './generated/market-client';
 
 export type Product = {

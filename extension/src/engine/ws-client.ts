@@ -1,5 +1,5 @@
-import * as vscode from 'vscode';
-import { IWebSocket, WebSocketMessageReader, WebSocketMessageWriter } from 'vscode-ws-jsonrpc';
+import { workspace } from 'vscode';
+import { WebSocketMessageReader, WebSocketMessageWriter, type IWebSocket } from 'vscode-ws-jsonrpc';
 import { logErrorMessage } from '../base/logging-util';
 import { animationSettings, handleOpenProcessEditor, openEditor } from './animation';
 import { WebIdeClientJsonRpc } from './api/jsonrpc';
@@ -12,7 +12,7 @@ export const WebIdeWebSocketProvider = (webSocketUrl: URL) => {
       client.animationSettings(animationSettings());
       client.onOpenProcessEditor.set(process => handleOpenProcessEditor(process));
       client.onOpenFormEditor.set(form => openEditor(form));
-      vscode.workspace.onDidChangeConfiguration(e => {
+      workspace.onDidChangeConfiguration(e => {
         if (e.affectsConfiguration('axonivy.process.animation')) {
           client.animationSettings(animationSettings());
         }
