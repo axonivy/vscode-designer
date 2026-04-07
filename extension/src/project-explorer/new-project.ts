@@ -1,8 +1,8 @@
 import path from 'path';
-import * as vscode from 'vscode';
+import { FileType, Uri, window, workspace } from 'vscode';
 import { logInformationMessage } from '../base/logging-util';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { TreeSelection, treeSelectionToUri } from './tree-selection';
+import { type TreeSelection, treeSelectionToUri } from './tree-selection';
 import { validateArtifactName, validateDotSeparatedName } from './utils/util';
 
 export const addNewProject = async (selection: TreeSelection) => {
@@ -20,23 +20,23 @@ export const addNewProject = async (selection: TreeSelection) => {
 };
 
 const getWorkspaceFolder = async () => {
-  const workspaceFolders = vscode.workspace.workspaceFolders;
+  const workspaceFolders = workspace.workspaceFolders;
   if (workspaceFolders?.length === 1 && workspaceFolders[0]) {
     return workspaceFolders[0].uri;
   }
-  return await vscode.window.showWorkspaceFolderPick().then(folder => folder?.uri);
+  return await window.showWorkspaceFolderPick().then(folder => folder?.uri);
 };
 
-const isDirectory = async (uri?: vscode.Uri) => {
+const isDirectory = async (uri?: Uri) => {
   if (!uri) {
     return false;
   }
-  return (await vscode.workspace.fs.stat(uri)).type === vscode.FileType.Directory;
+  return (await workspace.fs.stat(uri)).type === FileType.Directory;
 };
 
-const collectNewProjectParams = async (selectedUri: vscode.Uri) => {
+const collectNewProjectParams = async (selectedUri: Uri) => {
   const prompt = `Project Location: ${selectedUri.path}`;
-  const name = await vscode.window.showInputBox({
+  const name = await window.showInputBox({
     title: 'Project Name',
     validateInput: validateArtifactName,
     prompt,
@@ -46,7 +46,7 @@ const collectNewProjectParams = async (selectedUri: vscode.Uri) => {
     return;
   }
   const projectPath = path.join(selectedUri.fsPath, name);
-  const groupId = await vscode.window.showInputBox({
+  const groupId = await window.showInputBox({
     title: 'Group Id',
     value: name,
     validateInput: value => validateDotSeparatedName(value),
@@ -55,7 +55,7 @@ const collectNewProjectParams = async (selectedUri: vscode.Uri) => {
   if (!groupId) {
     return;
   }
-  const projectId = await vscode.window.showInputBox({
+  const projectId = await window.showInputBox({
     title: 'Project Id',
     value: name,
     validateInput: value => validateDotSeparatedName(value),

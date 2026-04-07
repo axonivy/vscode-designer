@@ -1,10 +1,11 @@
 import { XMLParser } from 'fast-xml-parser';
 import path from 'path';
-import * as vscode from 'vscode';
+import type { FileStat } from 'vscode';
+import { FileType, Uri, workspace } from 'vscode';
 
 const defaultNamespaceOf = (projecDir: string) => {
-  const designerPrefs = vscode.Uri.joinPath(vscode.Uri.file(projecDir), 'pom.xml');
-  return vscode.workspace.fs.readFile(designerPrefs).then(
+  const designerPrefs = Uri.joinPath(Uri.file(projecDir), 'pom.xml');
+  return workspace.fs.readFile(designerPrefs).then(
     content => {
       const pom = new XMLParser().parse(content);
       if (pom.project && pom.project.groupId) {
@@ -18,14 +19,14 @@ const defaultNamespaceOf = (projecDir: string) => {
 
 type ResourceDirectoryTarget = 'processes' | 'src_hd' | 'dataclasses';
 
-export const resolveNamespaceFromPath = async (selectedUri: vscode.Uri, projectDir: string, target: ResourceDirectoryTarget) => {
-  let fileStat: vscode.FileStat;
+export const resolveNamespaceFromPath = async (selectedUri: Uri, projectDir: string, target: ResourceDirectoryTarget) => {
+  let fileStat: FileStat;
   try {
-    fileStat = await vscode.workspace.fs.stat(selectedUri);
+    fileStat = await workspace.fs.stat(selectedUri);
   } catch {
     return resolveDefaultNamespace(projectDir, target);
   }
-  const selectedPath = fileStat.type === vscode.FileType.File ? getDirectory(selectedUri.fsPath, target) : selectedUri.fsPath;
+  const selectedPath = fileStat.type === FileType.File ? getDirectory(selectedUri.fsPath, target) : selectedUri.fsPath;
   const targetDir = path.join(projectDir, target);
   if (!selectedPath.includes(targetDir)) {
     return resolveDefaultNamespace(projectDir, target);

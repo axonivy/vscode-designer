@@ -1,6 +1,6 @@
-import { BaseRpcClient, Connection, createMessageConnection, Disposable } from '@axonivy/jsonrpc';
-import { ProcessBean, type HdBean } from './generated/client';
-import { Callback, WebIdeClient } from './jsonrpc-protocol';
+import { BaseRpcClient, createMessageConnection, type Connection, type Disposable } from '@axonivy/jsonrpc';
+import type { HdBean, ProcessBean } from './generated/client';
+import { Callback, type WebIdeClient } from './jsonrpc-protocol';
 
 export interface WebIdeOnRequestTypes {
   openProcessEditor: [ProcessBean, Promise<boolean>];

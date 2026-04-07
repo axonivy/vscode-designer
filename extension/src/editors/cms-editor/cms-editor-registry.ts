@@ -1,12 +1,12 @@
-import * as vscode from 'vscode';
+import type { WebviewPanel, WebviewPanelOnDidChangeViewStateEvent } from 'vscode';
 import { IvyProjectExplorer } from '../../project-explorer/ivy-project-explorer';
 
 class CmsEditorRegistryImpl {
-  private editors = new Map<string, vscode.WebviewPanel>();
+  private editors = new Map<string, WebviewPanel>();
 
-  register(projectPath: string, panel: vscode.WebviewPanel) {
+  register(projectPath: string, panel: WebviewPanel) {
     this.editors.set(projectPath, panel);
-    panel.onDidChangeViewState((event: vscode.WebviewPanelOnDidChangeViewStateEvent) => {
+    panel.onDidChangeViewState((event: WebviewPanelOnDidChangeViewStateEvent) => {
       if (event.webviewPanel.active) {
         IvyProjectExplorer.instance.selectCmsEntry(projectPath);
       }
@@ -14,7 +14,7 @@ class CmsEditorRegistryImpl {
     panel.onDidDispose(() => this.editors.delete(projectPath));
   }
 
-  find(projectPath: string): vscode.WebviewPanel | undefined {
+  find(projectPath: string): WebviewPanel | undefined {
     return this.editors.get(projectPath);
   }
 

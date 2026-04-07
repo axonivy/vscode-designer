@@ -1,8 +1,9 @@
-import { DataActionArgs, DataClassTypeSearchRequest } from '@axonivy/dataclass-editor-protocol';
+import type { DataActionArgs, DataClassTypeSearchRequest } from '@axonivy/dataclass-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
-import * as vscode from 'vscode';
+import type { TextDocument, WebviewPanel } from 'vscode';
+import { commands, Uri } from 'vscode';
 import { Messenger } from 'vscode-messenger';
-import { MessageParticipant, NotificationType } from 'vscode-messenger-common';
+import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { updateTextDocumentContent } from '../content-writer';
 import { JavaCompletion } from '../java-completion';
 import {
@@ -19,12 +20,7 @@ import { WebSocketForwarder } from '../websocket-forwarder';
 
 const DataClassWebSocketMessage: NotificationType<unknown> = { method: 'dataclassWebSocketMessage' };
 
-export const setupCommunication = (
-  websocketUrl: URL,
-  messenger: Messenger,
-  webviewPanel: vscode.WebviewPanel,
-  document: vscode.TextDocument
-) => {
+export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webviewPanel: WebviewPanel, document: TextDocument) => {
   const messageParticipant = messenger.registerWebviewPanel(webviewPanel);
   const toDispose = new DisposableCollection(
     new DataClassEditorWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
@@ -46,7 +42,7 @@ class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
     websocketUrl: URL,
     messenger: Messenger,
     messageParticipant: MessageParticipant,
-    readonly document: vscode.TextDocument
+    readonly document: TextDocument
   ) {
     super(websocketUrl, 'ivy-data-class-lsp', messenger, messageParticipant, DataClassWebSocketMessage);
     this.javaCompletion = new JavaCompletion(document.uri, 'data-class');
@@ -61,10 +57,10 @@ class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
           openUrlExternally(message.params.payload);
           break;
         case 'openProcess':
-          vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(`${path}Process.p.json`));
+          commands.executeCommand('vscode.open', Uri.parse(`${path}Process.p.json`));
           break;
         case 'openForm':
-          vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(`${path}.f.json`));
+          commands.executeCommand('vscode.open', Uri.parse(`${path}.f.json`));
           break;
         default:
           noUnknownAction(message.params.actionId);

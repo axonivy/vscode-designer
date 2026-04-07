@@ -1,4 +1,5 @@
-import * as vscode from 'vscode';
+import type { ExtensionContext } from 'vscode';
+import { ThemeIcon, window } from 'vscode';
 import { config } from '../base/configurations';
 import { extensionVersion } from '../version/extension-version';
 import { ReleaseTrainValidator } from './release-train-validator';
@@ -14,11 +15,11 @@ export const engineReleaseTrain = () => {
   return extensionVersion.isPreview ? 'nightly' : `${extensionVersion.major}.${extensionVersion.minor}`;
 };
 
-export const engineDirFromGlobalState = (contentx: vscode.ExtensionContext, releaseTrain: string) => {
+export const engineDirFromGlobalState = (contentx: ExtensionContext, releaseTrain: string) => {
   return contentx.globalState.get<string>(`axonivy.${releaseTrain}`);
 };
 
-export const updateGlobalStateEngineDir = async (contentx: vscode.ExtensionContext, releaseTrain: string, engineDir: string) => {
+export const updateGlobalStateEngineDir = async (contentx: ExtensionContext, releaseTrain: string, engineDir: string) => {
   await contentx.globalState.update(`axonivy.${releaseTrain}`, engineDir);
 };
 
@@ -28,14 +29,14 @@ export const switchEngineReleaseTrain = async (reason?: string) => {
     ? PREVIEW_TRAINS.map(train => toItem(train, currentTrain))
     : stableTrains(extensionVersion.major).map(train => toItem(train, currentTrain));
   let selectedTrain = (
-    await vscode.window.showQuickPick([...items, { label: 'Enter custom value' }], {
+    await window.showQuickPick([...items, { label: 'Enter custom value' }], {
       ignoreFocusOut: true,
       title: reason
     })
   )?.label;
   if (selectedTrain === 'Enter custom value') {
     const releaseTrainValidator = new ReleaseTrainValidator(extensionVersion);
-    selectedTrain = await vscode.window.showInputBox({
+    selectedTrain = await window.showInputBox({
       placeHolder: "Enter custom release train, e.g. '14.0.1' or a path of an existing engine directory)",
       validateInput: async (value: string) => {
         const result = await releaseTrainValidator.validate(value);
@@ -54,5 +55,5 @@ export const switchEngineReleaseTrain = async (reason?: string) => {
 };
 
 const toItem = (trainSelection: string, currentTrain?: string) => {
-  return { label: trainSelection, iconPath: currentTrain === trainSelection ? new vscode.ThemeIcon('check') : undefined };
+  return { label: trainSelection, iconPath: currentTrain === trainSelection ? new ThemeIcon('check') : undefined };
 };

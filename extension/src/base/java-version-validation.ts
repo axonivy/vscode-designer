@@ -1,13 +1,13 @@
 import fs from 'fs';
 import path from 'path';
-import * as vscode from 'vscode';
+import { commands, ConfigurationTarget, workspace } from 'vscode';
 import { logErrorMessage, logInformationMessage } from './logging-util';
 
 const EXPECTED_JAVA_VERSION = '25';
 
 export const validateAndSyncJavaVersion = async () => {
   const javaHome = process.env.IVY_JAVA_HOME ?? process.env.JAVA_HOME;
-  const jdtJavaHome = vscode.workspace.getConfiguration().get<string>('java.jdt.ls.java.home');
+  const jdtJavaHome = workspace.getConfiguration().get<string>('java.jdt.ls.java.home');
   const isValidJavaHome = isValidJavaVersion(javaHome);
   const isValidJdtJavaHome = isValidJavaVersion(jdtJavaHome);
   if (!isValidJavaHome && !isValidJdtJavaHome) {
@@ -23,8 +23,8 @@ export const validateAndSyncJavaVersion = async () => {
   }
   if (!isValidJdtJavaHome) {
     logInformationMessage("Updating 'java.jdt.ls.java.home' to match JAVA_HOME and restarting extension host...");
-    await vscode.workspace.getConfiguration().update('java.jdt.ls.java.home', javaHome, vscode.ConfigurationTarget.Global);
-    await vscode.commands.executeCommand('workbench.action.reloadWindow');
+    await workspace.getConfiguration().update('java.jdt.ls.java.home', javaHome, ConfigurationTarget.Global);
+    await commands.executeCommand('workbench.action.reloadWindow');
   }
 };
 

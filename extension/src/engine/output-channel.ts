@@ -1,3 +1,3 @@
-import * as vscode from 'vscode';
+import { window } from 'vscode';
 
-export const outputChannel = vscode.window.createOutputChannel('Axon Ivy Engine');
+export const outputChannel = window.createOutputChannel('Axon Ivy Engine');

@@ -1,4 +1,4 @@
-import { InscriptionActionArgs, InscriptionNotificationTypes } from '@axonivy/process-editor-inscription-protocol';
+import type { InscriptionActionArgs, InscriptionNotificationTypes } from '@axonivy/process-editor-inscription-protocol';
 import { executeCommand } from '../../../base/commands';
 import { logWarningMessage } from '../../../base/logging-util';
 import { isAction, noUnknownAction } from '../../notification-helper';
