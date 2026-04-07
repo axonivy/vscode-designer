@@ -1,21 +1,23 @@
+import { SetBreakpointAction, ToggleBreakpointAction } from '@axonivy/process-editor-protocol';
 import { SetModelAction } from '@eclipse-glsp/protocol';
 import {
   ActionMessage,
   GlspVscodeConnector,
+  MessageOrigin,
   type GModelRootSchema,
   type GlspVscodeClient,
   type GlspVscodeConnectorOptions,
   type MessageAction,
-  type MessageOrigin,
   type MessageProcessingResult,
   type NavigateToExternalTargetAction,
   type SelectionState,
   type SetMarkersAction
 } from '@eclipse-glsp/vscode-integration';
-import type { CustomDocument, StatusBarItem } from 'vscode';
+import type { StatusBarItem } from 'vscode';
 import { Diagnostic, DiagnosticSeverity, EventEmitter, Range, Uri, commands, window } from 'vscode';
 import { logErrorMessage, logInformationMessage, logWarningMessage } from '../../base/logging-util';
 import type { SelectedElement } from '../../base/process-editor-connector';
+import { ProcessBreakpointHandler } from './process-breakpoint-handler';
 import ProcessEditorProvider from './process-editor-provider';
 
 type IvyGlspClient = GlspVscodeClient & { app: string; pmv: string };
@@ -25,24 +27,31 @@ const severityMap = new Map([
   ['error', DiagnosticSeverity.Error]
 ]);
 
-export class ProcessVscodeConnector<D extends CustomDocument = CustomDocument> extends GlspVscodeConnector {
+export class ProcessVscodeConnector extends GlspVscodeConnector {
   private readonly emitter = new EventEmitter<SelectedElement>();
   private readonly onSelectedElementUpdate = this.emitter.event;
-  protected readonly onDidChangeActiveGlspEditorEventEmitter = new EventEmitter<{ client: GlspVscodeClient<D> }>();
+  protected readonly onDidChangeActiveGlspEditorEventEmitter = new EventEmitter<{ client: GlspVscodeClient }>();
   private readonly modelLoading: StatusBarItem;
+  private readonly breakpointHandler: ProcessBreakpointHandler;
 
   constructor(options: GlspVscodeConnectorOptions) {
     super(options);
     this.onSelectionUpdate(selection => this.selectionChange(selection));
     this.modelLoading = window.createStatusBarItem();
     this.modelLoading.text = '$(loading~spin) Model loading';
+    this.breakpointHandler = new ProcessBreakpointHandler(
+      clientId => this.clientMap.get(clientId),
+      () => this.clientMap.keys(),
+      (action, clientId) => this.dispatchAction(action, clientId)
+    );
+    this.breakpointHandler.register(this.disposables);
   }
 
   get onDidChangeActiveGlspEditor() {
     return this.onDidChangeActiveGlspEditorEventEmitter.event;
   }
 
-  override async registerClient(client: GlspVscodeClient<D>): Promise<void> {
+  override async registerClient(client: GlspVscodeClient): Promise<void> {
     this.onDidChangeActiveGlspEditorEventEmitter.fire({ client });
 
     client.webviewEndpoint.webviewPanel.onDidChangeViewState(e => {
@@ -85,7 +94,7 @@ export class ProcessVscodeConnector<D extends CustomDocument = CustomDocument> e
 
   protected override handleNavigateToExternalTargetAction(
     message: ActionMessage<NavigateToExternalTargetAction>,
-    _client: GlspVscodeClient<D> | undefined,
+    _client: GlspVscodeClient | undefined,
     _origin: MessageOrigin
   ) {
     const { args } = message.action.target;
@@ -106,6 +115,7 @@ export class ProcessVscodeConnector<D extends CustomDocument = CustomDocument> e
   }
 
   protected override processMessage(message: unknown, origin: MessageOrigin): MessageProcessingResult {
+    let syncBreakpointsAfterMessage = false;
     if (ActionMessage.is(message)) {
       if (SetModelAction.is(message.action)) {
         const action = message.action;
@@ -114,9 +124,20 @@ export class ProcessVscodeConnector<D extends CustomDocument = CustomDocument> e
         const newRoot = action.newRoot as GModelRootSchema & { args: { app: string; pmv: string } };
         ivyClient.app = newRoot.args.app;
         ivyClient.pmv = newRoot.args.pmv;
+        syncBreakpointsAfterMessage = origin === MessageOrigin.SERVER;
+      }
+      if (SetBreakpointAction.is(message.action)) {
+        this.breakpointHandler.toggleBreakpoint(message.clientId, message.action.elementId);
+      }
+      if (ToggleBreakpointAction.is(message.action)) {
+        this.breakpointHandler.setBreakpointDisabled(message.clientId, message.action.elementId, message.action.disable);
       }
     }
-    return super.processMessage(message, origin);
+    const result = super.processMessage(message, origin);
+    if (syncBreakpointsAfterMessage && ActionMessage.is(message)) {
+      queueMicrotask(() => this.breakpointHandler.syncForClient(message.clientId));
+    }
+    return result;
   }
 
   protected override handleMessageAction(message: ActionMessage<MessageAction>): MessageProcessingResult {
@@ -145,7 +166,7 @@ export class ProcessVscodeConnector<D extends CustomDocument = CustomDocument> e
 
   protected override handleSetMarkersAction(
     message: ActionMessage<SetMarkersAction>,
-    client: GlspVscodeClient<D> | undefined,
+    client: GlspVscodeClient | undefined,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _origin: MessageOrigin
   ): MessageProcessingResult {
