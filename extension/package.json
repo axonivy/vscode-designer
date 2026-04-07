@@ -82,7 +82,7 @@
   "contributes": {
     "configurationDefaults": {
       "workbench.editorAssociations": {
-        "{git,gitlens}:/**/{*.p.json,*.d.json,*.f.json,cms_*.yaml,variables.yaml}": "default"
+        "{git,gitlens}:/**/{*.p.json,*.d.json,*.f.json,*.yaml}": "default"
       },
       "json.schemaDownload.trustedDomains": {
         "https://schemastore.azurewebsites.net/": true,
@@ -102,15 +102,6 @@
         "selector": [
           {
             "filenamePattern": "variables.yaml"
-          }
-        ]
-      },
-      {
-        "viewType": "ivy.casemapEditor",
-        "displayName": "Axon Ivy Case Map Editor",
-        "selector": [
-          {
-            "filenamePattern": "*.m.json"
           }
         ]
       },
@@ -160,6 +151,15 @@
         ]
       },
       {
+        "viewType": "ivy.databaseEditor",
+        "displayName": "Axon Ivy Database Editor",
+        "selector": [
+          {
+            "filenamePattern": "databases.yaml"
+          }
+        ]
+      },
+      {
         "viewType": "ivy.cmsEditor",
         "displayName": "Axon Ivy CMS Editor",
         "selector": [
@@ -178,6 +178,15 @@
         ]
       },
       {
+        "viewType": "ivy.casemapEditor",
+        "displayName": "Axon Ivy Case Map Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.m.json"
+          }
+        ]
+      },
+      {
         "viewType": "ivy.formEditor",
         "displayName": "Axon Ivy Form Editor",
         "selector": [
@@ -192,15 +201,6 @@
         "selector": [
           {
             "filenamePattern": "*.d.json"
-          }
-        ]
-      },
-      {
-        "viewType": "ivy.databaseEditor",
-        "displayName": "Axon Ivy Database Editor",
-        "selector": [
-          {
-            "filenamePattern": "**/config/databases.yaml"
           }
         ]
       }
