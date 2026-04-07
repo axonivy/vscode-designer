@@ -12,8 +12,7 @@ test.describe('Problems View', () => {
     await processEditor.isViewVisible();
   });
 
-  // eslint-disable-next-line playwright/no-focused-test
-  test.only('Check existing warning and error', async ({ page }) => {
+  test('Check existing warning and error', async ({ page }) => {
     const trigger = processEditor.locatorForPID('18D9CDFA8F58DA2B-f3');
     await processEditor.hasWarning(trigger);
     const problemsView = await ProblemsView.initProblemsView(page);
