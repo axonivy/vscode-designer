@@ -1,0 +1,50 @@
+pipeline {
+  agent any
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '60', artifactNumToKeepStr: '2'))
+    disableConcurrentBuilds()
+  }
+
+  triggers {
+    cron '@midnight'
+  }
+
+  parameters {
+    string(name: 'engineDownloadUrl', defaultValue: 'https://jenkins.ivyteam.io/job/core_product/job/master/lastSuccessfulBuild/artifact/workspace/ch.ivyteam.ivy.server.product/target/products/*_Slim_*.zip/*zip*/products.zip', description: 'engine that will be packaged')
+  }
+
+  stages {
+    stage('Integration Test') {
+      steps {
+        script {
+          docker.build('node-webtest', '-f build/integration/Dockerfile .').inside {
+            sh """
+            pnpm run update:axonivy:next
+            pnpm install --no-frozen-lockfile
+            pnpm run build:production
+            pnpm run engine:download ${params.engineDownloadUrl}
+            nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
+            pnpm run test:playwright:download:vscode
+            """
+            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+              sh 'xvfb-run --auto-servernum pnpm run test:playwright'
+            }
+          }
+          archiveArtifacts artifacts: '**/playwright/test-results/**', allowEmptyArchive: true
+          archiveArtifacts artifacts: 'AxonIvyEngine/logs/ivy.log', allowEmptyArchive: true
+          archiveArtifacts artifacts: 'ivy-engine-console.out', allowEmptyArchive: true
+          withChecks('WebTests') {
+            junit testDataPublishers: [[$class: 'StabilityTestDataPublisher']], testResults: '**/node_modules/**/report.xml'
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      cleanWs()
+    }
+  }
+} 
