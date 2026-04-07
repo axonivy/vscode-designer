@@ -19,7 +19,7 @@ pipeline {
     stage('Integration Test') {
       steps {
         script {
-          docker.build('node-webtest', '-f build/integration/openvscode-server/Dockerfile .').inside {
+          docker.build('node-webtest', '-f build/integration/Dockerfile .').inside {
             sh """
             pnpm run update:axonivy:next
             pnpm install --no-frozen-lockfile
