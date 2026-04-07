@@ -28,7 +28,7 @@ pipeline {
             pnpm run test:playwright:download:vscode
             """
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-              sh 'xvfb-run --auto-servernum pnpm run test:playwright'
+              sh 'xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" pnpm run test:playwright'
             }
           }
           archiveArtifacts artifacts: '**/playwright/test-results/**', allowEmptyArchive: true
