@@ -71,7 +71,10 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.name,
-      validationFunction: validateArtifactName
+      validationFunction: validateArtifactName,
+      onBack: (typedValue: string) => {
+        state.name = typedValue;
+      }
     });
   };
 
@@ -87,7 +90,10 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.namespace,
-      validationFunction: validateNamespace
+      validationFunction: validateNamespace,
+      onBack: (typedValue: string) => {
+        state.namespace = typedValue;
+      }
     });
   };
 
