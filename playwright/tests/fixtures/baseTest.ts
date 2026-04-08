@@ -48,6 +48,7 @@ const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean
     args: [
       '--no-sandbox',
       '--disable-gpu-sandbox',
+      '--disable-gpu',
       '--disable-updates',
       '--skip-welcome',
       '--skip-release-notes',

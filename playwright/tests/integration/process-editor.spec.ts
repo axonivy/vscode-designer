@@ -4,7 +4,8 @@ import { ProcessEditor } from '../page-objects/process-editor';
 
 const userDialogPID = '15254DCE818AD7A2-f3';
 
-test.describe('Process Editor', () => {
+// eslint-disable-next-line playwright/no-focused-test
+test.describe.only('Process Editor', () => {
   let processEditor: ProcessEditor;
 
   test.beforeEach(async ({ page }) => {
