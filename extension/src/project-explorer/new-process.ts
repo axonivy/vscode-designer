@@ -94,9 +94,8 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
     });
   };
 
-  // Define step order, set execution counter for steps that might have defaults and set value automatically
+  // Define step order
   const steps: InputStep<NewProcessState>[] = [stepProject, stepName, stepNamespace];
-  stepProject.execCounter = 0;
 
   const newProcessData: NewProcessState = {
     dialogTitle: `Add New ${kind}`,
