@@ -22,7 +22,6 @@ interface NewProcessState extends MSStateBase {
   projectSelection: ProjectSelection;
   name: string;
   namespace: string;
-  namespaceFromPath?: string;
   projectSelectionFromPath?: ProjectSelection;
 }
 
@@ -41,8 +40,9 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
   }
 
   const stepProject: InputStep<NewProcessState> = async (input: MultiStepInput<NewProcessState>, state: NewProcessState) => {
-    if (state.projectSelectionFromPath && stepProject.execCounter !== undefined && stepProject.execCounter === 0) {
+    if (state.projectSelectionFromPath && (state.projectSelection.label === '' || state.projectSelection.label === undefined)) {
       state.projectSelection = state.projectSelectionFromPath;
+      state.projectSelectionFromPath = undefined;
     } else {
       state.projectSelection = await input.showQuickPick({
         title: state.dialogTitle,
@@ -80,9 +80,6 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
 
   // Step 3 - Enter the namespace of the process to be created
   const stepNamespace: InputStep<NewProcessState> = async (input: MultiStepInput<NewProcessState>, state: NewProcessState) => {
-    if (state.namespaceFromPath) {
-      state.namespace = state.namespaceFromPath;
-    }
     state.namespace = await input.showTextInput({
       title: state.dialogTitle,
       titleSuffix: ' - Choose process namespace',
@@ -106,8 +103,7 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
     currentStep: 1,
     totalSteps: steps.length,
     name: '',
-    namespace: '',
-    namespaceFromPath: namespaceFromPath,
+    namespace: typeof namespaceFromPath === 'string' && namespaceFromPath.trim() !== '' ? namespaceFromPath : '',
     projectSelection: {} as ProjectSelection,
     projectSelectionFromPath: projectSelectionFromPath
   };
