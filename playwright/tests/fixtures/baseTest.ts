@@ -45,10 +45,6 @@ const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean
   const tmpWorkspace = await createTmpWorkspace(workspace);
   const electronApp = await _electron.launch({
     executablePath: vscodePath,
-    env: {
-      ...process.env,
-      ELECTRON_DISABLE_GPU: '1'
-    },
     args: [
       '--disable-dev-shm-usage',
       '--disable-updates',
