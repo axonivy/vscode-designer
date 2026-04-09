@@ -41,6 +41,7 @@
     "@axonivy/process-editor-inscription-protocol": "~14.0.0-next.2163.692dc002",
     "@axonivy/process-editor-protocol": "~14.0.0-next.2163.692dc002",
     "@axonivy/role-editor-protocol": "~14.0.0-next.169.5337f2b",
+    "@axonivy/ui-icons": "~14.0.0-next.1104.91f4491",
     "@axonivy/user-editor-protocol": "~14.0.0-next.122.9aaa072",
     "@axonivy/persistence-editor-protocol": "~14.0.0-next.99.bb23b8c",
     "@axonivy/restclient-editor-protocol": "~14.0.0-next.119.34fbe37",
@@ -732,16 +733,11 @@
         "when": "activeCustomEditorId == 'ivy.glspDiagram'"
       }
     ],
-    "languages": [
+    "iconThemes": [
       {
-        "id": "ivy-process",
-        "icon": {
-          "light": "./assets/light/diagram-project-solid.svg",
-          "dark": "./assets/dark/diagram-project-solid.svg"
-        },
-        "extensions": [
-          ".p.json"
-        ]
+        "id": "ivy-icon-theme",
+        "label": "Axon Ivy Icon Theme",
+        "path": "./fileicons/ivy-icon-theme.json"
       }
     ],
     "viewsWelcome": [
