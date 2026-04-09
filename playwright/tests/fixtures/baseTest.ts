@@ -47,6 +47,9 @@ const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean
     executablePath: vscodePath,
     args: [
       '--disable-dev-shm-usage',
+      '--disable-telemetry',
+      '--disable-gpu',
+      '--disable-animation',
       '--disable-updates',
       '--skip-welcome',
       '--skip-release-notes',
