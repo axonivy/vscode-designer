@@ -30,6 +30,8 @@ test.only('Not possible to open multiple dialogs using shortcut', async ({ page 
   await editor.isTabVisible();
   await editor.isViewVisible();
 
+  await page.waitForTimeout(2_000);
+
   await editor.editorContent().press('a');
 
   const addDialog = editor.viewFrameLocator().getByRole('dialog', { name: 'Add Variable' });
