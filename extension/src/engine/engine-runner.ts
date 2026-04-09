@@ -1,6 +1,7 @@
 import { ChildProcess, execFile } from 'child_process';
 import Os from 'os';
 import path from 'path';
+import { config } from '../base/configurations';
 import { outputChannel } from './output-channel';
 
 export class EngineRunner {
@@ -37,8 +38,11 @@ export class EngineRunner {
       throw new Error('Engine directory is undefined');
     }
     const engineLauncherScriptPath = path.join(resolvedEngineDir, 'bin', executable);
+    const defaultVmArgs = '-Ddev.mode=true -Divy.engine.testheadless=true';
+    const userVmArgs = config.engineVmArgs();
+    const javaOpts = userVmArgs ? `${defaultVmArgs} ${userVmArgs}` : defaultVmArgs;
     const env = {
-      env: { ...process.env, JAVA_OPTS_IVY_SYSTEM: '-Ddev.mode=true -Divy.engine.testheadless=true' }
+      env: { ...process.env, JAVA_OPTS_IVY_SYSTEM: javaOpts }
     };
     outputChannel.appendLine('Start ' + engineLauncherScriptPath);
     return execFile(engineLauncherScriptPath, env);

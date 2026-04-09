@@ -7,6 +7,7 @@ export const config = {
   engineRunByExtension: () => configs().get<boolean>('axonivy.engine.runByExtension'),
   engineReleaseTrain: () => configs().get<string>('axonivy.engine.releaseTrain'),
   engineUrl: () => configs().get<string>('axonivy.engine.url'),
+  engineVmArgs: () => configs().get<string>('axonivy.engine.vmArgs'),
   projectExcludePattern: () => configs().get<string>('axonivy.project.excludePattern'),
   projectMaximumNumber: () => configs().get<number>('axonivy.project.maximumNumber'),
   processAnimationAnimate: () => configs().get<boolean>('axonivy.process.animation.animate'),
