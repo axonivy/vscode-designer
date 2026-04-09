@@ -1,0 +1,252 @@
+{
+  "fonts": [
+    {
+      "id": "ivy",
+      "src": [
+        {
+          "path": "../node_modules/@axonivy/ui-icons/src-gen/ivy-icons.woff2",
+          "format": "woff2"
+        }
+      ],
+      "weight": "normal",
+      "style": "normal",
+      "size": "120%"
+    }
+  ],
+  "iconDefinitions": {
+    "_default_light": {
+      "fontCharacter": "\\f142",
+      "fontColor": "#1b1b1b"
+    },
+    "_default": {
+      "fontCharacter": "\\f142",
+      "fontColor": "#ffffff"
+    },
+    "_folder_light": {
+      "fontCharacter": "\\f146",
+      "fontColor": "#1b1b1b"
+    },
+    "_folder": {
+      "fontCharacter": "\\f146",
+      "fontColor": "#ffffff"
+    },
+    "_html_light": {
+      "fontCharacter": "\\f183",
+      "fontColor": "#1b1b1b"
+    },
+    "_html": {
+      "fontCharacter": "\\f183",
+      "fontColor": "#ffffff"
+    },
+    "_xml_light": {
+      "fontCharacter": "\\f18c",
+      "fontColor": "#1b1b1b"
+    },
+    "_xml": {
+      "fontCharacter": "\\f18c",
+      "fontColor": "#ffffff"
+    },
+    "_image_light": {
+      "fontCharacter": "\\f127",
+      "fontColor": "#1b1b1b"
+    },
+    "_image": {
+      "fontCharacter": "\\f127",
+      "fontColor": "#ffffff"
+    },
+    "_java_light": {
+      "fontCharacter": "\\f129",
+      "fontColor": "#1b1b1b"
+    },
+    "_java": {
+      "fontCharacter": "\\f129",
+      "fontColor": "#ffffff"
+    },
+    "_ivy_process": {
+      "fontCharacter": "\\f16d",
+      "fontColor": "#ffffff",
+      "fontId": "ivy"
+    },
+    "_ivy_process_light": {
+      "fontCharacter": "\\f16d",
+      "fontColor": "#1b1b1b",
+      "fontId": "ivy"
+    },
+    "_ivy_dataclass": {
+      "fontCharacter": "\\f12c",
+      "fontColor": "#ffffff",
+      "fontId": "ivy"
+    },
+    "_ivy_dataclass_light": {
+      "fontCharacter": "\\f12c",
+      "fontColor": "#1b1b1b",
+      "fontId": "ivy"
+    },
+    "_ivy_form": {
+      "fontCharacter": "\\f142",
+      "fontColor": "#ffffff",
+      "fontId": "ivy"
+    },
+    "_ivy_form_light": {
+      "fontCharacter": "\\f142",
+      "fontColor": "#1b1b1b",
+      "fontId": "ivy"
+    },
+    "_ivy_casemap": {
+      "fontCharacter": "\\f116",
+      "fontColor": "#ffffff",
+      "fontId": "ivy"
+    },
+    "_ivy_casemap_light": {
+      "fontCharacter": "\\f116",
+      "fontColor": "#1b1b1b",
+      "fontId": "ivy"
+    },
+    "_ivy_cms": {
+      "fontCharacter": "\\f120",
+      "fontColor": "#ffffff",
+      "fontId": "ivy"
+    },
+    "_ivy_cms_light": {
+      "fontCharacter": "\\f120",
+      "fontColor": "#1b1b1b",
+      "fontId": "ivy"
+    },
+    "_ivy_databases": {
+      "fontCharacter": "\\f12c",
+      "fontColor": "#ffffff",
+      "fontId": "ivy"
+    },
+    "_ivy_databases_light": {
+      "fontCharacter": "\\f12c",
+      "fontColor": "#1b1b1b",
+      "fontId": "ivy"
+    },
+    "_ivy_persistence": {
+      "fontCharacter": "\\f12a",
+      "fontColor": "#ffffff",
+      "fontId": "ivy"
+    },
+    "_ivy_persistence_light": {
+      "fontCharacter": "\\f12a",
+      "fontColor": "#1b1b1b",
+      "fontId": "ivy"
+    },
+    "_ivy_restclients": {
+      "fontCharacter": "\\f177",
+      "fontColor": "#ffffff",
+      "fontId": "ivy"
+    },
+    "_ivy_restclients_light": {
+      "fontCharacter": "\\f177",
+      "fontColor": "#1b1b1b",
+      "fontId": "ivy"
+    },
+    "_ivy_roles": {
+      "fontCharacter": "\\f195",
+      "fontColor": "#ffffff",
+      "fontId": "ivy"
+    },
+    "_ivy_roles_light": {
+      "fontCharacter": "\\f195",
+      "fontColor": "#1b1b1b",
+      "fontId": "ivy"
+    },
+    "_ivy_users": {
+      "fontCharacter": "\\f194",
+      "fontColor": "#ffffff",
+      "fontId": "ivy"
+    },
+    "_ivy_users_light": {
+      "fontCharacter": "\\f194",
+      "fontColor": "#1b1b1b",
+      "fontId": "ivy"
+    },
+    "_ivy_variables": {
+      "fontCharacter": "\\f196",
+      "fontColor": "#ffffff",
+      "fontId": "ivy"
+    },
+    "_ivy_variables_light": {
+      "fontCharacter": "\\f196",
+      "fontColor": "#1b1b1b",
+      "fontId": "ivy"
+    },
+    "_ivy_webservices": {
+      "fontCharacter": "\\f19c",
+      "fontColor": "#ffffff",
+      "fontId": "ivy"
+    },
+    "_ivy_webservices_light": {
+      "fontCharacter": "\\f19c",
+      "fontColor": "#1b1b1b",
+      "fontId": "ivy"
+    }
+  },
+  "file": "_default",
+  "folder": "_folder",
+  "fileExtensions": {
+    "avif": "_image",
+    "gif": "_image",
+    "jpg": "_image",
+    "jpeg": "_image",
+    "png": "_image",
+    "pxm": "_image",
+    "svgx": "_image",
+    "tiff": "_image",
+    "webp": "_image",
+    "p.json": "_ivy_process",
+    "d.json": "_ivy_dataclass",
+    "f.json": "_ivy_form",
+    "m.json": "_ivy_casemap",
+    "cms/yaml": "_ivy_cms"
+  },
+  "fileNames": {
+    "databases.yaml": "_ivy_databases",
+    "persistence.yaml": "_ivy_persistence",
+    "rest-clients.yaml": "_ivy_restclients",
+    "roles.yaml": "_ivy_roles",
+    "users.yaml": "_ivy_users",
+    "variables.yaml": "_ivy_variables",
+    "webservice-clients.yaml": "_ivy_webservices"
+  },
+  "languageIds": {
+    "html": "_html",
+    "xml": "_xml",
+    "java": "_java"
+  },
+  "light": {
+    "file": "_default_light",
+    "folder": "_folder_light",
+    "fileExtensions": {
+      "avif": "_image_light",
+      "gif": "_image_light",
+      "jpg": "_image_light",
+      "jpeg": "_image_light",
+      "png": "_image_light",
+      "pxm": "_image_light",
+      "svgx": "_image_light",
+      "tiff": "_image_light",
+      "webp": "_image_light",
+      "p.json": "_ivy_process_light",
+      "d.json": "_ivy_dataclass_light",
+      "f.json": "_ivy_form_light",
+      "m.json": "_ivy_casemap_light",
+      "cms/yaml": "_ivy_cms_light"
+    },
+    "languageIds": {
+      "html": "_html_light",
+      "xml": "_xml_light",
+      "java": "_java_light"
+    },
+    "fileNames": {
+      "databases.yaml": "_ivy_databases_light",
+      "persistence.yaml": "_ivy_persistence_light",
+      "rest-clients.yaml": "_ivy_restclients_light",
+      "roles.yaml": "_ivy_roles_light",
+      "users.yaml": "_ivy_users_light",
+      "variables.yaml": "_ivy_variables_light",
+      "webservice-clients.yaml": "_ivy_webservices_light"
+    }
+  }
+}
