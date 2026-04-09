@@ -1,6 +1,6 @@
 import { Uri, window } from 'vscode';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { resolveNamespaceFromPath, validateArtifactName, validateNamespace } from './utils/util';
+import { resolveNamespaceFromPath, validateNamespace, validateProjectArtifactName } from './utils/util';
 
 export const addNewCaseMap = async (selectedUri: Uri, projectDir: string) => {
   const input = await collectNewCaseMapParams(selectedUri, projectDir);
@@ -26,7 +26,7 @@ const collectName = async () => {
     title: 'Case Map Name',
     placeHolder: 'Enter a name',
     ignoreFocusOut: true,
-    validateInput: validateArtifactName
+    validateInput: validateProjectArtifactName
   });
 };
 
