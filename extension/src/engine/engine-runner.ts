@@ -44,7 +44,7 @@ export class EngineRunner {
     const env = {
       env: { ...process.env, JAVA_OPTS_IVY_SYSTEM: javaOpts }
     };
-    outputChannel.appendLine('Start ' + engineLauncherScriptPath);
+    outputChannel.appendLine(`Start ${engineLauncherScriptPath} with JAVA_OPTS_IVY_SYSTEM=${javaOpts}`);
     return execFile(engineLauncherScriptPath, env);
   }
 
