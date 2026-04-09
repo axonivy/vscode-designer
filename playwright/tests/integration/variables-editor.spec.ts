@@ -22,8 +22,7 @@ test('Read, write', async ({ page }) => {
   await expect(editor.editorContent()).toContainText(`originalKey: ${newValue}`);
 });
 
-// eslint-disable-next-line playwright/no-focused-test
-test.only('Not possible to open multiple dialogs using shortcut', async ({ page }) => {
+test('Not possible to open multiple dialogs using shortcut', async ({ page }) => {
   const editor = new VariablesEditor(page);
   await editor.hasDeployProjectStatusMessage();
   await editor.openEditorFile();
