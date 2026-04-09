@@ -50,12 +50,7 @@ const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean
       ELECTRON_DISABLE_GPU: '1'
     },
     args: [
-      '--no-sandbox',
-      '--disable-gpu-sandbox',
-      '--disable-gpu',
-      '--disable-gpu-compositing',
-      '--disable-software-rasterizer',
-      '--in-process-gpu',
+      '--disable-dev-shm-usage',
       '--disable-updates',
       '--skip-welcome',
       '--skip-release-notes',
