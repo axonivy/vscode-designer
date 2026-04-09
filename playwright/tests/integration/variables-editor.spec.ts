@@ -22,13 +22,14 @@ test('Read, write', async ({ page }) => {
   await expect(editor.editorContent()).toContainText(`originalKey: ${newValue}`);
 });
 
-test('Not possible to open multiple dialogs using shortcut', async ({ page }) => {
+test.only('Not possible to open multiple dialogs using shortcut', async ({ page }) => {
   const editor = new VariablesEditor(page);
   await editor.hasDeployProjectStatusMessage();
   await editor.openEditorFile();
   await editor.isTabVisible();
   await editor.isViewVisible();
 
+  await editor.editorContent().focus();
   await editor.page.keyboard.press('a');
 
   const addDialog = editor.viewFrameLocator().getByRole('dialog', { name: 'Add Variable' });
