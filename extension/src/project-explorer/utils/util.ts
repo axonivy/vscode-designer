@@ -52,7 +52,15 @@ export const resolveDefaultNamespace = async (projectDir: string, target: Resour
   return target === 'processes' ? defaultNamespace.replaceAll('.', '/') : defaultNamespace;
 };
 
-export const validateArtifactName = (value: string) => {
+export const validateProjectArtifactName = (value: string) => {
+  const pattern = /^[\w]+$/;
+  if (pattern.test(value)) {
+    return;
+  }
+  return 'Only letters, numbers, and underscores are allowed. No trailing whitespaces.';
+};
+
+export const validateProjectName = (value: string) => {
   const pattern = /^[\w-]+$/;
   if (pattern.test(value)) {
     return;

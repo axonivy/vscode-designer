@@ -6,7 +6,7 @@ import type { ProcessInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { IvyProjectExplorer } from './ivy-project-explorer';
 import { type InputStep, type MSStateBase, MultiStepInput } from './utils/multi-step-input';
-import { resolveNamespaceFromPath, validateArtifactName, validateNamespace } from './utils/util';
+import { resolveNamespaceFromPath, validateNamespace, validateProjectArtifactName } from './utils/util';
 
 export type ProcessKind = 'Business Process' | 'Callable Sub Process' | 'Web Service Process' | '';
 
@@ -71,7 +71,7 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.name,
-      validationFunction: validateArtifactName,
+      validationFunction: validateProjectArtifactName,
       onBack: (typedValue: string) => {
         state.name = typedValue;
       }
