@@ -24,8 +24,10 @@ publicHoistPattern:
 
 sideEffectsCache: false
 trustPolicy: no-downgrade
-trustPolicyIgnoreAfter: 43200  # minutes (30 days)
+trustPolicyIgnoreAfter: 43200 # minutes (30 days)
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
-- '@axonivy/*'
+  - '@axonivy/*'
+  # Renovate security update: axios@1.15.0
+  - axios@1.15.0
 blockExoticSubdeps: true
