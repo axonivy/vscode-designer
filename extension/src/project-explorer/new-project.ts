@@ -3,7 +3,7 @@ import { FileType, Uri, window, workspace } from 'vscode';
 import { logInformationMessage } from '../base/logging-util';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { type TreeSelection, treeSelectionToUri } from './tree-selection';
-import { validateArtifactName, validateDotSeparatedName } from './utils/util';
+import { validateDotSeparatedName, validateProjectName } from './utils/util';
 
 export const addNewProject = async (selection: TreeSelection) => {
   const treeSelectionUri = await treeSelectionToUri(selection);
@@ -38,7 +38,7 @@ const collectNewProjectParams = async (selectedUri: Uri) => {
   const prompt = `Project Location: ${selectedUri.path}`;
   const name = await window.showInputBox({
     title: 'Project Name',
-    validateInput: validateArtifactName,
+    validateInput: validateProjectName,
     prompt,
     ignoreFocusOut: true
   });

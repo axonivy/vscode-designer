@@ -12,10 +12,7 @@ const enum InputFlowAction {
   cancel
 }
 
-export type InputStep<T extends MSStateBase> = {
-  execCounter?: number;
-  (input: MultiStepInput<T>, state: T): Thenable<InputStep<T>> | Promise<void>;
-};
+export type InputStep<T extends MSStateBase> = (input: MultiStepInput<T>, state: T) => Thenable<InputStep<T>> | Promise<void>;
 
 interface TextInputParameters {
   title: string;
@@ -58,9 +55,6 @@ export class MultiStepInput<T extends MSStateBase> {
       }
       try {
         await this.currentStep(this, state);
-        if (this.currentStep.execCounter !== undefined) {
-          this.currentStep.execCounter++;
-        }
         stepIndex++;
         state.currentStep = stepIndex + 1;
         this.currentStep = steps[stepIndex];
@@ -70,7 +64,7 @@ export class MultiStepInput<T extends MSStateBase> {
           state.currentStep = stepIndex + 1;
           this.currentStep = steps[stepIndex];
         } else if (err == InputFlowAction.cancel) {
-          return;
+          throw new Error('Dialog cancelled by the user');
         } else {
           throw err;
         }

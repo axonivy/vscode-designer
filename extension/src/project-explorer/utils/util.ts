@@ -52,7 +52,15 @@ export const resolveDefaultNamespace = async (projectDir: string, target: Resour
   return target === 'processes' ? defaultNamespace.replaceAll('.', '/') : defaultNamespace;
 };
 
-export const validateArtifactName = (value: string) => {
+export const validateProjectArtifactName = (value: string) => {
+  const pattern = /^[\w]+$/;
+  if (pattern.test(value)) {
+    return;
+  }
+  return 'Only letters, numbers, and underscores are allowed. No trailing whitespaces.';
+};
+
+export const validateProjectName = (value: string) => {
   const pattern = /^[\w-]+$/;
   if (pattern.test(value)) {
     return;
@@ -61,16 +69,16 @@ export const validateArtifactName = (value: string) => {
 };
 
 export const validateDotSeparatedName = (value: string) => {
-  const pattern = /^\w+(\.\w+)*(-\w+)*$/;
+  const pattern = /^\w+(\.\w+)*(\w+)*$/;
   if (pattern.test(value)) {
     return;
   }
-  return 'Enter Namespace separated by ".". Only letters, numbers, underscores, and hyphens are allowed. No hyphen except for last group';
+  return 'Enter Namespace separated by ".". Only letters, numbers, and underscores are allowed. No trailing whitespaces. Empty not allowed.';
 };
 export const validateNamespace = (value: string) => {
-  const pattern = /^(\w+(\/\w+)*(-\w+)*)?$/;
+  const pattern = /^(\w+(\/\w+)*(\w+)*)?$/;
   if (pattern.test(value)) {
     return;
   }
-  return 'Enter Namespace separated by "/". Only letters, numbers, underscores, and hyphens are allowed. No hyphen except for last group';
+  return 'Enter Namespace separated by "/". Only letters, numbers, and underscores are allowed. No trailing whitespaces. Empty allowed.';
 };

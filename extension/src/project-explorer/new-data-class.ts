@@ -1,6 +1,6 @@
 import { Uri, window } from 'vscode';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { resolveNamespaceFromPath, validateArtifactName, validateDotSeparatedName } from './utils/util';
+import { resolveNamespaceFromPath, validateDotSeparatedName, validateProjectArtifactName } from './utils/util';
 
 export const addNewDataClass = async (selectedUri: Uri, projectDir: string) => {
   const input = await collectNewDataClassParams(selectedUri, projectDir);
@@ -16,16 +16,12 @@ export const addNewEntityClass = async (selectedUri: Uri, projectDir: string) =>
   }
 };
 
-const collectNewDataClassParams = async (
-  selectedUri: Uri,
-  projectDir: string,
-  type: 'Data Class' | 'Entity Class' = 'Data Class'
-) => {
+const collectNewDataClassParams = async (selectedUri: Uri, projectDir: string, type: 'Data Class' | 'Entity Class' = 'Data Class') => {
   const name = await window.showInputBox({
     title: `${type} Name`,
     placeHolder: 'Enter a name',
     ignoreFocusOut: true,
-    validateInput: validateArtifactName
+    validateInput: validateProjectArtifactName
   });
   if (!name) {
     return;
