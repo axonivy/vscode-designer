@@ -12,6 +12,10 @@
   "task.autoDetect": "off",
   "typescript.tsdk": "node_modules/typescript/lib",
   "prettier.ignorePath": ".vscode/.prettierignore",
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "tailwindCSS.classFunctions": ["clsx", "cn", "cva"],
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },

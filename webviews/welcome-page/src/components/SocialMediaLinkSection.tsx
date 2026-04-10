@@ -13,19 +13,19 @@ import youTubeLogo from './socialMediaIcons/youtube.svg';
 export const SocialMediaLinkSection = () => {
   const { openUrl } = useVscode();
   return (
-    <Flex direction='row' justifyContent='flex-end' style={{ width: '100%' }}>
-      <Flex className='welcome-socialmedia-wrapper' direction='row'>
-        <SocialMediaLink name={'GitHub'} icon={gitHubLogo} url={'https://github.com/axonivy/'} onClick={openUrl} />
-        <SocialMediaLink name={'LinkedIn'} icon={linkedInLogo} url={'https://www.linkedin.com/company/axonivy'} onClick={openUrl} />
-        <SocialMediaLink name={'Xing'} icon={xingLogo} url={'https://www.xing.com/pages/axonivyag'} onClick={openUrl} />
+    <Flex direction='row' justifyContent='flex-end' className='w-full'>
+      <Flex className='overflow-hidden rounded-lg border border-n200' direction='row'>
+        <SocialMediaLink name='GitHub' icon={gitHubLogo} url={'https://github.com/axonivy/'} onClick={openUrl} />
+        <SocialMediaLink name='LinkedIn' icon={linkedInLogo} url={'https://www.linkedin.com/company/axonivy'} onClick={openUrl} />
+        <SocialMediaLink name='Xing' icon={xingLogo} url={'https://www.xing.com/pages/axonivyag'} onClick={openUrl} />
         <SocialMediaLink
-          name={'YouTube'}
+          name='YouTube'
           icon={youTubeLogo}
           url={'https://www.youtube.com/channel/UCkoNcDoeDAVM7FB-txy3jnQ'}
           onClick={openUrl}
         />
-        <SocialMediaLink name={'Facebook'} icon={facebookLogo} url={'https://www.facebook.com/axonivy/'} onClick={openUrl} />
-        <SocialMediaLink name={'Axon Ivy'} icon={ivyLogo} url={'https://www.axonivy.com/'} onClick={openUrl} />
+        <SocialMediaLink name='Facebook' icon={facebookLogo} url={'https://www.facebook.com/axonivy/'} onClick={openUrl} />
+        <SocialMediaLink name='Axon Ivy' icon={ivyLogo} url={'https://www.axonivy.com/'} onClick={openUrl} />
       </Flex>
     </Flex>
   );
