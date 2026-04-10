@@ -1,6 +1,5 @@
 import { Button, type ButtonProps } from '@axonivy/ui-components';
-import './SectionButton.css';
 
 export const SectionButton = (props: ButtonProps) => {
-  return <Button className='section-button' {...props}></Button>;
+  return <Button variant='primary-outline' {...props}></Button>;
 };

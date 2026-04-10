@@ -1,25 +1,13 @@
-import { Button, Flex } from '@axonivy/ui-components';
+import { Flex } from '@axonivy/ui-components';
 import { useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FeedStore, type NewsItem } from '../util/FeedStore';
 import { useVscode } from '../util/useVscode';
-import './NewsSection.css';
 import { SectionButton } from './SectionButton';
 
 export const NewsSection = () => {
   const { t } = useTranslation();
   const { openUrl } = useVscode();
-
-  const feed = useSyncExternalStore(FeedStore.subscribe, FeedStore.getFeed);
-
-  const generateFeed = () => {
-    if (!feed) {
-      return <span>{t('welcomePage.noNewsToShow')}</span>;
-    }
-    return feed.items.slice(0, 3).map(entry => {
-      return <NewsEntry key={entry.title} entry={entry} />;
-    });
-  };
 
   return (
     <Flex direction='column' gap={4} style={{ height: '100%' }}>
@@ -27,19 +15,35 @@ export const NewsSection = () => {
         <h2>{t('News')}</h2>
         <SectionButton onClick={() => openUrl('https://www.axonivy.com/blog')}>{t('welcomePage.showAll')}</SectionButton>
       </Flex>
-      <div className='welcome-news-grid'>{generateFeed()}</div>
+      <div className='grid h-full grid-cols-3 gap-3'>
+        <Feed />
+      </div>
     </Flex>
   );
+};
+
+const Feed = () => {
+  const { t } = useTranslation();
+  const feed = useSyncExternalStore(FeedStore.subscribe, FeedStore.getFeed);
+  if (!feed) {
+    return <span>{t('welcomePage.noNewsToShow')}</span>;
+  }
+  return feed.items.slice(0, 3).map(entry => {
+    return <NewsEntry key={entry.title} entry={entry} />;
+  });
 };
 
 const NewsEntry = ({ entry }: { entry: NewsItem }) => {
   const { openUrl } = useVscode();
   return (
-    <Button onClick={() => openUrl(entry.link)} className='welcome-news-entry'>
-      <Flex direction='column' gap={2} className='welcome-page-news-flex'>
+    <button
+      onClick={() => openUrl(entry.link)}
+      className='flex h-full cursor-pointer items-center justify-center gap-1 rounded-lg border border-n200 bg-n50 p-5 text-sm hover:bg-n100'
+    >
+      <Flex direction='column' gap={2} className='h-full justify-between text-start'>
         <h3>{entry.title}</h3>
-        <span className='welcome-news-entry-text'>{entry.contentSnippet}</span>
+        <span className='line-clamp-4 text-n900'>{entry.contentSnippet}</span>
       </Flex>
-    </Button>
+    </button>
   );
 };
