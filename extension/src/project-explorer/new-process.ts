@@ -67,7 +67,7 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
     state.name = await input.showTextInput({
       title: state.dialogTitle,
       titleSuffix: ' - Choose process name',
-      placeholder: 'Enter a name. Allowed characters: a-z, A-Z, 0-9, -, _',
+      placeholder: 'Enter a name. Allowed characters: a-z, A-Z, 0-9, _',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.name,
@@ -83,7 +83,7 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
     state.namespace = await input.showTextInput({
       title: state.dialogTitle,
       titleSuffix: ' - Choose process namespace',
-      placeholder: 'Enter Namespace separated by "/"',
+      placeholder: 'Enter Namespace separated by "/". Allowed characters: a-z, A-Z, 0-9, _, /',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.namespace,
