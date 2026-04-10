@@ -12,7 +12,6 @@ pipeline {
 
   parameters {
     string(name: 'engineDownloadUrl', defaultValue: 'https://jenkins.ivyteam.io/job/core_product/job/master/lastSuccessfulBuild/artifact/workspace/ch.ivyteam.ivy.server.product/target/products/*_Slim_*.zip/*zip*/products.zip', description: 'engine that will be packaged')
-    string(name: 'openvscodeVersion', defaultValue: 'v1.109.5', description: 'openvscode version that will be used')
   }
 
   stages {
@@ -26,14 +25,10 @@ pipeline {
             pnpm run build:production
             pnpm run engine:download ${params.engineDownloadUrl}
             nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
-            wget -O openvsc.tar.gz https://github.com/gitpod-io/openvscode-server/releases/download/openvscode-server-${params.openvscodeVersion}/openvscode-server-${params.openvscodeVersion}-linux-x64.tar.gz
-            tar -xzf openvsc.tar.gz --strip-components=1 --one-top-level=openvsc
-            cp -r extension/. openvsc/extensions/extension
-            openvsc/bin/openvscode-server --install-extension vscjava.vscode-java-pack
-            nohup openvsc/bin/openvscode-server --host 0.0.0.0 --without-connection-token --disable-workspace-trust &
+            pnpm run test:playwright:download:vscode
             """
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-              sh 'pnpm run test:playwright:browser'
+              sh 'xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" pnpm run test:playwright'
             }
           }
           archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true

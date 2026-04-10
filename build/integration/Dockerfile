@@ -22,4 +22,3 @@ RUN mkdir -p /usr/share/maven /usr/share/maven/ref \
 ENV JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 ENV JAVA_OPTS_IVY_SYSTEM="-Ddev.mode=true -Divy.engine.testheadless=true"
 ENV CI=true
-ENV RUN_IN_BROWSER=true

@@ -58,8 +58,8 @@ pipeline {
             bat 'pnpm run test:playwright'
             bat 'start AxonIvyEngine/bin/AxonIvyEngine.exe stop'
           }
-          archiveArtifacts artifacts: '**/playwright/test-results/**', allowEmptyArchive: true
-          archiveArtifacts artifacts: '**/playwright/playwright-videos/**', allowEmptyArchive: true
+          archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
+          archiveArtifacts artifacts: 'playwright/playwright-videos/**', allowEmptyArchive: true
           withChecks('WebTests') {
             junit testDataPublishers: [[$class: 'StabilityTestDataPublisher']], testResults: '**/node_modules/**/report.xml'
           }

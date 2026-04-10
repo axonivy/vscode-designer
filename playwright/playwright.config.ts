@@ -5,8 +5,7 @@ export default defineConfig({
     permissions: ['clipboard-read'],
     headless: true,
     trace: 'retain-on-failure',
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure'
+    screenshot: 'only-on-failure'
   },
   workers: 1,
   timeout: 40_000,

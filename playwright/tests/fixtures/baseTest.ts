@@ -46,8 +46,10 @@ const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean
   const electronApp = await _electron.launch({
     executablePath: vscodePath,
     args: [
-      '--no-sandbox',
-      '--disable-gpu-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-telemetry',
+      '--disable-gpu',
+      '--disable-animation',
       '--disable-updates',
       '--skip-welcome',
       '--skip-release-notes',
