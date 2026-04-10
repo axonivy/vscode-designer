@@ -120,7 +120,6 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
 
     await IvyEngineManager.instance.createProcess(createProcessInput);
   } else {
-    logErrorMessage('Process creation cancelled or invalid input provided. Current input state: ' + JSON.stringify(newProcessData));
-    return;
+    throw new Error('Process creation failed. Current input state: ' + JSON.stringify(newProcessData));
   }
 };
