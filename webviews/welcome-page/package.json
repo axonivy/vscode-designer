@@ -11,7 +11,10 @@
     "vscode-messenger-webview": "0.4.5"
   },
   "devDependencies": {
-    "i18next-cli": "^1.21.1"
+    "@tailwindcss/vite": "^4.2.2",
+    "@vanilla-extract/recipes": "^0.5.7",
+    "i18next-cli": "^1.21.1",
+    "tailwindcss": "^4.2.2"
   },
   "scripts": {
     "build": "vite build --mode development --emptyOutDir",
