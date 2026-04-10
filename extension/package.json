@@ -449,6 +449,12 @@
             "markdownDescription": "Url of the Axon Ivy Engine that will be used as backend. Only relevant if `#axonivy.engine.runByExtension#` is set to false.",
             "order": 1200
           },
+          "axonivy.engine.vmArgs": {
+            "type": "string",
+            "default": "",
+            "markdownDescription": "Specifies extra VM arguments used to launch the Axon Ivy Engine. Eg. use `-agentlib:jdwp=transport=dt_socket,server=y,address=*:8000,suspend=n` to enable remote debugging.",
+            "order": 1300
+          },
           "axonivy.project.excludePattern": {
             "type": "string",
             "default": "**/target/**",
