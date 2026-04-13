@@ -15,7 +15,7 @@ export default defineConfig({
     },
     output: {
       target: 'extension/src/engine/api/generated/client.ts',
-      prettier: true
+      formatter: 'prettier'
     }
   },
   openapiMarket: {
@@ -25,7 +25,7 @@ export default defineConfig({
     },
     output: {
       target: 'extension/src/market/generated/market-client.ts',
-      prettier: true,
+      formatter: 'prettier',
       client: 'fetch',
       override: marketFetch
     }
