@@ -24,17 +24,19 @@ export interface Link {
   templated?: boolean;
 }
 
-export interface Links {[key: string]: Link}
+export interface Links {
+  [key: string]: Link;
+}
 
 /**
  * Product name by locale
  */
-export type ProductModelNames = {[key: string]: string};
+export type ProductModelNames = { [key: string]: string };
 
 /**
  * Product's short descriptions by locale
  */
-export type ProductModelShortDescriptions = {[key: string]: string};
+export type ProductModelShortDescriptions = { [key: string]: string };
 
 export interface ProductModel {
   /** Product id */
@@ -101,197 +103,174 @@ export interface Image {
 }
 
 export type FindProductsParams = {
-/**
- * Page number to retrieve
- * @minimum 0
- */
-page?: unknown;
-/**
- * Number of items per page
- * @minimum 1
- */
-size?: unknown;
-/**
- * Sorting criteria in the format: Sorting criteria(popularity|alphabetically|recent), Sorting order(asc|desc)
- */
-sort?: unknown[];
-/**
- * Type of product.
- */
-type?: FindProductsType;
-/**
- * Keyword that exist in product's name or short description
- */
-keyword?: string;
-/**
- * Language of product short description
- */
-language?: FindProductsLanguage;
+  /**
+   * Page number to retrieve
+   * @minimum 0
+   */
+  page?: unknown;
+  /**
+   * Number of items per page
+   * @minimum 1
+   */
+  size?: unknown;
+  /**
+   * Sorting criteria in the format: Sorting criteria(popularity|alphabetically|recent), Sorting order(asc|desc)
+   */
+  sort?: unknown[];
+  /**
+   * Type of product.
+   */
+  type?: FindProductsType;
+  /**
+   * Keyword that exist in product's name or short description
+   */
+  keyword?: string;
+  /**
+   * Language of product short description
+   */
+  language?: FindProductsLanguage;
 };
 
-export type FindProductsType = typeof FindProductsType[keyof typeof FindProductsType];
-
+export type FindProductsType = (typeof FindProductsType)[keyof typeof FindProductsType];
 
 export const FindProductsType = {
   all: 'all',
   connectors: 'connectors',
   utilities: 'utilities',
   solutions: 'solutions',
-  demos: 'demos',
+  demos: 'demos'
 } as const;
 
-export type FindProductsLanguage = typeof FindProductsLanguage[keyof typeof FindProductsLanguage];
-
+export type FindProductsLanguage = (typeof FindProductsLanguage)[keyof typeof FindProductsLanguage];
 
 export const FindProductsLanguage = {
   en: 'en',
-  de: 'de',
+  de: 'de'
 } as const;
 
 export type FindProductVersionsByIdParams = {
-/**
- * Option to get Dev Version (Snapshot/ sprint release)
- */
-isShowDevVersion?: boolean;
-designerVersion?: string;
+  /**
+   * Option to get Dev Version (Snapshot/ sprint release)
+   */
+  isShowDevVersion?: boolean;
+  designerVersion?: string;
 };
 
 export type FindProductJsonContentParams = {
-productVersion?: string;
+  productVersion?: string;
 };
 
-export type FindProductJsonContent200 = {[key: string]: unknown};
+export type FindProductJsonContent200 = { [key: string]: unknown };
 
 /**
  * By default, the system finds products with type 'all'
  * @summary Retrieve a paginated list of all products, optionally filtered by type, keyword, and language
  */
 export type findProductsResponse200 = {
-  data: PagedModelProductModel
-  status: 200
-}
+  data: PagedModelProductModel;
+  status: 200;
+};
 
-export type findProductsResponseSuccess = (findProductsResponse200) & {
+export type findProductsResponseSuccess = findProductsResponse200 & {
   headers: Headers;
 };
-;
+export type findProductsResponse = findProductsResponseSuccess;
 
-export type findProductsResponse = (findProductsResponseSuccess)
-
-export const getFindProductsUrl = (params?: FindProductsParams,) => {
+export const getFindProductsUrl = (params?: FindProductsParams) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
+      normalizedParams.append(key, value === null ? 'null' : value.toString());
     }
   });
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/product?${stringifiedParams}` : `/api/product`
-}
+  return stringifiedParams.length > 0 ? `/api/product?${stringifiedParams}` : `/api/product`;
+};
 
 export const findProducts = async (params?: FindProductsParams, options?: RequestInit): Promise<findProductsResponse> => {
-
-  return marketFetch<findProductsResponse>(getFindProductsUrl(params),
-  {
+  return marketFetch<findProductsResponse>(getFindProductsUrl(params), {
     ...options,
     method: 'GET'
-
-
-  }
-);}
-
-
+  });
+};
 
 /**
  * Get all product versions by product id
  * @summary Get product versions by product id
  */
 export type findProductVersionsByIdResponse200 = {
-  data: MavenArtifactVersionModel[]
-  status: 200
-}
+  data: MavenArtifactVersionModel[];
+  status: 200;
+};
 
-export type findProductVersionsByIdResponseSuccess = (findProductVersionsByIdResponse200) & {
+export type findProductVersionsByIdResponseSuccess = findProductVersionsByIdResponse200 & {
   headers: Headers;
 };
-;
+export type findProductVersionsByIdResponse = findProductVersionsByIdResponseSuccess;
 
-export type findProductVersionsByIdResponse = (findProductVersionsByIdResponseSuccess)
-
-export const getFindProductVersionsByIdUrl = (id: string,
-    params?: FindProductVersionsByIdParams,) => {
+export const getFindProductVersionsByIdUrl = (id: string, params?: FindProductVersionsByIdParams) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
+      normalizedParams.append(key, value === null ? 'null' : value.toString());
     }
   });
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/product/${id}/versions?${stringifiedParams}` : `/api/product/${id}/versions`
-}
+  return stringifiedParams.length > 0 ? `/api/product/${id}/versions?${stringifiedParams}` : `/api/product/${id}/versions`;
+};
 
-export const findProductVersionsById = async (id: string,
-    params?: FindProductVersionsByIdParams, options?: RequestInit): Promise<findProductVersionsByIdResponse> => {
-
-  return marketFetch<findProductVersionsByIdResponse>(getFindProductVersionsByIdUrl(id,params),
-  {
+export const findProductVersionsById = async (
+  id: string,
+  params?: FindProductVersionsByIdParams,
+  options?: RequestInit
+): Promise<findProductVersionsByIdResponse> => {
+  return marketFetch<findProductVersionsByIdResponse>(getFindProductVersionsByIdUrl(id, params), {
     ...options,
     method: 'GET'
-
-
-  }
-);}
-
-
+  });
+};
 
 /**
  * When we click install in designer, this API will send content of product json for installing in Ivy designer
  * @summary Get product json content for designer to install
  */
 export type findProductJsonContentResponse200 = {
-  data: FindProductJsonContent200
-  status: 200
-}
+  data: FindProductJsonContent200;
+  status: 200;
+};
 
-export type findProductJsonContentResponseSuccess = (findProductJsonContentResponse200) & {
+export type findProductJsonContentResponseSuccess = findProductJsonContentResponse200 & {
   headers: Headers;
 };
-;
+export type findProductJsonContentResponse = findProductJsonContentResponseSuccess;
 
-export type findProductJsonContentResponse = (findProductJsonContentResponseSuccess)
-
-export const getFindProductJsonContentUrl = (id: string,
-    params?: FindProductJsonContentParams,) => {
+export const getFindProductJsonContentUrl = (id: string, params?: FindProductJsonContentParams) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
     if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
+      normalizedParams.append(key, value === null ? 'null' : value.toString());
     }
   });
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/product/${id}/install?${stringifiedParams}` : `/api/product/${id}/install`
-}
+  return stringifiedParams.length > 0 ? `/api/product/${id}/install?${stringifiedParams}` : `/api/product/${id}/install`;
+};
 
-export const findProductJsonContent = async (id: string,
-    params?: FindProductJsonContentParams, options?: RequestInit): Promise<findProductJsonContentResponse> => {
-
-  return marketFetch<findProductJsonContentResponse>(getFindProductJsonContentUrl(id,params),
-  {
+export const findProductJsonContent = async (
+  id: string,
+  params?: FindProductJsonContentParams,
+  options?: RequestInit
+): Promise<findProductJsonContentResponse> => {
+  return marketFetch<findProductJsonContentResponse>(getFindProductJsonContentUrl(id, params), {
     ...options,
     method: 'GET'
-
-
-  }
-);}
+  });
+};
