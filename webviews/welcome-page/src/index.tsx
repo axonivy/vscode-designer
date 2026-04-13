@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 import type { NotificationType } from 'vscode-messenger-common';
 import { WelcomePage } from './components/WelcomePage';
 import { initTranslation } from './i18n';
+import './index.css';
 import { FeedStore, type NewsFeed } from './util/FeedStore';
 import { VersionStore } from './util/VersionStore';
 import { getMessenger, VscodeMessengerProvider } from './util/VscodeApiProvider';

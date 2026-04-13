@@ -1,0 +1,10 @@
+@import 'tailwindcss';
+@import '@axonivy/ui-components/src/styles/themes.css';
+
+@custom-variant dark (&:where(.vscode-dark, .vscode-dark *, .vscode-high-contrast:not(.vscode-high-contrast-light), .vscode-high-contrast:not(.vscode-high-contrast-light) *));
+
+body:where(.vscode-dark, .vscode-high-contrast:not(.vscode-high-contrast-light)) {
+  color-scheme: dark;
+  background: var(--background);
+  color: var(--body);
+}

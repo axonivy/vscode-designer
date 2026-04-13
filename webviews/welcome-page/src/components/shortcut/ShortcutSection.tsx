@@ -3,16 +3,15 @@ import { IvyIcons } from '@axonivy/ui-icons';
 import { useTranslation } from 'react-i18next';
 import { useVscode } from '../../util/useVscode';
 import { ShortcutCard } from './Shortcut';
-import './ShortcutSection.css';
 
 export const ShortcutSection = () => {
   const { t } = useTranslation();
   const { openUrl } = useVscode();
 
   return (
-    <Flex direction='column' gap={4} style={{ width: '100%' }}>
-      <h2>{t('shortcuts')}</h2>
-      <div className='shortcut-grid'>
+    <Flex direction='column' gap={4} className='w-full'>
+      <h2 className='text-lg font-bold'>{t('shortcuts')}</h2>
+      <div className='grid h-full grid-cols-2 gap-3'>
         <ShortcutCard
           title={t('shortcut.documentation')}
           value={'https://dev.axonivy.com/doc'}

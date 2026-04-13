@@ -1,4 +1,13 @@
 {
+  "extensions": {
+    "recommendations": [
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "bradlc.vscode-tailwindcss",
+      "vitest.explorer",
+      "ms-playwright.playwright"
+    ]
+  },
   "folders": [
     {
       "name": "root",
@@ -86,6 +95,10 @@
     },
     "task.autoDetect": "off",
     "typescript.tsdk": "node_modules/typescript/lib",
+    "files.associations": {
+      "*.css": "tailwindcss"
+    },
+    "tailwindCSS.classFunctions": ["clsx", "cn", "cva"],
     "[css]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
