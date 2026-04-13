@@ -1,14 +1,14 @@
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, use, type ReactNode } from 'react';
 import { Messenger, type VsCodeApi } from 'vscode-messenger-webview';
 
 const Context = createContext<Messenger | undefined>(undefined);
 
 export const VscodeMessengerProvider = ({ children, messenger }: { children: ReactNode; messenger: Messenger }) => {
-  return <Context.Provider value={messenger}>{children}</Context.Provider>;
+  return <Context value={messenger}>{children}</Context>;
 };
 
 export const useMessenger = () => {
-  const messenger = useContext(Context);
+  const messenger = use(Context);
   if (!messenger) {
     throw new Error('useMessenger must be used within an VscodeMessengerProvider');
   }
