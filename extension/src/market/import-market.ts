@@ -102,11 +102,11 @@ async function replaceDynamicVersion(productJson: string) {
 }
 
 function parseProduct(productJson: string) {
-  let product: MarketProduct | undefined = undefined;
+  let product: MarketProduct | undefined;
   try {
     product = JSON.parse(productJson);
   } catch (e) {
-    throw new Error('Failed to parse product.json as JSON: ' + (e instanceof Error ? e.message : e));
+    throw new Error('Failed to parse product.json as JSON: ' + (e instanceof Error ? e.message : e), { cause: e });
   }
   if (product === undefined || product.installers === undefined) {
     throw new Error('Invalid product.json: No installers found.');
