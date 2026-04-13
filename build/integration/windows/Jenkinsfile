@@ -28,10 +28,10 @@ pipeline {
   }
 
   stages {
-    stage('Cleanup globalStorage') {
+    stage('Cleanup Coder User') {
       steps {
         script {
-          dir("${env.USERPROFILE}\\AppData\\Roaming\\Code\\User\\globalStorage") {
+          dir("${env.USERPROFILE}\\AppData\\Roaming\\Code\\User") {
             deleteDir()
           }
         }
