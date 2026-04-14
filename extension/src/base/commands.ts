@@ -52,6 +52,7 @@ type ViewCommand =
   | 'ivyBrowserView.openDevWfUi'
   | 'ivyBrowserView.openEngineCockpit'
   | 'ivyBrowserView.openNEO'
+  | 'ivyBrowserView.openPreview'
   | 'ivyPanelView.openRuntimeLog'
   | 'ivyPanelView.openWelcomePage';
 export type ConfigEditorCommand =

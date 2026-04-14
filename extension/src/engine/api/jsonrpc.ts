@@ -5,7 +5,10 @@ import { Callback, type WebIdeClient } from './jsonrpc-protocol';
 export interface WebIdeOnRequestTypes {
   openProcessEditor: [ProcessBean, Promise<boolean>];
   openFormEditor: [HdBean, Promise<boolean>];
+  openXhtmlEditor: [OpenXhtmlEditorArgs, Promise<boolean>];
 }
+
+export type OpenXhtmlEditorArgs = { bean: HdBean; selection?: string };
 
 export type AnimationSettings = {
   animate: boolean;
@@ -20,12 +23,15 @@ export interface WebIdeNotificationTypes {
 export class WebIdeClientJsonRpc extends BaseRpcClient implements WebIdeClient {
   onOpenProcessEditor = new Callback<ProcessBean, Promise<boolean>>();
   onOpenFormEditor = new Callback<HdBean, Promise<boolean>>();
+  onOpenXhtmlEditor = new Callback<OpenXhtmlEditorArgs, Promise<boolean>>();
   protected override setupConnection(): void {
     super.setupConnection();
     this.toDispose.push(this.onOpenProcessEditor);
     this.toDispose.push(this.onOpenFormEditor);
-    this.onRequest('openProcessEditor', data => this.onOpenProcessEditor.call(data) ?? new Promise(() => false));
-    this.onRequest('openFormEditor', data => this.onOpenFormEditor.call(data) ?? new Promise(() => false));
+    this.toDispose.push(this.onOpenXhtmlEditor);
+    this.onRequest('openProcessEditor', data => this.onOpenProcessEditor.call(data) ?? Promise.resolve(false));
+    this.onRequest('openFormEditor', data => this.onOpenFormEditor.call(data) ?? Promise.resolve(false));
+    this.onRequest('openXhtmlEditor', data => this.onOpenXhtmlEditor.call(data) ?? Promise.resolve(false));
   }
 
   animationSettings(settings: AnimationSettings) {

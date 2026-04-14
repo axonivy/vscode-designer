@@ -35,7 +35,7 @@ import { engineDirFromGlobalState, engineReleaseTrain, switchEngineReleaseTrain,
 import { EngineRunner } from './engine-runner';
 import { outputChannel } from './output-channel';
 import { ReleaseTrainValidator } from './release-train-validator';
-import { WebIdeWebSocketProvider } from './ws-client';
+import { WebIdeWebSocketProvider } from './web-ide-ws/web-ide-websocket-provider';
 
 export class IvyEngineManager {
   private static _instance: IvyEngineManager;

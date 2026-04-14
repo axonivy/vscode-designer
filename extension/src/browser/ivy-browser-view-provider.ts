@@ -3,6 +3,7 @@ import { Uri, env, l10n, window } from 'vscode';
 import { executeCommand, registerCommand } from '../base/commands';
 import { logErrorMessage } from '../base/logging-util';
 import { findRootEntry, parseBuildManifest } from '../editors/build-manifest';
+import { dialogPreviewUrl } from './dialog-preview-url';
 
 export class IvyBrowserViewProvider implements WebviewViewProvider {
   private static _instance: IvyBrowserViewProvider;
@@ -36,6 +37,7 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
     registerCommand('ivyBrowserView.openDevWfUi', context, () => provider.openDevWfUi());
     registerCommand('ivyBrowserView.openEngineCockpit', context, () => provider.openEngineRelativeUrlExternally('system/engine-cockpit'));
     registerCommand('ivyBrowserView.openNEO', context, () => provider.openEngineRelativeUrlExternally('neo'));
+    registerCommand('ivyBrowserView.openPreview', context, () => provider.openPreview());
   }
 
   private static resolveCodespacesEngineHost(engineUrl: URL): URL {
@@ -95,6 +97,14 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
 
   private async openDevWfUi() {
     this.openEngineRelativeUrl(this.devContextPath);
+  }
+
+  private async openPreview() {
+    const url = await dialogPreviewUrl(this.devContextPath);
+    if (!url) {
+      return;
+    }
+    this.openEngineRelativeUrl(url);
   }
 
   private refreshWebviewHtml(url: string) {

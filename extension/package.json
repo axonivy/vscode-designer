@@ -262,6 +262,13 @@
         "category": "Axon Ivy"
       },
       {
+        "command": "ivyBrowserView.openPreview",
+        "title": "Open Dialog Preview",
+        "category": "Axon Ivy",
+        "icon": "$(preview)",
+        "enablement": "ivy:hasIvyProjects"
+      },
+      {
         "command": "ivyBrowserView.open",
         "title": "Open Ivy Browser",
         "category": "Axon Ivy"
@@ -510,7 +517,8 @@
           "type": "webview",
           "id": "ivyBrowserView",
           "name": "Browser",
-          "when": "ivy:hasIvyProjects"
+          "when": "ivy:hasIvyProjects",
+          "icon": "$(globe)"
         }
       ],
       "explorer": [
@@ -548,6 +556,11 @@
         {
           "command": "ivyProjects.addDependency",
           "when": "resourceFilename == pom.xml",
+          "group": "navigation"
+        },
+        {
+          "command": "ivyBrowserView.openPreview",
+          "when": "resourceExtname == .xhtml && resourcePath =~ /src_hd/",
           "group": "navigation"
         }
       ],

@@ -1,6 +1,6 @@
 import type { Disposable } from '@axonivy/jsonrpc';
 import type { HdBean, ProcessBean } from './generated/client';
-import type { AnimationSettings } from './jsonrpc';
+import type { AnimationSettings, OpenXhtmlEditorArgs } from './jsonrpc';
 
 export class Callback<T, R = void> implements Disposable {
   private callback?: (e: T) => R;
@@ -21,6 +21,7 @@ export class Callback<T, R = void> implements Disposable {
 export interface WebIdeClient {
   onOpenProcessEditor: Callback<ProcessBean, Promise<boolean>>;
   onOpenFormEditor: Callback<HdBean, Promise<boolean>>;
+  onOpenXhtmlEditor: Callback<OpenXhtmlEditorArgs, Promise<boolean>>;
   animationSettings(settings: AnimationSettings): void;
 
   stop(): void;
