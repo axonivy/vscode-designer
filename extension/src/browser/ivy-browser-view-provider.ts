@@ -1,5 +1,5 @@
-import { Uri, env, l10n, window } from 'vscode';
 import type { ExtensionContext, Webview, WebviewView, WebviewViewProvider } from 'vscode';
+import { Uri, env, l10n, window } from 'vscode';
 import { executeCommand, registerCommand } from '../base/commands';
 import { logErrorMessage } from '../base/logging-util';
 import { findRootEntry, parseBuildManifest } from '../editors/build-manifest';
@@ -122,7 +122,7 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
         script-src 'nonce-${nonce}';
         frame-src *;
         ">
-      <link rel="stylesheet" type="text/css" href="${browserCss}">
+      <link rel="stylesheet" crossorigin type="text/css" href="${browserCss}">
     </head>
     <body>
       <header class="header">

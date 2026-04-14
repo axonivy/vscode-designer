@@ -4,19 +4,13 @@ import fs from 'fs';
 import { DomUtils, parseDocument } from 'htmlparser2';
 import type { ExtensionContext, Webview } from 'vscode';
 import { Uri } from 'vscode';
-import { findEditorWorker, findRootEntry, findRootHtml, parseBuildManifest, type ViteManifestEntry } from './build-manifest';
+import { findEditorWorker, findRootEntry, findRootHtml, parseBuildManifest } from './build-manifest';
 
-export const createWebViewContent = (
-  context: ExtensionContext,
-  webview: Webview,
-  webviewPath: string,
-  customAsset?: (nonce: string, rootEntry: ViteManifestEntry, rootPath: Uri) => Element
-) => {
+export const createWebViewContent = (context: ExtensionContext, webview: Webview, webviewPath: string) => {
   const nonce = createNonce();
   const rootPath = Uri.joinPath(context.extensionUri, 'dist', 'webviews', webviewPath);
-  // const pathOf = (path: string) => vscode.Uri.joinPath(rootPath, path);
-
   const manifest = parseBuildManifest(rootPath);
+  const rootEntry = findRootEntry(manifest);
 
   // create process editor HTML document from "template"
   const htmlUri = findRootHtml(rootPath, manifest);
@@ -28,27 +22,45 @@ export const createWebViewContent = (
     throw new Error('Invalid HTML template, missing head or body element');
   }
 
+  const templateScripts = Array.from(DomUtils.getElementsByTagName('script', htmlDoc));
+  const templateStyleLinks = Array.from(DomUtils.getElementsByTagName('link', htmlDoc)).filter(link => link.attribs.rel === 'stylesheet');
+
   // replace script and style references with webview URI references as otherwise we get an net::ERR_ACCESS_DENIED error
-  Array.from(DomUtils.getElementsByTagName('script', htmlDoc)).forEach(DomUtils.removeElement);
+  templateScripts.forEach(DomUtils.removeElement);
   Array.from(DomUtils.getElementsByTagName('link', htmlDoc)).forEach(DomUtils.removeElement);
 
+  // set the content security policy to specify what the webview is allowed to access
+  const csp = new Element('meta', {
+    'http-equiv': 'Content-Security-Policy',
+    content: `
+      default-src 'none';
+      style-src 'unsafe-inline' ${webview.cspSource};
+      img-src ${webview.cspSource} https: data:;
+      script-src 'nonce-${nonce}' *;
+      worker-src ${webview.cspSource} blob: data:;
+      font-src ${webview.cspSource};
+      connect-src ${webview.cspSource}`
+  });
+  DomUtils.appendChild(head, csp);
+
   // index root script, we skip other scripts as they are loaded dynamically within the application
+  const templateRootScript =
+    templateScripts.find(script => script.attribs.src?.endsWith(rootEntry.chunk.file)) ??
+    templateScripts.find(script => script.attribs.src);
   const indexScript = new Element('script', {
-    src: webview.asWebviewUri(Uri.joinPath(rootPath, findRootEntry(manifest).chunk.file)).toString(),
-    type: 'module',
-    async: 'true',
+    ...(templateRootScript?.attribs ?? {}),
+    src: webview.asWebviewUri(Uri.joinPath(rootPath, rootEntry.chunk.file)).toString(),
     nonce: nonce
   });
   DomUtils.appendChild(body, indexScript);
 
   // CSS files
-  const webviewCssUris =
-    findRootEntry(manifest).chunk.css?.map(relativePath => webview.asWebviewUri(Uri.joinPath(rootPath, relativePath))) ?? [];
-  for (const cssUri of webviewCssUris) {
+  const webviewCssPaths = rootEntry.chunk.css ?? [];
+  for (const relativePath of webviewCssPaths) {
+    const templateStyleLink = templateStyleLinks.find(link => link.attribs.href?.endsWith(relativePath));
     const styleLink = new Element('link', {
-      href: cssUri.toString(),
-      type: 'text/css',
-      rel: 'stylesheet'
+      ...(templateStyleLink?.attribs ?? {}),
+      href: webview.asWebviewUri(Uri.joinPath(rootPath, relativePath)).toString()
     });
     DomUtils.appendChild(head, styleLink);
   }
@@ -62,25 +74,6 @@ export const createWebViewContent = (
     ]);
     DomUtils.appendChild(head, editorWorkerLocationScript);
   }
-
-  if (customAsset) {
-    const asset = customAsset(nonce, findRootEntry(manifest), rootPath);
-    DomUtils.appendChild(head, asset);
-  }
-
-  // set the content security policy to specify what the webview is allowed to access
-  const csp = new Element('meta', {
-    httpEquiv: 'Content-Security-Policy',
-    content: `
-      default-src 'none';
-      style-src ${customAsset ? '' : 'unsafe-inline'} ${webview.cspSource};
-      img-src ${webview.cspSource} https: data:;
-      script-src 'nonce-${nonce}' *;
-      worker-src ${webview.cspSource} blob: data:;
-      font-src ${webview.cspSource};
-      connect-src ${webview.cspSource}`
-  });
-  DomUtils.appendChild(head, csp);
   return render(htmlDoc, { xmlMode: true, decodeEntities: false, selfClosingTags: false });
 };
 
