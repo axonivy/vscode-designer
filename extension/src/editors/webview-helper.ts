@@ -4,14 +4,9 @@ import fs from 'fs';
 import { DomUtils, parseDocument } from 'htmlparser2';
 import type { ExtensionContext, Webview } from 'vscode';
 import { Uri } from 'vscode';
-import { findEditorWorker, findRootEntry, findRootHtml, parseBuildManifest, type ViteManifestEntry } from './build-manifest';
+import { findEditorWorker, findRootEntry, findRootHtml, parseBuildManifest } from './build-manifest';
 
-export const createWebViewContent = (
-  context: ExtensionContext,
-  webview: Webview,
-  webviewPath: string,
-  customAsset?: (nonce: string, rootEntry: ViteManifestEntry, rootPath: Uri) => Element
-) => {
+export const createWebViewContent = (context: ExtensionContext, webview: Webview, webviewPath: string) => {
   const nonce = createNonce();
   const rootPath = Uri.joinPath(context.extensionUri, 'dist', 'webviews', webviewPath);
   const manifest = parseBuildManifest(rootPath);
@@ -39,7 +34,7 @@ export const createWebViewContent = (
     'http-equiv': 'Content-Security-Policy',
     content: `
       default-src 'none';
-      style-src ${customAsset ? '' : 'unsafe-inline'} ${webview.cspSource};
+      style-src 'unsafe-inline' ${webview.cspSource};
       img-src ${webview.cspSource} https: data:;
       script-src 'nonce-${nonce}' *;
       worker-src ${webview.cspSource} blob: data:;
@@ -78,11 +73,6 @@ export const createWebViewContent = (
       new Text(`const editorWorkerLocation = "${editorWorkerLocation}";`)
     ]);
     DomUtils.appendChild(head, editorWorkerLocationScript);
-  }
-
-  if (customAsset) {
-    const asset = customAsset(nonce, rootEntry, rootPath);
-    DomUtils.appendChild(head, asset);
   }
   return render(htmlDoc, { xmlMode: true, decodeEntities: false, selfClosingTags: false });
 };
