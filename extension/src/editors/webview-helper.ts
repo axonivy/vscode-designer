@@ -37,6 +37,7 @@ export const createWebViewContent = (
     src: webview.asWebviewUri(Uri.joinPath(rootPath, findRootEntry(manifest).chunk.file)).toString(),
     type: 'module',
     async: 'true',
+    crossorigin: '',
     nonce: nonce
   });
   DomUtils.appendChild(body, indexScript);
@@ -48,7 +49,8 @@ export const createWebViewContent = (
     const styleLink = new Element('link', {
       href: cssUri.toString(),
       type: 'text/css',
-      rel: 'stylesheet'
+      rel: 'stylesheet',
+      crossorigin: ''
     });
     DomUtils.appendChild(head, styleLink);
   }
