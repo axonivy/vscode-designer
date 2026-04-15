@@ -9,19 +9,23 @@
   xmlns:pe="http://primefaces.org/ui/extensions"
 >
   <h:body>
-    <h3>
-      This is an <a href="https://developer.axonivy.com/doc/">Html Dialog</a> implemented with JSF and
-      <a href="http://primefaces.org/">Primefaces</a> as widget library
-    </h3>
-    
-    <h:form id="form">
-      <p:messages />
-      <ic:ch.xhtml.test.AddressComponent startMethod="start" label="asdf" />
-      <br />
-      <div class="command-btns">
-        <p:commandLink id="cancel" actionListener="#{ivyWorkflowView.cancel()}" process="@this" value="#{ivy.cm.co('/Labels/Cancel')}" />
-        <p:commandButton id="proceed" actionListener="#{logic.close}" value="Proceed" update="form" icon="pi pi-check" />
-      </div>
-    </h:form>
+    <ui:composition template="/ivy-form/layouts/form.xhtml">
+      <ui:define name="content">
+        <h3>
+          This is an <a href="https://developer.axonivy.com/doc/">Html Dialog</a> implemented with JSF and
+          <a href="http://primefaces.org/">Primefaces</a> as widget library
+        </h3>
+        
+        <h:form id="form">
+          <p:messages />
+          <ic:ch.xhtml.test.AddressComponent startMethod="start" label="asdf" />
+          <br />
+          <div class="command-btns">
+            <p:commandLink id="cancel" actionListener="#{ivyWorkflowView.cancel()}" process="@this" value="#{ivy.cm.co('/Labels/Cancel')}" />
+            <p:commandButton id="proceed" actionListener="#{logic.close}" value="Proceed" update="form" icon="pi pi-check" />
+          </div>
+        </h:form>
+      </ui:define>
+    </ui:composition>
   </h:body>
 </html>

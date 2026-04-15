@@ -1,5 +1,6 @@
 import { workspace } from 'vscode';
-import type { AnimationFollowMode } from '../engine/animation';
+
+type AnimationFollowMode = 'all' | 'currentProcess' | 'openProcesses' | 'noDialogProcesses' | 'noEmbeddedProcesses';
 
 const configs = () => workspace.getConfiguration();
 
@@ -22,3 +23,9 @@ export const config = {
     await configs().update('axonivy.engine.releaseTrain', releaseTrain, false);
   }
 };
+
+export const animationSettings = () => ({
+  animate: config.processAnimationAnimate() ?? true,
+  speed: config.processAnimationSpeed() ?? 50,
+  mode: config.processAnimationMode() ?? 'all'
+});

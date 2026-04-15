@@ -1,23 +1,13 @@
 import { TabInputCustom, Uri, window } from 'vscode';
-import { executeCommand } from '../base/commands';
-import { config } from '../base/configurations';
-import type { ProcessBean } from './api/generated/client';
-
-export type AnimationFollowMode = 'all' | 'currentProcess' | 'openProcesses' | 'noDialogProcesses' | 'noEmbeddedProcesses';
-
-export const animationSettings = () => {
-  return {
-    animate: config.processAnimationAnimate() ?? true,
-    speed: config.processAnimationSpeed() ?? 50,
-    mode: config.processAnimationMode() ?? 'all'
-  };
-};
+import { animationSettings } from '../../base/configurations';
+import type { ProcessBean } from '../api/generated/client';
+import { openEditor } from './open-editor';
 
 export const handleOpenProcessEditor = async (process: ProcessBean) => {
   if (!process.uri) {
     return false;
   }
-  switch (config.processAnimationMode()) {
+  switch (animationSettings().mode) {
     case 'all':
       return openEditor(process);
     case 'currentProcess':
@@ -37,14 +27,6 @@ export const handleOpenProcessEditor = async (process: ProcessBean) => {
     default:
       return false;
   }
-};
-
-export const openEditor = async (editor: { uri?: string }) => {
-  if (!editor.uri) {
-    return false;
-  }
-  await executeCommand('vscode.open', Uri.parse(editor.uri));
-  return true;
 };
 
 const isCurrentProcess = (process: ProcessBean) => {
