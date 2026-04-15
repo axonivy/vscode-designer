@@ -4,15 +4,20 @@ packages:
   - extension
 
 allowUnusedPatches: true
+blockExoticSubdeps: true
 
 ignoredBuiltDependencies:
   - '@swc/core'
   - '@vscode/vsce-sign'
   - esbuild
   - keytar
+minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+  - '@axonivy/*'
 
 overrides:
   dompurify@>=3.1.3 <=3.3.1: '>=3.3.2'
+  lodash@<=4.17.23: '>=4.18.0'
 
 patchedDependencies:
   monaco-editor: patches/monaco-editor.patch
@@ -25,7 +30,3 @@ publicHoistPattern:
 sideEffectsCache: false
 trustPolicy: no-downgrade
 trustPolicyIgnoreAfter: 43200 # minutes (30 days)
-minimumReleaseAge: 1440
-minimumReleaseAgeExclude:
-  - '@axonivy/*'
-blockExoticSubdeps: true
