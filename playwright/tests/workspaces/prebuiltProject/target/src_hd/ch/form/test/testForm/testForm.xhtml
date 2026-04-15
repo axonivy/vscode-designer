@@ -6,19 +6,17 @@
   <ui:composition template="/ivy-form/layouts/form.xhtml">
     <ui:define name="title"></ui:define>
     <ui:define name="content">
-      <h:body class="body-hd #{ivyFreyaTheme.mode}">
-        <h:form id="form">
-          <h:panelGroup layout="block" styleClass="i-flex i-gap i-flex-col">
-            <h:outputText value="This is my test" styleClass="" />
-            <h:panelGroup layout="block" styleClass="i-flex i-gap i-flex-col ui-fluid ">
-              <p:outputLabel id="input2-label" for="input2" value="" />
-              <p:inputText id="input2" value="">
-                <p:ajax event="change" />
-              </p:inputText>
-            </h:panelGroup>
+      <h:form id="form">
+        <h:panelGroup layout="block" styleClass="i-flex i-gap i-flex-col">
+          <h:outputText value="This is my test" styleClass="" />
+          <h:panelGroup layout="block" styleClass="i-flex i-gap i-flex-col ui-fluid ">
+            <p:outputLabel id="input2-label" for="input2" value="" />
+            <p:inputText id="input2" value="">
+              <p:ajax event="change" />
+            </p:inputText>
           </h:panelGroup>
-        </h:form>
-      </h:body>
+        </h:panelGroup>
+      </h:form>
     </ui:define>
   </ui:composition>
 </h:body>
