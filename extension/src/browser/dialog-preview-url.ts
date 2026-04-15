@@ -5,6 +5,7 @@ import { IvyEngineManager } from '../engine/engine-manager';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { treeUriToProjectPath } from '../project-explorer/tree-selection';
 import { resolveNamespaceFromPath } from '../project-explorer/utils/util';
+import { stripTrailingSeparator } from '../utils/path-utils';
 import { buildDialogPreviewUrl } from './dialog-preview-url-builder';
 
 export const dialogPreviewUrl = async (devContextPath: string) => {
@@ -50,5 +51,3 @@ const isWithinDirectory = (filePath: string, directoryPath: string) => {
   const relativePath = path.relative(stripTrailingSeparator(directoryPath), stripTrailingSeparator(filePath));
   return relativePath !== '' && !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
 };
-
-const stripTrailingSeparator = (value: string) => value.replace(/[\\/]+$/, '');

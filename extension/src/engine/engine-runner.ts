@@ -1,7 +1,9 @@
 import { ChildProcess, execFile } from 'child_process';
 import Os from 'os';
 import path from 'path';
+import { Uri, env } from 'vscode';
 import { config } from '../base/configurations';
+import { stripTrailingSeparator } from '../utils/path-utils';
 import { outputChannel } from './output-channel';
 
 export class EngineRunner {
@@ -41,11 +43,34 @@ export class EngineRunner {
     const defaultVmArgs = '-Ddev.mode=true -Divy.engine.testheadless=true';
     const userVmArgs = config.engineVmArgs();
     const javaOpts = userVmArgs ? `${defaultVmArgs} ${userVmArgs}` : defaultVmArgs;
+    const ivyBaseUrl = await this.resolveIvyBaseUrl();
     const env = {
-      env: { ...process.env, JAVA_OPTS_IVY_SYSTEM: javaOpts }
+      env: {
+        ...process.env,
+        JAVA_OPTS_IVY_SYSTEM: javaOpts,
+        ...(ivyBaseUrl ? { IVY_BASEURL: ivyBaseUrl } : {})
+      }
     };
-    outputChannel.appendLine(`Start ${engineLauncherScriptPath} with JAVA_OPTS_IVY_SYSTEM=${javaOpts}`);
+    outputChannel.appendLine(
+      `Start ${engineLauncherScriptPath} with JAVA_OPTS_IVY_SYSTEM=${javaOpts}${ivyBaseUrl ? ` and IVY_BASEURL=${ivyBaseUrl}` : ''}`
+    );
     return execFile(engineLauncherScriptPath, env);
+  }
+
+  private async resolveIvyBaseUrl() {
+    if (process.env.IVY_BASEURL) {
+      return process.env.IVY_BASEURL;
+    }
+    if (process.env.CODESPACES !== 'true' && env.appHost !== 'codespaces') {
+      return undefined;
+    }
+    try {
+      return stripTrailingSeparator((await env.asExternalUri(Uri.parse('http://localhost:8080/'))).toString());
+    } catch (error) {
+      const message = error instanceof Error ? error.message : `${error}`;
+      outputChannel.appendLine(`Failed to resolve IVY_BASEURL: ${message}`);
+      return undefined;
+    }
   }
 
   public async stop() {
