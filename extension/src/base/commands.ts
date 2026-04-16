@@ -13,6 +13,7 @@ export async function registerCommand(command: Command, context: ExtensionContex
 export type Command =
   | VSCodeCommand
   | EngineCommand
+  | DebugCommand
   | ProjectViewCommand
   | ViewCommand
   | JavaCommand
@@ -27,6 +28,7 @@ type EngineCommand =
   | 'engine.deactivateAnimation'
   | 'engine.activateAnimation'
   | 'engine.restart';
+type DebugCommand = 'ivy.debug.attachProcess';
 type ProjectViewCommand =
   | 'ivyProjects.refreshEntry'
   | 'ivyProjects.deployProject'

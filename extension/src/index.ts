@@ -8,6 +8,7 @@ import { askToReloadWindow } from './base/reload-window';
 import { setStatusBarIcon, showStatusBarQuickPick } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
+import { registerProcessDebugging, startProcessDebugging } from './debug/process-debug';
 import { IvyDiagnostics } from './engine/diagnostics';
 import { IvyEngineManager } from './engine/engine-manager';
 import { registerAddDependencyHandler } from './maven/add-dependency';
@@ -27,10 +28,12 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
   registerCommand('engine.activateAnimation', context, async () => await config.setProcessAnimationAnimate(true));
   registerCommand('engine.deactivateAnimation', context, async () => await config.setProcessAnimationAnimate(false));
   registerCommand('engine.restart', context, async () => await askToReloadWindow('Engine restart'));
+  registerCommand('ivy.debug.attachProcess', context, async () => await startProcessDebugging());
   registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));
   registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
   registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
   registerCommand('ivy.showStatusBarQuickPick', context, () => showStatusBarQuickPick());
+  registerProcessDebugging(context, ivyEngineManager);
 
   IvyDiagnostics.init(context);
   setStatusBarIcon();

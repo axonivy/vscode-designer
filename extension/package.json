@@ -330,6 +330,13 @@
         "category": "Axon Ivy"
       },
       {
+        "command": "ivy.debug.attachProcess",
+        "title": "Attach Process Debugger",
+        "category": "Axon Ivy",
+        "icon": "$(debug-alt-small)",
+        "enablement": "ivy:hasIvyProjects"
+      },
+      {
         "command": "ivyProjects.deployProject",
         "title": "Deploy Project",
         "category": "Axon Ivy",
@@ -456,6 +463,20 @@
             "markdownDescription": "Url of the Axon Ivy Engine that will be used as backend. Only relevant if `#axonivy.engine.runByExtension#` is set to false.",
             "order": 1200
           },
+          "axonivy.engine.debugHost": {
+            "type": "string",
+            "default": "",
+            "markdownDescription": "Host name of the Axon Ivy Engine Debug Adapter Protocol server. If empty, the host of `#axonivy.engine.url#` is used.",
+            "order": 1250
+          },
+          "axonivy.engine.debugPort": {
+            "type": "integer",
+            "default": 5005,
+            "minimum": 1,
+            "maximum": 65535,
+            "markdownDescription": "Port of the Axon Ivy Engine Debug Adapter Protocol server used for process debugging.",
+            "order": 1275
+          },
           "axonivy.engine.vmArgs": {
             "type": "string",
             "default": "",
@@ -499,6 +520,56 @@
             "markdownDescription": "Specify process animation mode."
           }
         }
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "ivy-process",
+        "label": "Axon Ivy Process Debugger",
+        "languages": [
+          "ivy-process"
+        ],
+        "configurationAttributes": {
+          "attach": {
+            "required": [
+              "type",
+              "request",
+              "name"
+            ],
+            "properties": {
+              "host": {
+                "type": "string",
+                "description": "Host name of the Axon Ivy Engine DAP server. Defaults to the configured engine host."
+              },
+              "port": {
+                "type": "number",
+                "description": "Port of the Axon Ivy Engine DAP server. Defaults to the configured debug port.",
+                "minimum": 1,
+                "maximum": 65535
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "ivy-process",
+            "request": "attach",
+            "name": "Attach to Axon Ivy Engine"
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "Axon Ivy: Attach to Engine",
+            "description": "Attach the Axon Ivy process debugger to a running engine DAP server.",
+            "body": {
+              "type": "ivy-process",
+              "request": "attach",
+              "name": "${1:Attach to Axon Ivy Engine}",
+              "host": "${2:localhost}",
+              "port": 5005
+            }
+          }
+        ]
       }
     ],
     "viewsContainers": {
@@ -565,6 +636,11 @@
         }
       ],
       "workflow.editor.title": [
+        {
+          "command": "ivy.debug.attachProcess",
+          "group": "navigation",
+          "when": "activeCustomEditorId == 'ivy.glspDiagram'"
+        },
         {
           "command": "workflow.fit",
           "group": "navigation",
@@ -708,6 +784,11 @@
         }
       ],
       "explorer.run": [
+        {
+          "command": "ivy.debug.attachProcess",
+          "group": "run@1",
+          "when": "ivy:hasIvyProjects"
+        },
         {
           "command": "ivyProjects.deployProject",
           "group": "run@2",

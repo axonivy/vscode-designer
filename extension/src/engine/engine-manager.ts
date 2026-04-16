@@ -41,6 +41,7 @@ export class IvyEngineManager {
   private static _instance: IvyEngineManager;
 
   private readonly engineRunner: EngineRunner;
+  private engineUrl?: URL;
   private ivyEngineApi?: IvyEngineApi;
   private started = false;
 
@@ -105,7 +106,7 @@ export class IvyEngineManager {
     }
     this.started = true;
     const engineUrl = await this.resolveEngineUrl();
-    this.ivyEngineApi = new IvyEngineApi(engineUrl.toString());
+    this.ivyEngineApi ??= new IvyEngineApi(engineUrl.toString());
     let devContextPath = await this.ivyEngineApi.devContextPath;
     IvyBrowserViewProvider.register(this.context, engineUrl, devContextPath);
     devContextPath += devContextPath.endsWith('/') ? '' : '/';
@@ -133,12 +134,24 @@ export class IvyEngineManager {
   }
 
   private async resolveEngineUrl() {
+    if (this.engineUrl) {
+      return this.engineUrl;
+    }
     let engineUrl = config.engineUrl() ?? '';
     if (config.engineRunByExtension()) {
       await this.engineRunner.start();
       engineUrl = this.engineRunner.engineUrl;
     }
-    return new URL(engineUrl);
+    this.engineUrl = new URL(engineUrl);
+    return this.engineUrl;
+  }
+
+  public async resolveDebugConnection(overrides?: { host?: string; port?: number }) {
+    const engineUrl = await this.resolveEngineUrl();
+    const configuredHost = overrides?.host ?? config.engineDebugHost()?.trim();
+    const host = configuredHost || engineUrl.hostname || 'localhost';
+    const port = overrides?.port ?? config.engineDebugPort();
+    return { host, port };
   }
 
   private async initExistingProjects() {
@@ -272,6 +285,9 @@ export class IvyEngineManager {
 
   async stop() {
     await this.engineRunner.stop();
+    this.started = false;
+    this.engineUrl = undefined;
+    this.ivyEngineApi = undefined;
   }
 
   public static get instance() {
