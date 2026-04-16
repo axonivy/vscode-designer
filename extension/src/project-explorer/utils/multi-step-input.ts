@@ -64,7 +64,9 @@ export class MultiStepInput<T extends MSStateBase> {
           state.currentStep = stepIndex + 1;
           this.currentStep = steps[stepIndex];
         } else if (err == InputFlowAction.cancel) {
-          throw new Error('Dialog cancelled by the user');
+          throw new Error('Dialog cancelled by the user', {
+            cause: err
+          });
         } else {
           throw err;
         }
