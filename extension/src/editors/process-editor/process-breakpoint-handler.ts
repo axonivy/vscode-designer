@@ -71,6 +71,8 @@ export class ProcessBreakpointHandler {
       return;
     }
 
+    await this.cleanupStaleBreakpoints(client);
+
     this.dispatchAction(
       ShowBreakpointAction.create({
         elementBreakpoints: await this.breakpointsOf(client),
@@ -100,10 +102,7 @@ export class ProcessBreakpointHandler {
   }
 
   private async breakpointsOf(client: GlspVscodeClient<CustomDocument>): Promise<ElementBreakpoint[]> {
-    const documentUri = client.document.uri.toString();
-    const breakpoints = debug.breakpoints
-      .filter((breakpoint): breakpoint is SourceBreakpoint => breakpoint instanceof SourceBreakpoint)
-      .filter(breakpoint => breakpoint.location.uri.toString() === documentUri);
+    const breakpoints = this.processBreakpointsOf(client);
 
     const elementBreakpoints = await Promise.all(breakpoints.map(breakpoint => this.toElementBreakpoint(breakpoint)));
     return elementBreakpoints.filter((breakpoint): breakpoint is ElementBreakpoint => breakpoint !== undefined);
@@ -121,5 +120,27 @@ export class ProcessBreakpointHandler {
         breakpoint.location.uri.toString() === client.document.uri.toString() &&
         breakpoint.location.range.start.line === line
     );
+  }
+
+  private processBreakpointsOf(client: GlspVscodeClient<CustomDocument>): SourceBreakpoint[] {
+    const documentUri = client.document.uri.toString();
+    return debug.breakpoints
+      .filter((breakpoint): breakpoint is SourceBreakpoint => breakpoint instanceof SourceBreakpoint)
+      .filter(breakpoint => breakpoint.location.uri.toString() === documentUri);
+  }
+
+  private async cleanupStaleBreakpoints(client: GlspVscodeClient<CustomDocument>) {
+    const staleBreakpoints: SourceBreakpoint[] = [];
+
+    for (const breakpoint of this.processBreakpointsOf(client)) {
+      const pid = await this.locationResolver.pidOfLine(client.document.uri, breakpoint.location.range.start.line);
+      if (!pid) {
+        staleBreakpoints.push(breakpoint);
+      }
+    }
+
+    if (staleBreakpoints.length > 0) {
+      debug.removeBreakpoints(staleBreakpoints);
+    }
   }
 }
