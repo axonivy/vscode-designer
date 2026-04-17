@@ -3,7 +3,6 @@ import {
   findProducts,
   findProductVersionsById,
   type MavenArtifactVersionModel,
-  type PagedModelProductModel,
   type ProductModel
 } from './generated/market-client';
 
@@ -15,10 +14,9 @@ export type Product = {
 };
 
 export async function searchMarketProduct(): Promise<Product[]> {
-  const response = await findProducts({ page: 0, size: 200, type: 'all', sort: [], language: 'en' });
-  const data = response.data as PagedModelProductModel;
+  const response = await findProducts({ type: 'all', language: 'en' });
   return (
-    data._embedded?.products?.map((product: ProductModel) => ({
+    response.data.map((product: ProductModel) => ({
       id: product.id || '',
       name: product.names?.en || 'Unnamed Product',
       description: product.shortDescriptions?.en || '',
