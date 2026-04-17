@@ -2,13 +2,16 @@ import { ShowBreakpointAction, type ElementBreakpoint } from '@axonivy/process-e
 import type { Action } from '@eclipse-glsp/protocol';
 import type { GlspVscodeClient } from '@eclipse-glsp/vscode-integration';
 import type { CustomDocument, Disposable } from 'vscode';
-import { Location, Position, SourceBreakpoint, Uri, debug } from 'vscode';
+import { Location, Position, SourceBreakpoint, debug } from 'vscode';
+import { ProcessBreakpointLocationResolver } from './process-breakpoint-location-resolver';
 
 type DispatchAction = (action: Action, clientId: string) => void;
 type GetClient = (clientId: string) => GlspVscodeClient<CustomDocument> | undefined;
 type GetClientIds = () => IterableIterator<string>;
 
 export class ProcessBreakpointHandler {
+  private readonly locationResolver = new ProcessBreakpointLocationResolver();
+
   constructor(
     private readonly getClient: GetClient,
     private readonly getClientIds: GetClientIds,
@@ -19,29 +22,33 @@ export class ProcessBreakpointHandler {
     disposables.push(debug.onDidChangeBreakpoints(() => this.syncForAllClients()));
   }
 
-  toggleBreakpoint(clientId: string, elementId: string) {
+  async toggleBreakpoint(clientId: string, elementId: string) {
     const client = this.getClient(clientId);
     if (!client) {
       return;
     }
 
-    const existingBreakpoint = this.breakpointOf(client, elementId);
+    const existingBreakpoint = await this.breakpointOf(client, elementId);
     if (existingBreakpoint) {
       debug.removeBreakpoints([existingBreakpoint]);
       return;
     }
 
-    const breakpointUri = this.breakpointUriOf(client, elementId);
-    debug.addBreakpoints([new SourceBreakpoint(new Location(breakpointUri, new Position(0, 0)), undefined, 'true')]);
+    const line = await this.locationResolver.lineOfPid(client.document.uri, elementId);
+    if (line === undefined) {
+      return;
+    }
+
+    debug.addBreakpoints([new SourceBreakpoint(new Location(client.document.uri, new Position(line, 0)), undefined, 'true')]);
   }
 
-  setBreakpointDisabled(clientId: string, elementId: string, disabled: boolean) {
+  async setBreakpointDisabled(clientId: string, elementId: string, disabled: boolean) {
     const client = this.getClient(clientId);
     if (!client) {
       return;
     }
 
-    const existingBreakpoint = this.breakpointOf(client, elementId);
+    const existingBreakpoint = await this.breakpointOf(client, elementId);
     if (!existingBreakpoint) {
       return;
     }
@@ -58,7 +65,7 @@ export class ProcessBreakpointHandler {
     ]);
   }
 
-  syncForClient(clientId: string) {
+  async syncForClient(clientId: string) {
     const client = this.getClient(clientId);
     if (!client) {
       return;
@@ -66,21 +73,21 @@ export class ProcessBreakpointHandler {
 
     this.dispatchAction(
       ShowBreakpointAction.create({
-        elementBreakpoints: this.breakpointsOf(client),
+        elementBreakpoints: await this.breakpointsOf(client),
         globalDisabled: false
       }),
       clientId
     );
   }
 
-  syncForAllClients() {
+  async syncForAllClients() {
     for (const clientId of this.getClientIds()) {
-      this.syncForClient(clientId);
+      await this.syncForClient(clientId);
     }
   }
 
-  private toElementBreakpoint(breakpoint: SourceBreakpoint): ElementBreakpoint | undefined {
-    const elementId = breakpoint.location.uri.fragment;
+  private async toElementBreakpoint(breakpoint: SourceBreakpoint): Promise<ElementBreakpoint | undefined> {
+    const elementId = await this.locationResolver.pidOfLine(breakpoint.location.uri, breakpoint.location.range.start.line);
     if (!elementId) {
       return undefined;
     }
@@ -92,24 +99,27 @@ export class ProcessBreakpointHandler {
     };
   }
 
-  private breakpointsOf(client: GlspVscodeClient<CustomDocument>): ElementBreakpoint[] {
+  private async breakpointsOf(client: GlspVscodeClient<CustomDocument>): Promise<ElementBreakpoint[]> {
     const documentUri = client.document.uri.toString();
-    return debug.breakpoints
+    const breakpoints = debug.breakpoints
       .filter((breakpoint): breakpoint is SourceBreakpoint => breakpoint instanceof SourceBreakpoint)
-      .filter(breakpoint => breakpoint.location.uri.with({ fragment: '' }).toString() === documentUri)
-      .map(breakpoint => this.toElementBreakpoint(breakpoint))
-      .filter((breakpoint): breakpoint is ElementBreakpoint => breakpoint !== undefined);
+      .filter(breakpoint => breakpoint.location.uri.toString() === documentUri);
+
+    const elementBreakpoints = await Promise.all(breakpoints.map(breakpoint => this.toElementBreakpoint(breakpoint)));
+    return elementBreakpoints.filter((breakpoint): breakpoint is ElementBreakpoint => breakpoint !== undefined);
   }
 
-  private breakpointOf(client: GlspVscodeClient<CustomDocument>, elementId: string): SourceBreakpoint | undefined {
-    const breakpointUri = this.breakpointUriOf(client, elementId);
+  private async breakpointOf(client: GlspVscodeClient<CustomDocument>, elementId: string): Promise<SourceBreakpoint | undefined> {
+    const line = await this.locationResolver.lineOfPid(client.document.uri, elementId);
+    if (line === undefined) {
+      return undefined;
+    }
+
     return debug.breakpoints.find(
       (breakpoint): breakpoint is SourceBreakpoint =>
-        breakpoint instanceof SourceBreakpoint && breakpoint.location.uri.toString() === breakpointUri.toString()
+        breakpoint instanceof SourceBreakpoint &&
+        breakpoint.location.uri.toString() === client.document.uri.toString() &&
+        breakpoint.location.range.start.line === line
     );
-  }
-
-  private breakpointUriOf(client: GlspVscodeClient<CustomDocument>, elementId: string): Uri {
-    return client.document.uri.with({ fragment: elementId });
   }
 }
