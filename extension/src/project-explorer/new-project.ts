@@ -1,68 +1,93 @@
 import path from 'path';
-import { FileType, Uri, window, workspace } from 'vscode';
-import { logInformationMessage } from '../base/logging-util';
+import { Uri } from 'vscode';
+import { logErrorMessage } from '../base/logging-util';
+import type { NewProjectParams } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { type TreeSelection, treeSelectionToUri } from './tree-selection';
+import { type InputStep, type MSStateBase, MultiStepCancelledError, MultiStepInput } from './utils/multi-step-input';
 import { validateDotSeparatedName, validateProjectName } from './utils/util';
 
-export const addNewProject = async (selection: TreeSelection) => {
-  const treeSelectionUri = await treeSelectionToUri(selection);
-  const selectedUri = (await isDirectory(treeSelectionUri)) ? treeSelectionUri : await getWorkspaceFolder();
-  if (!selectedUri) {
-    logInformationMessage('No valid directory selected');
-    return;
+interface NewProjectState extends MSStateBase {
+  projectName: string;
+  projectPath: string;
+  groupId: string;
+  projectId: string;
+}
+
+export const addNewProject = async (selectedUri: Uri) => {
+  const stepProjectName: InputStep<NewProjectState> = async (input: MultiStepInput<NewProjectState>, state: NewProjectState) => {
+    state.projectName = await input.showTextInput({
+      title: state.dialogTitle,
+      titleSuffix: ' - Choose project name',
+      placeholder: 'Enter a name. Allowed characters: a-z, A-Z, 0-9, _, -',
+      currentStep: state.currentStep,
+      totalSteps: state.totalSteps,
+      value: state.projectName,
+      validationFunction: validateProjectName,
+      onBack: (typedValue: string) => {
+        state.projectName = typedValue;
+      }
+    });
+    state.projectPath = path.join(selectedUri.fsPath, state.projectName);
+  };
+
+  const stepGroupId: InputStep<NewProjectState> = async (input: MultiStepInput<NewProjectState>, state: NewProjectState) => {
+    state.groupId = await input.showTextInput({
+      title: state.dialogTitle,
+      titleSuffix: ' - Choose a group ID',
+      placeholder: 'Enter a group ID. Allowed characters: a-z, A-Z, 0-9, _. Separate namespaces with dots, e.g. com.mycompany',
+      currentStep: state.currentStep,
+      totalSteps: state.totalSteps,
+      value: state.groupId,
+      validationFunction: validateDotSeparatedName,
+      onBack: (typedValue: string) => {
+        state.groupId = typedValue;
+      }
+    });
+  };
+
+  const stepProjectId: InputStep<NewProjectState> = async (input: MultiStepInput<NewProjectState>, state: NewProjectState) => {
+    state.projectId = await input.showTextInput({
+      title: state.dialogTitle,
+      titleSuffix: ' - Choose a project artifact ID',
+      placeholder: 'Enter a project ID. Allowed characters: a-z, A-Z, 0-9, _. Separate namespaces with dots, e.g. my.project',
+      currentStep: state.currentStep,
+      totalSteps: state.totalSteps,
+      value: state.projectId,
+      validationFunction: validateDotSeparatedName,
+      onBack: (typedValue: string) => {
+        state.projectId = typedValue;
+      }
+    });
+  };
+
+  const steps: InputStep<NewProjectState>[] = [stepProjectName, stepGroupId, stepProjectId];
+  const newProjectData: NewProjectState = {
+    dialogTitle: 'Create New Project',
+    currentStep: 1,
+    totalSteps: steps.length,
+    projectName: '',
+    projectPath: '',
+    groupId: '',
+    projectId: ''
+  };
+
+  try {
+    await new MultiStepInput<NewProjectState>().stepThrough(steps, newProjectData);
+  } catch (err) {
+    if (err instanceof MultiStepCancelledError) {
+      logErrorMessage(err.message);
+      return;
+    } else {
+      throw err;
+    }
   }
 
-  const input = await collectNewProjectParams(selectedUri);
-  if (input) {
-    await IvyEngineManager.instance.createProject(input);
-  }
-};
+  const createProjectInput: NewProjectParams & { path: string } = {
+    name: newProjectData.projectName,
+    groupId: newProjectData.groupId,
+    projectId: newProjectData.projectId,
+    path: newProjectData.projectPath
+  };
 
-const getWorkspaceFolder = async () => {
-  const workspaceFolders = workspace.workspaceFolders;
-  if (workspaceFolders?.length === 1 && workspaceFolders[0]) {
-    return workspaceFolders[0].uri;
-  }
-  return await window.showWorkspaceFolderPick().then(folder => folder?.uri);
-};
-
-const isDirectory = async (uri?: Uri) => {
-  if (!uri) {
-    return false;
-  }
-  return (await workspace.fs.stat(uri)).type === FileType.Directory;
-};
-
-const collectNewProjectParams = async (selectedUri: Uri) => {
-  const prompt = `Project Location: ${selectedUri.path}`;
-  const name = await window.showInputBox({
-    title: 'Project Name',
-    validateInput: validateProjectName,
-    prompt,
-    ignoreFocusOut: true
-  });
-  if (!name) {
-    return;
-  }
-  const projectPath = path.join(selectedUri.fsPath, name);
-  const groupId = await window.showInputBox({
-    title: 'Group Id',
-    value: name,
-    validateInput: value => validateDotSeparatedName(value),
-    ignoreFocusOut: true
-  });
-  if (!groupId) {
-    return;
-  }
-  const projectId = await window.showInputBox({
-    title: 'Project Id',
-    value: name,
-    validateInput: value => validateDotSeparatedName(value),
-    ignoreFocusOut: true
-  });
-  if (!projectId) {
-    return;
-  }
-  return { path: projectPath, name, groupId, projectId };
+  await IvyEngineManager.instance.createProject(createProjectInput);
 };

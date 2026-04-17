@@ -5,7 +5,7 @@ import { logErrorMessage } from '../base/logging-util';
 import type { ProcessInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { IvyProjectExplorer } from './ivy-project-explorer';
-import { type InputStep, type MSStateBase, MultiStepInput } from './utils/multi-step-input';
+import { type InputStep, type MSStateBase, MultiStepCancelledError, MultiStepInput } from './utils/multi-step-input';
 import { resolveNamespaceFromPath, validateNamespace, validateProjectArtifactName } from './utils/util';
 
 export type ProcessKind = 'Business Process' | 'Callable Sub Process' | 'Web Service Process' | '';
@@ -107,7 +107,16 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
     projectSelectionFromPath: projectSelectionFromPath
   };
 
-  await new MultiStepInput<NewProcessState>().stepThrough(steps, newProcessData);
+  try {
+    await new MultiStepInput<NewProcessState>().stepThrough(steps, newProcessData);
+  } catch (err) {
+    if (err instanceof MultiStepCancelledError) {
+      logErrorMessage(err.message);
+      return;
+    } else {
+      throw err;
+    }
+  }
 
   if (newProcessData.projectSelection && newProcessData.name) {
     const createProcessInput: NewProcessParams = {
@@ -120,6 +129,6 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
 
     await IvyEngineManager.instance.createProcess(createProcessInput);
   } else {
-    throw new Error('Process creation failed. Current input state: ' + JSON.stringify(newProcessData));
+    throw new Error('Process creation failed due to corrupted input state. Current input state: ' + JSON.stringify(newProcessData));
   }
 };

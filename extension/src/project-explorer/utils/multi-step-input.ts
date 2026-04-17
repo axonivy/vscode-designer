@@ -1,6 +1,14 @@
 import type { QuickInput, QuickPickItem } from 'vscode';
 import { Disposable, QuickInputButtons, window } from 'vscode';
 
+export class MultiStepCancelledError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MultiStepCancelledError';
+    Object.setPrototypeOf(this, MultiStepCancelledError.prototype);
+  }
+}
+
 export interface MSStateBase {
   dialogTitle: string;
   currentStep: number;
@@ -64,9 +72,7 @@ export class MultiStepInput<T extends MSStateBase> {
           state.currentStep = stepIndex + 1;
           this.currentStep = steps[stepIndex];
         } else if (err == InputFlowAction.cancel) {
-          throw new Error('Dialog cancelled by the user', {
-            cause: err
-          });
+          throw new MultiStepCancelledError('Dialog cancelled by the user');
         } else {
           throw err;
         }
