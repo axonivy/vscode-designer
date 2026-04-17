@@ -3,15 +3,18 @@
  * Do not edit manually.
  * Marketplace stable
  * The stable public api
- * OpenAPI spec version: 1.23.0
+ * OpenAPI spec version: 1.24.0
  */
 import { marketFetch } from '../market-fetch';
-export interface PageMetadata {
-  size?: number;
-  totalElements?: number;
-  totalPages?: number;
-  number?: number;
-}
+/**
+ * Product name by locale
+ */
+export type ProductModelNames = { [key: string]: string };
+
+/**
+ * Product's short descriptions by locale
+ */
+export type ProductModelShortDescriptions = { [key: string]: string };
 
 export interface Link {
   href?: string;
@@ -27,16 +30,6 @@ export interface Link {
 export interface Links {
   [key: string]: Link;
 }
-
-/**
- * Product name by locale
- */
-export type ProductModelNames = { [key: string]: string };
-
-/**
- * Product's short descriptions by locale
- */
-export type ProductModelShortDescriptions = { [key: string]: string };
 
 export interface ProductModel {
   /** Product id */
@@ -54,16 +47,6 @@ export interface ProductModel {
   /** Extension folder directory in market repository */
   marketDirectory?: string;
   _links?: Links;
-}
-
-export type _PagedModelProductModelEmbedded = {
-  products?: ProductModel[];
-};
-
-export interface PagedModelProductModel {
-  _embedded?: _PagedModelProductModelEmbedded;
-  _links?: Links;
-  page?: PageMetadata;
 }
 
 export interface MavenArtifactKey {
@@ -90,6 +73,10 @@ export interface MavenArtifactVersionModel {
   artifactsByVersion?: MavenArtifactVersion[];
 }
 
+export interface BestMatchVersion {
+  version?: string;
+}
+
 export interface Image {
   id?: string;
   /** Product id */
@@ -103,20 +90,6 @@ export interface Image {
 }
 
 export type FindProductsParams = {
-  /**
-   * Page number to retrieve
-   * @minimum 0
-   */
-  page?: unknown;
-  /**
-   * Number of items per page
-   * @minimum 1
-   */
-  size?: unknown;
-  /**
-   * Sorting criteria in the format: Sorting criteria(popularity|alphabetically|recent), Sorting order(asc|desc)
-   */
-  sort?: unknown[];
   /**
    * Type of product.
    */
@@ -164,10 +137,10 @@ export type FindProductJsonContent200 = { [key: string]: unknown };
 
 /**
  * By default, the system finds products with type 'all'
- * @summary Retrieve a paginated list of all products, optionally filtered by type, keyword, and language
+ * @summary Retrieve a list of all products, optionally filtered by type, keyword, and language
  */
 export type findProductsResponse200 = {
-  data: PagedModelProductModel;
+  data: ProductModel[];
   status: 200;
 };
 
