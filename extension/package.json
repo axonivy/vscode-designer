@@ -546,6 +546,10 @@
                 "description": "Port of the Axon Ivy Engine DAP server. Defaults to the configured debug port.",
                 "minimum": 1,
                 "maximum": 65535
+              },
+              "workspaceFolder": {
+                "type": "string",
+                "description": "Absolute path of the workspace folder to expose to the Axon Ivy debug adapter. Defaults to the selected workspace folder."
               }
             }
           }

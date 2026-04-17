@@ -1,6 +1,6 @@
-import type { IvyEngineManager } from '../engine/engine-manager';
-import { logErrorMessage } from '../base/logging-util';
 import type { DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
+import { logErrorMessage } from '../base/logging-util';
+import type { IvyEngineManager } from '../engine/engine-manager';
 
 export const PROCESS_DEBUG_TYPE = 'ivy-process';
 export const PROCESS_DEBUG_NAME = 'Attach to Axon Ivy Engine';
@@ -11,23 +11,25 @@ type ProcessDebugConfiguration = DebugConfiguration & {
   name: string;
   host?: string;
   port?: number | string;
+  workspaceFolder?: string;
 };
 
 export class ProcessDebugConfigurationProvider implements DebugConfigurationProvider {
   constructor(private readonly engineManager: IvyEngineManager) {}
 
-  provideDebugConfigurations(_folder: WorkspaceFolder | undefined): ProviderResult<DebugConfiguration[]> {
+  provideDebugConfigurations(folder: WorkspaceFolder | undefined): ProviderResult<DebugConfiguration[]> {
     return [
       {
         type: PROCESS_DEBUG_TYPE,
         request: 'attach',
-        name: PROCESS_DEBUG_NAME
+        name: PROCESS_DEBUG_NAME,
+        workspaceFolder: folder?.uri.fsPath
       }
     ];
   }
 
   async resolveDebugConfiguration(
-    _folder: WorkspaceFolder | undefined,
+    folder: WorkspaceFolder | undefined,
     debugConfiguration: DebugConfiguration
   ): Promise<DebugConfiguration | undefined> {
     const configuration = this.toProcessDebugConfiguration(debugConfiguration);
@@ -48,7 +50,8 @@ export class ProcessDebugConfigurationProvider implements DebugConfigurationProv
       return {
         ...configuration,
         host: connection.host,
-        port: connection.port
+        port: connection.port,
+        workspaceFolder: configuration.workspaceFolder ?? folder?.uri.fsPath
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -62,9 +65,11 @@ export class ProcessDebugConfigurationProvider implements DebugConfigurationProv
       ...debugConfiguration,
       type: PROCESS_DEBUG_TYPE,
       request: 'attach',
-      name: typeof debugConfiguration.name === 'string' && debugConfiguration.name.length > 0 ? debugConfiguration.name : PROCESS_DEBUG_NAME,
+      name:
+        typeof debugConfiguration.name === 'string' && debugConfiguration.name.length > 0 ? debugConfiguration.name : PROCESS_DEBUG_NAME,
       host: typeof debugConfiguration.host === 'string' ? debugConfiguration.host : undefined,
-      port: debugConfiguration.port as number | string | undefined
+      port: debugConfiguration.port as number | string | undefined,
+      workspaceFolder: typeof debugConfiguration.workspaceFolder === 'string' ? debugConfiguration.workspaceFolder : undefined
     };
   }
 
