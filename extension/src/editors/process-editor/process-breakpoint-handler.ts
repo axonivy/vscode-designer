@@ -32,7 +32,7 @@ export class ProcessBreakpointHandler {
     }
 
     const breakpointUri = this.breakpointUriOf(client, elementId);
-    debug.addBreakpoints([new SourceBreakpoint(new Location(breakpointUri, new Position(2, 0)), undefined, 'true')]);
+    debug.addBreakpoints([new SourceBreakpoint(new Location(breakpointUri, new Position(0, 0)), undefined, 'true')]);
   }
 
   setBreakpointDisabled(clientId: string, elementId: string, disabled: boolean) {
