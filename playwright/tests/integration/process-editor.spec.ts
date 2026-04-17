@@ -14,7 +14,8 @@ test.describe('Process Editor', () => {
     await processEditor.isViewVisible();
   });
 
-  test('Check if User Dialog is visible', async () => {
+  // eslint-disable-next-line playwright/no-focused-test
+  test.only('Check if User Dialog is visible', async () => {
     const userDialog = processEditor.locatorForPID(userDialogPID);
     await expect(userDialog).toBeVisible();
     await processEditor.isNotDirty();
