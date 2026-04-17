@@ -35,7 +35,7 @@ export const createWebViewContent = (context: ExtensionContext, webview: Webview
     content: `
       default-src 'none';
       style-src 'unsafe-inline' ${webview.cspSource};
-      img-src ${webview.cspSource} https: data:;
+      img-src ${webview.cspSource} https: http://localhost:* http://127.0.0.1:* data:;
       script-src 'nonce-${nonce}' *;
       worker-src ${webview.cspSource} blob: data:;
       font-src ${webview.cspSource};
