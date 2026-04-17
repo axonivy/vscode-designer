@@ -28,7 +28,7 @@ pipeline {
             nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
             curl -fsSL https://code-server.dev/install.sh | sh
             code-server --install-extension vscjava.vscode-java-pack
-            code-server --install-extension /extensions/vscode-designer*.vsix
+            code-server --install-extension extension/vscode-designer*.vsix
             nohup code-server --bind-addr 0.0.0.0:3000 --auth none --disable-telemetry --disable-update-check --disable-workspace-trust &
             """
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
