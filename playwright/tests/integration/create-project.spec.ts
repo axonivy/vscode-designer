@@ -9,17 +9,20 @@ test.describe('Create Project', () => {
   test.use({ workspace: empty });
 
   test('Add Project and execute init Process', async ({ page }) => {
+    const projectName = 'testProject';
+    const projectNamespace = 'testProjectNamespace';
+    const projectId = 'testProjectId';
     const explorer = new FileExplorer(page);
-    await explorer.addNestedProject('parent', 'testProject');
+    await explorer.addNestedProject('parent', projectName, projectNamespace, projectId);
     await explorer.hasStatusMessage('Finished: Create new Project', 60_000);
-    await explorer.hasNode(`parent${path.sep}testProject`);
+    await explorer.hasNode(`parent${path.sep}${projectName}`);
 
     const problemsView = await ProblemsView.initProblemsView(page);
     await problemsView.hasNoMarker();
 
     const processEditor = new ProcessEditor(page, 'BusinessProcess.p.json');
     await processEditor.isViewVisible();
-    await processEditor.hasBreadCrumbs('parent', 'testProject', 'processes', 'testProject', 'BusinessProcess.p.json');
+    await processEditor.hasBreadCrumbs('parent', projectName, 'processes', projectNamespace, 'BusinessProcess.p.json');
     const start = processEditor.locatorForElementType('g.start\\:requestStart');
     const end = processEditor.locatorForElementType('g.end\\:taskEnd');
     await processEditor.startProcessAndAssertExecuted(start, end);
