@@ -1,7 +1,7 @@
 import { Uri, window } from 'vscode';
 import type { HdInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { resolveNamespaceFromPath, validateArtifactName, validateDotSeparatedName } from './utils/util';
+import { resolveNamespaceFromPath, validateDotSeparatedName, validateProjectArtifactName } from './utils/util';
 
 export const dialogTypes = ['JSF', 'Form', 'JSFOffline'] as const;
 export type DialogType = (typeof dialogTypes)[number];
@@ -62,7 +62,7 @@ const collectName = async () => {
     title: 'User Dialog Name',
     placeHolder: 'Enter a name',
     ignoreFocusOut: true,
-    validateInput: validateArtifactName
+    validateInput: validateProjectArtifactName
   });
 };
 

@@ -6,7 +6,7 @@ import type { ProcessInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { IvyProjectExplorer } from './ivy-project-explorer';
 import { type InputStep, type MSStateBase, MultiStepInput } from './utils/multi-step-input';
-import { resolveNamespaceFromPath, validateArtifactName, validateNamespace } from './utils/util';
+import { resolveNamespaceFromPath, validateNamespace, validateProjectArtifactName } from './utils/util';
 
 export type ProcessKind = 'Business Process' | 'Callable Sub Process' | 'Web Service Process' | '';
 
@@ -22,7 +22,6 @@ interface NewProcessState extends MSStateBase {
   projectSelection: ProjectSelection;
   name: string;
   namespace: string;
-  namespaceFromPath?: string;
   projectSelectionFromPath?: ProjectSelection;
 }
 
@@ -41,8 +40,9 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
   }
 
   const stepProject: InputStep<NewProcessState> = async (input: MultiStepInput<NewProcessState>, state: NewProcessState) => {
-    if (state.projectSelectionFromPath && stepProject.execCounter !== undefined && stepProject.execCounter === 0) {
+    if (state.projectSelectionFromPath && (state.projectSelection.label === '' || state.projectSelection.label === undefined)) {
       state.projectSelection = state.projectSelectionFromPath;
+      state.projectSelectionFromPath = undefined;
     } else {
       state.projectSelection = await input.showQuickPick({
         title: state.dialogTitle,
@@ -67,41 +67,42 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
     state.name = await input.showTextInput({
       title: state.dialogTitle,
       titleSuffix: ' - Choose process name',
-      placeholder: 'Enter a name. Allowed characters: a-z, A-Z, 0-9, -, _',
+      placeholder: 'Enter a name. Allowed characters: a-z, A-Z, 0-9, _',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.name,
-      validationFunction: validateArtifactName
+      validationFunction: validateProjectArtifactName,
+      onBack: (typedValue: string) => {
+        state.name = typedValue;
+      }
     });
   };
 
   // Step 3 - Enter the namespace of the process to be created
   const stepNamespace: InputStep<NewProcessState> = async (input: MultiStepInput<NewProcessState>, state: NewProcessState) => {
-    if (state.namespaceFromPath) {
-      state.namespace = state.namespaceFromPath;
-    }
     state.namespace = await input.showTextInput({
       title: state.dialogTitle,
       titleSuffix: ' - Choose process namespace',
-      placeholder: 'Enter Namespace separated by "/"',
+      placeholder: 'Enter Namespace separated by "/". Allowed characters: a-z, A-Z, 0-9, _, /',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.namespace,
-      validationFunction: validateNamespace
+      validationFunction: validateNamespace,
+      onBack: (typedValue: string) => {
+        state.namespace = typedValue;
+      }
     });
   };
 
-  // Define step order, set execution counter for steps that might have defaults and set value automatically
+  // Define step order
   const steps: InputStep<NewProcessState>[] = [stepProject, stepName, stepNamespace];
-  stepProject.execCounter = 0;
 
   const newProcessData: NewProcessState = {
     dialogTitle: `Add New ${kind}`,
     currentStep: 1,
     totalSteps: steps.length,
     name: '',
-    namespace: '',
-    namespaceFromPath: namespaceFromPath,
+    namespace: typeof namespaceFromPath === 'string' && namespaceFromPath.trim() !== '' ? namespaceFromPath : '',
     projectSelection: {} as ProjectSelection,
     projectSelectionFromPath: projectSelectionFromPath
   };
@@ -119,7 +120,6 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
 
     await IvyEngineManager.instance.createProcess(createProcessInput);
   } else {
-    logErrorMessage('Process creation cancelled or invalid input provided. Current input state: ' + JSON.stringify(newProcessData));
-    return;
+    throw new Error('Process creation failed. Current input state: ' + JSON.stringify(newProcessData));
   }
 };
