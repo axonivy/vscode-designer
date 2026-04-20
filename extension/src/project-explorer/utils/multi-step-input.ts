@@ -20,6 +20,12 @@ const enum InputFlowAction {
   cancel
 }
 
+export interface ProjectSelection extends QuickPickItem {
+  label: string;
+  description: string;
+  path: string;
+}
+
 export type InputStep<T extends MSStateBase> = (input: MultiStepInput<T>, state: T) => Thenable<InputStep<T>> | Promise<void>;
 
 interface TextInputParameters {

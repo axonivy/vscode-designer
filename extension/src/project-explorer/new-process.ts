@@ -1,21 +1,14 @@
 import path from 'path';
-import type { QuickPickItem } from 'vscode';
 import { Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { ProcessInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { type InputStep, type MSStateBase, MultiStepCancelledError, MultiStepInput } from './utils/multi-step-input';
+import { type InputStep, type MSStateBase, MultiStepCancelledError, MultiStepInput, type ProjectSelection } from './utils/multi-step-input';
 import { resolveNamespaceFromPath, validateNamespace, validateProjectArtifactName } from './utils/util';
 
 export type ProcessKind = 'Business Process' | 'Callable Sub Process' | 'Web Service Process' | '';
 
 export type NewProcessParams = ProcessInit;
-
-interface ProjectSelection extends QuickPickItem {
-  label: string;
-  description: string;
-  path: string;
-}
 
 interface NewProcessState extends MSStateBase {
   projectSelection: ProjectSelection;
