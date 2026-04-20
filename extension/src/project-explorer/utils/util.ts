@@ -81,7 +81,7 @@ export const validateProjectArtifactName = (value: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return 'Only letters, numbers, and underscores are allowed -- No trailing whitespaces -- Cannot be empty';
+  return 'Only letters, numbers, and underscores are allowed -- No spaces -- Cannot be empty';
 };
 
 export const validateProjectName = (value: string) => {
@@ -89,7 +89,7 @@ export const validateProjectName = (value: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return 'Only letters, numbers, underscores, and hyphens are allowed -- No trailing whitespaces -- Cannot be empty';
+  return 'Only letters, numbers, underscores, and hyphens are allowed -- No spaces -- Cannot be empty';
 };
 
 export const validateDotSeparatedName = (value: string) => {
@@ -97,12 +97,13 @@ export const validateDotSeparatedName = (value: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return 'Enter Namespace separated by "." -- Only letters, numbers, and underscores are allowed -- No trailing whitespaces -- Cannot be empty';
+  return 'Enter Namespace separated by "." -- Only letters, numbers, and underscores are allowed -- No spaces -- Cannot be empty';
 };
+
 export const validateNamespace = (value: string) => {
   const pattern = /^(\w+(\/\w+)*)?$/;
   if (pattern.test(value)) {
     return;
   }
-  return 'Enter Namespace separated by "/" -- Only letters, numbers, and underscores are allowed -- No trailing whitespaces -- Empty allowed.';
+  return 'Enter Namespace separated by "/" -- Only letters, numbers, and underscores are allowed -- No spaces -- Empty allowed.';
 };
