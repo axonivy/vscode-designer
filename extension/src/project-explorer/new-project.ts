@@ -32,8 +32,11 @@ export const addNewProject = async (selectedUri: Uri) => {
 
   const stepGroupId: InputStep<NewProjectState> = async (input: MultiStepInput<NewProjectState>, state: NewProjectState) => {
     if (state.groupId === undefined) {
-      if (state.projectName !== undefined && validateDotSeparatedName(state.projectName) === undefined) {
-        state.groupId = state.projectName;
+      if (state.projectName !== undefined) {
+        const sanitizedProjectName = state.projectName?.replace(/-/g, '.');
+        if (validateDotSeparatedName(sanitizedProjectName) === undefined) {
+          state.groupId = sanitizedProjectName;
+        }
       } else {
         state.groupId = '';
       }
@@ -54,8 +57,11 @@ export const addNewProject = async (selectedUri: Uri) => {
 
   const stepProjectId: InputStep<NewProjectState> = async (input: MultiStepInput<NewProjectState>, state: NewProjectState) => {
     if (state.projectId === undefined) {
-      if (state.projectName !== undefined && validateDotSeparatedName(state.projectName) === undefined) {
-        state.projectId = state.projectName;
+      if (state.projectName !== undefined) {
+        const sanitizedProjectName = state.projectName?.replace(/-/g, '.');
+        if (validateDotSeparatedName(sanitizedProjectName) === undefined) {
+          state.projectId = sanitizedProjectName;
+        }
       } else {
         state.projectId = '';
       }
