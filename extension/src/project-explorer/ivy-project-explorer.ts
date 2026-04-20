@@ -208,7 +208,7 @@ export class IvyProjectExplorer {
     const existingIvyProjects = await this.getIvyProjects();
     for (const existingProject of existingIvyProjects) {
       if (isSubdirectoryOrEqual(existingProject, selectedUri.fsPath)) {
-        logInformationMessage('Cannot create a new project inside an existing Axon Ivy project. Select a valid directory.');
+        logErrorMessage('Cannot create a new project inside an existing Axon Ivy project. Select a valid directory.');
         return;
       }
     }
