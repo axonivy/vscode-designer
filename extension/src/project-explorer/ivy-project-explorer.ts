@@ -272,17 +272,15 @@ export class IvyProjectExplorer {
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
-    if (!uri) {
-      logInformationMessage('Add User Dialog: no valid Axon Ivy Project selected.');
+    const hasIvyProjects = await this.hasIvyProjects();
+    if (!hasIvyProjects) {
+      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project before adding a dialog.');
       return;
     }
-    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (projectPath) {
-      await addNewUserDialog(uri, projectPath, type, pid);
-      return;
-    }
-    logInformationMessage('Add User Dialog: no valid Axon Ivy Project selected.');
+    const existingProjects = await this.getIvyProjects();
+    const uri = await treeSelectionToUri(selection);
+    const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
+    await addNewUserDialog(type, existingProjects, pid, uri, projectPath);
   }
 
   private async addDataClass(selection: TreeSelection) {
