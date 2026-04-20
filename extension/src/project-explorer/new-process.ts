@@ -4,7 +4,6 @@ import { Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { ProcessInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { IvyProjectExplorer } from './ivy-project-explorer';
 import { type InputStep, type MSStateBase, MultiStepCancelledError, MultiStepInput } from './utils/multi-step-input';
 import { resolveNamespaceFromPath, validateNamespace, validateProjectArtifactName } from './utils/util';
 
@@ -25,19 +24,19 @@ interface NewProcessState extends MSStateBase {
   projectSelectionFromPath?: ProjectSelection;
 }
 
-export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?: string, uri?: Uri, projectPath?: string) => {
+export const addNewProcess = async (
+  kind: ProcessKind = 'Business Process',
+  existingProjects: string[],
+  pid?: string,
+  uri?: Uri,
+  projectPath?: string
+) => {
   // Step 1 - Pick the project to create the process in, based on available projects in the workspace
   // If supplied, use preselected URI and project path for project and namespace
   const projectSelectionFromPath = projectPath
     ? { label: projectPath.substring(projectPath.lastIndexOf(path.sep) + 1), description: projectPath, path: projectPath }
     : undefined;
   const namespaceFromPath = projectPath && uri ? await resolveNamespaceFromPath(uri, projectPath, 'processes') : undefined;
-
-  const projects: string[] = await IvyProjectExplorer.instance.getIvyProjects();
-  if (!projects || projects.length === 0) {
-    logErrorMessage('No ivy-projects are open in the workspace.');
-    return;
-  }
 
   const stepProject: InputStep<NewProcessState> = async (input: MultiStepInput<NewProcessState>, state: NewProcessState) => {
     if (state.projectSelectionFromPath && (state.projectSelection.label === '' || state.projectSelection.label === undefined)) {
@@ -51,7 +50,7 @@ export const addNewProcess = async (kind: ProcessKind = 'Business Process', pid?
         currentStep: state.currentStep,
         totalSteps: state.totalSteps,
         activeItem: state.projectSelection,
-        items: projects.map(project => {
+        items: existingProjects.map(project => {
           return {
             label: project.substring(project.lastIndexOf(path.sep) + 1),
             description: project,

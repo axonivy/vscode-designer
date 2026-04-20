@@ -147,10 +147,6 @@ export class IvyProjectExplorer {
     }
   }
 
-  private async hasIvyProjects(): Promise<boolean> {
-    return this.treeDataProvider.hasIvyProjects();
-  }
-
   private async refresh() {
     this.treeDataProvider.refresh();
     await this.activateEngineIfNeeded();
@@ -216,9 +212,15 @@ export class IvyProjectExplorer {
   }
 
   public async addProcess(selection: TreeSelection, kind: ProcessKind, pid?: string) {
+    const hasIvyProjects = await this.hasIvyProjects();
+    if (!hasIvyProjects) {
+      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project before adding a process.');
+      return;
+    }
+    const existingProjects = await this.getIvyProjects();
     const uri = await treeSelectionToUri(selection);
     const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
-    await addNewProcess(kind, pid, uri, projectPath);
+    await addNewProcess(kind, existingProjects, pid, uri, projectPath);
   }
 
   private async addCaseMap(selection: TreeSelection) {
@@ -352,8 +354,12 @@ export class IvyProjectExplorer {
     });
   }
 
-  getIvyProjects() {
+  async getIvyProjects(): Promise<string[]> {
     return this.treeDataProvider.getIvyProjects();
+  }
+
+  private async hasIvyProjects(): Promise<boolean> {
+    return this.treeDataProvider.hasIvyProjects();
   }
 
   static get instance() {
