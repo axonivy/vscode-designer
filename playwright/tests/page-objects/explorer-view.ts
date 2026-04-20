@@ -84,7 +84,7 @@ export class FileExplorer extends ExplorerView {
     await this.page.keyboard.press('Enter');
   }
 
-  async addNestedProject(rootFolder: string, projectName: string, projectNamespace: string, projectId: string) {
+  async addNestedProject(rootFolder: string, projectName: string) {
     await this.viewLocator.click();
     await this.addFolder(rootFolder);
     await this.viewLocator.getByText(rootFolder).click({ button: 'right' });
@@ -96,8 +96,8 @@ export class FileExplorer extends ExplorerView {
     await expect(newProject).toBeHidden();
 
     await this.provideUserInput(projectName);
-    await this.provideUserInput(projectNamespace);
-    await this.provideUserInput(projectId);
+    await this.provideUserInput();
+    await this.provideUserInput();
   }
 
   async addProcess(processName: string, kind: 'Business Process' | 'Callable Sub Process' | 'Web Service Process', namespace?: string) {
