@@ -56,7 +56,11 @@ export const isDirectory = async (uri?: Uri) => {
   if (!uri) {
     return false;
   }
-  return (await workspace.fs.stat(uri)).type === FileType.Directory;
+  try {
+    return (await workspace.fs.stat(uri)).type === FileType.Directory;
+  } catch {
+    return false;
+  }
 };
 
 export const isSubdirectoryOrEqual = (parent: string, child: string) => {
