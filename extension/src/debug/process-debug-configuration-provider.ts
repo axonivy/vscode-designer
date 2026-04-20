@@ -1,4 +1,4 @@
-import type { DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode';
+import { workspace, type DebugConfiguration, type DebugConfigurationProvider, type ProviderResult, type WorkspaceFolder } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { IvyEngineManager } from '../engine/engine-manager';
 
@@ -42,10 +42,19 @@ export class ProcessDebugConfigurationProvider implements DebugConfigurationProv
         port: toPort(configuration.port) ?? PROCESS_DEBUG_PORT
       };
 
+      let workspaceFolder = configuration.workspaceFolder;
+      const firstWorkspaceFolder = workspace.workspaceFolders?.at(0);
+      if (workspaceFolder === undefined && firstWorkspaceFolder) {
+        workspaceFolder = firstWorkspaceFolder.uri.fsPath;
+      }
+      if (!workspaceFolder) {
+        workspaceFolder = folder?.uri.fsPath;
+      }
+
       return {
         ...configuration,
         ...connection,
-        workspaceFolder: configuration.workspaceFolder ?? folder?.uri.fsPath
+        workspaceFolder
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
