@@ -7,10 +7,10 @@ import { type InputStep, type MSStateBase, MultiStepCancelledError, MultiStepInp
 import { validateDotSeparatedName, validateProjectName } from './utils/util';
 
 interface NewProjectState extends MSStateBase {
-  projectName: string;
-  projectPath: string;
-  groupId: string;
-  projectId: string;
+  projectName?: string | undefined;
+  projectPath?: string | undefined;
+  groupId?: string | undefined;
+  projectId?: string | undefined;
 }
 
 export const addNewProject = async (selectedUri: Uri) => {
@@ -31,6 +31,13 @@ export const addNewProject = async (selectedUri: Uri) => {
   };
 
   const stepGroupId: InputStep<NewProjectState> = async (input: MultiStepInput<NewProjectState>, state: NewProjectState) => {
+    if (state.groupId === undefined) {
+      if (state.projectName !== undefined && validateDotSeparatedName(state.projectName) === undefined) {
+        state.groupId = state.projectName;
+      } else {
+        state.groupId = '';
+      }
+    }
     state.groupId = await input.showTextInput({
       title: state.dialogTitle,
       titleSuffix: ' - Choose a group ID',
@@ -46,6 +53,13 @@ export const addNewProject = async (selectedUri: Uri) => {
   };
 
   const stepProjectId: InputStep<NewProjectState> = async (input: MultiStepInput<NewProjectState>, state: NewProjectState) => {
+    if (state.projectId === undefined) {
+      if (state.projectName !== undefined && validateDotSeparatedName(state.projectName) === undefined) {
+        state.projectId = state.projectName;
+      } else {
+        state.projectId = '';
+      }
+    }
     state.projectId = await input.showTextInput({
       title: state.dialogTitle,
       titleSuffix: ' - Choose a project artifact ID',
@@ -64,11 +78,7 @@ export const addNewProject = async (selectedUri: Uri) => {
   const newProjectData: NewProjectState = {
     dialogTitle: 'Create New Project',
     currentStep: 1,
-    totalSteps: steps.length,
-    projectName: '',
-    projectPath: '',
-    groupId: '',
-    projectId: ''
+    totalSteps: steps.length
   };
 
   try {
@@ -82,12 +92,20 @@ export const addNewProject = async (selectedUri: Uri) => {
     }
   }
 
-  const createProjectInput: NewProjectParams & { path: string } = {
-    name: newProjectData.projectName,
-    groupId: newProjectData.groupId,
-    projectId: newProjectData.projectId,
-    path: newProjectData.projectPath
-  };
-
-  await IvyEngineManager.instance.createProject(createProjectInput);
+  if (
+    newProjectData.projectName !== undefined &&
+    newProjectData.groupId !== undefined &&
+    newProjectData.projectId !== undefined &&
+    newProjectData.projectPath !== undefined
+  ) {
+    const createProjectInput: NewProjectParams & { path: string } = {
+      name: newProjectData.projectName,
+      groupId: newProjectData.groupId,
+      projectId: newProjectData.projectId,
+      path: newProjectData.projectPath
+    };
+    await IvyEngineManager.instance.createProject(createProjectInput);
+  } else {
+    throw new Error('Project creation failed due to corrupted input state. Current input state: ' + JSON.stringify(newProjectData));
+  }
 };
