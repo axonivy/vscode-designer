@@ -17,6 +17,7 @@ import { addNewProcess, type ProcessKind } from './new-process';
 import { addNewProject } from './new-project';
 import { addNewUserDialog, type DialogType } from './new-user-dialog';
 import { treeSelectionToUri, treeUriToProjectPath, type TreeSelection } from './tree-selection';
+import { getWorkspaceFolder, isDirectory, isSubdirectoryOrEqual } from './utils/util';
 
 export const VIEW_ID = 'ivyProjects';
 
@@ -74,7 +75,7 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.installLocalMarketProduct`, (s: TreeSelection) => this.installLocalMarketProduct(s));
     registerCmd(`${VIEW_ID}.installMarketProduct`, (s: TreeSelection) => this.installMarketProduct(s));
 
-    registerCmd(`${VIEW_ID}.addNewProject`, (s: TreeSelection) => addNewProject(s));
+    registerCmd(`${VIEW_ID}.addNewProject`, (s: TreeSelection) => this.addProject(s));
     registerCmd(`${VIEW_ID}.addNewHtmlDialog`, (s: TreeSelection, selections?: [TreeSelection], pid?: string) =>
       this.addUserDialog(s, 'JSF', pid)
     );
@@ -195,6 +196,23 @@ export class IvyProjectExplorer {
       return;
     }
     return debouncedAction(() => action(project), `${project}:actionKey:${actionKey}`, 1_000)();
+  }
+
+  public async addProject(selection: TreeSelection) {
+    const treeSelectionUri = await treeSelectionToUri(selection);
+    const selectedUri = (await isDirectory(treeSelectionUri)) ? treeSelectionUri : await getWorkspaceFolder();
+    if (!selectedUri) {
+      logInformationMessage('No valid directory selected');
+      return;
+    }
+    const existingIvyProjects = await this.getIvyProjects();
+    for (const existingProject of existingIvyProjects) {
+      if (isSubdirectoryOrEqual(existingProject, selectedUri.fsPath)) {
+        logErrorMessage('Cannot create a new project inside an existing Axon Ivy project. Select a valid directory.');
+        return;
+      }
+    }
+    await addNewProject(selectedUri);
   }
 
   public async addProcess(selection: TreeSelection, kind: ProcessKind, pid?: string) {

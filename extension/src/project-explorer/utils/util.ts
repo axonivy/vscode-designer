@@ -1,7 +1,7 @@
 import { XMLParser } from 'fast-xml-parser';
 import path from 'path';
 import type { FileStat } from 'vscode';
-import { FileType, Uri, workspace } from 'vscode';
+import { FileType, Uri, window, workspace } from 'vscode';
 
 const defaultNamespaceOf = (projecDir: string) => {
   const designerPrefs = Uri.joinPath(Uri.file(projecDir), 'pom.xml');
@@ -52,12 +52,36 @@ export const resolveDefaultNamespace = async (projectDir: string, target: Resour
   return target === 'processes' ? defaultNamespace.replaceAll('.', '/') : defaultNamespace;
 };
 
+export const isDirectory = async (uri?: Uri) => {
+  if (!uri) {
+    return false;
+  }
+  try {
+    return (await workspace.fs.stat(uri)).type === FileType.Directory;
+  } catch {
+    return false;
+  }
+};
+
+export const isSubdirectoryOrEqual = (parent: string, child: string) => {
+  const relative = path.relative(parent, child);
+  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+};
+
+export const getWorkspaceFolder = async () => {
+  const workspaceFolders = workspace.workspaceFolders;
+  if (workspaceFolders?.length === 1 && workspaceFolders[0]) {
+    return workspaceFolders[0].uri;
+  }
+  return await window.showWorkspaceFolderPick().then(folder => folder?.uri);
+};
+
 export const validateProjectArtifactName = (value: string) => {
   const pattern = /^[\w]+$/;
   if (pattern.test(value)) {
     return;
   }
-  return 'Only letters, numbers, and underscores are allowed. No trailing whitespaces.';
+  return 'Only letters, numbers, and underscores are allowed -- No spaces -- Cannot be empty';
 };
 
 export const validateProjectName = (value: string) => {
@@ -65,7 +89,7 @@ export const validateProjectName = (value: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return 'Only letters, numbers, underscores, and hyphens are allowed. No trailing whitespaces.';
+  return 'Only letters, numbers, underscores, and hyphens are allowed -- No spaces -- Cannot be empty';
 };
 
 export const validateDotSeparatedName = (value: string) => {
@@ -73,12 +97,13 @@ export const validateDotSeparatedName = (value: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return 'Enter Namespace separated by ".". Only letters, numbers, and underscores are allowed. Cannot be empty. No trailing whitespaces. Empty not allowed.';
+  return 'Enter Namespace separated by "." -- Only letters, numbers, and underscores are allowed -- No spaces -- Cannot be empty';
 };
+
 export const validateNamespace = (value: string) => {
   const pattern = /^(\w+(\/\w+)*)?$/;
   if (pattern.test(value)) {
     return;
   }
-  return 'Enter Namespace separated by "/". Only letters, numbers, and underscores are allowed. No trailing whitespaces. Empty allowed.';
+  return 'Enter Namespace separated by "/" -- Only letters, numbers, and underscores are allowed -- No spaces -- Empty allowed.';
 };
