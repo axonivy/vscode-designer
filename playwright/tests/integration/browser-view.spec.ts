@@ -12,13 +12,11 @@ test.describe('Browser View', () => {
     const starts = /starts.xhtml/;
     await browserView.openDevWfUi();
     await assertToolbarInput(/dev-workflow-ui/);
-
-    await browserView.home().click();
     await assertToolbarInput(home);
 
     const startLink = browserView.content().locator('#menuform\\:sr_starts');
     await expect(startLink).toBeVisible();
-    await browserView.content().locator('#menuform\\:sr_starts').click();
+    await startLink.click();
     await assertToolbarInput(starts);
 
     await browserView.reload().click();
