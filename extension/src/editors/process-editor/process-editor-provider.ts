@@ -8,6 +8,7 @@ import type { CancellationToken, CustomDocument, ExtensionContext, WebviewPanel 
 import { window } from 'vscode';
 import { messenger } from '../..';
 import { createWebViewContent } from '../webview-helper';
+import { breakpointSnapshot, remapBreakpoints } from './process-breakpoint-handler';
 import { ProcessVscodeConnector } from './process-vscode-connector';
 import { setupCommunication } from './webview-communication';
 
@@ -34,6 +35,12 @@ export default class ProcessEditorProvider extends GlspEditorProvider {
     );
     webviewPanel.webview.options = { enableScripts: true };
     webviewPanel.webview.html = createWebViewContent(this.extensionContext, webviewPanel.webview, 'process-editor');
+  }
+
+  override async saveCustomDocument(document: CustomDocument, cancellation: CancellationToken): Promise<void> {
+    const breakpoints = await breakpointSnapshot(document.uri);
+    await super.saveCustomDocument(document, cancellation);
+    await remapBreakpoints(document.uri, breakpoints);
   }
 
   static register(context: ExtensionContext, websocketUrl: URL) {
