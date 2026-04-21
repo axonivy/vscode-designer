@@ -52,7 +52,7 @@ export const addNewDataClass = async (type: DataClassType, existingProjects: str
   const stepName: InputStep<NewDataClassState> = async (input: MultiStepInput<NewDataClassState>, state: NewDataClassState) => {
     state.name = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose dialog name',
+      titleSuffix: ' - Choose name',
       placeholder: 'Enter a name. Allowed characters: a-z, A-Z, 0-9, _',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
@@ -67,7 +67,7 @@ export const addNewDataClass = async (type: DataClassType, existingProjects: str
   const stepNamespace: InputStep<NewDataClassState> = async (input: MultiStepInput<NewDataClassState>, state: NewDataClassState) => {
     state.namespace = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose dialog namespace',
+      titleSuffix: ' - Choose namespace',
       placeholder: 'Enter Namespace separated by ".". Allowed characters: a-z, A-Z, 0-9, _, .',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
