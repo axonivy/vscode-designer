@@ -67,8 +67,8 @@ function prepareAndvalidateFinalState(
       if (state.layout === undefined) {
         throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Layout is required for JSF dialogs.');
       }
-      if (state.template === undefined) {
-        throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Template is required for JSF dialogs.');
+      if (state.template === undefined && state.layout.label !== 'Component') {
+        throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Template is required for JSF dialogs with non-Component layouts.');
       }
       break;
     case 'Form':
