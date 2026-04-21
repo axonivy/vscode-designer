@@ -189,8 +189,7 @@ test.describe('Inscription View', () => {
     await expect(dialogField).toHaveValue(`prebuiltProject.${userDialogName}:start(prebuiltProject.Data)`);
   });
 
-  // eslint-disable-next-line playwright/no-focused-test
-  test.only('Create Form Dialog', async () => {
+  test('Create Form Dialog', async () => {
     const inscriptionView = await processEditor.openInscriptionView(userDialogPID2);
     await inscriptionView.openInscriptionTab('Dialog');
     await inscriptionView.openCollapsible('Dialog');
@@ -208,8 +207,7 @@ test.describe('Inscription View', () => {
     await expect(dialogField).toHaveValue(`prebuiltProject.${userDialogName}:start(prebuiltProject.Data)`);
   });
 
-  // eslint-disable-next-line playwright/no-focused-test
-  test.only('Create Offline Dialog', async () => {
+  test('Create Offline Dialog', async () => {
     const inscriptionView = await processEditor.openInscriptionView(userTaskPID);
     await inscriptionView.openInscriptionTab('Dialog');
     await inscriptionView.openCollapsible('Dialog');
