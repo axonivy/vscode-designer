@@ -72,6 +72,9 @@ const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean
 };
 
 const initialize = async (page: Page, closeAllTabsOnInit: boolean) => {
+  const onboardingCard = page.locator('div.onboarding-card');
+  await expect(onboardingCard).toBeVisible();
+  await onboardingCard.getByRole('button', { name: 'Skip' }).click();
   await expect(page.locator('div.statusbar-item:has-text("Axon Ivy")')).toBeVisible();
   if (closeAllTabsOnInit) {
     await new FileExplorer(page).closeAllTabs();
