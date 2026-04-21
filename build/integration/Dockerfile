@@ -24,5 +24,7 @@ ENV JAVA_OPTS_IVY_SYSTEM="-Ddev.mode=true -Divy.engine.testheadless=true"
 ENV CI=true
 ENV RUN_STABLE_VERSION=true
 
-# Install code-server
-RUN curl -fsSL https://code-server.dev/install.sh | sh
+ARG INSTALL_CODE_SERVER=false
+RUN if [ "$INSTALL_CODE_SERVER" = "true" ]; then \
+  curl -fsSL https://code-server.dev/install.sh | sh; \
+  fi
