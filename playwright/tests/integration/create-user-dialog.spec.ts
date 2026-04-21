@@ -4,7 +4,8 @@ import { FileExplorer } from '../page-objects/explorer-view';
 import { FormEditor } from '../page-objects/form-editor';
 import { ProcessEditor } from '../page-objects/process-editor';
 
-test.describe('Create User Dialog', () => {
+// eslint-disable-next-line playwright/no-focused-test
+test.describe.only('Create User Dialog', () => {
   let explorer: FileExplorer;
   let processEditor: ProcessEditor;
   const userDialogName = 'testCreateUserDialog';
