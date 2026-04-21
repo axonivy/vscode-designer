@@ -146,6 +146,7 @@ export class FileExplorer extends ExplorerView {
   async addEntityClass(entityClass: string, namespace: string) {
     await this.selectNode('config');
     await this.executeCommand('Axon Ivy: New Entity Class');
+    await this.selectNthVisibleItemFromQuickPick(0);
     await this.provideUserInput(entityClass);
     await this.provideUserInput(namespace);
   }
