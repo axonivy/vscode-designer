@@ -26,6 +26,8 @@ test('xhtml definitions', async () => {
 
 test('xhtml preview', async ({ page }) => {
   await editor.activateExpensiveJavaStandardMode();
+  await editor.executeCommand('Axon Ivy: Deploy all Projects');
+  await editor.hasDeployProjectStatusMessage();
   const browserView = new BrowserView(page);
   await browserView.openDevWfUi();
   const browser = browserView.content();
