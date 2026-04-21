@@ -23,3 +23,6 @@ ENV JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 ENV JAVA_OPTS_IVY_SYSTEM="-Ddev.mode=true -Divy.engine.testheadless=true"
 ENV CI=true
 ENV RUN_STABLE_VERSION=true
+
+# Install code-server
+RUN curl -fsSL https://code-server.dev/install.sh | sh

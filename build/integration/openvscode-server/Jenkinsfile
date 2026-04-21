@@ -20,7 +20,6 @@ pipeline {
         script {
           docker.build('node-webtest', '-f build/integration/Dockerfile .').inside {
             sh """
-            curl -fsSL https://code-server.dev/install.sh | sh
             pnpm run update:axonivy:next
             pnpm install --no-frozen-lockfile
             pnpm run build:production
