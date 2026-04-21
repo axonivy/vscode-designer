@@ -1,7 +1,8 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import type { Uri } from 'vscode';
 import { Location, Position, SourceBreakpoint, debug } from 'vscode';
-import { breakpointSnapshot, remapBreakpoints } from './process-breakpoint-handler';
+import { promptToStartProcessDebuggingIfNeeded } from '../../debug/process-debug';
+import { ProcessBreakpointHandler, breakpointSnapshot, remapBreakpoints } from './process-breakpoint-handler';
 import { lineOfPid, pidOfLine } from './process-breakpoint-location-resolver';
 
 vi.mock('@axonivy/process-editor-protocol', () => ({
@@ -13,6 +14,10 @@ vi.mock('@axonivy/process-editor-protocol', () => ({
 vi.mock('./process-breakpoint-location-resolver', () => ({
   lineOfPid: vi.fn(),
   pidOfLine: vi.fn()
+}));
+
+vi.mock('../../debug/process-debug', () => ({
+  promptToStartProcessDebuggingIfNeeded: vi.fn()
 }));
 
 let mockBreakpoints: unknown[] = [];
@@ -85,6 +90,34 @@ test('creates a breakpoint snapshot for mapped process breakpoints only', async 
   await expect(breakpointSnapshot(processUri)).resolves.toEqual([{ breakpoint: mappedBreakpoint, elementId: 'process-3' }]);
 });
 
+test('prompts to start process debugging when adding a breakpoint', async () => {
+  const processUri = uri('file:///process.p.json');
+  const client = { document: { uri: processUri } };
+  const handler = new ProcessBreakpointHandler(() => client as never, emptyClientIds, vi.fn());
+
+  vi.mocked(lineOfPid).mockResolvedValue(4);
+
+  await handler.toggleBreakpoint('client-1', 'process-4');
+
+  expect(debug.addBreakpoints).toHaveBeenCalledTimes(1);
+  expect(promptToStartProcessDebuggingIfNeeded).toHaveBeenCalledTimes(1);
+});
+
+test('does not prompt when removing an existing breakpoint', async () => {
+  const processUri = uri('file:///process.p.json');
+  const client = { document: { uri: processUri } };
+  const existingBreakpoint = new SourceBreakpoint(new Location(processUri, new Position(4, 0)));
+  const handler = new ProcessBreakpointHandler(() => client as never, emptyClientIds, vi.fn());
+
+  mockBreakpoints = [existingBreakpoint];
+  vi.mocked(lineOfPid).mockResolvedValue(4);
+
+  await handler.toggleBreakpoint('client-1', 'process-4');
+
+  expect(debug.removeBreakpoints).toHaveBeenCalledWith([existingBreakpoint]);
+  expect(promptToStartProcessDebuggingIfNeeded).not.toHaveBeenCalled();
+});
+
 test('remaps breakpoints to current lines and preserves breakpoint settings', async () => {
   const processUri = uri('file:///process.p.json');
   const firstBreakpoint = new SourceBreakpoint(new Location(processUri, new Position(2, 0)), false, 'x > 1', '3', 'trace');
@@ -141,4 +174,8 @@ function uri(value: string): Uri {
   return {
     toString: () => value
   } as Uri;
+}
+
+function* emptyClientIds(): IterableIterator<string> {
+  yield* [];
 }
