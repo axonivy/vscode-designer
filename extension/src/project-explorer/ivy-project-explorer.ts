@@ -352,11 +352,11 @@ export class IvyProjectExplorer {
     });
   }
 
-  async getIvyProjects(): Promise<string[]> {
+  async getIvyProjects() {
     return this.treeDataProvider.getIvyProjects();
   }
 
-  private async hasIvyProjects(): Promise<boolean> {
+  private async hasIvyProjects() {
     return this.treeDataProvider.hasIvyProjects();
   }
 
