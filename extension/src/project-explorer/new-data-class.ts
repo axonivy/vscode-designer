@@ -24,7 +24,7 @@ export const addNewDataClass = async (type: DataClassType, existingProjects: str
   const projectSelectionFromPath = projectPath
     ? { label: projectPath.substring(projectPath.lastIndexOf(path.sep) + 1), description: projectPath, path: projectPath }
     : undefined;
-  const namespaceFromPath = projectPath && uri ? await resolveNamespaceFromPath(uri, projectPath, 'src_hd') : undefined;
+  const namespaceFromPath = projectPath && uri ? await resolveNamespaceFromPath(uri, projectPath, 'dataclasses') : undefined;
 
   const stepProject: InputStep<NewDataClassState> = async (input: MultiStepInput<NewDataClassState>, state: NewDataClassState) => {
     if (state.projectSelectionFromPath && state.projectSelection === undefined) {
