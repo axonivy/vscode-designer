@@ -5,7 +5,6 @@ export class MultiStepCancelledError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'MultiStepCancelledError';
-    Object.setPrototypeOf(this, MultiStepCancelledError.prototype);
   }
 }
 
@@ -13,7 +12,6 @@ export class MultiStepInvalidStateError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'MultiStepInvalidStateError';
-    Object.setPrototypeOf(this, MultiStepInvalidStateError.prototype);
   }
 }
 
