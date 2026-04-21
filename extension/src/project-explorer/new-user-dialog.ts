@@ -143,9 +143,6 @@ export const addNewUserDialog = async (type: DialogType, existingProjects: strin
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.namespace,
-      // TODO: Confusion about namespace with dot vs slash. Here, empty input should be allowed, this creates the dialog directly under "src_hc"
-      // TODO: What is the rule, when is the input dot vs slash separated?
-      // IMO: Is used in new-project.ts for GroupID and ArtifactID (cannot be empty), but here and in new-data-class.ts it is used for the folder path namespace, which should be validateNamespace and use "/"?
       validationFunction: validateDotSeparatedName,
       onBack: (typedValue: string) => {
         state.namespace = typedValue;
