@@ -4,7 +4,7 @@ import { logErrorMessage } from '../base/logging-util';
 import type { HdInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import type { InputStep, MSStateBase, ProjectSelection } from './utils/multi-step-input';
-import { MultiStepCancelledError, MultiStepInput } from './utils/multi-step-input';
+import { MultiStepCancelledError, MultiStepInput, MultiStepInvalidStateError } from './utils/multi-step-input';
 import { resolveNamespaceFromPath, validateDotSeparatedName, validateProjectArtifactName } from './utils/util';
 
 export const dialogTypes = ['JSF', 'Form', 'JSFOffline'] as const;
@@ -38,6 +38,56 @@ interface NewUserDialogState extends MSStateBase {
   layout?: LayoutPick | undefined;
   template?: TemplatePick | undefined;
   projectSelectionFromPath?: ProjectSelection | undefined;
+}
+
+function prepareAndvalidateFinalState(
+  type: DialogType,
+  state: NewUserDialogState
+): asserts state is NewUserDialogState & {
+  projectSelection: ProjectSelection;
+  name: string;
+  namespace: string;
+  layout: LayoutPick | undefined;
+  template: TemplatePick | undefined;
+} {
+  const ERROR_PREFIX = 'Invalid final input. Cannot create Dialog: ';
+
+  if (state.projectSelection === undefined) {
+    throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Project selection cannot be null.');
+  }
+  if (state.name === undefined) {
+    throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Dialog name cannot be null.');
+  }
+  if (state.namespace === undefined) {
+    throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Namespace cannot be null.');
+  }
+
+  switch (type) {
+    case 'JSF':
+      if (state.layout === undefined) {
+        throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Layout is required for JSF dialogs.');
+      }
+      if (state.template === undefined) {
+        throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Template is required for JSF dialogs.');
+      }
+      break;
+    case 'Form':
+      if (state.layout !== undefined) {
+        throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Layout should not be set for Form dialogs.');
+      }
+      if (state.template !== undefined) {
+        throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Template should not be set for Form dialogs.');
+      }
+      break;
+    case 'JSFOffline':
+      state.layout = { label: 'Page' };
+      if (state.template !== undefined) {
+        throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Template should not be set for JSF Offline dialogs.');
+      }
+      break;
+    default:
+      throw new Error('Unsupported dialog type: ' + type);
+  }
 }
 
 export const addNewUserDialog = async (type: DialogType, existingProjects: string[], pid?: string, uri?: Uri, projectPath?: string) => {
@@ -117,22 +167,41 @@ export const addNewUserDialog = async (type: DialogType, existingProjects: strin
       })
     });
   };
+
   const stepTemplate: InputStep<NewUserDialogState> = async (input: MultiStepInput<NewUserDialogState>, state: NewUserDialogState) => {
-    state.template = await input.showQuickPick<TemplatePick>({
-      title: state.dialogTitle,
-      titleSuffix: ' - Choose template',
-      placeholder: 'Select one of the available templates',
-      currentStep: state.currentStep,
-      totalSteps: state.totalSteps,
-      items: templates.map(template => {
-        return {
-          label: template
-        };
-      })
-    });
+    if (state.layout !== undefined && state.layout.label === 'Component') {
+      return;
+    } else {
+      state.template = await input.showQuickPick<TemplatePick>({
+        title: state.dialogTitle,
+        titleSuffix: ' - Choose template',
+        placeholder: 'Select one of the available templates',
+        currentStep: state.currentStep,
+        totalSteps: state.totalSteps,
+        items: templates.map(template => {
+          return {
+            label: template
+          };
+        })
+      });
+    }
   };
 
-  const steps = [stepProject, stepName, stepNamespace, stepLayout, stepTemplate];
+  let steps: InputStep<NewUserDialogState>[];
+  switch (type) {
+    case 'Form':
+      steps = [stepProject, stepName, stepNamespace];
+      break;
+    case 'JSFOffline':
+      steps = [stepProject, stepName, stepNamespace];
+      break;
+    case 'JSF':
+      steps = [stepProject, stepName, stepNamespace, stepLayout, stepTemplate];
+      break;
+    default:
+      throw new Error('Unsupported dialog type: ' + type);
+  }
+
   const newUserDialogData: NewUserDialogState = {
     dialogTitle: `Add New ${type}`,
     currentStep: 1,
@@ -152,24 +221,16 @@ export const addNewUserDialog = async (type: DialogType, existingProjects: strin
     }
   }
 
-  if (
-    newUserDialogData.projectSelection !== undefined &&
-    newUserDialogData.name !== undefined &&
-    newUserDialogData.namespace !== undefined &&
-    newUserDialogData.layout !== undefined &&
-    newUserDialogData.template !== undefined
-  ) {
-    const createDialogInput: NewUserDialogParams = {
-      type,
-      name: newUserDialogData.name,
-      namespace: newUserDialogData.namespace,
-      layout: newUserDialogData.layout.label,
-      template: newUserDialogData.template.label,
-      projectDir: newUserDialogData.projectSelection.path,
-      pid
-    };
-    await IvyEngineManager.instance.createUserDialog(createDialogInput);
-  } else {
-    throw new Error('Dialog creation failed due to corrupted input state. Current input state: ' + JSON.stringify(newUserDialogData));
-  }
+  // Let potential errors propagate without catching
+  prepareAndvalidateFinalState(type, newUserDialogData);
+  const createDialogInput: NewUserDialogParams = {
+    type,
+    name: newUserDialogData.name,
+    namespace: newUserDialogData.namespace,
+    projectDir: newUserDialogData.projectSelection.path,
+    pid,
+    layout: newUserDialogData.layout?.label,
+    template: newUserDialogData.template?.label
+  };
+  await IvyEngineManager.instance.createUserDialog(createDialogInput);
 };

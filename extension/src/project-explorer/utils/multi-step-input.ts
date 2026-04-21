@@ -9,6 +9,14 @@ export class MultiStepCancelledError extends Error {
   }
 }
 
+export class MultiStepInvalidStateError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MultiStepInvalidStateError';
+    Object.setPrototypeOf(this, MultiStepInvalidStateError.prototype);
+  }
+}
+
 export interface MSStateBase {
   dialogTitle: string;
   currentStep: number;
