@@ -40,16 +40,16 @@ interface NewUserDialogState extends MSStateBase {
   projectSelectionFromPath?: ProjectSelection | undefined;
 }
 
-function prepareAndValidateFinalState(
+const prepareAndValidateFinalState: (
   type: DialogType,
   state: NewUserDialogState
-): asserts state is NewUserDialogState & {
+) => asserts state is NewUserDialogState & {
   projectSelection: ProjectSelection;
   name: string;
   namespace: string;
   layout: LayoutPick | undefined;
   template: TemplatePick | undefined;
-} {
+} = (type, state) => {
   const ERROR_PREFIX = 'Invalid final input. Cannot create Dialog: ';
 
   if (state.projectSelection === undefined) {
@@ -88,7 +88,7 @@ function prepareAndValidateFinalState(
     default:
       throw new Error('Unsupported dialog type: ' + type);
   }
-}
+};
 
 export const addNewUserDialog = async (type: DialogType, existingProjects: string[], pid?: string, uri?: Uri, projectPath?: string) => {
   // If supplied, use preselected URI and project path for project and namespace
