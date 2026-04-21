@@ -5,7 +5,13 @@ export class MultiStepCancelledError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'MultiStepCancelledError';
-    Object.setPrototypeOf(this, MultiStepCancelledError.prototype);
+  }
+}
+
+export class MultiStepInvalidStateError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MultiStepInvalidStateError';
   }
 }
 
@@ -18,6 +24,12 @@ export interface MSStateBase {
 const enum InputFlowAction {
   back,
   cancel
+}
+
+export interface ProjectSelection extends QuickPickItem {
+  label: string;
+  description: string;
+  path: string;
 }
 
 export type InputStep<T extends MSStateBase> = (input: MultiStepInput<T>, state: T) => Thenable<InputStep<T>> | Promise<void>;

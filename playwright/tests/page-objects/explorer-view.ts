@@ -126,6 +126,7 @@ export class FileExplorer extends ExplorerView {
   async addUserDialog(dialogName: string, namespace: string, kind: 'Html Dialog (JSF)' | 'Offline Dialog (JSF)' | 'Dialog Form') {
     await this.selectNode('config');
     await this.executeCommand('Axon Ivy: New ' + kind);
+    await this.selectNthVisibleItemFromQuickPick(0);
     await this.provideUserInput(dialogName);
     await this.provideUserInput(namespace);
     if (kind === 'Html Dialog (JSF)') {
