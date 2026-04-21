@@ -40,7 +40,7 @@ interface NewUserDialogState extends MSStateBase {
   projectSelectionFromPath?: ProjectSelection | undefined;
 }
 
-function prepareAndvalidateFinalState(
+function prepareAndValidateFinalState(
   type: DialogType,
   state: NewUserDialogState
 ): asserts state is NewUserDialogState & {
@@ -219,7 +219,7 @@ export const addNewUserDialog = async (type: DialogType, existingProjects: strin
   }
 
   // Let potential errors propagate without catching
-  prepareAndvalidateFinalState(type, newUserDialogData);
+  prepareAndValidateFinalState(type, newUserDialogData);
   const createDialogInput: NewUserDialogParams = {
     type,
     name: newUserDialogData.name,
