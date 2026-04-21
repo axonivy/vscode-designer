@@ -72,7 +72,7 @@ const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean
 };
 
 const initialize = async (page: Page, closeAllTabsOnInit: boolean) => {
-  const onboardingCard = page.locator('div.onboarding-card');
+  const onboardingCard = page.locator('div.onboarding-a-card');
   await expect(onboardingCard).toBeVisible();
   await onboardingCard.getByRole('button', { name: 'Skip' }).click();
   await expect(page.locator('div.statusbar-item:has-text("Axon Ivy")')).toBeVisible();
