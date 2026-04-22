@@ -34,25 +34,8 @@ If you do not want to use the embedded engine as backend, you can define an alte
 
 ## Integration Tests
 
-Playwright tests can be executed against VSCode Insiders or openvscode-server
-
-### VS Code Insiders
-
+Playwright tests can be executed against VSCode Insiders.
 Make sure that an Engine is running on localhost:8080. It will be used as the backend for testing.
 
 - `pnpm run test:playwright:download:vscode`: download latest VSCode Insiders
 - `pnpm run test:playwright`: run all tests against electron app
-
-### openvscode-server
-
-Build the openvscode-server docker image using the Dockerfile located under `/build/integration/openvscode-server/server/Dockerfile`, e.g.:
-
-- `docker build -t openvscodeserver -f build/integration/openvscode-server/Dockerfile .`.
-
-Then run the container using
-
-- `docker run -it --init -p 3000:3000 -p 8080:8080 -p 8081:8081 -p 8082:8082  openvscodeserver --disable-workspace-trust`
-
-Finally
-
-- `pnpm run test:playwright:browser`: run all tests against openvscode-server in browser

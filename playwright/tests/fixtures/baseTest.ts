@@ -30,6 +30,9 @@ const runBrowserTest = async (workspace: string, closeAllTabsOnInit: boolean, ta
   const tmpWorkspace = await createTmpWorkspace(workspace);
   const queryParam = tmpWorkspace.tmpWsCofig ? `workspace=${tmpWorkspace.tmpWsCofig}` : `folder=${tmpWorkspace.tmpWorkspace}`;
   await page.goto(`http://localhost:3000/?${queryParam}`);
+  const onboardingCard = page.locator('div.onboarding-a-card');
+  await expect(onboardingCard).toBeVisible();
+  await onboardingCard.getByRole('button', { name: 'Skip' }).click();
   await initialize(page, closeAllTabsOnInit);
   await take(page);
   // this goto closes WebSocket connections

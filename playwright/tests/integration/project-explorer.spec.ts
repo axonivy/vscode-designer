@@ -59,20 +59,20 @@ test.describe('CMS entry', () => {
     await editor.tabLocator.click();
     await projectExplorer.isSelected('cms');
   });
+});
 
-  test.describe('Context menu', () => {
-    test.use({ workspace: minimalProjectWorkspacePath });
+test.describe('Context menu', () => {
+  test.use({ workspace: minimalProjectWorkspacePath });
 
-    test('New Resource', async ({ page }) => {
-      const explorer = new ProjectExplorerView(page);
-      await explorer.hasDeployProjectStatusMessage();
-      await explorer.openView();
-      await explorer.selectNode('playwrightTestWorkspace');
-      await explorer.selectInContextMenuOfNode('cms', 'New', 'New Business Process');
-      await explorer.provideUserInput('TestProcess');
-      await explorer.provideUserInput('TestNamespace');
-      await new ProcessEditor(page, 'TestProcess.p.json').isViewVisible();
-    });
+  test('New Resource', async ({ page }) => {
+    const explorer = new ProjectExplorerView(page);
+    await explorer.hasDeployProjectStatusMessage();
+    await explorer.openView();
+    await explorer.selectNode('playwrightTestWorkspace');
+    await explorer.selectInContextMenuOfNode('cms', 'New', 'New Business Process');
+    await explorer.provideUserInput('TestProcess');
+    await explorer.provideUserInput('TestNamespace');
+    await new ProcessEditor(page, 'TestProcess.p.json').isViewVisible();
   });
 });
 
