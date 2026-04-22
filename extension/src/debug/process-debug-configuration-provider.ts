@@ -1,11 +1,10 @@
 import { workspace, type DebugConfiguration, type DebugConfigurationProvider, type ProviderResult, type WorkspaceFolder } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
-import type { IvyEngineManager } from '../engine/engine-manager';
+import type { IvyEngineApi } from '../engine/api/engine-api';
 
 export const PROCESS_DEBUG_TYPE = 'ivy-process';
 export const PROCESS_DEBUG_NAME = 'Attach to Axon Ivy Engine';
 export const PROCESS_DEBUG_HOST = 'localhost';
-export const PROCESS_DEBUG_PORT = 5005;
 
 type ProcessDebugConfiguration = DebugConfiguration & {
   type: typeof PROCESS_DEBUG_TYPE;
@@ -17,7 +16,8 @@ type ProcessDebugConfiguration = DebugConfiguration & {
 };
 
 export class ProcessDebugConfigurationProvider implements DebugConfigurationProvider {
-  constructor(private readonly engineManager: IvyEngineManager) {}
+  private port = -1;
+  constructor(private readonly engineApi: IvyEngineApi) {}
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   provideDebugConfigurations(folder: WorkspaceFolder | undefined): ProviderResult<DebugConfiguration[]> {
@@ -37,11 +37,6 @@ export class ProcessDebugConfigurationProvider implements DebugConfigurationProv
     const configuration = this.toProcessDebugConfiguration(debugConfiguration);
 
     try {
-      const connection = {
-        host: configuration.host ?? PROCESS_DEBUG_HOST,
-        port: toPort(configuration.port) ?? PROCESS_DEBUG_PORT
-      };
-
       let workspaceFolder = configuration.workspaceFolder;
       const firstWorkspaceFolder = workspace.workspaceFolders?.at(0);
       if (workspaceFolder === undefined && firstWorkspaceFolder) {
@@ -51,9 +46,15 @@ export class ProcessDebugConfigurationProvider implements DebugConfigurationProv
         workspaceFolder = folder?.uri.fsPath;
       }
 
+      let port = toPort(configuration.port);
+      if (!port) {
+        port = await this.processDebugServerPort();
+      }
+
       return {
         ...configuration,
-        ...connection,
+        host: configuration.host ?? PROCESS_DEBUG_HOST,
+        port,
         workspaceFolder
       };
     } catch (error) {
@@ -74,6 +75,13 @@ export class ProcessDebugConfigurationProvider implements DebugConfigurationProv
       port: debugConfiguration.port as number | string | undefined,
       workspaceFolder: typeof debugConfiguration.workspaceFolder === 'string' ? debugConfiguration.workspaceFolder : undefined
     };
+  }
+
+  private async processDebugServerPort() {
+    if (this.port === -1) {
+      this.port = await this.engineApi.processDebugServerPort();
+    }
+    return this.port;
   }
 }
 

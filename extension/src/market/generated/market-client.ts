@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Marketplace stable
  * The stable public api
- * OpenAPI spec version: 1.24.0
+ * OpenAPI spec version: 1.24.1
  */
 import { marketFetch } from '../market-fetch';
 /**

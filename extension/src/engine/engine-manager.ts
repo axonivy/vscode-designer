@@ -7,6 +7,7 @@ import { askToReloadWindow } from '../base/reload-window';
 import { setStatusBarMessage } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
 import { IvyBrowserViewProvider } from '../browser/ivy-browser-view-provider';
+import { registerProcessDebugging } from '../debug/process-debug';
 import { CaseMapEditorProvider } from '../editors/casemap-editor/casemap-editor-provider';
 import { CmsEditorProvider } from '../editors/cms-editor/cms-editor-provider';
 import { CustomFieldEditorProvider } from '../editors/custom-field-editor/custom-field-editor-provider';
@@ -128,6 +129,7 @@ export class IvyEngineManager {
     RuntimeLogViewProvider(websocketUrl);
     WebIdeWebSocketProvider(websocketUrl);
     XhtmlLanguageClientProvider(websocketUrl);
+    registerProcessDebugging(this.context, this.ivyEngineApi);
 
     await IvyDiagnostics.instance.refresh();
   }

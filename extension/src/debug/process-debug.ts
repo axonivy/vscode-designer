@@ -2,15 +2,15 @@ import type { ExtensionContext } from 'vscode';
 import { debug, workspace } from 'vscode';
 import { registerCommand } from '../base/commands';
 import { logWarningMessage } from '../base/logging-util';
-import type { IvyEngineManager } from '../engine/engine-manager';
+import type { IvyEngineApi } from '../engine/api/engine-api';
 import { ProcessDebugAdapterDescriptorFactory } from './process-debug-adapter-descriptor-factory';
 import { PROCESS_DEBUG_NAME, PROCESS_DEBUG_TYPE, ProcessDebugConfigurationProvider } from './process-debug-configuration-provider';
 
+const START_PROCESS_DEBUG = 'Start Process Debug' as const;
 let hasRunningProcessDebugSession = debug.activeDebugSession?.type === PROCESS_DEBUG_TYPE;
-const START_PROCESS_DEBUG = 'Start Process Debug';
 
-export function registerProcessDebugging(context: ExtensionContext, engineManager: IvyEngineManager) {
-  const configurationProvider = new ProcessDebugConfigurationProvider(engineManager);
+export function registerProcessDebugging(context: ExtensionContext, engineApi: IvyEngineApi) {
+  const configurationProvider = new ProcessDebugConfigurationProvider(engineApi);
   const descriptorFactory = new ProcessDebugAdapterDescriptorFactory();
   context.subscriptions.push(
     debug.registerDebugConfigurationProvider(PROCESS_DEBUG_TYPE, configurationProvider),
