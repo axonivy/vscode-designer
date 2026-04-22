@@ -7,8 +7,7 @@ import type { InputStep, MSStateBase, ProjectSelection } from './utils/multi-ste
 import { MultiStepCancelledError, MultiStepInput, MultiStepInvalidStateError } from './utils/multi-step-input';
 import { resolveNamespaceFromPath, validateDotSeparatedName, validateProjectArtifactName } from './utils/util';
 
-export const dataClassTypes = ['Data Class', 'Entity Class'] as const;
-export type DataClassType = (typeof dataClassTypes)[number];
+type DataClassType = 'Data Class' | 'Entity Class';
 
 type NewDataClassParams = DataClassInit;
 
@@ -109,15 +108,10 @@ export const addNewDataClass = async (type: DataClassType, existingProjects: str
       name: `${newDataClassDialogData.namespace}.${newDataClassDialogData.name}`,
       projectDir: newDataClassDialogData.projectSelection.path
     };
-    switch (type) {
-      case 'Data Class':
-        await IvyEngineManager.instance.createDataClass(createDataClassInput);
-        break;
-      case 'Entity Class':
-        await IvyEngineManager.instance.createEntityClass(createDataClassInput);
-        break;
-      default:
-        throw new Error(`Unsupported data class type: ${type}`);
+    if (type === 'Data Class') {
+      await IvyEngineManager.instance.createDataClass(createDataClassInput);
+    } else {
+      await IvyEngineManager.instance.createEntityClass(createDataClassInput);
     }
   } else {
     throw new MultiStepInvalidStateError('Illegal state: name, namespace or project selection is undefined');
