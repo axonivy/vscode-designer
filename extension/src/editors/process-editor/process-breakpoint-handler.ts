@@ -3,6 +3,7 @@ import type { Action } from '@eclipse-glsp/protocol';
 import type { GlspVscodeClient } from '@eclipse-glsp/vscode-integration';
 import type { CustomDocument, Disposable, Uri } from 'vscode';
 import { Location, Position, SourceBreakpoint, debug } from 'vscode';
+import { promptToStartProcessDebuggingIfNeeded } from '../../debug/process-debug';
 import { lineOfPid, pidOfLine } from './process-breakpoint-location-resolver';
 
 type DispatchAction = (action: Action, clientId: string) => void;
@@ -37,7 +38,8 @@ export class ProcessBreakpointHandler {
       return;
     }
 
-    debug.addBreakpoints([new SourceBreakpoint(new Location(client.document.uri, new Position(line, 0)), undefined, 'true')]);
+    debug.addBreakpoints([new SourceBreakpoint(new Location(client.document.uri, new Position(line, 0)))]);
+    await promptToStartProcessDebuggingIfNeeded();
   }
 
   async setBreakpointDisabled(clientId: string, elementId: string, disabled: boolean) {
