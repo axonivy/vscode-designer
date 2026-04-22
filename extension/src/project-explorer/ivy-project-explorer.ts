@@ -12,7 +12,7 @@ import { importMarketProduct, importMarketProductFile } from '../market/import-m
 import { importNewProcess } from './import-process';
 import { IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject, type Entry } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
-import { addNewDataClass, addNewEntityClass } from './new-data-class';
+import { addNewDataClass } from './new-data-class';
 import { addNewProcess, type ProcessKind } from './new-process';
 import { addNewProject } from './new-project';
 import { addNewUserDialog, type DialogType } from './new-user-dialog';
@@ -284,31 +284,27 @@ export class IvyProjectExplorer {
   }
 
   private async addDataClass(selection: TreeSelection) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
-    if (!uri) {
-      logInformationMessage('Add Data Class: no valid Axon Ivy Project selected.');
+    const hasIvyProjects = await this.hasIvyProjects();
+    if (!hasIvyProjects) {
+      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project before adding a data class.');
       return;
     }
-    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (projectPath) {
-      await addNewDataClass(uri, projectPath);
-      return;
-    }
-    logInformationMessage('Add Data Class: no valid Axon Ivy Project selected.');
+    const existingProjects = await this.getIvyProjects();
+    const uri = await treeSelectionToUri(selection);
+    const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
+    await addNewDataClass('Data Class', existingProjects, uri, projectPath);
   }
 
   private async addEntityClass(selection: TreeSelection) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
-    if (!uri) {
-      logInformationMessage('Add Entity Class: no valid Axon Ivy Project selected.');
+    const hasIvyProjects = await this.hasIvyProjects();
+    if (!hasIvyProjects) {
+      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project before adding an entity class.');
       return;
     }
-    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (projectPath) {
-      await addNewEntityClass(uri, projectPath);
-      return;
-    }
-    logInformationMessage('Add Entity Class: no valid Axon Ivy Project selected.');
+    const existingProjects = await this.getIvyProjects();
+    const uri = await treeSelectionToUri(selection);
+    const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
+    await addNewDataClass('Entity Class', existingProjects, uri, projectPath);
   }
 
   public async setProjectExplorerActivationCondition(hasIvyProjects: boolean) {
