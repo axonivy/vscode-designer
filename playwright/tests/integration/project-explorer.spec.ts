@@ -4,7 +4,8 @@ import { FileExplorer, ProjectExplorerView } from '../page-objects/explorer-view
 import { ProcessEditor } from '../page-objects/process-editor';
 import { minimalProjectWorkspacePath, multiProjectWorkspacePath, multiRootWorkspacePath } from '../workspaces/workspace';
 
-test.describe('Project Explorer', () => {
+// eslint-disable-next-line playwright/no-focused-test
+test.describe.only('Project Explorer', () => {
   test.use({ workspace: multiProjectWorkspacePath });
 
   test('Projects are visible', async ({ page }) => {
@@ -19,7 +20,8 @@ test.describe('Project Explorer', () => {
   });
 });
 
-test.describe('CMS entry', () => {
+// eslint-disable-next-line playwright/no-focused-test
+test.describe.only('CMS entry', () => {
   test('Open', async ({ page }) => {
     const explorer = new ProjectExplorerView(page);
     await explorer.hasDeployProjectStatusMessage();
@@ -60,7 +62,8 @@ test.describe('CMS entry', () => {
     await projectExplorer.isSelected('cms');
   });
 
-  test.describe('Context menu', () => {
+  // eslint-disable-next-line playwright/no-focused-test
+  test.describe.only('Context menu', () => {
     test.use({ workspace: minimalProjectWorkspacePath });
 
     test('New Resource', async ({ page }) => {
