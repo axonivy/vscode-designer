@@ -12,7 +12,7 @@ import {
   type MSStateBase,
   type ProjectSelection
 } from './utils/multi-step-input';
-import { validateNamespace, validateProjectArtifactName } from './utils/util';
+import { validateNamespaceWithSpace, validateProjectArtifactName } from './utils/util';
 
 export type ProcessKind = 'Business Process' | 'Callable Sub Process' | 'Web Service Process' | '';
 
@@ -75,7 +75,7 @@ export const addNewProcess = async (selectionContext: AddCommandSelectionContext
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.namespace,
-      validationFunction: validateNamespace,
+      validationFunction: validateNamespaceWithSpace,
       onBack: (typedValue: string) => {
         state.namespace = typedValue;
       }

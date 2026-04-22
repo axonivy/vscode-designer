@@ -11,7 +11,7 @@ import {
   type ProjectSelection,
   resolveAddCommandSelectionContext
 } from './utils/multi-step-input';
-import { validateNamespace, validateProjectArtifactName } from './utils/util';
+import { validateNamespaceWithSpace, validateProjectArtifactName } from './utils/util';
 
 interface NewCaseMapState extends MSStateBase {
   project?: ProjectSelection;
@@ -70,7 +70,7 @@ export const addNewCaseMap = async (selectionContext: AddCommandSelectionContext
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.namespace,
-      validationFunction: validateNamespace,
+      validationFunction: validateNamespaceWithSpace,
       onBack: (typedValue: string) => {
         state.namespace = typedValue;
       }
