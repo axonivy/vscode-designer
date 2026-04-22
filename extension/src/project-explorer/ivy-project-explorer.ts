@@ -330,7 +330,7 @@ export class IvyProjectExplorer {
     const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
     const projects = IvyDiagnostics.instance.projectsToBeConverted();
     const quickPick = window.createQuickPick();
-    quickPick.title = 'Select Axon Ivy projects to be converted';
+    quickPick.title = 'Convert Projects - Select Axon Ivy projects to be converted (1/1)';
     quickPick.canSelectMany = true;
     quickPick.items = projects.map(pom => path.dirname(pom)).map(project => ({ label: path.basename(project), detail: project }));
     quickPick.selectedItems = quickPick.items.filter(item => item.detail === projectPath);
