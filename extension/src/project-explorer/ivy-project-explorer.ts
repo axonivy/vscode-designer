@@ -224,17 +224,15 @@ export class IvyProjectExplorer {
   }
 
   private async addCaseMap(selection: TreeSelection) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
-    if (!uri) {
-      logErrorMessage('Add Case Map: no valid Axon Ivy Project selected.');
+    const hasIvyProjects = await this.hasIvyProjects();
+    if (!hasIvyProjects) {
+      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project before.');
       return;
     }
-    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (projectPath) {
-      await addNewCaseMap(uri, projectPath);
-      return;
-    }
-    logErrorMessage('Add Case Map: no valid Axon Ivy Project selected.');
+    const existingProjects = await this.getIvyProjects();
+    const uri = await treeSelectionToUri(selection);
+    const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
+    await addNewCaseMap(existingProjects, uri, projectPath);
   }
 
   public async importBpmnProcess(selection: TreeSelection) {

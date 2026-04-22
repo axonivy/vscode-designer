@@ -1,43 +1,109 @@
-import { Uri, window } from 'vscode';
+import path from 'path';
+import { Uri } from 'vscode';
+import { logErrorMessage } from '../base/logging-util';
 import { IvyEngineManager } from '../engine/engine-manager';
+import { type InputStep, type MSStateBase, MultiStepCancelledError, MultiStepInput, type ProjectSelection } from './utils/multi-step-input';
 import { resolveNamespaceFromPath, validateNamespace, validateProjectArtifactName } from './utils/util';
 
-export const addNewCaseMap = async (selectedUri: Uri, projectDir: string) => {
-  const input = await collectNewCaseMapParams(selectedUri, projectDir);
-  if (input) {
-    await IvyEngineManager.instance.createCaseMap(input);
-  }
-};
+interface NewCaseMapState extends MSStateBase {
+  projectSelection: ProjectSelection;
+  name: string;
+  namespace: string;
+  projectSelectionFromPath?: ProjectSelection;
+}
 
-const collectNewCaseMapParams = async (selectedUri: Uri, projectDir: string) => {
-  const name = await collectName();
-  if (!name) {
-    return;
-  }
-  const namespace = await collectNamespace(selectedUri, projectDir);
-  if (namespace === undefined) {
-    return;
-  }
-  return { name, projectDir, namespace };
-};
+export const addNewCaseMap = async (existingProjects: string[], uri?: Uri, projectPath?: string) => {
+  // If supplied, use preselected URI and project path for project and namespace
+  const projectSelectionFromPath = projectPath
+    ? { label: projectPath.substring(projectPath.lastIndexOf(path.sep) + 1), description: projectPath, path: projectPath }
+    : undefined;
+  const namespaceFromPath = projectPath && uri ? await resolveNamespaceFromPath(uri, projectPath, 'processes') : undefined;
 
-const collectName = async () => {
-  return window.showInputBox({
-    title: 'Case Map Name',
-    placeHolder: 'Enter a name',
-    ignoreFocusOut: true,
-    validateInput: validateProjectArtifactName
-  });
-};
+  const stepProject: InputStep<NewCaseMapState> = async (input: MultiStepInput<NewCaseMapState>, state: NewCaseMapState) => {
+    if (state.projectSelectionFromPath && (state.projectSelection.label === '' || state.projectSelection.label === undefined)) {
+      state.projectSelection = state.projectSelectionFromPath;
+      state.projectSelectionFromPath = undefined;
+    } else {
+      state.projectSelection = await input.showQuickPick({
+        title: state.dialogTitle,
+        titleSuffix: ' - Choose project',
+        placeholder: 'Select one of the available projects',
+        currentStep: state.currentStep,
+        totalSteps: state.totalSteps,
+        activeItem: state.projectSelection,
+        items: existingProjects.map(project => {
+          return {
+            label: project.substring(project.lastIndexOf(path.sep) + 1),
+            description: project,
+            path: project
+          };
+        })
+      });
+    }
+  };
 
-const collectNamespace = async (selectedUri: Uri, projectDir: string) => {
-  const namespace = await resolveNamespaceFromPath(selectedUri, projectDir, 'processes');
-  return window.showInputBox({
-    title: 'Case Map Namespace',
-    value: namespace,
-    prompt: 'Enter Namespace separated by "/"',
-    valueSelection: [namespace.length, -1],
-    ignoreFocusOut: true,
-    validateInput: validateNamespace
-  });
+  const stepName: InputStep<NewCaseMapState> = async (input: MultiStepInput<NewCaseMapState>, state: NewCaseMapState) => {
+    state.name = await input.showTextInput({
+      title: state.dialogTitle,
+      titleSuffix: ' - Choose case map name',
+      placeholder: 'Enter a name. Allowed characters: a-z, A-Z, 0-9, _',
+      currentStep: state.currentStep,
+      totalSteps: state.totalSteps,
+      value: state.name,
+      validationFunction: validateProjectArtifactName,
+      onBack: (typedValue: string) => {
+        state.name = typedValue;
+      }
+    });
+  };
+
+  const stepNamespace: InputStep<NewCaseMapState> = async (input: MultiStepInput<NewCaseMapState>, state: NewCaseMapState) => {
+    state.namespace = await input.showTextInput({
+      title: state.dialogTitle,
+      titleSuffix: ' - Choose case map namespace',
+      placeholder: 'Enter Namespace separated by "/". Allowed characters: a-z, A-Z, 0-9, _, /',
+      currentStep: state.currentStep,
+      totalSteps: state.totalSteps,
+      value: state.namespace,
+      validationFunction: validateNamespace,
+      onBack: (typedValue: string) => {
+        state.namespace = typedValue;
+      }
+    });
+  };
+
+  const steps: InputStep<NewCaseMapState>[] = [stepProject, stepName, stepNamespace];
+
+  const newCaseMapData: NewCaseMapState = {
+    dialogTitle: 'Add New Case Map',
+    currentStep: 1,
+    totalSteps: steps.length,
+    name: '',
+    namespace: typeof namespaceFromPath === 'string' && namespaceFromPath.trim() !== '' ? namespaceFromPath : '',
+    projectSelection: {} as ProjectSelection,
+    projectSelectionFromPath: projectSelectionFromPath
+  };
+
+  try {
+    await new MultiStepInput<NewCaseMapState>().stepThrough(steps, newCaseMapData);
+  } catch (err) {
+    if (err instanceof MultiStepCancelledError) {
+      logErrorMessage(err.message);
+      return;
+    } else {
+      throw err;
+    }
+  }
+
+  if (newCaseMapData.projectSelection && newCaseMapData.name) {
+    const createCaseMapInput = {
+      projectDir: newCaseMapData.projectSelection.path,
+      name: newCaseMapData.name,
+      namespace: newCaseMapData.namespace
+    };
+
+    await IvyEngineManager.instance.createCaseMap(createCaseMapInput);
+  } else {
+    throw new Error('Case Map creation failed due to corrupted input state. Current input state: ' + JSON.stringify(newCaseMapData));
+  }
 };
