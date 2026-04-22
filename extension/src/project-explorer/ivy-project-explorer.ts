@@ -214,7 +214,7 @@ export class IvyProjectExplorer {
   public async addProcess(selection: TreeSelection, kind: ProcessKind, pid?: string) {
     const hasIvyProjects = await this.hasIvyProjects();
     if (!hasIvyProjects) {
-      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project before adding a process.');
+      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
       return;
     }
     const existingProjects = await this.getIvyProjects();
@@ -224,17 +224,15 @@ export class IvyProjectExplorer {
   }
 
   private async addCaseMap(selection: TreeSelection) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
-    if (!uri) {
-      logErrorMessage('Add Case Map: no valid Axon Ivy Project selected.');
+    const hasIvyProjects = await this.hasIvyProjects();
+    if (!hasIvyProjects) {
+      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
       return;
     }
-    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (projectPath) {
-      await addNewCaseMap(uri, projectPath);
-      return;
-    }
-    logErrorMessage('Add Case Map: no valid Axon Ivy Project selected.');
+    const existingProjects = await this.getIvyProjects();
+    const uri = await treeSelectionToUri(selection);
+    const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
+    await addNewCaseMap(existingProjects, uri, projectPath);
   }
 
   public async importBpmnProcess(selection: TreeSelection) {
@@ -274,7 +272,7 @@ export class IvyProjectExplorer {
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {
     const hasIvyProjects = await this.hasIvyProjects();
     if (!hasIvyProjects) {
-      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project before adding a dialog.');
+      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
       return;
     }
     const existingProjects = await this.getIvyProjects();
@@ -286,7 +284,7 @@ export class IvyProjectExplorer {
   private async addDataClass(selection: TreeSelection) {
     const hasIvyProjects = await this.hasIvyProjects();
     if (!hasIvyProjects) {
-      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project before adding a data class.');
+      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
       return;
     }
     const existingProjects = await this.getIvyProjects();
@@ -298,7 +296,7 @@ export class IvyProjectExplorer {
   private async addEntityClass(selection: TreeSelection) {
     const hasIvyProjects = await this.hasIvyProjects();
     if (!hasIvyProjects) {
-      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project before adding an entity class.');
+      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
       return;
     }
     const existingProjects = await this.getIvyProjects();
@@ -332,7 +330,7 @@ export class IvyProjectExplorer {
     const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
     const projects = IvyDiagnostics.instance.projectsToBeConverted();
     const quickPick = window.createQuickPick();
-    quickPick.title = 'Select Axon Ivy projects to be converted';
+    quickPick.title = 'Convert Projects - Select Axon Ivy projects to be converted (1/1)';
     quickPick.canSelectMany = true;
     quickPick.items = projects.map(pom => path.dirname(pom)).map(project => ({ label: path.basename(project), detail: project }));
     quickPick.selectedItems = quickPick.items.filter(item => item.detail === projectPath);
