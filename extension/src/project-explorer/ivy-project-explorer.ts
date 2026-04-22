@@ -214,7 +214,7 @@ export class IvyProjectExplorer {
   public async addProcess(selection: TreeSelection, kind: ProcessKind, pid?: string) {
     const hasIvyProjects = await this.hasIvyProjects();
     if (!hasIvyProjects) {
-      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project before adding a process.');
+      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
       return;
     }
     const existingProjects = await this.getIvyProjects();
@@ -226,7 +226,7 @@ export class IvyProjectExplorer {
   private async addCaseMap(selection: TreeSelection) {
     const hasIvyProjects = await this.hasIvyProjects();
     if (!hasIvyProjects) {
-      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project before.');
+      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
       return;
     }
     const existingProjects = await this.getIvyProjects();
@@ -272,7 +272,7 @@ export class IvyProjectExplorer {
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {
     const hasIvyProjects = await this.hasIvyProjects();
     if (!hasIvyProjects) {
-      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project before adding a dialog.');
+      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
       return;
     }
     const existingProjects = await this.getIvyProjects();
@@ -284,7 +284,7 @@ export class IvyProjectExplorer {
   private async addDataClass(selection: TreeSelection) {
     const hasIvyProjects = await this.hasIvyProjects();
     if (!hasIvyProjects) {
-      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project before adding a data class.');
+      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
       return;
     }
     const existingProjects = await this.getIvyProjects();
@@ -296,7 +296,7 @@ export class IvyProjectExplorer {
   private async addEntityClass(selection: TreeSelection) {
     const hasIvyProjects = await this.hasIvyProjects();
     if (!hasIvyProjects) {
-      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project before adding an entity class.');
+      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
       return;
     }
     const existingProjects = await this.getIvyProjects();

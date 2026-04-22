@@ -6,9 +6,9 @@ import { type InputStep, type MSStateBase, MultiStepCancelledError, MultiStepInp
 import { resolveNamespaceFromPath, validateNamespace, validateProjectArtifactName } from './utils/util';
 
 interface NewCaseMapState extends MSStateBase {
-  projectSelection: ProjectSelection;
-  name: string;
-  namespace: string;
+  projectSelection?: ProjectSelection;
+  name?: string;
+  namespace?: string;
   projectSelectionFromPath?: ProjectSelection;
 }
 
@@ -20,7 +20,7 @@ export const addNewCaseMap = async (existingProjects: string[], uri?: Uri, proje
   const namespaceFromPath = projectPath && uri ? await resolveNamespaceFromPath(uri, projectPath, 'processes') : undefined;
 
   const stepProject: InputStep<NewCaseMapState> = async (input: MultiStepInput<NewCaseMapState>, state: NewCaseMapState) => {
-    if (state.projectSelectionFromPath && (state.projectSelection.label === '' || state.projectSelection.label === undefined)) {
+    if (state.projectSelectionFromPath && state.projectSelection === undefined) {
       state.projectSelection = state.projectSelectionFromPath;
       state.projectSelectionFromPath = undefined;
     } else {
@@ -78,9 +78,7 @@ export const addNewCaseMap = async (existingProjects: string[], uri?: Uri, proje
     dialogTitle: 'Add New Case Map',
     currentStep: 1,
     totalSteps: steps.length,
-    name: '',
     namespace: typeof namespaceFromPath === 'string' && namespaceFromPath.trim() !== '' ? namespaceFromPath : '',
-    projectSelection: {} as ProjectSelection,
     projectSelectionFromPath: projectSelectionFromPath
   };
 
@@ -95,7 +93,7 @@ export const addNewCaseMap = async (existingProjects: string[], uri?: Uri, proje
     }
   }
 
-  if (newCaseMapData.projectSelection && newCaseMapData.name) {
+  if (newCaseMapData.name !== undefined && newCaseMapData.namespace !== undefined && newCaseMapData.projectSelection !== undefined) {
     const createCaseMapInput = {
       projectDir: newCaseMapData.projectSelection.path,
       name: newCaseMapData.name,
