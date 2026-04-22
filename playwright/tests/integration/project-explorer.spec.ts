@@ -60,8 +60,7 @@ test.describe('CMS entry', () => {
     await projectExplorer.isSelected('cms');
   });
 
-  // eslint-disable-next-line playwright/no-focused-test
-  test.describe.only('Context menu', () => {
+  test.describe('Context menu', () => {
     test.use({ workspace: minimalProjectWorkspacePath });
 
     test('New Resource', async ({ page }) => {
@@ -77,7 +76,8 @@ test.describe('CMS entry', () => {
   });
 });
 
-test.describe('Multi root workspace', () => {
+// eslint-disable-next-line playwright/no-focused-test
+test.describe.only('Multi root workspace', () => {
   test.use({ workspace: multiRootWorkspacePath });
 
   test('Projects from workspace config are shown', async ({ page }) => {
