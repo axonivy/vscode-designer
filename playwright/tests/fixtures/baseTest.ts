@@ -28,15 +28,8 @@ const runBrowserTest = async (workspace: string, closeAllTabsOnInit: boolean, ta
   const page = await browser.newPage();
   await page.setViewportSize({ width: 1920, height: 1080 });
   const tmpWorkspace = await createTmpWorkspace(workspace);
-  // '/private/var/folders/_v/3mgt4x_j4dqc5scvfsgczxch0000gn/T/playwrightTestWorkspaceqjEO22'
-  // '/private/var/folders/_v/3mgt4x_j4dqc5scvfsgczxch0000gn/T/playwrightTestWorkspaceqjEO22/multiRootWorkspace.code-workspace'
-  // http://localhost:3000/?workspace=/home/Untitled-1776841472996.code-workspace
   const queryParam = tmpWorkspace.tmpWsCofig ? `workspace=${tmpWorkspace.tmpWsCofig}` : `folder=${tmpWorkspace.tmpWorkspace}`;
-  console.log('queryparam', queryParam);
   await page.goto(`http://localhost:3000/?${queryParam}`);
-  const onboardingCard = page.locator('div.onboarding-a-card');
-  await expect(onboardingCard).toBeVisible();
-  await onboardingCard.getByRole('button', { name: 'Skip' }).click();
   await initialize(page, closeAllTabsOnInit);
   await take(page);
   // this goto closes WebSocket connections
@@ -79,6 +72,9 @@ const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean
 };
 
 const initialize = async (page: Page, closeAllTabsOnInit: boolean) => {
+  const onboardingCard = page.locator('div.onboarding-a-card');
+  await expect(onboardingCard).toBeVisible();
+  await onboardingCard.getByRole('button', { name: 'Skip' }).click();
   await expect(page.locator('div.statusbar-item:has-text("Axon Ivy")')).toBeVisible();
   if (closeAllTabsOnInit) {
     await new FileExplorer(page).closeAllTabs();

@@ -4,8 +4,7 @@ import { FileExplorer, ProjectExplorerView } from '../page-objects/explorer-view
 import { ProcessEditor } from '../page-objects/process-editor';
 import { minimalProjectWorkspacePath, multiProjectWorkspacePath, multiRootWorkspacePath } from '../workspaces/workspace';
 
-// eslint-disable-next-line playwright/no-focused-test
-test.describe.only('Project Explorer', () => {
+test.describe('Project Explorer', () => {
   test.use({ workspace: multiProjectWorkspacePath });
 
   test('Projects are visible', async ({ page }) => {
@@ -20,8 +19,7 @@ test.describe.only('Project Explorer', () => {
   });
 });
 
-// eslint-disable-next-line playwright/no-focused-test
-test.describe.only('CMS entry', () => {
+test.describe('CMS entry', () => {
   test('Open', async ({ page }) => {
     const explorer = new ProjectExplorerView(page);
     await explorer.hasDeployProjectStatusMessage();
@@ -61,26 +59,24 @@ test.describe.only('CMS entry', () => {
     await editor.tabLocator.click();
     await projectExplorer.isSelected('cms');
   });
+});
 
-  // eslint-disable-next-line playwright/no-focused-test
-  test.describe.only('Context menu', () => {
-    test.use({ workspace: minimalProjectWorkspacePath });
+test.describe('Context menu', () => {
+  test.use({ workspace: minimalProjectWorkspacePath });
 
-    test('New Resource', async ({ page }) => {
-      const explorer = new ProjectExplorerView(page);
-      await explorer.hasDeployProjectStatusMessage();
-      await explorer.openView();
-      await explorer.selectNode('playwrightTestWorkspace');
-      await explorer.selectInContextMenuOfNode('cms', 'New', 'New Business Process');
-      await explorer.provideUserInput('TestProcess');
-      await explorer.provideUserInput('TestNamespace');
-      await new ProcessEditor(page, 'TestProcess.p.json').isViewVisible();
-    });
+  test('New Resource', async ({ page }) => {
+    const explorer = new ProjectExplorerView(page);
+    await explorer.hasDeployProjectStatusMessage();
+    await explorer.openView();
+    await explorer.selectNode('playwrightTestWorkspace');
+    await explorer.selectInContextMenuOfNode('cms', 'New', 'New Business Process');
+    await explorer.provideUserInput('TestProcess');
+    await explorer.provideUserInput('TestNamespace');
+    await new ProcessEditor(page, 'TestProcess.p.json').isViewVisible();
   });
 });
 
-// eslint-disable-next-line playwright/no-focused-test
-test.describe.only('Multi root workspace', () => {
+test.describe('Multi root workspace', () => {
   test.use({ workspace: multiRootWorkspacePath });
 
   test('Projects from workspace config are shown', async ({ page }) => {
