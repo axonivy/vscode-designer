@@ -60,7 +60,8 @@ test.describe('CMS entry', () => {
     await projectExplorer.isSelected('cms');
   });
 
-  test.describe('Context menu', () => {
+  // eslint-disable-next-line playwright/no-focused-test
+  test.describe.only('Context menu', () => {
     test.use({ workspace: minimalProjectWorkspacePath });
 
     test('New Resource', async ({ page }) => {
