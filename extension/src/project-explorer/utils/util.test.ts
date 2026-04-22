@@ -1,5 +1,5 @@
 import { expect, test, vi } from 'vitest';
-import { validateDotSeparatedName, validateNamespace } from './util';
+import { validateDotSeparatedName, validateNamespace, validateProjectArtifactName } from './util';
 
 vi.mock('vscode', () => ({
   FileType: { File: 1, Directory: 2 },
@@ -109,4 +109,76 @@ test('namespace error hyphens', () => {
 
 test('namespace error dot-separated input', () => {
   expect(validateNamespace('com.example')).toBeTruthy();
+});
+
+test('project artifact name valid single letter', () => {
+  expect(validateProjectArtifactName('a')).toBeUndefined();
+});
+
+test('project artifact name valid underscore', () => {
+  expect(validateProjectArtifactName('_')).toBeUndefined();
+});
+
+test('project artifact name valid single uppercase letter', () => {
+  expect(validateProjectArtifactName('A')).toBeUndefined();
+});
+
+test('project artifact name valid one word', () => {
+  expect(validateProjectArtifactName('oneWord')).toBeUndefined();
+});
+
+test('project artifact name valid one word with underscore', () => {
+  expect(validateProjectArtifactName('oneWord_underscore')).toBeUndefined();
+});
+
+test('project artifact name valid leading underscore', () => {
+  expect(validateProjectArtifactName('_leadingUnderscore')).toBeUndefined();
+});
+
+test('project artifact name valid double leading underscore', () => {
+  expect(validateProjectArtifactName('__doubleLeadingUnderscore')).toBeUndefined();
+});
+
+test('project artifact name valid trailing underscore', () => {
+  expect(validateProjectArtifactName('trailingUnderscore_')).toBeUndefined();
+});
+
+test('project artifact name valid double trailing underscore', () => {
+  expect(validateProjectArtifactName('doubleTrailingUnderscore__')).toBeUndefined();
+});
+
+test('project artifact name valid both underscore', () => {
+  expect(validateProjectArtifactName('_bothUnderscore_')).toBeUndefined();
+});
+
+test('project artifact name valid both double underscore', () => {
+  expect(validateProjectArtifactName('__bothDoubleUnderscore__')).toBeUndefined();
+});
+
+test('project artifact name valid multiple underscore', () => {
+  expect(validateProjectArtifactName('_multiple__underscore_')).toBeUndefined();
+});
+
+test('project artifact name valid digit second place', () => {
+  expect(validateProjectArtifactName('d1igitSecondPlace')).toBeUndefined();
+});
+
+test('project artifact name valid digit last place', () => {
+  expect(validateProjectArtifactName('digitLastPlace9')).toBeUndefined();
+});
+
+test('project artifact name invalid empty', () => {
+  expect(validateProjectArtifactName('')).toBeTruthy();
+});
+
+test('project artifact name invalid leading digit', () => {
+  expect(validateProjectArtifactName('1leadingDigit')).toBeTruthy();
+});
+
+test('project artifact name invalid leading whitespace', () => {
+  expect(validateProjectArtifactName(' leadingWhitespace')).toBeTruthy();
+});
+
+test('project artifact name invalid trailing whitespace', () => {
+  expect(validateProjectArtifactName('trailingWhitespace ')).toBeTruthy();
 });

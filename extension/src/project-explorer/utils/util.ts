@@ -77,7 +77,7 @@ export const getWorkspaceFolder = async () => {
 };
 
 export const validateProjectArtifactName = (value: string) => {
-  const pattern = /^[\w]+$/;
+  const pattern = /^[a-zA-Z_][\w]*$/;
   if (pattern.test(value)) {
     return;
   }

@@ -114,6 +114,9 @@ export const addNewDataClass = async (type: DataClassType, existingProjects: str
       await IvyEngineManager.instance.createEntityClass(createDataClassInput);
     }
   } else {
-    throw new MultiStepInvalidStateError('Illegal state: name, namespace or project selection is undefined');
+    throw new MultiStepInvalidStateError(
+      'Data Class creation failed due to corrupted input state. name, namespace or project selection is undefined. Current input state: ' +
+        JSON.stringify(newDataClassDialogData)
+    );
   }
 };

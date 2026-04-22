@@ -3,7 +3,13 @@ import { Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { NewProjectParams } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { type InputStep, type MSStateBase, MultiStepCancelledError, MultiStepInput } from './utils/multi-step-input';
+import {
+  type InputStep,
+  type MSStateBase,
+  MultiStepCancelledError,
+  MultiStepInput,
+  MultiStepInvalidStateError
+} from './utils/multi-step-input';
 import { validateDotSeparatedName, validateProjectName } from './utils/util';
 
 interface NewProjectState extends MSStateBase {
@@ -112,6 +118,8 @@ export const addNewProject = async (selectedUri: Uri) => {
     };
     await IvyEngineManager.instance.createProject(createProjectInput);
   } else {
-    throw new Error('Project creation failed due to corrupted input state. Current input state: ' + JSON.stringify(newProjectData));
+    throw new MultiStepInvalidStateError(
+      'Project creation failed due to corrupted input state. Current input state: ' + JSON.stringify(newProjectData)
+    );
   }
 };

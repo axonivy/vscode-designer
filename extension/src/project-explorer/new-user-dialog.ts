@@ -123,7 +123,7 @@ export const addNewUserDialog = async (type: DialogType, existingProjects: strin
   const stepName: InputStep<NewUserDialogState> = async (input: MultiStepInput<NewUserDialogState>, state: NewUserDialogState) => {
     state.name = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose dialog name',
+      titleSuffix: ' - Choose name',
       placeholder: 'Enter a name. Allowed characters: a-z, A-Z, 0-9, _',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
@@ -138,7 +138,7 @@ export const addNewUserDialog = async (type: DialogType, existingProjects: strin
   const stepNamespace: InputStep<NewUserDialogState> = async (input: MultiStepInput<NewUserDialogState>, state: NewUserDialogState) => {
     state.namespace = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose dialog namespace',
+      titleSuffix: ' - Choose namespace',
       placeholder: 'Enter Namespace separated by ".". Allowed characters: a-z, A-Z, 0-9, _, .',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,

@@ -2,7 +2,14 @@ import path from 'path';
 import { Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { type InputStep, type MSStateBase, MultiStepCancelledError, MultiStepInput, type ProjectSelection } from './utils/multi-step-input';
+import {
+  type InputStep,
+  type MSStateBase,
+  MultiStepCancelledError,
+  MultiStepInput,
+  MultiStepInvalidStateError,
+  type ProjectSelection
+} from './utils/multi-step-input';
 import { resolveNamespaceFromPath, validateNamespace, validateProjectArtifactName } from './utils/util';
 
 interface NewCaseMapState extends MSStateBase {
@@ -45,7 +52,7 @@ export const addNewCaseMap = async (existingProjects: string[], uri?: Uri, proje
   const stepName: InputStep<NewCaseMapState> = async (input: MultiStepInput<NewCaseMapState>, state: NewCaseMapState) => {
     state.name = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose case map name',
+      titleSuffix: ' - Choose name',
       placeholder: 'Enter a name. Allowed characters: a-z, A-Z, 0-9, _',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
@@ -60,7 +67,7 @@ export const addNewCaseMap = async (existingProjects: string[], uri?: Uri, proje
   const stepNamespace: InputStep<NewCaseMapState> = async (input: MultiStepInput<NewCaseMapState>, state: NewCaseMapState) => {
     state.namespace = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose case map namespace',
+      titleSuffix: ' - Choose namespace',
       placeholder: 'Enter Namespace separated by "/". Allowed characters: a-z, A-Z, 0-9, _, /',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
@@ -102,6 +109,9 @@ export const addNewCaseMap = async (existingProjects: string[], uri?: Uri, proje
 
     await IvyEngineManager.instance.createCaseMap(createCaseMapInput);
   } else {
-    throw new Error('Case Map creation failed due to corrupted input state. Current input state: ' + JSON.stringify(newCaseMapData));
+    throw new MultiStepInvalidStateError(
+      'Case Map creation failed due to corrupted input state. name, namespace or project selection is undefined. Current input state: ' +
+        JSON.stringify(newCaseMapData)
+    );
   }
 };

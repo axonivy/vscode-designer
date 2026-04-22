@@ -3,7 +3,14 @@ import { Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { ProcessInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { type InputStep, type MSStateBase, MultiStepCancelledError, MultiStepInput, type ProjectSelection } from './utils/multi-step-input';
+import {
+  type InputStep,
+  type MSStateBase,
+  MultiStepCancelledError,
+  MultiStepInput,
+  MultiStepInvalidStateError,
+  type ProjectSelection
+} from './utils/multi-step-input';
 import { resolveNamespaceFromPath, validateNamespace, validateProjectArtifactName } from './utils/util';
 
 export type ProcessKind = 'Business Process' | 'Callable Sub Process' | 'Web Service Process' | '';
@@ -11,10 +18,10 @@ export type ProcessKind = 'Business Process' | 'Callable Sub Process' | 'Web Ser
 export type NewProcessParams = ProcessInit;
 
 interface NewProcessState extends MSStateBase {
-  projectSelection: ProjectSelection;
-  name: string;
-  namespace: string;
-  projectSelectionFromPath?: ProjectSelection;
+  projectSelection?: ProjectSelection | undefined;
+  name?: string | undefined;
+  namespace?: string | undefined;
+  projectSelectionFromPath?: ProjectSelection | undefined;
 }
 
 export const addNewProcess = async (
@@ -32,7 +39,7 @@ export const addNewProcess = async (
   const namespaceFromPath = projectPath && uri ? await resolveNamespaceFromPath(uri, projectPath, 'processes') : undefined;
 
   const stepProject: InputStep<NewProcessState> = async (input: MultiStepInput<NewProcessState>, state: NewProcessState) => {
-    if (state.projectSelectionFromPath && (state.projectSelection.label === '' || state.projectSelection.label === undefined)) {
+    if (state.projectSelectionFromPath && state.projectSelection === undefined) {
       state.projectSelection = state.projectSelectionFromPath;
       state.projectSelectionFromPath = undefined;
     } else {
@@ -58,7 +65,7 @@ export const addNewProcess = async (
   const stepName: InputStep<NewProcessState> = async (input: MultiStepInput<NewProcessState>, state: NewProcessState) => {
     state.name = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose process name',
+      titleSuffix: ' - Choose name',
       placeholder: 'Enter a name. Allowed characters: a-z, A-Z, 0-9, _',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
@@ -74,7 +81,7 @@ export const addNewProcess = async (
   const stepNamespace: InputStep<NewProcessState> = async (input: MultiStepInput<NewProcessState>, state: NewProcessState) => {
     state.namespace = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose process namespace',
+      titleSuffix: ' - Choose namespace',
       placeholder: 'Enter Namespace separated by "/". Allowed characters: a-z, A-Z, 0-9, _, /',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
@@ -93,9 +100,7 @@ export const addNewProcess = async (
     dialogTitle: `Add New ${kind}`,
     currentStep: 1,
     totalSteps: steps.length,
-    name: '',
     namespace: typeof namespaceFromPath === 'string' && namespaceFromPath.trim() !== '' ? namespaceFromPath : '',
-    projectSelection: {} as ProjectSelection,
     projectSelectionFromPath: projectSelectionFromPath
   };
 
@@ -110,7 +115,7 @@ export const addNewProcess = async (
     }
   }
 
-  if (newProcessData.projectSelection && newProcessData.name) {
+  if (newProcessData.projectSelection != undefined && newProcessData.name !== undefined && newProcessData.namespace !== undefined) {
     const createProcessInput: NewProcessParams = {
       name: newProcessData.name,
       namespace: newProcessData.namespace,
@@ -121,6 +126,8 @@ export const addNewProcess = async (
 
     await IvyEngineManager.instance.createProcess(createProcessInput);
   } else {
-    throw new Error('Process creation failed due to corrupted input state. Current input state: ' + JSON.stringify(newProcessData));
+    throw new MultiStepInvalidStateError(
+      'Process creation failed due to corrupted input state. Current input state: ' + JSON.stringify(newProcessData)
+    );
   }
 };
