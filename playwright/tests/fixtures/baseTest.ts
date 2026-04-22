@@ -30,6 +30,9 @@ const runBrowserTest = async (workspace: string, closeAllTabsOnInit: boolean, ta
   const tmpWorkspace = await createTmpWorkspace(workspace);
   const queryParam = tmpWorkspace.tmpWsCofig ? `workspace=${tmpWorkspace.tmpWsCofig}` : `folder=${tmpWorkspace.tmpWorkspace}`;
   await page.goto(`http://localhost:3000/?${queryParam}`);
+  const onboardingCard = page.locator('div.onboarding-a-card');
+  await expect(onboardingCard).toBeVisible();
+  await onboardingCard.getByRole('button', { name: 'Skip' }).click();
   await initialize(page, closeAllTabsOnInit);
   await take(page);
   // this goto closes WebSocket connections
@@ -72,9 +75,6 @@ const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean
 };
 
 const initialize = async (page: Page, closeAllTabsOnInit: boolean) => {
-  const onboardingCard = page.locator('div.onboarding-a-card');
-  await expect(onboardingCard).toBeVisible();
-  await onboardingCard.getByRole('button', { name: 'Skip' }).click();
   await expect(page.locator('div.statusbar-item:has-text("Axon Ivy")')).toBeVisible();
   if (closeAllTabsOnInit) {
     await new FileExplorer(page).closeAllTabs();
