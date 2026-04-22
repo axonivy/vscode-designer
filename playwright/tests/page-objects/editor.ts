@@ -4,11 +4,13 @@ import { View } from './view';
 export class Editor extends View {
   constructor(
     private readonly editorFile: string,
-    page: Page
+    page: Page,
+    frameIndex?: number
   ) {
     const viewData = {
       tabSelector: `div.tab:has-text("${editorFile}")`,
-      viewSelector: 'body > div > div[data-parent-flow-to-element-id] >> visible=true'
+      viewSelector: 'body > div > div > div[data-parent-flow-to-element-id] >> visible=true',
+      frameIndex
     };
     super(viewData, page);
   }

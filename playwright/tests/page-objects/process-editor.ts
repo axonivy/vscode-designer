@@ -3,8 +3,8 @@ import { Editor } from './editor';
 import { InscriptionView } from './inscription-view';
 
 export class ProcessEditor extends Editor {
-  constructor(page: Page, editorFile: string = 'ProcurementRequestUserTask.p.json') {
-    super(editorFile, page);
+  constructor(page: Page, editorFile: string = 'ProcurementRequestUserTask.p.json', frameIndex?: number) {
+    super(editorFile, page, frameIndex);
   }
 
   override async isViewVisible() {

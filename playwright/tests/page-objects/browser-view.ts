@@ -5,7 +5,7 @@ export class BrowserView extends View {
   constructor(page: Page) {
     const outputViewData: ViewData = {
       tabSelector: 'li.action-item:has-text("Browser")',
-      viewSelector: 'body > div > div:not([data-parent-flow-to-element-id]) >> visible=true'
+      viewSelector: 'body > div > div > div[data-parent-flow-to-element-id] >> visible=true'
     };
     super(outputViewData, page);
   }
@@ -48,5 +48,9 @@ export class BrowserView extends View {
 
   private header() {
     return this.viewFrameLocator().locator('.header');
+  }
+
+  override viewFrameLocator() {
+    return this.viewLocator.locator('iFrame.ready').last().contentFrame().frameLocator('iFrame#active-frame');
   }
 }

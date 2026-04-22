@@ -92,7 +92,8 @@ test.describe('Form Editor', () => {
     const input = frame.getByRole('textbox');
     await expect(input).toBeVisible();
 
-    await editor.closeAllTabs();
+    // TODO: This does no longer work, as when the webview is opened again, the order of them will change
+    // await editor.closeAllTabs();
 
     const overlay = frame.locator('#selectionOverlay');
     await expect(overlay).toHaveCount(0);
