@@ -4,12 +4,14 @@ import { logErrorMessage } from '../base/logging-util';
 import type { HdInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { type AddCommandSelectionContext } from './ivy-project-explorer';
-import type { InputStep, MSStateBase, ProjectSelection } from './utils/multi-step-input';
 import {
   MultiStepCancelledError,
   MultiStepInput,
   MultiStepInvalidStateError,
-  resolveAddCommandSelectionContext
+  resolveAddCommandSelectionContext,
+  type InputStep,
+  type MSStateBase,
+  type ProjectSelection
 } from './utils/multi-step-input';
 import { validateDotSeparatedName, validateProjectArtifactName } from './utils/util';
 
