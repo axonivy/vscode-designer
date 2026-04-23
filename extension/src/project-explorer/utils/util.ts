@@ -17,7 +17,7 @@ const defaultNamespaceOf = (projecDir: string) => {
   );
 };
 
-type ResourceDirectoryTarget = 'processes' | 'src_hd' | 'dataclasses';
+export type ResourceDirectoryTarget = 'processes' | 'src_hd' | 'dataclasses';
 
 export const resolveNamespaceFromPath = async (selectedUri: Uri, projectDir: string, target: ResourceDirectoryTarget) => {
   let fileStat: FileStat;
@@ -77,11 +77,11 @@ export const getWorkspaceFolder = async () => {
 };
 
 export const validateProjectArtifactName = (value: string) => {
-  const pattern = /^[\w]+$/;
+  const pattern = /^[a-zA-Z_][\w]*$/;
   if (pattern.test(value)) {
     return;
   }
-  return 'Only letters, numbers, and underscores are allowed -- No spaces -- Cannot be empty';
+  return 'Only letters, numbers, and underscores are allowed -- Must start with a letter or underscore -- No spaces -- Cannot be empty';
 };
 
 export const validateProjectName = (value: string) => {

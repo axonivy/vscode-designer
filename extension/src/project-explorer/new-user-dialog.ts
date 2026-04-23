@@ -1,11 +1,19 @@
 import path from 'path';
-import { Uri, type QuickPickItem } from 'vscode';
+import { type QuickPickItem } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { HdInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import type { InputStep, MSStateBase, ProjectSelection } from './utils/multi-step-input';
-import { MultiStepCancelledError, MultiStepInput, MultiStepInvalidStateError } from './utils/multi-step-input';
-import { resolveNamespaceFromPath, validateDotSeparatedName, validateProjectArtifactName } from './utils/util';
+import { type AddCommandSelectionContext } from './ivy-project-explorer';
+import {
+  MultiStepCancelledError,
+  MultiStepInput,
+  MultiStepInvalidStateError,
+  resolveAddCommandSelectionContext,
+  type InputStep,
+  type MSStateBase,
+  type ProjectSelection
+} from './utils/multi-step-input';
+import { validateDotSeparatedName, validateProjectArtifactName } from './utils/util';
 
 export const dialogTypes = ['JSF', 'Form', 'JSFOffline'] as const;
 export type DialogType = (typeof dialogTypes)[number];
@@ -32,19 +40,19 @@ interface TemplatePick extends QuickPickItem {
 export type NewUserDialogParams = HdInit;
 
 interface NewUserDialogState extends MSStateBase {
-  projectSelection?: ProjectSelection | undefined;
+  project?: ProjectSelection | undefined;
   name?: string | undefined;
   namespace?: string | undefined;
   layout?: LayoutPick | undefined;
   template?: TemplatePick | undefined;
-  projectSelectionFromPath?: ProjectSelection | undefined;
+  projectFromSelection?: ProjectSelection | undefined;
 }
 
 const prepareAndValidateFinalState: (
   type: DialogType,
   state: NewUserDialogState
 ) => asserts state is NewUserDialogState & {
-  projectSelection: ProjectSelection;
+  project: ProjectSelection;
   name: string;
   namespace: string;
   layout: LayoutPick | undefined;
@@ -52,7 +60,7 @@ const prepareAndValidateFinalState: (
 } = (type, state) => {
   const ERROR_PREFIX = 'Invalid final input. Cannot create Dialog: ';
 
-  if (state.projectSelection === undefined) {
+  if (state.project === undefined) {
     throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Project selection cannot be null.');
   }
   if (state.name === undefined) {
@@ -90,25 +98,22 @@ const prepareAndValidateFinalState: (
   }
 };
 
-export const addNewUserDialog = async (type: DialogType, existingProjects: string[], pid?: string, uri?: Uri, projectPath?: string) => {
-  // If supplied, use preselected URI and project path for project and namespace
-  const projectSelectionFromPath = projectPath
-    ? { label: projectPath.substring(projectPath.lastIndexOf(path.sep) + 1), description: projectPath, path: projectPath }
-    : undefined;
-  const namespaceFromPath = projectPath && uri ? await resolveNamespaceFromPath(uri, projectPath, 'src_hd') : undefined;
+export const addNewUserDialog = async (selectionContext: AddCommandSelectionContext, type: DialogType, pid?: string) => {
+  const existingProjects = selectionContext.existingIvyProjects;
+  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(selectionContext, 'src_hd');
 
   const stepProject: InputStep<NewUserDialogState> = async (input: MultiStepInput<NewUserDialogState>, state: NewUserDialogState) => {
-    if (state.projectSelectionFromPath && state.projectSelection === undefined) {
-      state.projectSelection = state.projectSelectionFromPath;
-      state.projectSelectionFromPath = undefined;
+    if (state.projectFromSelection && state.project === undefined) {
+      state.project = state.projectFromSelection;
+      state.projectFromSelection = undefined;
     } else {
-      state.projectSelection = await input.showQuickPick<ProjectSelection>({
+      state.project = await input.showQuickPick<ProjectSelection>({
         title: state.dialogTitle,
         titleSuffix: ' - Choose project',
         placeholder: 'Select one of the available projects',
         currentStep: state.currentStep,
         totalSteps: state.totalSteps,
-        activeItem: state.projectSelection,
+        activeItem: state.project,
         items: existingProjects.map(project => {
           return {
             label: project.substring(project.lastIndexOf(path.sep) + 1),
@@ -123,8 +128,8 @@ export const addNewUserDialog = async (type: DialogType, existingProjects: strin
   const stepName: InputStep<NewUserDialogState> = async (input: MultiStepInput<NewUserDialogState>, state: NewUserDialogState) => {
     state.name = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose dialog name',
-      placeholder: 'Enter a name. Allowed characters: a-z, A-Z, 0-9, _',
+      titleSuffix: ' - Choose name',
+      placeholder: 'Enter a name. Must start with a letter or underscore. Allowed characters: a-z, A-Z, 0-9, _',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.name,
@@ -138,7 +143,7 @@ export const addNewUserDialog = async (type: DialogType, existingProjects: strin
   const stepNamespace: InputStep<NewUserDialogState> = async (input: MultiStepInput<NewUserDialogState>, state: NewUserDialogState) => {
     state.namespace = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose dialog namespace',
+      titleSuffix: ' - Choose namespace',
       placeholder: 'Enter Namespace separated by ".". Allowed characters: a-z, A-Z, 0-9, _, .',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
@@ -203,8 +208,8 @@ export const addNewUserDialog = async (type: DialogType, existingProjects: strin
     dialogTitle: `Add New ${type}`,
     currentStep: 1,
     totalSteps: steps.length,
-    namespace: typeof namespaceFromPath === 'string' && namespaceFromPath.trim() !== '' ? namespaceFromPath : undefined,
-    projectSelectionFromPath: projectSelectionFromPath
+    namespace: typeof namespaceFromSelection === 'string' && namespaceFromSelection.trim() !== '' ? namespaceFromSelection : undefined,
+    projectFromSelection: projectFromSelection
   };
 
   try {
@@ -224,7 +229,7 @@ export const addNewUserDialog = async (type: DialogType, existingProjects: strin
     type,
     name: newUserDialogData.name,
     namespace: newUserDialogData.namespace,
-    projectDir: newUserDialogData.projectSelection.path,
+    projectDir: newUserDialogData.project.path,
     pid,
     layout: newUserDialogData.layout?.label,
     template: newUserDialogData.template?.label

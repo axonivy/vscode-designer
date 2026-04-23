@@ -212,27 +212,19 @@ export class IvyProjectExplorer {
   }
 
   public async addProcess(selection: TreeSelection, kind: ProcessKind, pid?: string) {
-    const hasIvyProjects = await this.hasIvyProjects();
-    if (!hasIvyProjects) {
-      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
+    const addCommandSelectionContext = await this.getAddCommandSelectionContext(selection);
+    if (!addCommandSelectionContext) {
       return;
     }
-    const existingProjects = await this.getIvyProjects();
-    const uri = await treeSelectionToUri(selection);
-    const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
-    await addNewProcess(kind, existingProjects, pid, uri, projectPath);
+    await addNewProcess(addCommandSelectionContext, kind, pid);
   }
 
   private async addCaseMap(selection: TreeSelection) {
-    const hasIvyProjects = await this.hasIvyProjects();
-    if (!hasIvyProjects) {
-      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
+    const addCommandContext = await this.getAddCommandSelectionContext(selection);
+    if (!addCommandContext) {
       return;
     }
-    const existingProjects = await this.getIvyProjects();
-    const uri = await treeSelectionToUri(selection);
-    const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
-    await addNewCaseMap(existingProjects, uri, projectPath);
+    await addNewCaseMap(addCommandContext);
   }
 
   public async importBpmnProcess(selection: TreeSelection) {
@@ -270,39 +262,27 @@ export class IvyProjectExplorer {
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {
-    const hasIvyProjects = await this.hasIvyProjects();
-    if (!hasIvyProjects) {
-      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
+    const addCommandContext = await this.getAddCommandSelectionContext(selection);
+    if (!addCommandContext) {
       return;
     }
-    const existingProjects = await this.getIvyProjects();
-    const uri = await treeSelectionToUri(selection);
-    const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
-    await addNewUserDialog(type, existingProjects, pid, uri, projectPath);
+    await addNewUserDialog(addCommandContext, type, pid);
   }
 
   private async addDataClass(selection: TreeSelection) {
-    const hasIvyProjects = await this.hasIvyProjects();
-    if (!hasIvyProjects) {
-      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
+    const addCommandContext = await this.getAddCommandSelectionContext(selection);
+    if (!addCommandContext) {
       return;
     }
-    const existingProjects = await this.getIvyProjects();
-    const uri = await treeSelectionToUri(selection);
-    const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
-    await addNewDataClass('Data Class', existingProjects, uri, projectPath);
+    await addNewDataClass('Data Class', addCommandContext);
   }
 
   private async addEntityClass(selection: TreeSelection) {
-    const hasIvyProjects = await this.hasIvyProjects();
-    if (!hasIvyProjects) {
-      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
+    const addCommandContext = await this.getAddCommandSelectionContext(selection);
+    if (!addCommandContext) {
       return;
     }
-    const existingProjects = await this.getIvyProjects();
-    const uri = await treeSelectionToUri(selection);
-    const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
-    await addNewDataClass('Entity Class', existingProjects, uri, projectPath);
+    await addNewDataClass('Entity Class', addCommandContext);
   }
 
   public async setProjectExplorerActivationCondition(hasIvyProjects: boolean) {
@@ -354,6 +334,18 @@ export class IvyProjectExplorer {
     return this.treeDataProvider.hasIvyProjects();
   }
 
+  private async getAddCommandSelectionContext(selection: TreeSelection): Promise<AddCommandSelectionContext | undefined> {
+    const hasIvyProjects = await this.hasIvyProjects();
+    if (!hasIvyProjects) {
+      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
+      return;
+    }
+    const existingProjects = await this.getIvyProjects();
+    const uri = await treeSelectionToUri(selection);
+    const projectPath = uri ? await treeUriToProjectPath(uri, Promise.resolve(existingProjects)) : undefined;
+    return { existingIvyProjects: existingProjects, uriSelection: uri, projectPathSelection: projectPath };
+  }
+
   static get instance() {
     if (IvyProjectExplorer._instance) {
       return IvyProjectExplorer._instance;
@@ -361,3 +353,8 @@ export class IvyProjectExplorer {
     throw new Error('IvyProjectExplorer has not been initialized');
   }
 }
+export type AddCommandSelectionContext = {
+  existingIvyProjects: string[];
+  uriSelection?: Uri | undefined;
+  projectPathSelection?: string | undefined;
+};
