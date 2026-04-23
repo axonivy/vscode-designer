@@ -306,6 +306,10 @@ export type ImportProjectsBody = {
   dependentProject?: Blob;
 };
 
+export const processDebugger = (options?: AxiosRequestConfig): Promise<AxiosResponse<number>> => {
+  return axios.get(`/web-ide/process/debugger`, options);
+};
+
 export const getCaseMaps = (options?: AxiosRequestConfig): Promise<AxiosResponse<CaseMapBean[]>> => {
   return axios.get(`/web-ide/casemaps`, options);
 };
@@ -527,6 +531,7 @@ export const installMarketProduct = (
   return axios.post(`/web-ide/workspace/install/${id}`, productInstallParams, options);
 };
 
+export type ProcessDebuggerResult = AxiosResponse<number>;
 export type GetCaseMapsResult = AxiosResponse<CaseMapBean[]>;
 export type CreateCaseMapResult = AxiosResponse<CaseMapBean>;
 export type DeleteCaseMapResult = AxiosResponse<unknown>;

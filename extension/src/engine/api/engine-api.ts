@@ -28,6 +28,7 @@ import {
   importProcess,
   installMarketProduct,
   invalidateClassLoader,
+  processDebugger,
   projects,
   refreshProjectStatuses,
   stopBpmEngine
@@ -212,6 +213,12 @@ export class IvyEngineApi {
   public async projects(withDependencies = false) {
     const baseURL = await this.baseURL;
     return (await projects({ withDependencies }, { baseURL, ...options })).data;
+  }
+
+  public async processDebugServerPort() {
+    return processDebugger({ baseURL: this.engineURL })
+      .then(res => res.data)
+      .catch(handleAxiosError);
   }
 
   public get devContextPath(): Promise<string> {

@@ -6,7 +6,6 @@ import { config } from './base/configurations';
 import { validateAndSyncJavaVersion } from './base/java-version-validation';
 import { askToReloadWindow } from './base/reload-window';
 import { setStatusBarIcon, showStatusBarQuickPick } from './base/status-bar';
-import { registerProcessDebugging } from './debug/process-debug';
 import { addDevContainer } from './dev-container/command';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
 import { IvyDiagnostics } from './engine/diagnostics';
@@ -32,7 +31,6 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
   registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
   registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
   registerCommand('ivy.showStatusBarQuickPick', context, () => showStatusBarQuickPick());
-  registerProcessDebugging(context, ivyEngineManager);
 
   IvyDiagnostics.init(context);
   setStatusBarIcon();
