@@ -1,43 +1,41 @@
 import path from 'path';
-import { Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { IvyEngineManager } from '../engine/engine-manager';
+import { type AddCommandSelectionContext } from './ivy-project-explorer';
 import {
   type InputStep,
   type MSStateBase,
   MultiStepCancelledError,
   MultiStepInput,
   MultiStepInvalidStateError,
-  type ProjectSelection
+  type ProjectSelection,
+  resolveAddCommandSelectionContext
 } from './utils/multi-step-input';
-import { resolveNamespaceFromPath, validateNamespace, validateProjectArtifactName } from './utils/util';
+import { validateNamespace, validateProjectArtifactName } from './utils/util';
 
 interface NewCaseMapState extends MSStateBase {
-  projectSelection?: ProjectSelection;
+  project?: ProjectSelection;
   name?: string;
   namespace?: string;
-  projectSelectionFromPath?: ProjectSelection;
+  projectFromSelection?: ProjectSelection;
 }
 
-export const addNewCaseMap = async (existingProjects: string[], uri?: Uri, projectPath?: string) => {
-  // If supplied, use preselected URI and project path for project and namespace
-  const projectSelectionFromPath = projectPath
-    ? { label: projectPath.substring(projectPath.lastIndexOf(path.sep) + 1), description: projectPath, path: projectPath }
-    : undefined;
-  const namespaceFromPath = projectPath && uri ? await resolveNamespaceFromPath(uri, projectPath, 'processes') : undefined;
+export const addNewCaseMap = async (selectionContext: AddCommandSelectionContext) => {
+  const existingProjects = selectionContext.existingIvyProjects;
+  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(selectionContext, 'processes');
 
   const stepProject: InputStep<NewCaseMapState> = async (input: MultiStepInput<NewCaseMapState>, state: NewCaseMapState) => {
-    if (state.projectSelectionFromPath && state.projectSelection === undefined) {
-      state.projectSelection = state.projectSelectionFromPath;
-      state.projectSelectionFromPath = undefined;
+    if (state.projectFromSelection && state.project === undefined) {
+      state.project = state.projectFromSelection;
+      state.projectFromSelection = undefined;
     } else {
-      state.projectSelection = await input.showQuickPick({
+      state.project = await input.showQuickPick({
         title: state.dialogTitle,
         titleSuffix: ' - Choose project',
         placeholder: 'Select one of the available projects',
         currentStep: state.currentStep,
         totalSteps: state.totalSteps,
-        activeItem: state.projectSelection,
+        activeItem: state.project,
         items: existingProjects.map(project => {
           return {
             label: project.substring(project.lastIndexOf(path.sep) + 1),
@@ -85,8 +83,8 @@ export const addNewCaseMap = async (existingProjects: string[], uri?: Uri, proje
     dialogTitle: 'Add New Case Map',
     currentStep: 1,
     totalSteps: steps.length,
-    namespace: typeof namespaceFromPath === 'string' && namespaceFromPath.trim() !== '' ? namespaceFromPath : '',
-    projectSelectionFromPath: projectSelectionFromPath
+    namespace: typeof namespaceFromSelection === 'string' && namespaceFromSelection.trim() !== '' ? namespaceFromSelection : '',
+    projectFromSelection: projectFromSelection
   };
 
   try {
@@ -100,9 +98,9 @@ export const addNewCaseMap = async (existingProjects: string[], uri?: Uri, proje
     }
   }
 
-  if (newCaseMapData.name !== undefined && newCaseMapData.namespace !== undefined && newCaseMapData.projectSelection !== undefined) {
+  if (newCaseMapData.name !== undefined && newCaseMapData.namespace !== undefined && newCaseMapData.project !== undefined) {
     const createCaseMapInput = {
-      projectDir: newCaseMapData.projectSelection.path,
+      projectDir: newCaseMapData.project.path,
       name: newCaseMapData.name,
       namespace: newCaseMapData.namespace
     };

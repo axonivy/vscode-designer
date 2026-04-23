@@ -17,7 +17,7 @@ const defaultNamespaceOf = (projecDir: string) => {
   );
 };
 
-type ResourceDirectoryTarget = 'processes' | 'src_hd' | 'dataclasses';
+export type ResourceDirectoryTarget = 'processes' | 'src_hd' | 'dataclasses';
 
 export const resolveNamespaceFromPath = async (selectedUri: Uri, projectDir: string, target: ResourceDirectoryTarget) => {
   let fileStat: FileStat;

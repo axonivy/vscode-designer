@@ -212,12 +212,11 @@ export class IvyProjectExplorer {
   }
 
   public async addProcess(selection: TreeSelection, kind: ProcessKind, pid?: string) {
-    const addCommandContext = await this.getAddCommandSelectionContext(selection);
-    if (!addCommandContext) {
+    const addCommandSelectionContext = await this.getAddCommandSelectionContext(selection);
+    if (!addCommandSelectionContext) {
       return;
     }
-    const [existingProjects, uriSelection, projectPathSelection] = addCommandContext;
-    await addNewProcess(kind, existingProjects, pid, uriSelection, projectPathSelection);
+    await addNewProcess(addCommandSelectionContext, kind, pid);
   }
 
   private async addCaseMap(selection: TreeSelection) {
@@ -225,8 +224,7 @@ export class IvyProjectExplorer {
     if (!addCommandContext) {
       return;
     }
-    const [existingProjects, uriSelection, projectPathSelection] = addCommandContext;
-    await addNewCaseMap(existingProjects, uriSelection, projectPathSelection);
+    await addNewCaseMap(addCommandContext);
   }
 
   public async importBpmnProcess(selection: TreeSelection) {
@@ -268,8 +266,7 @@ export class IvyProjectExplorer {
     if (!addCommandContext) {
       return;
     }
-    const [existingProjects, uriSelection, projectPathSelection] = addCommandContext;
-    await addNewUserDialog(type, existingProjects, pid, uriSelection, projectPathSelection);
+    await addNewUserDialog(addCommandContext, type, pid);
   }
 
   private async addDataClass(selection: TreeSelection) {
@@ -277,8 +274,7 @@ export class IvyProjectExplorer {
     if (!addCommandContext) {
       return;
     }
-    const [existingProjects, uriSelection, projectPathSelection] = addCommandContext;
-    await addNewDataClass('Data Class', existingProjects, uriSelection, projectPathSelection);
+    await addNewDataClass('Data Class', addCommandContext);
   }
 
   private async addEntityClass(selection: TreeSelection) {
@@ -286,8 +282,7 @@ export class IvyProjectExplorer {
     if (!addCommandContext) {
       return;
     }
-    const [existingProjects, uriSelection, projectPathSelection] = addCommandContext;
-    await addNewDataClass('Entity Class', existingProjects, uriSelection, projectPathSelection);
+    await addNewDataClass('Entity Class', addCommandContext);
   }
 
   public async setProjectExplorerActivationCondition(hasIvyProjects: boolean) {
@@ -339,7 +334,7 @@ export class IvyProjectExplorer {
     return this.treeDataProvider.hasIvyProjects();
   }
 
-  private async getAddCommandSelectionContext(selection: TreeSelection) {
+  private async getAddCommandSelectionContext(selection: TreeSelection): Promise<AddCommandSelectionContext | undefined> {
     const hasIvyProjects = await this.hasIvyProjects();
     if (!hasIvyProjects) {
       logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
@@ -348,7 +343,7 @@ export class IvyProjectExplorer {
     const existingProjects = await this.getIvyProjects();
     const uri = await treeSelectionToUri(selection);
     const projectPath = uri ? await treeUriToProjectPath(uri, Promise.resolve(existingProjects)) : undefined;
-    return [existingProjects, uri, projectPath] as const;
+    return { existingIvyProjects: existingProjects, uriSelection: uri, projectPathSelection: projectPath };
   }
 
   static get instance() {
@@ -358,3 +353,8 @@ export class IvyProjectExplorer {
     throw new Error('IvyProjectExplorer has not been initialized');
   }
 }
+export type AddCommandSelectionContext = {
+  existingIvyProjects: string[];
+  uriSelection?: Uri | undefined;
+  projectPathSelection?: string | undefined;
+};

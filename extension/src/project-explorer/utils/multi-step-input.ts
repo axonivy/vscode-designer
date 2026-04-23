@@ -1,5 +1,8 @@
+import path from 'path';
 import type { QuickInput, QuickPickItem } from 'vscode';
 import { Disposable, QuickInputButtons, window } from 'vscode';
+import { type AddCommandSelectionContext } from '../ivy-project-explorer';
+import { resolveNamespaceFromPath, type ResourceDirectoryTarget } from './util';
 
 export class MultiStepCancelledError extends Error {
   constructor(message: string) {
@@ -31,6 +34,29 @@ export interface ProjectSelection extends QuickPickItem {
   description: string;
   path: string;
 }
+
+export const resolveAddCommandSelectionContext = async (
+  selectionContext: AddCommandSelectionContext,
+  resourceDirectoryTarget: ResourceDirectoryTarget
+): Promise<{
+  projectFromSelection: ProjectSelection | undefined;
+  namespaceFromSelection: string | undefined;
+}> => {
+  const { projectPathSelection: projectPathFromSelection, uriSelection: uriFromSelection } = selectionContext;
+  if (!projectPathFromSelection || projectPathFromSelection === '') {
+    return { projectFromSelection: undefined, namespaceFromSelection: undefined };
+  }
+  const projectFromSelection: ProjectSelection = {
+    label: projectPathFromSelection.substring(projectPathFromSelection.lastIndexOf(path.sep) + 1),
+    description: projectPathFromSelection,
+    path: projectPathFromSelection
+  };
+  if (!uriFromSelection) {
+    return { projectFromSelection: projectFromSelection, namespaceFromSelection: undefined };
+  }
+  const namespaceFromSelection = await resolveNamespaceFromPath(uriFromSelection, projectPathFromSelection, resourceDirectoryTarget);
+  return { projectFromSelection, namespaceFromSelection };
+};
 
 export type InputStep<T extends MSStateBase> = (input: MultiStepInput<T>, state: T) => Thenable<InputStep<T>> | Promise<void>;
 
