@@ -55,7 +55,7 @@ export class IvyProjectExplorer {
 
   private async activateEngineIfNeeded() {
     const hasIvyProjects = await this.hasIvyProjects();
-    await this.setProjectExplorerActivationCondition(hasIvyProjects);
+    await this.setProjectExplorerContext({ hasIvyProjects: true });
     if (hasIvyProjects) {
       await IvyEngineManager.instance.start();
     }
@@ -285,8 +285,13 @@ export class IvyProjectExplorer {
     await addNewDataClass('Entity Class', addCommandContext);
   }
 
-  public async setProjectExplorerActivationCondition(hasIvyProjects: boolean) {
-    await executeCommand('setContext', 'ivy:hasIvyProjects', hasIvyProjects);
+  public async setProjectExplorerContext({ hasIvyProjects, isStarted }: { hasIvyProjects?: boolean; isStarted?: boolean }) {
+    if (hasIvyProjects !== undefined) {
+      await executeCommand('setContext', 'ivy:hasIvyProjects', hasIvyProjects);
+    }
+    if (isStarted !== undefined) {
+      await executeCommand('setContext', 'ivy:isStarted', isStarted);
+    }
   }
 
   public async selectCmsEntry(projectPath: string) {
