@@ -51,7 +51,7 @@ export const addNewCaseMap = async (selectionContext: AddCommandSelectionContext
     state.name = await input.showTextInput({
       title: state.dialogTitle,
       titleSuffix: ' - Choose name',
-      placeholder: 'Enter a name. Allowed characters: a-z, A-Z, 0-9, _',
+      placeholder: 'Enter a name. Must start with a letter or underscore. Allowed characters: a-z, A-Z, 0-9, _',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.name,

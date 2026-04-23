@@ -81,7 +81,7 @@ export const validateProjectArtifactName = (value: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return 'Only letters, numbers, and underscores are allowed -- No spaces -- Cannot be empty';
+  return 'Only letters, numbers, and underscores are allowed -- Must start with a letter or underscore -- No spaces -- Cannot be empty';
 };
 
 export const validateProjectName = (value: string) => {
