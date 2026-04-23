@@ -55,10 +55,8 @@ export class IvyProjectExplorer {
 
   private async activateEngineIfNeeded() {
     const hasIvyProjects = await this.hasIvyProjects();
-    await this.setProjectExplorerContext({ hasIvyProjects: true });
-    if (hasIvyProjects) {
-      await IvyEngineManager.instance.start();
-    }
+    await this.setProjectExplorerContext({ hasIvyProjects: hasIvyProjects });
+    await IvyEngineManager.instance.start();
   }
 
   private registerCommands(context: ExtensionContext) {
