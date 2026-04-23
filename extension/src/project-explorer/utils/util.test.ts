@@ -96,7 +96,7 @@ test('namespace valid leading underscore', () => {
 });
 
 test('namespace valid leading double underscore', () => {
-  expect(validateNamespaceWithSpace('_leading_double_underscore/abc')).toBeUndefined();
+  expect(validateNamespaceWithSpace('__leading_double_underscore/abc')).toBeUndefined();
 });
 
 test('namespace valid trailing underscore', () => {
@@ -141,6 +141,18 @@ test('namespace invalid leading whitespace', () => {
 
 test('namespace invalid spaces around slash', () => {
   expect(validateNamespaceWithSpace('spaces /around / a  /  slash')).toBeTruthy();
+});
+
+test('namespace invalid hyphen', () => {
+  expect(validateNamespaceWithSpace('invalid-hyphen')).toBeTruthy();
+});
+
+test('namespace invalid hyphen in first segment', () => {
+  expect(validateNamespaceWithSpace('invalid-hyphen/validpart')).toBeTruthy();
+});
+
+test('namespace invalid hyphen in last segment', () => {
+  expect(validateNamespaceWithSpace('validpart/invalid-hyphen')).toBeTruthy();
 });
 
 test('namespace invalid empty slash group double slash', () => {
