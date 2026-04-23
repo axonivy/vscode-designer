@@ -3,7 +3,7 @@ import { View, type ViewData } from './view';
 
 const welcomePageViewData: ViewData = {
   tabSelector: 'div.tab:has-text("welcome-page")',
-  viewSelector: 'body > div > div[data-parent-flow-to-element-id] >> visible=true'
+  viewSelector: 'body > div > div > div[data-parent-flow-to-element-id] >> visible=true'
 };
 
 export class WelcomePage extends View {
