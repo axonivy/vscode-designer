@@ -1,11 +1,11 @@
 import path from 'path';
 import { window } from 'vscode';
-import { logErrorMessage } from '../base/logging-util';
-import { IvyEngineManager } from '../engine/engine-manager';
-import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
-import { treeUriToProjectPath } from '../project-explorer/tree-selection';
-import { resolveNamespaceFromPath } from '../project-explorer/utils/util';
-import { stripTrailingSeparator } from '../utils/path-utils';
+import { logErrorMessage } from '../../base/logging-util';
+import { IvyEngineManager } from '../../engine/engine-manager';
+import { IvyProjectExplorer } from '../../project-explorer/ivy-project-explorer';
+import { treeUriToProjectPath } from '../../project-explorer/tree-selection';
+import { resolveNamespaceFromPath } from '../../project-explorer/utils/util';
+import { stripTrailingSeparator } from '../../utils/path-utils';
 import { buildDialogPreviewUrl } from './dialog-preview-url-builder';
 
 export const dialogPreviewUrl = async (devContextPath: string) => {
