@@ -59,56 +59,112 @@ test('dotseparated error slash-separated input', () => {
   expect(validateDotSeparatedName('com/example')).toBeTruthy();
 });
 
-test('namespace valid single word', () => {
-  expect(validateNamespace('hello')).toBeUndefined();
-});
-
-test('namespace valid slash-separated words', () => {
-  expect(validateNamespace('com/example/project')).toBeUndefined();
-});
-
-test('namespace valid words with numbers', () => {
-  expect(validateNamespace('com/example2/v3')).toBeUndefined();
-});
-
-test('namespace valid words with underscores before last group', () => {
-  expect(validateNamespace('com/my_project/util')).toBeUndefined();
-});
-
-test('namespace valid words with numbers and underscores before last group', () => {
-  expect(validateNamespace('4super_2com/my_project2/util')).toBeUndefined();
-});
-
 test('namespace valid empty string', () => {
   expect(validateNamespace('')).toBeUndefined();
 });
 
-test('namespace error trailing slash', () => {
-  expect(validateNamespace('com/example/')).toBeTruthy();
+test('namespace valid simple', () => {
+  expect(validateNamespace('simple')).toBeUndefined();
 });
 
-test('namespace error leading slash', () => {
-  expect(validateNamespace('/com/example')).toBeTruthy();
+test('namespace valid simple with slash', () => {
+  expect(validateNamespace('simple/with/slash')).toBeUndefined();
 });
 
-test('namespace error consecutive slashes', () => {
-  expect(validateNamespace('com//example')).toBeTruthy();
+test('namespace valid start digit', () => {
+  expect(validateNamespace('1startDigit')).toBeUndefined();
 });
 
-test('namespace error trailing whitespace', () => {
-  expect(validateNamespace('com/example ')).toBeTruthy();
+test('namespace valid end digit', () => {
+  expect(validateNamespace('endDigit9')).toBeUndefined();
 });
 
-test('namespace error leading whitespace', () => {
-  expect(validateNamespace(' com/example')).toBeTruthy();
+test('namespace valid start digit with slash', () => {
+  expect(validateNamespace('1startDigit/with/slash9')).toBeUndefined();
 });
 
-test('namespace error hyphens', () => {
-  expect(validateNamespace('com/my-project')).toBeTruthy();
+test('namespace valid with underscore', () => {
+  expect(validateNamespace('with_underscore')).toBeUndefined();
 });
 
-test('namespace error dot-separated input', () => {
-  expect(validateNamespace('com.example')).toBeTruthy();
+test('namespace valid with underscore and slash', () => {
+  expect(validateNamespace('with/underscore_and/slash')).toBeUndefined();
+});
+
+test('namespace valid leading underscore', () => {
+  expect(validateNamespace('_leading_underscore/abc')).toBeUndefined();
+});
+
+test('namespace valid leading double underscore', () => {
+  expect(validateNamespace('__leading_double_underscore/abc')).toBeUndefined();
+});
+
+test('namespace valid trailing underscore', () => {
+  expect(validateNamespace('abc/trailing_underscore_')).toBeUndefined();
+});
+
+test('namespace valid trailing double underscore', () => {
+  expect(validateNamespace('abc/trailing_double_underscore__')).toBeUndefined();
+});
+
+test('namespace valid with digits and underscores in slash groups', () => {
+  expect(validateNamespace('with/8digit/underscore/_and/_slash')).toBeUndefined();
+});
+
+test('namespace valid with whitespace in words', () => {
+  expect(validateNamespace('s imple with whitespac e')).toBeUndefined();
+});
+
+test('namespace valid with whitespace and slashes', () => {
+  expect(validateNamespace('s imple with/whitespac e')).toBeUndefined();
+});
+
+test('namespace valid double whitespace', () => {
+  expect(validateNamespace('d  ouble  whitespac  e')).toBeUndefined();
+});
+
+test('namespace invalid trailing slash', () => {
+  expect(validateNamespace('trailing/slash/')).toBeTruthy();
+});
+
+test('namespace invalid leading slash', () => {
+  expect(validateNamespace('/leading/slash')).toBeTruthy();
+});
+
+test('namespace invalid trailing whitespace', () => {
+  expect(validateNamespace('trailing/whitespace ')).toBeTruthy();
+});
+
+test('namespace invalid leading whitespace', () => {
+  expect(validateNamespace(' leading/whitespace')).toBeTruthy();
+});
+
+test('namespace invalid spaces around slash', () => {
+  expect(validateNamespace('spaces /around / a  /  slash')).toBeTruthy();
+});
+
+test('namespace invalid hyphen', () => {
+  expect(validateNamespace('invalid-hyphen')).toBeTruthy();
+});
+
+test('namespace invalid hyphen in first segment', () => {
+  expect(validateNamespace('invalid-hyphen/validpart')).toBeTruthy();
+});
+
+test('namespace invalid hyphen in last segment', () => {
+  expect(validateNamespace('validpart/invalid-hyphen')).toBeTruthy();
+});
+
+test('namespace invalid empty slash group double slash', () => {
+  expect(validateNamespace('emptySlash // group')).toBeTruthy();
+});
+
+test('namespace invalid empty slash group spaced single', () => {
+  expect(validateNamespace('emptySlash / / group')).toBeTruthy();
+});
+
+test('namespace invalid empty slash group spaced double', () => {
+  expect(validateNamespace('emptySlash /  / group')).toBeTruthy();
 });
 
 test('project artifact name valid single letter', () => {

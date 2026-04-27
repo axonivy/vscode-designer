@@ -101,9 +101,9 @@ export const validateDotSeparatedName = (value: string) => {
 };
 
 export const validateNamespace = (value: string) => {
-  const pattern = /^(\w+(\/\w+)*)?$/;
+  const pattern = /^(\w+(?: +\w+|\/\w+)*)?$/;
   if (pattern.test(value)) {
     return;
   }
-  return 'Enter Namespace separated by "/" -- Only letters, numbers, and underscores are allowed -- No spaces -- Empty allowed.';
+  return 'Enter Namespace separated by "/" -- Only letters, numbers, and underscores are allowed -- Spaces allowed within words -- Empty allowed.';
 };
