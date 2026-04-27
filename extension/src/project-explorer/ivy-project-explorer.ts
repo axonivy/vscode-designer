@@ -56,6 +56,10 @@ export class IvyProjectExplorer {
   private async activateEngineIfNeeded() {
     const hasIvyProjects = await this.hasIvyProjects();
     await this.setProjectExplorerContext({ hasIvyProjects: hasIvyProjects });
+    const workspaceHasOpenFolders = workspace.workspaceFolders && workspace.workspaceFolders.length > 0;
+    if (!workspaceHasOpenFolders) {
+      return;
+    }
     await IvyEngineManager.instance.start();
   }
 
