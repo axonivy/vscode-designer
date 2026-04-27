@@ -4,8 +4,7 @@ import { OutputView } from '../page-objects/output-view';
 import { SettingsView } from '../page-objects/settings-view';
 import { embeddedEngineWorkspace, noEngineWorkspacePath, noProjectWorkspacePath } from '../workspaces/workspace';
 
-// eslint-disable-next-line playwright/no-focused-test
-test.describe.only('Engine run by extension', () => {
+test.describe('Engine run by extension', () => {
   test.use({ workspace: embeddedEngineWorkspace });
 
   test('check if extension can download and start engine', async ({ page }) => {
