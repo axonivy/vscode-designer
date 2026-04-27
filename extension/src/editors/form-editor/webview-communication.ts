@@ -4,8 +4,8 @@ import type { TextDocument, WebviewPanel } from 'vscode';
 import { commands, Uri } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
-import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
 import { IvyEngineManager } from '../../engine/engine-manager';
+import { IvyBrowserViewProvider } from '../../views/browser/ivy-browser-view-provider';
 import { updateTextDocumentContent } from '../content-writer';
 import {
   hasEditorFileContent,

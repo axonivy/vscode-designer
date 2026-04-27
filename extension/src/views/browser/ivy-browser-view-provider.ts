@@ -1,8 +1,8 @@
 import type { ExtensionContext, Webview, WebviewView, WebviewViewProvider } from 'vscode';
 import { Uri, env, l10n, window } from 'vscode';
-import { executeCommand, registerCommand } from '../base/commands';
-import { logErrorMessage } from '../base/logging-util';
-import { findRootEntry, parseBuildManifest } from '../editors/build-manifest';
+import { executeCommand, registerCommand } from '../../base/commands';
+import { logErrorMessage } from '../../base/logging-util';
+import { findRootEntry, parseBuildManifest } from '../../editors/build-manifest';
 import { dialogPreviewUrl } from './dialog-preview-url';
 
 export class IvyBrowserViewProvider implements WebviewViewProvider {
@@ -116,7 +116,7 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
   }
 
   private getWebviewContent(webview: Webview) {
-    const browserCss = this.extensionResourceUrl(webview, 'src', 'browser', 'media', 'browser.css');
+    const browserCss = this.extensionResourceUrl(webview, 'src', 'views', 'browser', 'media', 'browser.css');
     const root = this.extensionResourceUrl(webview, 'dist', 'webviews', 'browser');
     const manifest = parseBuildManifest(root);
     const mainJs = Uri.joinPath(root, findRootEntry(manifest).chunk.file ?? '');

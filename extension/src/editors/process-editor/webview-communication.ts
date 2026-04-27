@@ -31,7 +31,7 @@ import {
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType, RequestType } from 'vscode-messenger-common';
-import { IvyBrowserViewProvider } from '../../browser/ivy-browser-view-provider';
+import { IvyBrowserViewProvider } from '../../views/browser/ivy-browser-view-provider';
 import { JavaCompletion } from '../java-completion';
 import { isAllTypesSearchRequest, isSearchResult } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
