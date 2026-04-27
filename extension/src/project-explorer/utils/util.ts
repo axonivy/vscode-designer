@@ -100,7 +100,7 @@ export const validateDotSeparatedName = (value: string) => {
   return 'Enter Namespace separated by "." -- Only letters, numbers, and underscores are allowed -- No spaces -- Cannot be empty';
 };
 
-export const validateNamespaceWithSpace = (value: string) => {
+export const validateNamespace = (value: string) => {
   const pattern = /^(\w+(?: +\w+|\/\w+)*)?$/;
   if (pattern.test(value)) {
     return;
