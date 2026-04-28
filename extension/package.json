@@ -560,6 +560,42 @@
         ]
       }
     ],
+    "languageModelTools": [
+      {
+        "name": "new_axon_ivy_project",
+        "displayName": "New Axon Ivy project",
+        "modelDescription": "Scaffolds and registers a new Axon Ivy project. MUST be called for every request to create, add, scaffold, initialize, or generate an Axon Ivy project. Do NOT attempt to create the project by writing files, copying an existing project, or running shell/maven commands — only this tool produces a valid, registered project.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Project name"
+            },
+            "path": {
+              "type": "string",
+              "description": "Absolute path to the parent directory where the new project folder should be created."
+            },
+            "groupId": {
+              "type": "string",
+              "description": "Dot-separated namespace"
+            },
+            "projectId": {
+              "type": "string",
+              "description": "Dot-separated namespace"
+            }
+          },
+          "required": [
+            "name",
+            "path",
+            "groupId",
+            "projectId"
+          ]
+        },
+        "canBeReferencedInPrompt": true,
+        "toolReferenceName": "newAxonIvyProject"
+      }
+    ],
     "viewsContainers": {
       "panel": [
         {

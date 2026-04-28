@@ -6,12 +6,14 @@ import { config } from './base/configurations';
 import { validateAndSyncJavaVersion } from './base/java-version-validation';
 import { askToReloadWindow } from './base/reload-window';
 import { setStatusBarIcon, showStatusBarQuickPick } from './base/status-bar';
+import { registerTool } from './base/tools';
 import { addDevContainer } from './dev-container/command';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
 import { IvyDiagnostics } from './engine/diagnostics';
 import { IvyEngineManager } from './engine/engine-manager';
 import { registerAddDependencyHandler } from './maven/add-dependency';
 import { IvyProjectExplorer } from './project-explorer/ivy-project-explorer';
+import { NewProjectTool } from './project-explorer/new-project';
 import { resolveExtensionVersion } from './version/extension-version';
 import { showRuntimeLog } from './views/runtimelog-view';
 
@@ -31,6 +33,8 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
   registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
   registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
   registerCommand('ivy.showStatusBarQuickPick', context, () => showStatusBarQuickPick());
+
+  registerTool('new_axon_ivy_project', context, new NewProjectTool());
 
   IvyDiagnostics.init(context);
   setStatusBarIcon();

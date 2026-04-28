@@ -197,7 +197,7 @@ export class IvyEngineManager {
       await this.start();
     }
     const path = newProjectParams.path;
-    this.ivyEngineApi
+    return this.ivyEngineApi
       ?.createProject(newProjectParams)
       .then(() => executeCommand('java.project.import.command'))
       .catch(() => {
