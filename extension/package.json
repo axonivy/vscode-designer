@@ -837,6 +837,11 @@
         "view": "ivyProjects",
         "contents": "You have not yet opened a folder.\n[Open Folder](command:vscode.openFolder)",
         "when": "workbenchState == empty"
+      },
+      {
+        "view": "ivyProjects",
+        "contents": "There are no Axon Ivy projects. Create one by clicking the button below.\n[Create Axon Ivy Project](command:ivyProjects.addNewProject)",
+        "when": "workbenchState != empty && !ivy:hasIvyProjects && ivy:isStarted"
       }
     ]
   }

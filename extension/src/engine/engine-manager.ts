@@ -105,6 +105,7 @@ export class IvyEngineManager {
       return;
     }
     this.started = true;
+    await IvyProjectExplorer.instance.setProjectExplorerContext({ isStarted: true });
     const engineUrl = await this.resolveEngineUrl();
     this.ivyEngineApi = new IvyEngineApi(engineUrl.toString());
     let devContextPath = await this.ivyEngineApi.devContextPath;
@@ -191,7 +192,7 @@ export class IvyEngineManager {
   }
 
   public async createProject(newProjectParams: NewProjectParams & { path: string }) {
-    await IvyProjectExplorer.instance.setProjectExplorerActivationCondition(true);
+    await IvyProjectExplorer.instance.setProjectExplorerContext({ hasIvyProjects: true });
     if (!this.started) {
       await this.start();
     }
