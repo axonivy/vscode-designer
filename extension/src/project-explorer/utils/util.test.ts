@@ -86,6 +86,13 @@ test('namespace valid simple', () => {
   expect(validateNamespace('simple')).toBeUndefined();
 });
 
+test('namespace valid single character with slash', () => {
+  expect(validateNamespace('a/b')).toBeUndefined();
+  expect(validateNamespace('a/b/c')).toBeUndefined();
+  expect(validateNamespace('ab/c')).toBeUndefined();
+  expect(validateNamespace('a/bc')).toBeUndefined();
+});
+
 test('namespace valid simple with slash', () => {
   expect(validateNamespace('simple/with/slash')).toBeUndefined();
 });
