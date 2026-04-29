@@ -125,13 +125,15 @@ test('namespace valid whitespaces in word', () => {
 });
 
 test('namespace error invalid characters', () => {
-  expect(validateDotSeparatedName('-')).toBeTruthy();
-  expect(validateDotSeparatedName('a-')).toBeTruthy();
-  expect(validateDotSeparatedName('-a')).toBeTruthy();
-  expect(validateDotSeparatedName('-a-')).toBeTruthy();
-  expect(validateDotSeparatedName('a-a')).toBeTruthy();
-  expect(validateDotSeparatedName('a/b')).toBeTruthy();
-  expect(validateDotSeparatedName('aa/b-b')).toBeTruthy();
+  expect(validateNamespace('-')).toBeTruthy();
+  expect(validateNamespace('.')).toBeTruthy();
+  expect(validateNamespace('a-')).toBeTruthy();
+  expect(validateNamespace('-a')).toBeTruthy();
+  expect(validateNamespace('-a-')).toBeTruthy();
+  expect(validateNamespace('a-a')).toBeTruthy();
+  expect(validateNamespace('a.a')).toBeTruthy();
+  expect(validateNamespace('aa/b-b')).toBeTruthy();
+  expect(validateNamespace('a.a/b-b')).toBeTruthy();
 });
 
 test('namespace error malformed slashes', () => {
