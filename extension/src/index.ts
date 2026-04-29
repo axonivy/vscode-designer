@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import type { ExtensionContext } from 'vscode';
 import { Messenger, type MessengerDiagnostic } from 'vscode-messenger';
+import { registerTools } from './ai/tools/tools';
 import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
 import { validateAndSyncJavaVersion } from './base/java-version-validation';
@@ -31,6 +32,8 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
   registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
   registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
   registerCommand('ivy.showStatusBarQuickPick', context, () => showStatusBarQuickPick());
+
+  registerTools(context);
 
   IvyDiagnostics.init(context);
   setStatusBarIcon();
