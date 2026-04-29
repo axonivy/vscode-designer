@@ -176,7 +176,7 @@ test('project name valid single word', () => {
   expect(validateProjectName('_-ab1-_')).toBeUndefined();
 });
 
-test('project name error ', () => {
+test('project name error invalid characters', () => {
   expect(validateProjectName('')).toBeTruthy();
   expect(validateProjectName(' ')).toBeTruthy();
   expect(validateProjectName('a ')).toBeTruthy();
