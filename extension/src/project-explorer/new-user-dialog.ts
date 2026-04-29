@@ -75,6 +75,9 @@ const prepareAndValidateFinalState: (
       if (state.layout === undefined) {
         throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Layout is required for JSF dialogs.');
       }
+      if (state.layout.label === 'Page') {
+        throw new MultiStepInvalidStateError(ERROR_PREFIX + '"Page" layout is only valid in Offline Dialog.');
+      }
       if (state.template === undefined && state.layout.label !== 'Component') {
         throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Template is required for JSF dialogs with non-Component layouts.');
       }
@@ -162,11 +165,13 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
       placeholder: 'Select one of the available layouts',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
-      items: layouts.map(layout => {
-        return {
-          label: layout
-        };
-      })
+      items: layouts
+        .filter(layout => layout !== 'Page')
+        .map(layout => {
+          return {
+            label: layout
+          };
+        })
     });
   };
 
