@@ -15,6 +15,13 @@ test('dotseparated valid single underscore', () => {
   expect(validateDotSeparatedName('_')).toBeUndefined();
 });
 
+test('dotseparated valid dot-separated words single character', () => {
+  expect(validateDotSeparatedName('a.b')).toBeUndefined();
+  expect(validateDotSeparatedName('a.b.c')).toBeUndefined();
+  expect(validateDotSeparatedName('ab.c')).toBeUndefined();
+  expect(validateDotSeparatedName('a.bc')).toBeUndefined();
+});
+
 test('dotseparated valid dot-separated words', () => {
   expect(validateDotSeparatedName('com.example.project')).toBeUndefined();
 });
