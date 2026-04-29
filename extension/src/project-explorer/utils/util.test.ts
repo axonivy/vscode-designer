@@ -11,6 +11,10 @@ test('dotseparated valid single word', () => {
   expect(validateDotSeparatedName('hello')).toBeUndefined();
 });
 
+test('dotseparated valid single underscore', () => {
+  expect(validateDotSeparatedName('_')).toBeUndefined();
+});
+
 test('dotseparated valid dot-separated words', () => {
   expect(validateDotSeparatedName('com.example.project')).toBeUndefined();
 });
@@ -60,6 +64,7 @@ test('dotseparated error slash-separated input', () => {
 });
 
 test('dotseparated error digit leading', () => {
+  expect(validateDotSeparatedName('1')).toBeTruthy();
   expect(validateDotSeparatedName('1com.example')).toBeTruthy();
   expect(validateDotSeparatedName('com.1example')).toBeTruthy();
   expect(validateDotSeparatedName('1com.1example')).toBeTruthy();
@@ -128,6 +133,10 @@ test('namespace valid with whitespace and slashes', () => {
 
 test('namespace valid double whitespace', () => {
   expect(validateNamespace('d  ouble  whitespac  e')).toBeUndefined();
+});
+
+test('namespace invalid slash', () => {
+  expect(validateNamespace('/')).toBeTruthy();
 });
 
 test('namespace invalid trailing slash', () => {
@@ -232,6 +241,10 @@ test('project artifact name valid digit last place', () => {
 
 test('project artifact name invalid empty', () => {
   expect(validateProjectArtifactName('')).toBeTruthy();
+});
+
+test('project artifact name invalid digit', () => {
+  expect(validateProjectArtifactName('1')).toBeTruthy();
 });
 
 test('project artifact name invalid leading digit', () => {
