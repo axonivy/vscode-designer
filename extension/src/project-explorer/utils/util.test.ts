@@ -59,6 +59,13 @@ test('dotseparated error slash-separated input', () => {
   expect(validateDotSeparatedName('com/example')).toBeTruthy();
 });
 
+test('dotseparated error digit leading', () => {
+  expect(validateDotSeparatedName('1com.example')).toBeTruthy();
+  expect(validateDotSeparatedName('com.1example')).toBeTruthy();
+  expect(validateDotSeparatedName('1com.1example')).toBeTruthy();
+  expect(validateDotSeparatedName('1com')).toBeTruthy();
+});
+
 test('namespace valid empty string', () => {
   expect(validateNamespace('')).toBeUndefined();
 });
