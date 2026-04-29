@@ -3,7 +3,7 @@ import { Uri, env, l10n, window } from 'vscode';
 import { executeCommand, registerCommand } from '../../base/commands';
 import { logErrorMessage } from '../../base/logging-util';
 import { findRootEntry, parseBuildManifest } from '../../editors/build-manifest';
-import { dialogPreviewUrl } from './dialog-preview-url';
+import { dialogPreviewUrl, isDialogPreviewSupported } from './dialog-preview/dialog-preview-url';
 
 export class IvyBrowserViewProvider implements WebviewViewProvider {
   private static _instance: IvyBrowserViewProvider;
@@ -38,6 +38,8 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
     registerCommand('ivyBrowserView.openEngineCockpit', context, () => provider.openEngineRelativeUrlExternally('system/engine-cockpit'));
     registerCommand('ivyBrowserView.openNEO', context, () => provider.openEngineRelativeUrlExternally('neo'));
     registerCommand('ivyBrowserView.openPreview', context, () => provider.openPreview());
+    context.subscriptions.push(window.tabGroups.onDidChangeTabs(() => void provider.updateDialogPreviewContext()));
+    void provider.updateDialogPreviewContext();
   }
 
   private static resolveCodespacesEngineHost(engineUrl: URL): URL {
@@ -105,6 +107,10 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
       return;
     }
     this.openEngineRelativeUrl(url);
+  }
+
+  private async updateDialogPreviewContext() {
+    await executeCommand('setContext', 'ivy:dialogPreviewSupported', await isDialogPreviewSupported());
   }
 
   private refreshWebviewHtml(url: string) {

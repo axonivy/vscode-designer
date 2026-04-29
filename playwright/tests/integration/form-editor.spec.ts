@@ -86,7 +86,7 @@ test.describe('Form Editor', () => {
     await editor.executeCommand('View: Move Panel Right');
 
     await expect(editor.locatorFor('.selected')).toHaveCount(0);
-    await editor.toolbar.getByRole('button', { name: 'Open Preview' }).click();
+    await editor.toolbar.getByRole('button', { name: 'Open Dialog Preview' }).click();
     await expect(browser.locator('#iFrameForm\\:frameTaskName')).toHaveText('Preview');
     const frame = browser.frameLocator('iframe');
     const input = frame.getByRole('textbox');
