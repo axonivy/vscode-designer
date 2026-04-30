@@ -100,11 +100,17 @@ export class FileExplorer extends ExplorerView {
     await this.provideUserInput();
   }
 
-  async addProcess(processName: string, kind: 'Business Process' | 'Callable Sub Process' | 'Web Service Process', namespace?: string) {
+  async addProcess(
+    processName: string,
+    kind: 'Business Process' | 'Callable Sub Process' | 'Web Service Process',
+    defaultNamespaceExpected: string = 'prebuiltProject',
+    namespace?: string
+  ) {
     await this.selectNode('config');
     await this.executeCommand('Axon Ivy: New ' + kind);
     await this.selectNthVisibleItemFromQuickPick(0);
     await this.provideUserInput(processName);
+    expect(await this.readInputBoxValue()).toBe(defaultNamespaceExpected);
     await this.provideUserInput(namespace);
   }
 
@@ -123,11 +129,17 @@ export class FileExplorer extends ExplorerView {
     await this.provideUserInput(productId);
   }
 
-  async addUserDialog(dialogName: string, namespace: string, kind: 'Html Dialog (JSF)' | 'Offline Dialog (JSF)' | 'Dialog Form') {
+  async addUserDialog(
+    dialogName: string,
+    namespace: string,
+    kind: 'Html Dialog (JSF)' | 'Offline Dialog (JSF)' | 'Dialog Form',
+    defaultNamespaceExpected: string = 'prebuiltProject'
+  ) {
     await this.selectNode('config');
     await this.executeCommand('Axon Ivy: New ' + kind);
     await this.selectNthVisibleItemFromQuickPick(0);
     await this.provideUserInput(dialogName);
+    expect(await this.readInputBoxValue()).toBe(defaultNamespaceExpected);
     await this.provideUserInput(namespace);
     if (kind === 'Html Dialog (JSF)') {
       await this.provideUserInput();
@@ -135,19 +147,21 @@ export class FileExplorer extends ExplorerView {
     }
   }
 
-  async addDataClass(dataClass: string, namespace: string) {
+  async addDataClass(dataClass: string, namespace: string, defaultNamespaceExpected: string = 'prebuiltProject') {
     await this.selectNode('config');
     await this.executeCommand('Axon Ivy: New Data Class');
     await this.selectNthVisibleItemFromQuickPick(0);
     await this.provideUserInput(dataClass);
+    expect(await this.readInputBoxValue()).toBe(defaultNamespaceExpected);
     await this.provideUserInput(namespace);
   }
 
-  async addEntityClass(entityClass: string, namespace: string) {
+  async addEntityClass(entityClass: string, namespace: string, defaultNamespaceExpected: string = 'prebuiltProject') {
     await this.selectNode('config');
     await this.executeCommand('Axon Ivy: New Entity Class');
     await this.selectNthVisibleItemFromQuickPick(0);
     await this.provideUserInput(entityClass);
+    expect(await this.readInputBoxValue()).toBe(defaultNamespaceExpected);
     await this.provideUserInput(namespace);
   }
 }
