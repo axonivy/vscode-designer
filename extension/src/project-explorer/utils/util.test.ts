@@ -1,5 +1,5 @@
 import { expect, test, vi } from 'vitest';
-import { validateDotSeparatedName, validateNamespace, validateProjectArtifactName } from './util';
+import { validateDotSeparatedName, validateNamespace, validateProjectArtifactName, validateProjectName } from './util';
 
 vi.mock('vscode', () => ({
   FileType: { File: 1, Directory: 2 },
@@ -7,234 +7,226 @@ vi.mock('vscode', () => ({
   workspace: { fs: { readFile: vi.fn(), stat: vi.fn() } }
 }));
 
-test('dotseparated valid single word', () => {
-  expect(validateDotSeparatedName('hello')).toBeUndefined();
+test.describe('validateDotSeparatedName', () => {
+  test('valid single character', () => {
+    expect(validateDotSeparatedName('a')).toBeUndefined();
+    expect(validateDotSeparatedName('_')).toBeUndefined();
+  });
+
+  test('valid single word', () => {
+    expect(validateDotSeparatedName('ab')).toBeUndefined();
+  });
+
+  test('valid dotseparated words single character', () => {
+    expect(validateDotSeparatedName('a.b')).toBeUndefined();
+    expect(validateDotSeparatedName('a.b.c')).toBeUndefined();
+    expect(validateDotSeparatedName('aa.bb.cc')).toBeUndefined();
+    expect(validateDotSeparatedName('aa.b')).toBeUndefined();
+    expect(validateDotSeparatedName('a.bb')).toBeUndefined();
+    expect(validateDotSeparatedName('aa.bb')).toBeUndefined();
+  });
+
+  test('valid dotseparated words digits underscores', () => {
+    expect(validateDotSeparatedName('a1.b')).toBeUndefined();
+    expect(validateDotSeparatedName('a.b2')).toBeUndefined();
+    expect(validateDotSeparatedName('a1.b2')).toBeUndefined();
+
+    expect(validateDotSeparatedName('a_.b')).toBeUndefined();
+    expect(validateDotSeparatedName('a.b_')).toBeUndefined();
+    expect(validateDotSeparatedName('a_.b_')).toBeUndefined();
+    expect(validateDotSeparatedName('_a.b')).toBeUndefined();
+    expect(validateDotSeparatedName('_a._b')).toBeUndefined();
+    expect(validateDotSeparatedName('_a_._b_')).toBeUndefined();
+
+    expect(validateDotSeparatedName('_._')).toBeUndefined();
+  });
+
+  test('error invalid characters', () => {
+    expect(validateDotSeparatedName('')).toBeTruthy();
+    expect(validateDotSeparatedName('-')).toBeTruthy();
+    expect(validateDotSeparatedName('a-')).toBeTruthy();
+    expect(validateDotSeparatedName('-a')).toBeTruthy();
+    expect(validateDotSeparatedName('-a-')).toBeTruthy();
+    expect(validateDotSeparatedName('a-a')).toBeTruthy();
+    expect(validateDotSeparatedName('aa.b-b')).toBeTruthy();
+    expect(validateDotSeparatedName('a/b')).toBeTruthy();
+  });
+
+  test('error malformed dots', () => {
+    expect(validateDotSeparatedName('a.b.')).toBeTruthy();
+    expect(validateDotSeparatedName('.a.b')).toBeTruthy();
+    expect(validateDotSeparatedName('a..b')).toBeTruthy();
+  });
+
+  test('error whitespace', () => {
+    expect(validateDotSeparatedName(' a')).toBeTruthy();
+    expect(validateDotSeparatedName('a ')).toBeTruthy();
+    expect(validateDotSeparatedName('a a')).toBeTruthy();
+    expect(validateDotSeparatedName('aa.a a')).toBeTruthy();
+    expect(validateDotSeparatedName('a a.aa')).toBeTruthy();
+    expect(validateDotSeparatedName('a a.a a')).toBeTruthy();
+    expect(validateDotSeparatedName('aa . aa')).toBeTruthy();
+  });
+
+  test('error leading digit', () => {
+    expect(validateDotSeparatedName('1')).toBeTruthy();
+    expect(validateDotSeparatedName('1a')).toBeTruthy();
+    expect(validateDotSeparatedName('1a.b')).toBeTruthy();
+    expect(validateDotSeparatedName('a.1b')).toBeTruthy();
+    expect(validateDotSeparatedName('1a.1b')).toBeTruthy();
+  });
 });
 
-test('dotseparated valid dot-separated words', () => {
-  expect(validateDotSeparatedName('com.example.project')).toBeUndefined();
+test.describe('validateNamespace', () => {
+  test('valid single character', () => {
+    expect(validateNamespace('')).toBeUndefined();
+    expect(validateNamespace('a')).toBeUndefined();
+    expect(validateNamespace('_')).toBeUndefined();
+  });
+
+  test('valid single word', () => {
+    expect(validateNamespace('ab')).toBeUndefined();
+  });
+
+  test(' valid slashseparated words single character', () => {
+    expect(validateNamespace('a/b')).toBeUndefined();
+    expect(validateNamespace('a/b/c')).toBeUndefined();
+    expect(validateNamespace('aa/bb/cc')).toBeUndefined();
+    expect(validateNamespace('aa/b')).toBeUndefined();
+    expect(validateNamespace('a/bb')).toBeUndefined();
+    expect(validateNamespace('aa/bb')).toBeUndefined();
+  });
+
+  test('valid slashseparated words digits underscores', () => {
+    expect(validateNamespace('a1/b')).toBeUndefined();
+    expect(validateNamespace('1a/b')).toBeUndefined();
+    expect(validateNamespace('a/b2')).toBeUndefined();
+    expect(validateNamespace('a/2b')).toBeUndefined();
+    expect(validateNamespace('a1/b2')).toBeUndefined();
+    expect(validateNamespace('1a/2b')).toBeUndefined();
+    expect(validateNamespace('a/123/b')).toBeUndefined();
+
+    expect(validateNamespace('a_/b')).toBeUndefined();
+    expect(validateNamespace('a/b_')).toBeUndefined();
+    expect(validateNamespace('a_/b_')).toBeUndefined();
+    expect(validateNamespace('_a/b')).toBeUndefined();
+    expect(validateNamespace('_a/_b')).toBeUndefined();
+    expect(validateNamespace('_a_/_b_')).toBeUndefined();
+    expect(validateNamespace('a_a/bb/cc')).toBeUndefined();
+    expect(validateNamespace('aa/bb/c_c')).toBeUndefined();
+    expect(validateNamespace('aa/b_b/cc')).toBeUndefined();
+    expect(validateNamespace('a_a/b_b/c_c')).toBeUndefined();
+
+    expect(validateNamespace('_/_')).toBeUndefined();
+  });
+
+  test('valid whitespaces in word', () => {
+    expect(validateNamespace('a b')).toBeUndefined();
+    expect(validateNamespace('a a/b b')).toBeUndefined();
+    expect(validateNamespace('aa/b b')).toBeUndefined();
+    expect(validateNamespace('a a/b b')).toBeUndefined();
+    expect(validateNamespace('aa/bb/c c')).toBeUndefined();
+  });
+
+  test('error invalid characters', () => {
+    expect(validateNamespace('-')).toBeTruthy();
+    expect(validateNamespace('.')).toBeTruthy();
+    expect(validateNamespace('a-')).toBeTruthy();
+    expect(validateNamespace('-a')).toBeTruthy();
+    expect(validateNamespace('-a-')).toBeTruthy();
+    expect(validateNamespace('a-a')).toBeTruthy();
+    expect(validateNamespace('a.a')).toBeTruthy();
+    expect(validateNamespace('aa/b-b')).toBeTruthy();
+    expect(validateNamespace('a.a/b-b')).toBeTruthy();
+  });
+
+  test('error malformed slashes', () => {
+    expect(validateNamespace('a/b/')).toBeTruthy();
+    expect(validateNamespace('/a/b')).toBeTruthy();
+    expect(validateNamespace('a//b')).toBeTruthy();
+  });
+
+  test('error whitespaces', () => {
+    expect(validateNamespace(' a')).toBeTruthy();
+    expect(validateNamespace('a ')).toBeTruthy();
+    expect(validateNamespace('a /b')).toBeTruthy();
+    expect(validateNamespace('a/ b')).toBeTruthy();
+    expect(validateNamespace('a / b')).toBeTruthy();
+  });
 });
 
-test('dotseparated valid words with numbers', () => {
-  expect(validateDotSeparatedName('com.example2.v3')).toBeUndefined();
+test.describe('validateProjectName', () => {
+  test('valid single character', () => {
+    expect(validateProjectName('a')).toBeUndefined();
+    expect(validateProjectName('_')).toBeUndefined();
+    expect(validateProjectName('-')).toBeUndefined();
+  });
+
+  test('valid single word', () => {
+    expect(validateProjectName('ab')).toBeUndefined();
+    expect(validateProjectName('11')).toBeUndefined();
+    expect(validateProjectName('__')).toBeUndefined();
+    expect(validateProjectName('--')).toBeUndefined();
+    expect(validateProjectName('1ab')).toBeUndefined();
+    expect(validateProjectName('ab1')).toBeUndefined();
+    expect(validateProjectName('_1ab')).toBeUndefined();
+    expect(validateProjectName('ab1_')).toBeUndefined();
+    expect(validateProjectName('_ab1_')).toBeUndefined();
+    expect(validateProjectName('-1ab')).toBeUndefined();
+    expect(validateProjectName('ab1-')).toBeUndefined();
+    expect(validateProjectName('-ab1-')).toBeUndefined();
+    expect(validateProjectName('_-1ab')).toBeUndefined();
+    expect(validateProjectName('ab1-_')).toBeUndefined();
+    expect(validateProjectName('_-ab1-_')).toBeUndefined();
+  });
+
+  test('error invalid characters', () => {
+    expect(validateProjectName('')).toBeTruthy();
+    expect(validateProjectName(' ')).toBeTruthy();
+    expect(validateProjectName('a ')).toBeTruthy();
+    expect(validateProjectName(' a')).toBeTruthy();
+    expect(validateProjectName('a a')).toBeTruthy();
+    expect(validateProjectName('/')).toBeTruthy();
+    expect(validateProjectName('a/a')).toBeTruthy();
+    expect(validateProjectName('.')).toBeTruthy();
+    expect(validateProjectName('a.a')).toBeTruthy();
+  });
 });
 
-test('dotseparated valid words with underscores', () => {
-  expect(validateDotSeparatedName('com.my_project.util')).toBeUndefined();
-});
+test.describe('validateProjectArtifactName', () => {
+  test('valid single character', () => {
+    expect(validateProjectArtifactName('a')).toBeUndefined();
+    expect(validateProjectArtifactName('_')).toBeUndefined();
+  });
 
-test('dotseparated valid words with numbers and underscores', () => {
-  expect(validateDotSeparatedName('com.my_project2.util')).toBeUndefined();
-});
+  test('valid single word', () => {
+    expect(validateProjectArtifactName('ab')).toBeUndefined();
+    expect(validateProjectArtifactName('__')).toBeUndefined();
+    expect(validateProjectArtifactName('ab1')).toBeUndefined();
+    expect(validateProjectArtifactName('ab1_')).toBeUndefined();
+    expect(validateProjectArtifactName('_1ab')).toBeUndefined();
+    expect(validateProjectArtifactName('_ab1_')).toBeUndefined();
+  });
 
-test('dotseparated error empty string', () => {
-  expect(validateDotSeparatedName('')).toBeTruthy();
-});
+  test('error invalid characters', () => {
+    expect(validateProjectArtifactName('-')).toBeTruthy();
+    expect(validateProjectArtifactName('a-')).toBeTruthy();
+    expect(validateProjectArtifactName('-a')).toBeTruthy();
+    expect(validateProjectArtifactName('-a-')).toBeTruthy();
+    expect(validateProjectArtifactName('a-a')).toBeTruthy();
+    expect(validateProjectArtifactName('aa/b-b')).toBeTruthy();
+    expect(validateProjectArtifactName('a.b')).toBeTruthy();
+  });
 
-test('dotseparated error trailing dot', () => {
-  expect(validateDotSeparatedName('com.example.')).toBeTruthy();
-});
+  test('error leading digit', () => {
+    expect(validateProjectArtifactName('1')).toBeTruthy();
+    expect(validateProjectArtifactName('1a')).toBeTruthy();
+    expect(validateProjectArtifactName('1ab')).toBeTruthy();
+  });
 
-test('dotseparated error leading dot', () => {
-  expect(validateDotSeparatedName('.com.example')).toBeTruthy();
-});
-
-test('dotseparated error consecutive dots', () => {
-  expect(validateDotSeparatedName('com..example')).toBeTruthy();
-});
-
-test('dotseparated error trailing whitespace', () => {
-  expect(validateDotSeparatedName('com.example ')).toBeTruthy();
-});
-
-test('dotseparated error leading whitespace', () => {
-  expect(validateDotSeparatedName(' com.example')).toBeTruthy();
-});
-
-test('dotseparated error hyphens', () => {
-  expect(validateDotSeparatedName('com.my-project')).toBeTruthy();
-});
-
-test('dotseparated error slash-separated input', () => {
-  expect(validateDotSeparatedName('com/example')).toBeTruthy();
-});
-
-test('namespace valid empty string', () => {
-  expect(validateNamespace('')).toBeUndefined();
-});
-
-test('namespace valid simple', () => {
-  expect(validateNamespace('simple')).toBeUndefined();
-});
-
-test('namespace valid simple with slash', () => {
-  expect(validateNamespace('simple/with/slash')).toBeUndefined();
-});
-
-test('namespace valid start digit', () => {
-  expect(validateNamespace('1startDigit')).toBeUndefined();
-});
-
-test('namespace valid end digit', () => {
-  expect(validateNamespace('endDigit9')).toBeUndefined();
-});
-
-test('namespace valid start digit with slash', () => {
-  expect(validateNamespace('1startDigit/with/slash9')).toBeUndefined();
-});
-
-test('namespace valid with underscore', () => {
-  expect(validateNamespace('with_underscore')).toBeUndefined();
-});
-
-test('namespace valid with underscore and slash', () => {
-  expect(validateNamespace('with/underscore_and/slash')).toBeUndefined();
-});
-
-test('namespace valid leading underscore', () => {
-  expect(validateNamespace('_leading_underscore/abc')).toBeUndefined();
-});
-
-test('namespace valid leading double underscore', () => {
-  expect(validateNamespace('__leading_double_underscore/abc')).toBeUndefined();
-});
-
-test('namespace valid trailing underscore', () => {
-  expect(validateNamespace('abc/trailing_underscore_')).toBeUndefined();
-});
-
-test('namespace valid trailing double underscore', () => {
-  expect(validateNamespace('abc/trailing_double_underscore__')).toBeUndefined();
-});
-
-test('namespace valid with digits and underscores in slash groups', () => {
-  expect(validateNamespace('with/8digit/underscore/_and/_slash')).toBeUndefined();
-});
-
-test('namespace valid with whitespace in words', () => {
-  expect(validateNamespace('s imple with whitespac e')).toBeUndefined();
-});
-
-test('namespace valid with whitespace and slashes', () => {
-  expect(validateNamespace('s imple with/whitespac e')).toBeUndefined();
-});
-
-test('namespace valid double whitespace', () => {
-  expect(validateNamespace('d  ouble  whitespac  e')).toBeUndefined();
-});
-
-test('namespace invalid trailing slash', () => {
-  expect(validateNamespace('trailing/slash/')).toBeTruthy();
-});
-
-test('namespace invalid leading slash', () => {
-  expect(validateNamespace('/leading/slash')).toBeTruthy();
-});
-
-test('namespace invalid trailing whitespace', () => {
-  expect(validateNamespace('trailing/whitespace ')).toBeTruthy();
-});
-
-test('namespace invalid leading whitespace', () => {
-  expect(validateNamespace(' leading/whitespace')).toBeTruthy();
-});
-
-test('namespace invalid spaces around slash', () => {
-  expect(validateNamespace('spaces /around / a  /  slash')).toBeTruthy();
-});
-
-test('namespace invalid hyphen', () => {
-  expect(validateNamespace('invalid-hyphen')).toBeTruthy();
-});
-
-test('namespace invalid hyphen in first segment', () => {
-  expect(validateNamespace('invalid-hyphen/validpart')).toBeTruthy();
-});
-
-test('namespace invalid hyphen in last segment', () => {
-  expect(validateNamespace('validpart/invalid-hyphen')).toBeTruthy();
-});
-
-test('namespace invalid empty slash group double slash', () => {
-  expect(validateNamespace('emptySlash // group')).toBeTruthy();
-});
-
-test('namespace invalid empty slash group spaced single', () => {
-  expect(validateNamespace('emptySlash / / group')).toBeTruthy();
-});
-
-test('namespace invalid empty slash group spaced double', () => {
-  expect(validateNamespace('emptySlash /  / group')).toBeTruthy();
-});
-
-test('project artifact name valid single letter', () => {
-  expect(validateProjectArtifactName('a')).toBeUndefined();
-});
-
-test('project artifact name valid underscore', () => {
-  expect(validateProjectArtifactName('_')).toBeUndefined();
-});
-
-test('project artifact name valid single uppercase letter', () => {
-  expect(validateProjectArtifactName('A')).toBeUndefined();
-});
-
-test('project artifact name valid one word', () => {
-  expect(validateProjectArtifactName('oneWord')).toBeUndefined();
-});
-
-test('project artifact name valid one word with underscore', () => {
-  expect(validateProjectArtifactName('oneWord_underscore')).toBeUndefined();
-});
-
-test('project artifact name valid leading underscore', () => {
-  expect(validateProjectArtifactName('_leadingUnderscore')).toBeUndefined();
-});
-
-test('project artifact name valid double leading underscore', () => {
-  expect(validateProjectArtifactName('__doubleLeadingUnderscore')).toBeUndefined();
-});
-
-test('project artifact name valid trailing underscore', () => {
-  expect(validateProjectArtifactName('trailingUnderscore_')).toBeUndefined();
-});
-
-test('project artifact name valid double trailing underscore', () => {
-  expect(validateProjectArtifactName('doubleTrailingUnderscore__')).toBeUndefined();
-});
-
-test('project artifact name valid both underscore', () => {
-  expect(validateProjectArtifactName('_bothUnderscore_')).toBeUndefined();
-});
-
-test('project artifact name valid both double underscore', () => {
-  expect(validateProjectArtifactName('__bothDoubleUnderscore__')).toBeUndefined();
-});
-
-test('project artifact name valid multiple underscore', () => {
-  expect(validateProjectArtifactName('_multiple__underscore_')).toBeUndefined();
-});
-
-test('project artifact name valid digit second place', () => {
-  expect(validateProjectArtifactName('d1igitSecondPlace')).toBeUndefined();
-});
-
-test('project artifact name valid digit last place', () => {
-  expect(validateProjectArtifactName('digitLastPlace9')).toBeUndefined();
-});
-
-test('project artifact name invalid empty', () => {
-  expect(validateProjectArtifactName('')).toBeTruthy();
-});
-
-test('project artifact name invalid leading digit', () => {
-  expect(validateProjectArtifactName('1leadingDigit')).toBeTruthy();
-});
-
-test('project artifact name invalid leading whitespace', () => {
-  expect(validateProjectArtifactName(' leadingWhitespace')).toBeTruthy();
-});
-
-test('project artifact name invalid trailing whitespace', () => {
-  expect(validateProjectArtifactName('trailingWhitespace ')).toBeTruthy();
+  test('error whitespace', () => {
+    expect(validateProjectArtifactName(' ab')).toBeTruthy();
+    expect(validateProjectArtifactName('ab ')).toBeTruthy();
+    expect(validateProjectArtifactName('a b')).toBeTruthy();
+  });
 });

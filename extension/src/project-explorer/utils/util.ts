@@ -93,11 +93,11 @@ export const validateProjectName = (value: string) => {
 };
 
 export const validateDotSeparatedName = (value: string) => {
-  const pattern = /^\w+(\.\w+)*$/;
+  const pattern = /^[a-zA-Z_]\w*(\.[a-zA-Z_]\w*)*$/;
   if (pattern.test(value)) {
     return;
   }
-  return 'Enter Namespace separated by "." -- Only letters, numbers, and underscores are allowed -- No spaces -- Cannot be empty';
+  return 'Enter Namespace separated by "." -- Only letters, numbers, and underscores are allowed -- Each segment must start with a letter or underscore -- No spaces -- Cannot be empty';
 };
 
 export const validateNamespace = (value: string) => {
