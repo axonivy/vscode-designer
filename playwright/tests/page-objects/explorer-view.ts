@@ -103,9 +103,12 @@ export class FileExplorer extends ExplorerView {
   async addProcess(
     processName: string,
     kind: 'Business Process' | 'Callable Sub Process' | 'Web Service Process',
-    defaultNamespaceExpected: string = 'prebuiltProject',
-    namespace?: string
+    namespace?: string,
+    defaultNamespaceExpected?: string
   ) {
+    if (defaultNamespaceExpected === undefined) {
+      defaultNamespaceExpected = 'prebuiltProject';
+    }
     await this.selectNode('config');
     await this.executeCommand('Axon Ivy: New ' + kind);
     await this.selectNthVisibleItemFromQuickPick(0);
