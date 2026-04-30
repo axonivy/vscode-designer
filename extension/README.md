@@ -1,4 +1,4 @@
-## Axon Ivy PRO Designer
+# Axon Ivy PRO Designer
 
 Axon Ivy PRO Designer is the official Visual Studio Code extension for developing powerful business applications with the Axon Ivy Platform. It provides all the tools you need to design, automate, and optimize workflows from simple tasks to complex enterprise processes. The PRO Designer combines intuitive visual modeling with the flexibility of advanced development tools, offering a unified environment for process orchestration and application development.
 
@@ -36,3 +36,13 @@ See how it works:
 
 See how it works:
 ![Add Project](extension/assets/readme/add-project.gif)
+
+## Features
+
+- Graphical editors for ivy specific file types
+- Simulate and debug processes
+  - Debug by add breakpoints, start debug session and start a process
+- XHTML editor with syntax highlighting autocompletion and validation
+- Dialog preview (xhtml or forms)
+- Integrated browser view
+- Inspect runtime logs
