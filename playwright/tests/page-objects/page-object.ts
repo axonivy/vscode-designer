@@ -102,4 +102,8 @@ export class PageObject {
     await item.click();
     await expect(item).toBeHidden();
   }
+
+  async readInputBoxValue() {
+    return await this.page.locator('.quick-input-box').locator('.input').inputValue();
+  }
 }
