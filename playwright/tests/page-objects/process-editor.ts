@@ -44,10 +44,21 @@ export class ProcessEditor extends Editor {
 
   async startProcessAndAssertExecuted(startEvent: Locator, executedElement: Locator) {
     await startEvent.locator('circle').click();
-    await expect(startEvent).toHaveClass(/selected/);
-    const playButton = this.viewFrameLocator().locator('i.ivy.ivy-play').first();
+    await this.assertSelected(startEvent);
+    const playButton = this.quickActionBar.getByRole('button', { name: /Start Process/ });
     await playButton.click();
     await this.assertExecuted(executedElement);
+  }
+
+  async addBreakpoint(element: Locator) {
+    await element.click();
+    await this.assertSelected(element);
+    await this.quickActionBar.getByRole('button', { name: /Toggle Breakpoint/ }).click();
+    await expect(element.locator('.ivy-breakpoint-handle')).toBeVisible();
+  }
+
+  get quickActionBar() {
+    return this.viewFrameLocator().locator('.quick-actions-bar');
   }
 
   async assertExecuted(element: Locator) {
@@ -58,13 +69,25 @@ export class ProcessEditor extends Editor {
     await expect(element).not.toHaveClass(/executed/);
   }
 
+  async assertStopped(element: Locator) {
+    await expect(element).toHaveClass(/stopped/);
+  }
+
+  async assertNotStopped(element: Locator) {
+    await expect(element).not.toHaveClass(/stopped/);
+  }
+
   async appendActivity(target: Locator, activityName: string) {
     await target.click();
-    await expect(target).toHaveClass(/selected/);
+    await this.assertSelected(target);
     const activities = this.viewFrameLocator().getByTitle('Activities (A)');
     await activities.click();
     const newItemButton = this.viewFrameLocator().locator('div.quick-action-bar-menu').getByRole('button', { name: activityName }).first();
     await newItemButton.click();
+  }
+
+  async assertSelected(element: Locator) {
+    await expect(element).toHaveClass(/selected/);
   }
 
   async hasWarning(element: Locator) {
