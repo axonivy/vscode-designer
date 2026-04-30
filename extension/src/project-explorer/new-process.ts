@@ -1,4 +1,5 @@
 import path from 'path';
+import { Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { ProcessInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -12,7 +13,7 @@ import {
   type MSStateBase,
   type ProjectSelection
 } from './utils/multi-step-input';
-import { validateNamespace, validateProjectArtifactName } from './utils/util';
+import { resolveNamespaceFromPath, validateNamespace, validateProjectArtifactName, type ResourceDirectoryTarget } from './utils/util';
 
 export type ProcessKind = 'Business Process' | 'Callable Sub Process' | 'Web Service Process' | '';
 
@@ -26,8 +27,12 @@ interface NewProcessState extends MSStateBase {
 }
 
 export const addNewProcess = async (selectionContext: AddCommandSelectionContext, kind: ProcessKind = 'Business Process', pid?: string) => {
+  const resourceDirectoryTarget: ResourceDirectoryTarget = 'processes';
   const existingProjects = selectionContext.existingIvyProjects;
-  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(selectionContext, 'processes');
+  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(
+    selectionContext,
+    resourceDirectoryTarget
+  );
 
   const stepProject: InputStep<NewProcessState> = async (input: MultiStepInput<NewProcessState>, state: NewProcessState) => {
     if (state.projectFromSelection && state.project === undefined) {
@@ -49,6 +54,16 @@ export const addNewProcess = async (selectionContext: AddCommandSelectionContext
           };
         })
       });
+      if (state.namespace === undefined || state.namespace === '') {
+        const projectDefaultNamespace = await resolveNamespaceFromPath(
+          Uri.file(state.project.path),
+          state.project.path,
+          resourceDirectoryTarget
+        );
+        if (validateNamespace(projectDefaultNamespace) === undefined) {
+          state.namespace = projectDefaultNamespace;
+        }
+      }
     }
   };
 

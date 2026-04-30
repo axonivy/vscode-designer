@@ -1,4 +1,5 @@
 import path from 'path';
+import { Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { type AddCommandSelectionContext } from './ivy-project-explorer';
@@ -11,7 +12,7 @@ import {
   type ProjectSelection,
   resolveAddCommandSelectionContext
 } from './utils/multi-step-input';
-import { validateNamespace, validateProjectArtifactName } from './utils/util';
+import { resolveNamespaceFromPath, type ResourceDirectoryTarget, validateNamespace, validateProjectArtifactName } from './utils/util';
 
 interface NewCaseMapState extends MSStateBase {
   project?: ProjectSelection;
@@ -21,8 +22,12 @@ interface NewCaseMapState extends MSStateBase {
 }
 
 export const addNewCaseMap = async (selectionContext: AddCommandSelectionContext) => {
+  const resourceDirectoryTarget: ResourceDirectoryTarget = 'processes';
   const existingProjects = selectionContext.existingIvyProjects;
-  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(selectionContext, 'processes');
+  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(
+    selectionContext,
+    resourceDirectoryTarget
+  );
 
   const stepProject: InputStep<NewCaseMapState> = async (input: MultiStepInput<NewCaseMapState>, state: NewCaseMapState) => {
     if (state.projectFromSelection && state.project === undefined) {
@@ -44,6 +49,16 @@ export const addNewCaseMap = async (selectionContext: AddCommandSelectionContext
           };
         })
       });
+      if (state.namespace === undefined || state.namespace === '') {
+        const projectDefaultNamespace = await resolveNamespaceFromPath(
+          Uri.file(state.project.path),
+          state.project.path,
+          resourceDirectoryTarget
+        );
+        if (validateNamespace(projectDefaultNamespace) === undefined) {
+          state.namespace = projectDefaultNamespace;
+        }
+      }
     }
   };
 
