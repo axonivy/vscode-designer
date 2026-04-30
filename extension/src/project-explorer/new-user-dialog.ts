@@ -1,5 +1,5 @@
 import path from 'path';
-import { type QuickPickItem } from 'vscode';
+import { Uri, type QuickPickItem } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { HdInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -13,7 +13,12 @@ import {
   type MSStateBase,
   type ProjectSelection
 } from './utils/multi-step-input';
-import { validateDotSeparatedName, validateProjectArtifactName } from './utils/util';
+import {
+  resolveNamespaceFromPath,
+  validateDotSeparatedName,
+  validateProjectArtifactName,
+  type ResourceDirectoryTarget
+} from './utils/util';
 
 export const dialogTypes = ['JSF', 'Form', 'JSFOffline'] as const;
 export type DialogType = (typeof dialogTypes)[number];
@@ -102,8 +107,12 @@ const prepareAndValidateFinalState: (
 };
 
 export const addNewUserDialog = async (selectionContext: AddCommandSelectionContext, type: DialogType, pid?: string) => {
+  const resourceDirectoryTarget: ResourceDirectoryTarget = 'src_hd';
   const existingProjects = selectionContext.existingIvyProjects;
-  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(selectionContext, 'src_hd');
+  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(
+    selectionContext,
+    resourceDirectoryTarget
+  );
 
   const stepProject: InputStep<NewUserDialogState> = async (input: MultiStepInput<NewUserDialogState>, state: NewUserDialogState) => {
     if (state.projectFromSelection && state.project === undefined) {
@@ -125,6 +134,16 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
           };
         })
       });
+      if (state.namespace === undefined || state.namespace === '') {
+        const projectDefaultNamespace = await resolveNamespaceFromPath(
+          Uri.file(state.project.path),
+          state.project.path,
+          resourceDirectoryTarget
+        );
+        if (validateDotSeparatedName(projectDefaultNamespace) === undefined) {
+          state.namespace = projectDefaultNamespace;
+        }
+      }
     }
   };
 

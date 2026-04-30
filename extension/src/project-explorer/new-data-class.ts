@@ -1,4 +1,5 @@
 import path from 'path';
+import { Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { type DataClassInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -12,7 +13,12 @@ import {
   type MSStateBase,
   type ProjectSelection
 } from './utils/multi-step-input';
-import { validateDotSeparatedName, validateProjectArtifactName } from './utils/util';
+import {
+  resolveNamespaceFromPath,
+  validateDotSeparatedName,
+  validateProjectArtifactName,
+  type ResourceDirectoryTarget
+} from './utils/util';
 
 type DataClassType = 'Data Class' | 'Entity Class';
 
@@ -26,8 +32,12 @@ interface NewDataClassState extends MSStateBase {
 }
 
 export const addNewDataClass = async (type: DataClassType, selectionContext: AddCommandSelectionContext) => {
+  const resourceDirectoryTarget: ResourceDirectoryTarget = 'dataclasses';
   const existingProjects = selectionContext.existingIvyProjects;
-  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(selectionContext, 'dataclasses');
+  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(
+    selectionContext,
+    resourceDirectoryTarget
+  );
 
   const stepProject: InputStep<NewDataClassState> = async (input: MultiStepInput<NewDataClassState>, state: NewDataClassState) => {
     if (state.projectFromSelection && state.project === undefined) {
@@ -49,6 +59,16 @@ export const addNewDataClass = async (type: DataClassType, selectionContext: Add
           };
         })
       });
+      if (state.namespace === undefined || state.namespace === '') {
+        const projectDefaultNamespace = await resolveNamespaceFromPath(
+          Uri.file(state.project.path),
+          state.project.path,
+          resourceDirectoryTarget
+        );
+        if (validateDotSeparatedName(projectDefaultNamespace) === undefined) {
+          state.namespace = projectDefaultNamespace;
+        }
+      }
     }
   };
 
