@@ -18,7 +18,7 @@ pipeline {
     stage('Integration Test') {
       steps {
         script {
-          docker.build('node-webtest', '-f build/integration/Dockerfile --build-arg INSTALL_CODE_SERVER=true .').inside {
+          docker.build('node-webtest', '-f build/integration/Dockerfile --build-arg INSTALL_CODE_SERVER=true --no-cache .').inside {
             sh """
             pnpm run update:axonivy:next
             pnpm install --no-frozen-lockfile
