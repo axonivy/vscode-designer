@@ -23,6 +23,7 @@ test('debug', async ({ page }) => {
   await debugView.assertBreakpoint('NoAnimation.p.json', '28');
 
   await debugView.startDebugSession();
+  await processEditor.page.waitForTimeout(2_000); // ensure session is started
 
   await processEditor.startProcessAndAssertExecuted(start, callSub);
   await expect(callSub).toBeVisible();
