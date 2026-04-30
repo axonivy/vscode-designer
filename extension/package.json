@@ -265,8 +265,8 @@
         "command": "ivyBrowserView.openPreview",
         "title": "Open Dialog Preview",
         "category": "Axon Ivy",
-        "icon": "$(preview)",
-        "enablement": "ivy:hasIvyProjects"
+        "icon": "$(play)",
+        "enablement": "ivy:hasIvyProjects && ivy:dialogPreviewSupported"
       },
       {
         "command": "ivyBrowserView.open",
@@ -655,7 +655,7 @@
         },
         {
           "command": "ivyBrowserView.openPreview",
-          "when": "resourceExtname == .xhtml && resourcePath =~ /src_hd/",
+          "when": "ivy:dialogPreviewSupported",
           "group": "navigation"
         }
       ],
