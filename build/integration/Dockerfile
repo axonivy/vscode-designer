@@ -27,5 +27,5 @@ ENV RUN_STABLE_VERSION=true
 ARG INSTALL_CODE_SERVER=false
 RUN if [ "$INSTALL_CODE_SERVER" = "true" ]; then \
   curl -fsSL https://code-server.dev/install.sh | sh; \
-  rm -rf /root/.local/share/code-server/User; \
   fi
+RUN rm -rf /root/.local/share/code-server/User
