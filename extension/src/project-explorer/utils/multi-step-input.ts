@@ -145,6 +145,7 @@ export class MultiStepInput<T extends MSStateBase> {
       input.placeholder = placeholder ?? '';
       input.ignoreFocusOut = ignoreFocusOut ?? true;
       input.buttons = currentStep > 1 ? [QuickInputButtons.Back] : [];
+      input.validationMessage = validationFunction ? validationFunction(input.value) : '';
       disposables.push(
         input.onDidTriggerButton(item => {
           if (item === QuickInputButtons.Back) {

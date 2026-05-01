@@ -39,6 +39,7 @@ export const addNewProcess = async (selectionContext: AddCommandSelectionContext
       state.project = state.projectFromSelection;
       state.projectFromSelection = undefined;
     } else {
+      const previousProject = state.project;
       state.project = await input.showQuickPick({
         title: state.dialogTitle,
         titleSuffix: ' - Choose project',
@@ -54,7 +55,7 @@ export const addNewProcess = async (selectionContext: AddCommandSelectionContext
           };
         })
       });
-      if (state.namespace === undefined || state.namespace === '') {
+      if (namespaceFromSelection === undefined && (previousProject === undefined || state.project.path !== previousProject.path)) {
         const projectDefaultNamespace = await resolveNamespaceFromPath(
           Uri.file(state.project.path),
           state.project.path,
@@ -104,7 +105,7 @@ export const addNewProcess = async (selectionContext: AddCommandSelectionContext
     dialogTitle: `Add New ${kind}`,
     currentStep: 1,
     totalSteps: steps.length,
-    namespace: typeof namespaceFromSelection === 'string' && namespaceFromSelection.trim() !== '' ? namespaceFromSelection : '',
+    namespace: namespaceFromSelection,
     projectFromSelection: projectFromSelection
   };
 
