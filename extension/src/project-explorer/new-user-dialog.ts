@@ -1,5 +1,5 @@
 import path from 'path';
-import { Uri, type QuickPickItem } from 'vscode';
+import { type QuickPickItem } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { HdInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -8,17 +8,13 @@ import {
   MultiStepCancelledError,
   MultiStepInput,
   MultiStepInvalidStateError,
+  overrideProjectDefaultNamespaceIfAllowed,
   resolveAddCommandSelectionContext,
   type InputStep,
   type MSStateBase,
   type ProjectSelection
 } from './utils/multi-step-input';
-import {
-  resolveNamespaceFromPath,
-  validateDotSeparatedName,
-  validateProjectArtifactName,
-  type ResourceDirectoryTarget
-} from './utils/util';
+import { validateDotSeparatedName, validateProjectArtifactName, type ResourceDirectoryTarget } from './utils/util';
 
 export const dialogTypes = ['JSF', 'Form', 'JSFOffline'] as const;
 export type DialogType = (typeof dialogTypes)[number];
@@ -135,16 +131,7 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
           };
         })
       });
-      if (namespaceFromSelection === undefined && (previousProject === undefined || state.project.path !== previousProject.path)) {
-        const projectDefaultNamespace = await resolveNamespaceFromPath(
-          Uri.file(state.project.path),
-          state.project.path,
-          resourceDirectoryTarget
-        );
-        if (validateDotSeparatedName(projectDefaultNamespace) === undefined) {
-          state.namespace = projectDefaultNamespace;
-        }
-      }
+      await overrideProjectDefaultNamespaceIfAllowed(state, previousProject, resourceDirectoryTarget, validateDotSeparatedName);
     }
   };
 
