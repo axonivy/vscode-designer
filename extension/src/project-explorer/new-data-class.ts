@@ -44,6 +44,7 @@ export const addNewDataClass = async (type: DataClassType, selectionContext: Add
       state.project = state.projectFromSelection;
       state.projectFromSelection = undefined;
     } else {
+      const previousProject = state.project;
       state.project = await input.showQuickPick<ProjectSelection>({
         title: state.dialogTitle,
         titleSuffix: ' - Choose project',
@@ -59,7 +60,7 @@ export const addNewDataClass = async (type: DataClassType, selectionContext: Add
           };
         })
       });
-      if (state.namespace === undefined || state.namespace === '') {
+      if (namespaceFromSelection === undefined && (previousProject === undefined || state.project.path !== previousProject.path)) {
         const projectDefaultNamespace = await resolveNamespaceFromPath(
           Uri.file(state.project.path),
           state.project.path,
@@ -108,7 +109,7 @@ export const addNewDataClass = async (type: DataClassType, selectionContext: Add
     dialogTitle: `Add New ${type}`,
     currentStep: 1,
     totalSteps: steps.length,
-    namespace: typeof namespaceFromSelection === 'string' && namespaceFromSelection.trim() !== '' ? namespaceFromSelection : undefined,
+    namespace: namespaceFromSelection,
     projectFromSelection: projectFromSelection
   };
 
