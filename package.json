@@ -9,6 +9,7 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "check": "pnpm run type && pnpm run lint:ci && pnpm run test:ci",
     "build": "pnpm run -r build",
     "build:production": "pnpm run -r build:production",
     "engine:download": "node scripts/download-engine.mts",
@@ -23,7 +24,8 @@
     "lint:inspect": "eslint --inspect-config",
     "package": "pnpm run -r package",
     "publish:next": "pnpm run -r publish:next",
-    "sbom": "pnpm dlx @cyclonedx/cdxgen -t pnpm",
+    "sbom": "pnpm sbom --sbom-format cyclonedx --prod > bom.json",
+    "sbom:dev": "pnpm sbom --sbom-format cyclonedx > bom-dev.json",
     "test": "pnpm run -r test",
     "test:ci": "pnpm run -r test:ci",
     "test:playwright": "pnpm run --filter @axonivy/vscode-designer-playwright test:ui",

@@ -18,9 +18,9 @@ pipeline {
               withCredentials([string(credentialsId: 'dependency-track', variable: 'API_KEY')]) {
                 sh 'pnpm run update:axonivy:next'
                 sh 'pnpm install --no-frozen-lockfile'
-                sh 'pnpm run sbom'
+                sh 'pnpm run sbom:dev'
                 def version = sh (script: "node -p \"require('./extension/package.json').version\"", returnStdout: true)
-                uploadBOM(projectName: 'vscode-designer', projectVersion: version, bomFile: 'bom.json')
+                uploadBOM(projectName: 'vscode-designer', projectVersion: version, bomFile: 'bom-dev.json')
               }
             }
           }
