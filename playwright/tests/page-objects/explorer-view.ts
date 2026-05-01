@@ -113,7 +113,7 @@ export class FileExplorer extends ExplorerView {
     await this.executeCommand('Axon Ivy: New ' + kind);
     await this.selectNthVisibleItemFromQuickPick(0);
     await this.provideUserInput(processName);
-    expect(await this.readInputBoxValue()).toBe(defaultNamespaceExpected);
+    await expect(this.quickInputBox().getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
     await this.provideUserInput(namespace);
   }
 
@@ -142,7 +142,7 @@ export class FileExplorer extends ExplorerView {
     await this.executeCommand('Axon Ivy: New ' + kind);
     await this.selectNthVisibleItemFromQuickPick(0);
     await this.provideUserInput(dialogName);
-    expect(await this.readInputBoxValue()).toBe(defaultNamespaceExpected);
+    await expect(this.quickInputBox().getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
     await this.provideUserInput(namespace);
     if (kind === 'Html Dialog (JSF)') {
       await this.provideUserInput();
@@ -155,7 +155,7 @@ export class FileExplorer extends ExplorerView {
     await this.executeCommand('Axon Ivy: New Data Class');
     await this.selectNthVisibleItemFromQuickPick(0);
     await this.provideUserInput(dataClass);
-    expect(await this.readInputBoxValue()).toBe(defaultNamespaceExpected);
+    await expect(this.quickInputBox().getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
     await this.provideUserInput(namespace);
   }
 
@@ -164,7 +164,7 @@ export class FileExplorer extends ExplorerView {
     await this.executeCommand('Axon Ivy: New Entity Class');
     await this.selectNthVisibleItemFromQuickPick(0);
     await this.provideUserInput(entityClass);
-    expect(await this.readInputBoxValue()).toBe(defaultNamespaceExpected);
+    await expect(this.quickInputBox().getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
     await this.provideUserInput(namespace);
   }
 }
