@@ -28,4 +28,4 @@ ARG INSTALL_CODE_SERVER=false
 RUN if [ "$INSTALL_CODE_SERVER" = "true" ]; then \
   curl -fsSL https://code-server.dev/install.sh | sh; \
   USER root
-fi
+  fi
