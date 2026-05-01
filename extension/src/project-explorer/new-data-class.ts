@@ -1,5 +1,4 @@
 import path from 'path';
-import { Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { type DataClassInit } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -8,17 +7,13 @@ import {
   MultiStepCancelledError,
   MultiStepInput,
   MultiStepInvalidStateError,
+  overrideProjectDefaultNamespaceIfAllowed,
   resolveAddCommandSelectionContext,
   type InputStep,
   type MSStateBase,
   type ProjectSelection
 } from './utils/multi-step-input';
-import {
-  resolveNamespaceFromPath,
-  validateDotSeparatedName,
-  validateProjectArtifactName,
-  type ResourceDirectoryTarget
-} from './utils/util';
+import { validateDotSeparatedName, validateProjectArtifactName, type ResourceDirectoryTarget } from './utils/util';
 
 type DataClassType = 'Data Class' | 'Entity Class';
 
@@ -60,16 +55,7 @@ export const addNewDataClass = async (type: DataClassType, selectionContext: Add
           };
         })
       });
-      if (namespaceFromSelection === undefined && (previousProject === undefined || state.project.path !== previousProject.path)) {
-        const projectDefaultNamespace = await resolveNamespaceFromPath(
-          Uri.file(state.project.path),
-          state.project.path,
-          resourceDirectoryTarget
-        );
-        if (validateDotSeparatedName(projectDefaultNamespace) === undefined) {
-          state.namespace = projectDefaultNamespace;
-        }
-      }
+      await overrideProjectDefaultNamespaceIfAllowed(state, previousProject, resourceDirectoryTarget, validateDotSeparatedName);
     }
   };
 
