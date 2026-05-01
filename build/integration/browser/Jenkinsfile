@@ -18,7 +18,7 @@ pipeline {
     stage('Integration Test') {
       steps {
         script {
-          docker.build('node-webtest', '-f build/integration/Dockerfile --build-arg INSTALL_CODE_SERVER=true .').inside {
+          docker.build('node-webtest', '-f build/integration/Dockerfile --build-arg INSTALL_CODE_SERVER=true --no-cache .').inside {
             sh """
             pnpm run update:axonivy:next
             pnpm install --no-frozen-lockfile
@@ -26,7 +26,6 @@ pipeline {
             pnpm run package
             pnpm run engine:download ${params.engineDownloadUrl}
             nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
-            rm -rf /root/.local/share/code-server/User
             code-server --install-extension vscjava.vscode-java-pack
             code-server --install-extension extension/vscode-designer*.vsix
             nohup code-server --bind-addr 0.0.0.0:3000 --auth none --disable-telemetry --disable-update-check --disable-workspace-trust &
