@@ -26,9 +26,7 @@ pipeline {
             sh 'pnpm run update:axonivy:next'
             sh 'pnpm install --no-frozen-lockfile'
             sh 'pnpm run build:production'
-            sh 'pnpm run type'
-            sh 'pnpm run lint:ci'
-            sh 'pnpm run test:ci'
+            sh 'pnpm run check'
           }
           withChecks('ESLint') {
             recordIssues enabledForFailure: true, publishAllIssues: true, aggregatingResults: true, tools: [esLint(pattern: 'eslint.xml', skipSymbolicLinks: true)], qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
