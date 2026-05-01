@@ -1,6 +1,6 @@
 import path from 'path';
 import type { QuickInput, QuickPickItem } from 'vscode';
-import { Disposable, QuickInputButtons, window } from 'vscode';
+import { Disposable, QuickInputButtons, Uri, window } from 'vscode';
 import { type AddCommandSelectionContext } from '../ivy-project-explorer';
 import { resolveNamespaceFromPath, type ResourceDirectoryTarget } from './util';
 
@@ -56,6 +56,37 @@ export const resolveAddCommandSelectionContext = async (
   }
   const namespaceFromSelection = await resolveNamespaceFromPath(uriFromSelection, projectPathFromSelection, resourceDirectoryTarget);
   return { projectFromSelection, namespaceFromSelection };
+};
+
+type StateWithProjectAndNamespace = MSStateBase & {
+  project: ProjectSelection;
+  namespace: string;
+};
+
+function stateHasProjectAndNamespace(state: MSStateBase): state is StateWithProjectAndNamespace {
+  return 'project' in state && 'namespace' in state;
+}
+
+export const overrideProjectDefaultNamespaceIfAllowed = async <S extends MSStateBase>(
+  state: S,
+  previousProject: ProjectSelection | undefined,
+  resourceDirectoryTarget: ResourceDirectoryTarget,
+  validationFunction: (namespace: string) => string | undefined
+): Promise<void> => {
+  if (!stateHasProjectAndNamespace(state)) {
+    return;
+  }
+  if (previousProject === undefined || state.project.path !== previousProject.path) {
+    const projectDefaultNamespace = await resolveNamespaceFromPath(
+      Uri.file(state.project.path),
+      state.project.path,
+      resourceDirectoryTarget
+    );
+    if (validationFunction(projectDefaultNamespace) === undefined) {
+      state.namespace = projectDefaultNamespace;
+    }
+  }
+  return;
 };
 
 export type InputStep<T extends MSStateBase> = (input: MultiStepInput<T>, state: T) => Thenable<InputStep<T>> | Promise<void>;
@@ -145,6 +176,7 @@ export class MultiStepInput<T extends MSStateBase> {
       input.placeholder = placeholder ?? '';
       input.ignoreFocusOut = ignoreFocusOut ?? true;
       input.buttons = currentStep > 1 ? [QuickInputButtons.Back] : [];
+      input.validationMessage = validationFunction ? validationFunction(input.value) : '';
       disposables.push(
         input.onDidTriggerButton(item => {
           if (item === QuickInputButtons.Back) {

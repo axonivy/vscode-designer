@@ -8,10 +8,11 @@ import {
   MultiStepCancelledError,
   MultiStepInput,
   MultiStepInvalidStateError,
+  overrideProjectDefaultNamespaceIfAllowed,
   type ProjectSelection,
   resolveAddCommandSelectionContext
 } from './utils/multi-step-input';
-import { validateNamespace, validateProjectArtifactName } from './utils/util';
+import { type ResourceDirectoryTarget, validateNamespace, validateProjectArtifactName } from './utils/util';
 
 interface NewCaseMapState extends MSStateBase {
   project?: ProjectSelection;
@@ -21,14 +22,19 @@ interface NewCaseMapState extends MSStateBase {
 }
 
 export const addNewCaseMap = async (selectionContext: AddCommandSelectionContext) => {
+  const resourceDirectoryTarget: ResourceDirectoryTarget = 'processes';
   const existingProjects = selectionContext.existingIvyProjects;
-  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(selectionContext, 'processes');
+  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(
+    selectionContext,
+    resourceDirectoryTarget
+  );
 
   const stepProject: InputStep<NewCaseMapState> = async (input: MultiStepInput<NewCaseMapState>, state: NewCaseMapState) => {
     if (state.projectFromSelection && state.project === undefined) {
       state.project = state.projectFromSelection;
       state.projectFromSelection = undefined;
     } else {
+      const previousProject = state.project;
       state.project = await input.showQuickPick({
         title: state.dialogTitle,
         titleSuffix: ' - Choose project',
@@ -44,6 +50,7 @@ export const addNewCaseMap = async (selectionContext: AddCommandSelectionContext
           };
         })
       });
+      await overrideProjectDefaultNamespaceIfAllowed(state, previousProject, resourceDirectoryTarget, validateNamespace);
     }
   };
 
@@ -83,7 +90,7 @@ export const addNewCaseMap = async (selectionContext: AddCommandSelectionContext
     dialogTitle: 'Add New Case Map',
     currentStep: 1,
     totalSteps: steps.length,
-    namespace: typeof namespaceFromSelection === 'string' && namespaceFromSelection.trim() !== '' ? namespaceFromSelection : '',
+    namespace: namespaceFromSelection,
     projectFromSelection: projectFromSelection
   };
 
