@@ -35,7 +35,7 @@ pipeline {
 
     stage('Build') {
       steps {
-        nodejs(nodeJSInstallationName: '24.11.0') {
+        nodejs(nodeJSInstallationName: '24.15.0') {
           bat 'pnpm run update:axonivy:next'
           bat 'pnpm install --no-frozen-lockfile'
           bat 'pnpm run build:production'
@@ -48,7 +48,7 @@ pipeline {
 
     stage('Playwright Performance Tests') {
       steps {
-        nodejs(nodeJSInstallationName: '24.11.0') {
+        nodejs(nodeJSInstallationName: '24.15.0') {
           catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
             bat 'pnpm run test:playwright:performance'
           }
