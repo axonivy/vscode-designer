@@ -40,7 +40,7 @@ pipeline {
 
     stage('Build') {
       steps {
-        nodejs(nodeJSInstallationName: '24.11.0') {
+        nodejs(nodeJSInstallationName: '24.15.0') {
           bat 'pnpm run update:axonivy:next'
           bat 'pnpm install --no-frozen-lockfile'
           bat 'pnpm run build:production'
@@ -51,7 +51,7 @@ pipeline {
 
     stage('Playwright Tests') {
       steps {
-        nodejs(nodeJSInstallationName: '24.11.0') {
+        nodejs(nodeJSInstallationName: '24.15.0') {
           catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
             bat 'start AxonIvyEngine/bin/AxonIvyEngine.exe'
             bat 'pnpm run test:playwright:download:vscode'
@@ -72,7 +72,7 @@ pipeline {
         expression { isReleasingBranch() }
       }
       steps {
-        nodejs(nodeJSInstallationName: '24.11.0') {
+        nodejs(nodeJSInstallationName: '24.15.0') {
           catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
             script {
               bat 'pnpm run openapi:download'
@@ -94,7 +94,7 @@ pipeline {
       }
       steps {
         script {
-          nodejs(nodeJSInstallationName: '24.11.0') {
+          nodejs(nodeJSInstallationName: '24.15.0') {
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
               def branchName = env.BRANCH_NAME.replace("/", "%252F")
               bat 'pnpm install --no-frozen-lockfile'
