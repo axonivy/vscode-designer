@@ -7,12 +7,13 @@ import {
   MultiStepCancelledError,
   MultiStepInput,
   MultiStepInvalidStateError,
+  overrideProjectDefaultNamespaceIfAllowed,
   resolveAddCommandSelectionContext,
   type InputStep,
   type MSStateBase,
   type ProjectSelection
 } from './utils/multi-step-input';
-import { validateNamespace, validateProjectArtifactName } from './utils/util';
+import { validateNamespace, validateProjectArtifactName, type ResourceDirectoryTarget } from './utils/util';
 
 export type ProcessKind = 'Business Process' | 'Callable Sub Process' | 'Web Service Process' | '';
 
@@ -26,14 +27,19 @@ interface NewProcessState extends MSStateBase {
 }
 
 export const addNewProcess = async (selectionContext: AddCommandSelectionContext, kind: ProcessKind = 'Business Process', pid?: string) => {
+  const resourceDirectoryTarget: ResourceDirectoryTarget = 'processes';
   const existingProjects = selectionContext.existingIvyProjects;
-  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(selectionContext, 'processes');
+  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(
+    selectionContext,
+    resourceDirectoryTarget
+  );
 
   const stepProject: InputStep<NewProcessState> = async (input: MultiStepInput<NewProcessState>, state: NewProcessState) => {
     if (state.projectFromSelection && state.project === undefined) {
       state.project = state.projectFromSelection;
       state.projectFromSelection = undefined;
     } else {
+      const previousProject = state.project;
       state.project = await input.showQuickPick({
         title: state.dialogTitle,
         titleSuffix: ' - Choose project',
@@ -49,6 +55,7 @@ export const addNewProcess = async (selectionContext: AddCommandSelectionContext
           };
         })
       });
+      await overrideProjectDefaultNamespaceIfAllowed(state, previousProject, resourceDirectoryTarget, validateNamespace);
     }
   };
 
@@ -89,7 +96,7 @@ export const addNewProcess = async (selectionContext: AddCommandSelectionContext
     dialogTitle: `Add New ${kind}`,
     currentStep: 1,
     totalSteps: steps.length,
-    namespace: typeof namespaceFromSelection === 'string' && namespaceFromSelection.trim() !== '' ? namespaceFromSelection : '',
+    namespace: namespaceFromSelection,
     projectFromSelection: projectFromSelection
   };
 

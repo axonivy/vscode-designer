@@ -7,12 +7,13 @@ import {
   MultiStepCancelledError,
   MultiStepInput,
   MultiStepInvalidStateError,
+  overrideProjectDefaultNamespaceIfAllowed,
   resolveAddCommandSelectionContext,
   type InputStep,
   type MSStateBase,
   type ProjectSelection
 } from './utils/multi-step-input';
-import { validateDotSeparatedName, validateProjectArtifactName } from './utils/util';
+import { validateDotSeparatedName, validateProjectArtifactName, type ResourceDirectoryTarget } from './utils/util';
 
 type DataClassType = 'Data Class' | 'Entity Class';
 
@@ -26,14 +27,19 @@ interface NewDataClassState extends MSStateBase {
 }
 
 export const addNewDataClass = async (type: DataClassType, selectionContext: AddCommandSelectionContext) => {
+  const resourceDirectoryTarget: ResourceDirectoryTarget = 'dataclasses';
   const existingProjects = selectionContext.existingIvyProjects;
-  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(selectionContext, 'dataclasses');
+  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(
+    selectionContext,
+    resourceDirectoryTarget
+  );
 
   const stepProject: InputStep<NewDataClassState> = async (input: MultiStepInput<NewDataClassState>, state: NewDataClassState) => {
     if (state.projectFromSelection && state.project === undefined) {
       state.project = state.projectFromSelection;
       state.projectFromSelection = undefined;
     } else {
+      const previousProject = state.project;
       state.project = await input.showQuickPick<ProjectSelection>({
         title: state.dialogTitle,
         titleSuffix: ' - Choose project',
@@ -49,6 +55,7 @@ export const addNewDataClass = async (type: DataClassType, selectionContext: Add
           };
         })
       });
+      await overrideProjectDefaultNamespaceIfAllowed(state, previousProject, resourceDirectoryTarget, validateDotSeparatedName);
     }
   };
 
@@ -88,7 +95,7 @@ export const addNewDataClass = async (type: DataClassType, selectionContext: Add
     dialogTitle: `Add New ${type}`,
     currentStep: 1,
     totalSteps: steps.length,
-    namespace: typeof namespaceFromSelection === 'string' && namespaceFromSelection.trim() !== '' ? namespaceFromSelection : undefined,
+    namespace: namespaceFromSelection,
     projectFromSelection: projectFromSelection
   };
 

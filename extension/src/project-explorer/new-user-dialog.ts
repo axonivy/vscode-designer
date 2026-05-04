@@ -8,12 +8,13 @@ import {
   MultiStepCancelledError,
   MultiStepInput,
   MultiStepInvalidStateError,
+  overrideProjectDefaultNamespaceIfAllowed,
   resolveAddCommandSelectionContext,
   type InputStep,
   type MSStateBase,
   type ProjectSelection
 } from './utils/multi-step-input';
-import { validateDotSeparatedName, validateProjectArtifactName } from './utils/util';
+import { validateDotSeparatedName, validateProjectArtifactName, type ResourceDirectoryTarget } from './utils/util';
 
 export const dialogTypes = ['JSF', 'Form', 'JSFOffline'] as const;
 export type DialogType = (typeof dialogTypes)[number];
@@ -102,14 +103,19 @@ const prepareAndValidateFinalState: (
 };
 
 export const addNewUserDialog = async (selectionContext: AddCommandSelectionContext, type: DialogType, pid?: string) => {
+  const resourceDirectoryTarget: ResourceDirectoryTarget = 'src_hd';
   const existingProjects = selectionContext.existingIvyProjects;
-  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(selectionContext, 'src_hd');
+  const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(
+    selectionContext,
+    resourceDirectoryTarget
+  );
 
   const stepProject: InputStep<NewUserDialogState> = async (input: MultiStepInput<NewUserDialogState>, state: NewUserDialogState) => {
     if (state.projectFromSelection && state.project === undefined) {
       state.project = state.projectFromSelection;
       state.projectFromSelection = undefined;
     } else {
+      const previousProject = state.project;
       state.project = await input.showQuickPick<ProjectSelection>({
         title: state.dialogTitle,
         titleSuffix: ' - Choose project',
@@ -125,6 +131,7 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
           };
         })
       });
+      await overrideProjectDefaultNamespaceIfAllowed(state, previousProject, resourceDirectoryTarget, validateDotSeparatedName);
     }
   };
 
@@ -213,7 +220,7 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
     dialogTitle: `Add New ${type}`,
     currentStep: 1,
     totalSteps: steps.length,
-    namespace: typeof namespaceFromSelection === 'string' && namespaceFromSelection.trim() !== '' ? namespaceFromSelection : undefined,
+    namespace: namespaceFromSelection,
     projectFromSelection: projectFromSelection
   };
 
