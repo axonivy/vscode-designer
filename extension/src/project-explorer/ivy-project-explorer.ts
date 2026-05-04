@@ -1,11 +1,16 @@
 import path from 'path';
-import type { ExtensionContext, TreeView, TreeViewVisibilityChangeEvent } from 'vscode';
-import { Uri, window, workspace } from 'vscode';
+import type { ExtensionContext, TreeView, TreeViewVisibilityChangeEvent, WebviewPanel } from 'vscode';
+import { Uri, ViewColumn, window, workspace } from 'vscode';
+import { Messenger } from 'vscode-messenger';
+import type { NotificationType } from 'vscode-messenger-common';
 import { executeCommand, registerCommand, type Command } from '../base/commands';
 import { debouncedAction } from '../base/debounce';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { logErrorMessage, logInformationMessage, logWarningMessage } from '../base/logging-util';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
+import { InitializeConnectionRequest } from '../editors/notification-helper';
+import { createWebViewContent } from '../editors/webview-helper';
+import type { ProjectBean } from '../engine/api/generated/client';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { importMarketProduct, importMarketProductFile } from '../market/import-market';
@@ -20,13 +25,30 @@ import { treeSelectionToUri, treeUriToProjectPath, type TreeSelection } from './
 import { getWorkspaceFolder, isDirectory, isSubdirectoryOrEqual } from './utils/util';
 
 export const VIEW_ID = 'ivyProjects';
+const PROJECT_GRAPH_VIEW_TYPE = 'ivy.projectGraph';
+const ProjectGraphProjectsNotification: NotificationType<Array<Pick<ProjectBean, 'id' | 'artifactId' | 'version' | 'dependencies'>>> = {
+  method: 'projectGraph/projects'
+};
+const ProjectGraphAddDependencyNotification: NotificationType<{
+  source: Pick<ProjectBean, 'id'>['id'];
+  dependency: Pick<ProjectBean, 'id'>['id'];
+}> = {
+  method: 'projectGraph/addDependency'
+};
+const ProjectGraphOpenPomNotification: NotificationType<Pick<ProjectBean, 'id'>['id']> = {
+  method: 'projectGraph/openPom'
+};
 
 export class IvyProjectExplorer {
   private static _instance: IvyProjectExplorer;
+  private readonly context: ExtensionContext;
   private readonly treeDataProvider: IvyProjectTreeDataProvider;
   private readonly treeView: TreeView<Entry>;
+  private projectGraphPanel: WebviewPanel | undefined;
+  private readonly projectGraphMessenger = new Messenger();
 
   private constructor(context: ExtensionContext) {
+    this.context = context;
     this.treeDataProvider = new IvyProjectTreeDataProvider();
     this.treeView = window.createTreeView(VIEW_ID, { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
     context.subscriptions.push(this.treeView);
@@ -37,6 +59,13 @@ export class IvyProjectExplorer {
           this.selectCmsEntry(activeProjectCmsEditor);
         }
       }
+    });
+
+    this.projectGraphMessenger.onNotification(ProjectGraphAddDependencyNotification, params => {
+      executeCommand('ivyProjects.addDependencyFromGraph', params);
+    });
+    this.projectGraphMessenger.onNotification(ProjectGraphOpenPomNotification, projectId => {
+      this.openProjectPom(projectId);
     });
   }
 
@@ -91,6 +120,7 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.addNewEntityClass`, (s: TreeSelection) => this.addEntityClass(s));
     registerCmd(`${VIEW_ID}.addNewCaseMap`, (s: TreeSelection) => this.addCaseMap(s));
     registerCmd(`${VIEW_ID}.convertProject`, (s: TreeSelection) => this.convertProject(s));
+    registerCmd(`${VIEW_ID}.openProjectGraph`, () => this.openProjectGraph());
   }
 
   private defineFileWatchers(context: ExtensionContext) {
@@ -118,8 +148,13 @@ export class IvyProjectExplorer {
     const pomWatcher = workspace.createFileSystemWatcher('**/pom.xml', true, false, true);
     pomWatcher.onDidChange(deployProject);
     const m2eDepsWatcher = workspace.createFileSystemWatcher('**/target/m2e.deps', false, false, true);
-    m2eDepsWatcher.onDidCreate(deployProject);
-    m2eDepsWatcher.onDidChange(deployProject);
+    const deployAndRefreshGraph = async (uri: Uri) => {
+      await deployProject(uri);
+      await IvyEngineManager.instance.refreshProjectStatuses();
+      await this.refreshProjectGraph();
+    };
+    m2eDepsWatcher.onDidCreate(deployAndRefreshGraph);
+    m2eDepsWatcher.onDidChange(deployAndRefreshGraph);
     const targetWatcher = workspace.createFileSystemWatcher('**/target/classes/**/*.*');
     const invalidateClassLoader = (uri: Uri) =>
       this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.invalidateClassLoader(d), 'invalidate', uri);
@@ -153,6 +188,7 @@ export class IvyProjectExplorer {
     this.treeDataProvider.refresh();
     await this.activateEngineIfNeeded();
     await this.syncProjects();
+    await this.refreshProjectGraph();
     await IvyDiagnostics.instance.refresh(true);
   }
 
@@ -310,6 +346,54 @@ export class IvyProjectExplorer {
       return;
     }
     this.treeView.reveal(entry, { select: true, expand: true });
+  }
+
+  private async openProjectGraph() {
+    if (this.projectGraphPanel) {
+      this.projectGraphPanel.reveal(ViewColumn.One);
+      await this.sendProjectsToProjectGraph();
+      return;
+    }
+
+    const panel = window.createWebviewPanel(PROJECT_GRAPH_VIEW_TYPE, 'Project Graph', ViewColumn.One, {
+      enableScripts: true,
+      retainContextWhenHidden: true
+    });
+    panel.webview.html = createWebViewContent(this.context, panel.webview, 'project-graph');
+    const participant = this.projectGraphMessenger.registerWebviewPanel(panel);
+    this.projectGraphMessenger.sendNotification(InitializeConnectionRequest, participant, { file: '' });
+    await this.sendProjectsToProjectGraph();
+    this.projectGraphPanel = panel;
+
+    panel.onDidDispose(() => {
+      this.projectGraphPanel = undefined;
+    });
+  }
+
+  private async sendProjectsToProjectGraph() {
+    const projects = (await IvyEngineManager.instance.projects(true)) ?? [];
+    this.projectGraphMessenger.sendNotification(
+      ProjectGraphProjectsNotification,
+      { type: 'webview', webviewType: PROJECT_GRAPH_VIEW_TYPE },
+      projects
+    );
+  }
+
+  private async openProjectPom(projectId: Pick<ProjectBean, 'id'>['id']) {
+    const projects = (await IvyEngineManager.instance.projects(true)) ?? [];
+    const project = projects.find(p => p.id.app === projectId.app && p.id.pmv === projectId.pmv);
+    if (!project) {
+      return;
+    }
+    const pomUri = Uri.joinPath(Uri.file(project.projectDirectory), 'pom.xml');
+    await executeCommand('vscode.open', pomUri);
+  }
+
+  public async refreshProjectGraph() {
+    if (!this.projectGraphPanel) {
+      return;
+    }
+    await this.sendProjectsToProjectGraph();
   }
 
   private async convertProject(selection: TreeSelection) {

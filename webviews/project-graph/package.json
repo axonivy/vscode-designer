@@ -1,0 +1,23 @@
+{
+  "name": "@axonivy/vscode-webview-form-editor",
+  "private": true,
+  "version": "14.0.0",
+  "description": "VSCode extension webview for the Axon Ivy form editor",
+  "license": "(EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0)",
+  "dependencies": {
+    "@axonivy/ui-components": "~14.0.0-next.1134.0b6ad82",
+    "@axonivy/ui-graph": "~14.0.0-next.1134.0b6ad82",
+    "@axonivy/ui-icons": "~14.0.0-next.1134.0b6ad82",
+    "@axonivy/vscode-webview-common": "workspace:~14.0.0-next",
+    "vscode-messenger-common": "0.4.5",
+    "vscode-messenger-webview": "0.4.5"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "vite build --mode development --emptyOutDir",
+    "build:production": "vite build --emptyOutDir",
+    "clean": "rimraf dist lib",
+    "type": "tsc --noEmit",
+    "watch": "vite build --mode development --watch --emptyOutDir"
+  }
+}

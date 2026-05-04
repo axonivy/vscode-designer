@@ -10,8 +10,15 @@ import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { treeUriToProjectPath } from '../project-explorer/tree-selection';
 import { registerPomCodeLensProvider } from './pom-code-lens-provider';
 
+type ProjectId = Pick<ProjectBean, 'id'>['id'];
+type AddDependencyFromGraphParams = {
+  source: ProjectId;
+  dependency: ProjectId;
+};
+
 export const registerAddDependencyHandler = (context: ExtensionContext) => {
   registerCommand('ivyProjects.addDependency', context, addDependencyHandler);
+  registerCommand('ivyProjects.addDependencyFromGraph', context, addDependencyFromGraphHandler);
   registerPomCodeLensProvider(context);
 };
 
@@ -44,13 +51,53 @@ const addDependencyHandler = async (uri: Uri) => {
   if (!newDependency) {
     return;
   }
-  commands.executeCommand('maven.project.addDependency', {
+  await addDependency(targetProjectBean, newDependency);
+};
+
+const addDependencyFromGraphHandler = async (params: AddDependencyFromGraphParams) => {
+  if (!params?.source || !params?.dependency) {
+    logErrorMessage('Add dependency failed: source or dependency project missing.');
+    return;
+  }
+
+  const projectBeans = await IvyEngineManager.instance.projects(true);
+  if (!projectBeans) {
+    logErrorMessage('Add dependency failed: no projects available.');
+    return;
+  }
+
+  const targetProjectBean = projectBeans.find(p => p.id.app === params.source.app && p.id.pmv === params.source.pmv);
+  const newDependency = projectBeans.find(p => p.id.app === params.dependency.app && p.id.pmv === params.dependency.pmv);
+  if (!targetProjectBean || !newDependency) {
+    logErrorMessage('Add dependency failed: could not resolve selected projects.');
+    return;
+  }
+  if (targetProjectBean.id.app === newDependency.id.app && targetProjectBean.id.pmv === newDependency.id.pmv) {
+    logErrorMessage('Cannot add a dependency from a project to itself.');
+    return;
+  }
+  if (targetProjectBean.dependencies.find(d => d.app === newDependency.id.app && d.pmv === newDependency.id.pmv)) {
+    return;
+  }
+  if (!isNotCircular(targetProjectBean, projectBeans, newDependency)) {
+    logErrorMessage('Cannot add dependency because it would create a circular dependency.');
+    return;
+  }
+
+  await addDependency(targetProjectBean, newDependency);
+};
+
+const addDependency = async (targetProjectBean: ProjectBean, newDependency: ProjectBean) => {
+  const pomPath = Uri.joinPath(Uri.file(targetProjectBean.projectDirectory), 'pom.xml').fsPath;
+  await commands.executeCommand('maven.project.addDependency', {
     pomPath,
     groupId: newDependency.groupId,
     artifactId: newDependency.artifactId,
     version: newDependency.version === targetProjectBean.version ? '${project.version}' : newDependency.version,
     packaging: 'iar'
   });
+  await IvyEngineManager.instance.refreshProjectStatuses();
+  await IvyProjectExplorer.instance.refreshProjectGraph();
 };
 
 const isNotCircular = (targetProjectBean: ProjectBean, projectBeans: ProjectBean[], possibleDependency: ProjectBean) => {

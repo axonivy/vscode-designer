@@ -118,7 +118,8 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
     if (element) {
       return [this.cmsEntry(element)];
     }
-    return (await this.ivyProjects).map(dir => this.createAndCacheRoot(dir));
+    const projects = (await this.ivyProjects).map(dir => this.createAndCacheRoot(dir));
+    return [this.projectGraphEntry(), ...projects];
   }
 
   private createAndCacheRoot(ivyProjectDir: string): Entry {
@@ -149,6 +150,21 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
     if (CmsEditorRegistry.find(element.uri.fsPath)?.active) {
       IvyProjectExplorer.instance.selectEntry(entry);
     }
+    return entry;
+  }
+
+  private projectGraphEntry() {
+    const entry: Entry = {
+      uri: Uri.parse('project-graph:///Project Graph'),
+      type: FileType.File,
+      collapsibleState: TreeItemCollapsibleState.None,
+      iconPath: {
+        light: Uri.file(path.join(__dirname, '..', 'assets', 'light', 'graph-view.svg')),
+        dark: Uri.file(path.join(__dirname, '..', 'assets', 'dark', 'graph-view.svg'))
+      },
+      command: { command: 'ivyProjects.openProjectGraph', title: 'Open Project Graph' }
+    };
+    this.cacheEntry(entry);
     return entry;
   }
 }

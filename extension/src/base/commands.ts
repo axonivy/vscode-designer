@@ -47,7 +47,9 @@ type ProjectViewCommand =
   | 'ivyProjects.addNewCaseMap'
   | 'ivyProjects.stopBpmEngine'
   | 'ivyProjects.convertProject'
-  | 'ivyProjects.addDependency';
+  | 'ivyProjects.addDependency'
+  | 'ivyProjects.addDependencyFromGraph'
+  | 'ivyProjects.openProjectGraph';
 type ViewCommand =
   | 'ivyBrowserView.focus'
   | 'ivyBrowserView.open'
