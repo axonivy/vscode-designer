@@ -1,5 +1,5 @@
 import { Uri, window, workspace, type QuickPickItem } from 'vscode';
-import { logErrorMessage, logInformationMessage } from '../base/logging-util';
+import { logErrorMessage } from '../base/logging-util';
 import type { ProductInstallParams } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import type { AddCommandSelectionContext } from '../project-explorer/ivy-project-explorer';
@@ -26,6 +26,7 @@ interface InstallMarketProductState extends MSStateBase {
   version?: string;
   projects?: ProjectSelection[];
   projectsSearchString?: string;
+  changedProjectSelection?: boolean;
   // productJson?: string;
 }
 
@@ -88,7 +89,8 @@ export const importMarketProduct = async (selectionContext: AddCommandSelectionC
       }))
     });
     if (previousProduct?.id !== state.product?.id) {
-      logInformationMessage('TODO Product selection ID changed, resetting version and project selection');
+      state.projects = undefined;
+      state.version = undefined;
     }
   };
 
@@ -99,6 +101,7 @@ export const importMarketProduct = async (selectionContext: AddCommandSelectionC
     const availableVersions = state.product ? await getAvailableVersions(state.product.id ?? '') : [];
     const bestVersion = await getBestVersion(state.product?.id ?? '', extensionVersion);
 
+    const previousVersion = state.version;
     const version = await input.showQuickPick({
       title: state.dialogTitle,
       titleSuffix: ' - Choose Version',
@@ -112,6 +115,9 @@ export const importMarketProduct = async (selectionContext: AddCommandSelectionC
       }
     });
     state.version = version.label;
+    if (previousVersion !== state.version) {
+      state.projects = undefined;
+    }
   };
 
   const stepProjects: InputStep<InstallMarketProductState> = async (
@@ -121,6 +127,10 @@ export const importMarketProduct = async (selectionContext: AddCommandSelectionC
     const productJson = await fetchInstaller(state.product?.id ?? '', state?.version ?? '');
     const product = parseProduct(productJson);
     const projectItems = parseAvailableProjects(product);
+    let initialProjectSelection: ProjectSelection[] | undefined = undefined;
+    if (!state.changedProjectSelection) {
+      initialProjectSelection = projectItems.filter(project => project.picked);
+    }
 
     state.projects = await input.showQuickPick<ProjectSelection, true>({
       title: state.dialogTitle,
@@ -130,11 +140,14 @@ export const importMarketProduct = async (selectionContext: AddCommandSelectionC
       totalSteps: state.totalSteps,
       canSelectMany: true,
       value: state.projectsSearchString,
-      selectedItems: state.projects ?? [],
       items: projectItems,
+      selectedItems: initialProjectSelection ?? state.projects ?? [],
       onBack: (typedValue: string, selectedItems: ProjectSelection[]) => {
         state.projectsSearchString = typedValue;
         state.projects = selectedItems;
+      },
+      onDidChangeSelection: () => {
+        state.changedProjectSelection = true;
       }
     });
   };
@@ -144,7 +157,8 @@ export const importMarketProduct = async (selectionContext: AddCommandSelectionC
   const installMarketProductData: InstallMarketProductState = {
     dialogTitle: 'Install Market Product',
     currentStep: 1,
-    totalSteps: steps.length
+    totalSteps: steps.length,
+    changedProjectSelection: false
   };
 
   try {

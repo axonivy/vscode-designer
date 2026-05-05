@@ -115,8 +115,9 @@ interface BaseQuickPickParameters<P extends QuickPickItem> {
   activeItems?: P[];
   selectedItems?: P[];
   placeholder?: string;
-  onBack?: (typedValue: string, selectedItems: P[]) => void;
   ignoreFocusOut?: boolean;
+  onBack?: (typedValue: string, selectedItems: P[]) => void;
+  onDidChangeSelection?: () => void;
 }
 
 interface SingleQuickPickParameters<P extends QuickPickItem> extends BaseQuickPickParameters<P> {
@@ -268,6 +269,7 @@ export class MultiStepInput<T extends MSStateBase> {
           }
         }),
         input.onDidChangeSelection(items => {
+          params.onDidChangeSelection?.();
           if (!params.canSelectMany && items.length === 1 && items[0]) {
             resolve(items[0] as QuickPickResult<T, M>);
           } else {
