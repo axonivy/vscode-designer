@@ -46,7 +46,7 @@ export const addNewDataClass = async (type: DataClassType, selectionContext: Add
         placeholder: 'Select one of the available projects',
         currentStep: state.currentStep,
         totalSteps: state.totalSteps,
-        activeItem: state.project,
+        value: state.project ? state.project.label : '',
         items: existingProjects.map(project => {
           return {
             label: project.substring(project.lastIndexOf(path.sep) + 1),

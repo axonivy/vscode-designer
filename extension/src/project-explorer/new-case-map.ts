@@ -35,13 +35,13 @@ export const addNewCaseMap = async (selectionContext: AddCommandSelectionContext
       state.projectFromSelection = undefined;
     } else {
       const previousProject = state.project;
-      state.project = await input.showQuickPick({
+      state.project = await input.showQuickPick<ProjectSelection>({
         title: state.dialogTitle,
         titleSuffix: ' - Choose project',
         placeholder: 'Select one of the available projects',
         currentStep: state.currentStep,
         totalSteps: state.totalSteps,
-        activeItem: state.project,
+        value: state.project ? state.project.label : '',
         items: existingProjects.map(project => {
           return {
             label: project.substring(project.lastIndexOf(path.sep) + 1),
