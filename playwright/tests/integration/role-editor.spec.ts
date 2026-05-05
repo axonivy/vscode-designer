@@ -3,7 +3,7 @@ import { test } from '../fixtures/baseTest';
 import { OutputView } from '../page-objects/output-view';
 import { RoleEditor } from '../page-objects/role-editor';
 
-test('Read, write and open help', async ({ page }) => {
+test('Read, write', async ({ page }) => {
   const editor = new RoleEditor(page);
   await editor.hasDeployProjectStatusMessage();
   await editor.openEditorFile();
