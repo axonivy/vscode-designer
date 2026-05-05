@@ -26,7 +26,9 @@ import { getWorkspaceFolder, isDirectory, isSubdirectoryOrEqual } from './utils/
 
 export const VIEW_ID = 'ivyProjects';
 const PROJECT_GRAPH_VIEW_TYPE = 'ivy.projectGraph';
-const ProjectGraphProjectsNotification: NotificationType<Array<Pick<ProjectBean, 'id' | 'artifactId' | 'version' | 'dependencies'>>> = {
+const ProjectGraphProjectsNotification: NotificationType<
+  Array<Pick<ProjectBean, 'id' | 'artifactId' | 'groupId' | 'version' | 'dependencies'>>
+> = {
   method: 'projectGraph/projects'
 };
 const ProjectGraphAddDependencyNotification: NotificationType<{
@@ -146,15 +148,13 @@ export class IvyProjectExplorer {
     const configWatcher = workspace.createFileSystemWatcher('**/config/{custom-fields.yaml,overrides.any}', true, false, true);
     configWatcher.onDidChange(deployProject);
     const pomWatcher = workspace.createFileSystemWatcher('**/pom.xml', true, false, true);
-    pomWatcher.onDidChange(deployProject);
-    const m2eDepsWatcher = workspace.createFileSystemWatcher('**/target/m2e.deps', false, false, true);
-    const deployAndRefreshGraph = async (uri: Uri) => {
+    pomWatcher.onDidChange(async uri => {
       await deployProject(uri);
-      await IvyEngineManager.instance.refreshProjectStatuses();
-      await this.refreshProjectGraph();
-    };
-    m2eDepsWatcher.onDidCreate(deployAndRefreshGraph);
-    m2eDepsWatcher.onDidChange(deployAndRefreshGraph);
+      await this.refreshProjectGraphDebounced(uri);
+    });
+    const m2eDepsWatcher = workspace.createFileSystemWatcher('**/target/m2e.deps', false, false, true);
+    m2eDepsWatcher.onDidCreate(deployProject);
+    m2eDepsWatcher.onDidChange(deployProject);
     const targetWatcher = workspace.createFileSystemWatcher('**/target/classes/**/*.*');
     const invalidateClassLoader = (uri: Uri) =>
       this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.invalidateClassLoader(d), 'invalidate', uri);
@@ -230,6 +230,21 @@ export class IvyProjectExplorer {
       return;
     }
     return debouncedAction(() => action(project), `${project}:actionKey:${actionKey}`, 1_000)();
+  }
+
+  private async refreshProjectGraphDebounced(uri?: Uri) {
+    const project = await treeUriToProjectPath(uri, this.getIvyProjects());
+    if (!project) {
+      return;
+    }
+    return debouncedAction(
+      async () => {
+        await IvyEngineManager.instance.refreshProjectStatuses();
+        await this.refreshProjectGraph();
+      },
+      `${project}:actionKey:projectGraph`,
+      1_000
+    )();
   }
 
   public async addProject(selection: TreeSelection) {

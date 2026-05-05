@@ -1,4 +1,4 @@
-import { HotkeysProvider, ThemeProvider, Toaster } from '@axonivy/ui-components';
+import { ThemeProvider } from '@axonivy/ui-components';
 import '@axonivy/ui-graph/lib/graph.css';
 import { initMessenger } from '@axonivy/vscode-webview-common';
 import '@axonivy/vscode-webview-common/css/colors.css';
@@ -24,10 +24,7 @@ export async function start(): Promise<void> {
     root.render(
       <React.StrictMode>
         <ThemeProvider disabled={true}>
-          <HotkeysProvider initiallyActiveScopes={['global']}>
-            <ProjectGraph projects={projects} messenger={messenger} />
-            <Toaster closeButton={true} />
-          </HotkeysProvider>
+          <ProjectGraph projects={projects} messenger={messenger} />
         </ThemeProvider>
       </React.StrictMode>
     );

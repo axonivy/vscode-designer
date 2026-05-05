@@ -7,6 +7,7 @@ import type { Messenger } from 'vscode-messenger-webview';
 export type ProjectGraphBean = {
   id: { app: string; pmv: string };
   artifactId: string;
+  groupId: string;
   version: string;
   dependencies?: Array<{ app: string; pmv: string }>;
 };
@@ -49,7 +50,7 @@ export const mapProjectsToGraphNodes = (projects: Array<ProjectGraphBean> | unde
   return projects.map<NodeData>(project => ({
     id: project.id.pmv,
     label: project.id.pmv,
-    content: `${project.artifactId} - ${project.version}`,
+    content: <ProjectNodeContent project={project} />,
     options: {
       expandContent: true,
       controls: <ProjectGraphControls project={project} onOpenPom={onOpenPom} />
@@ -71,3 +72,19 @@ const ProjectGraphControls = ({ project, onOpenPom }: { project: ProjectGraphBea
     />
   );
 };
+
+const ProjectNodeContent = ({ project }: { project: ProjectGraphBean }) => (
+  <ul style={{ padding: '0 10px', listStyle: 'none', margin: 0, overflow: 'auto' }}>
+    {Object.entries({
+      artifactId: project.artifactId,
+      groupId: project.groupId,
+      version: project.version,
+      app: project.id.app
+    }).map(([label, value]) => (
+      <li key={label} style={{ display: 'flex', gap: '5px' }}>
+        <div>{`${label}:`}</div>
+        <div style={{ color: 'var(--N700)' }}>{value}</div>
+      </li>
+    ))}
+  </ul>
+);
