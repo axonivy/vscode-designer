@@ -1,9 +1,33 @@
-import { Uri, window, workspace } from 'vscode';
-import { logErrorMessage } from '../base/logging-util';
+import { Uri, window, workspace, type QuickPickItem } from 'vscode';
+import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import type { ProductInstallParams } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import type { MarketProduct, MavenProjectInstaller } from './generated/market-product';
-import { availableVersions, fetchInstaller, type Product, searchMarketProduct } from './market-client';
+import type { AddCommandSelectionContext } from '../project-explorer/ivy-project-explorer';
+import { MultiStepCancelledError, MultiStepInput, type InputStep, type MSStateBase } from '../project-explorer/utils/multi-step-input';
+import type { MarketProduct, MavenDependencyInstaller, MavenProjectInstaller } from './generated/market-product';
+import { fetchInstaller, getAvailableVersions, getBestVersion, searchMarketProduct, type Product } from './market-client';
+
+interface ProductSelection extends QuickPickItem {
+  id: string;
+  label: string;
+  description?: string;
+  detail?: string;
+  iconPath?: Uri;
+}
+
+interface ProjectSelection extends QuickPickItem {
+  label: string;
+  picked?: boolean;
+  isEditable?: boolean;
+}
+
+interface InstallMarketProductState extends MSStateBase {
+  product?: ProductSelection;
+  version?: string;
+  projects?: ProjectSelection[];
+  projectsSearchString?: string;
+  // productJson?: string;
+}
 
 export const importMarketProductFile = async (projectDir: () => Promise<string>) => {
   try {
@@ -36,19 +60,113 @@ async function readProductJsonFromFile() {
   return productJson;
 }
 
-export const importMarketProduct = async (projectDir: () => Promise<string>) => {
+export const importMarketProduct = async (selectionContext: AddCommandSelectionContext, extensionVersion: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const existingProjects = selectionContext.existingIvyProjects;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const projectFromSelection = selectionContext.projectPathSelection;
+  const allProducts = await searchMarketProduct();
+
+  const stepProduct: InputStep<InstallMarketProductState> = async (
+    input: MultiStepInput<InstallMarketProductState>,
+    state: InstallMarketProductState
+  ) => {
+    const previousProduct = state.product;
+    state.product = await input.showQuickPick<ProductSelection>({
+      title: state.dialogTitle,
+      titleSuffix: ' - Choose available Market Product',
+      placeholder: 'Select a Market Product to install',
+      currentStep: state.currentStep,
+      totalSteps: state.totalSteps,
+      value: state.product ? state.product.label : '',
+      items: allProducts.map(product => ({
+        id: product.id,
+        label: product.name,
+        description: product.id,
+        detail: product.description,
+        iconPath: Uri.parse(product.logoUrl)
+      }))
+    });
+    if (previousProduct?.id !== state.product?.id) {
+      logInformationMessage('TODO Product selection ID changed, resetting version and project selection');
+    }
+  };
+
+  const stepVersion: InputStep<InstallMarketProductState> = async (
+    input: MultiStepInput<InstallMarketProductState>,
+    state: InstallMarketProductState
+  ) => {
+    const availableVersions = state.product ? await getAvailableVersions(state.product.id ?? '') : [];
+    const bestVersion = await getBestVersion(state.product?.id ?? '', extensionVersion);
+
+    const version = await input.showQuickPick({
+      title: state.dialogTitle,
+      titleSuffix: ' - Choose Version',
+      placeholder: 'Select a Market Product version to install',
+      currentStep: state.currentStep,
+      totalSteps: state.totalSteps,
+      value: state.version ?? (availableVersions.includes(bestVersion) ? bestVersion : ''),
+      items: availableVersions.map(version => ({ label: version })),
+      onBack: (typedValue: string) => {
+        state.version = typedValue;
+      }
+    });
+    state.version = version.label;
+  };
+
+  const stepProjects: InputStep<InstallMarketProductState> = async (
+    input: MultiStepInput<InstallMarketProductState>,
+    state: InstallMarketProductState
+  ) => {
+    const productJson = await fetchInstaller(state.product?.id ?? '', state?.version ?? '');
+    const product = parseProduct(productJson);
+    const projectItems = parseAvailableProjects(product);
+
+    state.projects = await input.showQuickPick<ProjectSelection, true>({
+      title: state.dialogTitle,
+      titleSuffix: ' - Choose Projects to Import',
+      placeholder: 'Select projects to import',
+      currentStep: state.currentStep,
+      totalSteps: state.totalSteps,
+      canSelectMany: true,
+      value: state.projectsSearchString,
+      selectedItems: state.projects ?? [],
+      items: projectItems,
+      onBack: (typedValue: string, selectedItems: ProjectSelection[]) => {
+        state.projectsSearchString = typedValue;
+        state.projects = selectedItems;
+      }
+    });
+  };
+
+  const steps: InputStep<InstallMarketProductState>[] = [stepProduct, stepVersion, stepProjects];
+
+  const installMarketProductData: InstallMarketProductState = {
+    dialogTitle: 'Install Market Product',
+    currentStep: 1,
+    totalSteps: steps.length
+  };
+
   try {
-    const input = await searchProduct(projectDir);
-    await IvyEngineManager.instance.installMarketProduct(input);
+    await new MultiStepInput<InstallMarketProductState>().stepThrough(steps, installMarketProductData);
   } catch (err) {
-    logErrorMessage('Import from Market failed: ' + (err instanceof Error ? err.message : err));
+    if (err instanceof MultiStepCancelledError) {
+      logErrorMessage(err.message);
+      return;
+    } else {
+      throw err;
+    }
   }
+
+  // const input: ProductInstallParams = await searchProduct(projectDir);
+  // await IvyEngineManager.instance.installMarketProduct(input);
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const searchProduct = async (projectDir: () => Promise<string>): Promise<ProductInstallParams> => {
   const products = await searchMarketProduct();
   const productId = await selectProduct(products);
-  const versions = await availableVersions(productId);
+  const versions = await getAvailableVersions(productId);
   const version = await selectVersion(versions);
   let productJson = await fetchInstaller(productId, version);
   const product = parseProduct(productJson);
@@ -113,6 +231,42 @@ function parseProduct(productJson: string) {
   }
   return product;
 }
+
+const parseAvailableProjects = (product: MarketProduct): ProjectSelection[] => {
+  if (!product.installers || product.installers.length === 0) {
+    throw new Error('No installers found in product.json');
+  }
+  const availableProjects: ProjectSelection[] = [];
+  for (const installer of product.installers) {
+    switch (installer.id) {
+      case 'maven-import': {
+        const data = installer.data as MavenProjectInstaller;
+        availableProjects.push(
+          ...data.projects.map(project => ({
+            label: `${project.artifactId} (${project.groupId})`,
+            picked: typeof project.importInWorkspace !== 'boolean' ? true : project.importInWorkspace,
+            isEditable: true
+          }))
+        );
+        break;
+      }
+      case 'maven-dependency': {
+        const data = installer.data as MavenDependencyInstaller;
+        availableProjects.push(
+          ...(data.dependencies?.map(dependency => ({
+            label: `${dependency.artifactId} (${dependency.groupId})`,
+            picked: true,
+            isEditable: false
+          })) ?? [])
+        );
+        break;
+      }
+      default:
+        throw new Error(`Unsupported installer type: ${installer.id}`);
+    }
+  }
+  return availableProjects;
+};
 
 async function selectProjects(product: MarketProduct) {
   for (const installer of product?.installers ?? []) {
