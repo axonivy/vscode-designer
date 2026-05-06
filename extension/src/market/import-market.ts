@@ -18,7 +18,7 @@ interface ProductSelection extends QuickPickItem {
 interface ProjectSelection extends QuickPickItem {
   label: string;
   picked?: boolean;
-  isEditable?: boolean;
+  required?: boolean;
 }
 
 interface InstallMarketProductState extends MSStateBase {
@@ -127,9 +127,10 @@ export const importMarketProduct = async (selectionContext: AddCommandSelectionC
     const productJson = await fetchInstaller(state.product?.id ?? '', state?.version ?? '');
     const product = parseProduct(productJson);
     const projectItems = parseAvailableProjects(product);
+    const projectItemsSorted = sortAvailableProjects(projectItems);
     let initialProjectSelection: ProjectSelection[] | undefined = undefined;
     if (!state.changedProjectSelection) {
-      initialProjectSelection = projectItems.filter(project => project.picked);
+      initialProjectSelection = projectItemsSorted.filter(project => project.picked);
     }
 
     state.projects = await input.showQuickPick<ProjectSelection, true>({
@@ -140,13 +141,17 @@ export const importMarketProduct = async (selectionContext: AddCommandSelectionC
       totalSteps: state.totalSteps,
       canSelectMany: true,
       value: state.projectsSearchString,
-      items: projectItems,
+      items: projectItemsSorted,
       selectedItems: initialProjectSelection ?? state.projects ?? [],
       onBack: (typedValue: string, selectedItems: ProjectSelection[]) => {
         state.projectsSearchString = typedValue;
         state.projects = selectedItems;
       },
-      onDidChangeSelection: () => {
+      onDidChangeSelection: (selectedItems: ProjectSelection[], overrideSelectedItems: (overrideItems: ProjectSelection[]) => void) => {
+        const requiredProjects = projectItemsSorted.filter(project => project.required);
+        const overrideSelection = [...new Map([...selectedItems, ...requiredProjects].map(item => [item.label, item])).values()];
+        overrideSelectedItems(overrideSelection);
+        state.projects = overrideSelection;
         state.changedProjectSelection = true;
       }
     });
@@ -246,6 +251,13 @@ function parseProduct(productJson: string) {
   return product;
 }
 
+const sortAvailableProjects = (projects: ProjectSelection[]) => {
+  projects.sort((p1, p2) => {
+    return Number(p2.required) - Number(p1.required) || p1.label.localeCompare(p2.label);
+  });
+  return projects;
+};
+
 const parseAvailableProjects = (product: MarketProduct): ProjectSelection[] => {
   if (!product.installers || product.installers.length === 0) {
     throw new Error('No installers found in product.json');
@@ -259,7 +271,7 @@ const parseAvailableProjects = (product: MarketProduct): ProjectSelection[] => {
           ...data.projects.map(project => ({
             label: `${project.artifactId} (${project.groupId})`,
             picked: typeof project.importInWorkspace !== 'boolean' ? true : project.importInWorkspace,
-            isEditable: true
+            required: false
           }))
         );
         break;
@@ -268,9 +280,9 @@ const parseAvailableProjects = (product: MarketProduct): ProjectSelection[] => {
         const data = installer.data as MavenDependencyInstaller;
         availableProjects.push(
           ...(data.dependencies?.map(dependency => ({
-            label: `${dependency.artifactId} (${dependency.groupId})`,
+            label: `(REQUIRED) ${dependency.artifactId} (${dependency.groupId})`,
             picked: true,
-            isEditable: false
+            required: true
           })) ?? [])
         );
         break;
