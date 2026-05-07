@@ -67,6 +67,10 @@ export class PageObject {
     return this.page.locator('div.quick-input-list');
   }
 
+  quickInputHeader(): Locator {
+    return this.page.locator('div.quick-input-header');
+  }
+
   toasts(): Locator {
     return this.page.locator('div.notification-toast-container');
   }

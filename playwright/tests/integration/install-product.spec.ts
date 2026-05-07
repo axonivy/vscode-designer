@@ -16,7 +16,16 @@ test.describe('Market Product installation', () => {
     await explorer.selectNode('resources');
     await explorer.installProduct('connectivity-demo');
     await explorer.provideUserInput('14.0.0-SNAPSHOT');
-    await explorer.provideUserInput('connectivity-demos$');
+    const header = explorer.quickInputHeader();
+    const checkbox = header.getByRole('checkbox', { name: 'Toggle all checkboxes' });
+    await expect(checkbox).toBeVisible();
+    const ariaChecked = await checkbox.getAttribute('aria-checked');
+    if (ariaChecked == 'false') {
+      await checkbox.click();
+    }
+    await expect(checkbox).toHaveAttribute('aria-checked', 'true');
+    await explorer.provideUserInput();
+    await explorer.selectNthVisibleItemFromQuickPick(0);
     await explorer.executeCommand('Refresh Explorer');
     await explorer.selectNodeExact('connectivity-demos');
     await processEditor.openEditorFile();
