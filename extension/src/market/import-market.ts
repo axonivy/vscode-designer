@@ -13,7 +13,7 @@ import {
   type ProjectSelection
 } from '../project-explorer/utils/multi-step-input';
 import type { MarketProduct, MavenDependencyInstaller, MavenProjectInstaller } from './generated/market-product';
-import { fetchInstaller, getAvailableVersions, getBestVersion, searchMarketProduct, type Product } from './market-client';
+import { fetchInstaller, getAvailableVersions, getBestVersion, searchMarketProduct } from './market-client';
 
 interface ProductSelection extends QuickPickItem {
   id: string;
@@ -71,6 +71,21 @@ async function readProductJsonFromFile() {
   const fileData = await workspace.fs.readFile(productInstaller[0]);
   const decoder = new TextDecoder('utf-8');
   const productJson = decoder.decode(fileData);
+  return productJson;
+}
+
+async function replaceDynamicVersion(productJson: string) {
+  if (productJson.includes('${version}')) {
+    const userVersion = await window.showInputBox({
+      title: 'Resolve dynamic ${version} in product.json',
+      prompt: 'Enter a Maven version, which you made locally available by running `mvn clean install` from your product workspace.',
+      placeHolder: '14.0.0-SNAPSHOT'
+    });
+    if (!userVersion) {
+      throw new Error('No version provided for ${version}');
+    }
+    productJson = productJson.replace(/\$\{version\}/g, userVersion);
+  }
   return productJson;
 }
 
@@ -241,66 +256,6 @@ export const importMarketProduct = async (selectionContext: AddCommandSelectionC
   }
 };
 
-// TODO: Deprecated
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const searchProduct = async (projectDir: () => Promise<string>): Promise<ProductInstallParams> => {
-  const products = await searchMarketProduct();
-  const productId = await selectProduct(products);
-  const versions = await getAvailableVersions(productId);
-  const version = await selectVersion(versions);
-  let productJson = await fetchInstaller(productId, version);
-  const product = parseProduct(productJson);
-  productJson = await selectProjects(product);
-  return { productJson, dependentProjectPath: await projectDir() };
-};
-
-// TODO: Deprecated
-async function selectVersion(versions: string[]) {
-  const selected = await window.showQuickPick(versions, {
-    placeHolder: 'Select a version to install',
-    canPickMany: false
-  });
-  if (!selected) {
-    throw new Error('No version selected by user');
-  }
-  return selected;
-}
-
-// TODO: Deprecated
-async function selectProduct(products: Product[]) {
-  const items = products.map(product => ({
-    label: product.name,
-    description: product.id,
-    detail: product.description,
-    iconPath: Uri.parse(product.logoUrl)
-  }));
-  const selected = await window.showQuickPick(items, {
-    placeHolder: 'Select a Product to install',
-    canPickMany: false,
-    matchOnDetail: true,
-    matchOnDescription: true
-  });
-  if (!selected || !selected.description) {
-    throw new Error('No product selected by user');
-  }
-  return selected.description;
-}
-
-async function replaceDynamicVersion(productJson: string) {
-  if (productJson.includes('${version}')) {
-    const userVersion = await window.showInputBox({
-      title: 'Resolve dynamic ${version} in product.json',
-      prompt: 'Enter a Maven version, which you made locally available by running `mvn clean install` from your product workspace.',
-      placeHolder: '14.0.0-SNAPSHOT'
-    });
-    if (!userVersion) {
-      throw new Error('No version provided for ${version}');
-    }
-    productJson = productJson.replace(/\$\{version\}/g, userVersion);
-  }
-  return productJson;
-}
-
 function parseProduct(productJson: string) {
   let product: MarketProduct | undefined;
   try {
@@ -389,7 +344,7 @@ const markProjectsForImport = (productJson: string, selectedProjects: ProductPro
   return JSON.stringify(product);
 };
 
-// TODO: Deprecated
+// TODO: Will be deprecated
 async function selectProjects(product: MarketProduct) {
   for (const installer of product?.installers ?? []) {
     if (installer.id === 'maven-import') {
