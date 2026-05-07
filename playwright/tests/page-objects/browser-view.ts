@@ -18,6 +18,10 @@ export class BrowserView extends View {
     await this.executeCommand('Open Developer Workflow UI');
   }
 
+  async moveToSecondaryPanel() {
+    await this.executeCommand('View: Move View', 'Browser', 'New Secondary Side Bar Entry');
+  }
+
   back() {
     return this.header().locator('.back-button');
   }

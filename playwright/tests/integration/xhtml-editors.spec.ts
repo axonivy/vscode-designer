@@ -32,8 +32,8 @@ test('xhtml preview', async ({ page }) => {
   const browserView = new BrowserView(page);
   await browserView.openDevWfUi();
   const browser = browserView.content();
-  await expect(browser.getByRole('menuitem', { name: /Home/ })).toBeVisible();
-  await editor.executeCommand('View: Move Panel Right');
+  await expect(browser.locator('.layout-topbar-logo')).toBeVisible();
+  await browserView.moveToSecondaryPanel();
 
   await editor.executeCommand('Axon Ivy: Open Dialog Preview');
   const frame = browser.frameLocator('iframe');
