@@ -1,9 +1,17 @@
+import path from 'path';
 import { Uri, window, workspace, type QuickPickItem } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { ProductInstallParams } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import type { AddCommandSelectionContext } from '../project-explorer/ivy-project-explorer';
-import { MultiStepCancelledError, MultiStepInput, type InputStep, type MSStateBase } from '../project-explorer/utils/multi-step-input';
+import {
+  MultiStepCancelledError,
+  MultiStepInput,
+  MultiStepInvalidStateError,
+  type InputStep,
+  type MSStateBase,
+  type ProjectSelection
+} from '../project-explorer/utils/multi-step-input';
 import type { MarketProduct, MavenDependencyInstaller, MavenProjectInstaller } from './generated/market-product';
 import { fetchInstaller, getAvailableVersions, getBestVersion, searchMarketProduct, type Product } from './market-client';
 
@@ -15,18 +23,23 @@ interface ProductSelection extends QuickPickItem {
   iconPath?: Uri;
 }
 
-interface ProjectSelection extends QuickPickItem {
+interface ProductProjectSelection extends QuickPickItem {
   label: string;
-  picked?: boolean;
-  required?: boolean;
+  mavenType: 'maven-import' | 'maven-dependency';
+  artifactId?: string;
+  groupId?: string;
+  isPicked: boolean;
 }
 
 interface InstallMarketProductState extends MSStateBase {
   product?: ProductSelection;
+  productJson?: string;
   version?: string;
-  projects?: ProjectSelection[];
+  projects?: ProductProjectSelection[];
   projectsSearchString?: string;
   changedProjectSelection?: boolean;
+  dependentProject?: ProjectSelection;
+  dependentProjectFilterText?: string;
   // productJson?: string;
 }
 
@@ -62,10 +75,8 @@ async function readProductJsonFromFile() {
 }
 
 export const importMarketProduct = async (selectionContext: AddCommandSelectionContext, extensionVersion: string) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const existingProjects = selectionContext.existingIvyProjects;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const projectFromSelection = selectionContext.projectPathSelection;
+  let projectFromSelection = selectionContext.projectPathSelection;
   const allProducts = await searchMarketProduct();
 
   const stepProduct: InputStep<InstallMarketProductState> = async (
@@ -124,40 +135,77 @@ export const importMarketProduct = async (selectionContext: AddCommandSelectionC
     input: MultiStepInput<InstallMarketProductState>,
     state: InstallMarketProductState
   ) => {
-    const productJson = await fetchInstaller(state.product?.id ?? '', state?.version ?? '');
-    const product = parseProduct(productJson);
-    const projectItems = parseAvailableProjects(product);
-    const projectItemsSorted = sortAvailableProjects(projectItems);
-    let initialProjectSelection: ProjectSelection[] | undefined = undefined;
+    const productJson = await fetchInstaller(state.product?.id ?? '', state.version ?? '');
+    const product = parseProduct(productJson ?? '');
+    const projectItems = parseAvailableProjectItems(product);
+    let initialProjectSelection: ProductProjectSelection[] | undefined = undefined;
     if (!state.changedProjectSelection) {
-      initialProjectSelection = projectItemsSorted.filter(project => project.picked);
+      initialProjectSelection = projectItems.filter(project => project.isPicked);
     }
 
-    state.projects = await input.showQuickPick<ProjectSelection, true>({
+    state.projects = await input.showQuickPick<ProductProjectSelection, true>({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose Projects to Import',
+      titleSuffix: ' - Choose Projects of Product to Import',
       placeholder: 'Select projects to import',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       canSelectMany: true,
       value: state.projectsSearchString,
-      items: projectItemsSorted,
+      items: projectItems,
       selectedItems: initialProjectSelection ?? state.projects ?? [],
-      onBack: (typedValue: string, selectedItems: ProjectSelection[]) => {
+      onBack: (typedValue: string, selectedItems: ProductProjectSelection[]) => {
         state.projectsSearchString = typedValue;
         state.projects = selectedItems;
       },
-      onDidChangeSelection: (selectedItems: ProjectSelection[], overrideSelectedItems: (overrideItems: ProjectSelection[]) => void) => {
-        const requiredProjects = projectItemsSorted.filter(project => project.required);
+      onDidChangeSelection: (
+        selectedItems: ProductProjectSelection[],
+        overrideSelectedItems: (overrideItems: ProductProjectSelection[]) => void
+      ) => {
+        const requiredProjects = projectItems.filter(project => project.mavenType === 'maven-dependency');
         const overrideSelection = [...new Map([...selectedItems, ...requiredProjects].map(item => [item.label, item])).values()];
         overrideSelectedItems(overrideSelection);
         state.projects = overrideSelection;
         state.changedProjectSelection = true;
       }
     });
+    state.productJson = markProjectsForImport(productJson, state.projects ?? []);
   };
 
-  const steps: InputStep<InstallMarketProductState>[] = [stepProduct, stepVersion, stepProjects];
+  const stepDependentProject: InputStep<InstallMarketProductState> = async (
+    input: MultiStepInput<InstallMarketProductState>,
+    state: InstallMarketProductState
+  ) => {
+    // Note: Curerntly, engine does not support missing ivy project dependency
+    if (!isIvyProjectSelectionRequired(state.projects ?? [])) {
+      return;
+    }
+
+    let dependentProjectFilterText: string | undefined = undefined;
+    if (projectFromSelection) {
+      dependentProjectFilterText = projectFromSelection.substring(projectFromSelection.lastIndexOf(path.sep) + 1);
+      projectFromSelection = undefined;
+    }
+    state.dependentProject = await input.showQuickPick<ProjectSelection>({
+      title: state.dialogTitle,
+      titleSuffix: ' - Choose Ivy Project to install Product into',
+      placeholder: 'Select one of the available projects',
+      currentStep: state.currentStep,
+      totalSteps: state.totalSteps,
+      value: dependentProjectFilterText ?? state.dependentProjectFilterText,
+      items: existingProjects.map(project => {
+        return {
+          label: project.substring(project.lastIndexOf(path.sep) + 1),
+          description: project,
+          path: project
+        };
+      }),
+      onBack: (typedValue: string) => {
+        state.dependentProjectFilterText = typedValue;
+      }
+    });
+  };
+
+  const steps: InputStep<InstallMarketProductState>[] = [stepProduct, stepVersion, stepProjects, stepDependentProject];
 
   const installMarketProductData: InstallMarketProductState = {
     dialogTitle: 'Install Market Product',
@@ -177,10 +225,21 @@ export const importMarketProduct = async (selectionContext: AddCommandSelectionC
     }
   }
 
-  // const input: ProductInstallParams = await searchProduct(projectDir);
-  // await IvyEngineManager.instance.installMarketProduct(input);
+  if (!installMarketProductData.productJson) {
+    throw new MultiStepInvalidStateError(
+      'Market Product installation failed due to corrupted input state. ProductJson is not set. Current input state: ' +
+        JSON.stringify(installMarketProductData)
+    );
+  } else {
+    const installMarketProductInput: ProductInstallParams = {
+      productJson: installMarketProductData.productJson,
+      dependentProjectPath: installMarketProductData.dependentProject?.path ?? ''
+    };
+    await IvyEngineManager.instance.installMarketProduct(installMarketProductInput);
+  }
 };
 
+// TODO: Deprecated
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const searchProduct = async (projectDir: () => Promise<string>): Promise<ProductInstallParams> => {
   const products = await searchMarketProduct();
@@ -193,6 +252,7 @@ const searchProduct = async (projectDir: () => Promise<string>): Promise<Product
   return { productJson, dependentProjectPath: await projectDir() };
 };
 
+// TODO: Deprecated
 async function selectVersion(versions: string[]) {
   const selected = await window.showQuickPick(versions, {
     placeHolder: 'Select a version to install',
@@ -204,6 +264,7 @@ async function selectVersion(versions: string[]) {
   return selected;
 }
 
+// TODO: Deprecated
 async function selectProduct(products: Product[]) {
   const items = products.map(product => ({
     label: product.name,
@@ -251,18 +312,28 @@ function parseProduct(productJson: string) {
   return product;
 }
 
-const sortAvailableProjects = (projects: ProjectSelection[]) => {
+const isIvyProjectSelectionRequired = (products: ProductProjectSelection[]) => {
+  if (products.every(project => project.mavenType === 'maven-import')) {
+    return false;
+  }
+  return true;
+};
+
+const sortAvailableProjects = (projects: ProductProjectSelection[]) => {
   projects.sort((p1, p2) => {
-    return Number(p2.required) - Number(p1.required) || p1.label.localeCompare(p2.label);
+    if (p1.mavenType === p2.mavenType) {
+      return p1.label.localeCompare(p2.label);
+    }
+    return p1.mavenType === 'maven-dependency' ? -1 : 1;
   });
   return projects;
 };
 
-const parseAvailableProjects = (product: MarketProduct): ProjectSelection[] => {
+const parseAvailableProjectItems = (product: MarketProduct): ProductProjectSelection[] => {
   if (!product.installers || product.installers.length === 0) {
     throw new Error('No installers found in product.json');
   }
-  const availableProjects: ProjectSelection[] = [];
+  const availableProjects: ProductProjectSelection[] = [];
   for (const installer of product.installers) {
     switch (installer.id) {
       case 'maven-import': {
@@ -270,8 +341,10 @@ const parseAvailableProjects = (product: MarketProduct): ProjectSelection[] => {
         availableProjects.push(
           ...data.projects.map(project => ({
             label: `${project.artifactId} (${project.groupId})`,
-            picked: typeof project.importInWorkspace !== 'boolean' ? true : project.importInWorkspace,
-            required: false
+            mavenType: 'maven-import' as const,
+            artifactId: project.artifactId ?? '',
+            groupId: project.groupId ?? '',
+            isPicked: typeof project.importInWorkspace !== 'boolean' ? true : project.importInWorkspace
           }))
         );
         break;
@@ -281,8 +354,10 @@ const parseAvailableProjects = (product: MarketProduct): ProjectSelection[] => {
         availableProjects.push(
           ...(data.dependencies?.map(dependency => ({
             label: `(REQUIRED) ${dependency.artifactId} (${dependency.groupId})`,
-            picked: true,
-            required: true
+            mavenType: 'maven-dependency' as const,
+            artifactId: dependency.artifactId ?? '',
+            groupId: dependency.groupId ?? '',
+            isPicked: true
           })) ?? [])
         );
         break;
@@ -291,9 +366,27 @@ const parseAvailableProjects = (product: MarketProduct): ProjectSelection[] => {
         throw new Error(`Unsupported installer type: ${installer.id}`);
     }
   }
-  return availableProjects;
+  return sortAvailableProjects(availableProjects);
 };
 
+const markProjectsForImport = (productJson: string, selectedProjects: ProductProjectSelection[]): string => {
+  const product = parseProduct(productJson);
+  if (!product.installers || product.installers.length === 0) {
+    throw new Error('No installers found in product.json');
+  }
+  for (const installer of product.installers) {
+    if (installer.id === 'maven-import') {
+      const dataProjectInstaller = installer.data as MavenProjectInstaller;
+      const projects = dataProjectInstaller.projects;
+      projects.forEach(project => {
+        project.importInWorkspace = selectedProjects.some(sp => sp.artifactId === project.artifactId && sp.groupId === project.groupId);
+      });
+    }
+  }
+  return JSON.stringify(product);
+};
+
+// TODO: Deprecated
 async function selectProjects(product: MarketProduct) {
   for (const installer of product?.installers ?? []) {
     if (installer.id === 'maven-import') {
