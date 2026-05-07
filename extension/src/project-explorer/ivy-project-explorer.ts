@@ -262,7 +262,8 @@ export class IvyProjectExplorer {
   }
 
   public async installMarketProduct(selection: TreeSelection, extensionVersion: string) {
-    const addCommandContext = await this.getAddCommandSelectionContext(selection, false);
+    // TODO: Accept missing existing projects if ever engine accepts market product installation without dependendt ivy project
+    const addCommandContext = await this.getAddCommandSelectionContext(selection);
     if (!addCommandContext) {
       return;
     }
