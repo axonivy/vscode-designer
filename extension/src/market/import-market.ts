@@ -192,7 +192,7 @@ export const importMarketProduct = async (selectionContext: AddCommandSelectionC
     input: MultiStepInput<InstallMarketProductState>,
     state: InstallMarketProductState
   ) => {
-    // Note: Curerntly, engine does not support missing ivy project dependency
+    // Note: Currently, engine does not support missing ivy project dependency
     // if (!isIvyProjectSelectionRequired(state.projects ?? [])) {
     //   return;
     // }
