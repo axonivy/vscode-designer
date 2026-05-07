@@ -91,6 +91,8 @@ export const importMarketProduct = async (selectionContext: AddCommandSelectionC
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.product ? state.product.label : '',
+      matchOnDescription: true,
+      matchOnDetail: true,
       items: allProducts.map(product => ({
         id: product.id,
         label: product.name,

@@ -116,6 +116,8 @@ interface BaseQuickPickParameters<P extends QuickPickItem> {
   selectedItems?: P[];
   placeholder?: string;
   ignoreFocusOut?: boolean;
+  matchOnDescription?: boolean;
+  matchOnDetail?: boolean;
   onBack?: (typedValue: string, selectedItems: P[]) => void;
   onDidChangeSelection?: (selectedItems: P[], overrideSelectedItems: (overrideItems: P[]) => void) => void;
 }
@@ -250,6 +252,8 @@ export class MultiStepInput<T extends MSStateBase> {
       input.canSelectMany = params.canSelectMany ?? false;
       input.placeholder = params.placeholder ?? '';
       input.items = params.items;
+      input.matchOnDescription = params.matchOnDescription ?? false;
+      input.matchOnDetail = params.matchOnDetail ?? false;
       if (params.canSelectMany) {
         if (params.selectedItems) {
           input.selectedItems = params.items.filter(item => params.selectedItems?.some(selected => selected.label === item.label));
