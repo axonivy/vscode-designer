@@ -112,7 +112,6 @@ interface BaseQuickPickParameters<P extends QuickPickItem> {
   value?: string;
   canSelectMany?: boolean;
   items: P[];
-  activeItems?: P[];
   selectedItems?: P[];
   placeholder?: string;
   ignoreFocusOut?: boolean;
