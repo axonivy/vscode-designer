@@ -176,9 +176,9 @@ export const importMarketProduct = async (selectionContext: AddCommandSelectionC
     state: InstallMarketProductState
   ) => {
     // Note: Curerntly, engine does not support missing ivy project dependency
-    if (!isIvyProjectSelectionRequired(state.projects ?? [])) {
-      return;
-    }
+    // if (!isIvyProjectSelectionRequired(state.projects ?? [])) {
+    //   return;
+    // }
 
     let dependentProjectFilterText: string | undefined = undefined;
     if (projectFromSelection) {
@@ -312,6 +312,7 @@ function parseProduct(productJson: string) {
   return product;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const isIvyProjectSelectionRequired = (products: ProductProjectSelection[]) => {
   if (products.every(project => project.mavenType === 'maven-import')) {
     return false;
