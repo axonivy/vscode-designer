@@ -247,12 +247,16 @@ export const importMarketProduct = async (selectionContext: AddCommandSelectionC
       'Market Product installation failed due to corrupted input state. ProductJson is not set. Current input state: ' +
         JSON.stringify(installMarketProductData)
     );
-  } else {
+  }
+
+  try {
     const installMarketProductInput: ProductInstallParams = {
       productJson: installMarketProductData.productJson,
       dependentProjectPath: installMarketProductData.dependentProject?.path ?? ''
     };
     await IvyEngineManager.instance.installMarketProduct(installMarketProductInput);
+  } catch (err) {
+    logErrorMessage('Market installation failed: ' + (err instanceof Error ? err.message : err));
   }
 };
 
