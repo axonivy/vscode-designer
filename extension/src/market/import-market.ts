@@ -160,6 +160,7 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
     let initialProjectSelection: ProductProjectSelection[] | undefined = undefined;
     if (!state.changedProjectSelection) {
       initialProjectSelection = projectItems.filter(project => project.isPicked);
+      state.changedProjectSelection = true;
     }
 
     state.projects = await input.showQuickPick<ProductProjectSelection, true>({
@@ -292,7 +293,7 @@ const parseAvailableProjectItems = (product: MarketProduct): ProductProjectSelec
         const data = installer.data as MavenProjectInstaller;
         availableProjects.push(
           ...data.projects.map(project => ({
-            label: `(${installer.id}) ${project.artifactId} (${project.groupId})`,
+            label: `🚀 (${installer.id}) ${project.artifactId} (${project.groupId})`,
             mavenType: 'maven-import' as const,
             artifactId: project.artifactId ?? '',
             groupId: project.groupId ?? '',
