@@ -12,7 +12,7 @@ import {
   type MSStateBase,
   type ProjectSelection
 } from '../project-explorer/utils/multi-step-input';
-import type { MarketProduct, MavenDependencyInstaller, MavenProjectInstaller } from './generated/market-product';
+import type { Dependency, Installer, MarketProduct, MavenDependencyInstaller, MavenProjectInstaller } from './generated/market-product';
 import { fetchInstaller, getAvailableVersions, getBestVersion, searchMarketProduct } from './market-client';
 
 interface ProductSelection extends QuickPickItem {
@@ -94,6 +94,8 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
   let projectFromSelection = selectionContext.projectPathSelection;
   const allProducts = await searchMarketProduct();
 
+  // TODO: Discard products that have minimumIvyVersion set and higher than current Ivy version. If no products left, abort and inform.
+
   const stepProduct: InputStep<InstallMarketProductState> = async (
     input: MultiStepInput<InstallMarketProductState>,
     state: InstallMarketProductState
@@ -173,16 +175,6 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
       onBack: (typedValue: string, selectedItems: ProductProjectSelection[]) => {
         state.projectsSearchString = typedValue;
         state.projects = selectedItems;
-      },
-      onDidChangeSelection: (
-        selectedItems: ProductProjectSelection[],
-        overrideSelectedItems: (overrideItems: ProductProjectSelection[]) => void
-      ) => {
-        const requiredProjects = projectItems.filter(project => project.mavenType === 'maven-dependency');
-        const overrideSelection = [...new Map([...selectedItems, ...requiredProjects].map(item => [item.label, item])).values()];
-        overrideSelectedItems(overrideSelection);
-        state.projects = overrideSelection;
-        state.changedProjectSelection = true;
       }
     });
     state.productJson = markProjectsForImport(productJson, state.projects ?? []);
@@ -300,7 +292,7 @@ const parseAvailableProjectItems = (product: MarketProduct): ProductProjectSelec
         const data = installer.data as MavenProjectInstaller;
         availableProjects.push(
           ...data.projects.map(project => ({
-            label: `${project.artifactId} (${project.groupId})`,
+            label: `(${installer.id}) ${project.artifactId} (${project.groupId})`,
             mavenType: 'maven-import' as const,
             artifactId: project.artifactId ?? '',
             groupId: project.groupId ?? '',
@@ -313,7 +305,7 @@ const parseAvailableProjectItems = (product: MarketProduct): ProductProjectSelec
         const data = installer.data as MavenDependencyInstaller;
         availableProjects.push(
           ...(data.dependencies?.map(dependency => ({
-            label: `(REQUIRED) ${dependency.artifactId} (${dependency.groupId})`,
+            label: `(${installer.id}) ${dependency.artifactId} (${dependency.groupId})`,
             mavenType: 'maven-dependency' as const,
             artifactId: dependency.artifactId ?? '',
             groupId: dependency.groupId ?? '',
@@ -335,14 +327,52 @@ const markProjectsForImport = (productJson: string, selectedProjects: ProductPro
     throw new Error('No installers found in product.json');
   }
   for (const installer of product.installers) {
-    if (installer.id === 'maven-import') {
-      const dataProjectInstaller = installer.data as MavenProjectInstaller;
-      const projects = dataProjectInstaller.projects;
-      projects.forEach(project => {
-        project.importInWorkspace = selectedProjects.some(sp => sp.artifactId === project.artifactId && sp.groupId === project.groupId);
-      });
+    switch (installer.id) {
+      case 'maven-import': {
+        const dataProjectInstaller = installer.data as MavenProjectInstaller;
+        const projects = dataProjectInstaller.projects;
+        projects.forEach(project => {
+          project.importInWorkspace = selectedProjects.some(sp => sp.artifactId === project.artifactId && sp.groupId === project.groupId);
+        });
+        break;
+      }
+      case 'maven-dependency': {
+        const dataDependencyInstaller = installer.data as MavenDependencyInstaller;
+        const selectedDependencies: Dependency[] = [];
+        const allDependencies = dataDependencyInstaller.dependencies ?? [];
+        allDependencies.forEach(dependency => {
+          const isSelected = selectedProjects.some(sp => sp.artifactId === dependency.artifactId && sp.groupId === dependency.groupId);
+          if (isSelected) {
+            selectedDependencies.push(dependency);
+          }
+        });
+        installer.data.dependencies = selectedDependencies;
+        break;
+      }
+      default:
+        throw new Error(`Unsupported installer type: ${installer.id}`);
     }
   }
+
+  const filteredInstallers: Installer[] = product.installers.filter(installer => {
+    if (!installer) return false;
+    switch (installer.id) {
+      case 'maven-import': {
+        const dataProjectInstaller = installer.data as MavenProjectInstaller;
+        const projects = dataProjectInstaller.projects;
+        return projects.length > 0;
+      }
+      case 'maven-dependency': {
+        const dataDependencyInstaller = installer.data as MavenDependencyInstaller;
+        const dependencies = dataDependencyInstaller.dependencies ?? [];
+        return dependencies.length > 0;
+      }
+      default:
+        throw new Error(`Unsupported installer type: ${installer.id}`);
+    }
+  });
+
+  product.installers = filteredInstallers;
   return JSON.stringify(product);
 };
 

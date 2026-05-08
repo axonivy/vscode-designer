@@ -26,7 +26,8 @@ export interface MSStateBase {
 
 const enum InputFlowAction {
   back,
-  cancel
+  cancel,
+  abort
 }
 
 export interface ProjectSelection extends QuickPickItem {
@@ -118,7 +119,6 @@ interface BaseQuickPickParameters<P extends QuickPickItem> {
   matchOnDescription?: boolean;
   matchOnDetail?: boolean;
   onBack?: (typedValue: string, selectedItems: P[]) => void;
-  onDidChangeSelection?: (selectedItems: P[], overrideSelectedItems: (overrideItems: P[]) => void) => void;
 }
 
 interface SingleQuickPickParameters<P extends QuickPickItem> extends BaseQuickPickParameters<P> {
@@ -156,6 +156,9 @@ export class MultiStepInput<T extends MSStateBase> {
           this.currentStep = steps[stepIndex];
         } else if (err == InputFlowAction.cancel) {
           throw new MultiStepCancelledError('Dialog cancelled by the user');
+        } else if (err == InputFlowAction.abort) {
+          this.current?.hide();
+          throw new MultiStepCancelledError('Selection was empty, dialog aborted');
         } else {
           throw err;
         }
@@ -268,6 +271,9 @@ export class MultiStepInput<T extends MSStateBase> {
         }),
         input.onDidAccept(() => {
           if (params.canSelectMany) {
+            if (input.selectedItems.length === 0) {
+              reject(InputFlowAction.abort);
+            }
             resolve(input.selectedItems as QuickPickResult<T, M>);
           }
         }),
@@ -275,9 +281,6 @@ export class MultiStepInput<T extends MSStateBase> {
           if (!params.canSelectMany && items.length === 1 && items[0]) {
             resolve(items[0] as QuickPickResult<T, M>);
           } else if (params.canSelectMany) {
-            params.onDidChangeSelection?.(items as T[], overrideItems => {
-              input.selectedItems = overrideItems;
-            });
             return;
           } else {
             return;
