@@ -8,7 +8,7 @@ import { logErrorMessage, logInformationMessage, logWarningMessage } from '../ba
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { importMarketProduct, importMarketProductFile } from '../market/import-market';
+import { importMarketProductFile, installMarketProduct } from '../market/import-market';
 import { importNewProcess } from './import-process';
 import { IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject, type Entry } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
@@ -267,7 +267,7 @@ export class IvyProjectExplorer {
     if (!addCommandContext) {
       return;
     }
-    await importMarketProduct(addCommandContext, extensionVersion);
+    await installMarketProduct(addCommandContext, extensionVersion);
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {

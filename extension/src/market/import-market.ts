@@ -89,7 +89,7 @@ async function replaceDynamicVersion(productJson: string) {
   return productJson;
 }
 
-export const importMarketProduct = async (selectionContext: AddCommandSelectionContext, extensionVersion: string) => {
+export const installMarketProduct = async (selectionContext: AddCommandSelectionContext, extensionVersion: string) => {
   const existingProjects = selectionContext.existingIvyProjects;
   let projectFromSelection = selectionContext.projectPathSelection;
   const allProducts = await searchMarketProduct();
