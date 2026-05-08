@@ -12,11 +12,11 @@ test.describe('Market Product installation', () => {
     await explorer.hasDeployProjectStatusMessage();
   });
 
-  test('Install product from Market website', async () => {
+  test('Install product without maven-dependency from Market website', async () => {
     await explorer.selectNode('resources');
     await explorer.installProduct('connectivity-demo');
     await explorer.provideUserInput('14.0.0-SNAPSHOT');
-    const header = explorer.quickInputHeader();
+    const header = explorer.page.locator('div.quick-input-header');
     const checkbox = header.getByRole('checkbox', { name: 'Toggle all checkboxes' });
     await expect(checkbox).toBeVisible();
     const ariaChecked = await checkbox.getAttribute('aria-checked');
@@ -25,10 +25,28 @@ test.describe('Market Product installation', () => {
     }
     await expect(checkbox).toHaveAttribute('aria-checked', 'true');
     await explorer.provideUserInput();
-    await explorer.selectNthVisibleItemFromQuickPick(0);
     await explorer.executeCommand('Refresh Explorer');
     await explorer.selectNodeExact('connectivity-demos');
     await processEditor.openEditorFile();
+  });
+
+  test('Install product with maven-dependency from Market website', async () => {
+    await explorer.selectNode('resources');
+    await explorer.installProduct('excel-connector');
+    await explorer.clickNthVisibleItemFromQuickPick(0);
+    const header = explorer.page.locator('div.quick-input-header');
+    const checkbox = header.getByRole('checkbox', { name: 'Toggle all checkboxes' });
+    await expect(checkbox).toBeVisible();
+    const ariaChecked = await checkbox.getAttribute('aria-checked');
+    if (ariaChecked == 'false') {
+      await checkbox.click();
+    }
+    await expect(checkbox).toHaveAttribute('aria-checked', 'true');
+    await explorer.provideUserInput();
+    await expect(explorer.quickInputBox()).toBeVisible();
+    await explorer.clickNthVisibleItemFromQuickPick(0);
+    await explorer.executeCommand('Refresh Explorer');
+    await explorer.selectNodeExact('excel-connector-demo');
   });
 
   test('Install local product.json', async () => {

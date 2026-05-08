@@ -67,10 +67,6 @@ export class PageObject {
     return this.page.locator('div.quick-input-list');
   }
 
-  quickInputHeader(): Locator {
-    return this.page.locator('div.quick-input-header');
-  }
-
   toasts(): Locator {
     return this.page.locator('div.notification-toast-container');
   }
@@ -101,9 +97,9 @@ export class PageObject {
     await expect(item).toBeHidden();
   }
 
-  async selectNthVisibleItemFromQuickPick(n: number) {
-    const item = this.page.locator('div.quick-input-list').locator('div.monaco-icon-label-container:visible').nth(n);
+  async clickNthVisibleItemFromQuickPick(n: number) {
+    const item = this.page.locator('.quick-input-list').locator(`.monaco-list-row[data-index="${n}"]`);
+    await expect(item).toHaveCount(1);
     await item.click();
-    await expect(item).toBeHidden();
   }
 }
