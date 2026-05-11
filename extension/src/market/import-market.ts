@@ -94,8 +94,6 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
   let projectFromSelection = selectionContext.projectPathSelection;
   const allProducts = await searchMarketProduct();
 
-  // TODO: Discard products that have minimumIvyVersion set and higher than current Ivy version. If no products left, abort and inform.
-
   const stepProduct: InputStep<InstallMarketProductState> = async (
     input: MultiStepInput<InstallMarketProductState>,
     state: InstallMarketProductState
@@ -129,6 +127,7 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
     state: InstallMarketProductState
   ) => {
     const availableVersions = state.product ? await getAvailableVersions(state.product.id ?? '') : [];
+    // TODO: Use extensionVersion or engineVersion?
     const bestVersion = await getBestVersion(state.product?.id ?? '', extensionVersion);
 
     const previousVersion = state.version;
@@ -162,6 +161,8 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
       initialProjectSelection = projectItems.filter(project => project.isPicked);
       state.changedProjectSelection = true;
     }
+
+    // TODO: Don't show products that have minimumIvyVersion set and higher than current Ivy version?
 
     state.projects = await input.showQuickPick<ProductProjectSelection, true>({
       title: state.dialogTitle,
@@ -383,7 +384,6 @@ const markProjectsForImport = (productJson: string, selectedProjects: ProductPro
   return JSON.stringify(product);
 };
 
-// TODO: Will be deprecated
 async function selectProjects(product: MarketProduct) {
   for (const installer of product?.installers ?? []) {
     if (installer.id === 'maven-import') {
