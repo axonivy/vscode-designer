@@ -96,10 +96,4 @@ export class PageObject {
     await item.click();
     await expect(item).toBeHidden();
   }
-
-  async clickNthVisibleItemFromQuickPick(n: number) {
-    const item = this.page.locator('.quick-input-list').locator(`.monaco-list-row[data-index="${n}"]`);
-    await expect(item).toHaveCount(1);
-    await item.click();
-  }
 }

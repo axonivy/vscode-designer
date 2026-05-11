@@ -33,7 +33,7 @@ test.describe('Market Product installation', () => {
   test('Install product with maven-dependency from Market website', async () => {
     await explorer.selectNode('resources');
     await explorer.installProduct('excel-connector');
-    await explorer.clickNthVisibleItemFromQuickPick(0);
+    await explorer.provideUserInput('13.1.2');
     const header = explorer.page.locator('div.quick-input-header');
     const checkbox = header.getByRole('checkbox', { name: 'Toggle all checkboxes' });
     await expect(checkbox).toBeVisible();
@@ -44,7 +44,7 @@ test.describe('Market Product installation', () => {
     await expect(checkbox).toHaveAttribute('aria-checked', 'true');
     await explorer.provideUserInput();
     await expect(explorer.quickInputBox()).toBeVisible();
-    await explorer.clickNthVisibleItemFromQuickPick(0);
+    await explorer.provideUserInput('playwrightTestWorkspace');
     await explorer.executeCommand('Refresh Explorer');
     await explorer.selectNodeExact('excel-connector-demo');
   });

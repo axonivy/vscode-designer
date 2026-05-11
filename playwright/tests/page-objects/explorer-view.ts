@@ -111,7 +111,7 @@ export class FileExplorer extends ExplorerView {
     }
     await this.selectNode('config');
     await this.executeCommand('Axon Ivy: New ' + kind);
-    await this.clickNthVisibleItemFromQuickPick(0);
+    await this.provideUserInput('playwrightTestWorkspace');
     await this.provideUserInput(processName);
     await expect(this.quickInputBox().getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
     await this.provideUserInput(namespace);
@@ -140,7 +140,7 @@ export class FileExplorer extends ExplorerView {
   ) {
     await this.selectNode('config');
     await this.executeCommand('Axon Ivy: New ' + kind);
-    await this.clickNthVisibleItemFromQuickPick(0);
+    await this.provideUserInput('playwrightTestWorkspace');
     await this.provideUserInput(dialogName);
     await expect(this.quickInputBox().getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
     await this.provideUserInput(namespace);
@@ -153,7 +153,7 @@ export class FileExplorer extends ExplorerView {
   async addDataClass(dataClass: string, namespace: string, defaultNamespaceExpected: string = 'prebuiltProject') {
     await this.selectNode('config');
     await this.executeCommand('Axon Ivy: New Data Class');
-    await this.clickNthVisibleItemFromQuickPick(0);
+    await this.provideUserInput('playwrightTestWorkspace');
     await this.provideUserInput(dataClass);
     await expect(this.quickInputBox().getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
     await this.provideUserInput(namespace);
@@ -162,7 +162,7 @@ export class FileExplorer extends ExplorerView {
   async addEntityClass(entityClass: string, namespace: string, defaultNamespaceExpected: string = 'prebuiltProject') {
     await this.selectNode('config');
     await this.executeCommand('Axon Ivy: New Entity Class');
-    await this.clickNthVisibleItemFromQuickPick(0);
+    await this.provideUserInput('playwrightTestWorkspace');
     await this.provideUserInput(entityClass);
     await expect(this.quickInputBox().getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
     await this.provideUserInput(namespace);
