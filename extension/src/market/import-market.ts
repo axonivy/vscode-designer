@@ -40,7 +40,6 @@ interface InstallMarketProductState extends MSStateBase {
   changedProjectSelection?: boolean;
   dependentProject?: ProjectSelection;
   dependentProjectFilterText?: string;
-  // productJson?: string;
 }
 
 export const importMarketProductFile = async (projectDir: () => Promise<string>) => {
