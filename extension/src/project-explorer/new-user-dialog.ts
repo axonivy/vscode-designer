@@ -122,7 +122,7 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
         placeholder: 'Select one of the available projects',
         currentStep: state.currentStep,
         totalSteps: state.totalSteps,
-        activeItem: state.project,
+        value: state.project ? state.project.label : '',
         items: existingProjects.map(project => {
           return {
             label: project.substring(project.lastIndexOf(path.sep) + 1),
@@ -172,13 +172,17 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
       placeholder: 'Select one of the available layouts',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
+      value: state.layout ? state.layout.label : '',
       items: layouts
         .filter(layout => layout !== 'Page')
         .map(layout => {
           return {
             label: layout
           };
-        })
+        }),
+      onBack: (typedValue: string) => {
+        state.layout = { label: typedValue as Layout };
+      }
     });
   };
 
@@ -192,11 +196,15 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
         placeholder: 'Select one of the available templates',
         currentStep: state.currentStep,
         totalSteps: state.totalSteps,
+        value: state.template ? state.template.label : '',
         items: templates.map(template => {
           return {
             label: template
           };
-        })
+        }),
+        onBack: (typedValue: string) => {
+          state.template = { label: typedValue as Template };
+        }
       });
     }
   };

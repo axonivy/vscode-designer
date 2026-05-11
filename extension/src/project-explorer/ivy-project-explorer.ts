@@ -8,7 +8,7 @@ import { logErrorMessage, logInformationMessage, logWarningMessage } from '../ba
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { importMarketProduct, importMarketProductFile } from '../market/import-market';
+import { importMarketProductFile, installMarketProduct } from '../market/import-market';
 import { importNewProcess } from './import-process';
 import { IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject, type Entry } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
@@ -75,7 +75,9 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.addWebServiceProcess`, (s: TreeSelection) => this.addProcess(s, 'Web Service Process'));
     registerCmd(`${VIEW_ID}.importBpmnProcess`, (s: TreeSelection) => this.importBpmnProcess(s));
     registerCmd(`${VIEW_ID}.installLocalMarketProduct`, (s: TreeSelection) => this.installLocalMarketProduct(s));
-    registerCmd(`${VIEW_ID}.installMarketProduct`, (s: TreeSelection) => this.installMarketProduct(s));
+    registerCmd(`${VIEW_ID}.installMarketProduct`, (s: TreeSelection) =>
+      this.installMarketProduct(s, context.extension.packageJSON.version)
+    );
 
     registerCmd(`${VIEW_ID}.addNewProject`, (s: TreeSelection) => this.addProject(s));
     registerCmd(`${VIEW_ID}.addNewHtmlDialog`, (s: TreeSelection, selections?: [TreeSelection], pid?: string) =>
@@ -259,8 +261,12 @@ export class IvyProjectExplorer {
     return projectPath;
   }
 
-  public async installMarketProduct(selection: TreeSelection) {
-    await importMarketProduct(() => this.resolveProject(selection));
+  public async installMarketProduct(selection: TreeSelection, extensionVersion: string) {
+    const addCommandContext = await this.getAddCommandSelectionContext(selection, false);
+    if (!addCommandContext) {
+      return;
+    }
+    await installMarketProduct(addCommandContext, extensionVersion);
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {
@@ -341,9 +347,12 @@ export class IvyProjectExplorer {
     return this.treeDataProvider.hasIvyProjects();
   }
 
-  private async getAddCommandSelectionContext(selection: TreeSelection): Promise<AddCommandSelectionContext | undefined> {
+  private async getAddCommandSelectionContext(
+    selection: TreeSelection,
+    needsExistingIvyProjects: boolean = true
+  ): Promise<AddCommandSelectionContext | undefined> {
     const hasIvyProjects = await this.hasIvyProjects();
-    if (!hasIvyProjects) {
+    if (needsExistingIvyProjects && !hasIvyProjects) {
       logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
       return;
     }

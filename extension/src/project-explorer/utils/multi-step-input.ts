@@ -26,7 +26,8 @@ export interface MSStateBase {
 
 const enum InputFlowAction {
   back,
-  cancel
+  cancel,
+  abortEmptySelection
 }
 
 export interface ProjectSelection extends QuickPickItem {
@@ -104,17 +105,30 @@ interface TextInputParameters {
   ignoreFocusOut?: boolean;
 }
 
-interface QuickPickParameters<P extends QuickPickItem> {
+interface BaseQuickPickParameters<P extends QuickPickItem> {
   title: string;
   titleSuffix?: string;
   currentStep: number;
   totalSteps: number;
+  value?: string;
+  canSelectMany?: boolean;
   items: P[];
-  activeItem?: P;
+  selectedItems?: P[];
   placeholder?: string;
-  onBack?: (typedValue: P) => void;
   ignoreFocusOut?: boolean;
+  matchOnDescription?: boolean;
+  matchOnDetail?: boolean;
+  onBack?: (typedValue: string, selectedItems: P[]) => void;
 }
+
+interface SingleQuickPickParameters<P extends QuickPickItem> extends BaseQuickPickParameters<P> {
+  canSelectMany?: false;
+}
+interface MultiQuickPickParameters<P extends QuickPickItem> extends BaseQuickPickParameters<P> {
+  canSelectMany: true;
+}
+
+type QuickPickResult<T, M extends boolean> = M extends true ? T[] : T;
 
 export class MultiStepInput<T extends MSStateBase> {
   private current?: QuickInput;
@@ -142,7 +156,11 @@ export class MultiStepInput<T extends MSStateBase> {
           this.currentStep = steps[stepIndex];
         } else if (err == InputFlowAction.cancel) {
           throw new MultiStepCancelledError('Dialog cancelled by the user');
+        } else if (err == InputFlowAction.abortEmptySelection) {
+          this.current?.hide();
+          throw new MultiStepCancelledError('Selection was empty, dialog aborted');
         } else {
+          this.current?.hide();
           throw err;
         }
       }
@@ -222,41 +240,50 @@ export class MultiStepInput<T extends MSStateBase> {
     }
   }
 
-  async showQuickPick<T extends QuickPickItem>({
-    title,
-    titleSuffix,
-    currentStep,
-    totalSteps,
-    activeItem,
-    items,
-    ignoreFocusOut,
-    placeholder
-  }: QuickPickParameters<T>): Promise<T> {
+  async showQuickPick<T extends QuickPickItem, M extends boolean = false>(
+    params: M extends true ? MultiQuickPickParameters<T> : SingleQuickPickParameters<T>
+  ): Promise<QuickPickResult<T, M>> {
     const disposables: Disposable[] = [];
 
-    const p = new Promise<T>((resolve, reject) => {
+    const p = new Promise<QuickPickResult<T, M>>((resolve, reject) => {
       const input = window.createQuickPick<T>();
-      input.title = title + (titleSuffix ?? '');
-      input.step = currentStep;
-      input.totalSteps = totalSteps;
-      input.ignoreFocusOut = ignoreFocusOut ?? true;
-      input.placeholder = placeholder ?? '';
-      input.items = items;
-      if (activeItem) {
-        input.activeItems = [activeItem];
-        input.selectedItems = [activeItem];
-        input.value = activeItem.label;
+      input.title = params.title + (params.titleSuffix ?? '');
+      input.step = params.currentStep;
+      input.totalSteps = params.totalSteps;
+      input.ignoreFocusOut = params.ignoreFocusOut ?? true;
+      input.value = params.value ?? '';
+      input.canSelectMany = params.canSelectMany ?? false;
+      input.placeholder = params.placeholder ?? '';
+      input.items = params.items;
+      input.matchOnDescription = params.matchOnDescription ?? false;
+      input.matchOnDetail = params.matchOnDetail ?? false;
+      if (params.canSelectMany) {
+        if (params.selectedItems) {
+          input.selectedItems = params.items.filter(item => params.selectedItems?.some(selected => selected.label === item.label));
+        }
       }
-      input.buttons = currentStep > 1 ? [QuickInputButtons.Back] : [];
+      input.buttons = params.currentStep > 1 ? [QuickInputButtons.Back] : [];
       disposables.push(
         input.onDidTriggerButton(item => {
           if (item === QuickInputButtons.Back) {
+            params.onBack?.(input.value, input.selectedItems as T[]);
             reject(InputFlowAction.back);
           }
         }),
+        input.onDidAccept(() => {
+          if (params.canSelectMany) {
+            if (input.selectedItems.length === 0) {
+              reject(InputFlowAction.abortEmptySelection);
+              return;
+            }
+            resolve(input.selectedItems as QuickPickResult<T, M>);
+          }
+        }),
         input.onDidChangeSelection(items => {
-          if (items.length === 1 && items[0]) {
-            resolve(items[0]);
+          if (!params.canSelectMany && items.length === 1 && items[0]) {
+            resolve(items[0] as QuickPickResult<T, M>);
+          } else if (params.canSelectMany) {
+            return;
           } else {
             return;
           }

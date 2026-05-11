@@ -21,7 +21,7 @@ export default defineConfig({
   openapiMarket: {
     input: {
       target: 'target/market/openapi.json',
-      filters: { tags: ['Product Controller', 'Product Detail Controllers'] }
+      filters: { tags: ['Product Controller', 'product-details-controller'] }
     },
     output: {
       target: 'extension/src/market/generated/market-client.ts',

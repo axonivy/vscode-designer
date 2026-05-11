@@ -1,7 +1,9 @@
 import {
+  findBestMatchProductDetailsByVersion,
   findProductJsonContent,
   findProducts,
   findProductVersionsById,
+  type BestMatchVersion,
   type MavenArtifactVersionModel,
   type ProductModel
 } from './generated/market-client';
@@ -25,11 +27,17 @@ export async function searchMarketProduct(): Promise<Product[]> {
   );
 }
 
-export async function availableVersions(productId: string) {
+export async function getAvailableVersions(productId: string) {
   const response = await findProductVersionsById(productId, { isShowDevVersion: true });
   const data = response.data as unknown as MavenArtifactVersionModel[];
-  return data.map(v => v.version || '') || [];
+  return (data || []).map(v => v.version).filter((version): version is string => typeof version === 'string' && version.length > 0);
 }
+
+export const getBestVersion = async (productId: string, designerVersion: string) => {
+  const response = await findBestMatchProductDetailsByVersion(productId, designerVersion, { isShowDevVersion: true });
+  const data = response.data as BestMatchVersion;
+  return data.version || '';
+};
 
 export async function fetchInstaller(productId: string, productVersion: string) {
   const response = await findProductJsonContent(productId, { productVersion });
