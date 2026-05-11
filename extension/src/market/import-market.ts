@@ -187,6 +187,12 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
   ) => {
     if (!isIvyProjectSelectionRequired(state.projects ?? [])) {
       return;
+    } else {
+      if (existingProjects.length === 0) {
+        throw new MultiStepCancelledError(
+          'At least one existing Ivy project is required for installing this Market Product. No Axon Ivy projects in the workspace. Create an Axon Ivy project first.'
+        );
+      }
     }
 
     let dependentProjectFilterText: string | undefined = undefined;

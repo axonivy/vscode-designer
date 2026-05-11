@@ -160,6 +160,7 @@ export class MultiStepInput<T extends MSStateBase> {
           this.current?.hide();
           throw new MultiStepCancelledError('Selection was empty, dialog aborted');
         } else {
+          this.current?.hide();
           throw err;
         }
       }
