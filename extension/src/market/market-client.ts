@@ -1,4 +1,3 @@
-import { logErrorMessage } from '../base/logging-util';
 import {
   findBestMatchProductDetailsByVersion,
   findProductJsonContent,
@@ -36,12 +35,6 @@ export async function getAvailableVersions(productId: string) {
 
 export const getBestVersion = async (productId: string, designerVersion: string) => {
   const response = await findBestMatchProductDetailsByVersion(productId, designerVersion, { isShowDevVersion: true });
-  if (response.status !== 200) {
-    const errorData = response.data as unknown;
-    logErrorMessage(
-      `Failed to fetch best match version for product ${productId} with version ${designerVersion}. Status: ${response.status}. Response: ${JSON.stringify(errorData)}`
-    );
-  }
   const data = response.data as BestMatchVersion;
   return data.version || '';
 };
