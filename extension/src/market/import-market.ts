@@ -293,7 +293,7 @@ const parseAvailableProjectItems = (product: MarketProduct): ProductProjectSelec
         const data = installer.data as MavenProjectInstaller;
         availableProjects.push(
           ...data.projects.map(project => ({
-            label: `🚀 (${installer.id}) ${project.artifactId} (${project.groupId})`,
+            label: `👁️ ${project.artifactId} (${project.groupId})`,
             mavenType: 'maven-import' as const,
             artifactId: project.artifactId ?? '',
             groupId: project.groupId ?? '',
@@ -306,7 +306,7 @@ const parseAvailableProjectItems = (product: MarketProduct): ProductProjectSelec
         const data = installer.data as MavenDependencyInstaller;
         availableProjects.push(
           ...(data.dependencies?.map(dependency => ({
-            label: `(${installer.id}) ${dependency.artifactId} (${dependency.groupId})`,
+            label: `🔧 ${dependency.artifactId} (${dependency.groupId})`,
             mavenType: 'maven-dependency' as const,
             artifactId: dependency.artifactId ?? '',
             groupId: dependency.groupId ?? '',
