@@ -27,7 +27,7 @@ export interface MSStateBase {
 const enum InputFlowAction {
   back,
   cancel,
-  abort
+  abortEmptySelection
 }
 
 export interface ProjectSelection extends QuickPickItem {
@@ -156,7 +156,7 @@ export class MultiStepInput<T extends MSStateBase> {
           this.currentStep = steps[stepIndex];
         } else if (err == InputFlowAction.cancel) {
           throw new MultiStepCancelledError('Dialog cancelled by the user');
-        } else if (err == InputFlowAction.abort) {
+        } else if (err == InputFlowAction.abortEmptySelection) {
           this.current?.hide();
           throw new MultiStepCancelledError('Selection was empty, dialog aborted');
         } else {
@@ -272,7 +272,8 @@ export class MultiStepInput<T extends MSStateBase> {
         input.onDidAccept(() => {
           if (params.canSelectMany) {
             if (input.selectedItems.length === 0) {
-              reject(InputFlowAction.abort);
+              reject(InputFlowAction.abortEmptySelection);
+              return;
             }
             resolve(input.selectedItems as QuickPickResult<T, M>);
           }
