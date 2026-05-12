@@ -1,6 +1,6 @@
 import path from 'path';
 import { Uri, window, workspace, type QuickPickItem } from 'vscode';
-import { logErrorMessage, logInformationMessage } from '../base/logging-util';
+import { logErrorMessage } from '../base/logging-util';
 import type { ProductInstallParams } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import type { AddCommandSelectionContext } from '../project-explorer/ivy-project-explorer';
@@ -53,10 +53,11 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
       openLabel: 'Import product.json'
     });
     if (!productInstaller || productInstaller.length === 0 || !productInstaller[0]) {
-      throw new MultiStepCancelledError('No product.json file selected. Market Product installation cancelled.');
+      throw new MultiStepCancelledError('No product.json file selected. Dialog cancelled.');
     }
     const fileData = await workspace.fs.readFile(productInstaller[0]);
     const productJson = new TextDecoder('utf-8').decode(fileData);
+    parseProduct(productJson);
     return productJson;
   };
 
@@ -82,8 +83,6 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
           state.version = typedValue;
         }
       });
-    } else {
-      logInformationMessage('No ${version} placeholder found in product.json. Skipping version input step.');
     }
   };
 
@@ -151,17 +150,18 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     });
   };
 
-  const steps: InputStep<InstallMarketProductState>[] = [stepVersion, stepProjects, stepDependentProject];
-
+  const productJsonSelection = await stepSelectJson();
+  const steps: InputStep<InstallMarketProductState>[] = [stepProjects, stepDependentProject];
+  if (productJsonSelection.includes('${version}')) {
+    steps.unshift(stepVersion);
+  }
   const installLocalMarketProductData: InstallMarketProductState = {
     dialogTitle: 'Install Local Market Product',
     currentStep: 1,
-    totalSteps: steps.length
+    totalSteps: steps.length,
+    productJson: productJsonSelection
   };
-
   try {
-    const projectJsonSelection = stepSelectJson();
-    installLocalMarketProductData.productJson = await projectJsonSelection;
     await new MultiStepInput<InstallMarketProductState>().stepThrough(steps, installLocalMarketProductData);
   } catch (err) {
     if (err instanceof MultiStepCancelledError) {
@@ -184,18 +184,28 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     );
   }
   try {
-    const productJsonFinal = installLocalMarketProductData.productJson.replace(
-      /\$\{version\}/g,
+    installLocalMarketProductData.productJson = replaceDynamicVersion(
+      installLocalMarketProductData.productJson ?? '',
       installLocalMarketProductData.version ?? ''
     );
     const installMarketProductInput: ProductInstallParams = {
-      productJson: productJsonFinal,
+      productJson: installLocalMarketProductData.productJson,
       dependentProjectPath: installLocalMarketProductData.dependentProject?.path ?? ''
     };
     await IvyEngineManager.instance.installMarketProduct(installMarketProductInput);
   } catch (err) {
     logErrorMessage('Market installation failed: ' + (err instanceof Error ? err.message : err));
   }
+};
+
+const replaceDynamicVersion = (productJson: string, version: string): string => {
+  if (!productJson.includes('${version}')) {
+    return productJson;
+  }
+  if (!version) {
+    return productJson;
+  }
+  return productJson.replace(/\$\{version\}/g, version);
 };
 
 export const installMarketProduct = async (selectionContext: AddCommandSelectionContext, extensionVersion: string) => {
