@@ -63,10 +63,13 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   }
 
   private async findIvyProjects(): Promise<string[]> {
-    return (await workspace.findFiles(IVY_RPOJECT_FILE_PATTERN, this.excludePattern, this.maxResults))
-      .filter(p => isIvyProject(p))
-      .map(p => path.dirname(p.fsPath))
-      .sort();
+    return Array.from(
+      new Set(
+        (await workspace.findFiles(IVY_RPOJECT_FILE_PATTERN, this.excludePattern, this.maxResults))
+          .filter(p => isIvyProject(p))
+          .map(p => path.dirname(p.fsPath))
+      )
+    ).sort();
   }
 
   async hasIvyProjects(): Promise<boolean> {

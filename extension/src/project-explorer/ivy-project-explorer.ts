@@ -8,7 +8,7 @@ import { logErrorMessage, logInformationMessage, logWarningMessage } from '../ba
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { importMarketProductFile, installMarketProduct } from '../market/import-market';
+import { installLocalMarketProduct, installMarketProduct } from '../market/import-market';
 import { importNewProcess } from './import-process';
 import { IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject, type Entry } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
@@ -246,7 +246,11 @@ export class IvyProjectExplorer {
   }
 
   public async installLocalMarketProduct(selection: TreeSelection) {
-    await importMarketProductFile(() => this.resolveProject(selection));
+    const addCommandContext = await this.getAddCommandSelectionContext(selection, false);
+    if (!addCommandContext) {
+      return;
+    }
+    await installLocalMarketProduct(addCommandContext);
   }
 
   private async resolveProject(selection: TreeSelection) {
