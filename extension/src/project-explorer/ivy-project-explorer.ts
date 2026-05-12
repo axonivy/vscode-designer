@@ -253,18 +253,6 @@ export class IvyProjectExplorer {
     await installLocalMarketProduct(addCommandContext);
   }
 
-  private async resolveProject(selection: TreeSelection) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
-    if (!uri) {
-      throw new Error('No valid Axon Ivy Project selected.');
-    }
-    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (!projectPath) {
-      throw new Error('No valid Axon Ivy Project selected.');
-    }
-    return projectPath;
-  }
-
   public async installMarketProduct(selection: TreeSelection, extensionVersion: string) {
     const addCommandContext = await this.getAddCommandSelectionContext(selection, false);
     if (!addCommandContext) {
