@@ -27,8 +27,8 @@ export async function searchMarketProduct(): Promise<Product[]> {
   );
 }
 
-export async function getAvailableVersions(productId: string) {
-  const response = await findProductVersionsById(productId, { isShowDevVersion: true });
+export async function getAvailableVersions(productId: string, engineVersion: string) {
+  const response = await findProductVersionsById(productId, { designerVersion: engineVersion, isShowDevVersion: true });
   const data = response.data as unknown as MavenArtifactVersionModel[];
   return (data || []).map(v => v.version).filter((version): version is string => typeof version === 'string' && version.length > 0);
 }

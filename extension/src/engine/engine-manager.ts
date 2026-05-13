@@ -259,6 +259,14 @@ export class IvyEngineManager {
     await this.ivyEngineApi?.invalidateClassLoader(ivyProjectDirectory);
   }
 
+  public async getEngineVersion() {
+    if (!this.ivyEngineApi) {
+      return '';
+    }
+    const engineInfo = await this.ivyEngineApi.getEngineInfo();
+    return engineInfo.version ?? '';
+  }
+
   public async projects(withDependencies = false) {
     return this.ivyEngineApi?.projects(withDependencies);
   }
