@@ -208,7 +208,7 @@ const replaceDynamicVersion = (productJson: string, version: string): string => 
   return productJson.replace(/\$\{version\}/g, version);
 };
 
-export const installMarketProduct = async (selectionContext: AddCommandSelectionContext, extensionVersion: string) => {
+export const installMarketProduct = async (selectionContext: AddCommandSelectionContext, engineVersion: string) => {
   const existingProjects = selectionContext.existingIvyProjects;
   let projectFromSelection = selectionContext.projectPathSelection;
   const allProducts = await searchMarketProduct();
@@ -245,9 +245,13 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
     input: MultiStepInput<InstallMarketProductState>,
     state: InstallMarketProductState
   ) => {
-    const availableVersions = state.product ? await getAvailableVersions(state.product.id ?? '') : [];
-    // TODO: Use extensionVersion or engineVersion?
-    const bestVersion = await getBestVersion(state.product?.id ?? '', extensionVersion);
+    const availableVersions = state.product ? await getAvailableVersions(state.product.id ?? '', engineVersion) : [];
+    if (availableVersions.length === 0) {
+      throw new Error(
+        `No available product versions found that satisfy your engine version.Your current Ivy Engine version: ${engineVersion}. Please update your Ivy Engine.`
+      );
+    }
+    const bestVersion = await getBestVersion(state.product?.id ?? '', engineVersion);
 
     const previousVersion = state.version;
     const version = await input.showQuickPick({
@@ -280,9 +284,6 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
       initialProjectSelection = projectItems.filter(project => project.isPicked);
       state.changedProjectSelection = true;
     }
-
-    // TODO: Don't show products that have minimumIvyVersion set and higher than current Ivy version?
-
     state.projects = await input.showQuickPick<ProductProjectSelection, true>({
       title: state.dialogTitle,
       titleSuffix: ' - Choose Projects of Product to Import',

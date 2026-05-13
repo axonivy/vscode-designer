@@ -253,12 +253,13 @@ export class IvyProjectExplorer {
     await installLocalMarketProduct(addCommandContext);
   }
 
-  public async installMarketProduct(selection: TreeSelection, extensionVersion: string) {
+  public async installMarketProduct(selection: TreeSelection, extensionVersion?: string) {
     const addCommandContext = await this.getAddCommandSelectionContext(selection, false);
     if (!addCommandContext) {
       return;
     }
-    await installMarketProduct(addCommandContext, extensionVersion);
+    const engineVersion = (await IvyEngineManager.instance.getEngineVersion()) ?? extensionVersion ?? '';
+    await installMarketProduct(addCommandContext, engineVersion);
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {
