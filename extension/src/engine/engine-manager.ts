@@ -261,10 +261,10 @@ export class IvyEngineManager {
 
   public async getEngineVersion() {
     if (!this.ivyEngineApi) {
-      return '';
+      return;
     }
     const engineInfo = await this.ivyEngineApi.getEngineInfo();
-    return engineInfo.version ?? '';
+    return engineInfo.version;
   }
 
   public async projects(withDependencies = false) {
