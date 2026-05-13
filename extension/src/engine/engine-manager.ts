@@ -192,14 +192,12 @@ export class IvyEngineManager {
   }
 
   public async createProject(newProjectParams: NewProjectParams & { path: string }) {
-    await IvyProjectExplorer.instance.setProjectExplorerContext({ hasIvyProjects: true });
     if (!this.started) {
       await this.start();
     }
-    const path = newProjectParams.path;
-    return this.ivyEngineApi
-      ?.createProject(newProjectParams)
-      .then(() => executeCommand('java.project.import.command'))
+    await this.ivyEngineApi?.createProject(newProjectParams);
+    await IvyProjectExplorer.instance.setProjectExplorerContext({ hasIvyProjects: true });
+    executeCommand('java.project.import.command')
       .catch(() => {
         logWarningMessage('Java extension could not import project. Java support will not be available.');
       })
@@ -207,8 +205,8 @@ export class IvyEngineManager {
         this.createAndOpenProcess({
           name: 'BusinessProcess',
           kind: 'Business Process',
-          path,
-          namespace: await resolveDefaultNamespace(path, 'processes')
+          path: newProjectParams.path,
+          namespace: await resolveDefaultNamespace(newProjectParams.path, 'processes')
         })
       )
       .then(() => setStatusBarMessage('Finished: Create new Project'));
