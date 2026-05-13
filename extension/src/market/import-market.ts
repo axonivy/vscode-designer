@@ -42,51 +42,171 @@ interface InstallMarketProductState extends MSStateBase {
   dependentProjectFilterText?: string;
 }
 
-export const importMarketProductFile = async (projectDir: () => Promise<string>) => {
+export const installLocalMarketProduct = async (selectionContext: AddCommandSelectionContext) => {
+  const existingProjects = selectionContext.existingIvyProjects;
+
+  const stepSelectJson: () => Promise<string> = async () => {
+    const productInstaller = await window.showOpenDialog({
+      title: 'Select product.json file',
+      filters: { 'JSON files': ['json'] },
+      canSelectMany: false,
+      openLabel: 'Import product.json'
+    });
+    if (!productInstaller || productInstaller.length === 0 || !productInstaller[0]) {
+      throw new MultiStepCancelledError('No product.json file selected. Dialog cancelled.');
+    }
+    const fileData = await workspace.fs.readFile(productInstaller[0]);
+    const productJson = new TextDecoder('utf-8').decode(fileData);
+    parseProduct(productJson);
+    return productJson;
+  };
+
+  const stepVersion: InputStep<InstallMarketProductState> = async (
+    input: MultiStepInput<InstallMarketProductState>,
+    state: InstallMarketProductState
+  ) => {
+    if (state.productJson?.includes('${version}')) {
+      state.version = await input.showTextInput({
+        title: state.dialogTitle,
+        titleSuffix: ' - Resolve dynamic ${version} in product.json',
+        prompt: 'Enter a Maven version, which you made locally available by running `mvn clean install` from your product workspace.',
+        placeholder: '14.0.0-SNAPSHOT',
+        currentStep: state.currentStep,
+        totalSteps: state.totalSteps,
+        value: state.version ?? '',
+        validationFunction: (value: string) => {
+          if (!value.trim()) {
+            return 'Version is required for product.json files with ${version} placeholder. Please enter a version.';
+          }
+        },
+        onBack: (typedValue: string) => {
+          state.version = typedValue;
+        }
+      });
+    }
+  };
+
+  const stepProjects: InputStep<InstallMarketProductState> = async (
+    input: MultiStepInput<InstallMarketProductState>,
+    state: InstallMarketProductState
+  ) => {
+    const product = parseProduct(state.productJson ?? '');
+    const projectItems = parseAvailableProjectItems(product);
+    let initialProjectSelection: ProductProjectSelection[] | undefined = undefined;
+    if (!state.changedProjectSelection) {
+      initialProjectSelection = projectItems;
+      state.changedProjectSelection = true;
+    }
+
+    state.projects = await input.showQuickPick<ProductProjectSelection, true>({
+      title: state.dialogTitle,
+      titleSuffix: ' - Choose Projects of Product to Import',
+      placeholder: 'Select projects to import',
+      currentStep: state.currentStep,
+      totalSteps: state.totalSteps,
+      canSelectMany: true,
+      value: state.projectsSearchString,
+      items: projectItems,
+      selectedItems: initialProjectSelection ?? state.projects ?? [],
+      onBack: (typedValue: string, selectedItems: ProductProjectSelection[]) => {
+        state.projectsSearchString = typedValue;
+        state.projects = selectedItems;
+      }
+    });
+    state.productJson = markProjectsForImport(state.productJson ?? '', state.projects ?? []);
+  };
+
+  const stepDependentProject: InputStep<InstallMarketProductState> = async (
+    input: MultiStepInput<InstallMarketProductState>,
+    state: InstallMarketProductState
+  ) => {
+    if (!isIvyProjectSelectionRequired(state.projects ?? [])) {
+      return;
+    } else {
+      if (existingProjects.length === 0) {
+        throw new MultiStepCancelledError(
+          'At least one existing Ivy project is required for installing this Market Product. No Axon Ivy projects in the workspace. Create an Axon Ivy project first.'
+        );
+      }
+    }
+
+    state.dependentProject = await input.showQuickPick<ProjectSelection>({
+      title: state.dialogTitle,
+      titleSuffix: ' - Choose Ivy Project to install Product into',
+      placeholder: 'Select one of the available projects',
+      currentStep: state.currentStep,
+      totalSteps: state.totalSteps,
+      value: state.dependentProjectFilterText,
+      items: existingProjects.map(project => {
+        return {
+          label: project.substring(project.lastIndexOf(path.sep) + 1),
+          description: project,
+          path: project
+        };
+      }),
+      onBack: (typedValue: string) => {
+        state.dependentProjectFilterText = typedValue;
+      }
+    });
+  };
+
+  const productJsonSelection = await stepSelectJson();
+  const steps: InputStep<InstallMarketProductState>[] = [stepProjects, stepDependentProject];
+  if (productJsonSelection.includes('${version}')) {
+    steps.unshift(stepVersion);
+  }
+  const installLocalMarketProductData: InstallMarketProductState = {
+    dialogTitle: 'Install Local Market Product',
+    currentStep: 1,
+    totalSteps: steps.length,
+    productJson: productJsonSelection
+  };
   try {
-    const input = await collectLocalProductJson(projectDir);
-    await IvyEngineManager.instance.installMarketProduct(input);
+    await new MultiStepInput<InstallMarketProductState>().stepThrough(steps, installLocalMarketProductData);
+  } catch (err) {
+    if (err instanceof MultiStepCancelledError) {
+      logErrorMessage(err.message);
+      return;
+    } else {
+      throw err;
+    }
+  }
+
+  if (!installLocalMarketProductData.productJson) {
+    throw new MultiStepInvalidStateError(
+      'Market Product installation failed due to corrupted input state. ProductJson is not set. Current input state: ' +
+        JSON.stringify(installLocalMarketProductData)
+    );
+  } else if (installLocalMarketProductData.productJson.includes('${version}') && !installLocalMarketProductData.version) {
+    throw new MultiStepInvalidStateError(
+      'Market Product installation failed due to corrupted input state. ProductJson contains ${version} placeholder but version is not set. Current input state: ' +
+        JSON.stringify(installLocalMarketProductData)
+    );
+  }
+  try {
+    installLocalMarketProductData.productJson = replaceDynamicVersion(
+      installLocalMarketProductData.productJson ?? '',
+      installLocalMarketProductData.version ?? ''
+    );
+    const installMarketProductInput: ProductInstallParams = {
+      productJson: installLocalMarketProductData.productJson,
+      dependentProjectPath: installLocalMarketProductData.dependentProject?.path ?? ''
+    };
+    await IvyEngineManager.instance.installMarketProduct(installMarketProductInput);
   } catch (err) {
     logErrorMessage('Market installation failed: ' + (err instanceof Error ? err.message : err));
   }
 };
 
-const collectLocalProductJson = async (projectDir: () => Promise<string>): Promise<ProductInstallParams> => {
-  let productJson = await readProductJsonFromFile();
-  productJson = await replaceDynamicVersion(productJson);
-  const product = parseProduct(productJson);
-  productJson = await selectProjects(product);
-  return { productJson, dependentProjectPath: await projectDir() };
+const replaceDynamicVersion = (productJson: string, version: string): string => {
+  if (!productJson.includes('${version}')) {
+    return productJson;
+  }
+  if (!version) {
+    return productJson;
+  }
+  return productJson.replace(/\$\{version\}/g, version);
 };
-
-async function readProductJsonFromFile() {
-  const productInstaller = await window.showOpenDialog({
-    canSelectMany: false,
-    openLabel: 'Select a product.json file to Import'
-  });
-  if (!productInstaller || productInstaller.length === 0 || !productInstaller[0]) {
-    throw new Error('Cannot pick product.json file.');
-  }
-  const fileData = await workspace.fs.readFile(productInstaller[0]);
-  const decoder = new TextDecoder('utf-8');
-  const productJson = decoder.decode(fileData);
-  return productJson;
-}
-
-async function replaceDynamicVersion(productJson: string) {
-  if (productJson.includes('${version}')) {
-    const userVersion = await window.showInputBox({
-      title: 'Resolve dynamic ${version} in product.json',
-      prompt: 'Enter a Maven version, which you made locally available by running `mvn clean install` from your product workspace.',
-      placeHolder: '14.0.0-SNAPSHOT'
-    });
-    if (!userVersion) {
-      throw new Error('No version provided for ${version}');
-    }
-    productJson = productJson.replace(/\$\{version\}/g, userVersion);
-  }
-  return productJson;
-}
 
 export const installMarketProduct = async (selectionContext: AddCommandSelectionContext, extensionVersion: string) => {
   const existingProjects = selectionContext.existingIvyProjects;
@@ -258,7 +378,7 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
   }
 };
 
-function parseProduct(productJson: string) {
+const parseProduct = (productJson: string) => {
   let product: MarketProduct | undefined;
   try {
     product = JSON.parse(productJson);
@@ -269,7 +389,7 @@ function parseProduct(productJson: string) {
     throw new Error('Invalid product.json: No installers found.');
   }
   return product;
-}
+};
 
 const isIvyProjectSelectionRequired = (products: ProductProjectSelection[]) => {
   if (products.some(project => project.mavenType === 'maven-dependency')) {
@@ -382,27 +502,3 @@ const markProjectsForImport = (productJson: string, selectedProjects: ProductPro
   product.installers = filteredInstallers;
   return JSON.stringify(product);
 };
-
-async function selectProjects(product: MarketProduct) {
-  for (const installer of product?.installers ?? []) {
-    if (installer.id === 'maven-import') {
-      const data = installer.data as MavenProjectInstaller;
-      const projectItems = data.projects.map(project => ({
-        label: `${project.artifactId} (${project.groupId})`,
-        picked: typeof project.importInWorkspace !== 'boolean' ? true : project.importInWorkspace
-      }));
-      const selected = await window.showQuickPick(projectItems, {
-        canPickMany: true,
-        placeHolder: 'Select projects to import'
-      });
-      if (!selected) {
-        throw new Error('No projects selected by user');
-      }
-      data.projects.forEach((project, idx) => {
-        const label = projectItems[idx]?.label ?? '';
-        project.importInWorkspace = Array.isArray(selected) && label !== '' && selected.some(item => item.label === label);
-      });
-    }
-  }
-  return JSON.stringify(product);
-}

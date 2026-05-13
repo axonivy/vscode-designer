@@ -69,7 +69,7 @@ test.describe('Market Product installation', () => {
     await expect(projects).toBeVisible();
     const entry = projects.locator('div.quick-input-list-entry');
     await expect(entry).toHaveCount(1);
-    await expect(entry.getByRole('checkbox')).toHaveAttribute('aria-label', 'connectivity-demos (com.axonivy.demo)');
+    await expect(entry.getByRole('checkbox')).toHaveAttribute('aria-label', '👁️ connectivity-demos (com.axonivy.demo)');
 
     await explorer.provideUserInput(); // confirm projects
     await explorer.executeCommand('Refresh Explorer');

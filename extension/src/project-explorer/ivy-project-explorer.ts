@@ -8,7 +8,7 @@ import { logErrorMessage, logInformationMessage, logWarningMessage } from '../ba
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { importMarketProductFile, installMarketProduct } from '../market/import-market';
+import { installLocalMarketProduct, installMarketProduct } from '../market/import-market';
 import { importNewProcess } from './import-process';
 import { IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject, type Entry } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
@@ -246,19 +246,11 @@ export class IvyProjectExplorer {
   }
 
   public async installLocalMarketProduct(selection: TreeSelection) {
-    await importMarketProductFile(() => this.resolveProject(selection));
-  }
-
-  private async resolveProject(selection: TreeSelection) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
-    if (!uri) {
-      throw new Error('No valid Axon Ivy Project selected.');
+    const addCommandContext = await this.getAddCommandSelectionContext(selection, false);
+    if (!addCommandContext) {
+      return;
     }
-    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (!projectPath) {
-      throw new Error('No valid Axon Ivy Project selected.');
-    }
-    return projectPath;
+    await installLocalMarketProduct(addCommandContext);
   }
 
   public async installMarketProduct(selection: TreeSelection, extensionVersion: string) {
