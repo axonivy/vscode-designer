@@ -263,7 +263,7 @@ export class IvyEngineManager {
     if (!this.ivyEngineApi) {
       return;
     }
-    const engineInfo = await this.ivyEngineApi.getEngineInfo();
+    const engineInfo = await this.ivyEngineApi.getEngineVersion();
     return engineInfo.version;
   }
 

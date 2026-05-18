@@ -7,12 +7,6 @@
 import axios from 'axios';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 
-export interface EngineInfo {
-  version?: string;
-  engineName?: string;
-  minimumSupportedMobileAppVersion?: string;
-}
-
 export interface ProjectIdentifier {
   app: string;
   pmv: string;
@@ -66,6 +60,10 @@ export interface DataClassInit {
   name: string;
   project?: ProjectIdentifier;
   projectDir?: string;
+}
+
+export interface EngineVersion {
+  version?: string;
 }
 
 export interface FormIdentifier {
@@ -237,13 +235,6 @@ export const processDebugger = (options?: AxiosRequestConfig): Promise<AxiosResp
   return axios.get(`/web-ide/process/debugger`, options);
 };
 
-/**
- * Returns the version and the name of the engine
- */
-export const getInfo = (options?: AxiosRequestConfig): Promise<AxiosResponse<EngineInfo>> => {
-  return axios.get(`/engine/info`, options);
-};
-
 export const getCaseMaps = (options?: AxiosRequestConfig): Promise<AxiosResponse<CaseMapBean[]>> => {
   return axios.get(`/web-ide/casemaps`, options);
 };
@@ -280,6 +271,13 @@ export const deleteDataClass = (
 
 export const createEntityClass = (dataClassInit?: DataClassInit, options?: AxiosRequestConfig): Promise<AxiosResponse<DataClassBean>> => {
   return axios.post(`/web-ide/dataclass/entity`, dataClassInit, options);
+};
+
+/**
+ * Returns the version of the engine
+ */
+export const getVersion = (options?: AxiosRequestConfig): Promise<AxiosResponse<EngineVersion>> => {
+  return axios.get(`/web-ide/engine/version`, options);
 };
 
 export const forms = (options?: AxiosRequestConfig): Promise<AxiosResponse<HdBean[]>> => {
@@ -466,7 +464,6 @@ export const installMarketProduct = (
 };
 
 export type ProcessDebuggerResult = AxiosResponse<number>;
-export type GetInfoResult = AxiosResponse<EngineInfo>;
 export type GetCaseMapsResult = AxiosResponse<CaseMapBean[]>;
 export type CreateCaseMapResult = AxiosResponse<CaseMapBean>;
 export type DeleteCaseMapResult = AxiosResponse<unknown>;
@@ -475,6 +472,7 @@ export type DataClassesResult = AxiosResponse<DataClassBean[]>;
 export type CreateDataClassResult = AxiosResponse<DataClassBean>;
 export type DeleteDataClassResult = AxiosResponse<DataClassIdentifier>;
 export type CreateEntityClassResult = AxiosResponse<DataClassBean>;
+export type GetVersionResult = AxiosResponse<EngineVersion>;
 export type FormsResult = AxiosResponse<HdBean[]>;
 export type ComponentFormResult = AxiosResponse<HdBean>;
 export type DeleteFormResult = AxiosResponse<unknown>;

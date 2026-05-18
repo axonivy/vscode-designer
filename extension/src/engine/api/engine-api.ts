@@ -25,7 +25,7 @@ import {
   deleteProject,
   deployProjects,
   findOrCreatePmv,
-  getInfo,
+  getVersion,
   importProcess,
   installMarketProduct,
   invalidateClassLoader,
@@ -216,8 +216,8 @@ export class IvyEngineApi {
     return (await projects({ withDependencies }, { baseURL, ...options })).data;
   }
 
-  public async getEngineInfo() {
-    return getInfo({ baseURL: this.engineURL })
+  public async getEngineVersion() {
+    return getVersion({ baseURL: this.engineURL })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
