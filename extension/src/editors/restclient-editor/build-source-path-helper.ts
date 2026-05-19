@@ -63,7 +63,7 @@ export class BuildSourcePathHelper {
     indentBy: '  '
   });
 
-  async ensureGeneratedSourcePath(projectPath: string, clientName: string): Promise<boolean> {
+  async ensureGeneratedSourcePath(projectPath: string, clientPath: string): Promise<boolean> {
     const pomUri = Uri.joinPath(Uri.file(projectPath), 'pom.xml');
     const pomXml = new TextDecoder().decode(await workspace.fs.readFile(pomUri));
     const pom = this.parser.parse(pomXml) as PomDocument;
@@ -71,7 +71,7 @@ export class BuildSourcePathHelper {
       return false;
     }
 
-    const sourcePath = `${PROJECT_BASEDIR}/src_generated/rest/${clientName}`;
+    const sourcePath = `${PROJECT_BASEDIR}/${clientPath}`;
     const project = pom.project;
     const build = (project.build ??= {});
     const pluginsContainer = (build.plugins ??= {});
