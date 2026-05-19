@@ -55,6 +55,6 @@ test.describe('Create Process', () => {
 
   test('Process name validation', async () => {
     await explorer.addProcess('default', 'Business Process');
-    await expect(explorer.toasts().first()).toHaveText('Error validating Artifact Name: The entered name "default" is forbidden for this input');
+    await expect(explorer.toasts().first()).toHaveText("Error validating Artifact Name: The input 'default' is not allowed (Java keywords are not allowed)");
   });
 });
