@@ -1,6 +1,8 @@
-import type { WebServiceActionArgs } from '@axonivy/webservice-editor-protocol';
+import type { WebServiceActionArgs, WsGeneratorConfig } from '@axonivy/webservice-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
+import * as path from 'path';
 import type { TextDocument, WebviewPanel } from 'vscode';
+import { window } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { updateTextDocumentContent } from '../content-writer';
@@ -12,6 +14,8 @@ import {
   openUrlExternally,
   WebviewReadyNotification
 } from '../notification-helper';
+import { BuildSourcePathHelper } from '../restclient-editor/build-source-path-helper';
+import { runMavenCommand } from '../restclient-editor/maven-runner';
 import { WebSocketForwarder } from '../websocket-forwarder';
 
 const WebServiceClientWebSocketMessage: NotificationType<unknown> = { method: 'webServiceClientWebSocketMessage' };
@@ -43,7 +47,10 @@ class WebServiceClientWebSocketForwarder extends WebSocketForwarder {
     if (isAction<WebServiceActionArgs>(message)) {
       switch (message.params.actionId) {
         case 'openUrl':
-          openUrlExternally(message.params.payload);
+          openUrlExternally(message.params.payload as string);
+          break;
+        case 'generateCxfClient':
+          generateClient(message.params.payload, this.document);
           break;
         default:
           noUnknownAction(message.params.actionId);
@@ -59,5 +66,33 @@ class WebServiceClientWebSocketForwarder extends WebSocketForwarder {
     } else {
       super.handleServerMessage(message);
     }
+  }
+}
+
+async function generateClient(payload: string | WsGeneratorConfig, document: TextDocument) {
+  const projectPath = path.dirname(path.dirname(document.uri.fsPath));
+
+  try {
+    const codegen = JSON.parse(payload as string) as WsGeneratorConfig;
+    const outputDir = `src_generated/soap/${codegen.clientName}`;
+
+    const commandParts = [
+      'mvn com.axonivy.ivy.tool.soap:cxf-client-codegen:generate-cxf-client -ntp',
+      `"-Divy.generate.webservice.client.wsdl=${codegen.wsdlUrl}"`,
+      `"-Divy.generate.webservice.client.output=${outputDir}"`,
+      `"-Divy.generate.webservice.client.underscoreNames=${codegen.underscoreNames}"`
+    ];
+    const command = commandParts.join(' ');
+
+    await runMavenCommand(projectPath, command);
+    window.showInformationMessage(`${codegen.clientName} web service client generation succeeded`);
+
+    const sourcePathAdded = await new BuildSourcePathHelper().ensureGeneratedSourcePath(projectPath, outputDir);
+    if (sourcePathAdded) {
+      window.showInformationMessage(`Added ${codegen.clientName} client source path to pom.xml.`);
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : `${error}`;
+    window.showErrorMessage(`Web service client generation failed: ${message}`);
   }
 }

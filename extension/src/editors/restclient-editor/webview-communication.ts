@@ -86,7 +86,7 @@ async function generateClient(payRaw: string, document: TextDocument) {
     await runMavenCommand(projectPath, command);
     window.showInformationMessage(`${openapi.clientName} OpenAPI client generation succeeded`);
 
-    const sourcePathAdded = await new BuildSourcePathHelper().ensureGeneratedSourcePath(projectPath, openapi.clientName);
+    const sourcePathAdded = await new BuildSourcePathHelper().ensureGeneratedSourcePath(projectPath, outputDir);
     if (sourcePathAdded) {
       window.showInformationMessage(`Added ${openapi.clientName} client source path to pom.xml.`);
     }

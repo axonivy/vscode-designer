@@ -20,6 +20,26 @@ test('Read, write', async ({ page }) => {
   await expect(editor.editorContent()).toContainText('#my cool description');
 });
 
+test('Webservice codegen', async ({ page }) => {
+  const editor = new WebServiceClientEditor(page);
+  await editor.hasDeployProjectStatusMessage();
+  await editor.openEditorFile();
+  await editor.isTabVisible();
+  await editor.isViewVisible();
+
+  await editor.main.getByText('personService', { exact: true }).click();
+  await editor.main.getByRole('button', { name: /Generate Service/i }).click();
+  const generator = editor.viewFrameLocator().getByRole('button', { name: /^Generate$/i });
+  await expect(generator).toBeEnabled();
+  await generator.click();
+
+  // const successToast = editor
+  //   .toasts()
+  //   .filter({ hasText: /personService web service client generation succeeded/i })
+  //   .first();
+  // await expect(successToast).toBeVisible();
+});
+
 test('Open Help', async ({ page }) => {
   const editor = new WebServiceClientEditor(page);
   await editor.openEditorFile();

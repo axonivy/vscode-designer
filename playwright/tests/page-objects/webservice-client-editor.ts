@@ -4,11 +4,13 @@ import { Editor } from './editor';
 export class WebServiceClientEditor extends Editor {
   rows: Locator;
   detail: Locator;
+  main: Locator;
 
   constructor(page: Page, editorFile = 'webservice-clients.yaml') {
     super(editorFile, page);
     this.rows = this.viewFrameLocator().locator('tbody > tr');
     this.detail = this.viewFrameLocator().locator('#webservice-editor-detail');
+    this.main = this.viewFrameLocator().locator('#webservice-editor-main');
   }
 
   override async isViewVisible() {
