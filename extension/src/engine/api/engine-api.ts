@@ -127,8 +127,10 @@ export class IvyEngineApi {
 
   public async createProject(newProjectParams: NewProjectParams) {
     const baseURL = await this.baseURL;
-    await window.withProgress(progressOptions('Create new Project'), async () => {
-      await createPmvAndProjectFiles(newProjectParams, { baseURL, ...options }).catch(handleAxiosError);
+    return await window.withProgress(progressOptions('Create new Project'), async () => {
+      return await createPmvAndProjectFiles(newProjectParams, { baseURL, ...options })
+        .then(res => res.data)
+        .catch(handleAxiosError);
     });
   }
 

@@ -9,6 +9,7 @@ import {
   type PreparedToolInvocation,
   type ProviderResult
 } from 'vscode';
+import type { DataClassBean } from '../../engine/api/generated/client';
 import { IvyEngineManager } from '../../engine/engine-manager';
 
 export type NewDataClassToolArgs = {
@@ -26,12 +27,14 @@ export class NewDataClassTool implements LanguageModelTool<NewDataClassToolArgs>
       name: `${options.input.namespace}.${options.input.name}`,
       projectDir: options.input.projectPath
     };
+    let dataClassBean: DataClassBean | undefined;
     if (type === 'Data Class') {
-      await IvyEngineManager.instance.createDataClass(newDataClassParams);
+      dataClassBean = await IvyEngineManager.instance.createDataClass(newDataClassParams);
     } else {
-      await IvyEngineManager.instance.createEntityClass(newDataClassParams);
+      dataClassBean = await IvyEngineManager.instance.createEntityClass(newDataClassParams);
     }
-    return Promise.resolve(new LanguageModelToolResult([new LanguageModelTextPart(`${type} created successfully`)]));
+    const dataClassPath = dataClassBean ? path.join(newDataClassParams.projectDir, dataClassBean.path) : '<unknown location>';
+    return Promise.resolve(new LanguageModelToolResult([new LanguageModelTextPart(`${type} created successfully at '${dataClassPath}'`)]));
   }
 
   prepareInvocation?(options: LanguageModelToolInvocationPrepareOptions<NewDataClassToolArgs>): ProviderResult<PreparedToolInvocation> {
