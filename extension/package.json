@@ -594,6 +594,44 @@
         },
         "canBeReferencedInPrompt": true,
         "toolReferenceName": "newAxonIvyProject"
+      },
+      {
+        "name": "new_axon_ivy_data_class",
+        "displayName": "New Axon Ivy Data Class",
+        "modelDescription": "Creates a new Axon Ivy Data Class or Entity Class. MUST be called for every request to create, add, scaffold, initialize, or generate an Axon Ivy Data Class. Do NOT attempt to create the Data Class by writing descriptor or Java files, or inspecting and copying existing Data Classes — only this tool produces a valid, registered Data Class.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Data Class name"
+            },
+            "namespace": {
+              "type": "string",
+              "description": "Dot-separated namespace"
+            },
+            "projectPath": {
+              "type": "string",
+              "description": "Absolute path to the project directory where the new Data Class should be created."
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "Data Class",
+                "Entity Class"
+              ],
+              "description": "Type of the class to create"
+            }
+          },
+          "required": [
+            "name",
+            "namespace",
+            "projectPath",
+            "type"
+          ]
+        },
+        "canBeReferencedInPrompt": true,
+        "toolReferenceName": "newAxonIvyDataClass"
       }
     ],
     "viewsContainers": {
