@@ -620,14 +620,14 @@
                 "Data Class",
                 "Entity Class"
               ],
+              "default": "Data Class",
               "description": "Type of the class to create"
             }
           },
           "required": [
             "name",
             "namespace",
-            "projectPath",
-            "type"
+            "projectPath"
           ]
         },
         "canBeReferencedInPrompt": true,
