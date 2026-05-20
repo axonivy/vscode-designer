@@ -24,11 +24,11 @@ test('Webservice codegen', async ({ wsPage }) => {
   await expect(generator).toBeEnabled();
   await generator.click();
 
-  // const successToast = wsPage
-  //   .toasts
-  //   .filter({ hasText: /personService web service client generation succeeded/i })
-  //   .first();
-  // await expect(successToast).toBeVisible();
+  const successToast = wsPage
+    .toasts
+    .filter({ hasText: /personService web service client generation succeeded/i })
+    .first();
+  await expect(successToast).toBeVisible();
 });
 
 test('Open Help', async ({ wsPage }) => {
