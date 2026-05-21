@@ -19,11 +19,9 @@ test.describe('Runtime Log', () => {
 
     await page.getByRole('button', { name: 'Maximize Panel' }).click();
 
-    await page.evaluate((linkText) => {
+    await page.evaluate(linkText => {
       const links = Array.from(document.querySelectorAll('a'));
-      const target = links.find(link =>
-        link.textContent?.trim() === linkText
-      );
+      const target = links.find(link => link.textContent?.trim() === linkText);
       if (target) {
         // Scroll the link into view
         target.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -37,9 +35,9 @@ test.describe('Runtime Log', () => {
           parent = parent.parentElement;
         }
       }
-    }, "Open Activities");
+    }, 'Whatever');
 
-    monaco-scrollable-element editor-scrollable
+    // monaco-scrollable-element editor-scrollable
 
     const runtimeLogOutput = page.getByRole('document', { name: 'Runtime Log - Output' }).getByRole('code');
 
