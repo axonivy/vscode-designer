@@ -33,7 +33,8 @@
           "code": [
             "import java.lang.RuntimeException;",
             "ivy.log.info(\"Process called\");",
-            "ivy.log.error(\"Process failed\", new RuntimeException());"
+            "ivy.log.error(\"Process failed\", new RuntimeException());",
+            "ivy.log.info(\"Done\");"
           ]
         }
       },
