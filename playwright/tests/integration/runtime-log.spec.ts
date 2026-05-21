@@ -20,7 +20,10 @@ test.describe.only('Runtime Log', () => {
     await processEditor.executeCommand('Axon Ivy: Open Axon Ivy Runtime Log');
 
     const panel = page.locator('#workbench\\.parts\\.panel');
-    await panel.getByRole('button', { name: 'Views and More Actions...' }).click();
+    const buttonViewMoreActions = panel.getByRole('button', { name: 'Views and More Actions...' });
+    await expect(buttonViewMoreActions).toBeVisible();
+    await buttonViewMoreActions.click();
+
     const buttonOpenInEditor = page.locator('span.action-label[aria-label="Open Output in Editor"]');
     await expect(buttonOpenInEditor).toBeVisible();
     await buttonOpenInEditor.click();
