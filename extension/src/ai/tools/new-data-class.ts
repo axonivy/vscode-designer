@@ -41,7 +41,7 @@ export class NewDataClassTool implements LanguageModelTool<NewDataClassToolArgs>
       confirmationMessages: {
         title: `New Axon Ivy ${type}`,
         message: new MarkdownString(
-          `Create an Axon Ivy ${type} with the following details?\n- Name: ${options.input.name}\n- Namespace: ${options.input.namespace}\n- Project: ${path.dirname(options.input.projectPath)}`
+          `Create an Axon Ivy ${type} with the following details?\n- Name: ${options.input.name}\n- Namespace: ${options.input.namespace}\n- Project: ${path.basename(options.input.projectPath)}`
         )
       }
     };
