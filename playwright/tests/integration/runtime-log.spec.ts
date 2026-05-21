@@ -25,11 +25,8 @@ test.describe.only('Runtime Log', () => {
     await buttonViewMoreActions.hover();
     await buttonViewMoreActions.click();
 
-    page.waitForTimeout(500); // wait for the dropdown to open and render
-
     const buttonOpenInEditor = page.locator('span.action-label[aria-label="Open Output in Editor"]');
     await expect(buttonOpenInEditor).toBeVisible();
-    await buttonOpenInEditor.hover();
     await buttonOpenInEditor.click();
 
     const runtimeLogEditor = new Editor('axonivy.vscode-designer-14.Axon Ivy Runtime Log.log', page);
