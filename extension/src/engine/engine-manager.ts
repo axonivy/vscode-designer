@@ -189,6 +189,7 @@ export class IvyEngineManager {
     if (hdBean?.uri) {
       executeCommand('vscode.open', Uri.parse(hdBean.uri));
     }
+    return hdBean;
   }
 
   public async createProject(newProjectParams: NewProjectParams & { path: string }) {

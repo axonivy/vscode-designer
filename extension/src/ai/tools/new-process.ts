@@ -12,7 +12,7 @@ import {
 } from 'vscode';
 import { IvyEngineManager } from '../../engine/engine-manager';
 
-export type NewProcessToolArgs = {
+type NewProcessToolArgs = {
   name: string;
   namespace: string;
   projectPath: string;

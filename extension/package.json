@@ -671,6 +671,68 @@
         },
         "canBeReferencedInPrompt": true,
         "toolReferenceName": "newAxonIvyProcess"
+      },
+      {
+        "name": "new_axon_ivy_dialog",
+        "displayName": "New Axon Ivy Dialog",
+        "modelDescription": "Creates a new Axon Ivy Dialog. MUST be called for every request to create, add, scaffold, initialize, or generate an Axon Ivy Dialog. Do NOT attempt to create the Dialog by writing files, or inspecting and copying existing Dialogs — only this tool produces a valid, registered Dialog.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Dialog name"
+            },
+            "namespace": {
+              "type": "string",
+              "description": "Dot-separated namespace"
+            },
+            "projectPath": {
+              "type": "string",
+              "description": "Absolute path to the project directory where the new Dialog should be created."
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "Form",
+                "JSF",
+                "JSFOffline"
+              ],
+              "default": "Form",
+              "description": "Type of the Dialog to create"
+            },
+            "template": {
+              "type": "string",
+              "enum": [
+                "basic-10",
+                "frame-10",
+                "frame-10-right",
+                "frame-10-full-width"
+              ],
+              "default": "basic-10",
+              "description": "Template to use for the new Dialog. Only applicable if type is 'JSF'."
+            },
+            "layout": {
+              "type": "string",
+              "enum": [
+                "Page Responsive Grid 2 Columns",
+                "Page Responsive Grid 4 Columns",
+                "Page Responsive Top Labels",
+                "Page Panel Grid",
+                "Component"
+              ],
+              "default": "Page Responsive Grid 2 Columns",
+              "description": "Layout to use for the new Dialog. Only applicable if type is 'JSF'."
+            }
+          },
+          "required": [
+            "name",
+            "namespace",
+            "projectPath"
+          ]
+        },
+        "canBeReferencedInPrompt": true,
+        "toolReferenceName": "newAxonIvyDialog"
       }
     ],
     "viewsContainers": {

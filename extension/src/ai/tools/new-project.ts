@@ -11,7 +11,7 @@ import {
 } from 'vscode';
 import { IvyEngineManager } from '../../engine/engine-manager';
 
-export type NewProjectToolArgs = {
+type NewProjectToolArgs = {
   name: string;
   path: string;
   groupId: string;
