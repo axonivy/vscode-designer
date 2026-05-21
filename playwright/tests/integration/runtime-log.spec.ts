@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 import { test } from '../fixtures/baseTest';
+import { Editor } from '../page-objects/editor';
 import { ProcessEditor } from '../page-objects/process-editor';
 
 test.describe('Runtime Log', () => {
@@ -17,37 +18,19 @@ test.describe('Runtime Log', () => {
 
     await processEditor.executeCommand('Axon Ivy: Open Axon Ivy Runtime Log');
 
-    await page.getByRole('button', { name: 'Maximize Panel' }).click();
+    const panel = page.locator('#workbench\\.parts\\.panel');
+    await panel.getByRole('button', { name: 'Views and More Actions...' }).click();
+    const buttonOpenInEditor = page.locator('span.action-label[aria-label="Open Output in Editor"]');
+    await expect(buttonOpenInEditor).toBeVisible();
+    await buttonOpenInEditor.click();
 
-    await page.evaluate(linkText => {
-      const links = Array.from(document.querySelectorAll('a'));
-      const target = links.find(link => link.textContent?.trim() === linkText);
-      if (target) {
-        // Scroll the link into view
-        target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    const runtimeLogEditor = new Editor('axonivy.vscode-designer-14.Axon Ivy Runtime Log.log', page);
+    await runtimeLogEditor.openEditorFile();
 
-        // Scroll any parent scrollable containers
-        let parent = target.parentElement;
-        while (parent) {
-          if (parent.scrollHeight > parent.clientHeight) {
-            parent.scrollTop += 100; // scroll down a bit
-          }
-          parent = parent.parentElement;
-        }
-      }
-    }, 'Whatever');
-
-    // monaco-scrollable-element editor-scrollable
-
-    const runtimeLogOutput = page.getByRole('document', { name: 'Runtime Log - Output' }).getByRole('code');
-
-    await runtimeLogOutput.click();
-    await runtimeLogOutput.press('ControlOrMeta+Home');
-
-    await expect(runtimeLogOutput).toContainText('[info]');
-    await expect(runtimeLogOutput).toContainText('Process Called');
-    await expect(runtimeLogOutput).toContainText('[error]');
-    await expect(runtimeLogOutput).toContainText('Process failed');
-    await expect(runtimeLogOutput).toContainText('java.lang.RuntimeException');
+    await expect(runtimeLogEditor.editorContent()).toContainText('[info]');
+    await expect(runtimeLogEditor.editorContent()).toContainText('Process called');
+    await expect(runtimeLogEditor.editorContent()).toContainText('[error]');
+    await expect(runtimeLogEditor.editorContent()).toContainText('Process failed');
+    await expect(runtimeLogEditor.editorContent()).toContainText('java.lang.RuntimeException');
   });
 });
