@@ -24,6 +24,7 @@ test.describe.only('Runtime Log', () => {
 
     const panel = page.locator('#workbench\\.parts\\.panel');
     const buttonViewMoreActions = panel.getByRole('button', { name: 'Views and More Actions...' });
+    await expect(buttonViewMoreActions).toBeVisible();
     await buttonViewMoreActions.click();
 
     const buttonOpenInEditor = page.locator('span.action-label[aria-label="Open Output in Editor"]');
