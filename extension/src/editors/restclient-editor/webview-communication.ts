@@ -69,9 +69,12 @@ class RestClientWebSocketForwarder extends WebSocketForwarder {
   }
 }
 
-async function generateClient(payRaw: string, document: TextDocument) {
+const generateClient = async (payRaw: string, document: TextDocument) => {
   const projectPath = path.dirname(path.dirname(document.uri.fsPath));
   const openapi = JSON.parse(payRaw) as OpenApiGeneratorConfig;
+  if (!openapi.spec) {
+    return;
+  }
   const outputDir = `src_generated/rest/${openapi.clientName}`;
 
   const command = [
@@ -94,4 +97,4 @@ async function generateClient(payRaw: string, document: TextDocument) {
     const message = error instanceof Error ? error.message : `${error}`;
     window.showErrorMessage(`OpenAPI client generation failed: ${message}`);
   }
-}
+};
