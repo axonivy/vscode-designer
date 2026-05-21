@@ -18,17 +18,17 @@ type NewDialogToolArgs = {
   namespace: string;
   projectPath: string;
   type?: DialogType;
-  template?: DialogTemplate;
   layout?: DialogLayout;
+  template?: DialogTemplate;
 };
 type DialogType = 'Form' | 'JSF' | 'JSFOffline';
-type DialogTemplate = 'basic-10' | 'frame-10' | 'frame-10-right' | 'frame-10-full-width';
 type DialogLayout =
   | 'Page Responsive Grid 2 Columns'
   | 'Page Responsive Grid 4 Columns'
   | 'Page Responsive Top Labels'
   | 'Page Panel Grid'
   | 'Component';
+type DialogTemplate = 'basic-10' | 'frame-10' | 'frame-10-right' | 'frame-10-full-width';
 
 export class NewDialogTool implements LanguageModelTool<NewDialogToolArgs> {
   async invoke(options: LanguageModelToolInvocationOptions<NewDialogToolArgs>): Promise<LanguageModelToolResult> {
@@ -44,7 +44,10 @@ export class NewDialogTool implements LanguageModelTool<NewDialogToolArgs> {
     const newDialogParams = resolvedParams(options.input);
     let confirmationMessage = `Create an Axon Ivy ${newDialogParams.type} Dialog with the following details?\n- Name: ${newDialogParams.name}\n- Namespace: ${newDialogParams.namespace}\n- Project: ${path.basename(newDialogParams.projectDir ?? '')}`;
     if (newDialogParams.type === 'JSF') {
-      confirmationMessage += `\n- Template: ${newDialogParams.template}\n- Layout: ${newDialogParams.layout}`;
+      confirmationMessage += `\n- Layout: ${newDialogParams.layout}`;
+      if (newDialogParams.layout !== 'Component') {
+        confirmationMessage += `\n- Template: ${newDialogParams.template}`;
+      }
     }
     return {
       invocationMessage: `Creating new Axon Ivy ${newDialogParams.type} Dialog "${newDialogParams.name}"`,
@@ -64,8 +67,10 @@ const resolvedParams = (args: NewDialogToolArgs) => {
     type: args.type ?? 'Form'
   };
   if (params.type === 'JSF') {
-    params.template = args.template ?? 'basic-10';
     params.layout = args.layout ?? 'Page Responsive Grid 2 Columns';
+    if (params.layout !== 'Component') {
+      params.template = args.template ?? 'basic-10';
+    }
   }
   if (params.type === 'JSFOffline') {
     params.layout = 'Page';

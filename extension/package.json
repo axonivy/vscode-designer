@@ -701,17 +701,6 @@
               "default": "Form",
               "description": "Type of the Dialog to create"
             },
-            "template": {
-              "type": "string",
-              "enum": [
-                "basic-10",
-                "frame-10",
-                "frame-10-right",
-                "frame-10-full-width"
-              ],
-              "default": "basic-10",
-              "description": "Template to use for the new Dialog. Only applicable if type is 'JSF'."
-            },
             "layout": {
               "type": "string",
               "enum": [
@@ -723,6 +712,17 @@
               ],
               "default": "Page Responsive Grid 2 Columns",
               "description": "Layout to use for the new Dialog. Only applicable if type is 'JSF'."
+            },
+            "template": {
+              "type": "string",
+              "enum": [
+                "basic-10",
+                "frame-10",
+                "frame-10-right",
+                "frame-10-full-width"
+              ],
+              "default": "basic-10",
+              "description": "Template to use for the new Dialog. Only applicable if type is 'JSF' and layout is not 'Component'."
             }
           },
           "required": [
