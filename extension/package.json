@@ -632,6 +632,45 @@
         },
         "canBeReferencedInPrompt": true,
         "toolReferenceName": "newAxonIvyDataClass"
+      },
+      {
+        "name": "new_axon_ivy_process",
+        "displayName": "New Axon Ivy Process",
+        "modelDescription": "Creates a new Axon Ivy Process. MUST be called for every request to create, add, scaffold, initialize, or generate an Axon Ivy Process. Do NOT attempt to create the Process by writing files, or inspecting and copying existing Processes — only this tool produces a valid, registered Process.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Process name"
+            },
+            "namespace": {
+              "type": "string",
+              "description": "Slash-separated namespace"
+            },
+            "projectPath": {
+              "type": "string",
+              "description": "Absolute path to the project directory where the new Process should be created."
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "Business Process",
+                "Callable Sub Process",
+                "Web Service Process"
+              ],
+              "default": "Business Process",
+              "description": "Type of the Process to create"
+            }
+          },
+          "required": [
+            "name",
+            "namespace",
+            "projectPath"
+          ]
+        },
+        "canBeReferencedInPrompt": true,
+        "toolReferenceName": "newAxonIvyProcess"
       }
     ],
     "viewsContainers": {

@@ -173,7 +173,7 @@ export class IvyEngineManager {
   }
 
   public async createProcess(newProcessParams: NewProcessParams) {
-    await this.createAndOpenProcess(newProcessParams);
+    return await this.createAndOpenProcess(newProcessParams);
   }
 
   public async createProcessFromBpmn(input: ImportProcessBody) {
@@ -195,7 +195,7 @@ export class IvyEngineManager {
     if (!this.started) {
       await this.start();
     }
-    await this.ivyEngineApi?.createProject(newProjectParams);
+    const projectBean = await this.ivyEngineApi?.createProject(newProjectParams);
     await IvyProjectExplorer.instance.setProjectExplorerContext({ hasIvyProjects: true });
     executeCommand('java.project.import.command')
       .catch(() => {
@@ -210,6 +210,7 @@ export class IvyEngineManager {
         })
       )
       .then(() => setStatusBarMessage('Finished: Create new Project'));
+    return projectBean;
   }
 
   public async createDataClass(params: DataClassInit) {
@@ -218,6 +219,7 @@ export class IvyEngineManager {
       const dataClassUri = Uri.joinPath(Uri.file(params.projectDir), dataClassBean.path);
       executeCommand('vscode.open', dataClassUri);
     }
+    return dataClassBean;
   }
 
   public async createEntityClass(params: DataClassInit) {
@@ -226,6 +228,7 @@ export class IvyEngineManager {
       const dataClassUri = Uri.joinPath(Uri.file(params.projectDir), dataClassBean.path);
       executeCommand('vscode.open', dataClassUri);
     }
+    return dataClassBean;
   }
 
   public async createCaseMap(params: CaseMapInit) {
@@ -241,6 +244,7 @@ export class IvyEngineManager {
     if (processBean?.uri) {
       executeCommand('vscode.open', Uri.parse(processBean.uri));
     }
+    return processBean;
   }
 
   public async deleteProject(ivyProjectDirectory: string) {
