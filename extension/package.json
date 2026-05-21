@@ -80,6 +80,11 @@
     "vscjava.vscode-java-dependency"
   ],
   "contributes": {
+    "chatSkills": [
+      {
+        "path": "./src/ai/skills/axon-ivy-market/SKILL.md"
+      }
+    ],
     "configurationDefaults": {
       "workbench.editorAssociations": {
         "{git,gitlens}:/**/{*.p.json,*.d.json,*.f.json,*.yaml}": "default"
