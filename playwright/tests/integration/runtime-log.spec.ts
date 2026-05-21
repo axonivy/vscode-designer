@@ -22,14 +22,13 @@ test.describe.only('Runtime Log', () => {
     const panel = page.locator('#workbench\\.parts\\.panel');
     const buttonViewMoreActions = panel.getByRole('button', { name: 'Views and More Actions...' });
     await expect(buttonViewMoreActions).toBeVisible();
-    await buttonViewMoreActions.click();
+    await buttonViewMoreActions.click({ delay: 500 });
 
     const buttonOpenInEditor = page.locator('span.action-label[aria-label="Open Output in Editor"]');
     await expect(buttonOpenInEditor).toBeVisible();
-    await buttonOpenInEditor.click();
+    await buttonOpenInEditor.click({ delay: 500 });
 
     const runtimeLogEditor = new Editor('axonivy.vscode-designer-14.Axon Ivy Runtime Log.log', page);
-    await runtimeLogEditor.openEditorFile();
 
     await expect(runtimeLogEditor.editorContent()).toContainText('[info]');
     await expect(runtimeLogEditor.editorContent()).toContainText('Process called');
