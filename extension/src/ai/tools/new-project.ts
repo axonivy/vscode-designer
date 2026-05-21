@@ -27,7 +27,7 @@ export class NewProjectTool implements LanguageModelTool<NewProjectToolArgs> {
 
   prepareInvocation?(options: LanguageModelToolInvocationPrepareOptions<NewProjectToolArgs>): ProviderResult<PreparedToolInvocation> {
     return {
-      invocationMessage: 'Creating new Axon Ivy project',
+      invocationMessage: `Creating new Axon Ivy project "${options.input.name}"`,
       confirmationMessages: {
         title: 'New Axon Ivy Project',
         message: new MarkdownString(
