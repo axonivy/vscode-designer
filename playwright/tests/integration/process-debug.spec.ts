@@ -1,13 +1,11 @@
 import { expect } from '@playwright/test';
 import { test } from '../fixtures/baseTest';
 import { FileExplorer } from '../page-objects/explorer-view';
-import { PageObject } from '../page-objects/page-object';
 import { ProcessEditor } from '../page-objects/process-editor';
 import { VsDebugView } from '../page-objects/vs-debug-view';
 
 test.beforeEach(async ({ page }) => {
   await new FileExplorer(page).hasDeployProjectStatusMessage();
-  await new PageObject(page).executeCommand('Axon Ivy: Deactivate Process Animation');
 });
 
 test('debug', async ({ page }) => {
