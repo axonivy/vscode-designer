@@ -30,8 +30,6 @@ test.describe('Process Animation', () => {
     const start = processEditor.locatorForPID('191A2645F90CDC61-f0');
     await expect(start).toBeVisible();
 
-    await processEditor.executeCommand('Axon Ivy: Deactivate Process Animation');
-    await processEditor.page.waitForTimeout(2_000); // ensure config is respected
     const callSub = processEditor.locatorForPID('191A2645F90CDC61-f3');
     await processEditor.startProcessAndAssertExecuted(start, callSub);
     await processEditor.page.waitForTimeout(1_000); // to ensure no jump
