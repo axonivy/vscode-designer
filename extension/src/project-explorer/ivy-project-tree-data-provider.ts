@@ -1,7 +1,19 @@
 import fs from 'fs';
 import * as path from 'path';
-import type { IconPath, TreeDataProvider, Command as VSCodeCommand } from 'vscode';
-import { EventEmitter, FileType, TreeItem, TreeItemCollapsibleState, Uri, workspace } from 'vscode';
+import {
+  Diagnostic,
+  DiagnosticSeverity,
+  EventEmitter,
+  FileType,
+  Range,
+  TreeItem,
+  TreeItemCollapsibleState,
+  Uri,
+  workspace,
+  type IconPath,
+  type TreeDataProvider,
+  type Command as VSCodeCommand
+} from 'vscode';
 import type { Command } from '../base/commands';
 import { config } from '../base/configurations';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
@@ -38,8 +50,13 @@ export const isIvyProject = (projectFile: Uri) => {
   }
 };
 
+type ProjectFindResult = {
+  projects: string[];
+  diagnostics: Map<Uri, Diagnostic>;
+};
+
 export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
-  private ivyProjects: Promise<string[]>;
+  private ivyProjects: Promise<ProjectFindResult>;
   private _onDidChangeTreeData = new EventEmitter<Entry | undefined | null>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
@@ -62,22 +79,39 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
     return this.entryCache.get(uri.fsPath);
   }
 
-  private async findIvyProjects(): Promise<string[]> {
-    return Array.from(
-      new Set(
-        (await workspace.findFiles(IVY_RPOJECT_FILE_PATTERN, this.excludePattern, this.maxResults))
-          .filter(p => isIvyProject(p))
-          .map(p => path.dirname(p.fsPath))
-      )
-    ).sort();
+  private async findIvyProjects() {
+    const projectFiles = await workspace.findFiles(IVY_RPOJECT_FILE_PATTERN, this.excludePattern, this.maxResults);
+    const distinctProjectDirs = [...new Set(projectFiles.filter(p => isIvyProject(p)).map(p => path.dirname(p.fsPath)))];
+    const projectsPerBaseName = new Map<string, string[]>();
+    for (const projectDir of distinctProjectDirs) {
+      const baseName = path.basename(projectDir).toLowerCase();
+      projectsPerBaseName.set(baseName, [...(projectsPerBaseName.get(baseName) ?? []), projectDir]);
+    }
+    const validProjects: string[] = [];
+    const diagnostics = new Map<Uri, Diagnostic>();
+    [...projectsPerBaseName.entries()].forEach(([baseName, projectDirs]) => {
+      if (projectDirs.length === 1 && projectDirs[0]) {
+        validProjects.push(projectDirs[0]);
+      } else if (projectDirs.length > 1) {
+        projectDirs.forEach(dir => {
+          const message = `Multiple project directories with the same name '${baseName}' found: ${projectDirs.join(', ')}. Please cleanup the workspace.`;
+          diagnostics.set(Uri.file(dir), new Diagnostic(new Range(0, 0, 0, 0), message, DiagnosticSeverity.Error));
+        });
+      }
+    });
+    return { projects: validProjects.sort(), diagnostics };
   }
 
   async hasIvyProjects(): Promise<boolean> {
-    return (await this.ivyProjects).length > 0;
+    return (await this.ivyProjects).projects.length > 0;
   }
 
   async getIvyProjects(): Promise<string[]> {
-    return this.ivyProjects;
+    return this.ivyProjects.then(result => result.projects);
+  }
+
+  async getDiagnostics(): Promise<Map<Uri, Diagnostic>> {
+    return this.ivyProjects.then(result => result.diagnostics);
   }
 
   refresh() {
@@ -121,7 +155,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
     if (element) {
       return [this.cmsEntry(element)];
     }
-    return (await this.ivyProjects).map(dir => this.createAndCacheRoot(dir));
+    return (await this.ivyProjects).projects.map(dir => this.createAndCacheRoot(dir));
   }
 
   private createAndCacheRoot(ivyProjectDir: string): Entry {
