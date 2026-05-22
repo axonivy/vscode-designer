@@ -24,14 +24,14 @@ test.describe('Runtime Log', () => {
     const panel = page.locator('#workbench\\.parts\\.panel');
     const buttonViewMoreActions = panel.getByRole('button', { name: 'Views and More Actions...' });
     await expect(buttonViewMoreActions).toBeVisible();
-    await buttonViewMoreActions.hover();
-    await page.waitForTimeout(300);
+    // await buttonViewMoreActions.hover();
+    // await page.waitForTimeout(300);
     await buttonViewMoreActions.click();
 
     const buttonOpenInEditor = page.locator('span.action-label[aria-label="Open Output in Editor"]');
     await expect(buttonOpenInEditor).toBeVisible();
-    await buttonOpenInEditor.hover();
-    await page.waitForTimeout(300);
+    // await buttonOpenInEditor.hover();
+    // await page.waitForTimeout(300);
     await buttonOpenInEditor.click();
 
     const runtimeLogEditor = new Editor('axonivy.vscode-designer-14.Axon Ivy Runtime Log.log', page);
