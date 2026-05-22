@@ -5,13 +5,21 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { FileExplorer } from '../page-objects/explorer-view';
+import { WorkspacePage } from '../page-objects/workspace-page';
 import { downloadVersion } from '../utils/download-version';
 import { prebuiltWorkspacePath } from '../workspaces/workspace';
 export { expect } from '@playwright/test';
 
 export const runInBrowser = process.env.RUN_IN_BROWSER ? true : false;
 
-export const test = base.extend<{ workspace: string; closeAllTabsOnInit: boolean; page: Page }>({
+type TestFixtures = {
+  workspace: string;
+  closeAllTabsOnInit: boolean;
+  page: Page;
+  wsPage: WorkspacePage;
+};
+
+export const test = base.extend<TestFixtures>({
   workspace: prebuiltWorkspacePath,
   closeAllTabsOnInit: true,
   page: async ({ workspace, closeAllTabsOnInit }, take) => {
@@ -20,6 +28,9 @@ export const test = base.extend<{ workspace: string; closeAllTabsOnInit: boolean
     } else {
       await runElectronAppTest(workspace, closeAllTabsOnInit, take);
     }
+  },
+  wsPage: async ({ page }, take) => {
+    await take(new WorkspacePage(page));
   }
 });
 

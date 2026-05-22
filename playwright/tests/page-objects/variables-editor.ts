@@ -1,24 +1,30 @@
-import { type Page, expect } from '@playwright/test';
-import { Editor } from './editor';
+import { expect, type Locator } from '@playwright/test';
+import { WebViewEditor } from './webview-editor';
+import type { WorkspacePage } from './workspace-page';
 
-export class VariablesEditor extends Editor {
-  constructor(page: Page, editorFile = 'variables.yaml') {
-    super(editorFile, page);
+export class VariablesEditor extends WebViewEditor {
+  detail: Locator;
+  main: Locator;
+
+  constructor(wsPage: WorkspacePage, fileName = 'variables.yaml') {
+    super(wsPage, fileName);
+    this.detail = this.webViewFrame.locator('#variable-editor-detail');
+    this.main = this.webViewFrame.locator('#variable-editor-main');
   }
 
-  override async isViewVisible() {
-    const header = this.viewFrameLocator().locator('#variable-editor-main .ui-toolbar:has-text("Variables")');
-    await expect(header).toBeVisible();
+  override async expectWebViewVisible() {
+    await super.expectWebViewVisible();
+    await expect(this.main.locator('.ui-toolbar')).toContainText('Variables');
   }
 
   async hasKey(key: string) {
-    const field = this.viewFrameLocator().locator('td > div > span');
+    const field = this.webViewFrame.locator('td > div > span');
     await expect(field).toHaveText(key);
     await expect(field).toBeVisible();
   }
 
   async hasValue(value: string, exact = true) {
-    const field = this.viewFrameLocator().locator('td:nth-child(2) > span');
+    const field = this.webViewFrame.locator('td:nth-child(2) > span');
     if (exact) {
       await expect(field).toHaveText(value);
     } else {
@@ -28,12 +34,12 @@ export class VariablesEditor extends Editor {
   }
 
   async selectFirstRow() {
-    const firstRow = this.viewFrameLocator().locator('tbody > tr');
+    const firstRow = this.webViewFrame.locator('tbody > tr');
     await firstRow.first().click();
   }
 
   async updateValue(value: string) {
-    const input = this.viewFrameLocator().getByLabel('Value');
+    const input = this.detail.getByLabel('Value');
     await input.fill(value);
     await this.hasValue(value);
   }

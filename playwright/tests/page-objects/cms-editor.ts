@@ -1,26 +1,25 @@
-import { expect, type Locator, type Page } from '@playwright/test';
-import { Editor } from './editor';
+import { expect, type Locator } from '@playwright/test';
+import { WebViewEditor } from './webview-editor';
+import type { WorkspacePage } from './workspace-page';
 
-export class CmsEditor extends Editor {
-  readonly toolbar: Locator;
+export class CmsEditor extends WebViewEditor {
+  readonly main: Locator;
   readonly help: Locator;
 
-  constructor(page: Page, editorFile = 'cms_en.yaml') {
-    super(editorFile, page);
-    this.toolbar = this.viewFrameLocator().locator('#cms-editor-main .ui-toolbar');
-    this.help = this.viewFrameLocator().getByRole('button', { name: /Help/ });
+  constructor(wsPage: WorkspacePage, fileName = 'cms_en.yaml') {
+    super(wsPage, fileName);
+    this.tab = this.wsPage.page.locator('div.tab:has-text("CMS -")');
+    this.main = this.webViewFrame.locator('#cms-editor-main');
+    this.help = this.webViewFrame.getByRole('button', { name: /Help/ });
   }
 
-  override get tabLocator(): Locator {
-    return this.page.locator('div.tab:has-text("CMS -")');
-  }
-
-  override async isViewVisible() {
-    await expect(this.toolbar).toContainText('CMS -');
+  override async expectWebViewVisible() {
+    await super.expectWebViewVisible();
+    await expect(this.main.locator('.ui-toolbar')).toContainText('CMS -');
   }
 
   async hasContentObject(contentObject: string) {
-    const field = this.viewFrameLocator().locator('td span').first();
+    const field = this.webViewFrame.locator('td span').first();
     await expect(field).toHaveText(contentObject);
   }
 
@@ -36,13 +35,13 @@ export class CmsEditorRow {
     readonly editor: CmsEditor,
     readonly name: string
   ) {
-    this.row = editor.viewFrameLocator().locator('.ui-table-row:not(.ui-message-row)').filter({ hasText: name });
+    this.row = editor.webViewFrame.locator('.ui-table-row:not(.ui-message-row)').filter({ hasText: name });
   }
 
   async openInscription() {
     await this.row.click();
     await this.expectSelected();
-    return this.editor.viewFrameLocator().locator('#cms-editor-detail');
+    return this.editor.webViewFrame.locator('#cms-editor-detail');
   }
 
   async expectSelected() {

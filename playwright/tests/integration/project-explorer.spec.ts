@@ -24,25 +24,25 @@ test.describe('Project Explorer', () => {
 });
 
 test.describe('CMS entry', () => {
-  test('Open', async ({ page }) => {
-    const explorer = new ProjectExplorerView(page);
+  test('Open', async ({ wsPage }) => {
+    const explorer = new ProjectExplorerView(wsPage.page);
     await explorer.hasDeployProjectStatusMessage();
     await explorer.openView();
 
     await explorer.selectNode('playwrightTestWorkspace');
     await explorer.selectNode('cms');
-    await new CmsEditor(page).isViewVisible();
+    await new CmsEditor(wsPage).expectWebViewVisible();
   });
 
-  test('Reveal and select when CMS Editor tab is active', async ({ page }) => {
-    const editor = new CmsEditor(page);
-    const fileExplorer = new FileExplorer(page);
-    const projectExplorer = new ProjectExplorerView(page);
+  test('Reveal and select when CMS Editor tab is active', async ({ wsPage }) => {
+    const editor = new CmsEditor(wsPage);
+    const fileExplorer = new FileExplorer(wsPage.page);
+    const projectExplorer = new ProjectExplorerView(wsPage.page);
 
-    await editor.hasDeployProjectStatusMessage();
+    await fileExplorer.hasDeployProjectStatusMessage();
     await fileExplorer.selectNode('cms');
-    await editor.executeCommand('Axon Ivy: Open CMS Editor');
-    await editor.isViewVisible();
+    await wsPage.executeCommand('Axon Ivy: Open CMS Editor');
+    await editor.expectWebViewVisible();
 
     await projectExplorer.openView();
     await projectExplorer.isSelected('cms');
@@ -58,9 +58,9 @@ test.describe('CMS entry', () => {
     await projectExplorer.closeView();
     await fileExplorer.doubleClickNode('pom.xml');
     await projectExplorer.openView();
-    await editor.isInactive();
+    await editor.expectTabInactive();
     await projectExplorer.hasNoNode('cms');
-    await editor.tabLocator.click();
+    await editor.tab.click();
     await projectExplorer.isSelected('cms');
   });
 });
