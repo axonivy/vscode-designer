@@ -1,6 +1,7 @@
 import fs from 'fs';
 import type { CodeActionContext, CodeActionProvider, DiagnosticCollection, ExtensionContext, Selection, TextDocument } from 'vscode';
 import { CodeAction, CodeActionKind, Diagnostic, DiagnosticSeverity, Range, Uri, languages } from 'vscode';
+import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { IvyEngineManager } from './engine-manager';
 
 const DIAGNOSTIC_SOURCE = 'Axon Ivy';
@@ -44,6 +45,11 @@ export class IvyDiagnostics {
         diagnostic.source = DIAGNOSTIC_SOURCE;
         this.diagnostics.set(uri, [diagnostic]);
       });
+    const projectExplorerDiagnostics = await IvyProjectExplorer.instance.getDiagnostics();
+    projectExplorerDiagnostics.forEach((d, uri) => {
+      d.source = DIAGNOSTIC_SOURCE;
+      this.diagnostics.set(uri, [...(this.diagnostics.get(uri) ?? []), d]);
+    });
   }
 
   public projectsToBeConverted() {

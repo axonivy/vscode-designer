@@ -21,7 +21,7 @@ export class ProblemsView extends View {
   }
 
   private async hasMaker(message: string, type: 'error' | 'warning', pid?: string) {
-    const marker = this.viewLocator.locator(`div.monaco-tl-row:has-text("${message}")`);
+    const marker = this.viewLocator.locator(`div.monaco-tl-row:has-text("${message}")`).first();
     await expect(marker).toBeVisible();
     await expect(marker.locator(`div.marker-icon.${type}`)).toBeVisible();
     if (pid) {

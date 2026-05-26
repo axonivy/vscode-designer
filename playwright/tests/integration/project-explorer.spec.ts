@@ -1,6 +1,7 @@
 import { test } from '../fixtures/baseTest';
 import { CmsEditor } from '../page-objects/cms-editor';
 import { FileExplorer, ProjectExplorerView } from '../page-objects/explorer-view';
+import { ProblemsView } from '../page-objects/problems-view';
 import { ProcessEditor } from '../page-objects/process-editor';
 import { minimalProjectWorkspacePath, multiProjectWorkspacePath, multiRootWorkspacePath } from '../workspaces/workspace';
 
@@ -16,6 +17,9 @@ test.describe('Project Explorer', () => {
     await explorer.hasNoNode('ivy-project-3');
     await explorer.hasNoNode('no-ivy-project');
     await explorer.hasNoNode('exclude-me');
+    await explorer.hasNoNode('ivy-project-duplicated');
+    const problemsView = await ProblemsView.initProblemsView(page);
+    await problemsView.hasError("Multiple project directories with the same name 'ivy-project-duplicated' found:");
   });
 });
 

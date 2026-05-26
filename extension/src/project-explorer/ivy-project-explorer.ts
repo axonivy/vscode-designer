@@ -336,6 +336,10 @@ export class IvyProjectExplorer {
     return this.treeDataProvider.getIvyProjects();
   }
 
+  async getDiagnostics() {
+    return this.treeDataProvider.getDiagnostics();
+  }
+
   private async hasIvyProjects() {
     return this.treeDataProvider.hasIvyProjects();
   }
