@@ -47,6 +47,7 @@ export class IvyDiagnostics {
       });
     const projectExplorerDiagnostics = await IvyProjectExplorer.instance.getDiagnostics();
     projectExplorerDiagnostics.forEach((d, uri) => {
+      d.source = DIAGNOSTIC_SOURCE;
       this.diagnostics.set(uri, [...(this.diagnostics.get(uri) ?? []), d]);
     });
   }
