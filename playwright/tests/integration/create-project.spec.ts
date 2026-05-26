@@ -1,5 +1,5 @@
 import path from 'path';
-import { test } from '../fixtures/baseTest';
+import { expect, test } from '../fixtures/baseTest';
 import { FileExplorer } from '../page-objects/explorer-view';
 import { ProblemsView } from '../page-objects/problems-view';
 import { ProcessEditor } from '../page-objects/process-editor';
@@ -12,7 +12,7 @@ test.describe('Create Project', () => {
     const projectName = 'testProject';
     const explorer = new FileExplorer(page);
     await explorer.addNestedProject('parent', projectName);
-    await explorer.hasStatusMessage('Finished: Create new Project', 60_000);
+    await explorer.hasStatusMessage('Finished: Create new Project');
     await explorer.hasNode(`parent${path.sep}${projectName}`);
 
     const problemsView = await ProblemsView.initProblemsView(page);
@@ -23,6 +23,8 @@ test.describe('Create Project', () => {
     await processEditor.hasBreadCrumbs('parent', projectName, 'processes', projectName, 'BusinessProcess.p.json');
     const start = processEditor.locatorForElementType('g.start\\:requestStart');
     const end = processEditor.locatorForElementType('g.end\\:taskEnd');
-    await processEditor.startProcessAndAssertExecuted(start, end);
+    await expect(async () => {
+      await processEditor.startProcessAndAssertExecuted(start, end, { timeout: 1_000 });
+    }).toPass({ intervals: [500] });
   });
 });
