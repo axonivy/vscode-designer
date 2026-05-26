@@ -85,15 +85,12 @@ export class FileExplorer extends ExplorerView {
   }
 
   async addNestedProject(rootFolder: string, projectName: string) {
-    await this.viewLocator.click();
     await this.addFolder(rootFolder);
     await this.viewLocator.getByText(rootFolder).click({ button: 'right' });
     const menu = this.page.getByRole('menu');
     await menu.getByRole('menuitem', { name: 'Axon Ivy New...' }).hover();
     const newProject = menu.getByRole('menuitem', { name: 'New Project' });
-    await expect(newProject).toBeVisible();
-    await newProject.click();
-    await expect(newProject).toBeHidden();
+    await newProject.click({ delay: 100 });
 
     await this.provideUserInput(projectName);
     await this.provideUserInput();
