@@ -1,10 +1,10 @@
 import { StatusBarAlignment, ThemeColor, window, type StatusBarItem } from 'vscode';
 import { executeCommand } from './commands';
 
-const DEFAULT_ICON: StatusBarIcon = '$(type-hierarchy)';
+const DEFAULT_ICON: StatusBarIcon = '$(ivy-logo)';
 const DEFAULT_PREFIX = 'Axon Ivy';
 
-type StatusBarIcon = '$(type-hierarchy)' | '$(loading~spin)' | '$(error)';
+type StatusBarIcon = '$(ivy-logo)' | '$(loading~spin)' | '$(error)';
 
 let statusBarItem: StatusBarItem | undefined;
 
