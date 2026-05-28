@@ -6,7 +6,7 @@ import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
 import { validateAndSyncJavaVersion } from './base/java-version-validation';
 import { askToReloadWindow } from './base/reload-window';
-import { setStatusBarIcon, showStatusBarQuickPick } from './base/status-bar';
+import { setStatusBarItem, showStatusBarQuickPick } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
 import { IvyDiagnostics } from './engine/diagnostics';
@@ -20,28 +20,35 @@ let ivyEngineManager: IvyEngineManager;
 export const messenger = new Messenger({ ignoreHiddenViews: false });
 
 export async function activate(context: ExtensionContext): Promise<MessengerDiagnostic> {
-  await validateAndSyncJavaVersion();
-  resolveExtensionVersion(context);
-  ivyEngineManager = IvyEngineManager.init(context);
-  registerCommand('engine.deployProjects', context, () => ivyEngineManager.deployProjects());
-  registerCommand('engine.switchEngineReleaseTrain', context, () => ivyEngineManager.switchEngineReleaseTrain());
-  registerCommand('engine.activateAnimation', context, async () => await config.setProcessAnimationAnimate(true));
-  registerCommand('engine.deactivateAnimation', context, async () => await config.setProcessAnimationAnimate(false));
-  registerCommand('engine.restart', context, async () => await askToReloadWindow('Engine restart'));
-  registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));
-  registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
-  registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
-  registerCommand('ivy.showStatusBarQuickPick', context, () => showStatusBarQuickPick());
+  const activationStatusBarItem = setStatusBarItem('Activating...', '$(loading~spin)');
+  context.subscriptions.push(activationStatusBarItem);
+  try {
+    await validateAndSyncJavaVersion();
+    resolveExtensionVersion(context);
+    ivyEngineManager = IvyEngineManager.init(context);
+    registerCommand('engine.deployProjects', context, () => ivyEngineManager.deployProjects());
+    registerCommand('engine.switchEngineReleaseTrain', context, () => ivyEngineManager.switchEngineReleaseTrain());
+    registerCommand('engine.activateAnimation', context, async () => await config.setProcessAnimationAnimate(true));
+    registerCommand('engine.deactivateAnimation', context, async () => await config.setProcessAnimationAnimate(false));
+    registerCommand('engine.restart', context, async () => await askToReloadWindow('Engine restart'));
+    registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));
+    registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
+    registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
+    registerCommand('ivy.showStatusBarQuickPick', context, () => showStatusBarQuickPick());
 
-  registerTools(context);
+    registerTools(context);
 
-  IvyDiagnostics.init(context);
-  setStatusBarIcon();
-  conditionalWelcomePage(context);
+    IvyDiagnostics.init(context);
+    conditionalWelcomePage(context);
 
-  await IvyProjectExplorer.init(context);
-  registerAddDependencyHandler(context);
-  return messenger.diagnosticApi();
+    await IvyProjectExplorer.init(context);
+    registerAddDependencyHandler(context);
+    setStatusBarItem('Ready');
+    return messenger.diagnosticApi();
+  } catch (error) {
+    setStatusBarItem('Activation failed', '$(error)', undefined, true);
+    throw error;
+  }
 }
 
 export async function deactivate() {
