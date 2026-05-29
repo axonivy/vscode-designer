@@ -1,7 +1,6 @@
 import { IncomingMessage } from 'http';
 import path from 'path';
 import { ProgressLocation, window, workspace } from 'vscode';
-import { setStatusBarMessage } from '../../base/status-bar';
 import type { NewProcessParams } from '../../project-explorer/new-process';
 import type { NewUserDialogParams } from '../../project-explorer/new-user-dialog';
 import { handleProjectConversionLog } from '../project-conversion-log';
@@ -92,29 +91,23 @@ export class IvyEngineApi {
 
   public async createProcess(newProcessParams: NewProcessParams) {
     const baseURL = await this.baseURL;
-    return window.withProgress(progressOptions('Create new Process'), async () => {
-      return createProcess(newProcessParams, { baseURL, ...options })
-        .then(res => res.data)
-        .catch(handleAxiosError);
-    });
+    return createProcess(newProcessParams, { baseURL, ...options })
+      .then(res => res.data)
+      .catch(handleAxiosError);
   }
 
   public async createProcessFromBpmn(params: ImportProcessBody) {
     const baseURL = await this.baseURL;
-    return window.withProgress(progressOptions('Import BPMN Process'), async () => {
-      return importProcess(params, { baseURL, ...options })
-        .then(res => res.data)
-        .catch(handleAxiosError);
-    });
+    return importProcess(params, { baseURL, ...options })
+      .then(res => res.data)
+      .catch(handleAxiosError);
   }
 
   public async installMarketProduct(params: ProductInstallParams) {
     const baseURL = this.engineURL;
-    return window.withProgress(progressOptions('Import Market Product'), async () => {
-      return installMarketProduct((await this.workspace).id, params, { baseURL, ...options })
-        .then(res => res.data)
-        .catch(handleAxiosError);
-    });
+    return installMarketProduct((await this.workspace).id, params, { baseURL, ...options })
+      .then(res => res.data)
+      .catch(handleAxiosError);
   }
 
   public async createProject(newProjectParams: NewProjectParams) {
@@ -126,45 +119,35 @@ export class IvyEngineApi {
 
   public async createUserDialog(newUserDialogParams: NewUserDialogParams) {
     const baseURL = await this.baseURL;
-    return window.withProgress(progressOptions('Create new User Dialog'), async () => {
-      return createHd(newUserDialogParams, { baseURL, ...options })
-        .then(res => res.data)
-        .catch(handleAxiosError);
-    });
+    return createHd(newUserDialogParams, { baseURL, ...options })
+      .then(res => res.data)
+      .catch(handleAxiosError);
   }
 
   public async createDataClass(params: DataClassInit) {
     const baseURL = await this.baseURL;
-    return window.withProgress(progressOptions('Create new Data Class'), async () => {
-      return createDataClass(params, { baseURL, ...options })
-        .then(res => res.data)
-        .catch(handleAxiosError);
-    });
+    return createDataClass(params, { baseURL, ...options })
+      .then(res => res.data)
+      .catch(handleAxiosError);
   }
 
   public async createEntityClass(params: DataClassInit) {
     const baseURL = await this.baseURL;
-    return window.withProgress(progressOptions('Create new Entity Class'), async () => {
-      return createEntityClass(params, { baseURL, ...options })
-        .then(res => res.data)
-        .catch(handleAxiosError);
-    });
+    return createEntityClass(params, { baseURL, ...options })
+      .then(res => res.data)
+      .catch(handleAxiosError);
   }
 
   public async createCaseMap(params: CaseMapInit) {
     const baseURL = await this.baseURL;
-    return window.withProgress(progressOptions('Create new Case Map'), async () => {
-      return createCaseMap(params, { baseURL, ...options })
-        .then(res => res.data)
-        .catch(handleAxiosError);
-    });
+    return createCaseMap(params, { baseURL, ...options })
+      .then(res => res.data)
+      .catch(handleAxiosError);
   }
 
   public async deleteProject(projectDir: string) {
     const baseURL = await this.baseURL;
-    await window.withProgress(progressOptions('Delete Project'), async () => {
-      await deleteProject({ projectDir }, { baseURL, ...options }).catch(handleAxiosError);
-    });
+    await deleteProject({ projectDir }, { baseURL, ...options }).catch(handleAxiosError);
   }
 
   public async convertProject(projectDir: string) {
@@ -179,28 +162,21 @@ export class IvyEngineApi {
 
   public async refreshProjectStatuses() {
     const baseURL = await this.baseURL;
-    return window.withProgress(progressOptions('Refresh project statuses'), async () => {
-      return refreshProjectStatuses({ baseURL, ...options })
-        .then(res => res.data)
-        .catch(handleAxiosError);
-    });
+    return refreshProjectStatuses({ baseURL, ...options })
+      .then(res => res.data)
+      .catch(handleAxiosError);
   }
 
   public async invalidateClassLoader(projectDir: string) {
     const baseURL = await this.baseURL;
-    await window.withProgress(progressOptions(`Invalidate class loader for ${projectDir}`), async () => {
-      await invalidateClassLoader({ projectDir }, { baseURL, ...options }).catch(handleAxiosError);
-    });
-    setStatusBarMessage('Finished: Invalidate class loader');
+    await invalidateClassLoader({ projectDir }, { baseURL, ...options }).catch(handleAxiosError);
   }
 
   public async getComponentForm(componentId: string, app: string, pmv: string) {
     const baseURL = await this.baseURL;
-    return window.withProgress(progressOptions('Get Component Form'), async () => {
-      return componentForm({ componentId, app, pmv }, { baseURL, ...options })
-        .then(res => res.data)
-        .catch(handleAxiosError);
-    });
+    return componentForm({ componentId, app, pmv }, { baseURL, ...options })
+      .then(res => res.data)
+      .catch(handleAxiosError);
   }
 
   public async projects(withDependencies = false) {

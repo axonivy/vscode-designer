@@ -196,15 +196,36 @@ export class IvyEngineManager {
   }
 
   public async createProcessFromBpmn(input: ImportProcessBody) {
-    await this.ivyEngineApi?.createProcessFromBpmn(input);
+    await withStatusBarProgress(
+      {
+        textDuring: 'Importing BPMN process...',
+        textSuccess: 'Success: Import BPMN process',
+        textFailure: 'Failed: Import BPMN process'
+      },
+      async () => await this.ivyEngineApi?.createProcessFromBpmn(input)
+    );
   }
 
   public async installMarketProduct(input: ProductInstallParams) {
-    await this.ivyEngineApi?.installMarketProduct(input);
+    await withStatusBarProgress(
+      {
+        textDuring: 'Importing market product...',
+        textSuccess: 'Success: Import market product',
+        textFailure: 'Failed: Import market product'
+      },
+      async () => await this.ivyEngineApi?.installMarketProduct(input)
+    );
   }
 
   public async createUserDialog(newUserDialogParams: NewUserDialogParams) {
-    const hdBean = await this.ivyEngineApi?.createUserDialog(newUserDialogParams);
+    const hdBean = await withStatusBarProgress(
+      {
+        textDuring: 'Creating new User Dialog...',
+        textSuccess: 'Success: Create new User Dialog',
+        textFailure: 'Failed: Create new User Dialog'
+      },
+      async () => await this.ivyEngineApi?.createUserDialog(newUserDialogParams)
+    );
     if (hdBean?.uri) {
       executeCommand('vscode.open', Uri.parse(hdBean.uri));
     }
@@ -244,7 +265,14 @@ export class IvyEngineManager {
   }
 
   public async createDataClass(params: DataClassInit) {
-    const dataClassBean = await this.ivyEngineApi?.createDataClass(params);
+    const dataClassBean = await withStatusBarProgress(
+      {
+        textDuring: 'Creating new Data Class...',
+        textSuccess: 'Success: Create new Data Class',
+        textFailure: 'Failed: Create new Data Class'
+      },
+      async () => await this.ivyEngineApi?.createDataClass(params)
+    );
     if (dataClassBean && params.projectDir) {
       const dataClassUri = Uri.joinPath(Uri.file(params.projectDir), dataClassBean.path);
       executeCommand('vscode.open', dataClassUri);
@@ -253,7 +281,14 @@ export class IvyEngineManager {
   }
 
   public async createEntityClass(params: DataClassInit) {
-    const dataClassBean = await this.ivyEngineApi?.createEntityClass(params);
+    const dataClassBean = await withStatusBarProgress(
+      {
+        textDuring: 'Creating new Entity Class...',
+        textSuccess: 'Success: Create new Entity Class',
+        textFailure: 'Failed: Create new Entity Class'
+      },
+      async () => await this.ivyEngineApi?.createEntityClass(params)
+    );
     if (dataClassBean && params.projectDir) {
       const dataClassUri = Uri.joinPath(Uri.file(params.projectDir), dataClassBean.path);
       executeCommand('vscode.open', dataClassUri);
@@ -262,7 +297,14 @@ export class IvyEngineManager {
   }
 
   public async createCaseMap(params: CaseMapInit) {
-    const caseMapBean = await this.ivyEngineApi?.createCaseMap(params);
+    const caseMapBean = await withStatusBarProgress(
+      {
+        textDuring: 'Creating new Case Map...',
+        textSuccess: 'Success: Create new Case Map',
+        textFailure: 'Failed: Create new Case Map'
+      },
+      async () => await this.ivyEngineApi?.createCaseMap(params)
+    );
     if (caseMapBean && params.projectDir) {
       const caseMapUri = Uri.joinPath(Uri.file(params.projectDir), caseMapBean.path);
       executeCommand('vscode.open', caseMapUri);
@@ -270,7 +312,14 @@ export class IvyEngineManager {
   }
 
   private async createAndOpenProcess(newProcessParams: NewProcessParams) {
-    const processBean = await this.ivyEngineApi?.createProcess(newProcessParams);
+    const processBean = await withStatusBarProgress(
+      {
+        textDuring: 'Creating new Process...',
+        textSuccess: 'Success: Create new Process',
+        textFailure: 'Failed: Create new Process'
+      },
+      async () => await this.ivyEngineApi?.createProcess(newProcessParams)
+    );
     if (processBean?.uri) {
       executeCommand('vscode.open', Uri.parse(processBean.uri));
     }
@@ -278,19 +327,48 @@ export class IvyEngineManager {
   }
 
   public async deleteProject(ivyProjectDirectory: string) {
-    this.ivyEngineApi?.deleteProject(ivyProjectDirectory);
+    await withStatusBarProgress(
+      {
+        textDuring: 'Deleting project...',
+        textSuccess: 'Success: Delete project',
+        textFailure: 'Failed: Delete project'
+      },
+      async () => await this.ivyEngineApi?.deleteProject(ivyProjectDirectory)
+    );
   }
 
   public async convertProject(ivyProjectDirectory: string) {
-    await this.ivyEngineApi?.convertProject(ivyProjectDirectory);
+    await withStatusBarProgress(
+      {
+        textDuring: 'Converting project...',
+        textSuccess: 'Success: Convert project',
+        textFailure: 'Failed: Convert project'
+      },
+      async () => await this.ivyEngineApi?.convertProject(ivyProjectDirectory)
+    );
   }
 
   public async refreshProjectStatuses() {
-    return await this.ivyEngineApi?.refreshProjectStatuses();
+    return await withStatusBarProgress(
+      {
+        textDuring: 'Refreshing project statuses...',
+        textSuccess: 'Success: Refresh project statuses',
+        textFailure: 'Failed: Refresh project statuses'
+      },
+      async () => await this.ivyEngineApi?.refreshProjectStatuses()
+    );
   }
 
   public async invalidateClassLoader(ivyProjectDirectory: string) {
-    await this.ivyEngineApi?.invalidateClassLoader(ivyProjectDirectory);
+    await withStatusBarProgress(
+      {
+        textDuring: 'Invalidating class loader...',
+        textSuccess: 'Success: Invalidate class loader',
+        textFailure: 'Failed: Invalidate class loader',
+        successMsgDuration: 1_000
+      },
+      async () => await this.ivyEngineApi?.invalidateClassLoader(ivyProjectDirectory)
+    );
   }
 
   public async getEngineVersion() {
