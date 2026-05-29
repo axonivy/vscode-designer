@@ -68,7 +68,7 @@ export class IvyProjectExplorer {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const registerCmd = (command: Command, callback: (...args: any[]) => any) => registerCommand(command, context, callback);
     registerCmd(`${VIEW_ID}.refreshEntry`, () => this.refresh());
-    registerCmd(`${VIEW_ID}.deployProject`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.deployProject(d), s));
+    registerCmd(`${VIEW_ID}.deployProject`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.deployProjects(d), s));
     registerCmd(`${VIEW_ID}.stopBpmEngine`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.stopBpmEngine(d), s));
     registerCmd(`${VIEW_ID}.addBusinessProcess`, (s: TreeSelection) => this.addProcess(s, 'Business Process'));
     registerCmd(`${VIEW_ID}.addCallableSubProcess`, (s: TreeSelection) => this.addProcess(s, 'Callable Sub Process'));
@@ -110,7 +110,7 @@ export class IvyProjectExplorer {
       await this.deleteProjectOnEngine(e.fsPath);
     });
     const deployProject = (uri: Uri) =>
-      this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.deployProject(d), 'deploy', uri);
+      this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.deployProjects(d), 'deploy', uri);
     const webContentWatcher = workspace.createFileSystemWatcher('**/webContent/**/*');
     webContentWatcher.onDidChange(deployProject);
     webContentWatcher.onDidDelete(deployProject);

@@ -75,27 +75,19 @@ export class IvyEngineApi {
     const name = path.basename(projectDir);
     const params = { name, path: projectDir };
     const baseURL = await this.baseURL;
-    await window.withProgress(progressOptions('Initialize Ivy Project'), async () => {
-      await findOrCreatePmv(params, { baseURL, ...options }).catch(handleAxiosError);
-    });
+    await findOrCreatePmv(params, { baseURL, ...options }).catch(handleAxiosError);
   }
 
   public async deployProjects(ivyProjectDirectories: string[]) {
     const baseURL = await this.baseURL;
-    await window.withProgress(progressOptions('Deploy Ivy Projects'), async () => {
-      await deployProjects(ivyProjectDirectories, { baseURL, ...options }).catch(handleAxiosError);
-    });
-    setStatusBarMessage('Finished: Deploy Ivy Projects');
+    await deployProjects(ivyProjectDirectories, { baseURL, ...options }).catch(handleAxiosError);
   }
 
   public async stopBpmEngine(projectDir: string) {
     const baseURL = await this.baseURL;
-    await window.withProgress(progressOptions('Stop BPM Engine'), async () => {
-      await stopBpmEngine({ projectDir }, { baseURL, ...options, headers: { ...headers, 'Content-Type': 'application/json' } }).catch(
-        handleAxiosError
-      );
-    });
-    setStatusBarMessage('Finished: Stop BPM Engine');
+    await stopBpmEngine({ projectDir }, { baseURL, ...options, headers: { ...headers, 'Content-Type': 'application/json' } }).catch(
+      handleAxiosError
+    );
   }
 
   public async createProcess(newProcessParams: NewProcessParams) {

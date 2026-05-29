@@ -153,23 +153,42 @@ export class IvyEngineManager {
     if (ivyProjectDirectories.length === 0) {
       return;
     }
-    for (const projectDir of ivyProjectDirectories) {
-      await this.ivyEngineApi?.findOrCreatePmv(projectDir);
-    }
-    await this.ivyEngineApi?.deployProjects(ivyProjectDirectories);
+    await withStatusBarProgress(
+      {
+        textDuring: 'Initialize projects...',
+        textSuccess: 'Success: Initialize projects',
+        textFailure: 'Failed: Initialize projects'
+      },
+      async () => {
+        for (const projectDir of ivyProjectDirectories) {
+          await this.ivyEngineApi?.findOrCreatePmv(projectDir);
+        }
+        await this.ivyEngineApi?.deployProjects(ivyProjectDirectories);
+      }
+    );
   }
 
-  public async deployProjects() {
-    const ivyProjectDirectories = await this.ivyProjectDirectories();
-    await this.ivyEngineApi?.deployProjects(ivyProjectDirectories);
-  }
-
-  public async deployProject(ivyProjectDirectory: string) {
-    await this.ivyEngineApi?.deployProjects([ivyProjectDirectory]);
+  public async deployProjects(ivyProjectDirectory?: string) {
+    const ivyProjectDirectories = ivyProjectDirectory ? [ivyProjectDirectory] : await this.ivyProjectDirectories();
+    await withStatusBarProgress(
+      {
+        textDuring: 'Deploying projects...',
+        textSuccess: 'Success: Deploy projects',
+        textFailure: 'Failed: Deploy projects'
+      },
+      async () => await this.ivyEngineApi?.deployProjects(ivyProjectDirectories)
+    );
   }
 
   public async stopBpmEngine(ivyProjectDirectory: string) {
-    await this.ivyEngineApi?.stopBpmEngine(ivyProjectDirectory);
+    await withStatusBarProgress(
+      {
+        textDuring: 'Stopping BPM Engine...',
+        textSuccess: 'Success: Stop BPM Engine',
+        textFailure: 'Failed: Stop BPM Engine'
+      },
+      async () => await this.ivyEngineApi?.stopBpmEngine(ivyProjectDirectory)
+    );
   }
 
   public async createProcess(newProcessParams: NewProcessParams) {

@@ -1,6 +1,7 @@
 import { StatusBarAlignment, ThemeColor, window, type StatusBarItem } from 'vscode';
 import { executeCommand } from './commands';
 
+const DEFAULT_TEXT = 'Ready';
 const DEFAULT_ICON: StatusBarIcon = '$(ivy-logo)';
 const DEFAULT_PREFIX = 'Axon Ivy';
 const DEFAULT_PRIORITY = 1;
@@ -29,16 +30,22 @@ const getStatusBarItem = () => {
   return statusBarItem;
 };
 
+const resetToDefault = () => {
+  const item = getStatusBarItem();
+  item.text = `${DEFAULT_ICON} ${DEFAULT_PREFIX}: ${DEFAULT_TEXT}`;
+  item.backgroundColor = undefined;
+  item.show();
+};
+
 export const setStatusBarMessage = (text: string) => {
   window.setStatusBarMessage(text, 5_000);
 };
 
-export const setStatusBarItem = (text: string, icon?: StatusBarIcon, prefix?: string, isError: boolean = false) => {
+export const setStatusBarItem = (text?: string, icon?: StatusBarIcon, prefix?: string, isError: boolean = false) => {
   const item = getStatusBarItem();
-  item.text = `${icon ?? DEFAULT_ICON} ${prefix ?? DEFAULT_PREFIX}: ${text}`;
+  item.text = `${icon ?? DEFAULT_ICON} ${prefix ?? DEFAULT_PREFIX}: ${text ?? DEFAULT_TEXT}`;
   item.backgroundColor = isError ? new ThemeColor('statusBarItem.errorBackground') : undefined;
   item.show();
-  return item;
 };
 
 export const showStatusBarQuickPick = () => {
@@ -53,9 +60,6 @@ export const showStatusBarQuickPick = () => {
 
 export const withStatusBarProgress = async <R>(options: StatusBarProgressOptions, action: () => Promise<R>): Promise<R> => {
   const { textDuring, textSuccess, textFailure, prefix, successMsgDuration, failureMsgDuration } = options;
-  const item = getStatusBarItem();
-  const previousText = item.text;
-  const previousBackground = item.backgroundColor;
 
   if (temporaryTimeout) {
     clearTimeout(temporaryTimeout);
@@ -68,16 +72,14 @@ export const withStatusBarProgress = async <R>(options: StatusBarProgressOptions
     const result = await action();
     setStatusBarItem(textSuccess, '$(check)', prefix);
     temporaryTimeout = setTimeout(() => {
-      item.text = previousText;
-      item.backgroundColor = previousBackground;
+      resetToDefault();
       temporaryTimeout = undefined;
     }, successMsgDuration ?? DEFAULT_SUCCESS_MESSAGE_DURATION);
     return result;
   } catch (error) {
     setStatusBarItem(textFailure, '$(error)', prefix, true);
     temporaryTimeout = setTimeout(() => {
-      item.text = previousText;
-      item.backgroundColor = previousBackground;
+      resetToDefault();
       temporaryTimeout = undefined;
     }, failureMsgDuration ?? DEFAULT_FAILURE_MESSAGE_DURATION);
     throw error;
