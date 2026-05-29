@@ -1,30 +1,35 @@
-import { expect, type Page } from '@playwright/test';
-import { Editor } from './editor';
+import { expect, type Locator } from '@playwright/test';
+import { WebViewEditor } from './webview-editor';
+import type { WorkspacePage } from './workspace-page';
 
-export class FormEditor extends Editor {
-  constructor(page: Page, editorFile: string = 'testForm.f.json') {
-    super(editorFile, page);
+export class FormEditor extends WebViewEditor {
+  main: Locator;
+  detail: Locator;
+
+  constructor(wsPage: WorkspacePage, fileName = 'testForm.f.json', nthFrame = 0) {
+    super(wsPage, fileName, nthFrame);
+    this.main = this.webViewFrame.locator('#canvas');
+    this.detail = this.webViewFrame.locator('#properties');
   }
 
-  override async isViewVisible() {
-    await this.isTabVisible();
-    const graph = this.viewFrameLocator().locator('#canvas');
-    await expect(graph).toBeVisible();
+  override async expectWebViewVisible() {
+    await super.expectWebViewVisible();
+    await expect(this.main).toBeVisible();
   }
 
-  locatorFor(type: string) {
-    return this.viewFrameLocator().locator(type);
+  blockFor(type: 'text' | 'input' | 'composite') {
+    return this.main.locator(`.block-${type}`);
   }
 
   get toolbar() {
-    return this.viewFrameLocator().locator('.toolbar');
+    return this.main.locator('.toolbar');
   }
 
   get quickBar() {
-    return this.viewFrameLocator().locator('.quickbar');
+    return this.webViewFrame.locator('.quickbar');
   }
 
   get quickBarMenu() {
-    return this.viewFrameLocator().locator('.quickbar-menu');
+    return this.webViewFrame.locator('.quickbar-menu');
   }
 }

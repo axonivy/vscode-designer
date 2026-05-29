@@ -1,18 +1,21 @@
-import { expect, type Locator, type Page } from '@playwright/test';
-import { Editor } from './editor';
+import { expect, type Locator } from '@playwright/test';
+import { WebViewEditor } from './webview-editor';
+import { WorkspacePage } from './workspace-page';
 
-export class DatabaseEditor extends Editor {
+export class DatabaseEditor extends WebViewEditor {
   readonly rows: Locator;
   readonly detail: Locator;
+  readonly main: Locator;
 
-  constructor(page: Page, editorFile = 'databases.yaml') {
-    super(editorFile, page);
-    this.rows = this.viewFrameLocator().locator('tbody > tr');
-    this.detail = this.viewFrameLocator().locator('#database-editor-detail');
+  constructor(wsPage: WorkspacePage, fileName = 'databases.yaml') {
+    super(wsPage, fileName);
+    this.rows = this.webViewFrame.locator('tbody > tr');
+    this.detail = this.webViewFrame.locator('#database-editor-detail');
+    this.main = this.webViewFrame.locator('#database-editor-main');
   }
 
-  override async isViewVisible() {
-    const header = this.viewFrameLocator().locator('#database-editor-main .ui-toolbar:has-text("Database Editor")');
-    await expect(header).toBeVisible();
+  override async expectWebViewVisible() {
+    await super.expectWebViewVisible();
+    await expect(this.main.locator('.ui-toolbar')).toContainText('Database Editor');
   }
 }

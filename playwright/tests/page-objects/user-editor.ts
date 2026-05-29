@@ -1,18 +1,21 @@
-import { type Locator, type Page, expect } from '@playwright/test';
-import { Editor } from './editor';
+import { type Locator, expect } from '@playwright/test';
+import { WebViewEditor } from './webview-editor';
+import type { WorkspacePage } from './workspace-page';
 
-export class UserEditor extends Editor {
+export class UserEditor extends WebViewEditor {
   rows: Locator;
   detail: Locator;
+  main: Locator;
 
-  constructor(page: Page, editorFile = 'users.yaml') {
-    super(editorFile, page);
-    this.rows = this.viewFrameLocator().locator('tbody > tr');
-    this.detail = this.viewFrameLocator().locator('#user-editor-detail');
+  constructor(wsPage: WorkspacePage, fileName = 'users.yaml') {
+    super(wsPage, fileName);
+    this.rows = this.webViewFrame.locator('tbody > tr');
+    this.detail = this.webViewFrame.locator('#user-editor-detail');
+    this.main = this.webViewFrame.locator('#user-editor-main');
   }
 
-  override async isViewVisible() {
-    const header = this.viewFrameLocator().locator('#user-editor-main .ui-toolbar:has-text("Users")');
-    await expect(header).toBeVisible();
+  override async expectWebViewVisible() {
+    await super.expectWebViewVisible();
+    await expect(this.main.locator('.ui-toolbar')).toContainText('Users');
   }
 }

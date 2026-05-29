@@ -4,7 +4,10 @@
     "rootDir": ".",
     "rootDirs": ["tests"],
     "outDir": "lib",
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "~/*": ["./tests/*"]
+    }
   },
   "include": ["tests"]
 }
