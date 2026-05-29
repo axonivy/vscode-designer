@@ -12,7 +12,7 @@ WebServiceClients:
       PersonServicePort:
         - '{ivy.app.baseurl}/ws/connectivity-demos/16150E1D07E8CA18'
     Codegen:
-      WsdlUrl: http://127.0.0.1:8081/designer/ws/connectivity-demos/16150E1D07E8CA18?WSDL
+      WsdlUrl: 'resources/wsdl/personService.wsdl'
     LegacyId: 16150E44A158D09C
   technicalBackend:
     Name: technicalBackend
