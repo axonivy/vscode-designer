@@ -4,7 +4,7 @@ import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
 import { logErrorMessage, logWarningMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
-import { setStatusBarMessage } from '../base/status-bar';
+import { withStatusBarProgress } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
 import { registerProcessDebugging } from '../debug/process-debug';
 import { CaseMapEditorProvider } from '../editors/casemap-editor/casemap-editor-provider';
@@ -196,22 +196,32 @@ export class IvyEngineManager {
     if (!this.started) {
       await this.start();
     }
-    const projectBean = await this.ivyEngineApi?.createProject(newProjectParams);
-    await IvyProjectExplorer.instance.setProjectExplorerContext({ hasIvyProjects: true });
-    executeCommand('java.project.import.command')
-      .catch(() => {
-        logWarningMessage('Java extension could not import project. Java support will not be available.');
-      })
-      .then(async () =>
-        this.createAndOpenProcess({
-          name: 'BusinessProcess',
-          kind: 'Business Process',
-          path: newProjectParams.path,
-          namespace: await resolveDefaultNamespace(newProjectParams.path, 'processes')
-        })
-      )
-      .then(() => setStatusBarMessage('Finished: Create new Project'));
-    return projectBean;
+    return await withStatusBarProgress(
+      {
+        textDuring: 'Creating and deploying new project...',
+        textSuccess: 'Success: Create new Project',
+        textFailure: 'Failed: Create new Project'
+      },
+      async () => {
+        const projectBean = await this.ivyEngineApi?.createProject(newProjectParams);
+        await IvyProjectExplorer.instance.setProjectExplorerContext({ hasIvyProjects: true });
+        executeCommand('java.project.import.command')
+          .catch(() => {
+            logWarningMessage(
+              'Java extension could not import project. Java support will not be available. Please clean Java workspace and import Java projects manually.'
+            );
+          })
+          .then(async () => {
+            this.createAndOpenProcess({
+              name: 'BusinessProcess',
+              kind: 'Business Process',
+              path: newProjectParams.path,
+              namespace: await resolveDefaultNamespace(newProjectParams.path, 'processes')
+            });
+          });
+        return projectBean;
+      }
+    );
   }
 
   public async createDataClass(params: DataClassInit) {

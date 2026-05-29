@@ -3,14 +3,27 @@ import { executeCommand } from './commands';
 
 const DEFAULT_ICON: StatusBarIcon = '$(ivy-logo)';
 const DEFAULT_PREFIX = 'Axon Ivy';
+const DEFAULT_PRIORITY = 1;
+const DEFAULT_SUCCESS_MESSAGE_DURATION = 3_000;
+const DEFAULT_FAILURE_MESSAGE_DURATION = 10_000;
 
-type StatusBarIcon = '$(ivy-logo)' | '$(loading~spin)' | '$(error)';
+type StatusBarIcon = '$(ivy-logo)' | '$(loading~spin)' | '$(error)' | '$(check)';
+
+interface StatusBarProgressOptions {
+  textDuring: string;
+  textSuccess: string;
+  textFailure: string;
+  prefix?: string;
+  successMsgDuration?: number;
+  failureMsgDuration?: number;
+}
 
 let statusBarItem: StatusBarItem | undefined;
+let temporaryTimeout: ReturnType<typeof setTimeout> | undefined;
 
 const getStatusBarItem = () => {
   if (!statusBarItem) {
-    statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
+    statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, DEFAULT_PRIORITY);
     statusBarItem.command = 'ivy.showStatusBarQuickPick';
   }
   return statusBarItem;
@@ -36,4 +49,37 @@ export const showStatusBarQuickPick = () => {
       executeCommand('engine.activateAnimation');
     }
   });
+};
+
+export const withStatusBarProgress = async <R>(options: StatusBarProgressOptions, action: () => Promise<R>): Promise<R> => {
+  const { textDuring, textSuccess, textFailure, prefix, successMsgDuration, failureMsgDuration } = options;
+  const item = getStatusBarItem();
+  const previousText = item.text;
+  const previousBackground = item.backgroundColor;
+
+  if (temporaryTimeout) {
+    clearTimeout(temporaryTimeout);
+    temporaryTimeout = undefined;
+  }
+
+  setStatusBarItem(textDuring, '$(loading~spin)', prefix);
+
+  try {
+    const result = await action();
+    setStatusBarItem(textSuccess, '$(check)', prefix);
+    temporaryTimeout = setTimeout(() => {
+      item.text = previousText;
+      item.backgroundColor = previousBackground;
+      temporaryTimeout = undefined;
+    }, successMsgDuration ?? DEFAULT_SUCCESS_MESSAGE_DURATION);
+    return result;
+  } catch (error) {
+    setStatusBarItem(textFailure, '$(error)', prefix, true);
+    temporaryTimeout = setTimeout(() => {
+      item.text = previousText;
+      item.backgroundColor = previousBackground;
+      temporaryTimeout = undefined;
+    }, failureMsgDuration ?? DEFAULT_FAILURE_MESSAGE_DURATION);
+    throw error;
+  }
 };
