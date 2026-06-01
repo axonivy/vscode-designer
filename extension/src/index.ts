@@ -20,7 +20,7 @@ let ivyEngineManager: IvyEngineManager;
 export const messenger = new Messenger({ ignoreHiddenViews: false });
 
 export async function activate(context: ExtensionContext): Promise<MessengerDiagnostic> {
-  setStatusBarItem('Activating...', '$(loading~spin)');
+  setStatusBarItem({ text: 'Activating...', icon: '$(loading~spin)', isClickable: false });
   try {
     await validateAndSyncJavaVersion();
     resolveExtensionVersion(context);
@@ -42,10 +42,10 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
 
     await IvyProjectExplorer.init(context);
     registerAddDependencyHandler(context);
-    setStatusBarItem();
+    setStatusBarItem({});
     return messenger.diagnosticApi();
   } catch (error) {
-    setStatusBarItem('Activation failed', '$(error)', undefined, true);
+    setStatusBarItem({ text: 'Activation failed', icon: '$(error)', isError: true });
     throw error;
   }
 }

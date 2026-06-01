@@ -21,7 +21,7 @@ export type Command =
   | EditorCommand
   | 'ivy.addDevContainer'
   | 'ivy.showStatusBarQuickPick';
-type VSCodeCommand = 'setContext' | 'vscode.open' | 'copyFilePath';
+type VSCodeCommand = 'setContext' | 'vscode.open' | 'copyFilePath' | 'workbench.action.openSettings';
 type EngineCommand =
   | 'engine.deployProjects'
   | 'engine.switchEngineReleaseTrain'
