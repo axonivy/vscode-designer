@@ -1,3 +1,4 @@
+import path from 'path';
 import { MarkdownString, QuickPickItemKind, StatusBarAlignment, ThemeColor, window, workspace, type StatusBarItem } from 'vscode';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { executeCommand } from './commands';
@@ -49,7 +50,7 @@ const buildListOfProjects = (projectPaths: string[] | undefined) => {
   if (!projectPaths || projectPaths.length === 0) {
     return '\nNo projects found in the workspace.';
   }
-  return '\n- ' + projectPaths.join('\n- ');
+  return '\n- ' + projectPaths.map(p => p.substring(p.lastIndexOf(path.sep) + 1)).join('\n- ');
 };
 
 const addDefaultProjectsHoverMarkdown = (item: StatusBarItem) => {
