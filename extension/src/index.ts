@@ -1,12 +1,12 @@
 import 'reflect-metadata';
-import type { ExtensionContext } from 'vscode';
+import { type ExtensionContext } from 'vscode';
 import { Messenger, type MessengerDiagnostic } from 'vscode-messenger';
 import { registerTools } from './ai/tools/tools';
 import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
 import { validateAndSyncJavaVersion } from './base/java-version-validation';
 import { askToReloadWindow } from './base/reload-window';
-import { setStatusBarItem, showStatusBarQuickPick } from './base/status-bar';
+import { newMarkdownString, setStatusBarItem, showStatusBarQuickPick } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
 import { IvyDiagnostics } from './engine/diagnostics';
@@ -20,7 +20,12 @@ let ivyEngineManager: IvyEngineManager;
 export const messenger = new Messenger({ ignoreHiddenViews: false });
 
 export async function activate(context: ExtensionContext): Promise<MessengerDiagnostic> {
-  setStatusBarItem({ text: 'Activating...', icon: '$(loading~spin)', isClickable: false });
+  setStatusBarItem({
+    text: 'Activating...',
+    hoverMarkdown: newMarkdownString('Activating...'),
+    icon: '$(loading~spin)',
+    isClickable: false
+  });
   try {
     await validateAndSyncJavaVersion();
     resolveExtensionVersion(context);
@@ -45,7 +50,13 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     setStatusBarItem({});
     return messenger.diagnosticApi();
   } catch (error) {
-    setStatusBarItem({ text: 'Activation failed', icon: '$(error)', isError: true });
+    setStatusBarItem({
+      text: 'Activation failed',
+      hoverMarkdown: newMarkdownString('Activation failed.\nCheck the error logs for more details.\nTry to reload the window.'),
+      icon: '$(error)',
+      isError: true,
+      isClickable: false
+    });
     throw error;
   }
 }

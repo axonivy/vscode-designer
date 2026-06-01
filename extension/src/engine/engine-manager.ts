@@ -157,7 +157,7 @@ export class IvyEngineManager {
       {
         textDuring: 'Initialize projects...',
         textSuccess: 'Success: Initialize projects',
-        textFailure: 'Failed: Initialize projects'
+        textError: 'Error: Initialize projects'
       },
       async () => {
         for (const projectDir of ivyProjectDirectories) {
@@ -174,7 +174,7 @@ export class IvyEngineManager {
       {
         textDuring: 'Deploying projects...',
         textSuccess: 'Success: Deploy projects',
-        textFailure: 'Failed: Deploy projects'
+        textError: 'Error: Deploy projects'
       },
       async () => await this.ivyEngineApi?.deployProjects(ivyProjectDirectories)
     );
@@ -185,7 +185,7 @@ export class IvyEngineManager {
       {
         textDuring: 'Stopping BPM Engine...',
         textSuccess: 'Success: Stop BPM Engine',
-        textFailure: 'Failed: Stop BPM Engine'
+        textError: 'Error: Stop BPM Engine'
       },
       async () => await this.ivyEngineApi?.stopBpmEngine(ivyProjectDirectory)
     );
@@ -200,7 +200,7 @@ export class IvyEngineManager {
       {
         textDuring: 'Importing BPMN process...',
         textSuccess: 'Success: Import BPMN process',
-        textFailure: 'Failed: Import BPMN process'
+        textError: 'Error: Import BPMN process'
       },
       async () => await this.ivyEngineApi?.createProcessFromBpmn(input)
     );
@@ -211,7 +211,7 @@ export class IvyEngineManager {
       {
         textDuring: 'Importing market product...',
         textSuccess: 'Success: Import market product',
-        textFailure: 'Failed: Import market product'
+        textError: 'Error: Import market product'
       },
       async () => await this.ivyEngineApi?.installMarketProduct(input)
     );
@@ -222,7 +222,7 @@ export class IvyEngineManager {
       {
         textDuring: 'Creating new User Dialog...',
         textSuccess: 'Success: Create new User Dialog',
-        textFailure: 'Failed: Create new User Dialog'
+        textError: 'Error: Create new User Dialog'
       },
       async () => await this.ivyEngineApi?.createUserDialog(newUserDialogParams)
     );
@@ -240,7 +240,7 @@ export class IvyEngineManager {
       {
         textDuring: 'Creating and deploying new project...',
         textSuccess: 'Success: Create new Project',
-        textFailure: 'Failed: Create new Project'
+        textError: 'Error: Create new Project'
       },
       async () => {
         const projectBean = await this.ivyEngineApi?.createProject(newProjectParams);
@@ -269,7 +269,7 @@ export class IvyEngineManager {
       {
         textDuring: 'Creating new Data Class...',
         textSuccess: 'Success: Create new Data Class',
-        textFailure: 'Failed: Create new Data Class'
+        textError: 'Error: Create new Data Class'
       },
       async () => await this.ivyEngineApi?.createDataClass(params)
     );
@@ -285,7 +285,7 @@ export class IvyEngineManager {
       {
         textDuring: 'Creating new Entity Class...',
         textSuccess: 'Success: Create new Entity Class',
-        textFailure: 'Failed: Create new Entity Class'
+        textError: 'Error: Create new Entity Class'
       },
       async () => await this.ivyEngineApi?.createEntityClass(params)
     );
@@ -301,7 +301,7 @@ export class IvyEngineManager {
       {
         textDuring: 'Creating new Case Map...',
         textSuccess: 'Success: Create new Case Map',
-        textFailure: 'Failed: Create new Case Map'
+        textError: 'Error: Create new Case Map'
       },
       async () => await this.ivyEngineApi?.createCaseMap(params)
     );
@@ -316,7 +316,7 @@ export class IvyEngineManager {
       {
         textDuring: 'Creating new Process...',
         textSuccess: 'Success: Create new Process',
-        textFailure: 'Failed: Create new Process'
+        textError: 'Error: Create new Process'
       },
       async () => await this.ivyEngineApi?.createProcess(newProcessParams)
     );
@@ -331,7 +331,7 @@ export class IvyEngineManager {
       {
         textDuring: 'Deleting project...',
         textSuccess: 'Success: Delete project',
-        textFailure: 'Failed: Delete project'
+        textError: 'Error: Delete project'
       },
       async () => await this.ivyEngineApi?.deleteProject(ivyProjectDirectory)
     );
@@ -342,7 +342,7 @@ export class IvyEngineManager {
       {
         textDuring: 'Converting project...',
         textSuccess: 'Success: Convert project',
-        textFailure: 'Failed: Convert project'
+        textError: 'Error: Convert project'
       },
       async () => await this.ivyEngineApi?.convertProject(ivyProjectDirectory)
     );
@@ -353,7 +353,7 @@ export class IvyEngineManager {
       {
         textDuring: 'Refreshing project statuses...',
         textSuccess: 'Success: Refresh project statuses',
-        textFailure: 'Failed: Refresh project statuses'
+        textError: 'Error: Refresh project statuses'
       },
       async () => await this.ivyEngineApi?.refreshProjectStatuses()
     );
@@ -364,7 +364,7 @@ export class IvyEngineManager {
       {
         textDuring: 'Invalidating class loader...',
         textSuccess: 'Success: Invalidate class loader',
-        textFailure: 'Failed: Invalidate class loader',
+        textError: 'Error: Invalidate class loader',
         successMsgDuration: 1_000
       },
       async () => await this.ivyEngineApi?.invalidateClassLoader(ivyProjectDirectory)
