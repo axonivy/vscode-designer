@@ -25,6 +25,7 @@ interface StatusBarItemOptions {
   prefix?: string;
   isError?: boolean;
   isClickable?: boolean;
+  visibleOptions?: string[];
 }
 
 interface StatusBarProgressOptions {
@@ -100,11 +101,13 @@ export const setStatusBarItem = (opt: StatusBarItemOptions) => {
   item.text = `${opt.icon ?? DEFAULT_ICON} ${opt.prefix ?? DEFAULT_PREFIX}: ${opt.text ?? DEFAULT_TEXT}`;
   item.tooltip = opt.hoverMarkdown ?? buildDefaultHoverMarkdown();
   item.backgroundColor = isError ? new ThemeColor('statusBarItem.errorBackground') : undefined;
-  item.command = isClickable ? 'ivy.showStatusBarQuickPick' : undefined;
+  item.command = isClickable
+    ? { title: 'Show Axon Ivy actions', command: 'ivy.showStatusBarQuickPick', arguments: [opt.visibleOptions] }
+    : undefined;
   item.show();
 };
 
-export const showStatusBarQuickPick = () => {
+export const showStatusBarQuickPick = (visibleOptions?: string[]) => {
   const animationIsOn = workspace.getConfiguration('axonivy.process.animation').get<boolean>('animate');
   const quickPickOptions = [
     { label: '↻ Reload Window' },
@@ -130,7 +133,12 @@ export const showStatusBarQuickPick = () => {
     { label: animationIsOn ? 'Deactivate Animation' : 'Activate Animation' }
   ];
 
-  window.showQuickPick(quickPickOptions, { ignoreFocusOut: true, canPickMany: false }).then(selection => {
+  const shownQuickPickOptions =
+    !visibleOptions || visibleOptions.length === 0
+      ? quickPickOptions
+      : quickPickOptions.filter(option => visibleOptions.includes(option.label));
+
+  window.showQuickPick(shownQuickPickOptions, { ignoreFocusOut: true, canPickMany: false }).then(selection => {
     if (!selection) {
       return;
     }

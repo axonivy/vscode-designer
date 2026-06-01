@@ -38,7 +38,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));
     registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
     registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
-    registerCommand('ivy.showStatusBarQuickPick', context, () => showStatusBarQuickPick());
+    registerCommand('ivy.showStatusBarQuickPick', context, (visibleOptions?: string[]) => showStatusBarQuickPick(visibleOptions));
 
     registerTools(context);
 
@@ -55,7 +55,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
       hoverMarkdown: newMarkdownString('Activation failed.\nCheck the error logs for more details.\nTry to reload the window.'),
       icon: '$(error)',
       isError: true,
-      isClickable: false
+      visibleOptions: ['↻ Reload Window']
     });
     throw error;
   }
