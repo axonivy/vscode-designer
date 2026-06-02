@@ -93,9 +93,9 @@ test.describe('Inscription View', () => {
     await expect(monacoEditor).toHaveText('ivy.log.debug(message, t)');
   });
 
-  test('Monaco Editor completion with JDT language server', async () => {
+  test('Monaco Editor completion with JDT language server', async ({ wsPage }) => {
     test.setTimeout(60_000); // slow test due to java activation
-    await processEditor.activateExpensiveJavaStandardMode();
+    await wsPage.activateExpensiveJavaStandardMode();
 
     // Code Editor - import expected
     const inscriptionView = await processEditor.openInscriptionView('15254DCE818AD7A2-f0');
