@@ -44,7 +44,7 @@ export class WorkspacePage {
   async activateExpensiveJavaStandardMode() {
     const statusBarItem = (text: string) => this.page.locator(`div.statusbar-item:has-text("${text}")`);
     await statusBarItem('Java: Lightweight Mode').click();
-    await expect(statusBarItem('Finished: Invalidate class loader')).toBeVisible();
+    await expect(statusBarItem('Java: Building')).toBeVisible();
     await expect(statusBarItem('Java: Ready')).toBeVisible();
   }
 }

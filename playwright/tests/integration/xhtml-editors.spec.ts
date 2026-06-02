@@ -16,16 +16,16 @@ test('xhtml completions', async () => {
   await editor.expectCompletionAtLineColumn('h:body', 19, 10);
 });
 
-test('xhtml definitions', async () => {
-  await editor.activateExpensiveJavaStandardMode();
+test('xhtml definitions', async ({ wsPage }) => {
+  await wsPage.activateExpensiveJavaStandardMode();
   await editor.expectDefinitionAtLineColumn('WorkflowBean.java', 24, 64);
   await editor.expectDefinitionAtLineColumn('IvyJsf.java', 24, 111);
   await editor.expectDefinitionAtLineColumn('IvyJsf.java', 24, 115);
   await editor.expectDefinitionAtLineColumn('ContentManagement.java', 24, 118);
 });
 
-test('xhtml preview', async ({ page }) => {
-  await editor.activateExpensiveJavaStandardMode();
+test('xhtml preview', async ({ page, wsPage }) => {
+  await wsPage.activateExpensiveJavaStandardMode();
   await editor.executeCommand('Axon Ivy: Deploy all Projects');
   await editor.hasDeployProjectStatusMessage();
   const browserView = new BrowserView(page);

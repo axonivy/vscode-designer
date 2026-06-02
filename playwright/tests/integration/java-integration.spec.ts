@@ -2,7 +2,7 @@ import { expect, test } from '../fixtures/baseTest';
 import { Editor } from '../page-objects/editor';
 import { ProcessEditor } from '../page-objects/process-editor';
 
-test('Compile java and invalidate class loader', async ({ page }) => {
+test('Compile java and invalidate class loader', async ({ page, wsPage }) => {
   test.setTimeout(60_000); // slow test due to java activation
   const processEditor = new ProcessEditor(page, 'CallJavaMethod.p.json');
   await processEditor.hasDeployProjectStatusMessage();
@@ -11,7 +11,7 @@ test('Compile java and invalidate class loader', async ({ page }) => {
   await processEditor.hasError(script);
   await processEditor.closeAllTabs();
 
-  await processEditor.activateExpensiveJavaStandardMode();
+  await wsPage.activateExpensiveJavaStandardMode();
 
   const javaEditor = new Editor('TestClass.java', page);
   await javaEditor.openEditorFile();

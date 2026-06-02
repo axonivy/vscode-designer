@@ -84,13 +84,6 @@ export class PageObject {
     }).toPass();
   }
 
-  async activateExpensiveJavaStandardMode() {
-    const statusBarItem = (text: string) => this.page.locator(`div.statusbar-item:has-text("${text}")`);
-    await statusBarItem('Java: Lightweight Mode').click();
-    await expect(statusBarItem('Java: Building')).toBeVisible();
-    await expect(statusBarItem('Java: Ready')).toBeVisible();
-  }
-
   async selectItemFromQuickPick(label: string) {
     const item = this.page.locator('div.quick-input-list').locator('div.monaco-icon-label-container', { hasText: label });
     await item.click();
