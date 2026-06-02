@@ -1,4 +1,5 @@
 import { test } from '~/fixtures/baseTest';
+import { FormEditor } from '~/page-objects/form-editor';
 import { ProblemsView } from '~/page-objects/problems-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
 
@@ -30,4 +31,17 @@ test('Check live validation', async ({ wsPage }) => {
   await editor.hasError(script);
   const problemsView = await ProblemsView.initProblemsView(wsPage);
   await problemsView.hasError("Output code: Unexpected token: identifier '", '18D9CDFA8F58DA2B-f7');
+});
+
+test('Worspace Validation', async ({ wsPage }) => {
+  const editor = new FormEditor(wsPage);
+  await editor.open();
+  await editor.blockFor('input').click();
+  await editor.quickBar.getByRole('button', { name: /Add new Component/ }).click();
+  await editor.quickBarMenu.getByRole('textbox').fill('Button');
+  await editor.quickBarMenu.locator('.ui-palette-item', { hasText: 'Button' }).click();
+  await wsPage.page.keyboard.press('Escape');
+  await editor.save();
+  const problemsView = await ProblemsView.initProblemsView(wsPage);
+  await problemsView.hasError('Button action cannot be empty');
 });
