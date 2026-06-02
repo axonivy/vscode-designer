@@ -82,6 +82,9 @@ async function generateClient(payload: string | WsGeneratorConfig, document: Tex
       `"-Divy.generate.webservice.client.output=${outputDir}"`,
       `"-Divy.generate.webservice.client.underscoreNames=${codegen.underscoreNames}"`
     ];
+    if (codegen.namespace?.trim()) {
+      commandParts.push(`"-Divy.generate.webservice.client.namespace=${codegen.namespace}"`);
+    }
     const command = commandParts.join(' ');
 
     await runMavenCommand(projectPath, command);
