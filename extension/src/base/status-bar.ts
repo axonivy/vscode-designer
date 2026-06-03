@@ -164,27 +164,37 @@ export const setStatusBarItem = (opt: StatusBarItemOptions) => {
 export const showStatusBarQuickPick = (visibleOptions?: string[]) => {
   const animationIsOn = animationSettings().animate;
   const quickPickOptions = [
-    { label: '↻ Reload Window' },
-    { label: '🔧 Open Axon Ivy Settings' },
-    { label: '🔧 Open Axon Ivy Runtime Log' },
-    { label: '🚀 Deploy all Axon Ivy Projects' },
-    { label: '🚀 Deploy Axon Ivy Project' },
+    { label: 'Animation', kind: QuickPickItemKind.Separator },
+    { label: animationIsOn ? 'Deactivate Animation' : 'Activate Animation', id: 'toggleAnimation' },
+
+    { label: 'Settings', kind: QuickPickItemKind.Separator },
+    { label: '$(settings-gear) Open Axon Ivy Settings', id: 'openSettings' },
+
+    { label: 'Logs', kind: QuickPickItemKind.Separator },
+    // TODO: Implement
+    // { label: '$(list-filter) Open Axon Ivy Extension Log' },
+    // { label: '$(list-filter) Open Axon Ivy Engine Log' },
+    { label: '$(list-filter) Open Axon Ivy Runtime Log', id: 'openRuntimeLog' },
+
+    { label: 'Deployment', kind: QuickPickItemKind.Separator },
+    { label: '$(layers) Deploy all Axon Ivy Projects', id: 'deployAllProjects' },
+    { label: '$(layers-dot) Deploy Axon Ivy Project', id: 'deployProject' },
+
+    { label: 'Market', kind: QuickPickItemKind.Separator },
+    { label: '$(gift) Install Market Product', id: 'installMarketProduct' },
+    { label: '$(gift) Install Local Market Product', id: 'installLocalMarketProduct' },
+
     { label: 'New ...', kind: QuickPickItemKind.Separator },
-    { label: 'New Business Process' },
-    { label: 'New Callable Sub Process' },
-    { label: 'New Web Service Process' },
-    { label: 'New Html Dialog (JSF)' },
-    { label: 'New Dialog Form' },
-    { label: 'New Offline Dialog (JSF)' },
-    { label: 'New Data Class' },
-    { label: 'New Entity Class' },
-    { label: 'New Case Map' },
-    { label: 'New Project' },
-    { label: 'Market Products', kind: QuickPickItemKind.Separator },
-    { label: 'Install Market Product' },
-    { label: 'Install Local Market Product' },
-    { label: '', kind: QuickPickItemKind.Separator },
-    { label: animationIsOn ? 'Deactivate Animation' : 'Activate Animation' }
+    { label: 'New Project', id: 'newProject' },
+    { label: 'New Business Process', id: 'newBusinessProcess' },
+    { label: 'New Callable Sub Process', id: 'newCallableSubProcess' },
+    { label: 'New Web Service Process', id: 'newWebServiceProcess' },
+    { label: 'New Html Dialog (JSF)', id: 'newHtmlDialog' },
+    { label: 'New Dialog Form', id: 'newDialogForm' },
+    { label: 'New Offline Dialog (JSF)', id: 'newOfflineDialog' },
+    { label: 'New Data Class', id: 'newDataClass' },
+    { label: 'New Entity Class', id: 'newEntityClass' },
+    { label: 'New Case Map', id: 'newCaseMap' }
   ];
 
   const shownQuickPickOptions =
@@ -196,64 +206,59 @@ export const showStatusBarQuickPick = (visibleOptions?: string[]) => {
     if (!selection) {
       return;
     }
-    switch (selection.label) {
-      case '↻ Reload Window':
-        executeCommand('workbench.action.reloadWindow');
+    switch (selection.id) {
+      case 'toggleAnimation':
+        executeCommand(selection.label.includes('Deactivate') ? 'engine.deactivateAnimation' : 'engine.activateAnimation');
         break;
-      case '🔧 Open Axon Ivy Settings':
+      case 'openSettings':
         executeCommand('workbench.action.openSettings', '@ext:axonivy.vscode-designer-14');
         break;
-      case '🔧 Open Axon Ivy Runtime Log':
+      case 'openRuntimeLog':
         executeCommand('ivyPanelView.openRuntimeLog');
         break;
-      case '🚀 Deploy all Axon Ivy Projects':
+      case 'deployAllProjects':
         executeCommand('engine.deployProjects');
         break;
-      case '🚀 Deploy Axon Ivy Project':
+      case 'deployProject':
         executeCommand('ivyProjects.deployProject');
         break;
-      case 'New Business Process':
-        executeCommand('ivyProjects.addBusinessProcess');
-        break;
-      case 'New Callable Sub Process':
-        executeCommand('ivyProjects.addCallableSubProcess');
-        break;
-      case 'New Web Service Process':
-        executeCommand('ivyProjects.addWebServiceProcess');
-        break;
-      case 'New Html Dialog (JSF)':
-        executeCommand('ivyProjects.addNewHtmlDialog');
-        break;
-      case 'New Dialog Form':
-        executeCommand('ivyProjects.addNewFormDialog');
-        break;
-      case 'New Offline Dialog (JSF)':
-        executeCommand('ivyProjects.addNewOfflineDialog');
-        break;
-      case 'New Data Class':
-        executeCommand('ivyProjects.addNewDataClass');
-        break;
-      case 'New Entity Class':
-        executeCommand('ivyProjects.addNewEntityClass');
-        break;
-      case 'New Case Map':
-        executeCommand('ivyProjects.addNewCaseMap');
-        break;
-      case 'New Project':
-        executeCommand('ivyProjects.addNewProject');
-        break;
-      case 'Install Market Product':
+      case 'installMarketProduct':
         executeCommand('ivyProjects.installMarketProduct');
         break;
-      case 'Install Local Market Product':
+      case 'installLocalMarketProduct':
         executeCommand('ivyProjects.installLocalMarketProduct');
         break;
-      case 'Deactivate Animation':
-        executeCommand('engine.deactivateAnimation');
+      case 'newProject':
+        executeCommand('ivyProjects.addNewProject');
         break;
-      case 'Activate Animation':
-        executeCommand('engine.activateAnimation');
+      case 'newBusinessProcess':
+        executeCommand('ivyProjects.addBusinessProcess');
         break;
+      case 'newCallableSubProcess':
+        executeCommand('ivyProjects.addCallableSubProcess');
+        break;
+      case 'newWebServiceProcess':
+        executeCommand('ivyProjects.addWebServiceProcess');
+        break;
+      case 'newHtmlDialog':
+        executeCommand('ivyProjects.addNewHtmlDialog');
+        break;
+      case 'newDialogForm':
+        executeCommand('ivyProjects.addNewFormDialog');
+        break;
+      case 'newOfflineDialog':
+        executeCommand('ivyProjects.addNewOfflineDialog');
+        break;
+      case 'newDataClass':
+        executeCommand('ivyProjects.addNewDataClass');
+        break;
+      case 'newEntityClass':
+        executeCommand('ivyProjects.addNewEntityClass');
+        break;
+      case 'newCaseMap':
+        executeCommand('ivyProjects.addNewCaseMap');
+        break;
+
       default:
         throw Error(`Unknown quick pick selection: ${selection}`);
     }
