@@ -7,14 +7,14 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure'
   },
-  workers: 1,
+  workers: process.env.RUN_IN_BROWSER ? 4 : 1,
   timeout: 40_000,
   fullyParallel: true,
   expect: { timeout: 30_000 },
   reporter: process.env.CI ? [['junit', { outputFile: 'report.xml' }], ['list']] : 'html',
   projects: [
-    { name: 'integration-parallel', testDir: './tests/integration', workers: process.env.RUN_IN_BROWSER ? 4 : 1, grepInvert: /@serial/ },
-    { name: 'integration-serial', testDir: './tests/integration', grep: /@serial/ },
+    { name: 'integration-parallel', testDir: './tests/integration', grepInvert: /@serial/ },
+    { name: 'integration-serial', testDir: './tests/integration', grep: /@serial/, workers: 1 },
     { name: 'performance', testDir: './tests/performance', timeout: 120_000, expect: { timeout: 60_000 } }
   ]
 });
