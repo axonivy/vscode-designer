@@ -1,5 +1,6 @@
 import { MarkdownString, QuickPickItemKind, StatusBarAlignment, ThemeColor, window, workspace, type StatusBarItem } from 'vscode';
 import { IvyEngineManager } from '../engine/engine-manager';
+import { getWebIdeWebSocketReadyState, onWebIdeWebSocketStateChange } from '../engine/web-ide-ws/web-ide-websocket-provider';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { executeCommand } from './commands';
 
@@ -39,6 +40,7 @@ interface StatusBarProgressOptions {
 
 let statusBarItem: StatusBarItem | undefined;
 let temporaryTimeout: ReturnType<typeof setTimeout> | undefined;
+let subscribedToWebIdeWebsocket = false;
 
 const buildDefaultHoverMarkdown = async (item: StatusBarItem) => {
   const markdown = newMarkdownString('### Axon Ivy is Ready');
@@ -48,8 +50,6 @@ const buildDefaultHoverMarkdown = async (item: StatusBarItem) => {
   // markdown.baseUri = Uri.file('p1/');
   // markdown.appendMarkdown('\n[Google](http://google.com)');
 
-  // markdown.appendMarkdown(projectsString);
-  // console.log(markdown.value);
   item.tooltip = markdown;
 };
 
@@ -75,9 +75,28 @@ const buildProjectCountString = async () => {
 
 const buildEngineStatusString = () => {
   let engineStatusString = '**Axon Ivy Engine Status**';
-  const engineUrl = IvyEngineManager.instance.engineUrl;
+
+  const engineWebIdeSocketReadyState = getWebIdeWebSocketReadyState();
+  const engineConnectionState = (function () {
+    switch (engineWebIdeSocketReadyState) {
+      case WebSocket.CONNECTING:
+        return 'Connecting';
+      case WebSocket.OPEN:
+        return 'Connected';
+      case WebSocket.CLOSING:
+        return 'Closing';
+      case WebSocket.CLOSED:
+        return 'Closed';
+    }
+  })();
+
+  const ivyEngineMangerInstance = IvyEngineManager.instance;
+  const engineUrl = ivyEngineMangerInstance.engineUrl;
   const engineUrlLink = engineUrl ? `[${engineUrl}](${engineUrl})` : 'Engine URL cannot be resolved';
-  engineStatusString += `\n\nURL: ${engineUrlLink}`;
+
+  engineStatusString += `\n\n- Status: ${engineConnectionState}`;
+  engineStatusString += `\n\n- URL: ${engineUrlLink}`;
+
   return engineStatusString;
 };
 
@@ -86,6 +105,14 @@ const getStatusBarItem = () => {
     statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, DEFAULT_PRIORITY);
     statusBarItem.command = 'ivy.showStatusBarQuickPick';
     buildDefaultHoverMarkdown(statusBarItem);
+    if (!subscribedToWebIdeWebsocket) {
+      subscribedToWebIdeWebsocket = true;
+      onWebIdeWebSocketStateChange(() => {
+        if (statusBarItem) {
+          buildDefaultHoverMarkdown(statusBarItem);
+        }
+      });
+    }
   }
   return statusBarItem;
 };
@@ -108,10 +135,10 @@ export const setStatusBarItem = (opt: StatusBarItemOptions) => {
   item.command = isClickable
     ? { title: 'Show Axon Ivy actions', command: 'ivy.showStatusBarQuickPick', arguments: [opt.visibleOptions] }
     : undefined;
-  if (!opt.hoverMarkdown) {
-    buildDefaultHoverMarkdown(item);
-  } else {
+  if (opt.hoverMarkdown) {
     item.tooltip = opt.hoverMarkdown;
+  } else {
+    buildDefaultHoverMarkdown(item);
   }
   item.show();
 };
