@@ -1,4 +1,4 @@
-import { workspace } from 'vscode';
+import { workspace, type Disposable } from 'vscode';
 
 type AnimationFollowMode = 'all' | 'currentProcess' | 'openProcesses' | 'noDialogProcesses' | 'noEmbeddedProcesses';
 
@@ -29,3 +29,11 @@ export const animationSettings = () => ({
   speed: config.processAnimationSpeed() ?? 50,
   mode: config.processAnimationMode() ?? 'all'
 });
+
+export const onAnimationSettingsChange = (listener: () => void): Disposable => {
+  return workspace.onDidChangeConfiguration(e => {
+    if (e.affectsConfiguration('axonivy.process.animation')) {
+      listener();
+    }
+  });
+};

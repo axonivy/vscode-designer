@@ -2,8 +2,8 @@ import { MarkdownString, QuickPickItemKind, StatusBarAlignment, ThemeColor, wind
 import { IvyEngineManager } from '../engine/engine-manager';
 import { getWebIdeWebSocketReadyState, onWebIdeWebSocketStateChange } from '../engine/web-ide-ws/web-ide-websocket-provider';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
-import { animationSettings } from './/configurations';
 import { executeCommand } from './commands';
+import { animationSettings, onAnimationSettingsChange } from './configurations';
 
 export const newMarkdownString = (text: string) => {
   const markdown = new MarkdownString(text, true);
@@ -42,13 +42,25 @@ interface StatusBarProgressOptions {
 let statusBarItem: StatusBarItem | undefined;
 let temporaryTimeout: ReturnType<typeof setTimeout> | undefined;
 let subscribedToWebIdeWebsocket = false;
+let subscribedToAnimationSettings = false;
+let hoverRefreshVersion = 0;
 
-const buildDefaultHoverMarkdown = async (item: StatusBarItem) => {
+const refreshDefaultHoverMarkdown = () => {
+  if (!statusBarItem) {
+    return;
+  }
+  const refreshVersion = ++hoverRefreshVersion;
+  void buildDefaultHoverMarkdown(statusBarItem, refreshVersion);
+};
+
+const buildDefaultHoverMarkdown = async (item: StatusBarItem, refreshVersion = ++hoverRefreshVersion) => {
   const markdown = newMarkdownString('### Axon Ivy is Ready');
   markdown.appendMarkdown('\n\n' + buildEngineStatusString());
   markdown.appendMarkdown('\n\n' + buildAnimationStatusString());
   markdown.appendMarkdown('\n\n' + (await buildProjectCountString()));
-  item.tooltip = markdown;
+  if (refreshVersion === hoverRefreshVersion) {
+    item.tooltip = markdown;
+  }
 };
 
 const buildProjectCountString = async () => {
@@ -109,14 +121,14 @@ const getStatusBarItem = () => {
   if (!statusBarItem) {
     statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, DEFAULT_PRIORITY);
     statusBarItem.command = 'ivy.showStatusBarQuickPick';
-    buildDefaultHoverMarkdown(statusBarItem);
+    refreshDefaultHoverMarkdown();
     if (!subscribedToWebIdeWebsocket) {
       subscribedToWebIdeWebsocket = true;
-      onWebIdeWebSocketStateChange(() => {
-        if (statusBarItem) {
-          buildDefaultHoverMarkdown(statusBarItem);
-        }
-      });
+      onWebIdeWebSocketStateChange(refreshDefaultHoverMarkdown);
+    }
+    if (!subscribedToAnimationSettings) {
+      subscribedToAnimationSettings = true;
+      onAnimationSettingsChange(refreshDefaultHoverMarkdown);
     }
   }
   return statusBarItem;
@@ -125,7 +137,7 @@ const getStatusBarItem = () => {
 const resetToDefault = () => {
   const item = getStatusBarItem();
   item.text = `${DEFAULT_ICON} ${DEFAULT_PREFIX}: ${DEFAULT_TEXT}`;
-  buildDefaultHoverMarkdown(item);
+  refreshDefaultHoverMarkdown();
   item.backgroundColor = undefined;
   item.command = 'ivy.showStatusBarQuickPick';
   item.show();
@@ -143,7 +155,7 @@ export const setStatusBarItem = (opt: StatusBarItemOptions) => {
   if (opt.hoverMarkdown) {
     item.tooltip = opt.hoverMarkdown;
   } else {
-    buildDefaultHoverMarkdown(item);
+    refreshDefaultHoverMarkdown();
   }
   item.show();
 };
