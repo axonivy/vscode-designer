@@ -4,8 +4,6 @@ import { FileExplorer } from '../page-objects/explorer-view';
 import { ProcessEditor } from '../page-objects/process-editor';
 
 test.describe('Process Animation', () => {
-  test.describe.configure({ mode: 'serial' });
-
   test.beforeEach(async ({ page }) => {
     await new FileExplorer(page).hasReadyStatusMessage();
   });

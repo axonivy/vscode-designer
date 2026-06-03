@@ -6,7 +6,6 @@ import { ProcessEditor } from '../page-objects/process-editor';
 import { empty } from '../workspaces/workspace';
 
 test.describe('Create Project', () => {
-  test.describe.configure({ mode: 'serial' });
   test.use({ workspace: empty });
 
   test('Add Project and execute init Process', async ({ page }) => {
