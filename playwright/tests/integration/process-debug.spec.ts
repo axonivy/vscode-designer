@@ -9,6 +9,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('debug', async ({ page }) => {
+  test.describe.configure({ mode: 'serial' });
   const processEditor = new ProcessEditor(page, 'NoAnimation.p.json');
   await processEditor.openEditorFile();
   const start = processEditor.locatorForPID('191A2645F90CDC61-f0');
