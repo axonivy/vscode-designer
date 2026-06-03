@@ -44,6 +44,7 @@ export class IvyEngineManager {
   private readonly engineRunner: EngineRunner;
   private ivyEngineApi?: IvyEngineApi;
   private started = false;
+  private resolvedEngineUrl?: URL;
 
   private constructor(readonly context: ExtensionContext) {
     const engineDir = this.resolveEngineDir();
@@ -106,13 +107,13 @@ export class IvyEngineManager {
     }
     this.started = true;
     await IvyProjectExplorer.instance.setProjectExplorerContext({ isStarted: true });
-    const engineUrl = await this.resolveEngineUrl();
-    this.ivyEngineApi = new IvyEngineApi(engineUrl.toString());
+    this.resolvedEngineUrl = await this.resolveEngineUrl();
+    this.ivyEngineApi = new IvyEngineApi(this.resolvedEngineUrl.toString());
     let devContextPath = await this.ivyEngineApi.devContextPath;
-    IvyBrowserViewProvider.register(this.context, engineUrl, devContextPath);
+    IvyBrowserViewProvider.register(this.context, this.resolvedEngineUrl, devContextPath);
     devContextPath += devContextPath.endsWith('/') ? '' : '/';
     await this.initExistingProjects();
-    const websocketUrl = new URL(devContextPath, toWebSocketUrl(engineUrl));
+    const websocketUrl = new URL(devContextPath, toWebSocketUrl(this.resolvedEngineUrl));
     ProcessEditorProvider.register(this.context, websocketUrl);
     FormEditorProvider.register(this.context, websocketUrl);
     VariableEditorProvider.register(this.context, websocketUrl);
@@ -383,16 +384,20 @@ export class IvyEngineManager {
     return this.ivyEngineApi?.projects(withDependencies);
   }
 
-  get engineApi() {
-    return this.ivyEngineApi;
-  }
-
   async ivyProjectDirectories() {
     return IvyProjectExplorer.instance.getIvyProjects();
   }
 
   async stop() {
     await this.engineRunner.stop();
+  }
+
+  get engineApi() {
+    return this.ivyEngineApi;
+  }
+
+  get engineUrl() {
+    return this.resolvedEngineUrl ?? '';
   }
 
   public static get instance() {

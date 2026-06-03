@@ -1,5 +1,5 @@
-import path from 'path';
 import { MarkdownString, QuickPickItemKind, StatusBarAlignment, ThemeColor, window, workspace, type StatusBarItem } from 'vscode';
+import { IvyEngineManager } from '../engine/engine-manager';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { executeCommand } from './commands';
 
@@ -10,7 +10,6 @@ export const newMarkdownString = (text: string) => {
 };
 
 const DEFAULT_TEXT = 'Ready';
-const DEFAULT_HOVER = '### Axon Ivy is Ready';
 const DEFAULT_ICON: StatusBarIcon = '$(ivy-logo)';
 const DEFAULT_PREFIX = 'Axon Ivy';
 const DEFAULT_PRIORITY = 1;
@@ -41,45 +40,52 @@ interface StatusBarProgressOptions {
 let statusBarItem: StatusBarItem | undefined;
 let temporaryTimeout: ReturnType<typeof setTimeout> | undefined;
 
-const buildDefaultHoverMarkdown = (projectsString = '') => {
-  const markdown = newMarkdownString(DEFAULT_HOVER);
-  markdown.appendMarkdown(projectsString);
-  return markdown;
+const buildDefaultHoverMarkdown = async (item: StatusBarItem) => {
+  const markdown = newMarkdownString('### Axon Ivy is Ready');
+  markdown.appendMarkdown('\n\n' + buildEngineStatusString());
+  markdown.appendMarkdown('\n\n' + (await buildProjectCountString()));
+
+  // markdown.baseUri = Uri.file('p1/');
+  // markdown.appendMarkdown('\n[Google](http://google.com)');
+
+  // markdown.appendMarkdown(projectsString);
+  // console.log(markdown.value);
+  item.tooltip = markdown;
 };
 
-const buildListOfProjects = (projectPaths: string[] | undefined) => {
-  if (!projectPaths || projectPaths.length === 0) {
-    return '\nNo projects found in the workspace.';
-  }
-  return '\n- ' + projectPaths.map(p => p.substring(p.lastIndexOf(path.sep) + 1)).join('\n- ');
-};
-
-const addDefaultProjectsHoverMarkdown = (item: StatusBarItem) => {
-  const projectsString = '\n**Projects in the workspace:**';
+const buildProjectCountString = async () => {
+  let projectsString = 'Projects in the workspace: ';
   let ivyProjectExplorerInstance: IvyProjectExplorer;
   try {
     ivyProjectExplorerInstance = IvyProjectExplorer.instance;
   } catch {
-    item.tooltip = buildDefaultHoverMarkdown(`${projectsString} + \nWaiting for extension to load projects.`);
-    return;
+    projectsString += 'Loading projects...';
+    return projectsString;
   }
 
-  void ivyProjectExplorerInstance
-    .getIvyProjects()
-    .then(projectPath => {
-      item.tooltip = buildDefaultHoverMarkdown(`${projectsString} ${buildListOfProjects(projectPath)}`);
-    })
-    .catch(() => {
-      item.tooltip = buildDefaultHoverMarkdown(`${projectsString} + \nFailed to load projects.`);
-    });
+  try {
+    const projectPaths = await ivyProjectExplorerInstance.getIvyProjects();
+    projectsString += `${projectPaths.length}`;
+  } catch {
+    projectsString += 'Error loading projects';
+  }
+
+  return projectsString;
+};
+
+const buildEngineStatusString = () => {
+  let engineStatusString = '**Axon Ivy Engine Status**';
+  const engineUrl = IvyEngineManager.instance.engineUrl;
+  const engineUrlLink = engineUrl ? `[${engineUrl}](${engineUrl})` : 'Engine URL cannot be resolved';
+  engineStatusString += `\n\nURL: ${engineUrlLink}`;
+  return engineStatusString;
 };
 
 const getStatusBarItem = () => {
   if (!statusBarItem) {
     statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, DEFAULT_PRIORITY);
     statusBarItem.command = 'ivy.showStatusBarQuickPick';
-    statusBarItem.tooltip = buildDefaultHoverMarkdown();
-    addDefaultProjectsHoverMarkdown(statusBarItem);
+    buildDefaultHoverMarkdown(statusBarItem);
   }
   return statusBarItem;
 };
@@ -87,8 +93,7 @@ const getStatusBarItem = () => {
 const resetToDefault = () => {
   const item = getStatusBarItem();
   item.text = `${DEFAULT_ICON} ${DEFAULT_PREFIX}: ${DEFAULT_TEXT}`;
-  item.tooltip = buildDefaultHoverMarkdown();
-  addDefaultProjectsHoverMarkdown(item);
+  buildDefaultHoverMarkdown(item);
   item.backgroundColor = undefined;
   item.command = 'ivy.showStatusBarQuickPick';
   item.show();
@@ -99,11 +104,15 @@ export const setStatusBarItem = (opt: StatusBarItemOptions) => {
   const isError = opt.isError ?? false;
   const isClickable = opt.isClickable ?? true;
   item.text = `${opt.icon ?? DEFAULT_ICON} ${opt.prefix ?? DEFAULT_PREFIX}: ${opt.text ?? DEFAULT_TEXT}`;
-  item.tooltip = opt.hoverMarkdown ?? buildDefaultHoverMarkdown();
   item.backgroundColor = isError ? new ThemeColor('statusBarItem.errorBackground') : undefined;
   item.command = isClickable
     ? { title: 'Show Axon Ivy actions', command: 'ivy.showStatusBarQuickPick', arguments: [opt.visibleOptions] }
     : undefined;
+  if (!opt.hoverMarkdown) {
+    buildDefaultHoverMarkdown(item);
+  } else {
+    item.tooltip = opt.hoverMarkdown;
+  }
   item.show();
 };
 
