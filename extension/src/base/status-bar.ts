@@ -1,4 +1,4 @@
-import { MarkdownString, QuickPickItemKind, StatusBarAlignment, ThemeColor, window, type StatusBarItem } from 'vscode';
+import { extensions, MarkdownString, QuickPickItemKind, StatusBarAlignment, ThemeColor, window, type StatusBarItem } from 'vscode';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { getWebIdeWebSocketReadyState, onWebIdeWebSocketStateChange } from '../engine/web-ide-ws/web-ide-websocket-provider';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
@@ -58,6 +58,8 @@ const buildDefaultHoverMarkdown = async (item: StatusBarItem, refreshVersion = +
   markdown.appendMarkdown('\n\n' + buildEngineStatusString());
   markdown.appendMarkdown('\n\n' + buildAnimationStatusString());
   markdown.appendMarkdown('\n\n' + (await buildProjectCountString()));
+  markdown.appendMarkdown(`\n\n Engine Version ${await buildEngineVersionString()}`);
+  markdown.appendMarkdown(`\n\n Extension Version ${extensions.getExtension('axonivy.vscode-designer-14')?.packageJSON.version}`);
   if (refreshVersion === hoverRefreshVersion) {
     item.tooltip = markdown;
   }
@@ -100,8 +102,7 @@ const buildEngineStatusString = () => {
     }
   })();
 
-  const ivyEngineMangerInstance = IvyEngineManager.instance;
-  const engineUrl = ivyEngineMangerInstance.engineUrl;
+  const engineUrl = IvyEngineManager.instance.engineUrl;
   const engineUrlLink = engineUrl ? `[${engineUrl}](${engineUrl})` : 'Engine URL cannot be resolved';
 
   engineStatusString += `\n\n- Status: ${engineConnectionState}`;
@@ -115,6 +116,10 @@ const buildAnimationStatusString = () => {
   animationStatusString += animationSettings().animate ? 'ON' : 'OFF';
   animationStatusString += ` (Speed: ${animationSettings().speed})`;
   return animationStatusString;
+};
+
+const buildEngineVersionString = async () => {
+  return await IvyEngineManager.instance.getEngineVersion();
 };
 
 const getStatusBarItem = () => {
