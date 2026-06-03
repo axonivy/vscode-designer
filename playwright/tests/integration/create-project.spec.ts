@@ -1,5 +1,5 @@
 import path from 'path';
-import { expect, test } from '../fixtures/baseTest';
+import { test } from '../fixtures/baseTest';
 import { FileExplorer } from '../page-objects/explorer-view';
 import { ProblemsView } from '../page-objects/problems-view';
 import { ProcessEditor } from '../page-objects/process-editor';
@@ -23,8 +23,7 @@ test.describe('Create Project', () => {
     await processEditor.hasBreadCrumbs('parent', projectName, 'processes', projectName, 'BusinessProcess.p.json');
     const start = processEditor.locatorForElementType('g.start\\:requestStart');
     const end = processEditor.locatorForElementType('g.end\\:taskEnd');
-    await expect(async () => {
-      await processEditor.startProcessAndAssertExecuted(start, end, { timeout: 1_000 });
-    }).toPass({ intervals: [500] });
+    await page.waitForTimeout(3_000);
+    await processEditor.startProcessAndAssertExecuted(start, end);
   });
 });

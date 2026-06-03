@@ -42,12 +42,12 @@ export class ProcessEditor extends Editor {
     return new InscriptionView(this.page, this.viewFrameLocator().locator('.inscription-ui-container'));
   }
 
-  async startProcessAndAssertExecuted(startEvent: Locator, executedElement: Locator, options?: { timeout?: number }) {
+  async startProcessAndAssertExecuted(startEvent: Locator, executedElement: Locator) {
     await startEvent.locator('circle').click();
     await this.assertSelected(startEvent);
     const playButton = this.quickActionBar.getByRole('button', { name: /Start Process/ });
     await playButton.click();
-    await expect(executedElement).toHaveClass(/executed/, options);
+    await expect(executedElement).toHaveClass(/executed/);
   }
 
   async addBreakpoint(element: Locator) {
