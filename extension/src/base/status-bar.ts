@@ -1,7 +1,8 @@
-import { MarkdownString, QuickPickItemKind, StatusBarAlignment, ThemeColor, window, workspace, type StatusBarItem } from 'vscode';
+import { MarkdownString, QuickPickItemKind, StatusBarAlignment, ThemeColor, window, type StatusBarItem } from 'vscode';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { getWebIdeWebSocketReadyState, onWebIdeWebSocketStateChange } from '../engine/web-ide-ws/web-ide-websocket-provider';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
+import { animationSettings } from './/configurations';
 import { executeCommand } from './commands';
 
 export const newMarkdownString = (text: string) => {
@@ -45,11 +46,8 @@ let subscribedToWebIdeWebsocket = false;
 const buildDefaultHoverMarkdown = async (item: StatusBarItem) => {
   const markdown = newMarkdownString('### Axon Ivy is Ready');
   markdown.appendMarkdown('\n\n' + buildEngineStatusString());
+  markdown.appendMarkdown('\n\n' + buildAnimationStatusString());
   markdown.appendMarkdown('\n\n' + (await buildProjectCountString()));
-
-  // markdown.baseUri = Uri.file('p1/');
-  // markdown.appendMarkdown('\n[Google](http://google.com)');
-
   item.tooltip = markdown;
 };
 
@@ -100,6 +98,13 @@ const buildEngineStatusString = () => {
   return engineStatusString;
 };
 
+const buildAnimationStatusString = () => {
+  let animationStatusString = 'Animation is ';
+  animationStatusString += animationSettings().animate ? 'ON' : 'OFF';
+  animationStatusString += ` (Speed: ${animationSettings().speed})`;
+  return animationStatusString;
+};
+
 const getStatusBarItem = () => {
   if (!statusBarItem) {
     statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, DEFAULT_PRIORITY);
@@ -144,7 +149,7 @@ export const setStatusBarItem = (opt: StatusBarItemOptions) => {
 };
 
 export const showStatusBarQuickPick = (visibleOptions?: string[]) => {
-  const animationIsOn = workspace.getConfiguration('axonivy.process.animation').get<boolean>('animate');
+  const animationIsOn = animationSettings().animate;
   const quickPickOptions = [
     { label: '↻ Reload Window' },
     { label: '🔧 Open Axon Ivy Settings' },
