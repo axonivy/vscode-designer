@@ -7,7 +7,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure'
   },
-  workers: process.env.RUN_IN_BROWSER ? 10 : 1,
+  workers: process.env.RUN_IN_BROWSER ? 2 : 1,
   timeout: 40_000,
   expect: { timeout: 30_000 },
   reporter: process.env.CI ? [['junit', { outputFile: 'report.xml' }], ['list']] : 'html',
