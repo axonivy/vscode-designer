@@ -41,8 +41,6 @@ interface StatusBarProgressOptions {
 
 let statusBarItem: StatusBarItem | undefined;
 let temporaryTimeout: ReturnType<typeof setTimeout> | undefined;
-let subscribedToWebIdeWebsocket = false;
-let subscribedToAnimationSettings = false;
 let hoverRefreshVersion = 0;
 
 const refreshDefaultHoverMarkdown = () => {
@@ -60,6 +58,10 @@ const buildDefaultHoverMarkdown = async (item: StatusBarItem, refreshVersion = +
   markdown.appendMarkdown('\n\n' + (await buildProjectCountString()));
   markdown.appendMarkdown(`\n\n Engine Version ${await buildEngineVersionString()}`);
   markdown.appendMarkdown(`\n\n Extension Version ${extensions.getExtension('axonivy.vscode-designer-14')?.packageJSON.version}`);
+  markdown.appendMarkdown(
+    (await IvyEngineManager.instance.resolveEngineDir()) ??
+      '\n\n Engine directory cannot be resolved when "Run Engine by Extension" is disabled.'
+  );
   if (refreshVersion === hoverRefreshVersion) {
     item.tooltip = markdown;
   }
@@ -127,14 +129,8 @@ const getStatusBarItem = () => {
     statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, DEFAULT_PRIORITY);
     statusBarItem.command = 'ivy.showStatusBarQuickPick';
     refreshDefaultHoverMarkdown();
-    if (!subscribedToWebIdeWebsocket) {
-      subscribedToWebIdeWebsocket = true;
-      onWebIdeWebSocketStateChange(refreshDefaultHoverMarkdown);
-    }
-    if (!subscribedToAnimationSettings) {
-      subscribedToAnimationSettings = true;
-      onAnimationSettingsChange(refreshDefaultHoverMarkdown);
-    }
+    onWebIdeWebSocketStateChange(refreshDefaultHoverMarkdown);
+    onAnimationSettingsChange(refreshDefaultHoverMarkdown);
   }
   return statusBarItem;
 };

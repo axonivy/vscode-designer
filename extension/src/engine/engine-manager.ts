@@ -58,7 +58,7 @@ export class IvyEngineManager {
     return IvyEngineManager._instance;
   }
 
-  async resolveEngineDir(): Promise<string | undefined> {
+  public async resolveEngineDir(): Promise<string | undefined> {
     if (!config.engineRunByExtension()) {
       return; // ok to be undefined, e.g. in cloud setup
     }
