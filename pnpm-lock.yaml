@@ -17,22 +17,22 @@ importers:
   .:
     devDependencies:
       '@axonivy/eslint-config':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01(jiti@2.7.0)(tailwindcss@4.3.0)(typescript@6.0.3)
       '@axonivy/prettier-config':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01
       '@axonivy/ts-config':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01
       '@lerna-lite/cli':
-        specifier: ^5.2.1
+        specifier: ^5.2.2
         version: 5.2.2(@lerna-lite/run@5.2.2)(@lerna-lite/version@5.2.2)(@types/node@24.12.4)
       '@lerna-lite/run':
-        specifier: ^5.2.1
+        specifier: ^5.2.2
         version: 5.2.2(@lerna-lite/version@5.2.2)(@types/node@24.12.4)
       '@lerna-lite/version':
-        specifier: ^5.2.1
+        specifier: ^5.2.2
         version: 5.2.2(@lerna-lite/run@5.2.2)(@types/node@24.12.4)(conventional-commits-filter@5.0.0)
       '@types/adm-zip':
         specifier: ^0.5.8
@@ -56,7 +56,7 @@ importers:
         specifier: 17.6.0
         version: 17.6.0
       i18next:
-        specifier: ^26.2.0
+        specifier: ^26.3.0
         version: 26.3.0(typescript@6.0.3)
       orval:
         specifier: 8.13.0
@@ -95,52 +95,52 @@ importers:
   extension:
     dependencies:
       '@axonivy/case-map-editor-protocol':
-        specifier: ~14.0.0-next.317.64794f2
+        specifier: 14.0.0-next.328.271502d
         version: 14.0.0-next.328.271502d
       '@axonivy/cms-editor-protocol':
-        specifier: ~14.0.0-next.779.c255267
+        specifier: 14.0.0-next.786.43a6ece
         version: 14.0.0-next.786.43a6ece
       '@axonivy/database-editor-protocol':
-        specifier: ~14.0.0-next.386.6ea9a6e
+        specifier: 14.0.0-next.392.44bf500
         version: 14.0.0-next.392.44bf500
       '@axonivy/dataclass-editor-protocol':
-        specifier: ~14.0.0-next.929.563da00
+        specifier: 14.0.0-next.938.44e8c2f
         version: 14.0.0-next.938.44e8c2f
       '@axonivy/form-editor-protocol':
-        specifier: ~14.0.0-next.1250.754359d
+        specifier: 14.0.0-next.1258.f1cb7c3
         version: 14.0.0-next.1258.f1cb7c3
       '@axonivy/jsonrpc':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01
       '@axonivy/log-view-core':
-        specifier: ~14.0.0-next.453.420c849
+        specifier: 14.0.0-next.457.5601961
         version: 14.0.0-next.457.5601961(@axonivy/jsonrpc@14.0.0-next.1157.a80ac01)
       '@axonivy/log-view-protocol':
-        specifier: ~14.0.0-next.453.420c849
+        specifier: 14.0.0-next.457.5601961
         version: 14.0.0-next.457.5601961
       '@axonivy/persistence-editor-protocol':
-        specifier: ~14.0.0-next.143.67b8e90
+        specifier: 14.0.0-next.153.04929a0
         version: 14.0.0-next.153.04929a0
       '@axonivy/process-editor-inscription-protocol':
-        specifier: ~14.0.0-next.2215.220a0f96
+        specifier: 14.0.0-next.2223.ff95d0df
         version: 14.0.0-next.2223.ff95d0df
       '@axonivy/process-editor-protocol':
-        specifier: ~14.0.0-next.2215.220a0f96
+        specifier: 14.0.0-next.2223.ff95d0df
         version: 14.0.0-next.2223.ff95d0df(inversify@6.2.2(reflect-metadata@0.2.2))
       '@axonivy/restclient-editor-protocol':
-        specifier: ~14.0.0-next.163.47f29fc
+        specifier: 14.0.0-next.178.53f2578
         version: 14.0.0-next.178.53f2578
       '@axonivy/role-editor-protocol':
-        specifier: ~14.0.0-next.211.cd04548
+        specifier: 14.0.0-next.223.f06d1ba
         version: 14.0.0-next.223.f06d1ba
       '@axonivy/user-editor-protocol':
-        specifier: ~14.0.0-next.164.bcb8d17
+        specifier: 14.0.0-next.170.8169a1b
         version: 14.0.0-next.170.8169a1b
       '@axonivy/variable-editor-protocol':
-        specifier: ~14.0.0-next.1077.9350ebb
+        specifier: 14.0.0-next.1081.169d89b
         version: 14.0.0-next.1081.169d89b
       '@axonivy/webservice-editor-protocol':
-        specifier: ~14.0.0-next.124.f258911
+        specifier: 14.0.0-next.139.506d954
         version: 14.0.0-next.139.506d954
       '@eclipse-glsp/protocol':
         specifier: 2.6.0
@@ -202,7 +202,7 @@ importers:
         version: 15.0.4
       vitest:
         specifier: 4.1.7
-        version: 4.1.7(@types/node@24.12.4)(vite@8.0.14(@types/node@24.12.4)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
+        version: 4.1.7(@types/node@25.9.1)(vite@8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
 
   playwright:
     devDependencies:
@@ -216,10 +216,10 @@ importers:
   webviews/browser:
     dependencies:
       '@axonivy/vscode-webview-common':
-        specifier: workspace:~14.0.0-next
+        specifier: workspace:~
         version: link:../webview-common
       dompurify:
-        specifier: ^3.4.3
+        specifier: ^3.4.7
         version: 3.4.7
       vscode-messenger-webview:
         specifier: 0.4.5
@@ -228,13 +228,13 @@ importers:
   webviews/casemap-editor:
     dependencies:
       '@axonivy/case-map-editor':
-        specifier: ~14.0.0-next.317.64794f2
+        specifier: 14.0.0-next.328.271502d
         version: 14.0.0-next.328.271502d(@axonivy/jsonrpc@14.0.0-next.1157.a80ac01)(@axonivy/ui-components@14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@tanstack/react-query-devtools@5.100.14(@tanstack/react-query@5.100.14(react@19.2.6))(react@19.2.6))(@tanstack/react-query@5.100.14(react@19.2.6))(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react-i18next@17.0.8(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@6.0.3))(react@19.2.6)
       '@axonivy/ui-components':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@axonivy/vscode-webview-common':
-        specifier: workspace:~14.0.0-next
+        specifier: workspace:~
         version: link:../webview-common
       vscode-messenger-webview:
         specifier: 0.4.5
@@ -243,13 +243,13 @@ importers:
   webviews/cms-editor:
     dependencies:
       '@axonivy/cms-editor':
-        specifier: ~14.0.0-next.779.c255267
+        specifier: 14.0.0-next.786.43a6ece
         version: 14.0.0-next.786.43a6ece(@axonivy/jsonrpc@14.0.0-next.1157.a80ac01)(@axonivy/ui-components@14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@tanstack/react-query-devtools@5.100.14(@tanstack/react-query@5.100.14(react@19.2.6))(react@19.2.6))(@tanstack/react-query@5.100.14(react@19.2.6))(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react-i18next@17.0.8(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@6.0.3))(react@19.2.6)
       '@axonivy/ui-components':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@axonivy/vscode-webview-common':
-        specifier: workspace:~14.0.0-next
+        specifier: workspace:~
         version: link:../webview-common
       vscode-messenger-webview:
         specifier: 0.4.5
@@ -258,13 +258,13 @@ importers:
   webviews/database-editor:
     dependencies:
       '@axonivy/database-editor':
-        specifier: ~14.0.0-next.386.6ea9a6e
+        specifier: 14.0.0-next.392.44bf500
         version: 14.0.0-next.392.44bf500(@axonivy/jsonrpc@14.0.0-next.1157.a80ac01)(@axonivy/ui-components@14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@tanstack/react-query-devtools@5.100.14(@tanstack/react-query@5.100.14(react@19.2.6))(react@19.2.6))(@tanstack/react-query@5.100.14(react@19.2.6))(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react-i18next@17.0.8(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@6.0.3))(react@19.2.6)
       '@axonivy/ui-components':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@axonivy/vscode-webview-common':
-        specifier: workspace:~14.0.0-next
+        specifier: workspace:~
         version: link:../webview-common
       vscode-messenger-webview:
         specifier: 0.4.5
@@ -273,13 +273,13 @@ importers:
   webviews/dataclass-editor:
     dependencies:
       '@axonivy/dataclass-editor':
-        specifier: ~14.0.0-next.929.563da00
+        specifier: 14.0.0-next.938.44e8c2f
         version: 14.0.0-next.938.44e8c2f(@axonivy/jsonrpc@14.0.0-next.1157.a80ac01)(@axonivy/ui-components@14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@tanstack/react-query-devtools@5.100.14(@tanstack/react-query@5.100.14(react@19.2.6))(react@19.2.6))(@tanstack/react-query@5.100.14(react@19.2.6))(i18next@26.3.0(typescript@6.0.3))(react-i18next@17.0.8(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@6.0.3))(react@19.2.6)
       '@axonivy/ui-components':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@axonivy/vscode-webview-common':
-        specifier: workspace:~14.0.0-next
+        specifier: workspace:~
         version: link:../webview-common
       vscode-messenger-webview:
         specifier: 0.4.5
@@ -288,16 +288,16 @@ importers:
   webviews/form-editor:
     dependencies:
       '@axonivy/form-editor':
-        specifier: ~14.0.0-next.1250.754359d
+        specifier: 14.0.0-next.1258.f1cb7c3
         version: 14.0.0-next.1258.f1cb7c3(@axonivy/ui-components@14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@tanstack/react-query-devtools@5.100.14(@tanstack/react-query@5.100.14(react@19.2.6))(react@19.2.6))(@tanstack/react-query@5.100.14(react@19.2.6))(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react-i18next@17.0.8(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@6.0.3))(react@19.2.6)
       '@axonivy/form-editor-core':
-        specifier: ~14.0.0-next.1250.754359d
+        specifier: 14.0.0-next.1258.f1cb7c3
         version: 14.0.0-next.1258.f1cb7c3(@axonivy/jsonrpc@14.0.0-next.1157.a80ac01)
       '@axonivy/ui-components':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@axonivy/vscode-webview-common':
-        specifier: workspace:~14.0.0-next
+        specifier: workspace:~
         version: link:../webview-common
       vscode-messenger-webview:
         specifier: 0.4.5
@@ -306,13 +306,13 @@ importers:
   webviews/persistence-editor:
     dependencies:
       '@axonivy/persistence-editor':
-        specifier: ~14.0.0-next.143.67b8e90
+        specifier: 14.0.0-next.153.04929a0
         version: 14.0.0-next.153.04929a0(@axonivy/jsonrpc@14.0.0-next.1157.a80ac01)(@axonivy/ui-components@14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@tanstack/react-query-devtools@5.100.14(@tanstack/react-query@5.100.14(react@19.2.6))(react@19.2.6))(@tanstack/react-query@5.100.14(react@19.2.6))(@types/react@19.2.15)(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react-i18next@17.0.8(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@6.0.3))(react@19.2.6)
       '@axonivy/ui-components':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@axonivy/vscode-webview-common':
-        specifier: workspace:~14.0.0-next
+        specifier: workspace:~
         version: link:../webview-common
       vscode-messenger-webview:
         specifier: 0.4.5
@@ -321,19 +321,19 @@ importers:
   webviews/process-editor:
     dependencies:
       '@axonivy/process-editor':
-        specifier: ~14.0.0-next.2215.220a0f96
+        specifier: 14.0.0-next.2223.ff95d0df
         version: 14.0.0-next.2223.ff95d0df(@axonivy/ui-components@14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@tanstack/react-query-devtools@5.100.14(@tanstack/react-query@5.100.14(react@19.2.6))(react@19.2.6))(@tanstack/react-query@5.100.14(react@19.2.6))(@tanstack/react-table@8.21.3(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(i18next@26.3.0(typescript@6.0.3))(inversify@6.2.2(reflect-metadata@0.2.2))(react-dom@19.2.6(react@19.2.6))(react-i18next@17.0.8(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@6.0.3))(react@19.2.6)(reflect-metadata@0.2.2)(snabbdom@3.5.1)
       '@axonivy/process-editor-inscription':
-        specifier: ~14.0.0-next.2215.220a0f96
+        specifier: 14.0.0-next.2223.ff95d0df
         version: 14.0.0-next.2223.ff95d0df(59325f9caa6ffab34405bc5ef89fd1b8)
       '@axonivy/process-editor-inscription-view':
-        specifier: ~14.0.0-next.2215.220a0f96
+        specifier: 14.0.0-next.2223.ff95d0df
         version: 14.0.0-next.2223.ff95d0df(881a70af0c023c37887fd567205ddbcd)
       '@axonivy/process-editor-protocol':
-        specifier: ~14.0.0-next.2215.220a0f96
+        specifier: 14.0.0-next.2223.ff95d0df
         version: 14.0.0-next.2223.ff95d0df(inversify@6.2.2(reflect-metadata@0.2.2))
       '@axonivy/vscode-webview-common':
-        specifier: workspace:~14.0.0-next
+        specifier: workspace:~
         version: link:../webview-common
       '@eclipse-glsp/client':
         specifier: 2.6.0
@@ -361,8 +361,8 @@ importers:
         version: 0.4.5
     devDependencies:
       '@axonivy/monaco-vite-plugin':
-        specifier: ~14.0.0-next.2215.220a0f96
-        version: 14.0.0-next.2223.ff95d0df(vite@8.0.14(@types/node@24.12.4)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
+        specifier: 14.0.0-next.2223.ff95d0df
+        version: 14.0.0-next.2223.ff95d0df(vite@8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
       '@vscode/codicons':
         specifier: 0.0.45
         version: 0.0.45
@@ -370,13 +370,13 @@ importers:
   webviews/restclient-editor:
     dependencies:
       '@axonivy/restclient-editor':
-        specifier: ~14.0.0-next.163.47f29fc
+        specifier: 14.0.0-next.178.53f2578
         version: 14.0.0-next.178.53f2578(@axonivy/jsonrpc@14.0.0-next.1157.a80ac01)(@axonivy/ui-components@14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@tanstack/react-query-devtools@5.100.14(@tanstack/react-query@5.100.14(react@19.2.6))(react@19.2.6))(@tanstack/react-query@5.100.14(react@19.2.6))(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react-i18next@17.0.8(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@6.0.3))(react@19.2.6)
       '@axonivy/ui-components':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@axonivy/vscode-webview-common':
-        specifier: workspace:~14.0.0-next
+        specifier: workspace:~
         version: link:../webview-common
       vscode-messenger-webview:
         specifier: 0.4.5
@@ -385,13 +385,13 @@ importers:
   webviews/role-editor:
     dependencies:
       '@axonivy/role-editor':
-        specifier: ~14.0.0-next.211.cd04548
+        specifier: 14.0.0-next.223.f06d1ba
         version: 14.0.0-next.223.f06d1ba(@axonivy/jsonrpc@14.0.0-next.1157.a80ac01)(@axonivy/ui-components@14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@tanstack/react-query-devtools@5.100.14(@tanstack/react-query@5.100.14(react@19.2.6))(react@19.2.6))(@tanstack/react-query@5.100.14(react@19.2.6))(@types/react@19.2.15)(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react-i18next@17.0.8(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@6.0.3))(react@19.2.6)
       '@axonivy/ui-components':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@axonivy/vscode-webview-common':
-        specifier: workspace:~14.0.0-next
+        specifier: workspace:~
         version: link:../webview-common
       vscode-messenger-webview:
         specifier: 0.4.5
@@ -400,13 +400,13 @@ importers:
   webviews/user-editor:
     dependencies:
       '@axonivy/ui-components':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@axonivy/user-editor':
-        specifier: ~14.0.0-next.164.bcb8d17
+        specifier: 14.0.0-next.170.8169a1b
         version: 14.0.0-next.170.8169a1b(@axonivy/jsonrpc@14.0.0-next.1157.a80ac01)(@axonivy/ui-components@14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@tanstack/react-query-devtools@5.100.14(@tanstack/react-query@5.100.14(react@19.2.6))(react@19.2.6))(@tanstack/react-query@5.100.14(react@19.2.6))(@types/react@19.2.15)(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react-i18next@17.0.8(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@6.0.3))(react@19.2.6)
       '@axonivy/vscode-webview-common':
-        specifier: workspace:~14.0.0-next
+        specifier: workspace:~
         version: link:../webview-common
       vscode-messenger-webview:
         specifier: 0.4.5
@@ -415,13 +415,13 @@ importers:
   webviews/variable-editor:
     dependencies:
       '@axonivy/ui-components':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@axonivy/variable-editor':
-        specifier: ~14.0.0-next.1077.9350ebb
+        specifier: 14.0.0-next.1081.169d89b
         version: 14.0.0-next.1081.169d89b(@axonivy/jsonrpc@14.0.0-next.1157.a80ac01)(@axonivy/ui-components@14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@tanstack/react-query-devtools@5.100.14(@tanstack/react-query@5.100.14(react@19.2.6))(react@19.2.6))(@tanstack/react-query@5.100.14(react@19.2.6))(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react-i18next@17.0.8(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@6.0.3))(react@19.2.6)
       '@axonivy/vscode-webview-common':
-        specifier: workspace:~14.0.0-next
+        specifier: workspace:~
         version: link:../webview-common
       vscode-messenger-webview:
         specifier: 0.4.5
@@ -430,13 +430,13 @@ importers:
   webviews/webservice-editor:
     dependencies:
       '@axonivy/ui-components':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@axonivy/vscode-webview-common':
-        specifier: workspace:~14.0.0-next
+        specifier: workspace:~
         version: link:../webview-common
       '@axonivy/webservice-editor':
-        specifier: ~14.0.0-next.124.f258911
+        specifier: 14.0.0-next.139.506d954
         version: 14.0.0-next.139.506d954(@axonivy/jsonrpc@14.0.0-next.1157.a80ac01)(@axonivy/ui-components@14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@tanstack/react-query-devtools@5.100.14(@tanstack/react-query@5.100.14(react@19.2.6))(react@19.2.6))(@tanstack/react-query@5.100.14(react@19.2.6))(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react-i18next@17.0.8(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@6.0.3))(react@19.2.6)
       vscode-messenger-webview:
         specifier: 0.4.5
@@ -445,10 +445,10 @@ importers:
   webviews/webview-common:
     dependencies:
       '@axonivy/ui-components':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@axonivy/ui-icons':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01
       vscode-jsonrpc:
         specifier: 8.2.1
@@ -463,13 +463,13 @@ importers:
   webviews/welcome-page:
     dependencies:
       '@axonivy/ui-components':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01(@axonivy/ui-icons@14.0.0-next.1157.a80ac01)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@axonivy/ui-icons':
-        specifier: ~14.0.0-next.1152.43581ef
+        specifier: 14.0.0-next.1157.a80ac01
         version: 14.0.0-next.1157.a80ac01
       '@axonivy/vscode-webview-common':
-        specifier: workspace:~14.0.0-next
+        specifier: workspace:~
         version: link:../webview-common
       vscode-messenger-common:
         specifier: 0.4.5
@@ -480,13 +480,13 @@ importers:
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.3.0
-        version: 4.3.0(vite@8.0.14(@types/node@24.12.4)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
+        version: 4.3.0(vite@8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
       '@vanilla-extract/recipes':
         specifier: ^0.5.7
         version: 0.5.7(@vanilla-extract/css@1.20.1)
       i18next-cli:
-        specifier: ^1.56.12
-        version: 1.58.2(@swc/helpers@0.5.23)(@types/node@24.12.4)(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(typescript@6.0.3)
+        specifier: ^1.58.2
+        version: 1.58.2(@swc/helpers@0.5.23)(@types/node@25.9.1)(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(typescript@6.0.3)
       tailwindcss:
         specifier: ^4.3.0
         version: 4.3.0
@@ -2600,6 +2600,9 @@ packages:
   '@types/node@24.12.4':
     resolution: {integrity: sha512-GUUEShf+PBCGW2KaXwcIt3Yk+e3pkKwWKb9GSyM9WQVE+ep2jzmHdGsHzu4wgcZy5fN9FBdVzjpBQsYlpfpgLA==}
 
+  '@types/node@25.9.1':
+    resolution: {integrity: sha512-xfrlY7UD5rMJk3ZVJP8BNzS28J36YJg+xp+LPXV1TdWxr8uMH5A860QNxYDGQe/ylDSgjxE52Q9VnO7p75tJxg==}
+
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
 
@@ -4378,8 +4381,8 @@ packages:
     engines: {node: ^20.17.0 || >=22.9.0}
     hasBin: true
 
-  node-releases@2.0.46:
-    resolution: {integrity: sha512-GYVXHE2KnrzAfsAjl4uP++evGFCrAU1jta4ubEjIG7YWt/64Gqv66a30yKwWczVjA6j3bM4nBwH7Pk1JmDHaxQ==}
+  node-releases@2.0.47:
+    resolution: {integrity: sha512-Uzmd6LXpouKo8EUK68IjH4+E01w/hXyV3R3g/geCJo+rXLNfh1xucB+LOzYEOQPSiUK3h/xZf0cQGcSsmyL2Og==}
     engines: {node: '>=18'}
 
   node-sarif-builder@3.4.0:
@@ -5278,6 +5281,9 @@ packages:
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
+  undici-types@7.24.6:
+    resolution: {integrity: sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg==}
+
   undici@6.26.0:
     resolution: {integrity: sha512-4yqz8a3n5HmGTlsbADNtr/dJlhkh/55Rq798G6ibiULcXbDtaLpTl1pvdqcbFfeoj3iSi52lePFM7h9H21cw/A==}
     engines: {node: '>=18.17'}
@@ -5769,9 +5775,9 @@ snapshots:
 
   '@axonivy/log-view-protocol@14.0.0-next.457.5601961': {}
 
-  '@axonivy/monaco-vite-plugin@14.0.0-next.2223.ff95d0df(vite@8.0.14(@types/node@24.12.4)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))':
+  '@axonivy/monaco-vite-plugin@14.0.0-next.2223.ff95d0df(vite@8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))':
     dependencies:
-      vite: 8.0.14(@types/node@24.12.4)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
+      vite: 8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
 
   '@axonivy/persistence-editor-protocol@14.0.0-next.153.04929a0': {}
 
@@ -6500,21 +6506,21 @@ snapshots:
 
   '@inquirer/ansi@2.0.7': {}
 
-  '@inquirer/checkbox@5.2.1(@types/node@24.12.4)':
+  '@inquirer/checkbox@5.2.1(@types/node@25.9.1)':
     dependencies:
       '@inquirer/ansi': 2.0.7
-      '@inquirer/core': 11.2.1(@types/node@24.12.4)
+      '@inquirer/core': 11.2.1(@types/node@25.9.1)
       '@inquirer/figures': 2.0.7
-      '@inquirer/type': 4.0.7(@types/node@24.12.4)
+      '@inquirer/type': 4.0.7(@types/node@25.9.1)
     optionalDependencies:
-      '@types/node': 24.12.4
+      '@types/node': 25.9.1
 
-  '@inquirer/confirm@6.1.1(@types/node@24.12.4)':
+  '@inquirer/confirm@6.1.1(@types/node@25.9.1)':
     dependencies:
-      '@inquirer/core': 11.2.1(@types/node@24.12.4)
-      '@inquirer/type': 4.0.7(@types/node@24.12.4)
+      '@inquirer/core': 11.2.1(@types/node@25.9.1)
+      '@inquirer/type': 4.0.7(@types/node@25.9.1)
     optionalDependencies:
-      '@types/node': 24.12.4
+      '@types/node': 25.9.1
 
   '@inquirer/core@11.2.1(@types/node@24.12.4)':
     dependencies:
@@ -6528,13 +6534,25 @@ snapshots:
     optionalDependencies:
       '@types/node': 24.12.4
 
-  '@inquirer/editor@5.2.2(@types/node@24.12.4)':
+  '@inquirer/core@11.2.1(@types/node@25.9.1)':
     dependencies:
-      '@inquirer/core': 11.2.1(@types/node@24.12.4)
-      '@inquirer/external-editor': 3.0.3(@types/node@24.12.4)
-      '@inquirer/type': 4.0.7(@types/node@24.12.4)
+      '@inquirer/ansi': 2.0.7
+      '@inquirer/figures': 2.0.7
+      '@inquirer/type': 4.0.7(@types/node@25.9.1)
+      cli-width: 4.1.0
+      fast-wrap-ansi: 0.2.2
+      mute-stream: 3.0.0
+      signal-exit: 4.1.0
     optionalDependencies:
-      '@types/node': 24.12.4
+      '@types/node': 25.9.1
+
+  '@inquirer/editor@5.2.2(@types/node@25.9.1)':
+    dependencies:
+      '@inquirer/core': 11.2.1(@types/node@25.9.1)
+      '@inquirer/external-editor': 3.0.3(@types/node@25.9.1)
+      '@inquirer/type': 4.0.7(@types/node@25.9.1)
+    optionalDependencies:
+      '@types/node': 25.9.1
 
   '@inquirer/expand@5.1.1(@types/node@24.12.4)':
     dependencies:
@@ -6543,12 +6561,19 @@ snapshots:
     optionalDependencies:
       '@types/node': 24.12.4
 
-  '@inquirer/external-editor@3.0.3(@types/node@24.12.4)':
+  '@inquirer/expand@5.1.1(@types/node@25.9.1)':
+    dependencies:
+      '@inquirer/core': 11.2.1(@types/node@25.9.1)
+      '@inquirer/type': 4.0.7(@types/node@25.9.1)
+    optionalDependencies:
+      '@types/node': 25.9.1
+
+  '@inquirer/external-editor@3.0.3(@types/node@25.9.1)':
     dependencies:
       chardet: 2.1.1
       iconv-lite: 0.7.2
     optionalDependencies:
-      '@types/node': 24.12.4
+      '@types/node': 25.9.1
 
   '@inquirer/figures@2.0.7': {}
 
@@ -6559,50 +6584,57 @@ snapshots:
     optionalDependencies:
       '@types/node': 24.12.4
 
-  '@inquirer/number@4.1.1(@types/node@24.12.4)':
+  '@inquirer/input@5.1.2(@types/node@25.9.1)':
     dependencies:
-      '@inquirer/core': 11.2.1(@types/node@24.12.4)
-      '@inquirer/type': 4.0.7(@types/node@24.12.4)
+      '@inquirer/core': 11.2.1(@types/node@25.9.1)
+      '@inquirer/type': 4.0.7(@types/node@25.9.1)
     optionalDependencies:
-      '@types/node': 24.12.4
+      '@types/node': 25.9.1
 
-  '@inquirer/password@5.1.1(@types/node@24.12.4)':
+  '@inquirer/number@4.1.1(@types/node@25.9.1)':
+    dependencies:
+      '@inquirer/core': 11.2.1(@types/node@25.9.1)
+      '@inquirer/type': 4.0.7(@types/node@25.9.1)
+    optionalDependencies:
+      '@types/node': 25.9.1
+
+  '@inquirer/password@5.1.1(@types/node@25.9.1)':
     dependencies:
       '@inquirer/ansi': 2.0.7
-      '@inquirer/core': 11.2.1(@types/node@24.12.4)
-      '@inquirer/type': 4.0.7(@types/node@24.12.4)
+      '@inquirer/core': 11.2.1(@types/node@25.9.1)
+      '@inquirer/type': 4.0.7(@types/node@25.9.1)
     optionalDependencies:
-      '@types/node': 24.12.4
+      '@types/node': 25.9.1
 
-  '@inquirer/prompts@8.5.2(@types/node@24.12.4)':
+  '@inquirer/prompts@8.5.2(@types/node@25.9.1)':
     dependencies:
-      '@inquirer/checkbox': 5.2.1(@types/node@24.12.4)
-      '@inquirer/confirm': 6.1.1(@types/node@24.12.4)
-      '@inquirer/editor': 5.2.2(@types/node@24.12.4)
-      '@inquirer/expand': 5.1.1(@types/node@24.12.4)
-      '@inquirer/input': 5.1.2(@types/node@24.12.4)
-      '@inquirer/number': 4.1.1(@types/node@24.12.4)
-      '@inquirer/password': 5.1.1(@types/node@24.12.4)
-      '@inquirer/rawlist': 5.3.1(@types/node@24.12.4)
-      '@inquirer/search': 4.2.1(@types/node@24.12.4)
-      '@inquirer/select': 5.2.1(@types/node@24.12.4)
+      '@inquirer/checkbox': 5.2.1(@types/node@25.9.1)
+      '@inquirer/confirm': 6.1.1(@types/node@25.9.1)
+      '@inquirer/editor': 5.2.2(@types/node@25.9.1)
+      '@inquirer/expand': 5.1.1(@types/node@25.9.1)
+      '@inquirer/input': 5.1.2(@types/node@25.9.1)
+      '@inquirer/number': 4.1.1(@types/node@25.9.1)
+      '@inquirer/password': 5.1.1(@types/node@25.9.1)
+      '@inquirer/rawlist': 5.3.1(@types/node@25.9.1)
+      '@inquirer/search': 4.2.1(@types/node@25.9.1)
+      '@inquirer/select': 5.2.1(@types/node@25.9.1)
     optionalDependencies:
-      '@types/node': 24.12.4
+      '@types/node': 25.9.1
 
-  '@inquirer/rawlist@5.3.1(@types/node@24.12.4)':
+  '@inquirer/rawlist@5.3.1(@types/node@25.9.1)':
     dependencies:
-      '@inquirer/core': 11.2.1(@types/node@24.12.4)
-      '@inquirer/type': 4.0.7(@types/node@24.12.4)
+      '@inquirer/core': 11.2.1(@types/node@25.9.1)
+      '@inquirer/type': 4.0.7(@types/node@25.9.1)
     optionalDependencies:
-      '@types/node': 24.12.4
+      '@types/node': 25.9.1
 
-  '@inquirer/search@4.2.1(@types/node@24.12.4)':
+  '@inquirer/search@4.2.1(@types/node@25.9.1)':
     dependencies:
-      '@inquirer/core': 11.2.1(@types/node@24.12.4)
+      '@inquirer/core': 11.2.1(@types/node@25.9.1)
       '@inquirer/figures': 2.0.7
-      '@inquirer/type': 4.0.7(@types/node@24.12.4)
+      '@inquirer/type': 4.0.7(@types/node@25.9.1)
     optionalDependencies:
-      '@types/node': 24.12.4
+      '@types/node': 25.9.1
 
   '@inquirer/select@5.2.1(@types/node@24.12.4)':
     dependencies:
@@ -6613,9 +6645,22 @@ snapshots:
     optionalDependencies:
       '@types/node': 24.12.4
 
+  '@inquirer/select@5.2.1(@types/node@25.9.1)':
+    dependencies:
+      '@inquirer/ansi': 2.0.7
+      '@inquirer/core': 11.2.1(@types/node@25.9.1)
+      '@inquirer/figures': 2.0.7
+      '@inquirer/type': 4.0.7(@types/node@25.9.1)
+    optionalDependencies:
+      '@types/node': 25.9.1
+
   '@inquirer/type@4.0.7(@types/node@24.12.4)':
     optionalDependencies:
       '@types/node': 24.12.4
+
+  '@inquirer/type@4.0.7(@types/node@25.9.1)':
+    optionalDependencies:
+      '@types/node': 25.9.1
 
   '@internationalized/date@3.12.2':
     dependencies:
@@ -7874,12 +7919,12 @@ snapshots:
       '@tailwindcss/oxide-win32-arm64-msvc': 4.3.0
       '@tailwindcss/oxide-win32-x64-msvc': 4.3.0
 
-  '@tailwindcss/vite@4.3.0(vite@8.0.14(@types/node@24.12.4)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))':
+  '@tailwindcss/vite@4.3.0(vite@8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))':
     dependencies:
       '@tailwindcss/node': 4.3.0
       '@tailwindcss/oxide': 4.3.0
       tailwindcss: 4.3.0
-      vite: 8.0.14(@types/node@24.12.4)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
+      vite: 8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
 
   '@tanstack/eslint-plugin-query@5.100.14(eslint@10.4.0(jiti@2.7.0))(typescript@6.0.3)':
     dependencies:
@@ -7981,6 +8026,10 @@ snapshots:
   '@types/node@24.12.4':
     dependencies:
       undici-types: 7.16.0
+
+  '@types/node@25.9.1':
+    dependencies:
+      undici-types: 7.24.6
 
   '@types/normalize-package-data@2.4.4': {}
 
@@ -8146,13 +8195,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.0
 
-  '@vitest/mocker@4.1.7(vite@8.0.14(@types/node@24.12.4)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))':
+  '@vitest/mocker@4.1.7(vite@8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))':
     dependencies:
       '@vitest/spy': 4.1.7
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 8.0.14(@types/node@24.12.4)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
+      vite: 8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
 
   '@vitest/pretty-format@4.1.7':
     dependencies:
@@ -8495,7 +8544,7 @@ snapshots:
       baseline-browser-mapping: 2.10.33
       caniuse-lite: 1.0.30001793
       electron-to-chromium: 1.5.364
-      node-releases: 2.0.46
+      node-releases: 2.0.47
       update-browserslist-db: 1.2.3(browserslist@4.28.2)
 
   buffer-crc32@0.2.13: {}
@@ -9408,7 +9457,7 @@ snapshots:
 
   human-signals@8.0.1: {}
 
-  i18next-cli@1.58.2(@swc/helpers@0.5.23)(@types/node@24.12.4)(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(typescript@6.0.3):
+  i18next-cli@1.58.2(@swc/helpers@0.5.23)(@types/node@25.9.1)(i18next@26.3.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(typescript@6.0.3):
     dependencies:
       '@croct/json5-parser': 0.2.2
       '@swc/core': 1.15.40(@swc/helpers@0.5.23)
@@ -9417,7 +9466,7 @@ snapshots:
       execa: 9.6.1
       glob: 13.0.6
       i18next-resources-for-ts: 2.1.0(@swc/helpers@0.5.23)
-      inquirer: 13.4.3(@types/node@24.12.4)
+      inquirer: 13.4.3(@types/node@25.9.1)
       jiti: 2.7.0
       jsonc-parser: 3.3.1
       magic-string: 0.30.21
@@ -9484,17 +9533,17 @@ snapshots:
 
   ini@6.0.0: {}
 
-  inquirer@13.4.3(@types/node@24.12.4):
+  inquirer@13.4.3(@types/node@25.9.1):
     dependencies:
       '@inquirer/ansi': 2.0.7
-      '@inquirer/core': 11.2.1(@types/node@24.12.4)
-      '@inquirer/prompts': 8.5.2(@types/node@24.12.4)
-      '@inquirer/type': 4.0.7(@types/node@24.12.4)
+      '@inquirer/core': 11.2.1(@types/node@25.9.1)
+      '@inquirer/prompts': 8.5.2(@types/node@25.9.1)
+      '@inquirer/type': 4.0.7(@types/node@25.9.1)
       mute-stream: 3.0.0
       run-async: 4.0.6
       rxjs: 7.8.2
     optionalDependencies:
-      '@types/node': 24.12.4
+      '@types/node': 25.9.1
 
   inversify@6.2.2(reflect-metadata@0.2.2):
     dependencies:
@@ -9556,7 +9605,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 24.12.4
+      '@types/node': 25.9.1
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
@@ -9898,7 +9947,7 @@ snapshots:
       undici: 6.26.0
       which: 6.0.1
 
-  node-releases@2.0.46: {}
+  node-releases@2.0.47: {}
 
   node-sarif-builder@3.4.0:
     dependencies:
@@ -10832,6 +10881,8 @@ snapshots:
 
   undici-types@7.16.0: {}
 
+  undici-types@7.24.6: {}
+
   undici@6.26.0: {}
 
   undici@7.27.0: {}
@@ -10911,10 +10962,25 @@ snapshots:
       terser: 5.48.0
       yaml: 2.9.0
 
-  vitest@4.1.7(@types/node@24.12.4)(vite@8.0.14(@types/node@24.12.4)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)):
+  vite@8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0):
+    dependencies:
+      lightningcss: 1.32.0
+      picomatch: 4.0.4
+      postcss: 8.5.15
+      rolldown: 1.0.2
+      tinyglobby: 0.2.17
+    optionalDependencies:
+      '@types/node': 25.9.1
+      esbuild: 0.28.0
+      fsevents: 2.3.3
+      jiti: 2.7.0
+      terser: 5.48.0
+      yaml: 2.9.0
+
+  vitest@4.1.7(@types/node@25.9.1)(vite@8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)):
     dependencies:
       '@vitest/expect': 4.1.7
-      '@vitest/mocker': 4.1.7(vite@8.0.14(@types/node@24.12.4)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
+      '@vitest/mocker': 4.1.7(vite@8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
       '@vitest/pretty-format': 4.1.7
       '@vitest/runner': 4.1.7
       '@vitest/snapshot': 4.1.7
@@ -10931,10 +10997,10 @@ snapshots:
       tinyexec: 1.2.4
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.0
-      vite: 8.0.14(@types/node@24.12.4)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
+      vite: 8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 24.12.4
+      '@types/node': 25.9.1
     transitivePeerDependencies:
       - msw
 
