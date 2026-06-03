@@ -4,7 +4,7 @@
   "scripts": {
     "type": "tsc --noEmit",
     "download:vscode": "node --experimental-strip-types tests/utils/download-vscode.ts",
-    "test:ui": "playwright test --project=integration-parallel --project=integration-serial",
+    "test:ui": "playwright test --project=integration-parallel && playwright test --project=integration-serial",
     "test:ui:performance": "playwright test --project=performance"
   },
   "devDependencies": {
