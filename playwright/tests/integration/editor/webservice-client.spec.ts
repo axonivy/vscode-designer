@@ -24,7 +24,7 @@ test('Webservice codegen', async ({ wsPage }) => {
   await expect(generator).toBeEnabled();
   await generator.click();
 
-  const successToast = wsPage.toasts.filter({ hasText: /personService web service client generation succeeded/i }).first();
+  const successToast = wsPage.toasts.filter({ hasText: /personService web service client generated successfully/i }).first();
   await expect(successToast).toBeVisible();
 });
 
