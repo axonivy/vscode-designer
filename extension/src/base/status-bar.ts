@@ -5,8 +5,6 @@ import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { executeCommand } from './commands';
 import { animationSettings, onAnimationSettingsChange } from './configurations';
 
-const DEFAULT_TEXT = 'Ready';
-const DEFAULT_ICON: StatusBarIcon = '$(ivy-logo)';
 const DEFAULT_PREFIX = 'Axon Ivy';
 const DEFAULT_PRIORITY = 1;
 const DEFAULT_SUCCESS_MESSAGE_DURATION = 3_000;
@@ -23,15 +21,10 @@ interface overrideStatusBar {
 }
 
 interface StatusBarProgressOptions {
-  text?: string;
-  textDuring?: string;
-  hoverTitle?: string;
-  hoverOverrideDuring?: MarkdownString;
-  hoverMarkdownDuring?: MarkdownString;
+  text: string;
+  tooltip?: string;
   textSuccess?: string;
-  hoverMarkdownSuccess?: MarkdownString;
   textError?: string;
-  prefix?: string;
   successMsgDuration?: number;
 }
 
@@ -136,7 +129,7 @@ export class StatusBar {
         break;
     }
 
-    const markdown = newMarkdownString(`### ${DEFAULT_TEXT} ${statusLabel}`);
+    const markdown = newMarkdownString(`### ${DEFAULT_PREFIX} ${statusLabel}`);
     markdown.appendMarkdown('\n\n' + this.buildAnimationStatusString());
     markdown.appendMarkdown('\n\n' + (await this.buildProjectCountString()));
     markdown.appendMarkdown('\n\n' + this.buildEngineUrlString());
@@ -357,10 +350,10 @@ export class StatusBar {
   }
 
   async withStatusBarProgress<R>(options: StatusBarProgressOptions, action: () => Promise<R>): Promise<R> {
-    const textDuring = options.textDuring ?? options.text ?? DEFAULT_TEXT;
+    const textDuring = options.text;
+    const tooltip =  newMarkdownString(options.tooltip ?? textDuring);
     const textSuccess = options.textSuccess ?? `Success: ${textDuring}`;
     const textError = options.textError ?? `Error: ${textDuring}`;
-    const prefix = options.prefix ?? DEFAULT_PREFIX;
     const successMsgDuration = options.successMsgDuration ?? DEFAULT_SUCCESS_MESSAGE_DURATION;
 
     if (this.temporaryTimeout) {
@@ -370,9 +363,8 @@ export class StatusBar {
 
     this.overrideStatusBar({
       text: textDuring,
+      tooltip: tooltip,
       icon: '$(loading~spin)',
-      prefix,
-      hoverOverride: options.hoverOverrideDuring ?? options.hoverMarkdownDuring ?? newMarkdownString(`In Progress: ${textDuring}`),
       isClickable: false
     });
 
@@ -380,9 +372,8 @@ export class StatusBar {
       const result = await action();
       this.overrideStatusBar({
         text: textSuccess,
-        icon: '$(check)',
-        prefix,
-        hoverOverride: options.hoverMarkdownSuccess ?? newMarkdownString(`${textSuccess}`)
+        tooltip: tooltip,
+        icon: '$(check)'
       });
       this.temporaryTimeout = setTimeout(() => {
         this.refreshStatusBar();
@@ -392,10 +383,9 @@ export class StatusBar {
     } catch (error) {
       this.overrideStatusBar({
         text: textError,
+        tooltip: tooltip,
         icon: '$(error)',
-        prefix,
         isError: true,
-        hoverOverride: newMarkdownString(`${error instanceof Error ? error.message : textError}`)
       });
       throw error;
     }
