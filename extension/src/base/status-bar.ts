@@ -262,7 +262,7 @@ export class StatusBar {
     const animationIsOn = animationSettings().animate;
     const quickPickOptions = [
       { label: 'Animation', kind: QuickPickItemKind.Separator },
-      { label: animationIsOn ? 'Deactivate Animation' : 'Activate Animation', id: 'toggleAnimation' },
+      { label: animationIsOn ? '$(eye-closed) Deactivate Animation' : '$(eye) Activate Animation', id: 'toggleAnimation' },
 
       { label: 'Settings', kind: QuickPickItemKind.Separator },
       { label: '$(settings-gear) Open Axon Ivy Settings', id: 'openSettings' },
@@ -282,7 +282,7 @@ export class StatusBar {
       { label: '$(gift) Install Local Market Product', id: 'installLocalMarketProduct' },
 
       { label: 'New ...', kind: QuickPickItemKind.Separator },
-      { label: 'New Project', id: 'newProject' },
+      { label: '$(repo-create) New Project', id: 'newProject' },
       { label: 'New Business Process', id: 'newBusinessProcess' },
       { label: 'New Callable Sub Process', id: 'newCallableSubProcess' },
       { label: 'New Web Service Process', id: 'newWebServiceProcess' },
