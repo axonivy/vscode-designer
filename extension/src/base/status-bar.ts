@@ -12,7 +12,7 @@ import { IvyEngineManager } from '../engine/engine-manager';
 import { onWebIdeWebSocketStateChange, type WebSocketReadyState } from '../engine/web-ide-ws/web-ide-websocket-provider';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { executeCommand } from './commands';
-import { animationSettings, onAnimationSettingsChange } from './configurations';
+import { animationSettings, config, onAnimationSettingsChange } from './configurations';
 
 const DEFAULT_PREFIX = 'Axon Ivy';
 const DEFAULT_PRIORITY = 1;
@@ -101,88 +101,6 @@ export class StatusBar {
     return this.statusBarItem;
   }
 
-  private refreshTooltip() {
-    if (!this.statusBarItem) {
-      return;
-    }
-    const refreshVersion = ++this.refreshVersion;
-    void this.buildTooltip(refreshVersion);
-  }
-
-  private async buildTooltip(refreshVersion = ++this.refreshVersion) {
-    if (!this.statusBarItem) {
-      return;
-    }
-    let statusLabel: string = '';
-    switch (this.readyState) {
-      case WebSocket.CONNECTING:
-        statusLabel = 'Connecting ...';
-        break;
-      case WebSocket.OPEN:
-        statusLabel = 'Connected';
-        break;
-      case WebSocket.CLOSING:
-        statusLabel = 'Closing ...';
-        break;
-      case WebSocket.CLOSED:
-        statusLabel = 'Closed';
-        break;
-      default:
-        break;
-    }
-
-    const markdown = newMarkdownString(`### ${DEFAULT_PREFIX} Engine Status - ${statusLabel}`);
-    markdown.appendMarkdown('\n\n' + this.buildEngineUrlString());
-    markdown.appendMarkdown('\n\n' + this.buildAnimationStatusString());
-    markdown.appendMarkdown('\n\n' + (await this.buildProjectCountString()));
-    markdown.appendMarkdown(`\n\n Engine Version ${await this.buildEngineVersionString()}`);
-    markdown.appendMarkdown(
-      (await IvyEngineManager.instance.resolveEngineDir()) ??
-        '\n\n Engine directory cannot be resolved when "Run by Extension" is disabled.'
-    );
-    markdown.appendMarkdown(`\n\n Extension Version ${extensions.getExtension('axonivy.vscode-designer-14')?.packageJSON.version}`);
-    if (refreshVersion === this.refreshVersion) {
-      this.statusBarItem.tooltip = markdown;
-    }
-  }
-
-  private async buildProjectCountString() {
-    let projectsString = 'Projects in the workspace: ';
-    let ivyProjectExplorerInstance: IvyProjectExplorer;
-    try {
-      ivyProjectExplorerInstance = IvyProjectExplorer.instance;
-    } catch {
-      projectsString += 'Loading projects...';
-      return projectsString;
-    }
-
-    try {
-      const projectPaths = await ivyProjectExplorerInstance.getIvyProjects();
-      projectsString += `${projectPaths.length}`;
-    } catch {
-      projectsString += 'Error loading projects';
-    }
-
-    return projectsString;
-  }
-
-  private buildEngineUrlString() {
-    const engineUrl = IvyEngineManager.instance.engineUrl;
-    const engineUrlLink = engineUrl ? `[${engineUrl}](${engineUrl})` : 'Engine URL cannot be resolved';
-    return `\n\nURL: ${engineUrlLink}`;
-  }
-
-  private buildAnimationStatusString() {
-    let animationStatusString = 'Animation is ';
-    animationStatusString += animationSettings().animate ? 'ON' : 'OFF';
-    animationStatusString += ` (Speed: ${animationSettings().speed})`;
-    return animationStatusString;
-  }
-
-  private async buildEngineVersionString() {
-    return await IvyEngineManager.instance.getEngineVersion();
-  }
-
   private refreshStatusBar() {
     if (this.temporaryTimeout) {
       clearTimeout(this.temporaryTimeout);
@@ -224,9 +142,7 @@ export class StatusBar {
         statusLabel = 'Closed';
         statusIcon = '$(debug-disconnect)';
         statusBackgroundColor = new ThemeColor('statusBarItem.errorBackground');
-        this.getStatusBarItem().tooltip = newMarkdownString(
-          'The connection to the Axon Ivy Engine is closed.\n\nPlease check if the engine is still running.'
-        );
+        this.refreshTooltip();
         break;
       default:
         break;
@@ -236,6 +152,96 @@ export class StatusBar {
     item.backgroundColor = statusBackgroundColor;
     item.command = command;
     item.show();
+  }
+
+  private refreshTooltip() {
+    if (!this.statusBarItem) {
+      return;
+    }
+    const refreshVersion = ++this.refreshVersion;
+    void this.buildTooltip(refreshVersion);
+  }
+
+  private async buildTooltip(refreshVersion = ++this.refreshVersion) {
+    if (!this.statusBarItem) {
+      return;
+    }
+    let statusLabel: string = '';
+    switch (this.readyState) {
+      case WebSocket.CONNECTING:
+        statusLabel = 'Connecting ...';
+        break;
+      case WebSocket.OPEN:
+        statusLabel = 'Connected';
+        break;
+      case WebSocket.CLOSING:
+        statusLabel = 'Closing ...';
+        break;
+      case WebSocket.CLOSED:
+        statusLabel = 'Closed';
+        break;
+      default:
+        break;
+    }
+
+    const markdown = newMarkdownString(`### ${DEFAULT_PREFIX} Engine Status - ${statusLabel}`);
+    markdown.appendMarkdown('\n\n Animation - ' + this.buildAnimationStatusString());
+    markdown.appendMarkdown('\n\n Projects in Workspace - ' + (await this.buildProjectCountString()));
+    markdown.appendMarkdown('\n\n Engine URL - ' + this.buildEngineUrlString());
+    markdown.appendMarkdown('\n\n Engine Dir - ' + (await this.buildEngineDirString()));
+    markdown.appendMarkdown('\n\n Engine Version - ' + (await this.buildEngineVersionString()));
+    markdown.appendMarkdown(`\n\n Extension Version - ${extensions.getExtension('axonivy.vscode-designer-14')?.packageJSON.version}`);
+    if (refreshVersion === this.refreshVersion) {
+      this.statusBarItem.tooltip = markdown;
+    }
+  }
+
+  private async buildProjectCountString() {
+    let ivyProjectExplorerInstance: IvyProjectExplorer;
+    try {
+      ivyProjectExplorerInstance = IvyProjectExplorer.instance;
+    } catch {
+      return 'Loading projects...';
+    }
+
+    try {
+      const projects = await ivyProjectExplorerInstance.getIvyProjects();
+      return projects.length.toString();
+    } catch {
+      return 'Error loading projects';
+    }
+  }
+
+  private buildEngineUrlString() {
+    if (this.readyState !== WebSocket.OPEN) {
+      return 'No connection to the engine. URL cannot be resolved.';
+    }
+    const engineUrl = IvyEngineManager.instance.engineUrl;
+    const engineUrlLink = engineUrl ? `[${engineUrl}](${engineUrl})` : 'Engine URL cannot be resolved';
+    return engineUrlLink;
+  }
+
+  private buildAnimationStatusString() {
+    return `${animationSettings().animate ? 'ON' : 'OFF'} (Speed: ${animationSettings().speed})`;
+  }
+
+  private async buildEngineVersionString() {
+    if (this.readyState !== WebSocket.OPEN) {
+      return 'Cannot retrieve engine version without a connection.';
+    }
+    const engineVersion = await IvyEngineManager.instance.getEngineVersion();
+    return engineVersion;
+  }
+
+  private async buildEngineDirString() {
+    if (!config.engineRunByExtension()) {
+      return 'Engine directory is only available when "Run by Extension" is enabled.';
+    }
+    if (this.readyState !== WebSocket.OPEN) {
+      return 'Cannot retrieve engine directory without a connection.';
+    }
+    const engineDir = await IvyEngineManager.instance.resolveEngineDir();
+    return `${engineDir ?? 'Cannot resolve engine directory'}`;
   }
 
   private overrideStatusBar(opt: overrideStatusBar) {

@@ -156,7 +156,7 @@ export class IvyEngineManager {
     }
     await StatusBar.withStatusBarProgress(
       {
-        text: 'Initialize projects',
+        text: 'Initialize projects'
       },
       async () => {
         for (const projectDir of ivyProjectDirectories) {
@@ -171,7 +171,7 @@ export class IvyEngineManager {
     const ivyProjectDirectories = ivyProjectDirectory ? [ivyProjectDirectory] : await this.ivyProjectDirectories();
     await StatusBar.withStatusBarProgress(
       {
-        text: 'Deploying projects',
+        text: 'Deploying projects'
       },
       async () => await this.ivyEngineApi?.deployProjects(ivyProjectDirectories)
     );
@@ -180,7 +180,7 @@ export class IvyEngineManager {
   public async stopBpmEngine(ivyProjectDirectory: string) {
     await StatusBar.withStatusBarProgress(
       {
-        text: 'Stopping BPM Engine',
+        text: 'Stopping BPM Engine'
       },
       async () => await this.ivyEngineApi?.stopBpmEngine(ivyProjectDirectory)
     );
@@ -193,7 +193,7 @@ export class IvyEngineManager {
   public async createProcessFromBpmn(input: ImportProcessBody) {
     await StatusBar.withStatusBarProgress(
       {
-        text: 'Importing BPMN process',
+        text: 'Importing BPMN process'
       },
       async () => await this.ivyEngineApi?.createProcessFromBpmn(input)
     );
@@ -202,7 +202,7 @@ export class IvyEngineManager {
   public async installMarketProduct(input: ProductInstallParams) {
     await StatusBar.withStatusBarProgress(
       {
-        text: 'Importing market product',
+        text: 'Importing market product'
       },
       async () => await this.ivyEngineApi?.installMarketProduct(input)
     );
@@ -211,7 +211,7 @@ export class IvyEngineManager {
   public async createUserDialog(newUserDialogParams: NewUserDialogParams) {
     const hdBean = await StatusBar.withStatusBarProgress(
       {
-        text: 'Creating new User Dialog',
+        text: 'Creating new User Dialog'
       },
       async () => await this.ivyEngineApi?.createUserDialog(newUserDialogParams)
     );
@@ -227,7 +227,7 @@ export class IvyEngineManager {
     }
     return await StatusBar.withStatusBarProgress(
       {
-        text: 'Creating and deploying new project',
+        text: 'Creating and deploying new project'
       },
       async () => {
         const projectBean = await this.ivyEngineApi?.createProject(newProjectParams);
@@ -254,7 +254,7 @@ export class IvyEngineManager {
   public async createDataClass(params: DataClassInit) {
     const dataClassBean = await StatusBar.withStatusBarProgress(
       {
-        text: 'Creating new Data Class',
+        text: 'Creating new Data Class'
       },
       async () => await this.ivyEngineApi?.createDataClass(params)
     );
@@ -268,7 +268,7 @@ export class IvyEngineManager {
   public async createEntityClass(params: DataClassInit) {
     const dataClassBean = await StatusBar.withStatusBarProgress(
       {
-        text: 'Creating new Entity Class',
+        text: 'Creating new Entity Class'
       },
       async () => await this.ivyEngineApi?.createEntityClass(params)
     );
@@ -297,7 +297,7 @@ export class IvyEngineManager {
   private async createAndOpenProcess(newProcessParams: NewProcessParams) {
     const processBean = await StatusBar.withStatusBarProgress(
       {
-        text: 'Creating new Process',
+        text: 'Creating new Process'
       },
       async () => await this.ivyEngineApi?.createProcess(newProcessParams)
     );
@@ -310,7 +310,7 @@ export class IvyEngineManager {
   public async deleteProject(ivyProjectDirectory: string) {
     await StatusBar.withStatusBarProgress(
       {
-        text: 'Deleting project',
+        text: 'Deleting project'
       },
       async () => await this.ivyEngineApi?.deleteProject(ivyProjectDirectory)
     );
@@ -319,7 +319,7 @@ export class IvyEngineManager {
   public async convertProject(ivyProjectDirectory: string) {
     await StatusBar.withStatusBarProgress(
       {
-        text: 'Converting project',
+        text: 'Converting project'
       },
       async () => await this.ivyEngineApi?.convertProject(ivyProjectDirectory)
     );
@@ -328,14 +328,14 @@ export class IvyEngineManager {
   public async refreshProjectStatuses() {
     return await StatusBar.withStatusBarProgress(
       {
-        text: 'Refreshing project statuses',
+        text: 'Refreshing project statuses'
       },
       async () => await this.ivyEngineApi?.refreshProjectStatuses()
     );
   }
 
   public async invalidateClassLoader(ivyProjectDirectory: string) {
-    async () => await this.ivyEngineApi?.invalidateClassLoader(ivyProjectDirectory)
+    await this.ivyEngineApi?.invalidateClassLoader(ivyProjectDirectory);
   }
 
   public async getEngineVersion() {
