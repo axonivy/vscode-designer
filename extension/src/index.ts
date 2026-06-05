@@ -6,7 +6,7 @@ import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
 import { validateAndSyncJavaVersion } from './base/java-version-validation';
 import { askToReloadWindow } from './base/reload-window';
-import { StatusBar } from './base/status-bar';
+import { newMarkdownString, StatusBar } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
 import { IvyDiagnostics } from './engine/diagnostics';
@@ -20,9 +20,9 @@ let ivyEngineManager: IvyEngineManager;
 export const messenger = new Messenger({ ignoreHiddenViews: false });
 
 export async function activate(context: ExtensionContext): Promise<MessengerDiagnostic> {
-  StatusBar.setStatusBarItem({
+  StatusBar.overrideStatusBar({
     text: 'Activating...',
-    hoverMarkdown: StatusBar.newMarkdownString('Activating...'),
+    tooltip: newMarkdownString('Activating Axon Ivy Extension ...'),
     icon: '$(loading~spin)',
     isClickable: false
   });
@@ -47,15 +47,15 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
 
     await IvyProjectExplorer.init(context);
     registerAddDependencyHandler(context);
-    StatusBar.setStatusBarItem({});
+    StatusBar.refreshStatusBar();
     return messenger.diagnosticApi();
   } catch (error) {
-    StatusBar.setStatusBarItem({
+    StatusBar.overrideStatusBar({
       text: 'Activation failed',
-      hoverMarkdown: StatusBar.newMarkdownString('Activation failed.\nCheck the error logs for more details.\nTry to reload the window.'),
+      tooltip: newMarkdownString('Activation of Axon Ivy Extension failed.\nCheck the error logs for more details.'),
       icon: '$(error)',
       isError: true,
-      visibleOptions: ['↻ Reload Window']
+      visibleOptions: ['openRuntimeLog']
     });
     throw error;
   }

@@ -1,6 +1,6 @@
-import { extensions, MarkdownString, QuickPickItemKind, StatusBarAlignment, ThemeColor, window, type StatusBarItem } from 'vscode';
+import { extensions, MarkdownString, QuickPickItemKind, StatusBarAlignment, ThemeColor, window, type Command, type StatusBarItem } from 'vscode';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { getWebIdeWebSocketReadyState, onWebIdeWebSocketStateChange } from '../engine/web-ide-ws/web-ide-websocket-provider';
+import { onWebIdeWebSocketStateChange, type WebSocketReadyState } from '../engine/web-ide-ws/web-ide-websocket-provider';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { executeCommand } from './commands';
 import { animationSettings, onAnimationSettingsChange } from './configurations';
@@ -11,15 +11,12 @@ const DEFAULT_PREFIX = 'Axon Ivy';
 const DEFAULT_PRIORITY = 1;
 const DEFAULT_SUCCESS_MESSAGE_DURATION = 3_000;
 
-type StatusBarIcon = '$(ivy-logo)' | '$(loading~spin)' | '$(error)' | '$(check)' | '$(plug)' | '$(debug-disconnect)';
+type StatusBarIcon = '$(ivy-logo)' | '$(loading~spin)' | '$(error)' | '$(check)' | '$(plug)' | '$(debug-disconnect)' | '';
 
-interface StatusBarItemOptions {
-  text?: string;
-  hoverTitle?: string;
-  hoverOverride?: MarkdownString;
-  hoverMarkdown?: MarkdownString;
-  icon?: StatusBarIcon;
-  prefix?: string;
+interface overrideStatusBar {
+  text: string;
+  tooltip: MarkdownString;
+  icon: StatusBarIcon;
   isError?: boolean;
   isClickable?: boolean;
   visibleOptions?: string[];
@@ -38,24 +35,23 @@ interface StatusBarProgressOptions {
   successMsgDuration?: number;
 }
 
-interface ConnectionStateDescriptor {
-  label: string;
-  icon: StatusBarIcon;
-  color?: ThemeColor;
-}
+export const newMarkdownString = (text: string) => {
+    const markdown = new MarkdownString(text, true);
+    markdown.supportThemeIcons = true;
+    return markdown;
+  }
 
 export class StatusBar {
   private static instance: StatusBar | undefined;
 
   private statusBarItem: StatusBarItem | undefined;
   private temporaryTimeout: ReturnType<typeof setTimeout> | undefined;
-  private hoverRefreshVersion = 0;
+  private refreshVersion = 0;
   private listenersSubscribed = false;
   private hasTemporaryOverride = false;
+  private readyState: WebSocketReadyState = WebSocket.CLOSED;
 
-  private constructor() {
-    // Singleton
-  }
+  private constructor() {}
 
   static getInstance(): StatusBar {
     if (!StatusBar.instance) {
@@ -68,14 +64,12 @@ export class StatusBar {
     return await StatusBar.getInstance().withStatusBarProgress(options, action);
   }
 
-  static newMarkdownString(text: string) {
-    const markdown = new MarkdownString(text, true);
-    markdown.supportThemeIcons = true;
-    return markdown;
+  static overrideStatusBar(opt: overrideStatusBar) {
+    StatusBar.getInstance().overrideStatusBar(opt);
   }
 
-  static setStatusBarItem(opt: StatusBarItemOptions) {
-    StatusBar.getInstance().setStatusBarItem(opt);
+  static refreshStatusBar() {
+    StatusBar.getInstance().refreshStatusBar();
   }
 
   static showStatusBarQuickPick(visibleOptions?: string[]) {
@@ -88,83 +82,72 @@ export class StatusBar {
     }
     this.listenersSubscribed = true;
 
-    onWebIdeWebSocketStateChange(() => {
+    onWebIdeWebSocketStateChange((readyState: WebSocketReadyState) => {
+      this.readyState = readyState;
       if (!this.hasTemporaryOverride) {
-        this.renderDefault();
+        this.refreshStatusBar();
       }
     });
 
     onAnimationSettingsChange(() => {
       if (!this.hasTemporaryOverride) {
-        this.refreshDefaultHoverMarkdown();
+        this.refreshTooltip();
       }
     });
-  }
-
-  private resolveConnectionState(): ConnectionStateDescriptor {
-    switch (getWebIdeWebSocketReadyState()) {
-      case WebSocket.CONNECTING:
-        return {
-          label: 'Connecting',
-          icon: '$(loading~spin)',
-          color: new ThemeColor('statusBarItem.warningForeground')
-        };
-      case WebSocket.OPEN:
-        return {
-          label: 'Connected',
-          icon: '$(plug)'
-        };
-      case WebSocket.CLOSING:
-        return {
-          label: 'Closing',
-          icon: '$(debug-disconnect)',
-          color: new ThemeColor('statusBarItem.warningForeground')
-        };
-      case WebSocket.CLOSED:
-        return {
-          label: 'Closed',
-          icon: '$(debug-disconnect)',
-          color: new ThemeColor('statusBarItem.errorForeground')
-        };
-      default:
-        return {
-          label: DEFAULT_TEXT,
-          icon: DEFAULT_ICON
-        };
-    }
   }
 
   private getStatusBarItem() {
     if (!this.statusBarItem) {
       this.statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, DEFAULT_PRIORITY);
-      this.statusBarItem.command = 'ivy.showStatusBarQuickPick';
       this.subscribeToReadyStatus();
     }
     return this.statusBarItem;
   }
 
-  private refreshDefaultHoverMarkdown(hoverTitle?: string) {
+  private refreshTooltip() {
     if (!this.statusBarItem) {
       return;
     }
-    const refreshVersion = ++this.hoverRefreshVersion;
-    void this.buildDefaultHoverMarkdown(this.statusBarItem, refreshVersion, hoverTitle);
+    const refreshVersion = ++this.refreshVersion;
+    void this.buildTooltip(refreshVersion);
   }
 
-  private async buildDefaultHoverMarkdown(item: StatusBarItem, refreshVersion = ++this.hoverRefreshVersion, hoverTitle?: string) {
-    const connectionState = this.resolveConnectionState();
-    const markdown = StatusBar.newMarkdownString(hoverTitle ?? `### ${connectionState.label}`);
-    markdown.appendMarkdown('\n\n' + this.buildEngineStatusString(connectionState));
+  private async buildTooltip(
+    refreshVersion = ++this.refreshVersion,
+  ) {
+    if (!this.statusBarItem) {
+      return;
+    }
+    let statusLabel: string = '';
+    switch (this.readyState) {
+      case WebSocket.CONNECTING:
+        statusLabel = 'Connecting';
+        break;
+      case WebSocket.OPEN:
+        statusLabel = 'Connected';
+        break;
+      case WebSocket.CLOSING:
+        statusLabel = 'Closing';
+        break;
+      case WebSocket.CLOSED:
+        statusLabel = 'Closed';
+        break;
+      default:
+        break;
+    }
+
+    const markdown = newMarkdownString(`### ${DEFAULT_TEXT} ${statusLabel}`);
     markdown.appendMarkdown('\n\n' + this.buildAnimationStatusString());
     markdown.appendMarkdown('\n\n' + (await this.buildProjectCountString()));
+    markdown.appendMarkdown('\n\n' + this.buildEngineUrlString());
     markdown.appendMarkdown(`\n\n Engine Version ${await this.buildEngineVersionString()}`);
     markdown.appendMarkdown(`\n\n Extension Version ${extensions.getExtension('axonivy.vscode-designer-14')?.packageJSON.version}`);
     markdown.appendMarkdown(
       (await IvyEngineManager.instance.resolveEngineDir()) ??
         '\n\n Engine directory cannot be resolved when "Run Engine by Extension" is disabled.'
     );
-    if (refreshVersion === this.hoverRefreshVersion) {
-      item.tooltip = markdown;
+    if (refreshVersion === this.refreshVersion) {
+      this.statusBarItem.tooltip = markdown;
     }
   }
 
@@ -188,15 +171,11 @@ export class StatusBar {
     return projectsString;
   }
 
-  private buildEngineStatusString(connectionState: ConnectionStateDescriptor) {
-    let engineStatusString = '**Axon Ivy Engine Status**';
-
+  private buildEngineUrlString() {
+    let engineStatusString = '**Axon Ivy Engine**';
     const engineUrl = IvyEngineManager.instance.engineUrl;
     const engineUrlLink = engineUrl ? `[${engineUrl}](${engineUrl})` : 'Engine URL cannot be resolved';
-
-    engineStatusString += `\n\n- Status: ${connectionState.icon} ${connectionState.label}`;
     engineStatusString += `\n\n- URL: ${engineUrlLink}`;
-
     return engineStatusString;
   }
 
@@ -211,7 +190,7 @@ export class StatusBar {
     return await IvyEngineManager.instance.getEngineVersion();
   }
 
-  private renderDefault(hoverTitle?: string) {
+  private refreshStatusBar() {
     if (this.temporaryTimeout) {
       clearTimeout(this.temporaryTimeout);
       this.temporaryTimeout = undefined;
@@ -219,54 +198,61 @@ export class StatusBar {
 
     this.hasTemporaryOverride = false;
     const item = this.getStatusBarItem();
-    const connectionState = this.resolveConnectionState();
+    let statusLabel: string = '';
+    let statusIcon: StatusBarIcon = '';
+    let statusBackgroundColor: ThemeColor | undefined;
+    let command: string | Command | undefined = { title: 'Show Axon Ivy actions', command: 'ivy.showStatusBarQuickPick', arguments: ['openRuntimeLog'] };
+    let tooltip: MarkdownString = newMarkdownString('');
 
-    item.text = `${connectionState.icon} ${DEFAULT_PREFIX}: ${connectionState.label}`;
-    item.color = connectionState.color;
-    item.backgroundColor = undefined;
-    item.command = 'ivy.showStatusBarQuickPick';
-    this.refreshDefaultHoverMarkdown(hoverTitle);
+    switch (this.readyState) {
+      case WebSocket.CONNECTING:
+        statusLabel = 'Connecting';
+        statusIcon = '$(loading~spin)';
+        this.getStatusBarItem().tooltip = newMarkdownString('Connecting to the Axon Ivy Engine...\n\nPlease wait while the connection is being established.');
+        break;
+      case WebSocket.OPEN:
+        statusLabel = 'Connected';
+        statusIcon = '$(plug)';
+        command = 'ivy.showStatusBarQuickPick';
+        this.refreshTooltip();
+        break;
+      case WebSocket.CLOSING:
+        statusLabel = 'Closing';
+        statusIcon = '$(debug-disconnect)';
+        this.getStatusBarItem().tooltip = newMarkdownString('The connection to the Axon Ivy Engine is closing.\n\nPlease wait while the connection is being closed.');
+        break;
+      case WebSocket.CLOSED:
+        statusLabel = 'Closed';
+        statusIcon = '$(debug-disconnect)';
+        statusBackgroundColor = new ThemeColor('statusBarItem.errorBackground');
+        this.getStatusBarItem().tooltip = newMarkdownString('The connection to the Axon Ivy Engine is closed.\n\nPlease check if the engine is still running.');
+        break;
+      default:
+        break;
+    }
+
+    item.text = `${statusIcon} ${DEFAULT_PREFIX}: ${statusLabel}`;
+    item.backgroundColor = statusBackgroundColor;
+    item.command = command;
     item.show();
   }
 
-  setStatusBarItem(opt: StatusBarItemOptions) {
-    const hoverOverride = opt.hoverOverride ?? opt.hoverMarkdown;
-    const isDefaultStateRequest =
-      opt.text === undefined &&
-      hoverOverride === undefined &&
-      opt.icon === undefined &&
-      opt.prefix === undefined &&
-      opt.isError === undefined &&
-      opt.isClickable === undefined &&
-      opt.visibleOptions === undefined;
-
-    if (isDefaultStateRequest) {
-      this.renderDefault(opt.hoverTitle);
-      return;
-    }
-
+  private overrideStatusBar(opt: overrideStatusBar) {
     const item = this.getStatusBarItem();
     const isError = opt.isError ?? false;
     const isClickable = opt.isClickable ?? true;
 
     this.hasTemporaryOverride = true;
-    item.color = undefined;
-    item.text = `${opt.icon ?? DEFAULT_ICON} ${opt.prefix ?? DEFAULT_PREFIX}: ${opt.text ?? DEFAULT_TEXT}`;
+    item.text = `${opt.icon} ${DEFAULT_PREFIX}: ${opt.text}`;
+    item.tooltip = opt.tooltip;
     item.backgroundColor = isError ? new ThemeColor('statusBarItem.errorBackground') : undefined;
     item.command = isClickable
       ? { title: 'Show Axon Ivy actions', command: 'ivy.showStatusBarQuickPick', arguments: [opt.visibleOptions] }
       : undefined;
-
-    if (hoverOverride) {
-      item.tooltip = hoverOverride;
-    } else {
-      this.refreshDefaultHoverMarkdown(opt.hoverTitle);
-    }
-
     item.show();
   }
 
-  showStatusBarQuickPick(visibleOptions?: string[]) {
+  private showStatusBarQuickPick(visibleOptions?: string[]) {
     const animationIsOn = animationSettings().animate;
     const quickPickOptions = [
       { label: 'Animation', kind: QuickPickItemKind.Separator },
@@ -305,7 +291,7 @@ export class StatusBar {
     const shownQuickPickOptions =
       !visibleOptions || visibleOptions.length === 0
         ? quickPickOptions
-        : quickPickOptions.filter(option => visibleOptions.includes(option.label));
+        : quickPickOptions.filter(option => visibleOptions.includes(option.id ?? ''));
 
     window.showQuickPick(shownQuickPickOptions, { ignoreFocusOut: true, canPickMany: false }).then(selection => {
       if (!selection) {
@@ -382,35 +368,34 @@ export class StatusBar {
       this.temporaryTimeout = undefined;
     }
 
-    this.setStatusBarItem({
+    this.overrideStatusBar({
       text: textDuring,
       icon: '$(loading~spin)',
       prefix,
-      hoverOverride:
-        options.hoverOverrideDuring ?? options.hoverMarkdownDuring ?? StatusBar.newMarkdownString(`In Progress: ${textDuring}`),
+      hoverOverride: options.hoverOverrideDuring ?? options.hoverMarkdownDuring ?? newMarkdownString(`In Progress: ${textDuring}`),
       isClickable: false
     });
 
     try {
       const result = await action();
-      this.setStatusBarItem({
+      this.overrideStatusBar({
         text: textSuccess,
         icon: '$(check)',
         prefix,
-        hoverOverride: options.hoverMarkdownSuccess ?? StatusBar.newMarkdownString(`${textSuccess}`)
+        hoverOverride: options.hoverMarkdownSuccess ?? newMarkdownString(`${textSuccess}`)
       });
       this.temporaryTimeout = setTimeout(() => {
-        this.renderDefault();
+        this.refreshStatusBar();
         this.temporaryTimeout = undefined;
       }, successMsgDuration);
       return result;
     } catch (error) {
-      this.setStatusBarItem({
+      this.overrideStatusBar({
         text: textError,
         icon: '$(error)',
         prefix,
         isError: true,
-        hoverOverride: StatusBar.newMarkdownString(`${error instanceof Error ? error.message : textError}`)
+        hoverOverride: newMarkdownString(`${error instanceof Error ? error.message : textError}`)
       });
       throw error;
     }

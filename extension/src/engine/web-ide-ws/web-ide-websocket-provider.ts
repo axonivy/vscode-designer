@@ -6,24 +6,21 @@ import { openEditor } from './open-editor';
 import { handleOpenProcessEditor } from './open-process-editor';
 import { openXhtmlEditor } from './open-xhtml-editor';
 
-let webIdeWebSocketState: WebSocket['readyState'] | undefined;
-const webIdeWebSocketStateListeners: Array<() => void> = [];
+export type WebSocketReadyState = WebSocket['readyState'] | undefined;
+const webIdeWebSocketStateListeners: Array<(readyState: WebSocketReadyState) => void> = [];
 
-export const getWebIdeWebSocketReadyState = () => webIdeWebSocketState;
-
-export const onWebIdeWebSocketStateChange = (listener: () => void) => {
+export const onWebIdeWebSocketStateChange = (listener: (readyState: WebSocketReadyState) => void) => {
   webIdeWebSocketStateListeners.push(listener);
 };
 
-const notifyWebIdeWebSocketStateChange = () => {
-  webIdeWebSocketStateListeners.forEach(listener => listener());
+const notifyWebIdeWebSocketStateChange = (readyState: WebSocketReadyState) => {
+  webIdeWebSocketStateListeners.forEach(listener => listener(readyState));
 };
 
 export const WebIdeWebSocketProvider = (webSocketUrl: URL) => {
   const socket = createWebSocket(new URL('ivy-web-ide-lsp', webSocketUrl));
   socket.onopen = () => {
-    webIdeWebSocketState = socket.readyState;
-    notifyWebIdeWebSocketStateChange();
+    notifyWebIdeWebSocketStateChange(socket.readyState);
     const connection = toSocketConnection(socket);
     WebIdeClientJsonRpc.startClient(connection).then(client => {
       client.animationSettings(animationSettings());
@@ -39,7 +36,6 @@ export const WebIdeWebSocketProvider = (webSocketUrl: URL) => {
   };
 
   socket.addEventListener('close', () => {
-    webIdeWebSocketState = socket.readyState;
-    notifyWebIdeWebSocketStateChange();
+    notifyWebIdeWebSocketStateChange(socket.readyState);
   });
 };
