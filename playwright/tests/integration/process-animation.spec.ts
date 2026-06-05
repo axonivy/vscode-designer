@@ -5,7 +5,7 @@ import { ProcessEditor } from '../page-objects/process-editor';
 
 test.describe('Process Animation', () => {
   test.beforeEach(async ({ page }) => {
-    await new FileExplorer(page).hasDeployProjectStatusMessage();
+    await new FileExplorer(page).hasReadyStatusMessage();
   });
 
   test('with activated animation and reset afterwards', async ({ page }) => {

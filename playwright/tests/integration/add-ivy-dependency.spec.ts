@@ -8,7 +8,7 @@ test.use({ workspace: multiProjectWorkspacePath });
 
 test('Add Ivy Project Dependency', async ({ page }) => {
   const explorer = new FileExplorer(page);
-  await explorer.hasDeployProjectStatusMessage();
+  await explorer.hasReadyStatusMessage();
   await explorer.selectNode('ivy-project-1');
   await explorer.doubleClickNode('pom.xml');
 

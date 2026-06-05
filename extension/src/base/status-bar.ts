@@ -96,7 +96,7 @@ export class StatusBar {
 
   private getStatusBarItem() {
     if (!this.statusBarItem) {
-      this.statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, DEFAULT_PRIORITY);
+      this.statusBarItem = window.createStatusBarItem('ivyStatusBarItem', StatusBarAlignment.Left, DEFAULT_PRIORITY);
       this.subscribeToReadyStatus();
     }
     return this.statusBarItem;

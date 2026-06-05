@@ -10,7 +10,7 @@ test.describe('Create Process', () => {
 
   test.beforeEach(async ({ page }) => {
     explorer = new FileExplorer(page);
-    await explorer.hasDeployProjectStatusMessage();
+    await explorer.hasReadyStatusMessage();
     processEditor = new ProcessEditor(page, `${processName}.p.json`);
   });
 
