@@ -1,5 +1,6 @@
-import type { WebServiceActionArgs, WsGeneratorConfig } from '@axonivy/webservice-editor-protocol';
+import type { WebServiceActionArgs, WsGeneratorConfig, WsGeneratorResult, WsInfo } from '@axonivy/webservice-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
+import { promises as fs } from 'fs';
 import * as path from 'path';
 import type { TextDocument, WebviewPanel } from 'vscode';
 import { window } from 'vscode';
@@ -7,10 +8,13 @@ import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { updateTextDocumentContent } from '../content-writer';
 import {
+  createJsonRpcSuccessResponse,
   hasEditorFileContent,
   InitializeConnectionRequest,
   isAction,
+  isIntegrationRequest,
   noUnknownAction,
+  noUnknownIntegrationMethod,
   openUrlExternally,
   WebviewReadyNotification
 } from '../notification-helper';
@@ -44,13 +48,26 @@ class WebServiceClientWebSocketForwarder extends WebSocketForwarder {
   }
 
   protected override handleClientMessage(message: unknown) {
+    if (isIntegrationRequest(message)) {
+      switch (message.method) {
+        case 'integration/generate':
+          void generateClient(message.params as WsGeneratorConfig, this.document).then(result => {
+            const response = createJsonRpcSuccessResponse(message, result);
+            super.handleServerMessage(response);
+          });
+          break;
+        default: {
+          const response = noUnknownIntegrationMethod(message, message.method);
+          super.handleServerMessage(response);
+        }
+      }
+      return;
+    }
+
     if (isAction<WebServiceActionArgs>(message)) {
       switch (message.params.actionId) {
         case 'openUrl':
           openUrlExternally(message.params.payload as string);
-          break;
-        case 'generateCxfClient':
-          generateClient(message.params.payload, this.document);
           break;
         default:
           noUnknownAction(message.params.actionId);
@@ -69,11 +86,10 @@ class WebServiceClientWebSocketForwarder extends WebSocketForwarder {
   }
 }
 
-async function generateClient(payload: string | WsGeneratorConfig, document: TextDocument) {
+async function generateClient(codegen: WsGeneratorConfig, document: TextDocument): Promise<WsGeneratorResult> {
   const projectPath = path.dirname(path.dirname(document.uri.fsPath));
 
   try {
-    const codegen = JSON.parse(payload as string) as WsGeneratorConfig;
     const outputDir = `src_generated/soap/${codegen.clientName}`;
 
     const commandParts = [
@@ -88,14 +104,28 @@ async function generateClient(payload: string | WsGeneratorConfig, document: Tex
     const command = commandParts.join(' ');
 
     await runMavenCommand(projectPath, command);
-    window.showInformationMessage(`${codegen.clientName} web service client generation succeeded`);
 
     const sourcePathAdded = await new BuildSourcePathHelper().ensureGeneratedSourcePath(projectPath, outputDir);
     if (sourcePathAdded) {
       window.showInformationMessage(`Added ${codegen.clientName} client source path to pom.xml.`);
     }
+
+    const serviceJson = path.join(projectPath, outputDir, 'service.json');
+    const serviceContent = await fs.readFile(serviceJson, 'utf-8');
+    const wsInfo = JSON.parse(serviceContent) as WsInfo;
+
+    window.showInformationMessage(`${codegen.clientName} web service client generated successfully`);
+    return {
+      success: true,
+      message: `${codegen.clientName} web service client generated successfully`,
+      ...wsInfo
+    };
   } catch (error) {
-    const message = error instanceof Error ? error.message : `${error}`;
-    window.showErrorMessage(`Web service client generation failed: ${message}`);
+    const errorMessage = error instanceof Error ? error.message : `${error}`;
+    window.showErrorMessage(`Web service client generation failed: ${errorMessage}`);
+    return {
+      success: false,
+      message: `Web service client generation failed: ${errorMessage}`
+    } as WsGeneratorResult;
   }
 }

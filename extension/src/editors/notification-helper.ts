@@ -17,6 +17,42 @@ export const isAction = <T>(obj: unknown): obj is { method: string; params: T } 
     obj.params !== null
   );
 };
+
+export const isIntegrationRequest = (obj: unknown): obj is { method: `integration/${string}`; id: number; params: unknown } => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'method' in obj &&
+    typeof obj.method === 'string' &&
+    obj.method.startsWith('integration/') &&
+    'id' in obj &&
+    typeof obj.id === 'number' &&
+    'params' in obj
+  );
+};
+
+export const createJsonRpcSuccessResponse = (request: { id: number }, result: unknown): string => {
+  return JSON.stringify({ jsonrpc: '2.0', id: request.id, result });
+};
+
+export const createJsonRpcErrorResponse = (request: { id: number }, code: number, message: string): string => {
+  return JSON.stringify({
+    jsonrpc: '2.0',
+    id: request.id,
+    error: { code, message }
+  });
+};
+
+export const createMethodNotFoundResponse = (request: { id: number }, method: string): string => {
+  return createJsonRpcErrorResponse(request, -32601, `Unsupported integration method: ${method}`);
+};
+
+export const noUnknownIntegrationMethod = (request: { id: number }, method: string): string => {
+  const errorMessage = `Unsupported integration method: ${method}`;
+  logErrorMessage(errorMessage);
+  return createJsonRpcErrorResponse(request, -32601, errorMessage);
+};
+
 export const hasEditorFileContent = (obj: unknown): obj is { jsonrpc: string; id: number; result: EditorFileContent } => {
   return (
     typeof obj === 'object' &&
