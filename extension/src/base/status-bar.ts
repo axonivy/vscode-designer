@@ -112,10 +112,10 @@ export class StatusBar {
     let statusLabel: string = '';
     let statusIcon: StatusBarIcon = '';
     let statusBackgroundColor: ThemeColor | undefined;
-    let command: string | Command | undefined = {
+    let command: string | Command = {
       title: 'Show Axon Ivy actions',
       command: 'ivy.showStatusBarQuickPick',
-      arguments: ['openRuntimeLog']
+      arguments: [['openRuntimeLog']]
     };
 
     switch (this.readyState) {
