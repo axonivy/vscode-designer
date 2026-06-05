@@ -1,4 +1,13 @@
-import { extensions, MarkdownString, QuickPickItemKind, StatusBarAlignment, ThemeColor, window, type Command, type StatusBarItem } from 'vscode';
+import {
+  extensions,
+  MarkdownString,
+  QuickPickItemKind,
+  StatusBarAlignment,
+  ThemeColor,
+  window,
+  type Command,
+  type StatusBarItem
+} from 'vscode';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { onWebIdeWebSocketStateChange, type WebSocketReadyState } from '../engine/web-ide-ws/web-ide-websocket-provider';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
@@ -29,10 +38,10 @@ interface StatusBarProgressOptions {
 }
 
 export const newMarkdownString = (text: string) => {
-    const markdown = new MarkdownString(text, true);
-    markdown.supportThemeIcons = true;
-    return markdown;
-  }
+  const markdown = new MarkdownString(text, true);
+  markdown.supportThemeIcons = true;
+  return markdown;
+};
 
 export class StatusBar {
   private static instance: StatusBar | undefined;
@@ -41,7 +50,6 @@ export class StatusBar {
   private temporaryTimeout: ReturnType<typeof setTimeout> | undefined;
   private refreshVersion = 0;
   private listenersSubscribed = false;
-  private hasTemporaryOverride = false;
   private readyState: WebSocketReadyState = WebSocket.CLOSED;
 
   private constructor() {}
@@ -77,15 +85,11 @@ export class StatusBar {
 
     onWebIdeWebSocketStateChange((readyState: WebSocketReadyState) => {
       this.readyState = readyState;
-      if (!this.hasTemporaryOverride) {
-        this.refreshStatusBar();
-      }
+      this.refreshStatusBar();
     });
 
     onAnimationSettingsChange(() => {
-      if (!this.hasTemporaryOverride) {
-        this.refreshTooltip();
-      }
+      this.refreshTooltip();
     });
   }
 
@@ -105,22 +109,20 @@ export class StatusBar {
     void this.buildTooltip(refreshVersion);
   }
 
-  private async buildTooltip(
-    refreshVersion = ++this.refreshVersion,
-  ) {
+  private async buildTooltip(refreshVersion = ++this.refreshVersion) {
     if (!this.statusBarItem) {
       return;
     }
     let statusLabel: string = '';
     switch (this.readyState) {
       case WebSocket.CONNECTING:
-        statusLabel = 'Connecting';
+        statusLabel = 'Connecting ...';
         break;
       case WebSocket.OPEN:
         statusLabel = 'Connected';
         break;
       case WebSocket.CLOSING:
-        statusLabel = 'Closing';
+        statusLabel = 'Closing ...';
         break;
       case WebSocket.CLOSED:
         statusLabel = 'Closed';
@@ -129,16 +131,16 @@ export class StatusBar {
         break;
     }
 
-    const markdown = newMarkdownString(`### ${DEFAULT_PREFIX} ${statusLabel}`);
+    const markdown = newMarkdownString(`### ${DEFAULT_PREFIX} Engine Status - ${statusLabel}`);
+    markdown.appendMarkdown('\n\n' + this.buildEngineUrlString());
     markdown.appendMarkdown('\n\n' + this.buildAnimationStatusString());
     markdown.appendMarkdown('\n\n' + (await this.buildProjectCountString()));
-    markdown.appendMarkdown('\n\n' + this.buildEngineUrlString());
     markdown.appendMarkdown(`\n\n Engine Version ${await this.buildEngineVersionString()}`);
-    markdown.appendMarkdown(`\n\n Extension Version ${extensions.getExtension('axonivy.vscode-designer-14')?.packageJSON.version}`);
     markdown.appendMarkdown(
       (await IvyEngineManager.instance.resolveEngineDir()) ??
-        '\n\n Engine directory cannot be resolved when "Run Engine by Extension" is disabled.'
+        '\n\n Engine directory cannot be resolved when "Run by Extension" is disabled.'
     );
+    markdown.appendMarkdown(`\n\n Extension Version ${extensions.getExtension('axonivy.vscode-designer-14')?.packageJSON.version}`);
     if (refreshVersion === this.refreshVersion) {
       this.statusBarItem.tooltip = markdown;
     }
@@ -165,11 +167,9 @@ export class StatusBar {
   }
 
   private buildEngineUrlString() {
-    let engineStatusString = '**Axon Ivy Engine**';
     const engineUrl = IvyEngineManager.instance.engineUrl;
     const engineUrlLink = engineUrl ? `[${engineUrl}](${engineUrl})` : 'Engine URL cannot be resolved';
-    engineStatusString += `\n\n- URL: ${engineUrlLink}`;
-    return engineStatusString;
+    return `\n\nURL: ${engineUrlLink}`;
   }
 
   private buildAnimationStatusString() {
@@ -189,19 +189,23 @@ export class StatusBar {
       this.temporaryTimeout = undefined;
     }
 
-    this.hasTemporaryOverride = false;
     const item = this.getStatusBarItem();
     let statusLabel: string = '';
     let statusIcon: StatusBarIcon = '';
     let statusBackgroundColor: ThemeColor | undefined;
-    let command: string | Command | undefined = { title: 'Show Axon Ivy actions', command: 'ivy.showStatusBarQuickPick', arguments: ['openRuntimeLog'] };
-    let tooltip: MarkdownString = newMarkdownString('');
+    let command: string | Command | undefined = {
+      title: 'Show Axon Ivy actions',
+      command: 'ivy.showStatusBarQuickPick',
+      arguments: ['openRuntimeLog']
+    };
 
     switch (this.readyState) {
       case WebSocket.CONNECTING:
         statusLabel = 'Connecting';
         statusIcon = '$(loading~spin)';
-        this.getStatusBarItem().tooltip = newMarkdownString('Connecting to the Axon Ivy Engine...\n\nPlease wait while the connection is being established.');
+        this.getStatusBarItem().tooltip = newMarkdownString(
+          'Connecting to the Axon Ivy Engine...\n\nPlease wait while the connection is being established.'
+        );
         break;
       case WebSocket.OPEN:
         statusLabel = 'Connected';
@@ -212,13 +216,17 @@ export class StatusBar {
       case WebSocket.CLOSING:
         statusLabel = 'Closing';
         statusIcon = '$(debug-disconnect)';
-        this.getStatusBarItem().tooltip = newMarkdownString('The connection to the Axon Ivy Engine is closing.\n\nPlease wait while the connection is being closed.');
+        this.getStatusBarItem().tooltip = newMarkdownString(
+          'The connection to the Axon Ivy Engine is closing.\n\nPlease wait while the connection is being closed.'
+        );
         break;
       case WebSocket.CLOSED:
         statusLabel = 'Closed';
         statusIcon = '$(debug-disconnect)';
         statusBackgroundColor = new ThemeColor('statusBarItem.errorBackground');
-        this.getStatusBarItem().tooltip = newMarkdownString('The connection to the Axon Ivy Engine is closed.\n\nPlease check if the engine is still running.');
+        this.getStatusBarItem().tooltip = newMarkdownString(
+          'The connection to the Axon Ivy Engine is closed.\n\nPlease check if the engine is still running.'
+        );
         break;
       default:
         break;
@@ -235,7 +243,6 @@ export class StatusBar {
     const isError = opt.isError ?? false;
     const isClickable = opt.isClickable ?? true;
 
-    this.hasTemporaryOverride = true;
     item.text = `${opt.icon} ${DEFAULT_PREFIX}: ${opt.text}`;
     item.tooltip = opt.tooltip;
     item.backgroundColor = isError ? new ThemeColor('statusBarItem.errorBackground') : undefined;
@@ -351,7 +358,7 @@ export class StatusBar {
 
   async withStatusBarProgress<R>(options: StatusBarProgressOptions, action: () => Promise<R>): Promise<R> {
     const textDuring = options.text;
-    const tooltip =  newMarkdownString(options.tooltip ?? textDuring);
+    const tooltip = newMarkdownString(options.tooltip ?? textDuring);
     const textSuccess = options.textSuccess ?? `Success: ${textDuring}`;
     const textError = options.textError ?? `Error: ${textDuring}`;
     const successMsgDuration = options.successMsgDuration ?? DEFAULT_SUCCESS_MESSAGE_DURATION;
@@ -360,6 +367,8 @@ export class StatusBar {
       clearTimeout(this.temporaryTimeout);
       this.temporaryTimeout = undefined;
     }
+
+    const previousTooltip = this.getStatusBarItem().tooltip as MarkdownString;
 
     this.overrideStatusBar({
       text: textDuring,
@@ -372,7 +381,7 @@ export class StatusBar {
       const result = await action();
       this.overrideStatusBar({
         text: textSuccess,
-        tooltip: tooltip,
+        tooltip: previousTooltip.appendMarkdown(`\n\n**Success last operation: ${textDuring}**`),
         icon: '$(check)'
       });
       this.temporaryTimeout = setTimeout(() => {
@@ -381,11 +390,12 @@ export class StatusBar {
       }, successMsgDuration);
       return result;
     } catch (error) {
+      const errorString = error instanceof Error ? error.message : String(error);
       this.overrideStatusBar({
         text: textError,
-        tooltip: tooltip,
+        tooltip: previousTooltip.appendMarkdown(`\n\n**Error last operation: ${textDuring}**\n\n**${errorString}**`),
         icon: '$(error)',
-        isError: true,
+        isError: true
       });
       throw error;
     }
