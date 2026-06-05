@@ -4,7 +4,7 @@ import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
 import { logErrorMessage, logWarningMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
-import { withStatusBarProgress } from '../base/status-bar';
+import { StatusBar } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
 import { registerProcessDebugging } from '../debug/process-debug';
 import { CaseMapEditorProvider } from '../editors/casemap-editor/casemap-editor-provider';
@@ -154,7 +154,7 @@ export class IvyEngineManager {
     if (ivyProjectDirectories.length === 0) {
       return;
     }
-    await withStatusBarProgress(
+    await StatusBar.withStatusBarProgress(
       {
         textDuring: 'Initialize projects...',
         textSuccess: 'Success: Initialize projects',
@@ -171,7 +171,7 @@ export class IvyEngineManager {
 
   public async deployProjects(ivyProjectDirectory?: string) {
     const ivyProjectDirectories = ivyProjectDirectory ? [ivyProjectDirectory] : await this.ivyProjectDirectories();
-    await withStatusBarProgress(
+    await StatusBar.withStatusBarProgress(
       {
         textDuring: 'Deploying projects...',
         textSuccess: 'Success: Deploy projects',
@@ -182,7 +182,7 @@ export class IvyEngineManager {
   }
 
   public async stopBpmEngine(ivyProjectDirectory: string) {
-    await withStatusBarProgress(
+    await StatusBar.withStatusBarProgress(
       {
         textDuring: 'Stopping BPM Engine...',
         textSuccess: 'Success: Stop BPM Engine',
@@ -197,7 +197,7 @@ export class IvyEngineManager {
   }
 
   public async createProcessFromBpmn(input: ImportProcessBody) {
-    await withStatusBarProgress(
+    await StatusBar.withStatusBarProgress(
       {
         textDuring: 'Importing BPMN process...',
         textSuccess: 'Success: Import BPMN process',
@@ -208,7 +208,7 @@ export class IvyEngineManager {
   }
 
   public async installMarketProduct(input: ProductInstallParams) {
-    await withStatusBarProgress(
+    await StatusBar.withStatusBarProgress(
       {
         textDuring: 'Importing market product...',
         textSuccess: 'Success: Import market product',
@@ -219,7 +219,7 @@ export class IvyEngineManager {
   }
 
   public async createUserDialog(newUserDialogParams: NewUserDialogParams) {
-    const hdBean = await withStatusBarProgress(
+    const hdBean = await StatusBar.withStatusBarProgress(
       {
         textDuring: 'Creating new User Dialog...',
         textSuccess: 'Success: Create new User Dialog',
@@ -237,7 +237,7 @@ export class IvyEngineManager {
     if (!this.started) {
       await this.start();
     }
-    return await withStatusBarProgress(
+    return await StatusBar.withStatusBarProgress(
       {
         textDuring: 'Creating and deploying new project...',
         textSuccess: 'Success: Create new Project',
@@ -266,7 +266,7 @@ export class IvyEngineManager {
   }
 
   public async createDataClass(params: DataClassInit) {
-    const dataClassBean = await withStatusBarProgress(
+    const dataClassBean = await StatusBar.withStatusBarProgress(
       {
         textDuring: 'Creating new Data Class...',
         textSuccess: 'Success: Create new Data Class',
@@ -282,7 +282,7 @@ export class IvyEngineManager {
   }
 
   public async createEntityClass(params: DataClassInit) {
-    const dataClassBean = await withStatusBarProgress(
+    const dataClassBean = await StatusBar.withStatusBarProgress(
       {
         textDuring: 'Creating new Entity Class...',
         textSuccess: 'Success: Create new Entity Class',
@@ -298,7 +298,7 @@ export class IvyEngineManager {
   }
 
   public async createCaseMap(params: CaseMapInit) {
-    const caseMapBean = await withStatusBarProgress(
+    const caseMapBean = await StatusBar.withStatusBarProgress(
       {
         textDuring: 'Creating new Case Map...',
         textSuccess: 'Success: Create new Case Map',
@@ -313,7 +313,7 @@ export class IvyEngineManager {
   }
 
   private async createAndOpenProcess(newProcessParams: NewProcessParams) {
-    const processBean = await withStatusBarProgress(
+    const processBean = await StatusBar.withStatusBarProgress(
       {
         textDuring: 'Creating new Process...',
         textSuccess: 'Success: Create new Process',
@@ -328,7 +328,7 @@ export class IvyEngineManager {
   }
 
   public async deleteProject(ivyProjectDirectory: string) {
-    await withStatusBarProgress(
+    await StatusBar.withStatusBarProgress(
       {
         textDuring: 'Deleting project...',
         textSuccess: 'Success: Delete project',
@@ -339,7 +339,7 @@ export class IvyEngineManager {
   }
 
   public async convertProject(ivyProjectDirectory: string) {
-    await withStatusBarProgress(
+    await StatusBar.withStatusBarProgress(
       {
         textDuring: 'Converting project...',
         textSuccess: 'Success: Convert project',
@@ -350,7 +350,7 @@ export class IvyEngineManager {
   }
 
   public async refreshProjectStatuses() {
-    return await withStatusBarProgress(
+    return await StatusBar.withStatusBarProgress(
       {
         textDuring: 'Refreshing project statuses...',
         textSuccess: 'Success: Refresh project statuses',
@@ -361,7 +361,7 @@ export class IvyEngineManager {
   }
 
   public async invalidateClassLoader(ivyProjectDirectory: string) {
-    await withStatusBarProgress(
+    await StatusBar.withStatusBarProgress(
       {
         textDuring: 'Invalidating class loader...',
         textSuccess: 'Success: Invalidate class loader',

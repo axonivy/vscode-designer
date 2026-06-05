@@ -6,7 +6,7 @@ import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
 import { validateAndSyncJavaVersion } from './base/java-version-validation';
 import { askToReloadWindow } from './base/reload-window';
-import { newMarkdownString, setStatusBarItem, showStatusBarQuickPick } from './base/status-bar';
+import { StatusBar } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
 import { IvyDiagnostics } from './engine/diagnostics';
@@ -20,9 +20,9 @@ let ivyEngineManager: IvyEngineManager;
 export const messenger = new Messenger({ ignoreHiddenViews: false });
 
 export async function activate(context: ExtensionContext): Promise<MessengerDiagnostic> {
-  setStatusBarItem({
+  StatusBar.setStatusBarItem({
     text: 'Activating...',
-    hoverMarkdown: newMarkdownString('Activating...'),
+    hoverMarkdown: StatusBar.newMarkdownString('Activating...'),
     icon: '$(loading~spin)',
     isClickable: false
   });
@@ -38,7 +38,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));
     registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
     registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
-    registerCommand('ivy.showStatusBarQuickPick', context, (visibleOptions?: string[]) => showStatusBarQuickPick(visibleOptions));
+    registerCommand('ivy.showStatusBarQuickPick', context, (visibleOptions?: string[]) => StatusBar.showStatusBarQuickPick(visibleOptions));
 
     registerTools(context);
 
@@ -47,12 +47,12 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
 
     await IvyProjectExplorer.init(context);
     registerAddDependencyHandler(context);
-    setStatusBarItem({});
+    StatusBar.setStatusBarItem({});
     return messenger.diagnosticApi();
   } catch (error) {
-    setStatusBarItem({
+    StatusBar.setStatusBarItem({
       text: 'Activation failed',
-      hoverMarkdown: newMarkdownString('Activation failed.\nCheck the error logs for more details.\nTry to reload the window.'),
+      hoverMarkdown: StatusBar.newMarkdownString('Activation failed.\nCheck the error logs for more details.\nTry to reload the window.'),
       icon: '$(error)',
       isError: true,
       visibleOptions: ['↻ Reload Window']

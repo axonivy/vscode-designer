@@ -6,8 +6,10 @@
   },
   "editor.insertSpaces": true,
   "search.exclude": {
-    "**/node_modules": true,
-    "**/lib": true
+    "node_modules/**": true,
+    "**/node_modules/**": true,
+    "lib/**": true,
+    "**/lib/**": true
   },
   "task.autoDetect": "off",
   "typescript.tsdk": "node_modules/typescript/lib",
