@@ -33,10 +33,6 @@ export class PageObject {
     await this.hasStatusMessage('Axon Ivy: Connected');
   }
 
-  async hasDeployProjectStatusMessage() {
-    await this.hasStatusMessage('Axon Ivy: Connected');
-  }
-
   async provideUserInput(input?: string) {
     if (input) {
       const textBox = this.quickInputBox().getByRole('textbox');
