@@ -12,7 +12,7 @@ The logo is referenced in `package.json` in
 
 ## Where is it used
 
-- Status bar custom logo
+- Currently nowhere, but can be used in the status bar to provide further visual feedback to the user.
 
 ## How to replace the icon
 

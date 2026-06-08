@@ -18,7 +18,7 @@ const DEFAULT_PREFIX = 'Axon Ivy';
 const DEFAULT_PRIORITY = 1;
 const DEFAULT_SUCCESS_MESSAGE_DURATION = 3_000;
 
-type StatusBarIcon = '$(ivy-logo)' | '$(loading~spin)' | '$(error)' | '$(check)' | '$(plug)' | '$(debug-disconnect)' | '';
+type StatusBarIcon = '$(loading~spin)' | '$(error)' | '$(check)' | '$(plug)' | '$(debug-disconnect)' | '';
 
 interface overrideStatusBar {
   text: string;
@@ -120,7 +120,7 @@ export class StatusBar {
 
     switch (this.readyState) {
       case WebSocket.CONNECTING:
-        statusLabel = 'Connecting';
+        statusLabel = 'Connecting ...';
         statusIcon = '$(loading~spin)';
         this.getStatusBarItem().tooltip = newMarkdownString(
           'Connecting to the Axon Ivy Engine...\n\nPlease wait while the connection is being established.'
@@ -133,14 +133,12 @@ export class StatusBar {
         this.refreshTooltip();
         break;
       case WebSocket.CLOSING:
-        statusLabel = 'Closing';
+        statusLabel = 'Disconnecting ...';
         statusIcon = '$(debug-disconnect)';
-        this.getStatusBarItem().tooltip = newMarkdownString(
-          'The connection to the Axon Ivy Engine is closing.\n\nPlease wait while the connection is being closed.'
-        );
+        this.getStatusBarItem().tooltip = newMarkdownString('Disconnecting from the Axon Ivy Engine...');
         break;
       case WebSocket.CLOSED:
-        statusLabel = 'Closed';
+        statusLabel = 'Disconnected';
         statusIcon = '$(debug-disconnect)';
         statusBackgroundColor = new ThemeColor('statusBarItem.errorBackground');
         this.refreshTooltip();
@@ -176,10 +174,10 @@ export class StatusBar {
         statusLabel = 'Connected';
         break;
       case WebSocket.CLOSING:
-        statusLabel = 'Closing ...';
+        statusLabel = 'Disconnecting ...';
         break;
       case WebSocket.CLOSED:
-        statusLabel = 'Closed';
+        statusLabel = 'Disconnected';
         break;
       default:
         break;
