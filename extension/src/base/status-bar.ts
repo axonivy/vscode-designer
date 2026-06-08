@@ -37,10 +37,15 @@ interface StatusBarProgressOptions {
   successMsgDuration?: number;
 }
 
-export const newMarkdownString = (text: string) => {
+export const newMarkdownString = (text: string, trustedCommands: string[] = []) => {
   const markdown = new MarkdownString(text, true);
   markdown.supportThemeIcons = true;
-  markdown.isTrusted = true;
+  markdown.isTrusted = false;
+  if (trustedCommands.length > 0) {
+    markdown.isTrusted = {
+      enabledCommands: trustedCommands
+    };
+  }
   return markdown;
 };
 
@@ -397,9 +402,13 @@ export class StatusBar {
     } catch (error) {
       const errorString = error instanceof Error ? error.message : String(error);
       const linkToLog = '\n\n[Open Runtime Log](command:ivyPanelView.openRuntimeLog)';
+      const previousTooltipError = newMarkdownString(previousTooltip.value, ['ivyPanelView.openRuntimeLog']);
+      previousTooltipError.appendMarkdown(`\n\n**Error last operation: ${textDuring}**`);
+      previousTooltipError.appendText(`\n\n${errorString}\n\n`);
+      previousTooltipError.appendMarkdown(`\n\n${linkToLog}`);
       this.overrideStatusBar({
         text: textError,
-        tooltip: previousTooltip.appendMarkdown(`\n\n**Error last operation: ${textDuring}**\n\n**${errorString}**\n\n${linkToLog}`),
+        tooltip: previousTooltipError,
         icon: '$(error)',
         isError: true
       });
