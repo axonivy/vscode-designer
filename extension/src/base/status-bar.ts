@@ -378,7 +378,8 @@ export class StatusBar {
       this.temporaryTimeout = undefined;
     }
 
-    const previousTooltip = this.getStatusBarItem().tooltip as MarkdownString;
+    const currentTooltip = this.getStatusBarItem().tooltip;
+    const previousTooltip = currentTooltip instanceof MarkdownString ? currentTooltip : newMarkdownString('');
 
     this.overrideStatusBar({
       text: textDuring,
