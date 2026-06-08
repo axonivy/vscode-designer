@@ -232,20 +232,19 @@ export class IvyEngineManager {
       async () => {
         const projectBean = await this.ivyEngineApi?.createProject(newProjectParams);
         await IvyProjectExplorer.instance.setProjectExplorerContext({ hasIvyProjects: true });
-        executeCommand('java.project.import.command')
-          .catch(() => {
-            logWarningMessage(
-              'Java extension could not import project. Java support will not be available. Please clean Java workspace and import Java projects manually.'
-            );
-          })
-          .then(async () => {
-            this.createAndOpenProcess({
-              name: 'BusinessProcess',
-              kind: 'Business Process',
-              path: newProjectParams.path,
-              namespace: await resolveDefaultNamespace(newProjectParams.path, 'processes')
-            });
-          });
+        try {
+          await executeCommand('java.project.import.command');
+        } catch {
+          logWarningMessage(
+            'Java extension could not import project. Java support will not be available. Please clean Java workspace and import Java projects manually.'
+          );
+        }
+        await this.createAndOpenProcess({
+          name: 'BusinessProcess',
+          kind: 'Business Process',
+          path: newProjectParams.path,
+          namespace: await resolveDefaultNamespace(newProjectParams.path, 'processes')
+        });
         return projectBean;
       }
     );
