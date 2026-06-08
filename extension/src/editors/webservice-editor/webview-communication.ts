@@ -1,11 +1,11 @@
 import type { WebServiceActionArgs, WsGeneratorConfig, WsGeneratorResult, WsInfo } from '@axonivy/webservice-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
-import { promises as fs } from 'fs';
+import { promises } from 'fs';
 import * as path from 'path';
 import type { TextDocument, WebviewPanel } from 'vscode';
-import { window } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
+import { logErrorMessage, logInformationMessage } from '../../base/logging-util';
 import { updateTextDocumentContent } from '../content-writer';
 import {
   createJsonRpcSuccessResponse,
@@ -107,14 +107,14 @@ async function generateClient(codegen: WsGeneratorConfig, document: TextDocument
 
     const sourcePathAdded = await new BuildSourcePathHelper().ensureGeneratedSourcePath(projectPath, outputDir);
     if (sourcePathAdded) {
-      window.showInformationMessage(`Added ${codegen.clientName} client source path to pom.xml.`);
+      logInformationMessage(`Added ${codegen.clientName} client source path to pom.xml.`);
     }
 
     const serviceJson = path.join(projectPath, outputDir, 'service.json');
-    const serviceContent = await fs.readFile(serviceJson, 'utf-8');
+    const serviceContent = await promises.readFile(serviceJson, 'utf-8');
     const wsInfo = JSON.parse(serviceContent) as WsInfo;
 
-    window.showInformationMessage(`${codegen.clientName} web service client generated successfully`);
+    logInformationMessage(`${codegen.clientName} web service client generated successfully`);
     return {
       success: true,
       message: `${codegen.clientName} web service client generated successfully`,
@@ -122,7 +122,7 @@ async function generateClient(codegen: WsGeneratorConfig, document: TextDocument
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : `${error}`;
-    window.showErrorMessage(`Web service client generation failed: ${errorMessage}`);
+    logErrorMessage(`Web service client generation failed: ${errorMessage}`);
     return {
       success: false,
       message: `Web service client generation failed: ${errorMessage}`
