@@ -7,6 +7,14 @@ export const logErrorMessage = (message: string, ...items: Array<string>) => {
   return window.showErrorMessage(message, ...items);
 };
 
+export const logErrorMessageWithActions = async (message: string, actions: Record<string, () => Promise<void> | Promise<unknown>>) => {
+  const selected = await window.showErrorMessage(message, ...Object.keys(actions));
+
+  if (selected && actions[selected]) {
+    await actions[selected]();
+  }
+};
+
 export const logWarningMessage = (message: string, ...items: Array<string>) => {
   outputChannel.warn(message, ...items);
   return window.showWarningMessage(message, ...items);

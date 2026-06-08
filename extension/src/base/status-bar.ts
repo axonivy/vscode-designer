@@ -13,6 +13,7 @@ import { onWebIdeWebSocketStateChange, type WebSocketReadyState } from '../engin
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { executeCommand } from './commands';
 import { animationSettings, config, onAnimationSettingsChange } from './configurations';
+import { logErrorMessageWithActions } from './logging-util';
 
 const DEFAULT_PREFIX = 'Axon Ivy';
 const DEFAULT_PRIORITY = 1;
@@ -413,6 +414,7 @@ export class StatusBar {
         icon: '$(error)',
         isError: true
       });
+      logErrorMessageWithActions(errorString, { 'Open Log': () => executeCommand('ivyPanelView.openRuntimeLog') });
       throw error;
     }
   }
