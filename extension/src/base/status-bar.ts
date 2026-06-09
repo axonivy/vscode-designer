@@ -252,7 +252,8 @@ export class StatusBar {
       return 'Cannot retrieve engine directory without a connection.';
     }
     const engineDir = await IvyEngineManager.instance.resolveEngineDir();
-    return `${engineDir ?? 'Cannot resolve engine directory'}`;
+    const engineDirLink = engineDir ? `[${engineDir}](${encodeURI('file://' + engineDir)})` : 'Cannot resolve engine directory';
+    return engineDirLink;
   }
 
   private overrideStatusBar(opt: overrideStatusBar) {
