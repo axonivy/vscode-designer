@@ -1,8 +1,10 @@
 @font-face {
   font-family: 'ivy-logo';
-  src('../font/fontello.woff?26322215') format('woff');
+  src: url('./ivy-logo.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
 
-.icon-ivy-logo-black-background:before { content: '\e800'; }
+.icon-ivy-logo-black-background:before {
+  content: '\e800';
+}
