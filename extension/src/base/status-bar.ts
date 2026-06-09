@@ -9,10 +9,13 @@ import {
   type StatusBarItem
 } from 'vscode';
 import { IvyEngineManager } from '../engine/engine-manager';
+import { showEngineLog } from '../engine/engine-output-channel';
 import { onWebIdeWebSocketStateChange, type WebSocketReadyState } from '../engine/web-ide-ws/web-ide-websocket-provider';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
+import { showRuntimeLog } from '../views/runtimelog-view';
 import { executeCommand } from './commands';
 import { animationSettings, config, onAnimationSettingsChange } from './configurations';
+import { showExtensionLog } from './extension-output-channel';
 import { logErrorMessageWithActions } from './logging-util';
 
 const DEFAULT_PREFIX = 'Axon Ivy';
@@ -426,9 +429,9 @@ export class StatusBar {
         isError: true
       });
       logErrorMessageWithActions(`${textError}\n\n${errorString}`, {
-        'Open Runtime Log': () => executeCommand('ivyPanelView.openRuntimeLog'),
-        'Open Extension Log': () => executeCommand('ivyPanelView.openExtensionLog'),
-        'Open Engine Log': () => executeCommand('ivyPanelView.openEngineLog')
+        'Open Runtime Log': () => showRuntimeLog(),
+        'Open Extension Log': () => showExtensionLog(),
+        'Open Engine Log': () => showEngineLog()
       });
     }
   }

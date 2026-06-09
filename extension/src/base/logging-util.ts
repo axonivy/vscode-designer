@@ -6,12 +6,12 @@ export const logErrorMessage = (message: string, ...items: Array<string>) => {
   return window.showErrorMessage(message, ...items);
 };
 
-export const logErrorMessageWithActions = async (message: string, actions: Record<string, () => Promise<void> | Promise<unknown>>) => {
+export const logErrorMessageWithActions = async (message: string, actions: Record<string, () => void>) => {
   extensionLogOutputChannel.error(message);
   const selected = await window.showErrorMessage(message, ...Object.keys(actions));
 
   if (selected && actions[selected]) {
-    await actions[selected]();
+    actions[selected]();
   }
 };
 
