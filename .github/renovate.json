@@ -12,13 +12,7 @@
   "postUpdateOptions": ["pnpmDedupe"],
   "packageRules": [
     {
-      "matchBaseBranches": ["release/*", "master"],
-      "matchPackageNames": [
-        "@axonivy/*",
-        "@types/vscode",
-        "vscode-messenger*",
-        "@codingame/*"
-      ],
+      "matchPackageNames": ["@axonivy/*", "@types/vscode", "vscode-messenger*", "@codingame/*"],
       "enabled": false
     },
     {
