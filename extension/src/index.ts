@@ -59,7 +59,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
       tooltip: newMarkdownString('Activation of Axon Ivy Extension failed.\nCheck the error logs for more details.'),
       icon: '$(error)',
       isError: true,
-      visibleOptions: ['openRuntimeLog', 'openSettings']
+      visibleOptions: ['openRuntimeLog', 'openExtensionLog', 'openEngineLog', 'openSettings']
     });
     throw error;
   }
