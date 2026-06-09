@@ -22,6 +22,7 @@ let ivyEngineManager: IvyEngineManager;
 export const messenger = new Messenger({ ignoreHiddenViews: false });
 
 export async function activate(context: ExtensionContext): Promise<MessengerDiagnostic> {
+  StatusBar.init(context);
   StatusBar.overrideStatusBar({
     text: 'Activating...',
     tooltip: newMarkdownString('Activating Axon Ivy Extension ...'),

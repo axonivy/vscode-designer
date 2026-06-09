@@ -6,6 +6,7 @@ import {
   ThemeColor,
   window,
   type Command,
+  type ExtensionContext,
   type StatusBarItem
 } from 'vscode';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -21,6 +22,7 @@ import { logErrorMessageWithActions } from './logging-util';
 const DEFAULT_PREFIX = 'Axon Ivy';
 const DEFAULT_PRIORITY = 1;
 const DEFAULT_SUCCESS_MESSAGE_DURATION = 3_000;
+const DEFAULT_TOOLTIP_DIVIDER = '\n\n============================================================';
 
 type StatusBarIcon = '$(loading~spin)' | '$(error)' | '$(check)' | '$(plug)' | '$(debug-disconnect)' | '';
 
@@ -56,35 +58,44 @@ export const newMarkdownString = (text: string, trustedCommands: string[] = []) 
 export class StatusBar {
   private static instance: StatusBar | undefined;
 
-  private statusBarItem: StatusBarItem | undefined;
+  private statusBarItem: StatusBarItem;
   private temporaryTimeout: ReturnType<typeof setTimeout> | undefined;
   private refreshVersion = 0;
   private listenersSubscribed = false;
   private readyState: WebSocketReadyState = WebSocket.CLOSED;
 
-  private constructor() {}
-
-  static getInstance(): StatusBar {
-    if (!StatusBar.instance) {
-      StatusBar.instance = new StatusBar();
-    }
-    return StatusBar.instance;
+  private constructor(context: ExtensionContext) {
+    this.statusBarItem = window.createStatusBarItem('ivyStatusBarItem', StatusBarAlignment.Left, DEFAULT_PRIORITY);
+    this.subscribeToReadyStatus();
+    context.subscriptions.push(this.statusBarItem);
   }
 
-  static async withStatusBarProgress<R>(options: StatusBarProgressOptions, action: () => Promise<R>): Promise<R | undefined> {
+  public static init(context: ExtensionContext) {
+    if (!StatusBar.instance) {
+      StatusBar.instance = new StatusBar(context);
+    }
+  }
+  public static async withStatusBarProgress<R>(options: StatusBarProgressOptions, action: () => Promise<R>): Promise<R | undefined> {
     return await StatusBar.getInstance().withStatusBarProgress(options, action);
   }
 
-  static overrideStatusBar(opt: overrideStatusBar) {
+  public static overrideStatusBar(opt: overrideStatusBar) {
     StatusBar.getInstance().overrideStatusBar(opt);
   }
 
-  static refreshStatusBar() {
+  public static refreshStatusBar() {
     StatusBar.getInstance().refreshStatusBar();
   }
 
-  static showStatusBarQuickPick(visibleOptions?: string[]) {
+  public static showStatusBarQuickPick(visibleOptions?: string[]) {
     StatusBar.getInstance().showStatusBarQuickPick(visibleOptions);
+  }
+
+  private static getInstance() {
+    if (!StatusBar.instance) {
+      throw new Error('StatusBar not initialized. Please call StatusBar.init(context) before using it.');
+    }
+    return StatusBar.instance;
   }
 
   private subscribeToReadyStatus() {
@@ -101,14 +112,6 @@ export class StatusBar {
     onAnimationSettingsChange(async () => {
       await this.refreshTooltip();
     });
-  }
-
-  private getStatusBarItem() {
-    if (!this.statusBarItem) {
-      this.statusBarItem = window.createStatusBarItem('ivyStatusBarItem', StatusBarAlignment.Left, DEFAULT_PRIORITY);
-      this.subscribeToReadyStatus();
-    }
-    return this.statusBarItem;
   }
 
   private async refreshStatusBar() {
@@ -130,7 +133,7 @@ export class StatusBar {
       case WebSocket.CONNECTING:
         statusLabel = 'Connecting ...';
         statusIcon = '$(loading~spin)';
-        this.getStatusBarItem().tooltip = newMarkdownString(
+        this.statusBarItem.tooltip = newMarkdownString(
           'Connecting to the Axon Ivy Engine...\n\nPlease wait while the connection is being established.'
         );
         break;
@@ -143,7 +146,7 @@ export class StatusBar {
       case WebSocket.CLOSING:
         statusLabel = 'Disconnecting ...';
         statusIcon = '$(debug-disconnect)';
-        this.getStatusBarItem().tooltip = newMarkdownString('Disconnecting from the Axon Ivy Engine...');
+        this.statusBarItem.tooltip = newMarkdownString('Disconnecting from the Axon Ivy Engine...');
         break;
       case WebSocket.CLOSED:
         statusLabel = 'Disconnected';
@@ -155,7 +158,7 @@ export class StatusBar {
         break;
     }
 
-    const item = this.getStatusBarItem();
+    const item = this.statusBarItem;
     item.text = `${statusIcon} ${DEFAULT_PREFIX}: ${statusLabel}`;
     item.backgroundColor = statusBackgroundColor;
     item.command = command;
@@ -253,7 +256,7 @@ export class StatusBar {
   }
 
   private overrideStatusBar(opt: overrideStatusBar) {
-    const item = this.getStatusBarItem();
+    const item = this.statusBarItem;
     const isError = opt.isError ?? false;
     const isClickable = opt.isClickable ?? true;
 
@@ -376,7 +379,6 @@ export class StatusBar {
   }
 
   async withStatusBarProgress<R>(options: StatusBarProgressOptions, action: () => Promise<R>): Promise<R | undefined> {
-    const TOOLTIP_DIVIDER = '\n\n============================================================';
     const textDuring = options.text;
     const tooltip = newMarkdownString(options.tooltip ?? textDuring);
     const textSuccess = options.textSuccess ?? `Success: ${textDuring}`;
@@ -389,7 +391,7 @@ export class StatusBar {
     }
 
     await this.refreshTooltip();
-    const currentTooltip = this.getStatusBarItem().tooltip;
+    const currentTooltip = this.statusBarItem.tooltip;
     const previousTooltip = currentTooltip instanceof MarkdownString ? currentTooltip : newMarkdownString('');
 
     this.overrideStatusBar({
@@ -403,7 +405,7 @@ export class StatusBar {
       const result = await action();
       this.overrideStatusBar({
         text: textSuccess,
-        tooltip: previousTooltip.appendMarkdown(`${TOOLTIP_DIVIDER}\n\n**Success last operation: ${textDuring}**`),
+        tooltip: previousTooltip.appendMarkdown(`${DEFAULT_TOOLTIP_DIVIDER}\n\n**Success last operation: ${textDuring}**`),
         icon: '$(check)'
       });
       this.temporaryTimeout = setTimeout(async () => {
@@ -419,7 +421,7 @@ export class StatusBar {
         'ivyPanelView.openExtensionLog',
         'ivyPanelView.openEngineLog'
       ]);
-      previousTooltipError.appendMarkdown(`${TOOLTIP_DIVIDER}\n\n**Error last operation: ${textDuring}**`);
+      previousTooltipError.appendMarkdown(`${DEFAULT_TOOLTIP_DIVIDER}\n\n**Error last operation: ${textDuring}**`);
       previousTooltipError.appendText(`\n\n${errorString}\n\n`);
       previousTooltipError.appendMarkdown(`\n\n${linksString}`);
       this.overrideStatusBar({
