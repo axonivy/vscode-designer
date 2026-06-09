@@ -23,6 +23,14 @@ const DEFAULT_PREFIX = 'Axon Ivy';
 const DEFAULT_PRIORITY = 1;
 const DEFAULT_SUCCESS_MESSAGE_DURATION = 3_000;
 const DEFAULT_TOOLTIP_DIVIDER = '\n\n============================================================';
+const DEFAULT_TRUSTED_COMMANDS_MARKDOWN = [
+  'ivyPanelView.openRuntimeLog',
+  'ivyPanelView.openExtensionLog',
+  'ivyPanelView.openEngineLog',
+  'engine.activateAnimation',
+  'engine.deactivateAnimation',
+  'workbench.action.openSettings'
+];
 
 type StatusBarIcon = '$(loading~spin)' | '$(error)' | '$(check)' | '$(plug)' | '$(debug-disconnect)' | '';
 
@@ -43,10 +51,10 @@ interface StatusBarProgressOptions {
   successMsgDuration?: number;
 }
 
-export const newMarkdownString = (text: string, trustedCommands: string[] = []) => {
+export const newMarkdownString = (text: string, additionalTrustedCommands: string[] = []) => {
   const markdown = new MarkdownString(text, true);
   markdown.supportThemeIcons = true;
-  markdown.isTrusted = false;
+  const trustedCommands = DEFAULT_TRUSTED_COMMANDS_MARKDOWN.concat(additionalTrustedCommands);
   if (trustedCommands.length > 0) {
     markdown.isTrusted = {
       enabledCommands: trustedCommands
@@ -102,7 +110,6 @@ export class StatusBar {
     if (this.listenersSubscribed) {
       return;
     }
-    this.listenersSubscribed = true;
 
     onWebIdeWebSocketStateChange(async (readyState: WebSocketReadyState) => {
       this.readyState = readyState;
@@ -112,6 +119,8 @@ export class StatusBar {
     onAnimationSettingsChange(async () => {
       await this.refreshTooltip();
     });
+
+    this.listenersSubscribed = true;
   }
 
   private async refreshStatusBar() {
@@ -196,7 +205,7 @@ export class StatusBar {
     }
 
     const markdown = newMarkdownString(`### ${DEFAULT_PREFIX} Engine Status - ${statusLabel}`);
-    markdown.appendMarkdown('\n\n Animation - ' + this.buildAnimationStatusString());
+    markdown.appendMarkdown('\n\n Animation ' + this.buildAnimationStatusString());
     markdown.appendMarkdown('\n\n Projects in Workspace - ' + (await this.buildProjectCountString()));
     markdown.appendMarkdown('\n\n Engine URL - ' + this.buildEngineUrlString());
     markdown.appendMarkdown('\n\n Engine Dir - ' + (await this.buildEngineDirString()));
@@ -233,7 +242,10 @@ export class StatusBar {
   }
 
   private buildAnimationStatusString() {
-    return `${animationSettings().animate ? 'ON' : 'OFF'} (Speed: ${animationSettings().speed})`;
+    const animationToggleCommandLink = animationSettings().animate
+      ? '[Turn OFF](command:engine.deactivateAnimation)'
+      : '[Turn ON](command:engine.activateAnimation)';
+    return `${animationSettings().animate ? `ON (${animationToggleCommandLink})` : `OFF (${animationToggleCommandLink})`} (Speed: ${animationSettings().speed}, Mode: ${animationSettings().mode})`;
   }
 
   private async buildEngineVersionString() {
@@ -417,11 +429,7 @@ export class StatusBar {
     } catch (error) {
       const errorString = error instanceof Error ? error.message : String(error);
       const linksString = this.buildLogLinks();
-      const previousTooltipError = newMarkdownString(previousTooltip.value, [
-        'ivyPanelView.openRuntimeLog',
-        'ivyPanelView.openExtensionLog',
-        'ivyPanelView.openEngineLog'
-      ]);
+      const previousTooltipError = newMarkdownString(previousTooltip.value);
       previousTooltipError.appendMarkdown(`${DEFAULT_TOOLTIP_DIVIDER}\n\n**Error last operation: ${textDuring}**`);
       previousTooltipError.appendText(`\n\n${errorString}\n\n`);
       previousTooltipError.appendMarkdown(`\n\n${linksString}`);
