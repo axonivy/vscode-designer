@@ -90,7 +90,7 @@ async function generateClient(codegen: WsGeneratorConfig, document: TextDocument
   const projectPath = path.dirname(path.dirname(document.uri.fsPath));
 
   try {
-    const outputDir = `src_generated/soap/${codegen.clientName}`;
+    const outputDir = `src_generated/ws/${codegen.clientName}`;
 
     const commandParts = [
       'mvn com.axonivy.ivy.tool.soap:cxf-client-codegen:generate-cxf-client -ntp',
