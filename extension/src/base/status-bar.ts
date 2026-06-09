@@ -120,7 +120,7 @@ export class StatusBar {
     let command: string | Command = {
       title: 'Show Axon Ivy actions',
       command: 'ivy.showStatusBarQuickPick',
-      arguments: [['openRuntimeLog']]
+      arguments: [['openRuntimeLog', 'openExtensionLog', 'openEngineLog', 'openSettings']]
     };
 
     switch (this.readyState) {
@@ -273,10 +273,9 @@ export class StatusBar {
       { label: '$(settings-gear) Open Axon Ivy Settings', id: 'openSettings' },
 
       { label: 'Logs', kind: QuickPickItemKind.Separator },
-      // TODO: Implement
-      // { label: '$(list-filter) Open Axon Ivy Extension Log' },
-      // { label: '$(list-filter) Open Axon Ivy Engine Log' },
       { label: '$(list-filter) Open Axon Ivy Runtime Log', id: 'openRuntimeLog' },
+      { label: '$(list-filter) Open Axon Ivy Extension Log', id: 'openExtensionLog' },
+      { label: '$(list-filter) Open Axon Ivy Engine Log', id: 'openEngineLog' },
 
       { label: 'Deployment', kind: QuickPickItemKind.Separator },
       { label: '$(layers) Deploy all Axon Ivy Projects', id: 'deployAllProjects' },
@@ -317,6 +316,12 @@ export class StatusBar {
           break;
         case 'openRuntimeLog':
           executeCommand('ivyPanelView.openRuntimeLog');
+          break;
+        case 'openExtensionLog':
+          executeCommand('ivyPanelView.openExtensionLog');
+          break;
+        case 'openEngineLog':
+          executeCommand('ivyPanelView.openEngineLog');
           break;
         case 'deployAllProjects':
           executeCommand('engine.deployProjects');
