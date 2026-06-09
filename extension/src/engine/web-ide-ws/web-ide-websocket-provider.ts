@@ -35,7 +35,7 @@ export const WebIdeWebSocketProvider = (webSocketUrl: URL) => {
     });
   };
 
-  socket.addEventListener('close', () => {
+  socket.addEventListener('close', async () => {
     notifyWebIdeWebSocketStateChange(socket.readyState);
   });
 };

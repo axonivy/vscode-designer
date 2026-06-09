@@ -84,19 +84,19 @@ export class StatusBar {
     StatusBar.getInstance().showStatusBarQuickPick(visibleOptions);
   }
 
-  subscribeToReadyStatus() {
+  private subscribeToReadyStatus() {
     if (this.listenersSubscribed) {
       return;
     }
     this.listenersSubscribed = true;
 
-    onWebIdeWebSocketStateChange((readyState: WebSocketReadyState) => {
+    onWebIdeWebSocketStateChange(async (readyState: WebSocketReadyState) => {
       this.readyState = readyState;
-      this.refreshStatusBar();
+      await this.refreshStatusBar();
     });
 
-    onAnimationSettingsChange(() => {
-      this.refreshTooltip();
+    onAnimationSettingsChange(async () => {
+      await this.refreshTooltip();
     });
   }
 
@@ -108,13 +108,12 @@ export class StatusBar {
     return this.statusBarItem;
   }
 
-  private refreshStatusBar() {
+  private async refreshStatusBar() {
     if (this.temporaryTimeout) {
       clearTimeout(this.temporaryTimeout);
       this.temporaryTimeout = undefined;
     }
 
-    const item = this.getStatusBarItem();
     let statusLabel: string = '';
     let statusIcon: StatusBarIcon = '';
     let statusBackgroundColor: ThemeColor | undefined;
@@ -136,7 +135,7 @@ export class StatusBar {
         statusLabel = 'Connected';
         statusIcon = '$(plug)';
         command = 'ivy.showStatusBarQuickPick';
-        this.refreshTooltip();
+        await this.refreshTooltip();
         break;
       case WebSocket.CLOSING:
         statusLabel = 'Disconnecting ...';
@@ -147,24 +146,25 @@ export class StatusBar {
         statusLabel = 'Disconnected';
         statusIcon = '$(debug-disconnect)';
         statusBackgroundColor = new ThemeColor('statusBarItem.errorBackground');
-        this.refreshTooltip();
+        await this.refreshTooltip();
         break;
       default:
         break;
     }
 
+    const item = this.getStatusBarItem();
     item.text = `${statusIcon} ${DEFAULT_PREFIX}: ${statusLabel}`;
     item.backgroundColor = statusBackgroundColor;
     item.command = command;
     item.show();
   }
 
-  private refreshTooltip() {
+  private async refreshTooltip() {
     if (!this.statusBarItem) {
       return;
     }
     const refreshVersion = ++this.refreshVersion;
-    void this.buildTooltip(refreshVersion);
+    await this.buildTooltip(refreshVersion);
   }
 
   private async buildTooltip(refreshVersion = ++this.refreshVersion) {
@@ -380,6 +380,7 @@ export class StatusBar {
       this.temporaryTimeout = undefined;
     }
 
+    await this.refreshTooltip();
     const currentTooltip = this.getStatusBarItem().tooltip;
     const previousTooltip = currentTooltip instanceof MarkdownString ? currentTooltip : newMarkdownString('');
 
@@ -397,8 +398,8 @@ export class StatusBar {
         tooltip: previousTooltip.appendMarkdown(`${TOOLTIP_DIVIDER}\n\n**Success last operation: ${textDuring}**`),
         icon: '$(check)'
       });
-      this.temporaryTimeout = setTimeout(() => {
-        this.refreshStatusBar();
+      this.temporaryTimeout = setTimeout(async () => {
+        await this.refreshStatusBar();
         this.temporaryTimeout = undefined;
       }, successMsgDuration);
       return result;
