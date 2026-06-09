@@ -27,6 +27,12 @@
       "matchManagers": ["npm"],
       "matchDepTypes": ["engines"],
       "enabled": false
+    },
+    {
+      "description": "ignore private openapi maven artifact",
+      "matchManagers": ["maven"],
+      "matchPackageNames": ["ch.ivyteam.openapi:openapi"],
+      "enabled": false
     }
   ]
 }
