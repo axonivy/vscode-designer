@@ -4,6 +4,7 @@ import { Messenger, type MessengerDiagnostic } from 'vscode-messenger';
 import { registerTools } from './ai/tools/tools';
 import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
+import { showExtensionLog } from './base/extension-output-channel';
 import { validateAndSyncJavaVersion } from './base/java-version-validation';
 import { askToReloadWindow } from './base/reload-window';
 import { newMarkdownString, StatusBar } from './base/status-bar';
@@ -11,6 +12,7 @@ import { addDevContainer } from './dev-container/command';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
 import { IvyDiagnostics } from './engine/diagnostics';
 import { IvyEngineManager } from './engine/engine-manager';
+import { showEngineLog } from './engine/engine-output-channel';
 import { registerAddDependencyHandler } from './maven/add-dependency';
 import { IvyProjectExplorer } from './project-explorer/ivy-project-explorer';
 import { resolveExtensionVersion } from './version/extension-version';
@@ -37,6 +39,8 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     registerCommand('engine.restart', context, async () => await askToReloadWindow('Engine restart'));
     registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));
     registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
+    registerCommand('ivyPanelView.openExtensionLog', context, () => showExtensionLog());
+    registerCommand('ivyPanelView.openEngineLog', context, () => showEngineLog());
     registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
     registerCommand('ivy.showStatusBarQuickPick', context, (visibleOptions?: string[]) => StatusBar.showStatusBarQuickPick(visibleOptions));
 

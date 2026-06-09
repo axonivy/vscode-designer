@@ -5,8 +5,8 @@ import { ProgressLocation, Uri, window } from 'vscode';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { downloadEngine } from './download';
+import { engineOutputChannel } from './engine-output-channel';
 import { updateGlobalStateEngineDir } from './engine-release-train';
-import { outputChannel } from './output-channel';
 
 export class EngineDownloader {
   private readonly globalEngieStoragePath: string;
@@ -20,7 +20,7 @@ export class EngineDownloader {
       async progress => {
         const logger = (message: string) => {
           progress.report({ message });
-          outputChannel.appendLine(message);
+          engineOutputChannel.appendLine(message);
         };
         const url = this.downloadUrl(releaseTrain);
         try {
@@ -54,7 +54,7 @@ export class EngineDownloader {
         return;
       }
     } catch (error) {
-      outputChannel.appendLine(`Failed to check for engine update: ${error}`);
+      engineOutputChannel.appendLine(`Failed to check for engine update: ${error}`);
       return;
     }
     const newEngineDir = await this.loadReleaseTrain(releaseTrain);

@@ -32,9 +32,9 @@ import { IvyEngineApi } from './api/engine-api';
 import type { CaseMapInit, DataClassInit, ImportProcessBody, NewProjectParams, ProductInstallParams } from './api/generated/client';
 import { IvyDiagnostics } from './diagnostics';
 import { EngineDownloader } from './engine-downloader';
+import { engineOutputChannel } from './engine-output-channel';
 import { engineDirFromGlobalState, engineReleaseTrain, switchEngineReleaseTrain, updateGlobalStateEngineDir } from './engine-release-train';
 import { EngineRunner } from './engine-runner';
-import { outputChannel } from './output-channel';
 import { ReleaseTrainValidator } from './release-train-validator';
 import { WebIdeWebSocketProvider } from './web-ide-ws/web-ide-websocket-provider';
 
@@ -87,7 +87,7 @@ export class IvyEngineManager {
 
   private async handleInvalidReleaseTrain(reason?: string) {
     const errorMessage = `Engine release train validation failed: ${reason}`;
-    outputChannel.appendLine(errorMessage);
+    engineOutputChannel.appendLine(errorMessage);
     const newTrain = await switchEngineReleaseTrain(errorMessage);
     if (!newTrain) {
       return logErrorMessage('No engine release train selected.');

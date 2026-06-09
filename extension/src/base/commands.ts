@@ -56,7 +56,9 @@ type ViewCommand =
   | 'ivyBrowserView.openNEO'
   | 'ivyBrowserView.openPreview'
   | 'ivyPanelView.openRuntimeLog'
-  | 'ivyPanelView.openWelcomePage';
+  | 'ivyPanelView.openWelcomePage'
+  | 'ivyPanelView.openExtensionLog'
+  | 'ivyPanelView.openEngineLog';
 export type ConfigEditorCommand =
   | 'ivyEditor.openVariableEditor'
   | 'ivyEditor.openRoleEditor'

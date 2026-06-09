@@ -368,6 +368,7 @@ export class StatusBar {
   }
 
   async withStatusBarProgress<R>(options: StatusBarProgressOptions, action: () => Promise<R>): Promise<R | undefined> {
+    const TOOLTIP_DIVIDER = '\n\n============================================================';
     const textDuring = options.text;
     const tooltip = newMarkdownString(options.tooltip ?? textDuring);
     const textSuccess = options.textSuccess ?? `Success: ${textDuring}`;
@@ -393,7 +394,7 @@ export class StatusBar {
       const result = await action();
       this.overrideStatusBar({
         text: textSuccess,
-        tooltip: previousTooltip.appendMarkdown(`\n\n**Success last operation: ${textDuring}**`),
+        tooltip: previousTooltip.appendMarkdown(`${TOOLTIP_DIVIDER}\n\n**Success last operation: ${textDuring}**`),
         icon: '$(check)'
       });
       this.temporaryTimeout = setTimeout(() => {
@@ -403,18 +404,33 @@ export class StatusBar {
       return result;
     } catch (error) {
       const errorString = error instanceof Error ? error.message : String(error);
-      const linkToLog = '\n\n[Open Runtime Log](command:ivyPanelView.openRuntimeLog)';
-      const previousTooltipError = newMarkdownString(previousTooltip.value, ['ivyPanelView.openRuntimeLog']);
-      previousTooltipError.appendMarkdown(`\n\n**Error last operation: ${textDuring}**`);
+      const linksString = this.buildLogLinks();
+      const previousTooltipError = newMarkdownString(previousTooltip.value, [
+        'ivyPanelView.openRuntimeLog',
+        'ivyPanelView.openExtensionLog',
+        'ivyPanelView.openEngineLog'
+      ]);
+      previousTooltipError.appendMarkdown(`${TOOLTIP_DIVIDER}\n\n**Error last operation: ${textDuring}**`);
       previousTooltipError.appendText(`\n\n${errorString}\n\n`);
-      previousTooltipError.appendMarkdown(`\n\n${linkToLog}`);
+      previousTooltipError.appendMarkdown(`\n\n${linksString}`);
       this.overrideStatusBar({
         text: textError,
         tooltip: previousTooltipError,
         icon: '$(error)',
         isError: true
       });
-      logErrorMessageWithActions(`${textError}\n\n${errorString}`, { 'Open Log': () => executeCommand('ivyPanelView.openRuntimeLog') });
+      logErrorMessageWithActions(`${textError}\n\n${errorString}`, {
+        'Open Runtime Log': () => executeCommand('ivyPanelView.openRuntimeLog'),
+        'Open Extension Log': () => executeCommand('ivyPanelView.openExtensionLog'),
+        'Open Engine Log': () => executeCommand('ivyPanelView.openEngineLog')
+      });
     }
+  }
+
+  private buildLogLinks() {
+    const linkRuntimeLog = '[Open Runtime Log](command:ivyPanelView.openRuntimeLog)';
+    const linkExtensionLog = '[Open Extension Log](command:ivyPanelView.openExtensionLog)';
+    const linkEngineLog = '[Open Engine Log](command:ivyPanelView.openEngineLog)';
+    return `${linkRuntimeLog} | ${linkExtensionLog} | ${linkEngineLog}`;
   }
 }
