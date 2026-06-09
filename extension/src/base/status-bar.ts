@@ -68,7 +68,7 @@ export class StatusBar {
     return StatusBar.instance;
   }
 
-  static async withStatusBarProgress<R>(options: StatusBarProgressOptions, action: () => Promise<R>): Promise<R> {
+  static async withStatusBarProgress<R>(options: StatusBarProgressOptions, action: () => Promise<R>): Promise<R | undefined> {
     return await StatusBar.getInstance().withStatusBarProgress(options, action);
   }
 
@@ -367,7 +367,7 @@ export class StatusBar {
     });
   }
 
-  async withStatusBarProgress<R>(options: StatusBarProgressOptions, action: () => Promise<R>): Promise<R> {
+  async withStatusBarProgress<R>(options: StatusBarProgressOptions, action: () => Promise<R>): Promise<R | undefined> {
     const textDuring = options.text;
     const tooltip = newMarkdownString(options.tooltip ?? textDuring);
     const textSuccess = options.textSuccess ?? `Success: ${textDuring}`;
@@ -414,8 +414,7 @@ export class StatusBar {
         icon: '$(error)',
         isError: true
       });
-      logErrorMessageWithActions(errorString, { 'Open Log': () => executeCommand('ivyPanelView.openRuntimeLog') });
-      throw error;
+      logErrorMessageWithActions(`${textError}\n\n${errorString}`, { 'Open Log': () => executeCommand('ivyPanelView.openRuntimeLog') });
     }
   }
 }
