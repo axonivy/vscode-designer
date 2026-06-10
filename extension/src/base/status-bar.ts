@@ -7,7 +7,7 @@ export const setStatusBarMessage = (text: string) => {
 
 export const setStatusBarIcon = () => {
   const item = window.createStatusBarItem(StatusBarAlignment.Left);
-  item.text = '$(type-hierarchy) Axon Ivy';
+  item.text = '$(ivy-logo) Axon Ivy';
   item.command = 'ivy.showStatusBarQuickPick';
   item.show();
 };
