@@ -96,7 +96,8 @@ async function generateClient(codegen: WsGeneratorConfig, document: TextDocument
       'mvn com.axonivy.ivy.tool.soap:cxf-client-codegen:generate-cxf-client -ntp',
       `"-Divy.generate.webservice.client.wsdl=${codegen.wsdlUrl}"`,
       `"-Divy.generate.webservice.client.output=${outputDir}"`,
-      `"-Divy.generate.webservice.client.underscoreNames=${codegen.underscoreNames}"`
+      `"-Divy.generate.webservice.client.underscoreNames=${codegen.underscoreNames}"`,
+      `"-Divy.generate.webservice.client.writeServiceInfo=true"`
     ];
     if (codegen.namespace?.trim()) {
       commandParts.push(`"-Divy.generate.webservice.client.namespace=${codegen.namespace}"`);
@@ -113,6 +114,9 @@ async function generateClient(codegen: WsGeneratorConfig, document: TextDocument
     const serviceJson = path.join(projectPath, outputDir, 'service.json');
     const serviceContent = await promises.readFile(serviceJson, 'utf-8');
     const wsInfo = JSON.parse(serviceContent) as WsInfo;
+    await promises.unlink(serviceJson).catch(error => {
+      logErrorMessage(`Could not delete generated service info file ${serviceJson}: ${error}`);
+    });
 
     logInformationMessage(`${codegen.clientName} web service client generated successfully`);
     return {
