@@ -6,9 +6,9 @@ test.describe('Status Bar', () => {
     const explorer = new FileExplorer(page);
     await explorer.hasReadyStatusMessage();
 
-    const statusBar = explorer.statusBar();
-    await expect(statusBar).toBeVisible();
-    await statusBar.click({ delay: 100 });
+    const ivyStatusBar = explorer.ivyStatusBar();
+    await expect(ivyStatusBar).toBeVisible();
+    await ivyStatusBar.click({ delay: 100 });
 
     const commands = explorer.quickInputList();
     await expect(commands).toBeVisible();

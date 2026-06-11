@@ -8,7 +8,7 @@ test.describe('Portal performance', () => {
 
   test('Portal home', async ({ page }) => {
     await expect(async () => {
-      const javaReady = async () => await expect(page.locator('div.statusbar-item:has-text("Java: Ready")')).toBeVisible({ timeout: 200 });
+      const javaReady = async () => await expect(page.locator('div.statusbar-item[id*="redhat.java"]').filter({ hasText: 'Java: Ready' })).toBeVisible({ timeout: 200 });
       for (let i = 0; i < 10; i++) {
         await javaReady();
         await page.waitForTimeout(800);
