@@ -170,18 +170,14 @@ export class IvyEngineManager {
   public async deployProjects(ivyProjectDirectory?: string) {
     const ivyProjectDirectories = ivyProjectDirectory ? [ivyProjectDirectory] : await this.ivyProjectDirectories();
     await StatusBar.withStatusBarProgress(
-      {
-        text: 'Deploying projects'
-      },
+      { text: 'Deploying projects' },
       async () => await this.ivyEngineApi?.deployProjects(ivyProjectDirectories)
     );
   }
 
   public async stopBpmEngine(ivyProjectDirectory: string) {
     await StatusBar.withStatusBarProgress(
-      {
-        text: 'Stopping BPM Engine'
-      },
+      { text: 'Stopping BPM Engine' },
       async () => await this.ivyEngineApi?.stopBpmEngine(ivyProjectDirectory)
     );
   }
@@ -192,27 +188,21 @@ export class IvyEngineManager {
 
   public async createProcessFromBpmn(input: ImportProcessBody) {
     await StatusBar.withStatusBarProgress(
-      {
-        text: 'Importing BPMN process'
-      },
+      { text: 'Importing BPMN process' },
       async () => await this.ivyEngineApi?.createProcessFromBpmn(input)
     );
   }
 
   public async installMarketProduct(input: ProductInstallParams) {
     await StatusBar.withStatusBarProgress(
-      {
-        text: 'Importing market product'
-      },
+      { text: 'Importing market product' },
       async () => await this.ivyEngineApi?.installMarketProduct(input)
     );
   }
 
   public async createUserDialog(newUserDialogParams: NewUserDialogParams) {
     const hdBean = await StatusBar.withStatusBarProgress(
-      {
-        text: 'Creating new User Dialog'
-      },
+      { text: 'Creating new User Dialog' },
       async () => await this.ivyEngineApi?.createUserDialog(newUserDialogParams)
     );
     if (hdBean?.uri) {
@@ -225,36 +215,29 @@ export class IvyEngineManager {
     if (!this.started) {
       await this.start();
     }
-    return await StatusBar.withStatusBarProgress(
-      {
-        text: 'Creating and deploying new project'
-      },
-      async () => {
-        const projectBean = await this.ivyEngineApi?.createProject(newProjectParams);
-        await IvyProjectExplorer.instance.setProjectExplorerContext({ hasIvyProjects: true });
-        try {
-          await executeCommand('java.project.import.command');
-        } catch {
-          logWarningMessage(
-            'Java extension could not import project. Java support will not be available. Please clean Java workspace and import Java projects manually.'
-          );
-        }
-        await this.createAndOpenProcess({
-          name: 'BusinessProcess',
-          kind: 'Business Process',
-          path: newProjectParams.path,
-          namespace: await resolveDefaultNamespace(newProjectParams.path, 'processes')
-        });
-        return projectBean;
+    return await StatusBar.withStatusBarProgress({ text: 'Creating and deploying new project' }, async () => {
+      const projectBean = await this.ivyEngineApi?.createProject(newProjectParams);
+      await IvyProjectExplorer.instance.setProjectExplorerContext({ hasIvyProjects: true });
+      try {
+        await executeCommand('java.project.import.command');
+      } catch {
+        logWarningMessage(
+          'Java extension could not import project. Java support will not be available. Please clean Java workspace and import Java projects manually.'
+        );
       }
-    );
+      await this.createAndOpenProcess({
+        name: 'BusinessProcess',
+        kind: 'Business Process',
+        path: newProjectParams.path,
+        namespace: await resolveDefaultNamespace(newProjectParams.path, 'processes')
+      });
+      return projectBean;
+    });
   }
 
   public async createDataClass(params: DataClassInit) {
     const dataClassBean = await StatusBar.withStatusBarProgress(
-      {
-        text: 'Creating new Data Class'
-      },
+      { text: 'Creating new Data Class' },
       async () => await this.ivyEngineApi?.createDataClass(params)
     );
     if (dataClassBean && params.projectDir) {
@@ -266,9 +249,7 @@ export class IvyEngineManager {
 
   public async createEntityClass(params: DataClassInit) {
     const dataClassBean = await StatusBar.withStatusBarProgress(
-      {
-        text: 'Creating new Entity Class'
-      },
+      { text: 'Creating new Entity Class' },
       async () => await this.ivyEngineApi?.createEntityClass(params)
     );
     if (dataClassBean && params.projectDir) {
@@ -280,11 +261,7 @@ export class IvyEngineManager {
 
   public async createCaseMap(params: CaseMapInit) {
     const caseMapBean = await StatusBar.withStatusBarProgress(
-      {
-        text: 'Creating new Case Map',
-        textSuccess: 'Success: Create new Case Map',
-        textError: 'Error: Create new Case Map'
-      },
+      { text: 'Creating new Case Map' },
       async () => await this.ivyEngineApi?.createCaseMap(params)
     );
     if (caseMapBean && params.projectDir) {
@@ -295,9 +272,7 @@ export class IvyEngineManager {
 
   private async createAndOpenProcess(newProcessParams: NewProcessParams) {
     const processBean = await StatusBar.withStatusBarProgress(
-      {
-        text: 'Creating new Process'
-      },
+      { text: 'Creating new Process' },
       async () => await this.ivyEngineApi?.createProcess(newProcessParams)
     );
     if (processBean?.uri) {
@@ -308,27 +283,21 @@ export class IvyEngineManager {
 
   public async deleteProject(ivyProjectDirectory: string) {
     await StatusBar.withStatusBarProgress(
-      {
-        text: 'Deleting project'
-      },
+      { text: 'Deleting project' },
       async () => await this.ivyEngineApi?.deleteProject(ivyProjectDirectory)
     );
   }
 
   public async convertProject(ivyProjectDirectory: string) {
     await StatusBar.withStatusBarProgress(
-      {
-        text: 'Converting project'
-      },
+      { text: 'Converting project' },
       async () => await this.ivyEngineApi?.convertProject(ivyProjectDirectory)
     );
   }
 
   public async refreshProjectStatuses() {
     return await StatusBar.withStatusBarProgress(
-      {
-        text: 'Refreshing project statuses'
-      },
+      { text: 'Refreshing project statuses' },
       async () => await this.ivyEngineApi?.refreshProjectStatuses()
     );
   }
