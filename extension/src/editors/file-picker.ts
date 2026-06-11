@@ -31,5 +31,5 @@ export async function pickFile(request: FilePickRequestLike, document: TextDocum
     return relativePath;
   }
 
-  return selected.fsPath;
+  return selected.toString();
 }
