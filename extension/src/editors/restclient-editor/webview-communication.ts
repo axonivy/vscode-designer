@@ -1,4 +1,4 @@
-import type { OpenApiGeneratorConfig, RestClientActionArgs } from '@axonivy/restclient-editor-protocol';
+import type { FilePickRequest, OpenApiGeneratorConfig, RestClientActionArgs } from '@axonivy/restclient-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as path from 'path';
 import type { TextDocument, WebviewPanel } from 'vscode';
@@ -6,11 +6,15 @@ import { window } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { updateTextDocumentContent } from '../content-writer';
+import { pickFile } from '../file-picker';
 import {
+  createJsonRpcSuccessResponse,
   hasEditorFileContent,
   InitializeConnectionRequest,
   isAction,
+  isIntegrationRequest,
   noUnknownAction,
+  noUnknownIntegrationMethod,
   openUrlExternally,
   WebviewReadyNotification
 } from '../notification-helper';
@@ -44,6 +48,22 @@ class RestClientWebSocketForwarder extends WebSocketForwarder {
   }
 
   protected override handleClientMessage(message: unknown) {
+    if (isIntegrationRequest(message)) {
+      switch (message.method) {
+        case 'integration/file/pick':
+          void pickFile(message.params as FilePickRequest, this.document).then(result => {
+            const response = createJsonRpcSuccessResponse(message, result);
+            super.handleServerMessage(response);
+          });
+          break;
+        default: {
+          const response = noUnknownIntegrationMethod(message, message.method);
+          super.handleServerMessage(response);
+        }
+      }
+      return;
+    }
+
     if (isAction<RestClientActionArgs>(message)) {
       switch (message.params.actionId) {
         case 'openUrl':
