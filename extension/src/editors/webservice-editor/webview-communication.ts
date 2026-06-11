@@ -9,11 +9,11 @@ import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import { promises } from 'fs';
 import * as path from 'path';
 import type { TextDocument, WebviewPanel } from 'vscode';
-import * as vscode from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { logErrorMessage, logInformationMessage } from '../../base/logging-util';
 import { updateTextDocumentContent } from '../content-writer';
+import { pickFile } from '../file-picker';
 import {
   createJsonRpcSuccessResponse,
   hasEditorFileContent,
@@ -145,32 +145,4 @@ async function generateClient(codegen: WsGeneratorConfig, document: TextDocument
       message: `Web service client generation failed: ${errorMessage}`
     } as WsGeneratorResult;
   }
-}
-
-async function pickFile(request: FilePickRequest, document: TextDocument): Promise<string | undefined> {
-  if (!request.fileTypes || Object.keys(request.fileTypes).length === 0) {
-    return undefined;
-  }
-
-  const projectPath = path.dirname(path.dirname(document.uri.fsPath));
-  const picked = await vscode.window.showOpenDialog({
-    canSelectFiles: true,
-    canSelectFolders: false,
-    canSelectMany: false,
-    defaultUri: vscode.Uri.file(projectPath),
-    openLabel: 'Select File',
-    filters: request.fileTypes
-  });
-
-  const selected = picked?.[0];
-  if (!selected) {
-    return undefined;
-  }
-
-  const relativePath = path.relative(projectPath, selected.fsPath);
-  if (relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath)) {
-    return relativePath;
-  }
-
-  return selected.fsPath;
 }
