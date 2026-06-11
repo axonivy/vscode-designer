@@ -26,7 +26,7 @@ export class PageObject {
   }
 
   async hasStatusMessage(message: string, timeout?: number) {
-    await expect(this.page.locator('div.statusbar-item[id*="ivyStatusBarItem"]')).toHaveText(message, { timeout });
+    await expect(this.statusBar()).toHaveText(message, { timeout });
   }
 
   async hasReadyStatusMessage() {
@@ -65,6 +65,10 @@ export class PageObject {
 
   quickInputList(): Locator {
     return this.page.locator('div.quick-input-list');
+  }
+
+  statusBar(): Locator {
+    return this.page.locator('div.statusbar-item[id*="ivyStatusBarItem"]');
   }
 
   toasts(): Locator {
