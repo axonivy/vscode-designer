@@ -12,6 +12,7 @@ test.describe('Create Project', () => {
     const projectName = 'testProject';
     const explorer = new FileExplorer(page);
     await explorer.addNestedProject('parent', projectName);
+    await explorer.hasStatusMessage('Axon Ivy: Success: Refreshing project statuses');
     await explorer.hasReadyStatusMessage();
     await explorer.hasNode(`parent${path.sep}${projectName}`);
 
