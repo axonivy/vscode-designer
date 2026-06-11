@@ -34,7 +34,7 @@ const DEFAULT_TRUSTED_COMMANDS_MARKDOWN = [
 
 type StatusBarIcon = '$(loading~spin)' | '$(error)' | '$(check)' | '$(plug)' | '$(debug-disconnect)' | '';
 
-interface overrideStatusBar {
+interface OverrideStatusBar {
   text: string;
   tooltip: MarkdownString;
   icon: StatusBarIcon;
@@ -87,7 +87,7 @@ export class StatusBar {
     return await StatusBar.getInstance().withStatusBarProgress(options, action);
   }
 
-  public static overrideStatusBar(opt: overrideStatusBar) {
+  public static overrideStatusBar(opt: OverrideStatusBar) {
     StatusBar.getInstance().overrideStatusBar(opt);
   }
 
@@ -268,7 +268,7 @@ export class StatusBar {
     return engineDirLink;
   }
 
-  private overrideStatusBar(opt: overrideStatusBar) {
+  private overrideStatusBar(opt: OverrideStatusBar) {
     const item = this.statusBarItem;
     const isError = opt.isError ?? false;
     const isClickable = opt.isClickable ?? true;
