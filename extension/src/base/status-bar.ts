@@ -286,35 +286,54 @@ export class StatusBar {
     const animationIsOn = animationSettings().animate;
     const quickPickOptions = [
       { label: 'Animation', kind: QuickPickItemKind.Separator },
-      { label: animationIsOn ? '$(eye-closed) Deactivate Animation' : '$(eye) Activate Animation', id: 'toggleAnimation' },
+      {
+        label: animationIsOn ? '$(eye-closed) Deactivate Animation' : '$(eye) Activate Animation',
+        id: 'toggleAnimation',
+        callback: () => executeCommand(animationIsOn ? 'engine.deactivateAnimation' : 'engine.activateAnimation')
+      },
 
       { label: 'Settings', kind: QuickPickItemKind.Separator },
-      { label: '$(settings-gear) Open Axon Ivy Settings', id: 'openSettings' },
+      {
+        label: '$(settings-gear) Open Axon Ivy Settings',
+        id: 'openSettings',
+        callback: () => executeCommand('workbench.action.openSettings', '@ext:axonivy.vscode-designer-14')
+      },
 
       { label: 'Logs', kind: QuickPickItemKind.Separator },
-      { label: '$(list-filter) Open Axon Ivy Runtime Log', id: 'openRuntimeLog' },
-      { label: '$(list-filter) Open Axon Ivy Extension Log', id: 'openExtensionLog' },
-      { label: '$(list-filter) Open Axon Ivy Engine Log', id: 'openEngineLog' },
+      {
+        label: '$(list-filter) Open Axon Ivy Runtime Log',
+        id: 'openRuntimeLog',
+        callback: () => executeCommand('ivyPanelView.openRuntimeLog')
+      },
+      {
+        label: '$(list-filter) Open Axon Ivy Extension Log',
+        id: 'openExtensionLog',
+        callback: () => executeCommand('ivyPanelView.openExtensionLog')
+      },
+      {
+        label: '$(list-filter) Open Axon Ivy Engine Log',
+        id: 'openEngineLog',
+        callback: () => executeCommand('ivyPanelView.openEngineLog')
+      },
 
       { label: 'Deployment', kind: QuickPickItemKind.Separator },
-      { label: '$(layers) Deploy all Axon Ivy Projects', id: 'deployAllProjects' },
-      { label: '$(layers-dot) Deploy Axon Ivy Project', id: 'deployProject' },
+      { label: '$(layers) Deploy all Axon Ivy Projects', id: 'deployAllProjects', callback: () => executeCommand('engine.deployProjects') },
+      { label: '$(layers-dot) Deploy Axon Ivy Project', id: 'deployProject', callback: () => executeCommand('ivyProjects.deployProject') },
 
       { label: 'Market', kind: QuickPickItemKind.Separator },
-      { label: '$(gift) Install Market Product', id: 'installMarketProduct' },
-      { label: '$(gift) Install Local Market Product', id: 'installLocalMarketProduct' },
+      {
+        label: '$(gift) Install Market Product',
+        id: 'installMarketProduct',
+        callback: () => executeCommand('ivyProjects.installMarketProduct')
+      },
+      {
+        label: '$(gift) Install Local Market Product',
+        id: 'installLocalMarketProduct',
+        callback: () => executeCommand('ivyProjects.installLocalMarketProduct')
+      },
 
       { label: 'New ...', kind: QuickPickItemKind.Separator },
-      { label: '$(repo-create) New Project', id: 'newProject' },
-      { label: 'New Business Process', id: 'newBusinessProcess' },
-      { label: 'New Callable Sub Process', id: 'newCallableSubProcess' },
-      { label: 'New Web Service Process', id: 'newWebServiceProcess' },
-      { label: 'New Html Dialog (JSF)', id: 'newHtmlDialog' },
-      { label: 'New Dialog Form', id: 'newDialogForm' },
-      { label: 'New Offline Dialog (JSF)', id: 'newOfflineDialog' },
-      { label: 'New Data Class', id: 'newDataClass' },
-      { label: 'New Entity Class', id: 'newEntityClass' },
-      { label: 'New Case Map', id: 'newCaseMap' }
+      { label: '$(repo-create) New Project', id: 'newProject', callback: () => executeCommand('ivyProjects.addNewProject') }
     ];
 
     const shownQuickPickOptions =
@@ -326,67 +345,9 @@ export class StatusBar {
       if (!selection) {
         return;
       }
-      switch (selection.id) {
-        case 'toggleAnimation':
-          executeCommand(selection.label.includes('Deactivate') ? 'engine.deactivateAnimation' : 'engine.activateAnimation');
-          break;
-        case 'openSettings':
-          executeCommand('workbench.action.openSettings', '@ext:axonivy.vscode-designer-14');
-          break;
-        case 'openRuntimeLog':
-          executeCommand('ivyPanelView.openRuntimeLog');
-          break;
-        case 'openExtensionLog':
-          executeCommand('ivyPanelView.openExtensionLog');
-          break;
-        case 'openEngineLog':
-          executeCommand('ivyPanelView.openEngineLog');
-          break;
-        case 'deployAllProjects':
-          executeCommand('engine.deployProjects');
-          break;
-        case 'deployProject':
-          executeCommand('ivyProjects.deployProject');
-          break;
-        case 'installMarketProduct':
-          executeCommand('ivyProjects.installMarketProduct');
-          break;
-        case 'installLocalMarketProduct':
-          executeCommand('ivyProjects.installLocalMarketProduct');
-          break;
-        case 'newProject':
-          executeCommand('ivyProjects.addNewProject');
-          break;
-        case 'newBusinessProcess':
-          executeCommand('ivyProjects.addBusinessProcess');
-          break;
-        case 'newCallableSubProcess':
-          executeCommand('ivyProjects.addCallableSubProcess');
-          break;
-        case 'newWebServiceProcess':
-          executeCommand('ivyProjects.addWebServiceProcess');
-          break;
-        case 'newHtmlDialog':
-          executeCommand('ivyProjects.addNewHtmlDialog');
-          break;
-        case 'newDialogForm':
-          executeCommand('ivyProjects.addNewFormDialog');
-          break;
-        case 'newOfflineDialog':
-          executeCommand('ivyProjects.addNewOfflineDialog');
-          break;
-        case 'newDataClass':
-          executeCommand('ivyProjects.addNewDataClass');
-          break;
-        case 'newEntityClass':
-          executeCommand('ivyProjects.addNewEntityClass');
-          break;
-        case 'newCaseMap':
-          executeCommand('ivyProjects.addNewCaseMap');
-          break;
-
-        default:
-          throw Error(`Unknown quick pick selection: ${selection}`);
+      if (selection.callback) {
+        selection.callback();
+        return;
       }
     });
   }
