@@ -1,10 +1,15 @@
-import type { FilePickRequest, OpenApiGeneratorConfig, RestClientActionArgs } from '@axonivy/restclient-editor-protocol';
+import type {
+  FilePickRequest,
+  OpenApiGeneratorConfig,
+  OpenApiGeneratorResult,
+  RestClientActionArgs
+} from '@axonivy/restclient-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as path from 'path';
 import type { TextDocument, WebviewPanel } from 'vscode';
-import { window } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
+import { logErrorMessage, logInformationMessage } from '../../base/logging-util';
 import { updateTextDocumentContent } from '../content-writer';
 import { pickFile } from '../file-picker';
 import {
@@ -50,6 +55,12 @@ class RestClientWebSocketForwarder extends WebSocketForwarder {
   protected override handleClientMessage(message: unknown) {
     if (isIntegrationRequest(message)) {
       switch (message.method) {
+        case 'integration/generate':
+          void generateClient(message.params as OpenApiGeneratorConfig, this.document).then(result => {
+            const response = createJsonRpcSuccessResponse(message, result);
+            super.handleServerMessage(response);
+          });
+          break;
         case 'integration/file/pick':
           void pickFile(message.params as FilePickRequest, this.document).then(result => {
             const response = createJsonRpcSuccessResponse(message, result);
@@ -69,9 +80,6 @@ class RestClientWebSocketForwarder extends WebSocketForwarder {
         case 'openUrl':
           openUrlExternally(message.params.payload as string);
           break;
-        case 'generateOpenApiClient':
-          generateClient(message.params.payload as string, this.document);
-          break;
         default:
           noUnknownAction(message.params.actionId);
       }
@@ -89,9 +97,8 @@ class RestClientWebSocketForwarder extends WebSocketForwarder {
   }
 }
 
-async function generateClient(payRaw: string, document: TextDocument) {
+async function generateClient(openapi: OpenApiGeneratorConfig, document: TextDocument): Promise<OpenApiGeneratorResult> {
   const projectPath = path.dirname(path.dirname(document.uri.fsPath));
-  const openapi = JSON.parse(payRaw) as OpenApiGeneratorConfig;
   const outputDir = `src_generated/rest/${openapi.clientName}`;
 
   const command = [
@@ -104,14 +111,23 @@ async function generateClient(payRaw: string, document: TextDocument) {
 
   try {
     await runMavenCommand(projectPath, command);
-    window.showInformationMessage(`${openapi.clientName} OpenAPI client generation succeeded`);
+    logInformationMessage(`${openapi.clientName} OpenAPI client generated successfully`);
 
     const sourcePathAdded = await new BuildSourcePathHelper().ensureGeneratedSourcePath(projectPath, outputDir);
     if (sourcePathAdded) {
-      window.showInformationMessage(`Added ${openapi.clientName} client source path to pom.xml.`);
+      logInformationMessage(`Added ${openapi.clientName} client source path to pom.xml.`);
     }
+
+    return {
+      success: true,
+      message: `${openapi.clientName} OpenAPI client generated successfully`
+    };
   } catch (error) {
-    const message = error instanceof Error ? error.message : `${error}`;
-    window.showErrorMessage(`OpenAPI client generation failed: ${message}`);
+    const errorMessage = error instanceof Error ? error.message : `${error}`;
+    logErrorMessage(`OpenAPI client generation failed: ${errorMessage}`);
+    return {
+      success: false,
+      message: `OpenAPI client generation failed: ${errorMessage}`
+    };
   }
 }
