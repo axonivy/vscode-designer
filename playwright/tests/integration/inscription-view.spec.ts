@@ -13,7 +13,7 @@ test.describe('Inscription View', () => {
 
   test.beforeEach(async ({ page }) => {
     processEditor = new ProcessEditor(page);
-    await processEditor.hasDeployProjectStatusMessage();
+    await processEditor.hasReadyStatusMessage();
     await processEditor.openEditorFile();
     await processEditor.isViewVisible();
   });

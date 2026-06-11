@@ -7,7 +7,7 @@ test.describe('Problems View', () => {
 
   test.beforeEach(async ({ page }) => {
     processEditor = new ProcessEditor(page, 'Validation.p.json');
-    await processEditor.hasDeployProjectStatusMessage();
+    await processEditor.hasReadyStatusMessage();
     await processEditor.openEditorFile();
     await processEditor.isViewVisible();
   });

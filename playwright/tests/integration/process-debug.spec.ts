@@ -5,7 +5,7 @@ import { ProcessEditor } from '../page-objects/process-editor';
 import { VsDebugView } from '../page-objects/vs-debug-view';
 
 test.beforeEach(async ({ page }) => {
-  await new FileExplorer(page).hasDeployProjectStatusMessage();
+  await new FileExplorer(page).hasReadyStatusMessage();
 });
 
 test('debug', async ({ page }) => {

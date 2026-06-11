@@ -26,11 +26,11 @@ export class PageObject {
   }
 
   async hasStatusMessage(message: string, timeout?: number) {
-    await expect(this.page.locator('#status\\.extensionMessage')).toHaveText(message, { timeout });
+    await expect(this.ivyStatusBar()).toHaveText(message, { timeout });
   }
 
-  async hasDeployProjectStatusMessage() {
-    await this.hasStatusMessage('Finished: Deploy Ivy Projects');
+  async hasReadyStatusMessage() {
+    await this.hasStatusMessage('Axon Ivy: Connected');
   }
 
   async provideUserInput(input?: string) {
@@ -65,6 +65,10 @@ export class PageObject {
 
   quickInputList(): Locator {
     return this.page.locator('div.quick-input-list');
+  }
+
+  ivyStatusBar(): Locator {
+    return this.page.locator('div.statusbar-item[id*="ivyStatusBarItem"]');
   }
 
   toasts(): Locator {

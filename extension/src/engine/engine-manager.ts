@@ -4,7 +4,7 @@ import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
 import { logErrorMessage, logWarningMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
-import { setStatusBarMessage } from '../base/status-bar';
+import { StatusBar } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
 import { registerProcessDebugging } from '../debug/process-debug';
 import { CaseMapEditorProvider } from '../editors/casemap-editor/casemap-editor-provider';
@@ -32,9 +32,9 @@ import { IvyEngineApi } from './api/engine-api';
 import type { CaseMapInit, DataClassInit, ImportProcessBody, NewProjectParams, ProductInstallParams } from './api/generated/client';
 import { IvyDiagnostics } from './diagnostics';
 import { EngineDownloader } from './engine-downloader';
+import { engineOutputChannel } from './engine-output-channel';
 import { engineDirFromGlobalState, engineReleaseTrain, switchEngineReleaseTrain, updateGlobalStateEngineDir } from './engine-release-train';
 import { EngineRunner } from './engine-runner';
-import { outputChannel } from './output-channel';
 import { ReleaseTrainValidator } from './release-train-validator';
 import { WebIdeWebSocketProvider } from './web-ide-ws/web-ide-websocket-provider';
 
@@ -44,6 +44,7 @@ export class IvyEngineManager {
   private readonly engineRunner: EngineRunner;
   private ivyEngineApi?: IvyEngineApi;
   private started = false;
+  private resolvedEngineUrl?: URL;
 
   private constructor(readonly context: ExtensionContext) {
     const engineDir = this.resolveEngineDir();
@@ -57,7 +58,7 @@ export class IvyEngineManager {
     return IvyEngineManager._instance;
   }
 
-  async resolveEngineDir(): Promise<string | undefined> {
+  public async resolveEngineDir(): Promise<string | undefined> {
     if (!config.engineRunByExtension()) {
       return; // ok to be undefined, e.g. in cloud setup
     }
@@ -86,7 +87,7 @@ export class IvyEngineManager {
 
   private async handleInvalidReleaseTrain(reason?: string) {
     const errorMessage = `Engine release train validation failed: ${reason}`;
-    outputChannel.appendLine(errorMessage);
+    engineOutputChannel.appendLine(errorMessage);
     const newTrain = await switchEngineReleaseTrain(errorMessage);
     if (!newTrain) {
       return logErrorMessage('No engine release train selected.');
@@ -106,13 +107,13 @@ export class IvyEngineManager {
     }
     this.started = true;
     await IvyProjectExplorer.instance.setProjectExplorerContext({ isStarted: true });
-    const engineUrl = await this.resolveEngineUrl();
-    this.ivyEngineApi = new IvyEngineApi(engineUrl.toString());
+    this.resolvedEngineUrl = await this.resolveEngineUrl();
+    this.ivyEngineApi = new IvyEngineApi(this.resolvedEngineUrl.toString());
     let devContextPath = await this.ivyEngineApi.devContextPath;
-    IvyBrowserViewProvider.register(this.context, engineUrl, devContextPath);
+    IvyBrowserViewProvider.register(this.context, this.resolvedEngineUrl, devContextPath);
     devContextPath += devContextPath.endsWith('/') ? '' : '/';
     await this.initExistingProjects();
-    const websocketUrl = new URL(devContextPath, toWebSocketUrl(engineUrl));
+    const websocketUrl = new URL(devContextPath, toWebSocketUrl(this.resolvedEngineUrl));
     ProcessEditorProvider.register(this.context, websocketUrl);
     FormEditorProvider.register(this.context, websocketUrl);
     VariableEditorProvider.register(this.context, websocketUrl);
@@ -153,23 +154,32 @@ export class IvyEngineManager {
     if (ivyProjectDirectories.length === 0) {
       return;
     }
-    for (const projectDir of ivyProjectDirectories) {
-      await this.ivyEngineApi?.findOrCreatePmv(projectDir);
-    }
-    await this.ivyEngineApi?.deployProjects(ivyProjectDirectories);
+    await StatusBar.withStatusBarProgress(
+      {
+        text: 'Initialize projects'
+      },
+      async () => {
+        for (const projectDir of ivyProjectDirectories) {
+          await this.ivyEngineApi?.findOrCreatePmv(projectDir);
+        }
+        await this.ivyEngineApi?.deployProjects(ivyProjectDirectories);
+      }
+    );
   }
 
-  public async deployProjects() {
-    const ivyProjectDirectories = await this.ivyProjectDirectories();
-    await this.ivyEngineApi?.deployProjects(ivyProjectDirectories);
-  }
-
-  public async deployProject(ivyProjectDirectory: string) {
-    await this.ivyEngineApi?.deployProjects([ivyProjectDirectory]);
+  public async deployProjects(ivyProjectDirectory?: string) {
+    const ivyProjectDirectories = ivyProjectDirectory ? [ivyProjectDirectory] : await this.ivyProjectDirectories();
+    await StatusBar.withStatusBarProgress(
+      { text: 'Deploying projects' },
+      async () => await this.ivyEngineApi?.deployProjects(ivyProjectDirectories)
+    );
   }
 
   public async stopBpmEngine(ivyProjectDirectory: string) {
-    await this.ivyEngineApi?.stopBpmEngine(ivyProjectDirectory);
+    await StatusBar.withStatusBarProgress(
+      { text: 'Stopping BPM Engine' },
+      async () => await this.ivyEngineApi?.stopBpmEngine(ivyProjectDirectory)
+    );
   }
 
   public async createProcess(newProcessParams: NewProcessParams) {
@@ -177,15 +187,24 @@ export class IvyEngineManager {
   }
 
   public async createProcessFromBpmn(input: ImportProcessBody) {
-    await this.ivyEngineApi?.createProcessFromBpmn(input);
+    await StatusBar.withStatusBarProgress(
+      { text: 'Importing BPMN process' },
+      async () => await this.ivyEngineApi?.createProcessFromBpmn(input)
+    );
   }
 
   public async installMarketProduct(input: ProductInstallParams) {
-    await this.ivyEngineApi?.installMarketProduct(input);
+    await StatusBar.withStatusBarProgress(
+      { text: 'Importing market product' },
+      async () => await this.ivyEngineApi?.installMarketProduct(input)
+    );
   }
 
   public async createUserDialog(newUserDialogParams: NewUserDialogParams) {
-    const hdBean = await this.ivyEngineApi?.createUserDialog(newUserDialogParams);
+    const hdBean = await StatusBar.withStatusBarProgress(
+      { text: 'Creating new User Dialog' },
+      async () => await this.ivyEngineApi?.createUserDialog(newUserDialogParams)
+    );
     if (hdBean?.uri) {
       executeCommand('vscode.open', Uri.parse(hdBean.uri));
     }
@@ -196,26 +215,31 @@ export class IvyEngineManager {
     if (!this.started) {
       await this.start();
     }
-    const projectBean = await this.ivyEngineApi?.createProject(newProjectParams);
-    await IvyProjectExplorer.instance.setProjectExplorerContext({ hasIvyProjects: true });
-    executeCommand('java.project.import.command')
-      .catch(() => {
-        logWarningMessage('Java extension could not import project. Java support will not be available.');
-      })
-      .then(async () =>
-        this.createAndOpenProcess({
-          name: 'BusinessProcess',
-          kind: 'Business Process',
-          path: newProjectParams.path,
-          namespace: await resolveDefaultNamespace(newProjectParams.path, 'processes')
-        })
-      )
-      .then(() => setStatusBarMessage('Finished: Create new Project'));
-    return projectBean;
+    return await StatusBar.withStatusBarProgress({ text: 'Creating and deploying new project' }, async () => {
+      const projectBean = await this.ivyEngineApi?.createProject(newProjectParams);
+      await IvyProjectExplorer.instance.setProjectExplorerContext({ hasIvyProjects: true });
+      try {
+        await executeCommand('java.project.import.command');
+      } catch {
+        logWarningMessage(
+          'Java extension could not import project. Java support will not be available. Please clean Java workspace and import Java projects manually.'
+        );
+      }
+      await this.createAndOpenProcess({
+        name: 'BusinessProcess',
+        kind: 'Business Process',
+        path: newProjectParams.path,
+        namespace: await resolveDefaultNamespace(newProjectParams.path, 'processes')
+      });
+      return projectBean;
+    });
   }
 
   public async createDataClass(params: DataClassInit) {
-    const dataClassBean = await this.ivyEngineApi?.createDataClass(params);
+    const dataClassBean = await StatusBar.withStatusBarProgress(
+      { text: 'Creating new Data Class' },
+      async () => await this.ivyEngineApi?.createDataClass(params)
+    );
     if (dataClassBean && params.projectDir) {
       const dataClassUri = Uri.joinPath(Uri.file(params.projectDir), dataClassBean.path);
       executeCommand('vscode.open', dataClassUri);
@@ -224,7 +248,10 @@ export class IvyEngineManager {
   }
 
   public async createEntityClass(params: DataClassInit) {
-    const dataClassBean = await this.ivyEngineApi?.createEntityClass(params);
+    const dataClassBean = await StatusBar.withStatusBarProgress(
+      { text: 'Creating new Entity Class' },
+      async () => await this.ivyEngineApi?.createEntityClass(params)
+    );
     if (dataClassBean && params.projectDir) {
       const dataClassUri = Uri.joinPath(Uri.file(params.projectDir), dataClassBean.path);
       executeCommand('vscode.open', dataClassUri);
@@ -233,7 +260,10 @@ export class IvyEngineManager {
   }
 
   public async createCaseMap(params: CaseMapInit) {
-    const caseMapBean = await this.ivyEngineApi?.createCaseMap(params);
+    const caseMapBean = await StatusBar.withStatusBarProgress(
+      { text: 'Creating new Case Map' },
+      async () => await this.ivyEngineApi?.createCaseMap(params)
+    );
     if (caseMapBean && params.projectDir) {
       const caseMapUri = Uri.joinPath(Uri.file(params.projectDir), caseMapBean.path);
       executeCommand('vscode.open', caseMapUri);
@@ -241,7 +271,10 @@ export class IvyEngineManager {
   }
 
   private async createAndOpenProcess(newProcessParams: NewProcessParams) {
-    const processBean = await this.ivyEngineApi?.createProcess(newProcessParams);
+    const processBean = await StatusBar.withStatusBarProgress(
+      { text: 'Creating new Process' },
+      async () => await this.ivyEngineApi?.createProcess(newProcessParams)
+    );
     if (processBean?.uri) {
       executeCommand('vscode.open', Uri.parse(processBean.uri));
     }
@@ -249,15 +282,24 @@ export class IvyEngineManager {
   }
 
   public async deleteProject(ivyProjectDirectory: string) {
-    this.ivyEngineApi?.deleteProject(ivyProjectDirectory);
+    await StatusBar.withStatusBarProgress(
+      { text: 'Deleting project' },
+      async () => await this.ivyEngineApi?.deleteProject(ivyProjectDirectory)
+    );
   }
 
   public async convertProject(ivyProjectDirectory: string) {
-    await this.ivyEngineApi?.convertProject(ivyProjectDirectory);
+    await StatusBar.withStatusBarProgress(
+      { text: 'Converting project' },
+      async () => await this.ivyEngineApi?.convertProject(ivyProjectDirectory)
+    );
   }
 
   public async refreshProjectStatuses() {
-    return await this.ivyEngineApi?.refreshProjectStatuses();
+    return await StatusBar.withStatusBarProgress(
+      { text: 'Refreshing project statuses' },
+      async () => await this.ivyEngineApi?.refreshProjectStatuses()
+    );
   }
 
   public async invalidateClassLoader(ivyProjectDirectory: string) {
@@ -276,16 +318,20 @@ export class IvyEngineManager {
     return this.ivyEngineApi?.projects(withDependencies);
   }
 
-  get engineApi() {
-    return this.ivyEngineApi;
-  }
-
   async ivyProjectDirectories() {
     return IvyProjectExplorer.instance.getIvyProjects();
   }
 
   async stop() {
     await this.engineRunner.stop();
+  }
+
+  get engineApi() {
+    return this.ivyEngineApi;
+  }
+
+  get engineUrl() {
+    return this.resolvedEngineUrl ?? '';
   }
 
   public static get instance() {

@@ -21,7 +21,7 @@ export type Command =
   | EditorCommand
   | 'ivy.addDevContainer'
   | 'ivy.showStatusBarQuickPick';
-type VSCodeCommand = 'setContext' | 'vscode.open' | 'copyFilePath';
+type VSCodeCommand = 'setContext' | 'vscode.open' | 'copyFilePath' | 'workbench.action.openSettings';
 type EngineCommand =
   | 'engine.deployProjects'
   | 'engine.switchEngineReleaseTrain'
@@ -56,7 +56,9 @@ type ViewCommand =
   | 'ivyBrowserView.openNEO'
   | 'ivyBrowserView.openPreview'
   | 'ivyPanelView.openRuntimeLog'
-  | 'ivyPanelView.openWelcomePage';
+  | 'ivyPanelView.openWelcomePage'
+  | 'ivyPanelView.openExtensionLog'
+  | 'ivyPanelView.openEngineLog';
 export type ConfigEditorCommand =
   | 'ivyEditor.openVariableEditor'
   | 'ivyEditor.openRoleEditor'

@@ -83,7 +83,7 @@ const runElectronAppTest = async (workspace: string, closeAllTabsOnInit: boolean
 };
 
 const initialize = async (page: Page, closeAllTabsOnInit: boolean) => {
-  await expect(page.locator('div.statusbar-item:has-text("Axon Ivy")')).toBeVisible();
+  await expect(page.locator('div.statusbar-item[id*="ivyStatusBarItem"]')).toContainText('Axon Ivy');
   if (closeAllTabsOnInit) {
     await new FileExplorer(page).closeAllTabs();
   }

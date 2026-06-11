@@ -6,10 +6,22 @@ import { openEditor } from './open-editor';
 import { handleOpenProcessEditor } from './open-process-editor';
 import { openXhtmlEditor } from './open-xhtml-editor';
 
+export type WebSocketReadyState = WebSocket['readyState'] | undefined;
+const webIdeWebSocketStateListeners: Array<(readyState: WebSocketReadyState) => void> = [];
+
+export const onWebIdeWebSocketStateChange = (listener: (readyState: WebSocketReadyState) => void) => {
+  webIdeWebSocketStateListeners.push(listener);
+};
+
+const notifyWebIdeWebSocketStateChange = (readyState: WebSocketReadyState) => {
+  webIdeWebSocketStateListeners.forEach(listener => listener(readyState));
+};
+
 export const WebIdeWebSocketProvider = (webSocketUrl: URL) => {
-  const webIdeWebSocket = createWebSocket(new URL('ivy-web-ide-lsp', webSocketUrl));
-  webIdeWebSocket.onopen = () => {
-    const connection = toSocketConnection(webIdeWebSocket);
+  const socket = createWebSocket(new URL('ivy-web-ide-lsp', webSocketUrl));
+  socket.onopen = () => {
+    notifyWebIdeWebSocketStateChange(socket.readyState);
+    const connection = toSocketConnection(socket);
     WebIdeClientJsonRpc.startClient(connection).then(client => {
       client.animationSettings(animationSettings());
       client.onOpenProcessEditor.set(process => handleOpenProcessEditor(process));
@@ -22,4 +34,8 @@ export const WebIdeWebSocketProvider = (webSocketUrl: URL) => {
       });
     });
   };
+
+  socket.addEventListener('close', async () => {
+    notifyWebIdeWebSocketStateChange(socket.readyState);
+  });
 };

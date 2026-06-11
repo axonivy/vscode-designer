@@ -42,9 +42,9 @@ export class WorkspacePage {
   }
 
   async activateExpensiveJavaStandardMode() {
-    const statusBarItem = (text: string) => this.page.locator(`div.statusbar-item:has-text("${text}")`);
-    await statusBarItem('Java: Lightweight Mode').click();
-    await expect(statusBarItem('Java: Building')).toBeVisible();
-    await expect(statusBarItem('Java: Ready')).toBeVisible();
+    const javaStatusBar = this.page.locator('div.statusbar-item[id*="redhat.java"]');
+    await javaStatusBar.filter({ hasText: 'Java: Lightweight Mode' }).click();
+    await expect(javaStatusBar.filter({ hasText: 'Java: Building' })).toBeVisible();
+    await expect(javaStatusBar.filter({ hasText: 'Java: Ready' })).toBeVisible();
   }
 }

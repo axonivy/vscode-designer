@@ -4,7 +4,7 @@ import path from 'path';
 import { Uri, env } from 'vscode';
 import { config } from '../base/configurations';
 import { stripTrailingSeparator } from '../utils/path-utils';
-import { outputChannel } from './output-channel';
+import { engineOutputChannel } from './engine-output-channel';
 
 export class EngineRunner {
   private childProcess?: ChildProcess;
@@ -13,10 +13,10 @@ export class EngineRunner {
   constructor(private readonly engineDir: Promise<string | undefined>) {}
 
   public async start(): Promise<void> {
-    outputChannel.show(true);
+    engineOutputChannel.show(true);
     this.childProcess = await this.launchEngineChildProcess();
     this.childProcess.on('error', (error: Error) => {
-      outputChannel.append(error.message);
+      engineOutputChannel.append(error.message);
       throw error;
     });
     return new Promise<void>(resolve => {
@@ -27,7 +27,7 @@ export class EngineRunner {
           this._engineUrl = output.split('Go to ')[1]?.split(' to see')[0];
           resolve();
         }
-        outputChannel.append(output);
+        engineOutputChannel.append(output);
       });
     });
   }
@@ -36,7 +36,7 @@ export class EngineRunner {
     const executable = Os.platform() === 'win32' ? 'AxonIvyEngineC.exe' : 'AxonIvyEngine';
     const resolvedEngineDir = await this.engineDir;
     if (!resolvedEngineDir) {
-      outputChannel.appendLine('Engine directory is undefined. Cannot start Axon Ivy Engine.');
+      engineOutputChannel.appendLine('Engine directory is undefined. Cannot start Axon Ivy Engine.');
       throw new Error('Engine directory is undefined');
     }
     const engineLauncherScriptPath = path.join(resolvedEngineDir, 'bin', executable);
@@ -51,7 +51,7 @@ export class EngineRunner {
         ...(ivyBaseUrl ? { IVY_BASEURL: ivyBaseUrl } : {})
       }
     };
-    outputChannel.appendLine(
+    engineOutputChannel.appendLine(
       `Start ${engineLauncherScriptPath} with JAVA_OPTS_IVY_SYSTEM=${javaOpts}${ivyBaseUrl ? ` and IVY_BASEURL=${ivyBaseUrl}` : ''}`
     );
     return execFile(engineLauncherScriptPath, env);
@@ -68,7 +68,7 @@ export class EngineRunner {
       return stripTrailingSeparator((await env.asExternalUri(Uri.parse('http://localhost:8080/'))).toString());
     } catch (error) {
       const message = error instanceof Error ? error.message : `${error}`;
-      outputChannel.appendLine(`Failed to resolve IVY_BASEURL: ${message}`);
+      engineOutputChannel.appendLine(`Failed to resolve IVY_BASEURL: ${message}`);
       return undefined;
     }
   }

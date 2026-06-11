@@ -10,7 +10,7 @@ test.describe('Create Process', () => {
 
   test.beforeEach(async ({ page }) => {
     explorer = new FileExplorer(page);
-    await explorer.hasDeployProjectStatusMessage();
+    await explorer.hasReadyStatusMessage();
     processEditor = new ProcessEditor(page, `${processName}.p.json`);
   });
 
@@ -55,6 +55,6 @@ test.describe('Create Process', () => {
 
   test('Process name validation', async () => {
     await explorer.addProcess('default', 'Business Process');
-    await expect(explorer.toasts().first()).toHaveText("Error validating Artifact Name: The input 'default' is not allowed (Java keywords are not allowed)");
+    await expect(explorer.toasts().first()).toContainText("Error validating Artifact Name: The input 'default' is not allowed (Java keywords are not allowed)");
   });
 });

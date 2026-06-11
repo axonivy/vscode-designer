@@ -5,7 +5,7 @@ import { ProcessEditor } from '../page-objects/process-editor';
 test('Compile java and invalidate class loader', async ({ page, wsPage }) => {
   test.setTimeout(60_000); // slow test due to java activation
   const processEditor = new ProcessEditor(page, 'CallJavaMethod.p.json');
-  await processEditor.hasDeployProjectStatusMessage();
+  await processEditor.hasReadyStatusMessage();
   await processEditor.openEditorFile();
   const script = processEditor.locatorForPID('19BE060A6564078E-f3');
   await processEditor.hasError(script);
@@ -22,7 +22,7 @@ test('Compile java and invalidate class loader', async ({ page, wsPage }) => {
   await javaEditor.typeText(runMethod);
   await expect(javaEditor.editorContent()).toContainText(runMethod);
   await javaEditor.saveAllFiles();
-  await javaEditor.hasStatusMessage('Finished: Invalidate class loader');
+  await javaEditor.hasReadyStatusMessage();
 
   await processEditor.openEditorFile();
   const start = processEditor.locatorForPID('19BE060A6564078E-f0');
