@@ -24,7 +24,7 @@ test('OpenAPI codegen', async ({ wsPage }) => {
   await generator.isEnabled();
   await generator.click();
 
-  const successToast = wsPage.toasts.filter({ hasText: /openApiService OpenAPI client generation succeeded/i }).first();
+  const successToast = wsPage.toasts.filter({ hasText: /openApiService OpenAPI client generated successfully/i }).first();
   await expect(successToast).toBeVisible();
 });
 
