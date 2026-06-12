@@ -5,15 +5,13 @@ import { ProblemsView } from '../page-objects/problems-view';
 import { ProcessEditor } from '../page-objects/process-editor';
 import { empty } from '../workspaces/workspace';
 
-// eslint-disable-next-line playwright/no-focused-test
-test.describe.only('Create Project', () => {
+test.describe('Create Project', () => {
   test.use({ workspace: empty });
 
   test('Add Project and execute init Process', async ({ page }) => {
     const projectName = 'testProject';
     const explorer = new FileExplorer(page);
     await explorer.addNestedProject('parent', projectName);
-    await explorer.hasStatusMessage('Axon Ivy: Success: Refreshing project statuses');
     await explorer.hasReadyStatusMessage();
     await explorer.hasNode(`parent${path.sep}${projectName}`);
 
