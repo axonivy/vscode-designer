@@ -4,6 +4,7 @@ import {
   QuickPickItemKind,
   StatusBarAlignment,
   ThemeColor,
+  Uri,
   window,
   type Command,
   type ExtensionContext,
@@ -263,8 +264,8 @@ export class StatusBar {
     if (this.readyState !== WebSocket.OPEN) {
       return 'Cannot retrieve engine directory without a connection.';
     }
-    const engineDir = await IvyEngineManager.instance.resolveEngineDir();
-    const engineDirLink = engineDir ? `[${engineDir}](${encodeURI('file://' + engineDir)})` : 'Cannot resolve engine directory';
+    const engineDir = IvyEngineManager.instance.engineDir;
+    const engineDirLink = engineDir ? `[${engineDir}](${Uri.file(engineDir).toString()})` : 'Cannot resolve engine directory';
     return engineDirLink;
   }
 

@@ -45,6 +45,7 @@ export class IvyEngineManager {
   private ivyEngineApi?: IvyEngineApi;
   private started = false;
   private resolvedEngineUrl?: URL;
+  private resolvedEngineDir?: string;
 
   private constructor(readonly context: ExtensionContext) {
     const engineDir = this.resolveEngineDir();
@@ -58,7 +59,7 @@ export class IvyEngineManager {
     return IvyEngineManager._instance;
   }
 
-  public async resolveEngineDir(): Promise<string | undefined> {
+  async resolveEngineDir(): Promise<string | undefined> {
     if (!config.engineRunByExtension()) {
       return; // ok to be undefined, e.g. in cloud setup
     }
@@ -69,17 +70,20 @@ export class IvyEngineManager {
       return this.handleInvalidReleaseTrain(validationResult.reason);
     }
     if (validationResult.isDirectory) {
+      this.resolvedEngineDir = releaseTrain;
       return releaseTrain;
     }
     const engineDownloader = new EngineDownloader(this.context);
     const globalStateEngineDir = engineDirFromGlobalState(this.context, releaseTrain);
     if (globalStateEngineDir && (await releaseTrainValidator.isValidEngineDir(globalStateEngineDir)).valid) {
       engineDownloader.tryToUpdateDevEngine(releaseTrain);
+      this.resolvedEngineDir = globalStateEngineDir;
       return globalStateEngineDir;
     }
     const newEngineDir = await engineDownloader.loadReleaseTrain(releaseTrain);
     if ((await releaseTrainValidator.isValidEngineDir(newEngineDir)).valid) {
       await updateGlobalStateEngineDir(this.context, releaseTrain, newEngineDir);
+      this.resolvedEngineDir = newEngineDir;
       return newEngineDir;
     }
     logErrorMessage(`Downloaded engine is invalid: ${newEngineDir}`);
@@ -332,6 +336,10 @@ export class IvyEngineManager {
 
   get engineUrl() {
     return this.resolvedEngineUrl ?? '';
+  }
+
+  get engineDir() {
+    return this.resolvedEngineDir;
   }
 
   public static get instance() {
