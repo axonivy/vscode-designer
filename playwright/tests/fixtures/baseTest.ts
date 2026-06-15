@@ -35,7 +35,7 @@ export const test = base.extend<TestFixtures>({
 
 const runBrowserTest = async (workspace: string, closeWelcomePage: boolean, take: (r: Page) => Promise<void>) => {
   const browser = await chromium.launch({ args: ['--disable-web-security'] }); // disable-web-security because of https://chromestatus.com/feature/5152728072060928
-  const page = await browser.newPage();
+  const page = await (await browser.newContext()).newPage();
   await page.setViewportSize({ width: 1920, height: 1080 });
   const tmpWorkspace = await createTmpWorkspace(workspace);
   const queryParam = tmpWorkspace.tmpWsCofig ? `workspace=${tmpWorkspace.tmpWsCofig}` : `folder=${tmpWorkspace.tmpWorkspace}`;
