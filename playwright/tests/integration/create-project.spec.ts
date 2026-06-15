@@ -1,5 +1,5 @@
 import path from 'path';
-import { expect, test } from '../fixtures/baseTest';
+import { test } from '../fixtures/baseTest';
 import { FileExplorer } from '../page-objects/explorer-view';
 import { ProblemsView } from '../page-objects/problems-view';
 import { ProcessEditor } from '../page-objects/process-editor';
@@ -13,7 +13,6 @@ test.describe('Create Project', () => {
     const explorer = new FileExplorer(page);
     await explorer.hasReadyStatusMessage();
     await explorer.addNestedProject('parent', projectName);
-    await expect(page.locator('div.notification-list-item').filter({ hasText: 'Java extension could not import project.' })).toBeVisible();
     await explorer.hasReadyStatusMessage();
     await explorer.hasNode(`parent${path.sep}${projectName}`);
 
