@@ -3,7 +3,7 @@ import { test } from '../fixtures/baseTest';
 import { ProcessEditor } from '../page-objects/process-editor';
 
 test.describe('Runtime Log', () => {
-  test('Runtime Log view output channel', { tag: '@serial' }, async ({ page }) => {
+  test('Runtime Log view output channel', async ({ page }) => {
     const processEditor = new ProcessEditor(page, 'RuntimeLog.p.json');
     await processEditor.hasReadyStatusMessage();
     await processEditor.openEditorFile();

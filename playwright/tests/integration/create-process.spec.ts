@@ -14,7 +14,7 @@ test.describe('Create Process', () => {
     processEditor = new ProcessEditor(page, `${processName}.p.json`);
   });
 
-  test('Add business process, execute, edit and redeploy', { tag: '@serial' }, async () => {
+  test('Add business process, execute, edit and redeploy', async () => {
     await explorer.addProcess(processName, 'Business Process');
     await explorer.hasNode(`${processName}.p.json`);
     const start = processEditor.locatorForElementType('g.start\\:requestStart');

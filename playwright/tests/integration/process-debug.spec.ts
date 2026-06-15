@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
   await new FileExplorer(page).hasReadyStatusMessage();
 });
 
-test('debug', { tag: '@serial' }, async ({ page }) => {
+test('debug', async ({ page }) => {
   const processEditor = new ProcessEditor(page, 'NoAnimation.p.json');
   await processEditor.openEditorFile();
   const start = processEditor.locatorForPID('191A2645F90CDC61-f0');
