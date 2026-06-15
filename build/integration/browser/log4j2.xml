@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <RollingRandomAccessFile name="RuntimeLog" fileName="logs/runtime.log"
+            filePattern="logs/runtime-%d{yyyy-MM-dd}.log.gz" ignoreExceptions="false">
+            <PatternLayout pattern="${pattern}" />
+            <TimeBasedTriggeringPolicy />
+        </RollingRandomAccessFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="runtimelog" level="info" includeLocation="false" additivity="false">
+            <AppenderRef ref="RuntimeLog" />
+        </Logger>
+    </Loggers>
+</Configuration>
