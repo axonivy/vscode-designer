@@ -23,7 +23,8 @@ test.describe('Project Conversion', () => {
     await quickPick.getByRole('button').getByText('OK').click();
 
     const output = new OutputView(page);
-    await expect(output.viewLocator).toContainText('[info] Finished conversion of project playwrightTestWorkspace');
+    await output.viewLocator.press('ControlOrMeta+End');
+    await output.expectLogEntry('[info] Finished conversion of project playwrightTestWorkspace');
     editor = new Editor('.ivyproject', page);
     await editor.openEditorFile();
     await expect(editor.editorContent()).toContainText('version=');
