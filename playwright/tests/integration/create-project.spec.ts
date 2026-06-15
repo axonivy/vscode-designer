@@ -23,7 +23,6 @@ test.describe('Create Project', () => {
     await processEditor.hasBreadCrumbs('parent', projectName, 'processes', projectName, 'BusinessProcess.p.json');
     const start = processEditor.locatorForElementType('g.start\\:requestStart');
     const end = processEditor.locatorForElementType('g.end\\:taskEnd');
-    await page.waitForTimeout(10_000);
     await processEditor.startProcessAndAssertExecuted(start, end);
   });
 });
