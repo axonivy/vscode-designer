@@ -11,6 +11,7 @@ test.describe('Create Project', () => {
   test('Add Project and execute init Process', async ({ page }) => {
     const projectName = 'testProject';
     const explorer = new FileExplorer(page);
+    await explorer.hasReadyStatusMessage();
     await explorer.addNestedProject('parent', projectName);
     await explorer.hasReadyStatusMessage();
     await explorer.hasNode(`parent${path.sep}${projectName}`);
