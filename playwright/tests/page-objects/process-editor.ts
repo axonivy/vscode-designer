@@ -46,7 +46,7 @@ export class ProcessEditor extends Editor {
     await startEvent.locator('circle').click();
     await this.assertSelected(startEvent);
     const playButton = this.quickActionBar.getByRole('button', { name: /Start Process/ });
-    await playButton.click();
+    await playButton.click({ delay: 500 });
     await expect(executedElement).toHaveClass(/executed/);
   }
 
