@@ -42,9 +42,6 @@ const runBrowserTest = async (workspace: string, closeWelcomePage: boolean, take
   await page.goto(`http://localhost:3000/?${queryParam}`);
   await initialize(page, closeWelcomePage);
   await take(page);
-  // this goto closes WebSocket connections
-  await page.goto('about:blank');
-  await browser.close();
   await removeTmpWorkspace(tmpWorkspace.tmpWorkspace);
 };
 
