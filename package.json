@@ -4,9 +4,6 @@
   "engines": {
     "node": ">=20.19.0"
   },
-  "volta": {
-    "node": "24.14.1"
-  },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "check": "pnpm run type && pnpm run lint:ci && pnpm run test:ci",
