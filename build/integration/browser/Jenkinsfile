@@ -35,7 +35,7 @@ pipeline {
               sh 'pnpm run test:playwright:browser --grep-invert /@serial/'
             }
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-              sh 'pnpm run test:playwright:browser --grep /@serial/'
+              sh 'pnpm run test:playwright:browser --workers 1 --grep /@serial/'
             }
           }
           archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
