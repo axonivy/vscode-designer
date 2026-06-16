@@ -1,0 +1,128 @@
+pipeline {
+  agent {
+    label 'windows-vscode'
+  }
+
+  tools {
+    jdk 'temurin-jdk-25.0.2.10'
+    maven '3.9'
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '60', artifactNumToKeepStr: '2'))
+    disableConcurrentBuilds()
+  }
+
+  triggers {
+    cron '@midnight'
+  }
+
+  parameters {
+    string(name: 'engineDownloadUrl', defaultValue: 'https://jenkins.ivyteam.io/job/core_product/job/master/lastSuccessfulBuild/artifact/workspace/ch.ivyteam.ivy.server.product/target/products/*_Slim_*.zip/*zip*/products.zip', description: 'engine that will be packaged')
+  }
+
+  environment {
+    JAVA_OPTS_IVY_SYSTEM = '-Ddev.mode=true -Divy.engine.testheadless=true'
+    CI = 'true'
+    RUN_STABLE_VERSION = 'true'
+  }
+
+  stages {
+    stage('Cleanup Coder User') {
+      steps {
+        script {
+          dir("${env.USERPROFILE}\\AppData\\Roaming\\Code\\User") {
+            deleteDir()
+          }
+        }
+      }
+    }
+
+    stage('Build') {
+      steps {
+        nodejs(nodeJSInstallationName: '24.15.0') {
+          bat 'pnpm run update:axonivy:next'
+          bat 'pnpm install --no-frozen-lockfile'
+          bat 'pnpm run build:production'
+          bat "pnpm run engine:download ${params.engineDownloadUrl}"
+        }
+      }
+    }
+
+    stage('Playwright Tests') {
+      steps {
+        nodejs(nodeJSInstallationName: '24.15.0') {
+          catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+            bat 'start AxonIvyEngine/bin/AxonIvyEngine.exe'
+            bat 'pnpm run test:playwright:download:vscode'
+            bat 'pnpm run test:playwright'
+            bat 'start AxonIvyEngine/bin/AxonIvyEngine.exe stop'
+          }
+          archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
+          archiveArtifacts artifacts: 'playwright/playwright-videos/**', allowEmptyArchive: true
+          withChecks('WebTests') {
+            junit testDataPublishers: [[$class: 'StabilityTestDataPublisher']], testResults: '**/node_modules/**/report.xml'
+          }
+        }
+      }
+    }
+
+    stage('Protocol:OpenAPI') {
+      when {
+        expression { isReleasingBranch() }
+      }
+      steps {
+        nodejs(nodeJSInstallationName: '24.15.0') {
+          catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+            script {
+              bat 'pnpm run openapi:download'
+              bat 'pnpm run openapi:codegen'
+              bat 'pnpm run type'
+              bat 'pnpm run lint:ci'
+            }
+          }
+          withChecks('Integration Protocol ESLint') {
+            recordIssues enabledForFailure: true, publishAllIssues: true, aggregatingResults: true, tools: [esLint(id: 'openapi', pattern: 'extension/**/eslint.xml')], qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+          }
+        }
+      }
+    }
+
+    stage('Protocol:Market') {
+      when {
+        expression { isReleasingBranch() }
+      }
+      steps {
+        script {
+          nodejs(nodeJSInstallationName: '24.15.0') {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+              def branchName = env.BRANCH_NAME.replace("/", "%252F")
+              bat 'pnpm install --no-frozen-lockfile'
+              bat 'pnpm run market:generate clean'
+              bat '''
+                set artifacts=https://jenkins.ivyteam.io/job/core_json-schema/job/'''+branchName+'''/lastSuccessfulBuild/artifact
+                set devSchema=%artifacts%/workspace/ch.ivyteam.ivy.market.schema/target/schema/market/*/product.json/*zip*/schema.zip
+                curl -o schema.zip %devSchema%'
+              '''
+              bat 'powershell -Command "Expand-Archive -Path schema.zip -DestinationPath . -Force"'
+              bat 'move 10.0.0\\product.json marketProduct.json'
+              bat 'pnpm run market:generate %cd%\\marketProduct.json'
+              bat 'pnpm run type && pnpm run lint:ci'
+            }
+            withChecks('Integration Protocol ESLint') {
+              recordIssues enabledForFailure: true, publishAllIssues: true, aggregatingResults: true, tools: [esLint(id: 'market', pattern: 'packages/**/eslint.xml,integrations/**/eslint.xml')], qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+            }
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+        cleanWs()
+      }
+    }
+  }
+}
