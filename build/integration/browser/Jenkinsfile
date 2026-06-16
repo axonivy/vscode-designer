@@ -25,7 +25,6 @@ pipeline {
             pnpm run build:production
             pnpm run package
             pnpm run engine:download ${params.engineDownloadUrl}
-            cp build/integration/browser/log4j2.xml AxonIvyEngine/configuration/log4j2.xml
             nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
             code-server --install-extension vscjava.vscode-java-pack
             code-server --install-extension extension/vscode-designer*.vsix
