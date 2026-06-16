@@ -21,6 +21,7 @@ test('Compile java and invalidate class loader', { tag: '@serial' }, async ({ pa
   await javaEditor.goToLineColumn(5, 1);
   await javaEditor.typeText(runMethod);
   await expect(javaEditor.editorContent()).toContainText(runMethod);
+  await processEditor.hasReadyStatusMessage();
   await javaEditor.saveAllFiles();
   await javaEditor.hasStatusMessage('Axon Ivy: Success: Invalidating class loader');
 
