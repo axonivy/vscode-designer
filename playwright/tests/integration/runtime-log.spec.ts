@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { test } from '../fixtures/baseTest';
 import { ProcessEditor } from '../page-objects/process-editor';
 
-test.describe('Runtime Log', () => {
+test.describe('Runtime Log', { tag: '@serial' }, () => {
   test('Runtime Log view output channel', async ({ page }) => {
     const processEditor = new ProcessEditor(page, 'RuntimeLog.p.json');
     await processEditor.hasReadyStatusMessage();
