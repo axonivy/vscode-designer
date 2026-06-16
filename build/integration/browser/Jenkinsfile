@@ -32,10 +32,10 @@ pipeline {
             nohup code-server --bind-addr 0.0.0.0:3000 --auth none --disable-telemetry --disable-update-check --disable-workspace-trust &
             """
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-              sh 'pnpm run test:playwright:browser -- --grep-invert "@serial'
+              sh 'pnpm run test:playwright:browser -- --grep-invert "@serial"'
             }
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-              sh 'pnpm run test:playwright:browser  -- --grep "@serial'
+              sh 'pnpm run test:playwright:browser  -- --grep "@serial"'
             }
           }
           archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
