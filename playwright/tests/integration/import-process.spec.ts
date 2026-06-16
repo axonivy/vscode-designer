@@ -6,9 +6,9 @@ test('Import BPMN Process', async ({ page }) => {
   await explorer.hasReadyStatusMessage();
   await explorer.selectNode('processes');
 
-  await explorer.selectNode('resources');
-  await explorer.selectNode('all_elements_diagram.bpmn');
-  await explorer.importBpmnProcess('all_elements_diagram.bpmn');
+  await explorer.executeCommand('Axon Ivy: Import BPMN Process');
+  await explorer.selectItemFromQuickPick('resources');
+  await explorer.selectItemFromQuickPick('all_elements_diagram.bpmn');
   await explorer.executeCommand('Refresh Explorer');
   await explorer.hasNode(`all_elements_diagram.p.json`);
 });
