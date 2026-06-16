@@ -44,6 +44,8 @@ const runBrowserTest = async (workspace: string, closeWelcomePage: boolean, take
   await page.getByRole('tab', { name: 'Welcome' }).getByRole('button', { name: 'Close' }).click({ delay: 100 });
   await initialize(page, closeWelcomePage);
   await take(page);
+  // this goto closes WebSocket connections
+  await page.goto('about:blank');
   await context.close();
   await browser.close();
   await removeTmpWorkspace(tmpWorkspace.tmpWorkspace);
