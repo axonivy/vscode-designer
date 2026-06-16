@@ -307,7 +307,10 @@ export class IvyEngineManager {
   }
 
   public async invalidateClassLoader(ivyProjectDirectory: string) {
-    await this.ivyEngineApi?.invalidateClassLoader(ivyProjectDirectory);
+    return await StatusBar.withStatusBarProgress(
+      { text: 'Invalidating class loader' },
+      async () => await this.ivyEngineApi?.invalidateClassLoader(ivyProjectDirectory)
+    );
   }
 
   public async getEngineVersion() {
