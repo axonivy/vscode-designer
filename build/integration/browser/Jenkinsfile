@@ -34,6 +34,8 @@ pipeline {
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
               sh 'pnpm run test:playwright:browser --grep-invert /@serial/'
             }
+            sh 'mv playwright/report.xml playwright/report-parallel.xml'
+            archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
               sh 'pnpm run test:playwright:browser --workers 1 --grep /@serial/'
             }
@@ -42,7 +44,7 @@ pipeline {
           archiveArtifacts artifacts: 'AxonIvyEngine/logs/ivy.log', allowEmptyArchive: true
           archiveArtifacts artifacts: 'ivy-engine-console.out', allowEmptyArchive: true
           withChecks('WebTests') {
-            junit testDataPublishers: [[$class: 'StabilityTestDataPublisher']], testResults: '**/node_modules/**/report.xml'
+            junit testDataPublishers: [[$class: 'StabilityTestDataPublisher']], testResults: 'playwright/report*.xml'
           }
         }
       }
