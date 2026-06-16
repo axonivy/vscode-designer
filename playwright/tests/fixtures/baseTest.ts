@@ -41,6 +41,7 @@ const runBrowserTest = async (workspace: string, closeWelcomePage: boolean, take
   const tmpWorkspace = await createTmpWorkspace(workspace);
   const queryParam = tmpWorkspace.tmpWsCofig ? `workspace=${tmpWorkspace.tmpWsCofig}` : `folder=${tmpWorkspace.tmpWorkspace}`;
   await page.goto(`http://localhost:3000/?${queryParam}`);
+  await page.getByRole('tab', { name: 'Welcome' }).getByRole('button', { name: 'Close' }).click({ delay: 100 });
   await initialize(page, closeWelcomePage);
   await take(page);
   await context.close();
