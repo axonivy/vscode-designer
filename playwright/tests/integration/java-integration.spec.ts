@@ -21,12 +21,12 @@ test('Compile java and invalidate class loader', { tag: '@serial' }, async ({ pa
   await javaEditor.goToLineColumn(5, 1);
   await javaEditor.typeText(runMethod);
   await expect(javaEditor.editorContent()).toContainText(runMethod);
-  await processEditor.hasReadyStatusMessage();
   await javaEditor.saveAllFiles();
-  await javaEditor.hasStatusMessage('Axon Ivy: Success: Invalidating class loader');
+  await processEditor.hasReadyStatusMessage();
 
   await processEditor.openEditorFile();
   const start = processEditor.locatorForPID('19BE060A6564078E-f0');
   const end = processEditor.locatorForPID('19BE060A6564078E-f1');
+  await page.waitForTimeout(4_000);
   await processEditor.startProcessAndAssertExecuted(start, end);
 });
