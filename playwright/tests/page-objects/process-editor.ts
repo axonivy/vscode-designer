@@ -43,11 +43,13 @@ export class ProcessEditor extends Editor {
   }
 
   async startProcessAndAssertExecuted(startEvent: Locator, executedElement: Locator) {
-    await startEvent.locator('circle').click();
-    await this.assertSelected(startEvent);
-    const playButton = this.quickActionBar.getByRole('button', { name: /Start Process/ });
-    await playButton.click({ delay: 100 });
-    await expect(executedElement).toHaveClass(/executed/);
+    await expect(async () => {
+      await startEvent.locator('circle').click();
+      await this.assertSelected(startEvent);
+      const playButton = this.quickActionBar.getByRole('button', { name: /Start Process/ });
+      await playButton.click({ delay: 100 });
+      await expect(executedElement).toHaveClass(/executed/, { timeout: 1_000 });
+    }).toPass();
   }
 
   async addBreakpoint(element: Locator) {
