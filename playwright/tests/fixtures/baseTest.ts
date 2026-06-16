@@ -35,12 +35,7 @@ export const test = base.extend<TestFixtures>({
 
 const runBrowserTest = async (workspace: string, closeWelcomePage: boolean, take: (r: Page) => Promise<void>) => {
   const browser = await chromium.launch({ args: ['--disable-web-security'] }); // disable-web-security because of https://chromestatus.com/feature/5152728072060928
-  const context = await browser.newContext({
-    recordVideo: {
-      dir: 'test-results/videos',
-      size: { width: 1920, height: 1080 }
-    }
-  });
+  const context = await browser.newContext();
   const page = await context.newPage();
   await page.setViewportSize({ width: 1920, height: 1080 });
   const tmpWorkspace = await createTmpWorkspace(workspace);
