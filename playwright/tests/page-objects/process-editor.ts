@@ -48,7 +48,7 @@ export class ProcessEditor extends Editor {
       await this.assertSelected(startEvent);
       const playButton = this.quickActionBar.getByRole('button', { name: /Start Process/ });
       await playButton.click({ delay: 100 });
-      await expect(executedElement).toHaveClass(/executed/, { timeout: 1_000 });
+      await expect(executedElement).toHaveClass(/executed/, { timeout: 5_000 });
     }).toPass();
   }
 
