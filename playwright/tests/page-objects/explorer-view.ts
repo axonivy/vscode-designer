@@ -114,11 +114,6 @@ export class FileExplorer extends ExplorerView {
     await this.provideUserInput(namespace);
   }
 
-  async importBpmnProcess(bpmnXml: string) {
-    await this.executeCommand('Axon Ivy: Import BPMN Process');
-    await this.selectItemFromQuickPick(bpmnXml);
-  }
-
   async installLocalProduct(productJson: string) {
     await this.executeCommand('Axon Ivy: Install Local Market Product');
     await this.selectItemFromQuickPick(productJson);

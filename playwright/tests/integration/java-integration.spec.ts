@@ -2,7 +2,7 @@ import { expect, test } from '../fixtures/baseTest';
 import { Editor } from '../page-objects/editor';
 import { ProcessEditor } from '../page-objects/process-editor';
 
-test('Compile java and invalidate class loader', async ({ page, wsPage }) => {
+test('Compile java and invalidate class loader', { tag: '@serial' }, async ({ page, wsPage }) => {
   test.setTimeout(60_000); // slow test due to java activation
   const processEditor = new ProcessEditor(page, 'CallJavaMethod.p.json');
   await processEditor.hasReadyStatusMessage();
@@ -22,10 +22,11 @@ test('Compile java and invalidate class loader', async ({ page, wsPage }) => {
   await javaEditor.typeText(runMethod);
   await expect(javaEditor.editorContent()).toContainText(runMethod);
   await javaEditor.saveAllFiles();
-  await javaEditor.hasReadyStatusMessage();
+  await processEditor.hasReadyStatusMessage();
 
   await processEditor.openEditorFile();
   const start = processEditor.locatorForPID('19BE060A6564078E-f0');
   const end = processEditor.locatorForPID('19BE060A6564078E-f1');
+  await page.waitForTimeout(4_000);
   await processEditor.startProcessAndAssertExecuted(start, end);
 });

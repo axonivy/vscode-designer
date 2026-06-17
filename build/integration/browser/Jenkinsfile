@@ -31,14 +31,19 @@ pipeline {
             nohup code-server --bind-addr 0.0.0.0:3000 --auth none --disable-telemetry --disable-update-check --disable-workspace-trust &
             """
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-              sh 'pnpm run test:playwright:browser'
+              sh 'pnpm run test:playwright:browser --project=integration-parallel'
+            }
+            sh 'mv playwright/report.xml playwright/report-parallel.xml'
+            archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
+            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+              sh 'pnpm run test:playwright:browser --project=integration-serial'
             }
           }
           archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
           archiveArtifacts artifacts: 'AxonIvyEngine/logs/ivy.log', allowEmptyArchive: true
           archiveArtifacts artifacts: 'ivy-engine-console.out', allowEmptyArchive: true
           withChecks('WebTests') {
-            junit testDataPublishers: [[$class: 'StabilityTestDataPublisher']], testResults: '**/node_modules/**/report.xml'
+            junit testDataPublishers: [[$class: 'StabilityTestDataPublisher']], testResults: 'playwright/report*.xml'
           }
         }
       }

@@ -2,7 +2,7 @@ import { expect, test } from '../fixtures/baseTest';
 import { WelcomePage } from '../page-objects/welcome-page';
 
 test.describe('Welcome Page', () => {
-  test.use({ closeAllTabsOnInit: false });
+  test.use({ closeWelcomePage: false });
 
   test('toggle show welcome page', async ({ page }) => {
     const welcomePage = new WelcomePage(page);

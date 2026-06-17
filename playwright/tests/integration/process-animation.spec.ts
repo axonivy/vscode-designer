@@ -8,7 +8,7 @@ test.describe('Process Animation', () => {
     await new FileExplorer(page).hasReadyStatusMessage();
   });
 
-  test('with activated animation and reset afterwards', async ({ page }) => {
+  test('with activated animation and reset afterwards', { tag: '@serial' }, async ({ page }) => {
     const processEditor = new ProcessEditor(page, 'Animation.p.json');
     const callableEditor = new ProcessEditor(page, 'Callable.p.json', 1);
     await processEditor.openEditorFile();
@@ -24,7 +24,7 @@ test.describe('Process Animation', () => {
     await processEditor.assertNotExecuted(taskInCallSub);
   });
 
-  test('with deactivated animation', async ({ page }) => {
+  test('with deactivated animation', { tag: '@serial' }, async ({ page }) => {
     const processEditor = new ProcessEditor(page, 'NoAnimation.p.json');
     await processEditor.openEditorFile();
     const start = processEditor.locatorForPID('191A2645F90CDC61-f0');

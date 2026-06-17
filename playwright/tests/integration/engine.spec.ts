@@ -35,16 +35,6 @@ test.describe('Engine noProjectWorkspacePath', () => {
     const outputview = new OutputView(page);
     await outputview.checkIfEngineStarted();
   });
-
-  test('switch release train', async ({ page }) => {
-    const settingsView = new SettingsView(page);
-    await settingsView.openWorkspaceSettings();
-    await settingsView.doesNotContainSetting('"axonivy.engine.releaseTrain":');
-    await settingsView.executeCommand('Axon Ivy: Switch Engine Release Train');
-    await settingsView.selectItemFromQuickPick('nightly');
-    await settingsView.containsSetting('"axonivy.engine.releaseTrain": "nightly');
-    await expect(page.locator('div.quick-input-widget')).toContainText('Engine release train switched - reload window to apply new settings and restart the engine');
-  });
 });
 
 test.describe('Engine noEngineWorkspacePath', () => {
@@ -58,5 +48,16 @@ test.describe('Engine noEngineWorkspacePath', () => {
     await settingsView.containsSetting('"axonivy.engine.url": "http://localhost:8080/"');
     const outputview = new OutputView(page);
     await expect(outputview.viewLocator).toBeHidden();
+  });
+
+  test('switch release train', async ({ page }) => {
+    const settingsView = new SettingsView(page);
+    await settingsView.hasReadyStatusMessage();
+    await settingsView.openWorkspaceSettings();
+    await settingsView.doesNotContainSetting('"axonivy.engine.releaseTrain":');
+    await settingsView.executeCommand('Axon Ivy: Switch Engine Release Train');
+    await settingsView.selectItemFromQuickPick('nightly');
+    await settingsView.containsSetting('"axonivy.engine.releaseTrain": "nightly');
+    await expect(page.locator('div.quick-input-widget')).toContainText('Engine release train switched - reload window to apply new settings and restart the engine');
   });
 });
