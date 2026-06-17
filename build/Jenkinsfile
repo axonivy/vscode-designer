@@ -23,8 +23,7 @@ pipeline {
       steps {
         script {
           catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-            sh 'pnpm run update:axonivy:next'
-            sh 'pnpm install --no-frozen-lockfile'
+            sh 'pnpm install && pnpm run update:axonivy:next'
             sh 'pnpm run build:production'
             sh 'pnpm run check'
           }
