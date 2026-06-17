@@ -14,7 +14,7 @@ test.describe('Project Conversion', () => {
     await editor.openEditorFile();
     await expect(editor.editorContent()).toContainText(`PROJECT_VERSION=120001`);
     const problemsView = await ProblemsView.initProblemsView(page);
-    await problemsView.hasError('Project is outdated and needs to be converted.');
+    await problemsView.hasError('Project is too old. Needs to be converted in Axon Ivy Designer.');
 
     await editor.executeCommand('Axon Ivy: Convert Project');
     const quickPick = page.locator('div.quick-input-widget');

@@ -5,7 +5,7 @@ import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { IvyEngineManager } from './engine-manager';
 
 const DIAGNOSTIC_SOURCE = 'Axon Ivy';
-const CONVERSION_MESSAGE_PREFIX = 'Project is outdated and needs to be converted';
+const CONVERSION_MESSAGE_PREFIX = 'Project is too old. Needs to be converted in Axon Ivy Designer.';
 const IVY_PROJECT_FILE = '.ivyproject';
 const POM_FILE = 'pom.xml';
 export class IvyDiagnostics {
