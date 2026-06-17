@@ -36,8 +36,8 @@ pipeline {
     stage('Build') {
       steps {
         nodejs(nodeJSInstallationName: '24.15.0') {
+          bat 'pnpm install'
           bat 'pnpm run update:axonivy:next'
-          bat 'pnpm install --no-frozen-lockfile'
           bat 'pnpm run build:production'
           bat 'pnpm run test:playwright:download:vscode'
           bat 'git clone https://github.com/axonivy-market/portal.git playwright/tests/workspaces/portalPerformance/portal || exit /b 0'

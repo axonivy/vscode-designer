@@ -20,8 +20,7 @@ pipeline {
         script {
           docker.build('node-webtest', '-f build/integration/Dockerfile .').inside {
             sh """
-            pnpm run update:axonivy:next
-            pnpm install --no-frozen-lockfile
+            pnpm install && pnpm run update:axonivy:next
             pnpm run build:production
             pnpm run engine:download ${params.engineDownloadUrl}
             nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out

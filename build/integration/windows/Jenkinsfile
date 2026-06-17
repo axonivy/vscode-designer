@@ -41,8 +41,8 @@ pipeline {
     stage('Build') {
       steps {
         nodejs(nodeJSInstallationName: '24.15.0') {
+          bat 'pnpm install'
           bat 'pnpm run update:axonivy:next'
-          bat 'pnpm install --no-frozen-lockfile'
           bat 'pnpm run build:production'
           bat "pnpm run engine:download ${params.engineDownloadUrl}"
         }
@@ -97,7 +97,7 @@ pipeline {
           nodejs(nodeJSInstallationName: '24.15.0') {
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
               def branchName = env.BRANCH_NAME.replace("/", "%252F")
-              bat 'pnpm install --no-frozen-lockfile'
+              bat 'pnpm install'
               bat 'pnpm run market:generate clean'
               bat '''
                 set artifacts=https://jenkins.ivyteam.io/job/core_json-schema/job/'''+branchName+'''/lastSuccessfulBuild/artifact
