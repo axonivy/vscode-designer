@@ -1,11 +1,12 @@
 import 'reflect-metadata';
-import { type ExtensionContext } from 'vscode';
+import { commands, extensions, type ExtensionContext } from 'vscode';
 import { Messenger, type MessengerDiagnostic } from 'vscode-messenger';
 import { registerTools } from './ai/tools/tools';
 import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
 import { showExtensionLog } from './base/extension-output-channel';
 import { validateAndSyncJavaVersion } from './base/java-version-validation';
+import { logInformationMessage, logWarningMessage } from './base/logging-util';
 import { askToReloadWindow } from './base/reload-window';
 import { newMarkdownString, StatusBar } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
@@ -31,6 +32,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
   });
   try {
     await validateAndSyncJavaVersion();
+    checkThirdPartyExtensionAvailability();
     resolveExtensionVersion(context);
     ivyEngineManager = IvyEngineManager.init(context);
     registerCommand('engine.deployProjects', context, () => ivyEngineManager.deployProjects());
@@ -69,3 +71,19 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
 export async function deactivate() {
   await ivyEngineManager.stop();
 }
+
+const checkThirdPartyExtensionAvailability = () => {
+  const JAVA_EXTENSION_ID = 'redhat.java';
+  if (extensions.getExtension(JAVA_EXTENSION_ID)) {
+    return;
+  }
+  logWarningMessage('Language Support for Java by Red Hat extension is not installed or disabled.', 'Install', 'Enable').then(selection => {
+    if (selection === 'Install') {
+      logInformationMessage('Installing Language Support for Java by Red Hat extension...');
+      commands.executeCommand('workbench.extensions.installExtension', JAVA_EXTENSION_ID);
+    } else if (selection === 'Enable') {
+      logInformationMessage('Opening Language Support for Java by Red Hat extension...');
+      commands.executeCommand('extension.open', JAVA_EXTENSION_ID);
+    }
+  });
+};
