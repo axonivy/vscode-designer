@@ -14,20 +14,19 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
 
   private constructor(
     readonly extensionUri: Uri,
-    readonly externalEngineUrl: string,
+    readonly engineUri: Uri,
     readonly devContextPath: string
   ) {}
 
-  private static init(context: ExtensionContext, externalEngineUrl: string, devContextPath: string) {
+  private static init(context: ExtensionContext, engineUri: Uri, devContextPath: string) {
     if (!IvyBrowserViewProvider._instance) {
-      IvyBrowserViewProvider._instance = new IvyBrowserViewProvider(context.extensionUri, externalEngineUrl, devContextPath);
+      IvyBrowserViewProvider._instance = new IvyBrowserViewProvider(context.extensionUri, engineUri, devContextPath);
     }
     return IvyBrowserViewProvider._instance;
   }
 
-  public static async register(context: ExtensionContext, engineUrl: string, devContextPath: string) {
-    const externalEngineUrl = (await env.asExternalUri(Uri.parse(engineUrl))).toString();
-    const provider = IvyBrowserViewProvider.init(context, externalEngineUrl, devContextPath);
+  public static register(context: ExtensionContext, engineUrl: string, devContextPath: string) {
+    const provider = IvyBrowserViewProvider.init(context, Uri.parse(engineUrl), devContextPath);
     context.subscriptions.push(
       window.registerWebviewViewProvider(IvyBrowserViewProvider.viewType, provider, {
         webviewOptions: { retainContextWhenHidden: true }
@@ -65,12 +64,17 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
   }
 
   async openEngineRelativeUrl(input: string) {
-    this.refreshWebviewHtml(new URL(input, this.externalEngineUrl).toString());
+    this.refreshWebviewHtml(await this.toExternalEngineUrl(input));
   }
 
   async openEngineRelativeUrlExternally(input: string) {
-    const uri = Uri.parse(new URL(input, this.externalEngineUrl).toString());
+    const uri = Uri.parse(await this.toExternalEngineUrl(input));
     env.openExternal(uri);
+  }
+
+  async toExternalEngineUrl(input: string) {
+    const externalEngineUrl = (await env.asExternalUri(this.engineUri)).toString();
+    return new URL(input, externalEngineUrl).toString();
   }
 
   async open(url?: string) {

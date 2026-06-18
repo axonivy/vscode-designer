@@ -114,7 +114,7 @@ export class IvyEngineManager {
     this.resolvedEngineUrl = await this.resolveEngineUrl();
     this.ivyEngineApi = new IvyEngineApi(this.resolvedEngineUrl.toString());
     let devContextPath = await this.ivyEngineApi.devContextPath;
-    await IvyBrowserViewProvider.register(this.context, this.resolvedEngineUrl, devContextPath);
+    IvyBrowserViewProvider.register(this.context, this.resolvedEngineUrl, devContextPath);
     devContextPath += devContextPath.endsWith('/') ? '' : '/';
     await this.initExistingProjects();
     const websocketUrl = new URL(devContextPath, toWebSocketUrl(this.resolvedEngineUrl));
