@@ -44,7 +44,7 @@ export class IvyEngineManager {
   private readonly engineRunner: EngineRunner;
   private ivyEngineApi?: IvyEngineApi;
   private started = false;
-  private resolvedEngineUrl?: URL;
+  private resolvedEngineUrl?: string;
   private resolvedEngineDir?: string;
 
   private constructor(readonly context: ExtensionContext) {
@@ -146,7 +146,7 @@ export class IvyEngineManager {
       await this.engineRunner.start();
       engineUrl = this.engineRunner.engineUrl;
     }
-    return new URL(engineUrl);
+    return engineUrl;
   }
 
   private async initExistingProjects() {

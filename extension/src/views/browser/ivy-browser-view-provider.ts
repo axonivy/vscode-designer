@@ -14,20 +14,19 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
 
   private constructor(
     readonly extensionUri: Uri,
-    readonly engineUrl: URL,
+    readonly engineUri: Uri,
     readonly devContextPath: string
   ) {}
 
-  private static init(context: ExtensionContext, engineUrl: URL, devContextPath: string) {
+  private static init(context: ExtensionContext, engineUri: Uri, devContextPath: string) {
     if (!IvyBrowserViewProvider._instance) {
-      IvyBrowserViewProvider._instance = new IvyBrowserViewProvider(context.extensionUri, engineUrl, devContextPath);
+      IvyBrowserViewProvider._instance = new IvyBrowserViewProvider(context.extensionUri, engineUri, devContextPath);
     }
     return IvyBrowserViewProvider._instance;
   }
 
-  public static register(context: ExtensionContext, engineUrl: URL, devContextPath: string) {
-    const resolvedEngineUrl = this.resolveCodespacesEngineHost(engineUrl);
-    const provider = IvyBrowserViewProvider.init(context, resolvedEngineUrl, devContextPath);
+  public static register(context: ExtensionContext, engineUrl: string, devContextPath: string) {
+    const provider = IvyBrowserViewProvider.init(context, Uri.parse(engineUrl), devContextPath);
     context.subscriptions.push(
       window.registerWebviewViewProvider(IvyBrowserViewProvider.viewType, provider, {
         webviewOptions: { retainContextWhenHidden: true }
@@ -40,17 +39,6 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
     registerCommand('ivyBrowserView.openPreview', context, () => provider.openPreview());
     context.subscriptions.push(window.tabGroups.onDidChangeTabs(() => void provider.updateDialogPreviewContext()));
     void provider.updateDialogPreviewContext();
-  }
-
-  private static resolveCodespacesEngineHost(engineUrl: URL): URL {
-    if (process.env.CODESPACES === 'true') {
-      const codespaceEngineUrl = new URL(engineUrl.toString());
-      const codespaceEngineHost = `${process.env.CODESPACE_NAME}-${engineUrl.port}.${process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}`;
-      codespaceEngineUrl.host = codespaceEngineHost;
-      codespaceEngineUrl.port = '';
-      return codespaceEngineUrl;
-    }
-    return engineUrl;
   }
 
   resolveWebviewView(webviewView: WebviewView) {
@@ -76,15 +64,14 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
   }
 
   async openEngineRelativeUrl(input: string) {
-    this.refreshWebviewHtml(this.toEngineUrl(input));
+    // code-server (used for integration browser test) does not support env.asExternalUri
+    const engineUrl = env.appName === 'code-server' ? this.engineUri.toString() : (await env.asExternalUri(this.engineUri)).toString();
+    this.refreshWebviewHtml(new URL(input, engineUrl).toString());
   }
 
   async openEngineRelativeUrlExternally(input: string) {
-    const uri = Uri.parse(this.toEngineUrl(input));
-    env.openExternal(uri);
+    env.openExternal(this.engineUri.with({ path: input }));
   }
-
-  toEngineUrl = (input: string) => new URL(input, this.engineUrl).toString();
 
   async open(url?: string) {
     if (!url) {
