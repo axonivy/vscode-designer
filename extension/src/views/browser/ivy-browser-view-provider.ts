@@ -64,17 +64,12 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
   }
 
   async openEngineRelativeUrl(input: string) {
-    this.refreshWebviewHtml(await this.toExternalEngineUrl(input));
+    const externalEngineUrl = (await env.asExternalUri(this.engineUri)).toString();
+    this.refreshWebviewHtml(new URL(input, externalEngineUrl).toString());
   }
 
   async openEngineRelativeUrlExternally(input: string) {
-    const uri = Uri.parse(await this.toExternalEngineUrl(input));
-    env.openExternal(uri);
-  }
-
-  async toExternalEngineUrl(input: string) {
-    const externalEngineUrl = (await env.asExternalUri(this.engineUri)).toString();
-    return new URL(input, externalEngineUrl).toString();
+    env.openExternal(this.engineUri.with({ path: input }));
   }
 
   async open(url?: string) {
