@@ -77,13 +77,10 @@ const checkThirdPartyExtensionAvailability = () => {
   if (extensions.getExtension(JAVA_EXTENSION_ID)) {
     return;
   }
-  logWarningMessage('Language Support for Java by Red Hat extension is not installed or disabled.', 'Install', 'Enable').then(selection => {
+  logWarningMessage('Language Support for Java by Red Hat extension is not installed.', 'Install').then(selection => {
     if (selection === 'Install') {
       logInformationMessage('Installing Language Support for Java by Red Hat extension...');
       commands.executeCommand('workbench.extensions.installExtension', JAVA_EXTENSION_ID);
-    } else if (selection === 'Enable') {
-      logInformationMessage('Opening Language Support for Java by Red Hat extension...');
-      commands.executeCommand('extension.open', JAVA_EXTENSION_ID);
     }
   });
 };
