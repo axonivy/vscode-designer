@@ -32,7 +32,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
   });
   try {
     await validateAndSyncJavaVersion();
-    checkThirdPartyExtensionAvailability();
+    ensureJavaExtensionInstalled();
     resolveExtensionVersion(context);
     ivyEngineManager = IvyEngineManager.init(context);
     registerCommand('engine.deployProjects', context, () => ivyEngineManager.deployProjects());
@@ -72,7 +72,7 @@ export async function deactivate() {
   await ivyEngineManager.stop();
 }
 
-const checkThirdPartyExtensionAvailability = () => {
+const ensureJavaExtensionInstalled = () => {
   const JAVA_EXTENSION_ID = 'redhat.java';
   if (extensions.getExtension(JAVA_EXTENSION_ID)) {
     return;
