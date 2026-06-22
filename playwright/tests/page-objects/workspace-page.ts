@@ -13,9 +13,9 @@ export class WorkspacePage {
     await expect(this.page.locator('div.command-center')).toBeAttached();
     await expect(async () => {
       await this.page.keyboard.press('ControlOrMeta+Shift+KeyP');
-      await this.quickInputBox.locator('input.input').fill('>' + command, { timeout: 100 });
-      await this.page.locator(`.quick-input-list-entry:has-text("${command}")`).nth(0).click({ force: true, timeout: 100 });
+      await this.quickInputBox.locator('input.input').fill('>' + command, { timeout: 300 });
     }).toPass();
+    await this.quickInputListEntry.getByText(command).first().click({ delay: 100 });
     for (const userInput of userInputs) {
       await this.provideUserInput(userInput);
     }
@@ -25,8 +25,7 @@ export class WorkspacePage {
     if (input) {
       const textBox = this.quickInputBox.getByRole('textbox');
       await textBox.fill(input);
-      await expect(textBox).toHaveValue(input);
-      await textBox.press('Enter', { delay: 100 });
+      await this.quickInputListEntry.getByText(input).first().click({ delay: 100 });
       return;
     }
     await this.quickInputBox.click({ delay: 100 });
@@ -43,6 +42,10 @@ export class WorkspacePage {
 
   get ivyStatusBar() {
     return this.page.locator('div.statusbar-item[id*="ivyStatusBarItem"]');
+  }
+
+  get quickInputListEntry() {
+    return this.page.locator('div.quick-input-list-entry');
   }
 
   async activateExpensiveJavaStandardMode() {

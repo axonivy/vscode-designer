@@ -9,9 +9,9 @@ export class PageObject {
       await this.page.keyboard.press('ControlOrMeta+Shift+KeyP');
       await this.quickInputBox()
         .locator('input.input')
-        .fill('>' + command, { timeout: 100 });
-      await this.page.locator(`.quick-input-list-entry:has-text("${command}")`).nth(0).click({ force: true, timeout: 100 });
+        .fill('>' + command, { timeout: 300 });
     }).toPass();
+    await this.quickInputListEntry().getByText(command).first().click({ delay: 100 });
     for (const userInput of userInputs) {
       await this.provideUserInput(userInput);
     }
@@ -21,8 +21,7 @@ export class PageObject {
     if (input) {
       const textBox = this.quickInputBox().getByRole('textbox');
       await textBox.fill(input);
-      await expect(textBox).toHaveValue(input);
-      await textBox.press('Enter', { delay: 100 });
+      await this.quickInputListEntry().getByText(input).first().click({ delay: 100 });
       return;
     }
     await this.quickInputBox().click({ delay: 100 });
@@ -49,6 +48,10 @@ export class PageObject {
 
   quickInputList(): Locator {
     return this.page.locator('div.quick-input-list');
+  }
+
+  quickInputListEntry() {
+    return this.page.locator('.quick-input-list-entry');
   }
 
   async saveAllFiles() {
