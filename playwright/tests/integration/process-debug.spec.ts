@@ -3,10 +3,6 @@ import { test } from '../fixtures/baseTest';
 import { ProcessEditor } from '../page-objects/process-editor';
 import { VsDebugView } from '../page-objects/vs-debug-view';
 
-test.beforeEach(async ({ wsPage }) => {
-  await wsPage.hasReadyStatusMessage();
-});
-
 test('debug', { tag: '@serial' }, async ({ page }) => {
   const processEditor = new ProcessEditor(page, 'NoAnimation.p.json');
   await processEditor.openEditorFile();

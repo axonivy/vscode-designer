@@ -8,9 +8,8 @@ import { outdatedProjectWorkspacePath } from '../workspaces/workspace';
 test.describe('Project Conversion', () => {
   test.use({ workspace: outdatedProjectWorkspacePath });
 
-  test('Convert project', async ({ page, wsPage }) => {
+  test('Convert project', async ({ page }) => {
     let editor = new Editor('ch.ivyteam.ivy.designer.prefs', page);
-    await wsPage.hasReadyStatusMessage();
     await editor.openEditorFile();
     await expect(editor.editorContent()).toContainText(`PROJECT_VERSION=120001`);
     const problemsView = await ProblemsView.initProblemsView(page);

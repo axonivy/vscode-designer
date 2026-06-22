@@ -8,9 +8,8 @@ test.describe('Create Process', () => {
   let processEditor: ProcessEditor;
   const processName = 'testCreateProcess';
 
-  test.beforeEach(async ({ page, wsPage }) => {
+  test.beforeEach(async ({ page }) => {
     explorer = new FileExplorer(page);
-    await wsPage.hasReadyStatusMessage();
     processEditor = new ProcessEditor(page, `${processName}.p.json`);
   });
 

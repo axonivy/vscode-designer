@@ -11,7 +11,6 @@ test.describe('Create Project', () => {
   test('Add Project and execute init Process', { tag: '@serial' }, async ({ page, wsPage }) => {
     const projectName = 'testProject';
     const explorer = new FileExplorer(page);
-    await wsPage.hasReadyStatusMessage();
     await explorer.addNestedProject('parent', projectName);
     await wsPage.hasReadyStatusMessage();
     await explorer.hasNode(`parent${path.sep}${projectName}`);

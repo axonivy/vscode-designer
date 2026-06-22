@@ -26,7 +26,6 @@ test.describe('Project Explorer', () => {
 test.describe('CMS entry', () => {
   test('Open', async ({ wsPage }) => {
     const explorer = new ProjectExplorerView(wsPage.page);
-    await wsPage.hasReadyStatusMessage();
     await explorer.openView();
 
     await explorer.selectNode('playwrightTestWorkspace');
@@ -39,7 +38,6 @@ test.describe('CMS entry', () => {
     const fileExplorer = new FileExplorer(wsPage.page);
     const projectExplorer = new ProjectExplorerView(wsPage.page);
 
-    await wsPage.hasReadyStatusMessage();
     await fileExplorer.selectNode('cms');
     await wsPage.executeCommand('Axon Ivy: Open CMS Editor');
     await editor.expectWebViewVisible();
@@ -68,9 +66,8 @@ test.describe('CMS entry', () => {
 test.describe('Context menu', () => {
   test.use({ workspace: minimalProjectWorkspacePath });
 
-  test('New Resource', async ({ page, wsPage }) => {
+  test('New Resource', async ({ page }) => {
     const explorer = new ProjectExplorerView(page);
-    await wsPage.hasReadyStatusMessage();
     await explorer.openView();
     await explorer.selectNode('playwrightTestWorkspace');
     await explorer.selectInContextMenuOfNode('cms', 'New', 'New Business Process');

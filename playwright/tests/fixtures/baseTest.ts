@@ -1,4 +1,4 @@
-import { _electron, test as base, chromium, expect, type Page } from '@playwright/test';
+import { _electron, test as base, chromium, type Page } from '@playwright/test';
 import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath } from '@vscode/test-electron';
 import { execSync } from 'child_process';
 import fs from 'fs';
@@ -35,11 +35,10 @@ export const test = base.extend<TestFixtures>({
   },
   isReady: [
     async ({ page, wsPage, closeWelcomePage }, take) => {
-      await expect(page.locator('div.statusbar-item[id*="ivyStatusBarItem"]')).toContainText('Axon Ivy');
+      await wsPage.hasReadyStatusMessage();
       if (closeWelcomePage) {
         await page.getByRole('tab', { name: 'Axon Ivy PRO Designer' }).getByRole('button', { name: 'Close' }).click({ delay: 100 });
       }
-      await wsPage.hasReadyStatusMessage();
       await take();
     },
     { auto: true }

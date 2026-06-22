@@ -11,9 +11,8 @@ const namespace = 'testNamespace';
 test.describe('Inscription View', () => {
   let processEditor: ProcessEditor;
 
-  test.beforeEach(async ({ page, wsPage }) => {
+  test.beforeEach(async ({ page }) => {
     processEditor = new ProcessEditor(page);
-    await wsPage.hasReadyStatusMessage();
     await processEditor.openEditorFile();
     await processEditor.isViewVisible();
   });

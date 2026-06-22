@@ -6,8 +6,7 @@ import { multiProjectWorkspacePath } from '../workspaces/workspace';
 
 test.use({ workspace: multiProjectWorkspacePath });
 
-test('Add Ivy Project Dependency', async ({ page, wsPage }) => {
-  await wsPage.hasReadyStatusMessage();
+test('Add Ivy Project Dependency', async ({ page }) => {
   const explorer = new FileExplorer(page);
   await explorer.selectNode('ivy-project-1');
   await explorer.doubleClickNode('pom.xml');

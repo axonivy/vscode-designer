@@ -6,7 +6,6 @@ let editor: XhtmlEditor;
 
 test.beforeEach(async ({ page }) => {
   editor = new XhtmlEditor(page);
-  await editor.hasReadyStatusMessage();
   await editor.openEditorFile();
 });
 
@@ -27,8 +26,8 @@ test('xhtml definitions', async ({ wsPage }) => {
 test('xhtml preview', async ({ page, wsPage }) => {
   await wsPage.activateExpensiveJavaStandardMode();
   await editor.executeCommand('Axon Ivy: Deploy all Projects');
-  await editor.hasStatusMessage('Axon Ivy: Success: Deploying projects');
-  await editor.hasReadyStatusMessage();
+  await wsPage.hasStatusMessage('Axon Ivy: Success: Deploying projects');
+  await wsPage.hasReadyStatusMessage();
   const browserView = new BrowserView(page);
   await browserView.openDevWfUi();
   const browser = browserView.content();

@@ -3,10 +3,6 @@ import { test } from '../fixtures/baseTest';
 import { ProcessEditor } from '../page-objects/process-editor';
 
 test.describe('Process Animation', () => {
-  test.beforeEach(async ({ wsPage }) => {
-    await wsPage.hasReadyStatusMessage();
-  });
-
   test('with activated animation and reset afterwards', { tag: '@serial' }, async ({ page }) => {
     const processEditor = new ProcessEditor(page, 'Animation.p.json');
     const callableEditor = new ProcessEditor(page, 'Callable.p.json', 1);

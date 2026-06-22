@@ -50,9 +50,8 @@ test.describe('Engine noEngineWorkspacePath', () => {
     await expect(outputview.viewLocator).toBeHidden();
   });
 
-  test('switch release train', async ({ page, wsPage }) => {
+  test('switch release train', async ({ page }) => {
     const settingsView = new SettingsView(page);
-    await wsPage.hasReadyStatusMessage();
     await settingsView.openWorkspaceSettings();
     await settingsView.doesNotContainSetting('"axonivy.engine.releaseTrain":');
     await settingsView.executeCommand('Axon Ivy: Switch Engine Release Train');
