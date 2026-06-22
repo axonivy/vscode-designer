@@ -46,17 +46,20 @@ const headers = { 'X-Requested-By': 'web-ide' };
 const options = { headers, paramsSerializer: { indexes: null } };
 
 export class IvyEngineApi {
-  private readonly workspace: Promise<WorkspaceBean>;
-  private readonly baseURL: Promise<string>;
-  private readonly engineURL: string;
+  constructor(
+    private readonly workspace: WorkspaceBean,
+    private readonly baseURL: string,
+    private readonly engineURL: string
+  ) {}
 
-  constructor(engineUrl: string) {
-    this.engineURL = new URL('api', engineUrl).toString();
-    this.workspace = this.createWorkspace(engineUrl).catch(handleAxiosError);
-    this.baseURL = this.workspace.then(workspace => new URL(path.join(workspace.baseUrl, 'api'), engineUrl).toString());
+  static async init(rawEngineUrl: string) {
+    const engineUrl = new URL('api', rawEngineUrl).toString();
+    const workspace = await IvyEngineApi.createWorkspace(engineUrl).catch(handleAxiosError);
+    const baseURL = new URL(path.join(workspace.baseUrl, 'api'), engineUrl).toString();
+    return new IvyEngineApi(workspace, baseURL, engineUrl);
   }
 
-  private async createWorkspace(engineUrl: string) {
+  private static async createWorkspace(engineUrl: string) {
     await pollWithProgress(engineUrl, 'Waiting for Axon Ivy Engine to be ready.');
     const baseURL = new URL(path.join('api'), engineUrl).toString();
     const workspaces = workspace.workspaceFolders;
@@ -73,86 +76,74 @@ export class IvyEngineApi {
   public async findOrCreatePmv(projectDir: string) {
     const name = path.basename(projectDir);
     const params = { name, path: projectDir };
-    const baseURL = await this.baseURL;
-    await findOrCreatePmv(params, { baseURL, ...options }).catch(handleAxiosError);
+    await findOrCreatePmv(params, { baseURL: this.baseURL, ...options }).catch(handleAxiosError);
   }
 
   public async deployProjects(ivyProjectDirectories: string[]) {
-    const baseURL = await this.baseURL;
-    await deployProjects(ivyProjectDirectories, { baseURL, ...options }).catch(handleAxiosError);
+    await deployProjects(ivyProjectDirectories, { baseURL: this.baseURL, ...options }).catch(handleAxiosError);
   }
 
   public async stopBpmEngine(projectDir: string) {
-    const baseURL = await this.baseURL;
-    await stopBpmEngine({ projectDir }, { baseURL, ...options, headers: { ...headers, 'Content-Type': 'application/json' } }).catch(
-      handleAxiosError
-    );
+    await stopBpmEngine(
+      { projectDir },
+      { baseURL: this.baseURL, ...options, headers: { ...headers, 'Content-Type': 'application/json' } }
+    ).catch(handleAxiosError);
   }
 
   public async createProcess(newProcessParams: NewProcessParams) {
-    const baseURL = await this.baseURL;
-    return createProcess(newProcessParams, { baseURL, ...options })
+    return createProcess(newProcessParams, { baseURL: this.baseURL, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
   public async createProcessFromBpmn(params: ImportProcessBody) {
-    const baseURL = await this.baseURL;
-    return importProcess(params, { baseURL, ...options })
+    return importProcess(params, { baseURL: this.baseURL, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
   public async installMarketProduct(params: ProductInstallParams) {
-    const baseURL = this.engineURL;
-    return installMarketProduct((await this.workspace).id, params, { baseURL, ...options })
+    return installMarketProduct(this.workspace.id, params, { baseURL: this.engineURL, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
   public async createProject(newProjectParams: NewProjectParams) {
-    const baseURL = await this.baseURL;
-    return await createPmvAndProjectFiles(newProjectParams, { baseURL, ...options })
+    return await createPmvAndProjectFiles(newProjectParams, { baseURL: this.baseURL, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
   public async createUserDialog(newUserDialogParams: NewUserDialogParams) {
-    const baseURL = await this.baseURL;
-    return createHd(newUserDialogParams, { baseURL, ...options })
+    return createHd(newUserDialogParams, { baseURL: this.baseURL, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
   public async createDataClass(params: DataClassInit) {
-    const baseURL = await this.baseURL;
-    return createDataClass(params, { baseURL, ...options })
+    return createDataClass(params, { baseURL: this.baseURL, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
   public async createEntityClass(params: DataClassInit) {
-    const baseURL = await this.baseURL;
-    return createEntityClass(params, { baseURL, ...options })
+    return createEntityClass(params, { baseURL: this.baseURL, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
   public async createCaseMap(params: CaseMapInit) {
-    const baseURL = await this.baseURL;
-    return createCaseMap(params, { baseURL, ...options })
+    return createCaseMap(params, { baseURL: this.baseURL, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
   public async deleteProject(projectDir: string) {
-    const baseURL = await this.baseURL;
-    await deleteProject({ projectDir }, { baseURL, ...options }).catch(handleAxiosError);
+    await deleteProject({ projectDir }, { baseURL: this.baseURL, ...options }).catch(handleAxiosError);
   }
 
   public async convertProject(projectDir: string) {
-    const baseURL = await this.baseURL;
-    const data = await convertProject({ projectDir }, { baseURL, ...options, responseType: 'stream' })
+    const data = await convertProject({ projectDir }, { baseURL: this.baseURL, ...options, responseType: 'stream' })
       .catch(handleAxiosError)
       .then(res => res.data);
     if (data instanceof IncomingMessage) {
@@ -161,27 +152,23 @@ export class IvyEngineApi {
   }
 
   public async refreshProjectStatuses() {
-    const baseURL = await this.baseURL;
-    return refreshProjectStatuses({ baseURL, ...options })
+    return refreshProjectStatuses({ baseURL: this.baseURL, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
   public async invalidateClassLoader(projectDir: string) {
-    const baseURL = await this.baseURL;
-    await invalidateClassLoader({ projectDir }, { baseURL, ...options }).catch(handleAxiosError);
+    await invalidateClassLoader({ projectDir }, { baseURL: this.baseURL, ...options }).catch(handleAxiosError);
   }
 
   public async getComponentForm(componentId: string, app: string, pmv: string) {
-    const baseURL = await this.baseURL;
-    return componentForm({ componentId, app, pmv }, { baseURL, ...options })
+    return componentForm({ componentId, app, pmv }, { baseURL: this.baseURL, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
   public async projects(withDependencies = false) {
-    const baseURL = await this.baseURL;
-    return (await projects({ withDependencies }, { baseURL, ...options })).data;
+    return (await projects({ withDependencies }, { baseURL: this.baseURL, ...options })).data;
   }
 
   public async getEngineVersion() {
@@ -196,7 +183,7 @@ export class IvyEngineApi {
       .catch(handleAxiosError);
   }
 
-  public get devContextPath(): Promise<string> {
-    return this.workspace.then(ws => ws.baseUrl);
+  public get devContextPath(): string {
+    return this.workspace.baseUrl;
   }
 }
