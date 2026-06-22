@@ -1,6 +1,7 @@
 import { IncomingMessage } from 'http';
 import path from 'path';
-import { ProgressLocation, window, workspace } from 'vscode';
+import { workspace } from 'vscode';
+import { StatusBar } from '../../base/status-bar';
 import type { NewProcessParams } from '../../project-explorer/new-process';
 import type { NewUserDialogParams } from '../../project-explorer/new-user-dialog';
 import { handleProjectConversionLog } from '../project-conversion-log';
@@ -35,13 +36,6 @@ import {
 } from './generated/client';
 import { pollWithProgress } from './poll';
 
-const progressOptions = (title: string) => {
-  return {
-    location: ProgressLocation.Window,
-    title,
-    cancellable: false
-  };
-};
 const headers = { 'X-Requested-By': 'web-ide' };
 const options = { headers, paramsSerializer: { indexes: null } };
 
@@ -53,8 +47,11 @@ export class IvyEngineApi {
   ) {}
 
   static async init(rawEngineUrl: string) {
+    const workspace = await IvyEngineApi.createWorkspace(rawEngineUrl).catch(handleAxiosError);
     const engineUrl = new URL('api', rawEngineUrl).toString();
-    const workspace = await IvyEngineApi.createWorkspace(engineUrl).catch(handleAxiosError);
+    if (!workspace) {
+      throw new Error('Failed to create workspace');
+    }
     const baseURL = new URL(path.join(workspace.baseUrl, 'api'), engineUrl).toString();
     return new IvyEngineApi(workspace, baseURL, engineUrl);
   }
@@ -67,9 +64,9 @@ export class IvyEngineApi {
     if (!workspaces || !workspaceFolder) {
       throw new Error('No workspace available');
     }
-    const workspaceInit = { name: workspaceFolder.name, path: workspaceFolder.uri.fsPath };
-    return await window.withProgress(progressOptions('Create workspace'), async () => {
-      return (await createWorkspace(workspaceInit, { baseURL, ...options })).data;
+    return StatusBar.withStatusBarProgress({ text: 'Creating workspace' }, async () => {
+      const response = await createWorkspace({ name: workspaceFolder.name, path: workspaceFolder.uri.fsPath }, { baseURL, ...options });
+      return response.data;
     });
   }
 
