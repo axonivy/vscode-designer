@@ -10,7 +10,6 @@ test.describe('Project Conversion', () => {
 
   test('Convert project', async ({ page }) => {
     let editor = new Editor('ch.ivyteam.ivy.designer.prefs', page);
-    await editor.hasReadyStatusMessage();
     await editor.openEditorFile();
     await expect(editor.editorContent()).toContainText(`PROJECT_VERSION=120001`);
     const problemsView = await ProblemsView.initProblemsView(page);

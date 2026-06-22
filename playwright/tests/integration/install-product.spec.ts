@@ -9,7 +9,6 @@ test.describe('Market Product installation', () => {
   test.beforeEach(async ({ page }) => {
     explorer = new FileExplorer(page);
     processEditor = new ProcessEditor(page, 'personService.p.json');
-    await explorer.hasReadyStatusMessage();
   });
 
   test('Install product without maven-dependency from Market website', async () => {

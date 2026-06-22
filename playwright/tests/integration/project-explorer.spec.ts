@@ -26,7 +26,6 @@ test.describe('Project Explorer', () => {
 test.describe('CMS entry', () => {
   test('Open', async ({ wsPage }) => {
     const explorer = new ProjectExplorerView(wsPage.page);
-    await explorer.hasReadyStatusMessage();
     await explorer.openView();
 
     await explorer.selectNode('playwrightTestWorkspace');
@@ -39,7 +38,6 @@ test.describe('CMS entry', () => {
     const fileExplorer = new FileExplorer(wsPage.page);
     const projectExplorer = new ProjectExplorerView(wsPage.page);
 
-    await fileExplorer.hasReadyStatusMessage();
     await fileExplorer.selectNode('cms');
     await wsPage.executeCommand('Axon Ivy: Open CMS Editor');
     await editor.expectWebViewVisible();
@@ -70,7 +68,6 @@ test.describe('Context menu', () => {
 
   test('New Resource', async ({ page }) => {
     const explorer = new ProjectExplorerView(page);
-    await explorer.hasReadyStatusMessage();
     await explorer.openView();
     await explorer.selectNode('playwrightTestWorkspace');
     await explorer.selectInContextMenuOfNode('cms', 'New', 'New Business Process');
@@ -82,9 +79,9 @@ test.describe('Context menu', () => {
 
 test.describe('Multi root workspace', () => {
   test.use({ workspace: multiRootWorkspacePath });
+  test.skip(process.env.RUN_IN_BROWSER === 'true');
 
   test('Projects from workspace config are shown', async ({ page }) => {
-    test.skip(process.env.RUN_IN_BROWSER === 'true');
     const explorer = new ProjectExplorerView(page);
     await explorer.openView();
 

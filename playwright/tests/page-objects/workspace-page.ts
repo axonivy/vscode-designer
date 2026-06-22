@@ -13,9 +13,9 @@ export class WorkspacePage {
     await expect(this.page.locator('div.command-center')).toBeAttached();
     await expect(async () => {
       await this.page.keyboard.press('ControlOrMeta+Shift+KeyP');
-      await this.quickInputBox.locator('input.input').fill('>' + command, { timeout: 100 });
-      await this.page.locator(`.quick-input-list-entry:has-text("${command}")`).nth(0).click({ force: true, timeout: 100 });
+      await this.quickInputBox.locator('input.input').fill('>' + command, { timeout: 300 });
     }).toPass();
+    await this.quickInputListEntry.getByText(command).first().click({ delay: 100 });
     for (const userInput of userInputs) {
       await this.provideUserInput(userInput);
     }
@@ -41,10 +41,26 @@ export class WorkspacePage {
     return this.page.locator('div.notification-toast-container');
   }
 
+  get ivyStatusBar() {
+    return this.page.locator('div.statusbar-item[id*="ivyStatusBarItem"]');
+  }
+
+  get quickInputListEntry() {
+    return this.page.locator('div.quick-input-list-entry');
+  }
+
   async activateExpensiveJavaStandardMode() {
     const javaStatusBar = this.page.locator('div.statusbar-item[id*="redhat.java"]');
     await javaStatusBar.filter({ hasText: 'Java: Lightweight Mode' }).click();
     await expect(javaStatusBar.filter({ hasText: 'Java: Building' })).toBeVisible();
     await expect(javaStatusBar.filter({ hasText: 'Java: Ready' })).toBeVisible();
+  }
+
+  async hasReadyStatusMessage() {
+    await this.hasStatusMessage('Axon Ivy: Connected');
+  }
+
+  async hasStatusMessage(message: string, timeout?: number) {
+    await expect(this.ivyStatusBar).toHaveText(message, { timeout });
   }
 }

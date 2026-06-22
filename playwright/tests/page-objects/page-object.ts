@@ -9,28 +9,12 @@ export class PageObject {
       await this.page.keyboard.press('ControlOrMeta+Shift+KeyP');
       await this.quickInputBox()
         .locator('input.input')
-        .fill('>' + command, { timeout: 100 });
-      await this.page.locator(`.quick-input-list-entry:has-text("${command}")`).nth(0).click({ force: true, timeout: 100 });
+        .fill('>' + command, { timeout: 300 });
     }).toPass();
+    await this.quickInputListEntry().getByText(command).first().click({ delay: 100 });
     for (const userInput of userInputs) {
       await this.provideUserInput(userInput);
     }
-  }
-
-  async isExplorerActionItemChecked() {
-    await this.isActionItemChecked('Explorer');
-  }
-
-  async isActionItemChecked(label: string) {
-    await expect(this.page.locator('li.action-item.checked').getByLabel(label).first()).toBeVisible();
-  }
-
-  async hasStatusMessage(message: string, timeout?: number) {
-    await expect(this.ivyStatusBar()).toHaveText(message, { timeout });
-  }
-
-  async hasReadyStatusMessage() {
-    await this.hasStatusMessage('Axon Ivy: Connected');
   }
 
   async provideUserInput(input?: string) {
@@ -67,12 +51,8 @@ export class PageObject {
     return this.page.locator('div.quick-input-list');
   }
 
-  ivyStatusBar(): Locator {
-    return this.page.locator('div.statusbar-item[id*="ivyStatusBarItem"]');
-  }
-
-  toasts(): Locator {
-    return this.page.locator('div.notification-toast-container');
+  quickInputListEntry() {
+    return this.page.locator('.quick-input-list-entry');
   }
 
   async saveAllFiles() {

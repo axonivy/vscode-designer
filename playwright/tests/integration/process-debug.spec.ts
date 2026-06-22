@@ -1,12 +1,7 @@
 import { expect } from '@playwright/test';
 import { test } from '../fixtures/baseTest';
-import { FileExplorer } from '../page-objects/explorer-view';
 import { ProcessEditor } from '../page-objects/process-editor';
 import { VsDebugView } from '../page-objects/vs-debug-view';
-
-test.beforeEach(async ({ page }) => {
-  await new FileExplorer(page).hasReadyStatusMessage();
-});
 
 test('debug', { tag: '@serial' }, async ({ page }) => {
   const processEditor = new ProcessEditor(page, 'NoAnimation.p.json');

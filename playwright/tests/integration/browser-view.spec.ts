@@ -6,7 +6,6 @@ test.describe('Browser View', () => {
 
   test('Toolbar and navigation', async ({ page }) => {
     browserView = new BrowserView(page);
-    await browserView.hasReadyStatusMessage();
 
     const home = /home.xhtml/;
     const starts = /starts.xhtml/;

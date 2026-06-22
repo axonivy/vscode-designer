@@ -6,7 +6,6 @@ test.describe('Welcome Page', () => {
 
   test('toggle show welcome page', async ({ page }) => {
     const welcomePage = new WelcomePage(page);
-    await welcomePage.hasReadyStatusMessage();
     await welcomePage.isViewVisible();
     await expect(welcomePage.showPageCheckbox).toBeChecked();
 

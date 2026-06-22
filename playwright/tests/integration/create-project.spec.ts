@@ -8,12 +8,11 @@ import { empty } from '../workspaces/workspace';
 test.describe('Create Project', () => {
   test.use({ workspace: empty });
 
-  test('Add Project and execute init Process', { tag: '@serial' }, async ({ page }) => {
+  test('Add Project and execute init Process', { tag: '@serial' }, async ({ page, wsPage }) => {
     const projectName = 'testProject';
     const explorer = new FileExplorer(page);
-    await explorer.hasReadyStatusMessage();
     await explorer.addNestedProject('parent', projectName);
-    await explorer.hasReadyStatusMessage();
+    await wsPage.hasReadyStatusMessage();
     await explorer.hasNode(`parent${path.sep}${projectName}`);
 
     const problemsView = await ProblemsView.initProblemsView(page);

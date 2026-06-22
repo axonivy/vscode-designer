@@ -1,13 +1,8 @@
 import { expect } from '@playwright/test';
 import { test } from '../fixtures/baseTest';
-import { FileExplorer } from '../page-objects/explorer-view';
 import { ProcessEditor } from '../page-objects/process-editor';
 
 test.describe('Process Animation', () => {
-  test.beforeEach(async ({ page }) => {
-    await new FileExplorer(page).hasReadyStatusMessage();
-  });
-
   test('with activated animation and reset afterwards', { tag: '@serial' }, async ({ page }) => {
     const processEditor = new ProcessEditor(page, 'Animation.p.json');
     const callableEditor = new ProcessEditor(page, 'Callable.p.json', 1);
