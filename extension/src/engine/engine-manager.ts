@@ -112,8 +112,8 @@ export class IvyEngineManager {
     this.started = true;
     await IvyProjectExplorer.instance.setProjectExplorerContext({ isStarted: true });
     this.resolvedEngineUrl = await this.resolveEngineUrl();
-    this.ivyEngineApi = new IvyEngineApi(this.resolvedEngineUrl.toString());
-    let devContextPath = await this.ivyEngineApi.devContextPath;
+    this.ivyEngineApi = await IvyEngineApi.init(this.resolvedEngineUrl.toString());
+    let devContextPath = this.ivyEngineApi.devContextPath;
     IvyBrowserViewProvider.register(this.context, this.resolvedEngineUrl, devContextPath);
     devContextPath += devContextPath.endsWith('/') ? '' : '/';
     await this.initExistingProjects();
