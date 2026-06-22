@@ -79,9 +79,9 @@ test.describe('Context menu', () => {
 
 test.describe('Multi root workspace', () => {
   test.use({ workspace: multiRootWorkspacePath });
+  test.skip(process.env.RUN_IN_BROWSER === 'true');
 
   test('Projects from workspace config are shown', async ({ page }) => {
-    test.skip(process.env.RUN_IN_BROWSER === 'true');
     const explorer = new ProjectExplorerView(page);
     await explorer.openView();
 
