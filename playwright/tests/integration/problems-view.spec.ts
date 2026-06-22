@@ -5,9 +5,9 @@ import { ProcessEditor } from '../page-objects/process-editor';
 test.describe('Problems View', () => {
   let processEditor: ProcessEditor;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, wsPage }) => {
     processEditor = new ProcessEditor(page, 'Validation.p.json');
-    await processEditor.hasReadyStatusMessage();
+    await wsPage.hasReadyStatusMessage();
     await processEditor.openEditorFile();
     await processEditor.isViewVisible();
   });

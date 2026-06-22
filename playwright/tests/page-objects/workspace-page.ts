@@ -41,10 +41,22 @@ export class WorkspacePage {
     return this.page.locator('div.notification-toast-container');
   }
 
+  get ivyStatusBar() {
+    return this.page.locator('div.statusbar-item[id*="ivyStatusBarItem"]');
+  }
+
   async activateExpensiveJavaStandardMode() {
     const javaStatusBar = this.page.locator('div.statusbar-item[id*="redhat.java"]');
     await javaStatusBar.filter({ hasText: 'Java: Lightweight Mode' }).click();
     await expect(javaStatusBar.filter({ hasText: 'Java: Building' })).toBeVisible();
     await expect(javaStatusBar.filter({ hasText: 'Java: Ready' })).toBeVisible();
+  }
+
+  async hasReadyStatusMessage() {
+    await this.hasStatusMessage('Axon Ivy: Connected');
+  }
+
+  async hasStatusMessage(message: string, timeout?: number) {
+    await expect(this.ivyStatusBar).toHaveText(message, { timeout });
   }
 }

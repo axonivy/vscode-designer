@@ -16,6 +16,8 @@ type TestFixtures = {
   closeWelcomePage: boolean;
   page: Page;
   wsPage: WorkspacePage;
+  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+  isReady: void;
 };
 
 export const test = base.extend<TestFixtures>({
@@ -30,7 +32,18 @@ export const test = base.extend<TestFixtures>({
   },
   wsPage: async ({ page }, take) => {
     await take(new WorkspacePage(page));
-  }
+  },
+  isReady: [
+    async ({ page, wsPage, closeWelcomePage }, take) => {
+      await expect(page.locator('div.statusbar-item[id*="ivyStatusBarItem"]')).toContainText('Axon Ivy');
+      if (closeWelcomePage) {
+        await page.getByRole('tab', { name: 'Axon Ivy PRO Designer' }).getByRole('button', { name: 'Close' }).click({ delay: 100 });
+      }
+      await wsPage.hasReadyStatusMessage();
+      await take();
+    },
+    { auto: true }
+  ]
 });
 
 const runBrowserTest = async (workspace: string, closeWelcomePage: boolean, take: (r: Page) => Promise<void>) => {
@@ -42,7 +55,6 @@ const runBrowserTest = async (workspace: string, closeWelcomePage: boolean, take
   const queryParam = tmpWorkspace.tmpWsCofig ? `workspace=${tmpWorkspace.tmpWsCofig}` : `folder=${tmpWorkspace.tmpWorkspace}`;
   await page.goto(`http://localhost:3000/?${queryParam}`);
   await page.getByRole('tab', { name: 'Welcome' }).getByRole('button', { name: 'Close' }).click({ delay: 100 });
-  await initialize(page, closeWelcomePage);
   await take(page);
   // this goto closes WebSocket connections
   await page.goto('about:blank');
@@ -76,18 +88,10 @@ const runElectronAppTest = async (workspace: string, closeWelcomePage: boolean, 
     await page.setViewportSize({ width: 1920, height: 1080 });
   }
   await page.context().tracing.start({ screenshots: true, snapshots: true, title: test.info().title });
-  await initialize(page, closeWelcomePage);
   await take(page);
   await electronApp.close();
   if (!process.env.CI) {
     await removeTmpWorkspace(tmpWorkspace.tmpWorkspace);
-  }
-};
-
-const initialize = async (page: Page, closeWelcomePage: boolean) => {
-  await expect(page.locator('div.statusbar-item[id*="ivyStatusBarItem"]')).toContainText('Axon Ivy');
-  if (closeWelcomePage) {
-    await page.getByRole('tab', { name: 'Axon Ivy PRO Designer' }).getByRole('button', { name: 'Close' }).click({ delay: 100 });
   }
 };
 

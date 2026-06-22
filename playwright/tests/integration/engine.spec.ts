@@ -42,7 +42,7 @@ test.describe('Engine noEngineWorkspacePath', () => {
 
   test('ensure that engine is not started due to settings', async ({ page }) => {
     const settingsView = new SettingsView(page);
-    await settingsView.isExplorerActionItemChecked();
+    await expect(page.locator('li.action-item.checked').getByLabel('Explorer').first()).toBeVisible();
     await settingsView.openWorkspaceSettings();
     await settingsView.containsSetting('"axonivy.engine.runByExtension": false');
     await settingsView.containsSetting('"axonivy.engine.url": "http://localhost:8080/"');
@@ -50,9 +50,9 @@ test.describe('Engine noEngineWorkspacePath', () => {
     await expect(outputview.viewLocator).toBeHidden();
   });
 
-  test('switch release train', async ({ page }) => {
+  test('switch release train', async ({ page, wsPage }) => {
     const settingsView = new SettingsView(page);
-    await settingsView.hasReadyStatusMessage();
+    await wsPage.hasReadyStatusMessage();
     await settingsView.openWorkspaceSettings();
     await settingsView.doesNotContainSetting('"axonivy.engine.releaseTrain":');
     await settingsView.executeCommand('Axon Ivy: Switch Engine Release Train');

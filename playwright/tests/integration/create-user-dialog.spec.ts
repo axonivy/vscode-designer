@@ -12,7 +12,6 @@ test.describe('Create User Dialog', () => {
 
   test.beforeEach(async ({ page }) => {
     explorer = new FileExplorer(page);
-    await explorer.hasReadyStatusMessage();
     processEditor = new ProcessEditor(page);
   });
 

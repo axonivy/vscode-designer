@@ -17,22 +17,6 @@ export class PageObject {
     }
   }
 
-  async isExplorerActionItemChecked() {
-    await this.isActionItemChecked('Explorer');
-  }
-
-  async isActionItemChecked(label: string) {
-    await expect(this.page.locator('li.action-item.checked').getByLabel(label).first()).toBeVisible();
-  }
-
-  async hasStatusMessage(message: string, timeout?: number) {
-    await expect(this.ivyStatusBar()).toHaveText(message, { timeout });
-  }
-
-  async hasReadyStatusMessage() {
-    await this.hasStatusMessage('Axon Ivy: Connected');
-  }
-
   async provideUserInput(input?: string) {
     if (input) {
       const textBox = this.quickInputBox().getByRole('textbox');
@@ -65,14 +49,6 @@ export class PageObject {
 
   quickInputList(): Locator {
     return this.page.locator('div.quick-input-list');
-  }
-
-  ivyStatusBar(): Locator {
-    return this.page.locator('div.statusbar-item[id*="ivyStatusBarItem"]');
-  }
-
-  toasts(): Locator {
-    return this.page.locator('div.notification-toast-container');
   }
 
   async saveAllFiles() {

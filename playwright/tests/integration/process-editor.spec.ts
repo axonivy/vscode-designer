@@ -7,9 +7,9 @@ const userDialogPID = '15254DCE818AD7A2-f3';
 test.describe('Process Editor', () => {
   let processEditor: ProcessEditor;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, wsPage }) => {
     processEditor = new ProcessEditor(page);
-    await processEditor.hasReadyStatusMessage();
+    await wsPage.hasReadyStatusMessage();
     await processEditor.openEditorFile();
     await processEditor.isViewVisible();
   });
