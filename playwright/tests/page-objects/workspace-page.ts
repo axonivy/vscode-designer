@@ -15,7 +15,7 @@ export class WorkspacePage {
       await this.page.keyboard.press('ControlOrMeta+Shift+KeyP');
       await this.quickInputBox.locator('input.input').fill('>' + command, { timeout: 300 });
     }).toPass();
-    await this.quickInputListEntry.getByText(command).first().click({ delay: 100 });
+    await this.quickInputList.getByRole('option', { name: command }).first().click({ force: true, delay: 200 });
     for (const userInput of userInputs) {
       await this.provideUserInput(userInput);
     }
@@ -47,6 +47,10 @@ export class WorkspacePage {
 
   get quickInputListEntry() {
     return this.page.locator('div.quick-input-list-entry');
+  }
+
+  get quickInputList() {
+    return this.page.locator('div.quick-input-list');
   }
 
   async activateExpensiveJavaStandardMode() {

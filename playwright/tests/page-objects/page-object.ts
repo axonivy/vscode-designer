@@ -11,7 +11,7 @@ export class PageObject {
         .locator('input.input')
         .fill('>' + command, { timeout: 300 });
     }).toPass();
-    await this.quickInputListEntry().getByText(command).first().click({ delay: 100 });
+    await this.quickInputList().getByRole('option', { name: command }).first().click({ force: true, delay: 200 });
     for (const userInput of userInputs) {
       await this.provideUserInput(userInput);
     }
