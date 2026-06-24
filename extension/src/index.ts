@@ -22,6 +22,7 @@ import { showRuntimeLog } from './views/runtimelog-view';
 
 let ivyEngineManager: IvyEngineManager;
 let localMcpServer: LocalMcpServer;
+let localMcpStartup: Promise<void> | undefined;
 export const messenger = new Messenger({ ignoreHiddenViews: false });
 
 export async function activate(context: ExtensionContext): Promise<MessengerDiagnostic> {
@@ -50,9 +51,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     registerCommand('ivy.showStatusBarQuickPick', context, (visibleOptions?: string[]) => StatusBar.showStatusBarQuickPick(visibleOptions));
 
     registerTools(context);
-    const localMcp = config.localMcp();
-    localMcpServer = new LocalMcpServer();
-    await localMcpServer.start(localMcp);
+    startLocalMcpServer();
 
     IvyDiagnostics.init(context);
     conditionalWelcomePage(context);
@@ -74,6 +73,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
 }
 
 export async function deactivate() {
+  await localMcpStartup;
   await localMcpServer?.stop();
   await ivyEngineManager?.stop();
 }
@@ -88,5 +88,13 @@ const ensureJavaExtensionInstalled = () => {
       logInformationMessage('Installing Language Support for Java by Red Hat extension...');
       commands.executeCommand('workbench.extensions.installExtension', JAVA_EXTENSION_ID);
     }
+  });
+};
+
+const startLocalMcpServer = () => {
+  localMcpServer = new LocalMcpServer();
+  localMcpStartup = localMcpServer.start(config.localMcp()).catch(error => {
+    const reason = error instanceof Error ? error.message : String(error);
+    logWarningMessage(`Local MCP server failed to start: ${reason}`);
   });
 };
