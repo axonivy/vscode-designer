@@ -18,7 +18,7 @@ export class Editor extends View {
   }
 
   async openEditorFile() {
-    this.wsPage.openEditorFile(this.editorFile);
+    await this.wsPage.openEditorFile(this.editorFile);
   }
 
   async revertAndCloseEditor() {
