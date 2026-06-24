@@ -19,10 +19,7 @@ export const XhtmlLanguageClientProvider = async (webSocketUrl: URL) => {
         const connection = toSocketConnection(webSocket);
         resolve(connection as unknown as StreamInfo);
       };
-      webSocket.onerror = (event: Event) => {
-        console.error('WebSocket error:', event);
-        reject(event);
-      };
+      webSocket.onerror = reject;
     });
   };
 
