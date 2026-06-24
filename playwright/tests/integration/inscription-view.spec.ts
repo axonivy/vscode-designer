@@ -168,7 +168,7 @@ test.describe('Inscription View', () => {
     await expect(processStartField).toHaveValue(`${namespace}/${processName}:call(prebuiltProject.Data)`);
   });
 
-  test('Create Html Dialog', async () => {
+  test('Create Html Dialog', async ({ wsPage }) => {
     const inscriptionView = await processEditor.openInscriptionView(userDialogPID1);
     await inscriptionView.openInscriptionTab('Dialog');
     await inscriptionView.openCollapsible('Dialog');
@@ -183,12 +183,12 @@ test.describe('Inscription View', () => {
     await inscriptionView.provideUserInput();
     await processEditor.isDirty();
     await processEditor.isInactive();
-    await processEditor.isTabWithNameVisible(`${userDialogName}.xhtml`);
+    await wsPage.isTabWithNameVisible(`${userDialogName}.xhtml`);
     await processEditor.tabLocator.click();
     await expect(dialogField).toHaveValue(`prebuiltProject.${userDialogName}:start(prebuiltProject.Data)`);
   });
 
-  test('Create Form Dialog', async () => {
+  test('Create Form Dialog', async ({ wsPage }) => {
     const inscriptionView = await processEditor.openInscriptionView(userDialogPID2);
     await inscriptionView.openInscriptionTab('Dialog');
     await inscriptionView.openCollapsible('Dialog');
@@ -201,12 +201,12 @@ test.describe('Inscription View', () => {
     await inscriptionView.provideUserInput();
     await processEditor.isDirty();
     await processEditor.isInactive();
-    await processEditor.isTabWithNameVisible(`${userDialogName}.f.json`);
+    await wsPage.isTabWithNameVisible(`${userDialogName}.f.json`);
     await processEditor.tabLocator.click();
     await expect(dialogField).toHaveValue(`prebuiltProject.${userDialogName}:start(prebuiltProject.Data)`);
   });
 
-  test('Create Offline Dialog', async () => {
+  test('Create Offline Dialog', async ({ wsPage }) => {
     const inscriptionView = await processEditor.openInscriptionView(userTaskPID);
     await inscriptionView.openInscriptionTab('Dialog');
     await inscriptionView.openCollapsible('Dialog');
@@ -219,7 +219,7 @@ test.describe('Inscription View', () => {
     await inscriptionView.provideUserInput();
     await processEditor.isDirty();
     await processEditor.isInactive();
-    await processEditor.isTabWithNameVisible(`${userDialogName}.xhtml`);
+    await wsPage.isTabWithNameVisible(`${userDialogName}.xhtml`);
     await processEditor.tabLocator.click();
     await expect(dialogField).toHaveValue(`prebuiltProject.${userDialogName}:start(prebuiltProject.Data)`);
   });

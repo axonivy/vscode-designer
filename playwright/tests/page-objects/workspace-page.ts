@@ -4,16 +4,15 @@ export class WorkspacePage {
   constructor(readonly page: Page) {}
 
   async openEditorFile(fileName: string) {
-    await this.page.keyboard.press('ControlOrMeta+KeyP');
-    await this.quickInputBox.locator('input.input').fill(fileName);
+    await this.commandCenter.click({ delay: 100 });
+    await this.quickInputBox.locator('input.input').fill(fileName, { force: true });
     await this.page.locator('span.monaco-icon-name-container').getByText(fileName).first().click();
   }
 
   async executeCommand(command: string, ...userInputs: Array<string>) {
-    await expect(this.page.locator('div.command-center')).toBeAttached();
     await expect(async () => {
-      await this.page.keyboard.press('ControlOrMeta+Shift+KeyP');
-      await this.quickInputBox.locator('input.input').fill('>' + command, { timeout: 300 });
+      await this.commandCenter.click({ delay: 100 });
+      await this.quickInputBox.locator('input.input').fill('>' + command, { timeout: 300, force: true });
     }).toPass();
     await this.quickInputList.getByRole('option', { name: command }).first().click({ force: true, delay: 200 });
     for (const userInput of userInputs) {
@@ -53,6 +52,10 @@ export class WorkspacePage {
     return this.page.locator('div.quick-input-list');
   }
 
+  get commandCenter() {
+    return this.page.locator('div.command-center');
+  }
+
   async activateExpensiveJavaStandardMode() {
     const javaStatusBar = this.page.locator('div.statusbar-item[id*="redhat.java"]');
     await javaStatusBar.filter({ hasText: 'Java: Lightweight Mode' }).click();
@@ -66,5 +69,15 @@ export class WorkspacePage {
 
   async hasStatusMessage(message: string, timeout?: number) {
     await expect(this.ivyStatusBar).toHaveText(message, { timeout });
+  }
+
+  async closeAllTabs() {
+    await this.executeCommand('View: Close All Editor Groups');
+    await expect(this.page.locator('div.tab')).toBeHidden();
+  }
+
+  async isTabWithNameVisible(name: string) {
+    const tabSelector = `div.tab:has-text("${name}")`;
+    await expect(this.page.locator(tabSelector)).toBeVisible();
   }
 }

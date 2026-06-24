@@ -4,20 +4,20 @@ import { WelcomePage } from '../page-objects/welcome-page';
 test.describe('Welcome Page', () => {
   test.use({ closeWelcomePage: false });
 
-  test('toggle show welcome page', async ({ page }) => {
+  test('toggle show welcome page', async ({ page, wsPage }) => {
     const welcomePage = new WelcomePage(page);
     await welcomePage.isViewVisible();
     await expect(welcomePage.showPageCheckbox).toBeChecked();
 
     await welcomePage.showPageCheckbox.uncheck();
     await expect(welcomePage.showPageCheckbox).not.toBeChecked();
-    await welcomePage.closeAllTabs();
+    await wsPage.closeAllTabs();
     await welcomePage.executeCommand('Axon Ivy: Open Welcome Page');
     await expect(welcomePage.showPageCheckbox).not.toBeChecked();
 
     await welcomePage.showPageCheckbox.check();
     await expect(welcomePage.showPageCheckbox).toBeChecked();
-    await welcomePage.closeAllTabs();
+    await wsPage.closeAllTabs();
     await welcomePage.executeCommand('Axon Ivy: Open Welcome Page');
     await expect(welcomePage.showPageCheckbox).toBeChecked();
   });
