@@ -7,7 +7,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure'
   },
-  workers: process.env.RUN_IN_BROWSER ? 4 : 1,
+  workers: process.env.RUN_IN_BROWSER ? 2 : 1,
   retries: process.env.CI ? 1 : 0,
   timeout: 40_000,
   expect: { timeout: 30_000 },
