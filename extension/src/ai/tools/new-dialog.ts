@@ -32,12 +32,8 @@ type DialogTemplate = 'basic-10' | 'frame-10' | 'frame-10-right' | 'frame-10-ful
 
 export class NewDialogTool implements LanguageModelTool<NewDialogToolArgs> {
   async invoke(options: LanguageModelToolInvocationOptions<NewDialogToolArgs>): Promise<LanguageModelToolResult> {
-    const newDialogParams = resolvedParams(options.input);
-    const hdBean = await IvyEngineManager.instance.createUserDialog(newDialogParams);
-    const dialogPath = hdBean?.uri ? Uri.parse(hdBean.uri).fsPath : '<unknown location>';
-    return Promise.resolve(
-      new LanguageModelToolResult([new LanguageModelTextPart(`${newDialogParams.type} Dialog created successfully at '${dialogPath}'`)])
-    );
+    const message = await createNewDialog(options.input);
+    return Promise.resolve(new LanguageModelToolResult([new LanguageModelTextPart(message)]));
   }
 
   prepareInvocation?(options: LanguageModelToolInvocationPrepareOptions<NewDialogToolArgs>): ProviderResult<PreparedToolInvocation> {
@@ -58,6 +54,13 @@ export class NewDialogTool implements LanguageModelTool<NewDialogToolArgs> {
     };
   }
 }
+
+export const createNewDialog = async (input: NewDialogToolArgs): Promise<string> => {
+  const newDialogParams = resolvedParams(input);
+  const hdBean = await IvyEngineManager.instance.createUserDialog(newDialogParams);
+  const dialogPath = hdBean?.uri ? Uri.parse(hdBean.uri).fsPath : '<unknown location>';
+  return `${newDialogParams.type} Dialog created successfully at '${dialogPath}'`;
+};
 
 const resolvedParams = (args: NewDialogToolArgs) => {
   const params: HdInit = {

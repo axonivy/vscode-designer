@@ -22,19 +22,8 @@ type DataClassType = 'Data Class' | 'Entity Class';
 
 export class NewDataClassTool implements LanguageModelTool<NewDataClassToolArgs> {
   async invoke(options: LanguageModelToolInvocationOptions<NewDataClassToolArgs>): Promise<LanguageModelToolResult> {
-    const type = resolvedType(options.input.type);
-    const newDataClassParams = {
-      name: `${options.input.namespace}.${options.input.name}`,
-      projectDir: options.input.projectPath
-    };
-    let dataClassBean: DataClassBean | undefined;
-    if (type === 'Data Class') {
-      dataClassBean = await IvyEngineManager.instance.createDataClass(newDataClassParams);
-    } else {
-      dataClassBean = await IvyEngineManager.instance.createEntityClass(newDataClassParams);
-    }
-    const dataClassPath = dataClassBean ? path.join(newDataClassParams.projectDir, dataClassBean.path) : '<unknown location>';
-    return Promise.resolve(new LanguageModelToolResult([new LanguageModelTextPart(`${type} created successfully at '${dataClassPath}'`)]));
+    const message = await createNewDataClass(options.input);
+    return Promise.resolve(new LanguageModelToolResult([new LanguageModelTextPart(message)]));
   }
 
   prepareInvocation?(options: LanguageModelToolInvocationPrepareOptions<NewDataClassToolArgs>): ProviderResult<PreparedToolInvocation> {
@@ -50,5 +39,23 @@ export class NewDataClassTool implements LanguageModelTool<NewDataClassToolArgs>
     };
   }
 }
+
+export const createNewDataClass = async (input: NewDataClassToolArgs): Promise<string> => {
+  const type = resolvedType(input.type);
+  const newDataClassParams = {
+    name: `${input.namespace}.${input.name}`,
+    projectDir: input.projectPath
+  };
+
+  let dataClassBean: DataClassBean | undefined;
+  if (type === 'Data Class') {
+    dataClassBean = await IvyEngineManager.instance.createDataClass(newDataClassParams);
+  } else {
+    dataClassBean = await IvyEngineManager.instance.createEntityClass(newDataClassParams);
+  }
+
+  const dataClassPath = dataClassBean ? path.join(newDataClassParams.projectDir, dataClassBean.path) : '<unknown location>';
+  return `${type} created successfully at '${dataClassPath}'`;
+};
 
 const resolvedType = (type?: DataClassType) => type ?? 'Data Class';

@@ -3,17 +3,34 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 import { createServer } from 'node:http';
 import { afterEach, expect, test, vi } from 'vitest';
 
-const { mockOutputChannel, mockLm, mockCreateNewProject } = vi.hoisted(() => ({
-  mockOutputChannel: { appendLine: vi.fn() },
-  mockLm: {
-    tools: [] as Array<{ name: string; description?: string; inputSchema?: unknown }>,
-    invokeTool: vi.fn()
-  },
-  mockCreateNewProject: vi.fn().mockResolvedValue('Project created successfully')
-}));
+const { mockOutputChannel, mockLm, mockCreateNewProject, mockCreateNewDataClass, mockCreateNewProcess, mockCreateNewDialog } = vi.hoisted(
+  () => ({
+    mockOutputChannel: { appendLine: vi.fn() },
+    mockLm: {
+      tools: [] as Array<{ name: string; description?: string; inputSchema?: unknown }>,
+      invokeTool: vi.fn()
+    },
+    mockCreateNewProject: vi.fn().mockResolvedValue('Project created successfully'),
+    mockCreateNewDataClass: vi.fn().mockResolvedValue("Data Class created successfully at '/tmp/ivy/src_hd/my/pkg/Demo.ivyClass'"),
+    mockCreateNewProcess: vi.fn().mockResolvedValue("Business Process created successfully at '/tmp/ivy/processes/MyProcess.p.json'"),
+    mockCreateNewDialog: vi.fn().mockResolvedValue("Form Dialog created successfully at '/tmp/ivy/dialogs/MyDialog.xhtml'")
+  })
+);
 
 vi.mock('./new-project', () => ({
   createNewProject: mockCreateNewProject
+}));
+
+vi.mock('./new-data-class', () => ({
+  createNewDataClass: mockCreateNewDataClass
+}));
+
+vi.mock('./new-process', () => ({
+  createNewProcess: mockCreateNewProcess
+}));
+
+vi.mock('./new-dialog', () => ({
+  createNewDialog: mockCreateNewDialog
 }));
 
 vi.mock('vscode', () => ({
@@ -38,6 +55,12 @@ afterEach(async () => {
   mockOutputChannel.appendLine.mockReset();
   mockCreateNewProject.mockReset();
   mockCreateNewProject.mockResolvedValue('Project created successfully');
+  mockCreateNewDataClass.mockReset();
+  mockCreateNewDataClass.mockResolvedValue("Data Class created successfully at '/tmp/ivy/src_hd/my/pkg/Demo.ivyClass'");
+  mockCreateNewProcess.mockReset();
+  mockCreateNewProcess.mockResolvedValue("Business Process created successfully at '/tmp/ivy/processes/MyProcess.p.json'");
+  mockCreateNewDialog.mockReset();
+  mockCreateNewDialog.mockResolvedValue("Form Dialog created successfully at '/tmp/ivy/dialogs/MyDialog.xhtml'");
 });
 
 async function getFreePort(): Promise<number> {
@@ -284,4 +307,70 @@ test('executes own tools headlessly in MCP mode', async () => {
     result?: { content: Array<{ type: string; text: string }> };
   };
   expect(payload.result?.content[0]).toEqual({ type: 'text', text: 'Project created successfully' });
+});
+
+test('executes additional own tools headlessly in MCP mode', async () => {
+  mockLm.tools = [
+    {
+      name: 'new_axon_ivy_data_class',
+      description: 'Create a new Axon Ivy data class',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          namespace: { type: 'string' },
+          projectPath: { type: 'string' },
+          type: { type: 'string' }
+        }
+      }
+    }
+  ];
+
+  const port = await getFreePort();
+  const baseUrl = `http://127.0.0.1:${port}`;
+
+  rpcServer = new LocalMcpServer();
+  await rpcServer.start({ enabled: true, host: '127.0.0.1', port });
+
+  const initialize = await postMcp(baseUrl, {
+    jsonrpc: '2.0',
+    id: 'init-2',
+    method: 'initialize',
+    params: {
+      protocolVersion: '2025-03-26',
+      capabilities: {},
+      clientInfo: { name: 'local-mcp-test', version: '0.0.1' }
+    }
+  });
+
+  const call = await postMcp(
+    baseUrl,
+    {
+      jsonrpc: '2.0',
+      id: 'call-2',
+      method: 'tools/call',
+      params: {
+        name: 'new_axon_ivy_data_class',
+        arguments: {
+          name: 'Demo',
+          namespace: 'my.pkg',
+          projectPath: '/tmp/ivy',
+          type: 'Data Class'
+        }
+      }
+    },
+    initialize.sessionId
+  );
+
+  expect(call.status).toBe(200);
+  expect(mockCreateNewDataClass).toHaveBeenCalledOnce();
+  expect(mockLm.invokeTool).not.toHaveBeenCalled();
+
+  const payload = call.payload as {
+    result?: { content: Array<{ type: string; text: string }> };
+  };
+  expect(payload.result?.content[0]).toEqual({
+    type: 'text',
+    text: "Data Class created successfully at '/tmp/ivy/src_hd/my/pkg/Demo.ivyClass'"
+  });
 });
