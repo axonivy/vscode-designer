@@ -18,12 +18,19 @@ type NewProjectToolArgs = {
   projectId: string;
 };
 
+export const createNewProject = async (input: NewProjectToolArgs): Promise<string> => {
+  const newProjectParams = {
+    ...input,
+    path: path.join(input.path, input.name)
+  };
+  await IvyEngineManager.instance.createProject(newProjectParams);
+  return 'Project created successfully';
+};
+
 export class NewProjectTool implements LanguageModelTool<NewProjectToolArgs> {
   async invoke(options: LanguageModelToolInvocationOptions<NewProjectToolArgs>): Promise<LanguageModelToolResult> {
-    const newProjectParams = { ...options.input, path: path.join(options.input.path, options.input.name) };
-    const projectBean = await IvyEngineManager.instance.createProject(newProjectParams);
-    const projectPath = projectBean ? projectBean.projectDirectory : '<unknown location>';
-    return Promise.resolve(new LanguageModelToolResult([new LanguageModelTextPart(`Project created successfully at '${projectPath}'`)]));
+    const message = await createNewProject(options.input);
+    return Promise.resolve(new LanguageModelToolResult([new LanguageModelTextPart(message)]));
   }
 
   prepareInvocation?(options: LanguageModelToolInvocationPrepareOptions<NewProjectToolArgs>): ProviderResult<PreparedToolInvocation> {

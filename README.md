@@ -32,6 +32,11 @@ Then simply start the `Run Extension` launch config, which will also activate th
 
 If you do not want to use the embedded engine as backend, you can define an alternative under `VS Code Settings / Axon Ivy`. Simply uncheck `Engine: Run By Extension` and set `Engine: Url` you want to use.
 
+## MCP setup for Copilot CLI
+
+You can expose the extension tools through MCP and connect Copilot CLI to that local endpoint.
+For details see [mcp.md](docs/mcp.md).
+
 ## Integration Tests
 
 Playwright tests can be executed against VSCode Insiders.

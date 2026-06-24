@@ -1,14 +1,23 @@
 import { workspace, type Disposable } from 'vscode';
+import type { McpOptions } from '../ai/tools/local-mcp';
 
 type AnimationFollowMode = 'all' | 'currentProcess' | 'openProcesses' | 'noDialogProcesses' | 'noEmbeddedProcesses';
 
 const configs = () => workspace.getConfiguration();
+
+const localMcpConfig = (): McpOptions => ({
+  enabled: configs().get<boolean>('axonivy.localMcp.enabled') ?? false,
+  host: configs().get<string>('axonivy.localMcp.host') ?? '127.0.0.1',
+  port: configs().get<number>('axonivy.localMcp.port') ?? 32140,
+  exposeAllTools: configs().get<boolean>('axonivy.localMcp.exposeAllTools') ?? false
+});
 
 export const config = {
   engineRunByExtension: () => configs().get<boolean>('axonivy.engine.runByExtension'),
   engineReleaseTrain: () => configs().get<string>('axonivy.engine.releaseTrain'),
   engineUrl: () => configs().get<string>('axonivy.engine.url'),
   engineVmArgs: () => configs().get<string>('axonivy.engine.vmArgs'),
+  localMcp: () => localMcpConfig(),
   projectExcludePattern: () => configs().get<string>('axonivy.project.excludePattern'),
   projectMaximumNumber: () => configs().get<number>('axonivy.project.maximumNumber'),
   processAnimationAnimate: () => configs().get<boolean>('axonivy.process.animation.animate'),

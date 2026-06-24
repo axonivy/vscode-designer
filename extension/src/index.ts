@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { commands, extensions, type ExtensionContext } from 'vscode';
 import { Messenger, type MessengerDiagnostic } from 'vscode-messenger';
+import { LocalMcpServer } from './ai/tools/local-mcp';
 import { registerTools } from './ai/tools/tools';
 import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
@@ -20,6 +21,7 @@ import { resolveExtensionVersion } from './version/extension-version';
 import { showRuntimeLog } from './views/runtimelog-view';
 
 let ivyEngineManager: IvyEngineManager;
+let localMcpServer: LocalMcpServer;
 export const messenger = new Messenger({ ignoreHiddenViews: false });
 
 export async function activate(context: ExtensionContext): Promise<MessengerDiagnostic> {
@@ -48,6 +50,9 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     registerCommand('ivy.showStatusBarQuickPick', context, (visibleOptions?: string[]) => StatusBar.showStatusBarQuickPick(visibleOptions));
 
     registerTools(context);
+    const localMcp = config.localMcp();
+    localMcpServer = new LocalMcpServer();
+    await localMcpServer.start(localMcp);
 
     IvyDiagnostics.init(context);
     conditionalWelcomePage(context);
@@ -69,7 +74,8 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
 }
 
 export async function deactivate() {
-  await ivyEngineManager.stop();
+  await localMcpServer?.stop();
+  await ivyEngineManager?.stop();
 }
 
 const ensureJavaExtensionInstalled = () => {
