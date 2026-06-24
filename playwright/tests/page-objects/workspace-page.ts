@@ -4,14 +4,14 @@ export class WorkspacePage {
   constructor(readonly page: Page) {}
 
   async openEditorFile(fileName: string) {
-    await this.commandCenter.click({ delay: 100 });
+    await this.page.keyboard.press('ControlOrMeta+KeyP');
     await this.quickInputBox.locator('input.input').fill(fileName, { force: true });
     await this.page.locator('span.monaco-icon-name-container').getByText(fileName).first().click();
   }
 
   async executeCommand(command: string, ...userInputs: Array<string>) {
     await expect(async () => {
-      await this.commandCenter.click({ delay: 100 });
+      await this.page.keyboard.press('ControlOrMeta+KeyP');
       await this.quickInputBox.locator('input.input').fill('>' + command, { timeout: 300, force: true });
     }).toPass();
     await this.quickInputList.getByRole('option', { name: command }).first().click({ force: true, delay: 200 });
@@ -50,10 +50,6 @@ export class WorkspacePage {
 
   get quickInputList() {
     return this.page.locator('div.quick-input-list');
-  }
-
-  get commandCenter() {
-    return this.page.locator('div.command-center');
   }
 
   async activateExpensiveJavaStandardMode() {

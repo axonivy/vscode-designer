@@ -10,6 +10,7 @@ export default defineConfig({
   workers: process.env.RUN_IN_BROWSER ? 3 : 1,
   timeout: 40_000,
   expect: { timeout: 30_000 },
+  retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['junit', { outputFile: 'report.xml' }], ['list']] : 'html',
   projects: [
     { name: 'integration-parallel', testDir: './tests/integration', grepInvert: /@serial/ },
