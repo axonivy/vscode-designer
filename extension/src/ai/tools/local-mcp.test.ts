@@ -113,6 +113,33 @@ async function postMcp(
   };
 }
 
+async function setupRpcServer(options?: { exposeAllTools?: boolean }): Promise<{ baseUrl: string }> {
+  const port = await getFreePort();
+  const baseUrl = `http://127.0.0.1:${port}`;
+
+  rpcServer = new LocalMcpServer();
+  await rpcServer.start({ enabled: true, host: '127.0.0.1', port, exposeAllTools: options?.exposeAllTools });
+
+  return { baseUrl };
+}
+
+async function initializeMcpSession(baseUrl: string, id = 'init-1'): Promise<string> {
+  const initialize = await postMcp(baseUrl, {
+    jsonrpc: '2.0',
+    id,
+    method: 'initialize',
+    params: {
+      protocolVersion: '2025-03-26',
+      capabilities: {},
+      clientInfo: { name: 'local-mcp-test', version: '0.0.1' }
+    }
+  });
+
+  expect(initialize.status).toBe(200);
+  expect(initialize.sessionId).toBeDefined();
+  return initialize.sessionId as string;
+}
+
 test('exposes health endpoint and returns lm tools via MCP tools/list', async () => {
   mockLm.tools = [
     {
@@ -147,11 +174,7 @@ test('exposes health endpoint and returns lm tools via MCP tools/list', async ()
     }
   ];
 
-  const port = await getFreePort();
-  const baseUrl = `http://127.0.0.1:${port}`;
-
-  rpcServer = new LocalMcpServer();
-  await rpcServer.start({ enabled: true, host: '127.0.0.1', port });
+  const { baseUrl } = await setupRpcServer();
 
   const healthResponse = await fetch(`${baseUrl}/health`);
   expect(healthResponse.status).toBe(200);
@@ -190,11 +213,7 @@ test('supports repeated client initialize/list cycles', async () => {
     }
   ];
 
-  const port = await getFreePort();
-  const baseUrl = `http://127.0.0.1:${port}`;
-
-  rpcServer = new LocalMcpServer();
-  await rpcServer.start({ enabled: true, host: '127.0.0.1', port });
+  const { baseUrl } = await setupRpcServer();
 
   const transport1 = new StreamableHTTPClientTransport(new URL(`${baseUrl}/mcp`));
   const client1 = new Client({ name: 'local-rpc-test-1', version: '0.0.1' });
@@ -225,11 +244,7 @@ test('exposes all IDE tools when exposeAllTools is enabled', async () => {
     }
   ];
 
-  const port = await getFreePort();
-  const baseUrl = `http://127.0.0.1:${port}`;
-
-  rpcServer = new LocalMcpServer();
-  await rpcServer.start({ enabled: true, host: '127.0.0.1', port, exposeAllTools: true });
+  const { baseUrl } = await setupRpcServer({ exposeAllTools: true });
 
   const transport = new StreamableHTTPClientTransport(new URL(`${baseUrl}/mcp`));
   const client = new Client({ name: 'local-rpc-test-all-tools', version: '0.0.1' });
@@ -260,25 +275,8 @@ test('executes own tools headlessly in MCP mode', async () => {
     }
   ];
 
-  const port = await getFreePort();
-  const baseUrl = `http://127.0.0.1:${port}`;
-
-  rpcServer = new LocalMcpServer();
-  await rpcServer.start({ enabled: true, host: '127.0.0.1', port });
-
-  const initialize = await postMcp(baseUrl, {
-    jsonrpc: '2.0',
-    id: 'init-1',
-    method: 'initialize',
-    params: {
-      protocolVersion: '2025-03-26',
-      capabilities: {},
-      clientInfo: { name: 'local-mcp-test', version: '0.0.1' }
-    }
-  });
-
-  expect(initialize.status).toBe(200);
-  expect(initialize.sessionId).toBeDefined();
+  const { baseUrl } = await setupRpcServer();
+  const sessionId = await initializeMcpSession(baseUrl, 'init-1');
 
   const call = await postMcp(
     baseUrl,
@@ -296,7 +294,7 @@ test('executes own tools headlessly in MCP mode', async () => {
         }
       }
     },
-    initialize.sessionId
+    sessionId
   );
 
   expect(call.status).toBe(200);
@@ -326,22 +324,8 @@ test('executes additional own tools headlessly in MCP mode', async () => {
     }
   ];
 
-  const port = await getFreePort();
-  const baseUrl = `http://127.0.0.1:${port}`;
-
-  rpcServer = new LocalMcpServer();
-  await rpcServer.start({ enabled: true, host: '127.0.0.1', port });
-
-  const initialize = await postMcp(baseUrl, {
-    jsonrpc: '2.0',
-    id: 'init-2',
-    method: 'initialize',
-    params: {
-      protocolVersion: '2025-03-26',
-      capabilities: {},
-      clientInfo: { name: 'local-mcp-test', version: '0.0.1' }
-    }
-  });
+  const { baseUrl } = await setupRpcServer();
+  const sessionId = await initializeMcpSession(baseUrl, 'init-2');
 
   const call = await postMcp(
     baseUrl,
@@ -359,7 +343,7 @@ test('executes additional own tools headlessly in MCP mode', async () => {
         }
       }
     },
-    initialize.sessionId
+    sessionId
   );
 
   expect(call.status).toBe(200);
