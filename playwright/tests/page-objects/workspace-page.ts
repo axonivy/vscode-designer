@@ -5,16 +5,16 @@ export class WorkspacePage {
 
   async openEditorFile(fileName: string) {
     await this.page.keyboard.press('ControlOrMeta+KeyP');
-    await this.quickInputBox.locator('input.input').fill(fileName, { force: true });
+    await this.quickInputBox.locator('input.input').fill(fileName);
     await this.page.locator('span.monaco-icon-name-container').getByText(fileName).first().click();
   }
 
   async executeCommand(command: string, ...userInputs: Array<string>) {
     await expect(async () => {
       await this.page.keyboard.press('ControlOrMeta+KeyP');
-      await this.quickInputBox.locator('input.input').fill('>' + command, { timeout: 300, force: true });
+      await this.quickInputBox.locator('input.input').fill('>' + command, { timeout: 300 });
+      await this.quickInputList.getByRole('option', { name: command }).first().click({ timeout: 300, delay: 100 });
     }).toPass();
-    await this.quickInputList.getByRole('option', { name: command }).first().click({ force: true, delay: 200 });
     for (const userInput of userInputs) {
       await this.provideUserInput(userInput);
     }
