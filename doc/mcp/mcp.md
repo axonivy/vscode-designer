@@ -1,8 +1,8 @@
 # MCP Integration
 
 The vscode-designer extension is able to serve its tools via MCP.
-This enables you to integrate axonivy-specific
-AI tools into your preferred CLI or third-party harness.
+This enables you to integrate axonivy-specific AI tools
+into your preferred CLI or third-party harness like Claude or Copliot CLI.
 
 ## Enable the endpoint
 
@@ -20,7 +20,7 @@ the AI tools, enable it by setting the `axonivy.localMcp.enabled: true`
 
 ## Copilot CLI or Claude CLI configuration
 
-Workspace `.mcp.json` example for direct native MCP usage from your harness:
+Workspace [.mcp.json](./.mcp.json) example for direct native MCP usage from your harness:
 
 ```json
 {

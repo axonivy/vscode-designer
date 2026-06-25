@@ -39,7 +39,7 @@ and connect your favorite AI harness to that local endpoint.
 
 We tested this with Claude and and Copilot CLI.
 But it will work other vendors alike.
-For MCPP setup instruction see [mcp.md](docs/mcp.md).
+For MCPP setup instruction see [mcp.md](doc/mcp/mcp.md).
 
 ## Integration Tests
 
