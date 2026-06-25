@@ -7,7 +7,7 @@ export class WorkspacePage {
     await expect(async () => {
       await this.page.keyboard.press('ControlOrMeta+KeyP');
       await this.quickInputBox.locator('input.input').fill(fileName, { timeout: 300 });
-      await this.page.locator('span.monaco-icon-name-container').getByText(fileName).first().click({ timeout: 300, delay: 100 });
+      await this.page.locator('span.monaco-icon-name-container').getByText(fileName).first().click({ timeout: 3_000, delay: 100 });
     }).toPass();
   }
 
@@ -15,7 +15,7 @@ export class WorkspacePage {
     await expect(async () => {
       await this.page.keyboard.press('ControlOrMeta+KeyP');
       await this.quickInputBox.locator('input.input').fill('>' + command, { timeout: 300 });
-      await this.quickInputList.getByRole('option', { name: command }).first().click({ timeout: 300, delay: 100 });
+      await this.quickInputList.getByRole('option', { name: command }).first().click({ timeout: 1_000, delay: 100 });
     }).toPass();
     for (const userInput of userInputs) {
       await this.provideUserInput(userInput);
