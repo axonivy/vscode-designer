@@ -7,18 +7,18 @@ export class Editor extends View {
     page: Page,
     frameIndex?: number
   ) {
-    const viewData = {
-      tabSelector: `div.tab:has-text("${editorFile}")`,
-      viewSelector: 'body > div > div > div[data-parent-flow-to-element-id] >> visible=true',
-      frameIndex
-    };
-    super(viewData, page);
+    super(
+      {
+        tabSelector: `div.tab:has-text("${editorFile}")`,
+        viewSelector: 'body > div > div > div[data-parent-flow-to-element-id] >> visible=true',
+        frameIndex
+      },
+      page
+    );
   }
 
   async openEditorFile() {
-    await this.page.keyboard.press('ControlOrMeta+KeyP');
-    await this.quickInputBox().locator('input.input').fill(this.editorFile);
-    await this.page.locator('span.monaco-icon-name-container').getByText(this.editorFile).first().click();
+    await this.wsPage.openEditorFile(this.editorFile);
   }
 
   async revertAndCloseEditor() {

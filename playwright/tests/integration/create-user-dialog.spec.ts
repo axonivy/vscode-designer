@@ -15,24 +15,24 @@ test.describe('Create User Dialog', () => {
     processEditor = new ProcessEditor(page);
   });
 
-  test('Add Html Dialog', async () => {
+  test('Add Html Dialog', async ({ wsPage }) => {
     await explorer.addUserDialog(userDialogName, 'ch.ivyteam.test', 'Html Dialog (JSF)');
     await explorer.hasNode(`${userDialogName}.xhtml`);
     await explorer.hasNode(`${userDialogName}Data.d.json`);
     await explorer.hasNode(`${userDialogName}Process.p.json`);
-    await explorer.isTabWithNameVisible(userDialogName + '.xhtml');
+    await wsPage.isTabWithNameVisible(userDialogName + '.xhtml');
     await expect(processEditor.editorContent()).toContainText('>Html Dialog</a>');
     await explorer.doubleClickNode(`${userDialogName}Process.p.json`);
     const start = processEditor.locatorForElementType('g.start\\:htmlDialogStart');
     await expect(start).toBeVisible();
   });
 
-  test('Add Offline Dialog', async () => {
+  test('Add Offline Dialog', async ({ wsPage }) => {
     await explorer.addUserDialog(userDialogName, 'ch.ivyteam.test.offline', 'Offline Dialog (JSF)');
     await explorer.hasNode(`${userDialogName}.xhtml`);
     await explorer.hasNode(`${userDialogName}Data.d.json`);
     await explorer.hasNode(`${userDialogName}Process.p.json`);
-    await explorer.isTabWithNameVisible(userDialogName + '.xhtml');
+    await wsPage.isTabWithNameVisible(userDialogName + '.xhtml');
     await expect(processEditor.editorContent()).toContainText('>Offline Html Dialog</a>');
     await explorer.doubleClickNode(`${userDialogName}Process.p.json`);
     const start = processEditor.locatorForElementType('g.start\\:htmlDialogStart');
@@ -44,7 +44,7 @@ test.describe('Create User Dialog', () => {
     await explorer.hasNode(`${userDialogName}.f.json`);
     await explorer.hasNode(`${userDialogName}Data.d.json`);
     await explorer.hasNode(`${userDialogName}Process.p.json`);
-    await explorer.isTabWithNameVisible(userDialogName + '.f.json');
+    await wsPage.isTabWithNameVisible(userDialogName + '.f.json');
     const formEditor = new FormEditor(wsPage, `${userDialogName}.f.json`);
     await formEditor.expectWebViewVisible();
     await explorer.doubleClickNode(`${userDialogName}Process.p.json`);

@@ -39,7 +39,7 @@ test('xhtml preview', async ({ page, wsPage }) => {
   const button = frame.getByRole('button', { name: 'Proceed' });
   await expect(button).toBeVisible();
 
-  await editor.closeAllTabs();
+  await wsPage.closeAllTabs();
 
   const overlay = frame.locator('#selectionOverlay');
   await expect(overlay).toHaveCount(0);

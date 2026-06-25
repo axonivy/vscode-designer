@@ -28,10 +28,13 @@ pipeline {
   }
 
   stages {
-    stage('Cleanup Coder User') {
+    stage('Cleanup VSCode Test Directories') {
       steps {
         script {
-          dir("${env.USERPROFILE}\\AppData\\Roaming\\Code\\User") {
+          dir("playwright/test-extension-dir") {
+            deleteDir()
+          }
+          dir("playwright/test-user-data-dir") {
             deleteDir()
           }
         }

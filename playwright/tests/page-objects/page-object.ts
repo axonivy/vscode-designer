@@ -1,58 +1,26 @@
-import { type Locator, type Page, expect } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
+import { WorkspacePage } from './workspace-page';
 
 export class PageObject {
-  constructor(readonly page: Page) {}
+  readonly wsPage: WorkspacePage;
+  constructor(readonly page: Page) {
+    this.wsPage = new WorkspacePage(page);
+  }
 
   async executeCommand(command: string, ...userInputs: Array<string>) {
-    await expect(this.page.locator('div.command-center')).toBeAttached();
-    await expect(async () => {
-      await this.page.keyboard.press('ControlOrMeta+Shift+KeyP');
-      await this.quickInputBox()
-        .locator('input.input')
-        .fill('>' + command, { timeout: 300 });
-    }).toPass();
-    await this.quickInputList().getByRole('option', { name: command }).first().click({ force: true, delay: 200 });
-    for (const userInput of userInputs) {
-      await this.provideUserInput(userInput);
-    }
+    await this.wsPage.executeCommand(command, ...userInputs);
   }
 
   async provideUserInput(input?: string) {
-    if (input) {
-      const textBox = this.quickInputBox().getByRole('textbox');
-      await textBox.fill(input);
-      await expect(textBox).toHaveValue(input);
-      await textBox.press('Enter', { delay: 100 });
-      return;
-    }
-    await this.quickInputBox().click({ delay: 100 });
-    await this.quickInputBox().press('Enter', { delay: 100 });
-  }
-
-  async closeAllTabs() {
-    await this.executeCommand('View: Close All Editor Groups');
-    await expect(this.page.locator('div.tab')).toBeHidden();
-  }
-
-  async isTabWithNameVisible(name: string) {
-    const tabSelector = `div.tab:has-text("${name}")`;
-    await expect(this.page.locator(tabSelector)).toBeVisible();
+    await this.wsPage.provideUserInput(input);
   }
 
   async typeText(text: string, delay = 10) {
     await this.page.keyboard.type(text, { delay });
   }
 
-  quickInputBox(): Locator {
-    return this.page.locator('div.quick-input-box');
-  }
-
-  quickInputList(): Locator {
-    return this.page.locator('div.quick-input-list');
-  }
-
-  quickInputListEntry() {
-    return this.page.locator('.quick-input-list-entry');
+  quickInputBox() {
+    return this.wsPage.quickInputBox;
   }
 
   async saveAllFiles() {

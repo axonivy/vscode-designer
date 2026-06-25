@@ -58,13 +58,13 @@ test.describe('Market Product installation', () => {
     await processEditor.openEditorFile();
   });
 
-  test('Install local product.json with dynamic version', async () => {
+  test('Install local product.json with dynamic version', async ({ wsPage }) => {
     await explorer.selectNode('resources');
     await explorer.selectNode('product-dynamic.json');
     await explorer.installLocalProduct('product-dynamic.json');
     await explorer.provideUserInput('14.0.0-SNAPSHOT');
 
-    const projects = explorer.quickInputList();
+    const projects = wsPage.quickInputList;
     await expect(projects).toBeVisible();
     const entry = projects.locator('div.quick-input-list-entry');
     await expect(entry).toHaveCount(1);

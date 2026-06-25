@@ -4,18 +4,20 @@ export class WorkspacePage {
   constructor(readonly page: Page) {}
 
   async openEditorFile(fileName: string) {
-    await this.page.keyboard.press('ControlOrMeta+KeyP');
-    await this.quickInputBox.locator('input.input').fill(fileName);
-    await this.page.locator('span.monaco-icon-name-container').getByText(fileName).first().click();
+    await expect(async () => {
+      await this.executeCommand('Refresh Explorer');
+      await this.page.keyboard.press('ControlOrMeta+KeyP');
+      await this.quickInputBox.locator('input.input').fill(fileName, { timeout: 300 });
+      await this.page.locator('span.monaco-icon-name-container').getByText(fileName).first().click({ timeout: 1_000, delay: 100 });
+    }).toPass();
   }
 
   async executeCommand(command: string, ...userInputs: Array<string>) {
-    await expect(this.page.locator('div.command-center')).toBeAttached();
     await expect(async () => {
-      await this.page.keyboard.press('ControlOrMeta+Shift+KeyP');
+      await this.page.keyboard.press('ControlOrMeta+KeyP');
       await this.quickInputBox.locator('input.input').fill('>' + command, { timeout: 300 });
+      await this.quickInputList.getByRole('option', { name: command }).first().click({ timeout: 1_000, delay: 100 });
     }).toPass();
-    await this.quickInputList.getByRole('option', { name: command }).first().click({ force: true, delay: 200 });
     for (const userInput of userInputs) {
       await this.provideUserInput(userInput);
     }
@@ -66,5 +68,15 @@ export class WorkspacePage {
 
   async hasStatusMessage(message: string, timeout?: number) {
     await expect(this.ivyStatusBar).toHaveText(message, { timeout });
+  }
+
+  async closeAllTabs() {
+    await this.executeCommand('View: Close All Editor Groups');
+    await expect(this.page.locator('div.tab')).toBeHidden();
+  }
+
+  async isTabWithNameVisible(name: string) {
+    const tabSelector = `div.tab:has-text("${name}")`;
+    await expect(this.page.locator(tabSelector)).toBeVisible();
   }
 }

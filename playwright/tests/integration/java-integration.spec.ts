@@ -8,7 +8,7 @@ test('Compile java and invalidate class loader', { tag: '@serial' }, async ({ pa
   await processEditor.openEditorFile();
   const script = processEditor.locatorForPID('19BE060A6564078E-f3');
   await processEditor.hasError(script);
-  await processEditor.closeAllTabs();
+  await wsPage.closeAllTabs();
 
   await wsPage.activateExpensiveJavaStandardMode();
 

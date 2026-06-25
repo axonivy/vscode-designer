@@ -9,11 +9,11 @@ test.describe('Status Bar', () => {
     await expect(ivyStatusBar).toBeVisible();
     await ivyStatusBar.click({ delay: 100 });
 
-    const commands = explorer.quickInputList();
+    const commands = wsPage.quickInputList;
     await expect(commands).toBeVisible();
 
     await explorer.selectItemFromQuickPick('Animation');
 
-    await expect(explorer.quickInputList()).toBeHidden();
+    await expect(wsPage.quickInputList).toBeHidden();
   });
 });
