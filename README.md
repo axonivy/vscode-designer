@@ -32,6 +32,14 @@ Then simply start the `Run Extension` launch config, which will also activate th
 
 If you do not want to use the embedded engine as backend, you can define an alternative under `VS Code Settings / Axon Ivy`. Simply uncheck `Engine: Run By Extension` and set `Engine: Url` you want to use.
 
+## MCP setup for third-party harness
+
+You can expose the extension AI tools through an MCP
+and connect your favorite AI harness to that local endpoint.
+
+We tested this with Claude and Copilot CLI, but it should work with other vendors as well.
+For MCP setup instructions, see [mcp.md](doc/mcp/mcp.md).
+
 ## Integration Tests
 
 Playwright tests can be executed against VSCode Insiders.

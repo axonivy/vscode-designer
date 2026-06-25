@@ -48,6 +48,7 @@
     "@axonivy/webservice-editor-protocol": "next-14.0.0",
     "@eclipse-glsp/protocol": "2.6.0",
     "@eclipse-glsp/vscode-integration": "2.6.0",
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "axios": "1.18.0",
     "dom-serializer": "3.1.1",
     "domhandler": "6.0.1",
@@ -478,6 +479,32 @@
             "default": "",
             "markdownDescription": "Specifies extra VM arguments used to launch the Axon Ivy Engine. Eg. use `-agentlib:jdwp=transport=dt_socket,server=y,address=*:8000,suspend=n` to enable remote debugging.",
             "order": 1300
+          },
+          "axonivy.localMcp.enabled": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "Enable local loopback MCP endpoints for third-party harness automation clients. Use only on trusted machines.",
+            "order": 1400
+          },
+          "axonivy.localMcp.host": {
+            "type": "string",
+            "default": "127.0.0.1",
+            "markdownDescription": "Host interface for the local MCP server. Keep this on loopback for security.",
+            "order": 1410
+          },
+          "axonivy.localMcp.port": {
+            "type": "integer",
+            "default": 32140,
+            "minimum": 1,
+            "maximum": 65535,
+            "markdownDescription": "TCP port for the local MCP server.",
+            "order": 1420
+          },
+          "axonivy.localMcp.exposeAllTools": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "Expose all IDE language model tools via the local MCP endpoint. If false, only tools contributed by this extension are exposed.",
+            "order": 1430
           },
           "axonivy.project.excludePattern": {
             "type": "string",

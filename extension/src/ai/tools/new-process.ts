@@ -22,16 +22,8 @@ type ProcessType = 'Business Process' | 'Callable Sub Process' | 'Web Service Pr
 
 export class NewProcessTool implements LanguageModelTool<NewProcessToolArgs> {
   async invoke(options: LanguageModelToolInvocationOptions<NewProcessToolArgs>): Promise<LanguageModelToolResult> {
-    const type = resolvedType(options.input.type);
-    const newProcessParams = {
-      name: options.input.name,
-      namespace: options.input.namespace,
-      path: options.input.projectPath,
-      kind: type
-    };
-    const processBean = await IvyEngineManager.instance.createProcess(newProcessParams);
-    const processPath = processBean?.uri ? Uri.parse(processBean.uri).fsPath : '<unknown location>';
-    return Promise.resolve(new LanguageModelToolResult([new LanguageModelTextPart(`${type} created successfully at '${processPath}'`)]));
+    const message = await createNewProcess(options.input);
+    return Promise.resolve(new LanguageModelToolResult([new LanguageModelTextPart(message)]));
   }
 
   prepareInvocation?(options: LanguageModelToolInvocationPrepareOptions<NewProcessToolArgs>): ProviderResult<PreparedToolInvocation> {
@@ -47,5 +39,18 @@ export class NewProcessTool implements LanguageModelTool<NewProcessToolArgs> {
     };
   }
 }
+
+export const createNewProcess = async (input: NewProcessToolArgs): Promise<string> => {
+  const type = resolvedType(input.type);
+  const newProcessParams = {
+    name: input.name,
+    namespace: input.namespace,
+    path: input.projectPath,
+    kind: type
+  };
+  const processBean = await IvyEngineManager.instance.createProcess(newProcessParams);
+  const processPath = processBean?.uri ? Uri.parse(processBean.uri).fsPath : '<unknown location>';
+  return `${type} created successfully at '${processPath}'`;
+};
 
 const resolvedType = (type?: ProcessType) => type ?? 'Business Process';
