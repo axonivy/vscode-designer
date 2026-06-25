@@ -4,9 +4,11 @@ export class WorkspacePage {
   constructor(readonly page: Page) {}
 
   async openEditorFile(fileName: string) {
-    await this.page.keyboard.press('ControlOrMeta+KeyP');
-    await this.quickInputBox.locator('input.input').fill(fileName);
-    await this.page.locator('span.monaco-icon-name-container').getByText(fileName).first().click();
+    await expect(async () => {
+      await this.page.keyboard.press('ControlOrMeta+KeyP');
+      await this.quickInputBox.locator('input.input').fill(fileName, { timeout: 300 });
+      await this.page.locator('span.monaco-icon-name-container').getByText(fileName).first().click({ timeout: 300, delay: 100 });
+    }).toPass();
   }
 
   async executeCommand(command: string, ...userInputs: Array<string>) {
