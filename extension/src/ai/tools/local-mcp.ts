@@ -4,7 +4,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 import { randomUUID } from 'crypto';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'http';
 import { LanguageModelTextPart, lm } from 'vscode';
-import { engineOutputChannel } from './../../engine/engine-output-channel.js';
+import { engineOutputChannel } from '../../engine/engine-output-channel';
 import { getOwnToolHeadlessInvoker, isOwnToolName, type OwnToolName } from './tools';
 
 export type McpOptions = {
@@ -102,7 +102,7 @@ export class LocalMcpServer {
     if ((req.method === 'GET' || req.method === 'POST' || req.method === 'DELETE') && url.pathname === '/mcp') {
       return this.handleMcpRequest(req, res);
     }
-    if (req.method === 'GET' && req.url === '/health') {
+    if (req.method === 'GET' && url.pathname === '/health') {
       return this.writeJson(res, 200, { ok: true, status: 'up' });
     }
     if (req.method !== 'GET') {

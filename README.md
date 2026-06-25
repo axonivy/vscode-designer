@@ -37,9 +37,8 @@ If you do not want to use the embedded engine as backend, you can define an alte
 You can expose the extension AI tools through an MCP
 and connect your favorite AI harness to that local endpoint.
 
-We tested this with Claude and and Copilot CLI.
-But it will work other vendors alike.
-For MCPP setup instruction see [mcp.md](doc/mcp/mcp.md).
+We tested this with Claude and Copilot CLI, but it should work with other vendors as well.
+For MCP setup instructions, see [mcp.md](doc/mcp/mcp.md).
 
 ## Integration Tests
 

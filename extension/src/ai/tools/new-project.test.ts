@@ -40,5 +40,7 @@ test('invoke creates a new project with resolved path', async () => {
     ...input,
     path: path.join(input.path, input.name)
   });
-  expect((result as { content: Array<{ value: string }> }).content[0]?.value).toBe('Project created successfully');
+  expect((result as { content: Array<{ value: string }> }).content[0]?.value).toBe(
+    `Project created successfully at '${path.join(input.path, input.name)}'`
+  );
 });

@@ -24,7 +24,7 @@ export const createNewProject = async (input: NewProjectToolArgs): Promise<strin
     path: path.join(input.path, input.name)
   };
   await IvyEngineManager.instance.createProject(newProjectParams);
-  return 'Project created successfully';
+  return `Project created successfully at '${newProjectParams.path}'`;
 };
 
 export class NewProjectTool implements LanguageModelTool<NewProjectToolArgs> {
