@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'http';
 import { LanguageModelTextPart, lm } from 'vscode';
 import { engineOutputChannel } from './../../engine/engine-output-channel.js';
-import { isOwnToolName, type OwnToolName } from './tool-ids';
+import { getOwnToolHeadlessInvoker, isOwnToolName, type OwnToolName } from './tools';
 
 export type McpOptions = {
   enabled: boolean;
@@ -176,31 +176,14 @@ export class LocalMcpServer {
       throw new Error(`Tool '${name}' expects arguments as an object`);
     }
 
-    switch (name) {
-      case 'new_axon_ivy_project': {
-        // Avoid lm.invokeTool for own tools in MCP mode to prevent interactive confirmation popups.
-        const { createNewProject } = await import('./new-project');
-        const message = await createNewProject(args as Awaited<Parameters<typeof createNewProject>[0]>);
-        return { content: [new LanguageModelTextPart(message)] };
-      }
-      case 'new_axon_ivy_data_class': {
-        const { createNewDataClass } = await import('./new-data-class');
-        const message = await createNewDataClass(args as Awaited<Parameters<typeof createNewDataClass>[0]>);
-        return { content: [new LanguageModelTextPart(message)] };
-      }
-      case 'new_axon_ivy_process': {
-        const { createNewProcess } = await import('./new-process');
-        const message = await createNewProcess(args as Awaited<Parameters<typeof createNewProcess>[0]>);
-        return { content: [new LanguageModelTextPart(message)] };
-      }
-      case 'new_axon_ivy_dialog': {
-        const { createNewDialog } = await import('./new-dialog');
-        const message = await createNewDialog(args as Awaited<Parameters<typeof createNewDialog>[0]>);
-        return { content: [new LanguageModelTextPart(message)] };
-      }
-      default:
-        throw new Error(`No headless MCP handler registered for tool '${name}'`);
+    // Avoid lm.invokeTool for own tools in MCP mode to prevent interactive confirmation popups.
+    const ownToolInvoker = getOwnToolHeadlessInvoker(name);
+    if (!ownToolInvoker) {
+      throw new Error(`No headless MCP handler registered for tool '${name}'`);
     }
+
+    const message = await ownToolInvoker(args as Record<string, unknown>);
+    return { content: [new LanguageModelTextPart(message)] };
   }
 
   private isToolExposed(name: string): boolean {
