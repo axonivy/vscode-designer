@@ -23,7 +23,8 @@ export default config.defineConfig(
       '**/generated/client*',
       '**/market/generated/*',
       '**/browser/media/*',
-      '**/monaco-workers/*'
+      '**/monaco-workers/*',
+      '**/playwright/test-extension-dir/**/*'
     ]
   },
   {
