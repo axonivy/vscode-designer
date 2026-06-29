@@ -15,6 +15,13 @@
       "enabled": false
     },
     {
+      "description": "ignore pnpm override for i18next",
+      "matchManagers": ["pnpm"],
+      "matchDepTypes": ["overrides"],
+      "matchPackageNames": ["i18next"],
+      "enabled": false
+    },
+    {
       "description": "ignore vscode engine",
       "matchPackageNames": ["vscode"],
       "matchManagers": ["npm"],
