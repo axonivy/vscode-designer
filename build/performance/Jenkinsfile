@@ -58,8 +58,7 @@ pipeline {
             bat 'pnpm run test:playwright:performance'
           }
           archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
-          archiveArtifacts
-            artifacts: 'playwright/test-user-data-dir/User/globalStorage/axonivy.vscode-designer-14/engines/*Slim*All*/logs/**',
+          archiveArtifacts artifacts: 'playwright/test-user-data-dir/User/globalStorage/axonivy.vscode-designer-14/engines/*Slim*All*/logs/**',
             allowEmptyArchive: true,
             targetPath: 'logsEngine'
           withChecks('Performance Tests') {
