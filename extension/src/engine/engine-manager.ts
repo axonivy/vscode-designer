@@ -1,5 +1,5 @@
 import type { ExtensionContext } from 'vscode';
-import { Uri } from 'vscode';
+import { Uri, extensions } from 'vscode';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
 import { logErrorMessage, logWarningMessage } from '../base/logging-util';
@@ -202,6 +202,8 @@ export class IvyEngineManager {
       { text: 'Importing market product' },
       async () => await this.ivyEngineApi?.installMarketProduct(input)
     );
+    await this.importJavaProjects();
+    await executeCommand('ivyProjects.refreshEntry');
   }
 
   public async createUserDialog(newUserDialogParams: NewUserDialogParams) {
@@ -222,13 +224,7 @@ export class IvyEngineManager {
     return await StatusBar.withStatusBarProgress({ text: 'Creating and deploying new project' }, async () => {
       const projectBean = await this.ivyEngineApi?.createProject(newProjectParams);
       await IvyProjectExplorer.instance.setProjectExplorerContext({ hasIvyProjects: true });
-      try {
-        await executeCommand('java.project.import.command');
-      } catch {
-        logWarningMessage(
-          'Java extension could not import project. Java support will not be available. Please clean Java workspace and import Java projects manually.'
-        );
-      }
+      await this.importJavaProjects();
       await this.createAndOpenProcess({
         name: 'BusinessProcess',
         kind: 'Business Process',
@@ -331,6 +327,27 @@ export class IvyEngineManager {
 
   async stop() {
     await this.engineRunner.stop();
+  }
+
+  private async importJavaProjects() {
+    const javaExt = extensions.getExtension('redhat.java');
+    if (javaExt !== undefined && javaExt.isActive) {
+      try {
+        await executeCommand('java.project.import.command');
+      } catch {
+        logWarningMessage(
+          'Java extension could not import projects. Java support will not be available. Please clean Java workspace and import Java projects manually.'
+        );
+      }
+    } else {
+      try {
+        javaExt?.activate();
+      } catch {
+        logWarningMessage(
+          'Java extension could not be activated. Java support will not be available. Please clean Java workspace and import Java projects manually.'
+        );
+      }
+    }
   }
 
   get engineApi() {
