@@ -203,6 +203,7 @@ export class IvyEngineManager {
       async () => await this.ivyEngineApi?.installMarketProduct(input)
     );
     await this.importJavaProjects();
+    await executeCommand('ivyProjects.refreshEntry');
   }
 
   public async createUserDialog(newUserDialogParams: NewUserDialogParams) {
