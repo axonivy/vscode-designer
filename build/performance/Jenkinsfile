@@ -24,19 +24,6 @@ pipeline {
 
   stages {
 
-    stage('Cleanup VSCode Test Directories') {
-      steps {
-        script {
-          dir("playwright/test-extension-dir") {
-            deleteDir()
-          }
-          dir("playwright/test-user-data-dir") {
-            deleteDir()
-          }
-        }
-      }
-    }
-
     stage('Build') {
       steps {
         nodejs(nodeJSInstallationName: '24.15.0') {
@@ -44,11 +31,14 @@ pipeline {
           bat 'pnpm run update:axonivy:next'
           bat 'pnpm run build:production'
           bat 'pnpm run test:playwright:download:vscode'
-          bat 'rmdir /s /q playwright/tests/workspaces/portalPerformance/portal 2>nul || exit /b 0'
-          // TODO: Reset to default branch instead of jakarta later
-          bat 'git clone -b jakarta https://github.com/axonivy-market/portal.git playwright/tests/workspaces/portalPerformance/portal || exit /b 0'
-          bat 'git -C playwright/tests/workspaces/portalPerformance/portal pull'
         }
+      script {
+        bat 'rmdir /s /q playwright/tests/workspaces/portalPerformance/portal 2>nul || exit /b 0'
+        // TODO: Reset to default branch instead of jakarta later
+        bat 'git clone -b jakarta https://github.com/axonivy-market/portal.git playwright/tests/workspaces/portalPerformance/portal || exit /b 0'
+        bat 'git -C playwright/tests/workspaces/portalPerformance/portal pull'
+        maven cmd: 'clean verify ' +
+                   '-f playwright/tests/workspaces/portalPerformance/portal/pom.xml'
       }
     }
 
