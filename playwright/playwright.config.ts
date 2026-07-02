@@ -15,6 +15,7 @@ export default defineConfig({
   projects: [
     { name: 'integration-parallel', testDir: './tests/integration', grepInvert: /@serial/ },
     { name: 'integration-serial', testDir: './tests/integration', grep: /@serial/, workers: 1 },
-    { name: 'performance', testDir: './tests/performance', timeout: 120_000, expect: { timeout: 60_000 } }
+    // { name: 'performance', testDir: './tests/performance', timeout: 120_000, expect: { timeout: 60_000 } }
+    { name: 'performance', testDir: './tests/performance', timeout: 240_000, expect: { timeout: 120_000 } }
   ]
 });

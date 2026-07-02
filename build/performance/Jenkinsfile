@@ -33,7 +33,15 @@ pipeline {
           bat 'pnpm run test:playwright:download:vscode'
         }
         script {
-          bat 'rmdir /s /q playwright/tests/workspaces/portalPerformance/portal 2>nul || exit /b 0'
+          
+          echo "Cleaning up portal directory..."
+          def rmResult = bat(script: '''rmdir /s /q playwright\\tests\\workspaces\\portalPerformance\\portal''', returnStatus: true)
+          if (rmResult == 0) {
+            echo "SUCCESS: Portal directory deleted"
+          } else {
+            echo "WARNING: rmdir failed with exit code ${rmResult}"
+          }
+
           // TODO: Reset to default branch instead of jakarta later
           bat 'git clone -b jakarta https://github.com/axonivy-market/portal.git playwright/tests/workspaces/portalPerformance/portal || exit /b 0'
           bat 'git -C playwright/tests/workspaces/portalPerformance/portal pull'
