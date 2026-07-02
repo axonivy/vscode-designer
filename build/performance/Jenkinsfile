@@ -34,13 +34,14 @@ pipeline {
         }
         script {
           
-          echo "Cleaning up portal directory..."
-          def rmResult = bat(script: '''rmdir /s /q playwright\\tests\\workspaces\\portalPerformance\\portal''', returnStatus: true)
-          if (rmResult == 0) {
-            echo "SUCCESS: Portal directory deleted"
-          } else {
-            echo "WARNING: rmdir failed with exit code ${rmResult}"
-          }
+          bat '''
+            if exists playwright\\tests\\workspaces\\portalPerformance\\portal (
+              echo "Portal directory exists, try cleaning up..."
+              rmdir /s /q playwright\\tests\\workspaces\\portalPerformance\\portal || exit /b 0
+            ) else (
+              echo "Portal directory does not exist, skipping cleanup."
+            )
+          '''
 
           // TODO: Reset to default branch instead of jakarta later
           bat 'git clone -b jakarta https://github.com/axonivy-market/portal.git playwright/tests/workspaces/portalPerformance/portal || exit /b 0'
