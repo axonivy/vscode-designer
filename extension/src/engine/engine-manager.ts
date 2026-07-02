@@ -341,7 +341,7 @@ export class IvyEngineManager {
       }
     } else {
       try {
-        javaExt?.activate();
+        await javaExt?.activate();
       } catch {
         logWarningMessage(
           'Java extension could not be activated. Java support will not be available. Please clean Java workspace and import Java projects manually.'
