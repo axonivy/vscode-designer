@@ -23,15 +23,6 @@ pipeline {
   }
 
   stages {
-    stage('Cleanup globalStorage') {
-      steps {
-        script {
-          dir("${env.USERPROFILE}\\AppData\\Roaming\\Code\\User\\globalStorage") {
-            deleteDir()
-          }
-        }
-      }
-    }
 
     stage('Build') {
       steps {
@@ -40,8 +31,15 @@ pipeline {
           bat 'pnpm run update:axonivy:next'
           bat 'pnpm run build:production'
           bat 'pnpm run test:playwright:download:vscode'
-          bat 'git clone https://github.com/axonivy-market/portal.git playwright/tests/workspaces/portalPerformance/portal || exit /b 0'
+        }
+        script {
+          bat 'rmdir /s /q playwright/tests/workspaces/portalPerformance/portal 2>nul || exit /b 0'
+          // TODO: Reset to default branch instead of jakarta later
+          bat 'git clone -b jakarta https://github.com/axonivy-market/portal.git playwright/tests/workspaces/portalPerformance/portal || exit /b 0'
           bat 'git -C playwright/tests/workspaces/portalPerformance/portal pull'
+          // TODO: Remove this workaround as soon as vscode properly handles the build and deploy order
+          maven cmd: 'clean verify ' +
+                    '-f playwright/tests/workspaces/portalPerformance/portal/pom.xml'
         }
       }
     }
@@ -53,6 +51,7 @@ pipeline {
             bat 'pnpm run test:playwright:performance'
           }
           archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
+          archiveArtifacts artifacts: 'playwright/test-user-data-dir/User/globalStorage/axonivy.vscode-designer*/engines/*Slim*All*/logs/**', allowEmptyArchive: true
           withChecks('Performance Tests') {
             junit testDataPublishers: [[$class: 'StabilityTestDataPublisher']], testResults: 'node_modules/**/report.xml'
           }
