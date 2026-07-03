@@ -63,21 +63,6 @@ pipeline {
             '''
           )
           echo "Cleanup exited with status ${status}"
-          
-          def status = bat(
-            label: 'Cleanup portal directory',
-            returnStatus: true,
-            script: '''
-            @echo off
-            if exist "playwright\\tests\\workspaces\\portalPerformance\\portal" (
-              echo Portal directory exists, cleaning up...
-              rmdir /s /q "playwright\\tests\\workspaces\\portalPerformance\\portal"
-            ) else (
-              echo Portal directory does not exist, skipping cleanup.
-            )
-            '''
-          )
-          echo "Cleanup exited with status ${status}"
 
           // TODO: Reset to default branch instead of jakarta later
           bat 'git clone -b jakarta https://github.com/axonivy-market/portal.git playwright/tests/workspaces/portalPerformance/portal || exit /b 0'
