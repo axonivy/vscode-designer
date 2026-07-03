@@ -91,7 +91,8 @@ pipeline {
   }
 
   post {
-    success {
+    // success {
+    always {
       catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
         cleanWs()
       }
