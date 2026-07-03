@@ -34,6 +34,35 @@ pipeline {
           bat 'pnpm run test:playwright:download:vscode'
         }
         script {
+
+          def statusTest = bat(
+            label: 'Test Folder Exists',
+            returnStatus: true,
+            script: '''
+            @echo off
+            if exist "playwright" (
+              echo Directory playwright exists
+            ) else (
+              echo Directory playwright does not exist
+            )
+            '''
+          )
+          echo "Test Folder Exists exited with status ${statusTest}"
+
+          def status = bat(
+            label: 'Cleanup portal directory',
+            returnStatus: true,
+            script: '''
+            @echo off
+            if exist "playwright\\tests\\workspaces\\portalPerformance\\portal" (
+              echo Portal directory exists, cleaning up...
+              rmdir /s /q "playwright\\tests\\workspaces\\portalPerformance\\portal"
+            ) else (
+              echo Portal directory does not exist, skipping cleanup.
+            )
+            '''
+          )
+          echo "Cleanup exited with status ${status}"
           
           def status = bat(
             label: 'Cleanup portal directory',
