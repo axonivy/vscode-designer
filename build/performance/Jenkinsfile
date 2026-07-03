@@ -35,21 +35,7 @@ pipeline {
         }
         script {
 
-          def statusTest = bat(
-            label: 'Test Folder Exists',
-            returnStatus: true,
-            script: '''
-            @echo off
-            if exist "playwright" (
-              echo Directory playwright exists
-            ) else (
-              echo Directory playwright does not exist
-            )
-            '''
-          )
-          echo "Test Folder Exists exited with status ${statusTest}"
-
-          def status = bat(
+          def statusCleanup = bat(
             label: 'Cleanup portal directory',
             returnStatus: true,
             script: '''
@@ -62,7 +48,7 @@ pipeline {
             )
             '''
           )
-          echo "Cleanup exited with status ${status}"
+            echo "Cleanup exited with status ${statusCleanup}"
 
           // TODO: Reset to default branch instead of jakarta later
           bat 'git clone -b jakarta https://github.com/axonivy-market/portal.git playwright/tests/workspaces/portalPerformance/portal || exit /b 0'
@@ -91,9 +77,8 @@ pipeline {
   }
 
   post {
-    // success {
     always {
-      catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+      catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
         cleanWs()
       }
     }
