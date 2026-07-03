@@ -1,6 +1,7 @@
 pipeline {
   agent {
-    label 'windows-vscode'
+    // label 'windows-vscode'
+    label 'windows-build12'
   }
 
   tools {
