@@ -83,8 +83,9 @@ pipeline {
     }
     always {
       catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-        deleteDir dir: 'playwright/tests/workspaces/portalPerformance/portal', deleteDirs: true, failIfNotExists: true
+        dir('playwright/tests/workspaces/portalPerformance/portal') {
+          deleteDir()
+        }
       }
     }
-  }
 }
