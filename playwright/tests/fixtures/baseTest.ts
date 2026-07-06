@@ -64,13 +64,11 @@ const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<
   const vscodePath = await downloadAndUnzipVSCode(downloadVersion);
   const [cliPath] = resolveCliArgsFromVSCodeExecutablePath(vscodePath);
   const extensionDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'pw-vscode-ext-'));
-  const electronEnv = createElectronEnv();
-  execSync(`"${cliPath}" --install-extension vscjava.vscode-java-pack --extensions-dir ${extensionDir}`, { env: electronEnv });
+  execSync(`"${cliPath}" --install-extension vscjava.vscode-java-pack --extensions-dir ${extensionDir}`);
   const tmpWorkspace = await createTmpWorkspace(workspace);
   const userDataDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'pw-vscode-user-'));
   const electronApp = await _electron.launch({
     executablePath: vscodePath,
-    env: electronEnv,
     args: [
       '--disable-dev-shm-usage',
       '--disable-telemetry',
@@ -101,22 +99,6 @@ const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<
       await removeTmpWorkspace(tmpWorkspace.tmpWorkspace);
     }
   }
-};
-
-const createElectronEnv = (): Record<string, string> => {
-  const env: Record<string, string> = {};
-  for (const [key, value] of Object.entries(process.env)) {
-    if (value !== undefined) {
-      env[key] = value;
-    }
-  }
-  delete env.ELECTRON_RUN_AS_NODE;
-  delete env.ELECTRON_NO_ASAR;
-  delete env.ELECTRON_NO_ATTACH_CONSOLE;
-  delete env.NODE_OPTIONS;
-  delete env.VSCODE_IPC_HOOK;
-  delete env.VSCODE_IPC_HOOK_CLI;
-  return env;
 };
 
 const createTmpWorkspace = async (workspace: string) => {
