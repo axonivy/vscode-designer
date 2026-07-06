@@ -63,11 +63,14 @@ const runBrowserTest = async (workspace: string, take: (r: Page) => Promise<void
 const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<void>) => {
   const vscodePath = await downloadAndUnzipVSCode(downloadVersion);
   const [cliPath] = resolveCliArgsFromVSCodeExecutablePath(vscodePath);
-  const extensionDir = 'test-extension-dir';
-  execSync(`"${cliPath}" --install-extension vscjava.vscode-java-pack --extensions-dir ${extensionDir}`);
+  const extensionDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'pw-vscode-ext-'));
+  const electronEnv = createElectronEnv();
+  execSync(`"${cliPath}" --install-extension vscjava.vscode-java-pack --extensions-dir ${extensionDir}`, { env: electronEnv });
   const tmpWorkspace = await createTmpWorkspace(workspace);
+  const userDataDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'pw-vscode-user-'));
   const electronApp = await _electron.launch({
     executablePath: vscodePath,
+    env: electronEnv,
     args: [
       '--disable-dev-shm-usage',
       '--disable-telemetry',
@@ -79,20 +82,41 @@ const runElectronAppTest = async (workspace: string, take: (r: Page) => Promise<
       '--disable-workspace-trust',
       `--extensionDevelopmentPath=${path.resolve(__dirname, '../../../extension/')}`,
       `--extensions-dir=${extensionDir}`,
-      `--user-data-dir=test-user-data-dir`,
+      `--user-data-dir=${userDataDir}`,
       tmpWorkspace.tmpWsCofig ?? tmpWorkspace.tmpWorkspace
     ]
   });
-  const page = await electronApp.firstWindow();
-  if (process.env.CI) {
-    await page.setViewportSize({ width: 1920, height: 1080 });
+  try {
+    const page = await electronApp.firstWindow();
+    if (process.env.CI) {
+      await page.setViewportSize({ width: 1920, height: 1080 });
+    }
+    await page.context().tracing.start({ screenshots: true, snapshots: true, title: test.info().title });
+    await take(page);
+  } finally {
+    await electronApp.close().catch(() => undefined);
+    await fs.promises.rm(extensionDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 1000 });
+    await fs.promises.rm(userDataDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 1000 });
+    if (!process.env.CI) {
+      await removeTmpWorkspace(tmpWorkspace.tmpWorkspace);
+    }
   }
-  await page.context().tracing.start({ screenshots: true, snapshots: true, title: test.info().title });
-  await take(page);
-  await electronApp.close();
-  if (!process.env.CI) {
-    await removeTmpWorkspace(tmpWorkspace.tmpWorkspace);
+};
+
+const createElectronEnv = (): Record<string, string> => {
+  const env: Record<string, string> = {};
+  for (const [key, value] of Object.entries(process.env)) {
+    if (value !== undefined) {
+      env[key] = value;
+    }
   }
+  delete env.ELECTRON_RUN_AS_NODE;
+  delete env.ELECTRON_NO_ASAR;
+  delete env.ELECTRON_NO_ATTACH_CONSOLE;
+  delete env.NODE_OPTIONS;
+  delete env.VSCODE_IPC_HOOK;
+  delete env.VSCODE_IPC_HOOK_CLI;
+  return env;
 };
 
 const createTmpWorkspace = async (workspace: string) => {
