@@ -66,6 +66,16 @@ pipeline {
           catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
             bat 'pnpm run test:playwright:performance'
           }
+
+          echo 'Listing playwright directory contents:'
+          bat 'dir playwright'
+
+          echo 'Listing playwright test-user-data-dir directory contents:'
+          bat 'dir playwright/test-user-data-dir'
+
+          echo 'Listing full test-user-data-dir directory contents:'
+          bat 'dir playwright/test-user-data-dir/User/globalStorage/axonivy.vscode-designer-14/engines/'
+
           archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
           archiveArtifacts artifacts: 'playwright/test-user-data-dir/User/globalStorage/axonivy.vscode-designer*/engines/*Slim*All*/logs/**', allowEmptyArchive: true
           withChecks('Performance Tests') {
