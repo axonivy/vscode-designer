@@ -25,6 +25,7 @@
     "publish:next": "bash -c 'vsce publish --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version:0:4}.$(date \"+%Y%m%d%H\")'",
     "test": "vitest",
     "test:ci": "vitest run",
+    "test:integration": "node src/test-integration/build.mts && node dist-test-integration/runTest.js",
     "type": "tsc --noEmit",
     "watch": "node esbuild.mts --watch"
   },
@@ -63,11 +64,15 @@
     "vscode-ws-jsonrpc": "3.5.0"
   },
   "devDependencies": {
+    "@types/mocha": "^10.0.10",
     "@types/vscode": "1.98.0",
     "@types/vscode-webview": "1.57.5",
+    "@vscode/test-electron": "3.0.0",
     "@vscode/vsce": "3.9.2",
     "esbuild": "0.28.1",
+    "glob": "^13.0.6",
     "json-schema-to-typescript": "^15.0.4",
+    "mocha": "^11.7.6",
     "vitest": "4.1.9"
   },
   "activationEvents": [
