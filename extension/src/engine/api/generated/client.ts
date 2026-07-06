@@ -4,8 +4,8 @@
  * Axon Ivy OpenAPI
  * OpenAPI spec version: 0.0.1
  */
-import axios from 'axios';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios from 'axios';
 
 export interface ProjectIdentifier {
   app: string;
@@ -457,10 +457,11 @@ export const deleteWorkspace = (id: string, options?: AxiosRequestConfig): Promi
 
 export const installMarketProduct = (
   id: string,
+  doCompile: boolean,
   productInstallParams?: ProductInstallParams,
   options?: AxiosRequestConfig
 ): Promise<AxiosResponse<MarketInstallResult>> => {
-  return axios.post(`/web-ide/workspace/install/${id}`, productInstallParams, options);
+  return axios.post(`/web-ide/workspace/install/${id}?doCompile=${doCompile}`, productInstallParams, options);
 };
 
 export type ProcessDebuggerResult = AxiosResponse<number>;

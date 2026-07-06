@@ -99,8 +99,8 @@ export class IvyEngineApi {
       .catch(handleAxiosError);
   }
 
-  public async installMarketProduct(params: ProductInstallParams) {
-    return installMarketProduct(this.workspace.id, params, { baseURL: this.engineURL, ...options })
+  public async installMarketProduct(doCompile: boolean, params: ProductInstallParams) {
+    return installMarketProduct(this.workspace.id, doCompile, params, { baseURL: this.engineURL, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
