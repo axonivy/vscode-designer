@@ -1,8 +1,8 @@
 import { expect } from '@playwright/test';
 import { test } from '~/fixtures/baseTest';
 import { DataClassEditor } from '~/page-objects/dataclass-editor';
+import { TextEditor } from '~/page-objects/editor';
 import { OutputView } from '~/page-objects/output-view';
-import { TextEditor } from '~/page-objects/text-editor';
 
 test('Add attribute', async ({ wsPage }) => {
   const editor = new DataClassEditor(wsPage);
@@ -44,7 +44,7 @@ test('Type completion with JDT language server', async ({ wsPage }) => {
 
 test('Open help', async ({ wsPage }) => {
   const editor = new DataClassEditor(wsPage);
-  const outputView = new OutputView(wsPage.page);
+  const outputView = new OutputView(wsPage);
   await editor.open();
   await outputView.openLog('Axon Ivy Extension');
 

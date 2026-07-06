@@ -17,7 +17,7 @@ test('Read, write', async ({ wsPage }) => {
 test('Open help', async ({ wsPage }) => {
   const editor = new DatabaseEditor(wsPage);
   await editor.open();
-  const outputView = new OutputView(wsPage.page);
+  const outputView = new OutputView(wsPage);
   await outputView.openLog('Axon Ivy Extension');
 
   await editor.webViewFrame.getByRole('button', { name: /Help/ }).click();

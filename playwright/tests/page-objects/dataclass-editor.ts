@@ -1,5 +1,5 @@
 import { expect, type Locator } from '@playwright/test';
-import { WebViewEditor } from './webview-editor';
+import { WebViewEditor } from './editor';
 import type { WorkspacePage } from './workspace-page';
 
 export class DataClassEditor extends WebViewEditor {

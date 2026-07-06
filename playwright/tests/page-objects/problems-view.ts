@@ -1,27 +1,26 @@
-import { type Page, expect } from '@playwright/test';
-import { View, type ViewData } from './view';
+import { type Locator, expect } from '@playwright/test';
+import type { WorkspacePage } from './workspace-page';
 
-const problemsViewData: ViewData = {
-  tabSelector: 'li.action-item:has-text("Problems")',
-  viewSelector: 'div.markers-panel-container'
-};
+export class ProblemsView {
+  readonly tab: Locator;
+  readonly view: Locator;
 
-export class ProblemsView extends View {
-  constructor(page: Page) {
-    super(problemsViewData, page);
+  constructor(readonly wsPage: WorkspacePage) {
+    this.tab = wsPage.page.locator('li.action-item:has-text("Problems")');
+    this.view = wsPage.page.locator('div.markers-panel-container');
   }
 
-  static async initProblemsView(page: Page) {
-    const problemsView = new ProblemsView(page);
-    if (await problemsView.tabLocator.isHidden()) {
-      await page.locator('#status\\.problems').click();
+  static async initProblemsView(wsPage: WorkspacePage) {
+    const problemsView = new ProblemsView(wsPage);
+    if (await problemsView.tab.isHidden()) {
+      await wsPage.page.locator('#status\\.problems').click();
     }
     await problemsView.show();
     return problemsView;
   }
 
   private async hasMaker(message: string, type: 'error' | 'warning', pid?: string) {
-    const marker = this.viewLocator.locator(`div.monaco-tl-row:has-text("${message}")`).first();
+    const marker = this.view.locator(`div.monaco-tl-row:has-text("${message}")`).first();
     await expect(marker).toBeVisible();
     await expect(marker.locator(`div.marker-icon.${type}`)).toBeVisible();
     if (pid) {
@@ -30,8 +29,8 @@ export class ProblemsView extends View {
   }
 
   async show() {
-    await this.tabLocator.click();
-    await this.isChecked();
+    await this.tab.click();
+    await expect(this.tab).toHaveClass(/checked/);
   }
 
   async hasWarning(message: string, pid: string) {
@@ -43,8 +42,8 @@ export class ProblemsView extends View {
   }
 
   async hasNoMarker() {
-    const marker = this.viewLocator.locator('div.monaco-tl-row');
+    const marker = this.view.locator('div.monaco-tl-row');
     await expect(marker).not.toBeAttached();
-    await expect(this.viewLocator).toContainText('No problems have been detected in the workspace.');
+    await expect(this.view).toContainText('No problems have been detected in the workspace.');
   }
 }

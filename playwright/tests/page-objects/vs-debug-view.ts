@@ -1,5 +1,5 @@
-import { expect, type Locator, type Page } from '@playwright/test';
-import { PageObject } from './page-object';
+import { expect, type Locator } from '@playwright/test';
+import type { WorkspacePage } from './workspace-page';
 
 export class VsDebugView {
   readonly view: Locator;
@@ -7,16 +7,16 @@ export class VsDebugView {
   readonly variablesSection: Locator;
   readonly callStackSection: Locator;
 
-  constructor(readonly page: Page) {
-    this.view = page.locator('.debug-viewlet');
+  constructor(readonly wsPage: WorkspacePage) {
+    this.view = wsPage.page.locator('.debug-viewlet');
     this.welcome = this.view.locator('.welcome-view');
     this.variablesSection = this.view.locator('.debug-variables');
     this.callStackSection = this.view.locator('.debug-call-stack');
   }
 
-  static async showDebugView(page: Page) {
-    await new PageObject(page).executeCommand('View: Show Run and Debug');
-    const view = new VsDebugView(page);
+  static async showDebugView(wsPage: WorkspacePage) {
+    await wsPage.executeCommand('View: Show Run and Debug');
+    const view = new VsDebugView(wsPage);
     await expect(view.welcome).toBeVisible();
     return view;
   }
@@ -28,20 +28,20 @@ export class VsDebugView {
   }
 
   async startDebugSession() {
-    await new PageObject(this.page).executeCommand('Axon Ivy: Attach Process Debugger');
+    await this.wsPage.executeCommand('Axon Ivy: Attach Process Debugger');
     await expect(this.welcome).toBeHidden();
     await expect(this.variablesSection).toBeVisible();
     await expect(this.variable('Scope Process Data')).toBeHidden();
   }
 
   async stopDebugSession() {
-    await new PageObject(this.page).executeCommand('Debug: Disconnect');
+    await this.wsPage.executeCommand('Debug: Disconnect');
     await expect(this.welcome).toBeVisible();
     await expect(this.variablesSection).toBeHidden();
   }
 
   async continueDebugSession() {
-    await new PageObject(this.page).executeCommand('Debug: Continue');
+    await this.wsPage.executeCommand('Debug: Continue');
   }
 
   callStackEntry(name: string, fileName: string) {

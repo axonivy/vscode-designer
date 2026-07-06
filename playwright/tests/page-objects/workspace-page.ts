@@ -35,6 +35,12 @@ export class WorkspacePage {
     await this.quickInputBox.press('Enter', { delay: 100 });
   }
 
+  async selectItemFromQuickPick(label: string) {
+    const item = this.page.locator('div.quick-input-list').locator('div.monaco-icon-label-container', { hasText: label });
+    await item.click({ delay: 100 });
+    await expect(item).toBeHidden();
+  }
+
   get quickInputBox() {
     return this.page.locator('div.quick-input-box');
   }

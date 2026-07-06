@@ -1,16 +1,16 @@
-import type { Locator, Page } from '@playwright/test';
-import { View, type ViewData } from './view';
+import { expect, type Locator } from '@playwright/test';
+import { webViewFrameLocator } from './webview-util';
+import type { WorkspacePage } from './workspace-page';
 
-const welcomePageViewData: ViewData = {
-  tabSelector: 'div.tab:has-text("welcome-page")',
-  viewSelector: 'body > div > div > div[data-parent-flow-to-element-id] >> visible=true'
-};
-
-export class WelcomePage extends View {
+export class WelcomePage {
   readonly showPageCheckbox: Locator;
 
-  constructor(page: Page) {
-    super(welcomePageViewData, page);
-    this.showPageCheckbox = this.viewFrameLocator().getByRole('checkbox', { name: 'Show welcome page on extension activation' });
+  constructor(readonly wsPage: WorkspacePage) {
+    this.showPageCheckbox = webViewFrameLocator(wsPage).getByRole('checkbox', { name: 'Show welcome page on extension activation' });
+  }
+
+  async open() {
+    await this.wsPage.executeCommand('Axon Ivy: Open Welcome Page');
+    await expect(this.showPageCheckbox).toBeVisible();
   }
 }

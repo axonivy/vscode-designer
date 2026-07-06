@@ -1,28 +1,27 @@
-import { type Locator, type Page, expect } from '@playwright/test';
-import { View, type ViewData } from './view';
+import { type Locator, expect } from '@playwright/test';
+import type { WorkspacePage } from './workspace-page';
 
-const outputViewData: ViewData = {
-  tabSelector: 'li.action-item:has-text("Output")',
-  viewSelector: 'div.output-view'
-};
-
-export class OutputView extends View {
+export class OutputView {
+  readonly tab: Locator;
+  readonly view: Locator;
   readonly sourceSelection: Locator;
   readonly logEntries: Locator;
-  constructor(page: Page) {
-    super(outputViewData, page);
-    this.sourceSelection = page.getByRole('toolbar', { name: 'Output actions', includeHidden: false }).locator('select');
-    this.logEntries = page.locator('div.output-view').locator('.view-lines');
+
+  constructor(readonly wsPage: WorkspacePage) {
+    this.tab = wsPage.page.locator('li.action-item:has-text("Output")');
+    this.view = wsPage.page.locator('div.output-view');
+    this.sourceSelection = wsPage.page.getByRole('toolbar', { name: 'Output actions', includeHidden: false }).locator('select');
+    this.logEntries = wsPage.page.locator('div.output-view').locator('.view-lines');
   }
 
   async open() {
-    await this.executeCommand('Output: Focus on Output View');
+    await this.wsPage.executeCommand('Output: Focus on Output View');
   }
 
   async checkIfEngineStarted() {
     const expectedText = 'Axon Ivy Engine is running and ready to serve.';
     await expect(async () => {
-      await expect(this.viewLocator).toContainText(expectedText);
+      await expect(this.view).toContainText(expectedText);
     }).toPass();
   }
 

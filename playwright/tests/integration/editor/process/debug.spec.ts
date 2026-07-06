@@ -1,22 +1,22 @@
 import { expect } from '@playwright/test';
-import { test } from '../fixtures/baseTest';
-import { ProcessEditor } from '../page-objects/process-editor';
-import { VsDebugView } from '../page-objects/vs-debug-view';
+import { test } from '~/fixtures/baseTest';
+import { ProcessEditor } from '~/page-objects/process-editor';
+import { VsDebugView } from '~/page-objects/vs-debug-view';
 
-test('debug', { tag: '@serial' }, async ({ page }) => {
-  const processEditor = new ProcessEditor(page, 'NoAnimation.p.json');
-  await processEditor.openEditorFile();
-  const start = processEditor.locatorForPID('191A2645F90CDC61-f0');
+test('debug', { tag: '@serial' }, async ({ wsPage }) => {
+  const processEditor = new ProcessEditor(wsPage, 'NoAnimation.p.json');
+  await processEditor.open();
+  const start = processEditor.elementByPID('191A2645F90CDC61-f0');
   await expect(start).toBeVisible();
 
-  const callSub = processEditor.locatorForPID('191A2645F90CDC61-f3');
+  const callSub = processEditor.elementByPID('191A2645F90CDC61-f3');
   await processEditor.addBreakpoint(callSub);
 
-  const debugView = await VsDebugView.showDebugView(page);
+  const debugView = await VsDebugView.showDebugView(wsPage);
   await debugView.assertBreakpoint('NoAnimation.p.json', '28');
 
   await debugView.startDebugSession();
-  await processEditor.page.waitForTimeout(2_000); // ensure session is started
+  await wsPage.page.waitForTimeout(2_000); // ensure session is started
 
   await processEditor.startProcessAndAssertExecuted(start, callSub);
   await expect(callSub).toBeVisible();

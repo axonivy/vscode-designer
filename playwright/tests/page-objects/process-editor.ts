@@ -1,45 +1,40 @@
-import { expect, type Locator, type Page } from '@playwright/test';
-import { Editor } from './editor';
-import { InscriptionView } from './inscription-view';
+import { expect, type Locator } from '@playwright/test';
+import { WebViewEditor } from './editor';
+import type { WorkspacePage } from './workspace-page';
 
-export class ProcessEditor extends Editor {
-  constructor(page: Page, editorFile: string = 'ProcurementRequestUserTask.p.json', frameIndex?: number) {
-    super(editorFile, page, frameIndex);
+export class ProcessEditor extends WebViewEditor {
+  constructor(wsPage: WorkspacePage, fileName: string = 'ProcurementRequestUserTask.p.json', frameIndex?: number) {
+    super(wsPage, fileName, frameIndex);
   }
 
-  override async isViewVisible() {
-    await this.isTabVisible();
-    await expect(this.graphLocator()).toBeVisible();
-  }
-
-  graphLocator() {
-    return this.viewFrameLocator().locator('#sprotty .sprotty-graph');
+  get graph() {
+    return this.webViewFrame.locator('#sprotty .sprotty-graph');
   }
 
   get toolbar() {
-    return this.viewFrameLocator().locator('.ivy-tool-bar');
+    return this.webViewFrame.locator('.ivy-tool-bar');
   }
 
-  locatorForPID(pid: string) {
-    return this.graphLocator().locator(`[id$="_${pid}"]`);
+  elementByPID(pid: string) {
+    return this.graph.locator(`[id$="_${pid}"]`);
   }
 
-  locatorForElementType(type: string) {
-    return this.graphLocator().locator(type);
+  elementByType(type: string) {
+    return this.graph.locator(`.${type.replaceAll(':', '\\:')}`);
   }
 
   async openInscriptionView(pid: string) {
-    await this.locatorForPID(pid).click();
+    await this.elementByPID(pid).click();
     const view = this.inscriptionView();
     if (await view.parent.isHidden()) {
-      await this.viewFrameLocator().locator('#btn_inscription_toggle').click();
+      await this.webViewFrame.locator('#btn_inscription_toggle').click();
     }
     await view.assertViewVisible();
     return view;
   }
 
   inscriptionView() {
-    return new InscriptionView(this.page, this.viewFrameLocator().locator('.inscription-ui-container'));
+    return new InscriptionView(this.wsPage, this.webViewFrame.locator('.inscription-ui-container'));
   }
 
   async startProcessAndAssertExecuted(startEvent: Locator, executedElement: Locator) {
@@ -58,7 +53,7 @@ export class ProcessEditor extends Editor {
   }
 
   get quickActionBar() {
-    return this.viewFrameLocator().locator('.quick-actions-bar');
+    return this.webViewFrame.locator('.quick-actions-bar');
   }
 
   async assertNotExecuted(element: Locator) {
@@ -76,9 +71,9 @@ export class ProcessEditor extends Editor {
   async appendActivity(target: Locator, activityName: string) {
     await target.click();
     await this.assertSelected(target);
-    const activities = this.viewFrameLocator().getByTitle('Activities (A)');
+    const activities = this.webViewFrame.getByTitle('Activities (A)');
     await activities.click();
-    const newItemButton = this.viewFrameLocator().locator('div.quick-action-bar-menu').getByRole('button', { name: activityName }).first();
+    const newItemButton = this.webViewFrame.locator('div.quick-action-bar-menu').getByRole('button', { name: activityName }).first();
     await newItemButton.click();
   }
 
@@ -97,5 +92,77 @@ export class ProcessEditor extends Editor {
   async hasNoValidationMarker(element: Locator) {
     await expect(element).not.toHaveClass(/warning/);
     await expect(element).not.toHaveClass(/error/);
+  }
+}
+
+class InscriptionView {
+  constructor(
+    readonly wsPage: WorkspacePage,
+    readonly parent: Locator
+  ) {}
+
+  async assertViewVisible() {
+    await expect(this.parent).toBeVisible();
+  }
+
+  get header() {
+    return this.parent.locator('.header');
+  }
+
+  async openInscriptionTab(name: string) {
+    const inscriptionTab = this.parent.getByRole('tab', { name: name });
+    await expect(inscriptionTab).toBeVisible();
+    if ((await inscriptionTab.getAttribute('aria-selected')) !== 'true') {
+      await inscriptionTab.click();
+    }
+  }
+
+  async openCollapsible(name: string) {
+    await this.openOrCloseCollapsible(name, true);
+  }
+
+  async closeCollapsible(name: string) {
+    await this.openOrCloseCollapsible(name, false);
+  }
+
+  private async openOrCloseCollapsible(name: string, openIt: boolean) {
+    const collapsible = this.parent.locator(`.ui-collapsible-trigger:has-text("${name}")`);
+    if ((await collapsible.getAttribute('data-state')) === (openIt ? 'closed' : 'open')) {
+      await collapsible.click();
+    }
+    await expect(collapsible).toHaveAttribute('data-state', openIt ? 'open' : 'closed');
+  }
+
+  inputFieldFor(label: string) {
+    return this.parent.getByLabel(label, { exact: true });
+  }
+
+  cellInsideTable(tableCount: number, cellCount: number) {
+    const firstTable = this.parent.getByRole('table').nth(tableCount);
+    return firstTable.getByRole('cell').nth(cellCount);
+  }
+
+  async clickButton(label: string) {
+    await this.parent.getByRole('button', { name: label }).click();
+  }
+
+  get monacoEditor() {
+    return this.parent.locator('.view-lines.monaco-mouse-cursor-text');
+  }
+
+  async triggerMonacoContentAssist() {
+    await this.wsPage.page.keyboard.press('Control+Space');
+  }
+
+  async writeToMonacoEditorWithCompletion(input: string, expectedCompletion: string) {
+    await this.wsPage.page.keyboard.type(input, { delay: 50 });
+    const contentAssist = this.monacoContentAssist;
+    await expect(contentAssist).toBeVisible();
+    await contentAssist.getByText(expectedCompletion).first().locator('span.highlight').click();
+    await expect(contentAssist).toBeHidden();
+  }
+
+  get monacoContentAssist() {
+    return this.parent.locator('div.editor-widget.suggest-widget');
   }
 }

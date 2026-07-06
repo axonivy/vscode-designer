@@ -1,100 +1,98 @@
-import { expect, type Locator, type Page } from '@playwright/test';
-import { View, type ViewData } from './view';
+import { expect, type Locator } from '@playwright/test';
+import type { WorkspacePage } from './workspace-page';
 
-export abstract class ExplorerView extends View {
+abstract class ExplorerView {
+  readonly tab: Locator;
+  private readonly expandedTab: Locator;
+  readonly view: Locator;
+
   constructor(
-    private viewName: string,
-    page: Page
+    readonly wsPage: WorkspacePage,
+    private viewName: string
   ) {
-    const data: ViewData = {
-      tabSelector: `div.pane-header:has-text("${viewName}")`,
-      viewSelector: ''
-    };
-    super(data, page);
-  }
-
-  override get viewLocator(): Locator {
-    return this.page.getByRole('tree', { name: this.viewName });
+    this.tab = wsPage.page.locator(`div.pane-header:has-text("${viewName}")`);
+    this.expandedTab = wsPage.page.locator(`div.pane-header:has-text("${viewName}").expanded`);
+    this.view = wsPage.page.getByRole('tree', { name: this.viewName });
   }
 
   async isHidden() {
-    await expect(this.tabLocator).toBeHidden();
+    await expect(this.tab).toBeHidden();
   }
 
   async openView() {
-    if (!(await this.page.locator(`${this.data.tabSelector}.expanded`).isVisible())) {
-      await this.tabLocator.click();
+    if (!(await this.expandedTab.isVisible())) {
+      await this.tab.click();
     }
-    await expect(this.viewLocator).toBeVisible();
+    await expect(this.view).toBeVisible();
   }
 
   async closeView() {
-    if (await this.page.locator(`${this.data.tabSelector}.expanded`).isVisible()) {
-      await this.tabLocator.click();
+    if (await this.expandedTab.isVisible()) {
+      await this.tab.click();
     }
-    await expect(this.viewLocator).toBeHidden();
+    await expect(this.view).toBeHidden();
   }
 
   async hasNode(name: string) {
-    const node = this.viewLocator.getByText(name);
+    const node = this.view.getByText(name);
     await expect(node).toBeVisible();
   }
 
   async hasNoNode(name: string) {
-    const node = this.viewLocator.getByText(name);
+    const node = this.view.getByText(name);
     await expect(node).not.toBeAttached();
   }
 
   async selectNode(name: string) {
-    await this.viewLocator.getByText(name).click();
+    await this.view.getByText(name).click();
     await this.isSelected(name);
   }
 
   async selectNodeExact(name: string) {
-    await this.viewLocator.getByText(name, { exact: true }).click();
+    await this.view.getByText(name, { exact: true }).click();
     await this.isSelected(name);
   }
 
   async isSelected(name: string) {
-    const selected = this.viewLocator.locator('.monaco-list-row.selected');
+    const selected = this.view.locator('.monaco-list-row.selected');
     await expect(selected).toContainText(name);
   }
 
   async doubleClickNode(name: string) {
-    await this.viewLocator.getByText(name).dblclick();
+    await this.view.getByText(name).dblclick();
   }
 
   async selectInContextMenuOfNode(name: string, ...menuPath: Array<string>) {
-    await this.viewLocator.getByText(name).click({ button: 'right' });
+    await this.view.getByText(name).click({ button: 'right' });
     for (const menuEntry of menuPath.slice(0, -1)) {
-      await this.page.getByRole('menuitem', { name: menuEntry }).hover();
+      await this.wsPage.page.getByRole('menuitem', { name: menuEntry }).hover();
     }
-    await this.page.getByRole('menuitem', { name: menuPath[menuPath.length - 1] }).click({ delay: 100 });
+    await this.wsPage.page.getByRole('menuitem', { name: menuPath[menuPath.length - 1] }).click({ delay: 100 });
   }
 }
 
 export class FileExplorer extends ExplorerView {
-  constructor(page: Page) {
-    super('Explorer', page);
+  constructor(wsPage: WorkspacePage) {
+    super(wsPage, 'Explorer');
   }
 
   async addFolder(name: string) {
-    await this.executeCommand('File: New Folder');
-    await this.page.locator('div.explorer-item-edited').getByRole('textbox').fill(name);
-    await this.page.keyboard.press('Enter');
+    await this.wsPage.executeCommand('File: New Folder');
+    await this.wsPage.page.locator('div.explorer-item-edited').getByRole('textbox').fill(name);
+    await this.wsPage.page.keyboard.press('Enter');
   }
 
   async addNestedProject(rootFolder: string, projectName: string) {
     await this.addFolder(rootFolder);
-    await this.viewLocator.getByText(rootFolder).click({ button: 'right' });
-    const menu = this.page.getByRole('menu');
+    await this.view.getByText(rootFolder).click({ button: 'right' });
+    const menu = this.wsPage.page.getByRole('menu');
     await menu.getByRole('menuitem', { name: 'Axon Ivy New...' }).hover();
     const newProject = menu.getByRole('menuitem', { name: 'New Project' });
     await newProject.click({ delay: 100 });
 
-    await this.provideUserInput(projectName);
-    await this.provideUserInput();
-    await this.provideUserInput();
+    await this.wsPage.provideUserInput(projectName);
+    await this.wsPage.provideUserInput();
+    await this.wsPage.provideUserInput();
   }
 
   async addProcess(
@@ -107,21 +105,21 @@ export class FileExplorer extends ExplorerView {
       defaultNamespaceExpected = 'prebuiltProject';
     }
     await this.selectNode('config');
-    await this.executeCommand('Axon Ivy: New ' + kind);
-    await this.provideUserInput('playwrightTestWorkspace');
-    await this.provideUserInput(processName);
-    await expect(this.quickInputBox().getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
-    await this.provideUserInput(namespace);
+    await this.wsPage.executeCommand('Axon Ivy: New ' + kind);
+    await this.wsPage.provideUserInput('playwrightTestWorkspace');
+    await this.wsPage.provideUserInput(processName);
+    await expect(this.wsPage.quickInputBox.getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
+    await this.wsPage.provideUserInput(namespace);
   }
 
   async installLocalProduct(productJson: string) {
-    await this.executeCommand('Axon Ivy: Install Local Market Product');
-    await this.selectItemFromQuickPick(productJson);
+    await this.wsPage.executeCommand('Axon Ivy: Install Local Market Product');
+    await this.wsPage.selectItemFromQuickPick(productJson);
   }
 
   async installProduct(productId: string) {
-    await this.executeCommand('Axon Ivy: Install Market Product');
-    await this.provideUserInput(productId);
+    await this.wsPage.executeCommand('Axon Ivy: Install Market Product');
+    await this.wsPage.provideUserInput(productId);
   }
 
   async addUserDialog(
@@ -131,38 +129,38 @@ export class FileExplorer extends ExplorerView {
     defaultNamespaceExpected: string = 'prebuiltProject'
   ) {
     await this.selectNode('config');
-    await this.executeCommand('Axon Ivy: New ' + kind);
-    await this.provideUserInput('playwrightTestWorkspace');
-    await this.provideUserInput(dialogName);
-    await expect(this.quickInputBox().getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
-    await this.provideUserInput(namespace);
+    await this.wsPage.executeCommand('Axon Ivy: New ' + kind);
+    await this.wsPage.provideUserInput('playwrightTestWorkspace');
+    await this.wsPage.provideUserInput(dialogName);
+    await expect(this.wsPage.quickInputBox.getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
+    await this.wsPage.provideUserInput(namespace);
     if (kind === 'Html Dialog (JSF)') {
-      await this.provideUserInput();
-      await this.provideUserInput();
+      await this.wsPage.provideUserInput();
+      await this.wsPage.provideUserInput();
     }
   }
 
   async addDataClass(dataClass: string, namespace: string, defaultNamespaceExpected: string = 'prebuiltProject') {
     await this.selectNode('config');
-    await this.executeCommand('Axon Ivy: New Data Class');
-    await this.provideUserInput('playwrightTestWorkspace');
-    await this.provideUserInput(dataClass);
-    await expect(this.quickInputBox().getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
-    await this.provideUserInput(namespace);
+    await this.wsPage.executeCommand('Axon Ivy: New Data Class');
+    await this.wsPage.provideUserInput('playwrightTestWorkspace');
+    await this.wsPage.provideUserInput(dataClass);
+    await expect(this.wsPage.quickInputBox.getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
+    await this.wsPage.provideUserInput(namespace);
   }
 
   async addEntityClass(entityClass: string, namespace: string, defaultNamespaceExpected: string = 'prebuiltProject') {
     await this.selectNode('config');
-    await this.executeCommand('Axon Ivy: New Entity Class');
-    await this.provideUserInput('playwrightTestWorkspace');
-    await this.provideUserInput(entityClass);
-    await expect(this.quickInputBox().getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
-    await this.provideUserInput(namespace);
+    await this.wsPage.executeCommand('Axon Ivy: New Entity Class');
+    await this.wsPage.provideUserInput('playwrightTestWorkspace');
+    await this.wsPage.provideUserInput(entityClass);
+    await expect(this.wsPage.quickInputBox.getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
+    await this.wsPage.provideUserInput(namespace);
   }
 }
 
 export class ProjectExplorerView extends ExplorerView {
-  constructor(page: Page) {
-    super('Axon Ivy Projects', page);
+  constructor(wsPage: WorkspacePage) {
+    super(wsPage, 'Axon Ivy Projects');
   }
 }
