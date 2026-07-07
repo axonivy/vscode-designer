@@ -1,41 +1,108 @@
-import { type Page, expect } from '@playwright/test';
-import { View } from './view';
+import { expect, type Locator } from '@playwright/test';
+import { webViewFrameLocator } from './webview-util';
+import type { WorkspacePage } from './workspace-page';
 
-export class Editor extends View {
+abstract class Editor {
+  tab: Locator;
+
   constructor(
-    private readonly editorFile: string,
-    page: Page,
-    frameIndex?: number
+    readonly wsPage: WorkspacePage,
+    readonly fileName: string
   ) {
-    super(
-      {
-        tabSelector: `div.tab:has-text("${editorFile}")`,
-        viewSelector: 'body > div > div > div[data-parent-flow-to-element-id] >> visible=true',
-        frameIndex
-      },
-      page
-    );
+    this.tab = this.wsPage.page.locator(`div.tab:has-text("${fileName}")`);
   }
 
-  async openEditorFile() {
-    await this.wsPage.openEditorFile(this.editorFile);
+  abstract open(): Promise<void>;
+
+  async close() {
+    await this.expectTabActive();
+    await this.wsPage.executeCommand('View: Close Editor');
+    await expect(this.tab).toBeHidden();
   }
 
-  async revertAndCloseEditor() {
-    if (await this.tabLocator.isVisible()) {
-      await this.tabLocator.click({ delay: 500 });
-      await this.executeCommand('View: Revert and Close Editor');
+  async save(options?: { force?: boolean }) {
+    if (!options?.force) {
+      await this.expectTabDirty();
     }
-    await expect(this.tabLocator).toBeHidden();
+    await this.wsPage.executeCommand('File: Save');
+    await this.expectTabNotDirty();
   }
 
-  editorContent() {
-    return this.page.locator('div.editor-container');
+  async expectTabDirty() {
+    await expect(this.tab).toHaveClass(/dirty/);
+  }
+
+  async expectTabNotDirty() {
+    await expect(this.tab).not.toHaveClass(/dirty/);
+  }
+
+  async expectTabActive() {
+    await expect(this.tab).toHaveClass(/active/);
+  }
+
+  async expectTabInactive() {
+    await expect(this.tab).not.toHaveClass(/active/);
+  }
+
+  async expectTabVisible() {
+    await expect(this.tab).toBeVisible();
+  }
+
+  async expectHasBreadCrumbs(...breadCrumbs: Array<string>) {
+    const breadCrumbsLocator = this.wsPage.page.locator('div.breadcrumbs-below-tabs').getByRole('listitem');
+    for (let i = 0; i < breadCrumbs.length; i++) {
+      await expect(breadCrumbsLocator.nth(i)).toHaveText(breadCrumbs[i]!);
+    }
+  }
+}
+
+export class TextEditor extends Editor {
+  content: Locator;
+
+  constructor(wsPage: WorkspacePage, fileName: string) {
+    super(wsPage, fileName);
+    this.content = this.wsPage.page.locator('div.editor-container');
+  }
+
+  override async open() {
+    await this.wsPage.openEditorFile(this.fileName);
+    await this.expectTabVisible();
   }
 
   async goToLineColumn(line: number, column: number) {
-    await this.page.locator('#status\\.editor\\.selection').click();
-    await this.provideUserInput(`:${line}:${column}`);
-    await expect(this.page.locator('a.statusbar-item-label').getByText(`Ln ${line}, Col ${column}`)).toBeVisible();
+    await this.wsPage.page.locator('#status\\.editor\\.selection').click();
+    await this.wsPage.provideUserInput(`:${line}:${column}`);
+    await expect(this.wsPage.page.locator('a.statusbar-item-label').getByText(`Ln ${line}, Col ${column}`)).toBeVisible();
+  }
+}
+
+export class WebViewEditor extends Editor {
+  readonly content: Locator;
+  webViewFrame!: Locator;
+
+  constructor(wsPage: WorkspacePage, fileName: string, nthFrame = 0) {
+    super(wsPage, fileName);
+    this.content = this.wsPage.page.locator('div.editor-container');
+    this.updateWebViewFrameLocator(nthFrame);
+  }
+
+  override async open() {
+    await this.wsPage.openEditorFile(this.fileName);
+    await this.expectTabVisible();
+    await this.expectTabActive();
+    await this.expectWebViewVisible();
+  }
+
+  async expectTextContent(expected: string) {
+    await this.wsPage.executeCommand('View: Reopen Editor With Text Editor');
+    await expect(this.content).toContainText(expected);
+  }
+
+  async expectWebViewVisible() {
+    await expect(this.webViewFrame).toBeVisible();
+  }
+
+  updateWebViewFrameLocator(nthFrame = 0) {
+    this.webViewFrame = webViewFrameLocator(this.wsPage, nthFrame);
   }
 }

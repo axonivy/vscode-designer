@@ -31,7 +31,7 @@ test('OpenAPI codegen', async ({ wsPage }) => {
 test('Open Help', async ({ wsPage }) => {
   const editor = new RestClientEditor(wsPage);
   await editor.open();
-  const outputView = new OutputView(wsPage.page);
+  const outputView = new OutputView(wsPage);
   await outputView.openLog('Axon Ivy Extension');
 
   await editor.webViewFrame.getByRole('button', { name: /Help/ }).click();

@@ -1,9 +1,9 @@
 import { expect } from '@playwright/test';
 import { test } from '~/fixtures/baseTest';
 import { BrowserView } from '~/page-objects/browser-view';
+import { TextEditor } from '~/page-objects/editor';
 import { FormEditor } from '~/page-objects/form-editor';
 import { OutputView } from '~/page-objects/output-view';
-import { TextEditor } from '~/page-objects/text-editor';
 
 test('Edit input label', async ({ wsPage }) => {
   const editor = new FormEditor(wsPage);
@@ -63,7 +63,7 @@ test('Open Help', async ({ wsPage }) => {
   const editor = new FormEditor(wsPage);
   await editor.open();
   await editor.blockFor('input').dblclick();
-  const outputView = new OutputView(wsPage.page);
+  const outputView = new OutputView(wsPage);
   await outputView.openLog('Axon Ivy Extension');
 
   await editor.detail.getByRole('button', { name: /Help/ }).click();
@@ -75,9 +75,9 @@ test('Open Help', async ({ wsPage }) => {
 test('Preview', async ({ wsPage }) => {
   const editor = new FormEditor(wsPage);
   await editor.open();
-  const browserView = new BrowserView(wsPage.page);
+  const browserView = new BrowserView(wsPage, 1);
   await browserView.openDevWfUi();
-  const browser = browserView.content();
+  const browser = browserView.content;
   await expect(browser.locator('.layout-topbar-logo')).toBeVisible();
   await browserView.moveToSecondaryPanel();
 

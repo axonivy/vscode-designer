@@ -1,60 +1,50 @@
-import { type Page, expect } from '@playwright/test';
-import { View, type ViewData } from './view';
+import { type FrameLocator, type Locator } from '@playwright/test';
+import { webViewFrameLocator } from './webview-util';
+import type { WorkspacePage } from './workspace-page';
 
-export class BrowserView extends View {
-  constructor(page: Page) {
-    const outputViewData: ViewData = {
-      tabSelector: 'li.action-item:has-text("Browser")',
-      viewSelector: 'body > div > div > div[data-parent-flow-to-element-id] >> visible=true'
-    };
-    super(outputViewData, page);
-  }
+export class BrowserView {
+  readonly webViewFrame: Locator;
+  readonly header: Locator;
+  readonly content: FrameLocator;
 
-  override async isViewVisible() {
-    await expect(this.header()).toBeVisible();
+  constructor(
+    readonly wsPage: WorkspacePage,
+    nthFrame = 0
+  ) {
+    this.webViewFrame = webViewFrameLocator(this.wsPage, nthFrame);
+    this.header = this.webViewFrame.locator('.header');
+    this.content = this.webViewFrame.locator('.content').frameLocator('iFrame');
   }
 
   async openDevWfUi() {
-    await this.executeCommand('Open Developer Workflow UI');
+    await this.wsPage.executeCommand('Open Developer Workflow UI');
   }
 
   async moveToSecondaryPanel() {
-    await this.executeCommand('View: Move View', 'Browser', 'New Secondary Side Bar Entry');
+    await this.wsPage.executeCommand('View: Move View', 'Browser', 'New Secondary Side Bar Entry');
   }
 
-  back() {
-    return this.header().locator('.back-button');
+  get back() {
+    return this.header.locator('.back-button');
   }
 
-  forward() {
-    return this.header().locator('.forward-button');
+  get forward() {
+    return this.header.locator('.forward-button');
   }
 
-  reload() {
-    return this.header().locator('.reload-button');
+  get reload() {
+    return this.header.locator('.reload-button');
   }
 
-  input() {
-    return this.header().locator('.url-input');
+  get input() {
+    return this.header.locator('.url-input');
   }
 
-  home() {
-    return this.header().locator('.open-home-button');
+  get home() {
+    return this.header.locator('.open-home-button');
   }
 
-  external() {
-    return this.header().locator('.open-external-button');
-  }
-
-  content() {
-    return this.viewFrameLocator().locator('.content').frameLocator('iFrame');
-  }
-
-  private header() {
-    return this.viewFrameLocator().locator('.header');
-  }
-
-  override viewFrameLocator() {
-    return this.viewLocator.locator('iFrame.ready').last().contentFrame().frameLocator('iFrame#active-frame');
+  get external() {
+    return this.header.locator('.open-external-button');
   }
 }

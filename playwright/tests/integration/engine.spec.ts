@@ -7,11 +7,8 @@ import { embeddedEngineWorkspace, noEngineWorkspacePath, noProjectWorkspacePath 
 test.describe('Engine run by extension', () => {
   test.use({ workspace: embeddedEngineWorkspace });
 
-  test('check if extension can download and start engine', async ({ page }) => {
-    const outputview = new OutputView(page);
-    await outputview.isTabVisible();
-    await outputview.isChecked();
-    await outputview.isViewVisible();
+  test('check if extension can download and start engine', async ({ wsPage }) => {
+    const outputview = new OutputView(wsPage);
     await outputview.checkIfEngineStarted();
   });
 });
@@ -19,8 +16,8 @@ test.describe('Engine run by extension', () => {
 test.describe('Engine noProjectWorkspacePath', () => {
   test.use({ workspace: noProjectWorkspacePath });
 
-  test('check default engine settings and ensure engine is started even if no projects in workspace', async ({ page }) => {
-    const settingsView = new SettingsView(page);
+  test('check default engine settings and ensure engine is started even if no projects in workspace', async ({ wsPage }) => {
+    const settingsView = new SettingsView(wsPage);
     await settingsView.openDefaultSettings();
     await settingsView.containsSetting('"axonivy.engine.runByExtension": true');
     await settingsView.containsSetting('"axonivy.engine.releaseTrain": ""');
@@ -32,7 +29,7 @@ test.describe('Engine noProjectWorkspacePath', () => {
 
     await settingsView.openWorkspaceSettings();
     await settingsView.containsSetting('"axonivy.engine.runByExtension": true');
-    const outputview = new OutputView(page);
+    const outputview = new OutputView(wsPage);
     await outputview.checkIfEngineStarted();
   });
 });
@@ -40,23 +37,23 @@ test.describe('Engine noProjectWorkspacePath', () => {
 test.describe('Engine noEngineWorkspacePath', () => {
   test.use({ workspace: noEngineWorkspacePath });
 
-  test('ensure that engine is not started due to settings', async ({ page }) => {
-    const settingsView = new SettingsView(page);
-    await expect(page.locator('li.action-item.checked').getByLabel('Explorer').first()).toBeVisible();
+  test('ensure that engine is not started due to settings', async ({ wsPage }) => {
+    const settingsView = new SettingsView(wsPage);
+    await expect(wsPage.page.locator('li.action-item.checked').getByLabel('Explorer').first()).toBeVisible();
     await settingsView.openWorkspaceSettings();
     await settingsView.containsSetting('"axonivy.engine.runByExtension": false');
     await settingsView.containsSetting('"axonivy.engine.url": "http://localhost:8080/"');
-    const outputview = new OutputView(page);
-    await expect(outputview.viewLocator).toBeHidden();
+    const outputview = new OutputView(wsPage);
+    await expect(outputview.view).toBeHidden();
   });
 
-  test('switch release train', async ({ page }) => {
-    const settingsView = new SettingsView(page);
+  test('switch release train', async ({ wsPage }) => {
+    const settingsView = new SettingsView(wsPage);
     await settingsView.openWorkspaceSettings();
     await settingsView.doesNotContainSetting('"axonivy.engine.releaseTrain":');
-    await settingsView.executeCommand('Axon Ivy: Switch Engine Release Train');
-    await settingsView.selectItemFromQuickPick('nightly');
+    await wsPage.executeCommand('Axon Ivy: Switch Engine Release Train');
+    await wsPage.selectItemFromQuickPick('nightly');
     await settingsView.containsSetting('"axonivy.engine.releaseTrain": "nightly');
-    await expect(page.locator('div.quick-input-widget')).toContainText('Engine release train switched - reload window to apply new settings and restart the engine');
+    await expect(wsPage.page.locator('div.quick-input-widget')).toContainText('Engine release train switched - reload window to apply new settings and restart the engine');
   });
 });
