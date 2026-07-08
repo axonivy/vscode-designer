@@ -172,6 +172,7 @@ export interface WorkspaceInit {
 
 export interface ProductInstallParams {
   productJson: string;
+  doCompile: boolean;
   dependentProject?: ProjectIdentifier;
   dependentProjectPath?: string;
 }
@@ -457,11 +458,10 @@ export const deleteWorkspace = (id: string, options?: AxiosRequestConfig): Promi
 
 export const installMarketProduct = (
   id: string,
-  doCompile: boolean,
   productInstallParams?: ProductInstallParams,
   options?: AxiosRequestConfig
 ): Promise<AxiosResponse<MarketInstallResult>> => {
-  return axios.post(`/web-ide/workspace/install/${id}/${doCompile}`, productInstallParams, options);
+  return axios.post(`/web-ide/workspace/install/${id}`, productInstallParams, options);
 };
 
 export type ProcessDebuggerResult = AxiosResponse<number>;
