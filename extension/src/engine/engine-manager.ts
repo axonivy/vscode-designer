@@ -197,10 +197,11 @@ export class IvyEngineManager {
     );
   }
 
-  public async installMarketProduct(input: ProductInstallParams) {
+  public async installMarketProduct(input: Omit<ProductInstallParams, 'doCompile'>) {
+    const inputFull: ProductInstallParams = { ...input, doCompile: false };
     await StatusBar.withStatusBarProgress(
       { text: 'Importing market product' },
-      async () => await this.ivyEngineApi?.installMarketProduct(input)
+      async () => await this.ivyEngineApi?.installMarketProduct(inputFull)
     );
     await this.importJavaProjects();
     await IvyProjectExplorer.instance.refresh();
