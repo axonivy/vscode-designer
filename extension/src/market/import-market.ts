@@ -42,6 +42,8 @@ interface InstallMarketProductState extends MSStateBase {
   dependentProjectFilterText?: string;
 }
 
+const DO_COMPILE = false;
+
 export const installLocalMarketProduct = async (selectionContext: AddCommandSelectionContext) => {
   const existingProjects = selectionContext.existingIvyProjects;
 
@@ -190,6 +192,7 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     );
     const installMarketProductInput: ProductInstallParams = {
       productJson: installLocalMarketProductData.productJson,
+      doCompile: DO_COMPILE,
       dependentProjectPath: installLocalMarketProductData.dependentProject?.path ?? ''
     };
     await IvyEngineManager.instance.installMarketProduct(installMarketProductInput);
@@ -371,6 +374,7 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
   try {
     const installMarketProductInput: ProductInstallParams = {
       productJson: installMarketProductData.productJson,
+      doCompile: DO_COMPILE,
       dependentProjectPath: installMarketProductData.dependentProject?.path ?? ''
     };
     await IvyEngineManager.instance.installMarketProduct(installMarketProductInput);
