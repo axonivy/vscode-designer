@@ -151,7 +151,7 @@ export class IvyProjectExplorer {
     }
   }
 
-  private async refresh() {
+  public async refresh() {
     this.treeDataProvider.refresh();
     await this.activateEngineIfNeeded();
     await this.syncProjects();
