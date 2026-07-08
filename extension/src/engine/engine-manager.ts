@@ -198,13 +198,12 @@ export class IvyEngineManager {
   }
 
   public async installMarketProduct(input: ProductInstallParams) {
-    const doCompile = false;
     await StatusBar.withStatusBarProgress(
       { text: 'Importing market product' },
-      async () => await this.ivyEngineApi?.installMarketProduct(doCompile, input)
+      async () => await this.ivyEngineApi?.installMarketProduct(input)
     );
     await this.importJavaProjects();
-    await executeCommand('ivyProjects.refreshEntry');
+    await IvyProjectExplorer.instance.refresh();
   }
 
   public async createUserDialog(newUserDialogParams: NewUserDialogParams) {
