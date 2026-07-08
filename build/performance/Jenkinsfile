@@ -35,6 +35,7 @@ pipeline {
         script {
           bat 'git clone https://github.com/axonivy-market/portal.git playwright/tests/workspaces/portalPerformance/portal || exit /b 0'
           bat 'git -C playwright/tests/workspaces/portalPerformance/portal clean -fdx'
+          bat 'git -C playwright/tests/workspaces/portalPerformance/portal checkout master'
           bat 'git -C playwright/tests/workspaces/portalPerformance/portal pull'
         }
       }
