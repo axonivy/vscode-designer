@@ -5,7 +5,8 @@ import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { IvyEngineManager } from './engine-manager';
 
 const DIAGNOSTIC_SOURCE = 'Axon Ivy';
-const CONVERSION_MESSAGE_PREFIX = 'Project is too old. Needs to be converted in Axon Ivy Designer.';
+const CONVERSION_TOO_OLD_MESSAGE_PREFIX = 'Project is too old. Needs to be converted in Axon Ivy Designer.';
+const CONVERSION_OUTDATED_MESSAGE_PREFIX = 'Project is outdated and needs to be converted.';
 const IVY_PROJECT_FILE = '.ivyproject';
 const POM_FILE = 'pom.xml';
 export class IvyDiagnostics {
@@ -41,7 +42,11 @@ export class IvyDiagnostics {
         if (!fs.existsSync(uri.fsPath)) {
           uri = Uri.joinPath(Uri.file(project.projectDirectory), POM_FILE);
         }
-        const diagnostic = new Diagnostic(new Range(1, 0, 1, 0), project.errorMessage, DiagnosticSeverity.Error);
+        let severity = DiagnosticSeverity.Error;
+        if (project.errorMessage?.startsWith(CONVERSION_OUTDATED_MESSAGE_PREFIX)) {
+          severity = DiagnosticSeverity.Warning;
+        }
+        const diagnostic = new Diagnostic(new Range(1, 0, 1, 0), project.errorMessage, severity);
         diagnostic.source = DIAGNOSTIC_SOURCE;
         this.diagnostics.set(uri, [diagnostic]);
       });
@@ -55,7 +60,7 @@ export class IvyDiagnostics {
   public projectsToBeConverted() {
     const projects: string[] = [];
     this.diagnostics.forEach((uri, diagnostics) => {
-      if (diagnostics.find(d => d.message.startsWith(CONVERSION_MESSAGE_PREFIX))) {
+      if (diagnostics.find(isConversionDiagnostic)) {
         projects.push(uri.fsPath);
       }
     });
@@ -72,11 +77,11 @@ export class IvyDiagnostics {
 
 export class ConvertProjectQuickFix implements CodeActionProvider {
   provideCodeActions(document: TextDocument, range: Range | Selection, context: CodeActionContext) {
-    if (context.diagnostics.length !== 1) {
+    const firstDiagnostic = context.diagnostics[0];
+    if (firstDiagnostic === undefined || context.diagnostics.length > 1) {
       return [];
     }
-    const diagnostic = context.diagnostics[0];
-    if (diagnostic?.source !== DIAGNOSTIC_SOURCE || !diagnostic.message.startsWith(CONVERSION_MESSAGE_PREFIX)) {
+    if (!isConversionDiagnostic(firstDiagnostic)) {
       return [];
     }
     const title = 'Axon Ivy: Convert Project';
@@ -90,3 +95,7 @@ export class ConvertProjectQuickFix implements CodeActionProvider {
     return [action];
   }
 }
+
+const isConversionDiagnostic = (diagnostic: Diagnostic) =>
+  diagnostic.source === DIAGNOSTIC_SOURCE &&
+  (diagnostic.message.startsWith(CONVERSION_TOO_OLD_MESSAGE_PREFIX) || diagnostic.message.startsWith(CONVERSION_OUTDATED_MESSAGE_PREFIX));
