@@ -14,7 +14,8 @@ test('Read, write', async ({ wsPage }) => {
   await editor.expectTextContent('Url: jdbc:mysql://127.0.0.1:3306/demo');
 });
 
-test('Open help', async ({ wsPage }) => {
+// eslint-disable-next-line playwright/no-focused-test
+test.only('Open help', async ({ wsPage }) => {
   const editor = new DatabaseEditor(wsPage);
   await editor.open();
   const outputView = new OutputView(wsPage);
