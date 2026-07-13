@@ -24,6 +24,7 @@
     "@eclipse-glsp/client": "2.7.0",
     "@eclipse-glsp/vscode-integration": "2.7.0",
     "@eclipse-glsp/vscode-integration-webview": "2.7.0",
+    "i18next": "26.3.6",
     "inversify": "6.2.2",
     "vscode-messenger-common": "0.4.5",
     "vscode-messenger-webview": "0.4.5"
@@ -34,7 +35,9 @@
   },
   "devDependencies": {
     "@axonivy/monaco-vite-plugin": "next-14.0.0",
-    "@vscode/codicons": "0.0.45"
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "@vscode/codicons": "0.0.45",
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
   },
   "type": "module",
   "scripts": {

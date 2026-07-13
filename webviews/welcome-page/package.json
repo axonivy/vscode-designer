@@ -7,14 +7,17 @@
     "@axonivy/ui-components": "next-14.0.0",
     "@axonivy/ui-icons": "next-14.0.0",
     "@axonivy/vscode-webview-common": "workspace:~",
+    "i18next": "26.3.6",
     "vscode-messenger-common": "0.4.5",
     "vscode-messenger-webview": "0.4.5"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.0",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "@vanilla-extract/recipes": "^0.5.7",
     "i18next-cli": "^1.56.12",
-    "tailwindcss": "^4.3.0"
+    "tailwindcss": "^4.3.0",
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
   },
   "scripts": {
     "build": "vite build --mode development --emptyOutDir",
