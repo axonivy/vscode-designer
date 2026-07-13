@@ -13,6 +13,7 @@ import { CustomFieldEditorProvider } from '../editors/custom-field-editor/custom
 import { DatabaseEditorProvider } from '../editors/database-editor/database-editor-provider';
 import DataClassEditorProvider from '../editors/dataclass-editor/dataclass-editor-provider';
 import FormEditorProvider from '../editors/form-editor/form-editor-provider';
+import { IvyLanguageServerClientProvider } from '../editors/ivy-languageServer/ivy-language-server-client';
 import { PersistenceEditorProvider } from '../editors/persistence-editor/persistence-editor-provider';
 import ProcessEditorProvider from '../editors/process-editor/process-editor-provider';
 import { RestClientEditorProvider } from '../editors/restclient-editor/restclient-editor-provider';
@@ -136,6 +137,8 @@ export class IvyEngineManager {
     WebIdeWebSocketProvider(websocketUrl);
     XhtmlLanguageClientProvider(websocketUrl);
     registerProcessDebugging(this.context, this.ivyEngineApi);
+
+    IvyLanguageServerClientProvider(websocketUrl);
 
     await IvyDiagnostics.instance.refresh();
   }

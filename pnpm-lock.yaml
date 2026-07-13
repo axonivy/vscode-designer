@@ -8,7 +8,9 @@ overrides:
   dompurify: '>=3.4.11'
 
 patchedDependencies:
-  monaco-editor: 899da2f303ca4825b0017a43537473be707dba57c101f26ff4a9aea957f2351f
+  monaco-editor:
+    hash: 899da2f303ca4825b0017a43537473be707dba57c101f26ff4a9aea957f2351f
+    path: patches/monaco-editor.patch
 
 importers:
 
