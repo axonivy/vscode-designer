@@ -347,7 +347,7 @@ export class IvyProjectExplorer {
     return this.treeDataProvider.getIvyProjects();
   }
 
-  private async getDiagnostics() {
+  public async getDiagnostics() {
     return this.treeDataProvider.getDiagnostics();
   }
 
