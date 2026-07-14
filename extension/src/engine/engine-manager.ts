@@ -29,7 +29,14 @@ import { extensionVersion } from '../version/extension-version';
 import { IvyBrowserViewProvider } from '../views/browser/ivy-browser-view-provider';
 import { RuntimeLogViewProvider } from '../views/runtimelog-view';
 import { IvyEngineApi } from './api/engine-api';
-import type { CaseMapInit, DataClassInit, ImportProcessBody, NewProjectParams, ProductInstallParams } from './api/generated/client';
+import type {
+  CaseMapInit,
+  DataClassInit,
+  ImportProcessBody,
+  ImportProjectsBody,
+  NewProjectParams,
+  ProductInstallParams
+} from './api/generated/client';
 import { IvyDiagnostics } from './diagnostics';
 import { EngineDownloader } from './engine-downloader';
 import { engineOutputChannel } from './engine-output-channel';
@@ -194,6 +201,13 @@ export class IvyEngineManager {
     await StatusBar.withStatusBarProgress(
       { text: 'Importing BPMN process' },
       async () => await this.ivyEngineApi?.createProcessFromBpmn(input)
+    );
+  }
+
+  public async importIvyProject(workspaceName: string, input: ImportProjectsBody) {
+    await StatusBar.withStatusBarProgress(
+      { text: 'Importing Ivy project' },
+      async () => await this.ivyEngineApi?.importIvyProject(workspaceName, input)
     );
   }
 
