@@ -102,7 +102,7 @@ export class IvyEngineApi {
   }
 
   public async importIvyProject(workspaceName: string, params: ImportProjectsBody) {
-    return importProjects(workspaceName, params, { baseURL: this.baseURL, ...options })
+    return importProjects(workspaceName, params, { baseURL: this.engineURL, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
