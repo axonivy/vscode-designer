@@ -209,6 +209,8 @@ export class IvyEngineManager {
       { text: 'Importing Ivy project' },
       async () => await this.ivyEngineApi?.importIvyProject(workspaceName, input)
     );
+    await this.importJavaProjects();
+    await IvyProjectExplorer.instance.refresh();
   }
 
   public async installMarketProduct(input: ProductInstallParams) {
