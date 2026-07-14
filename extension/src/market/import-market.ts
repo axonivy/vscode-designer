@@ -188,7 +188,7 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
       installLocalMarketProductData.productJson ?? '',
       installLocalMarketProductData.version ?? ''
     );
-    const installMarketProductInput: Omit<ProductInstallParams, 'doCompile'> = {
+    const installMarketProductInput: ProductInstallParams = {
       productJson: installLocalMarketProductData.productJson,
       dependentProjectPath: installLocalMarketProductData.dependentProject?.path ?? ''
     };
@@ -369,7 +369,7 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
   }
 
   try {
-    const installMarketProductInput: Omit<ProductInstallParams, 'doCompile'> = {
+    const installMarketProductInput: ProductInstallParams = {
       productJson: installMarketProductData.productJson,
       dependentProjectPath: installMarketProductData.dependentProject?.path ?? ''
     };
