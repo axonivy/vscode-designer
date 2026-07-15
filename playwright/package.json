@@ -3,7 +3,7 @@
   "name": "@axonivy/vscode-designer-playwright",
   "scripts": {
     "type": "tsc --noEmit",
-    "download:vscode": "node --experimental-strip-types tests/utils/download-vscode.ts",
+    "download:vscode": "node tests/utils/download-vscode.ts",
     "test:ui": "playwright test"
   },
   "devDependencies": {
