@@ -204,10 +204,10 @@ export class IvyEngineManager {
     );
   }
 
-  public async importIvyProject(workspaceName: string, input: ImportProjectsBody) {
+  public async importIvyProject(workspaceId: string, input: ImportProjectsBody) {
     await StatusBar.withStatusBarProgress(
       { text: 'Importing Ivy project' },
-      async () => await this.ivyEngineApi?.importIvyProject(workspaceName, input)
+      async () => await this.ivyEngineApi?.importIvyProject(workspaceId, input)
     );
     await this.importJavaProjects();
     await IvyProjectExplorer.instance.refresh();

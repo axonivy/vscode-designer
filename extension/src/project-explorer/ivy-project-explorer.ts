@@ -252,8 +252,7 @@ export class IvyProjectExplorer {
       logInformationMessage('No valid workspace selected, dialog aborted.');
       return;
     }
-    const selectedWorkspaceName = selectedWorkspaceUri.fsPath.split(path.sep).pop();
-    await importIvyProject(selectedWorkspaceName ?? selectedWorkspaceUri.fsPath);
+    await importIvyProject(selectedWorkspaceUri);
   }
 
   private async installLocalMarketProduct(selection: TreeSelection) {

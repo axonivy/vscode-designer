@@ -1,11 +1,13 @@
+import path from 'path';
 import { Uri, window, workspace } from 'vscode';
 import type { ImportProjectsBody } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 
-export const importIvyProject = async (workspaceName: string) => {
+export const importIvyProject = async (workspaceUri: Uri) => {
+  const workspaceId = path.basename(workspaceUri.fsPath);
   const input = await collectImportIvyProjectParams();
   if (input) {
-    await IvyEngineManager.instance.importIvyProject(workspaceName, input);
+    await IvyEngineManager.instance.importIvyProject(workspaceId, input);
   }
 };
 
