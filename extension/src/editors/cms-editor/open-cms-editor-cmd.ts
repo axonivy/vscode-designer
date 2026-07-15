@@ -1,3 +1,4 @@
+import path from 'path';
 import type { ExtensionContext, WebviewPanel } from 'vscode';
 import { ViewColumn, window } from 'vscode';
 import { messenger } from '../..';
@@ -37,7 +38,7 @@ export const revealExistingPanel = (projectPath: string) => {
 export const setupWebviewPanel = (context: ExtensionContext, websocketUrl: URL, projectPath: string, webviewPanel: WebviewPanel) => {
   CmsEditorRegistry.register(projectPath, webviewPanel);
 
-  const projectName = projectPath.split('/').pop();
+  const projectName = projectPath.split(path.sep).pop();
   webviewPanel.title = `CMS - ${projectName}`;
 
   setupCommunication(websocketUrl, messenger, webviewPanel, projectPath);

@@ -28,7 +28,7 @@ const collectImportIvyProjectParams = async (): Promise<ImportProjectsBody | und
   const fileFsPath = fileUri.fsPath;
   const fileData = await workspace.fs.readFile(fileUri);
   const regularArray = new Uint8Array(fileData);
-  const fileName = fileFsPath.split('/').pop();
+  const fileName = fileFsPath.split(path.sep).pop();
   const fileObj = new File([regularArray.buffer], fileName ?? fileFsPath, { type: 'application/zip' });
   return { file: fileObj };
 };

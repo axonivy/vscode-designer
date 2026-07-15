@@ -1,3 +1,4 @@
+import path from 'path';
 import { window, workspace } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { ImportProcessBody } from '../engine/api/generated/client';
@@ -21,7 +22,7 @@ const collectImportBpmnProcessParams = async (projectDir: string): Promise<Impor
   }
   const fileData = await workspace.fs.readFile(bpmnXmlFile[0]);
   const regularArray = new Uint8Array(fileData);
-  const fileName = bpmnXmlFile[0].fsPath.split('/').pop();
+  const fileName = bpmnXmlFile[0].fsPath.split(path.sep).pop();
   const fileObj = new File([regularArray.buffer], fileName ? fileName : 'bpmn.xml', { type: 'application/xml' });
   return { projectDir, file: fileObj };
 };
