@@ -18,8 +18,7 @@ const collectImportIvyProjectParams = async (): Promise<ImportProjectsBody | und
     openLabel: 'Import Ivy Project',
     filters: {
       'Ivy Project Files': ['iar', 'zip']
-    },
-    defaultUri: Uri.file('/home/dominik/Desktop/testIarImport')
+    }
   });
   if (!ivyProjectFile || ivyProjectFile.length === 0 || !ivyProjectFile[0]) {
     return undefined;
