@@ -63,7 +63,8 @@ const downloadIar = async (
 };
 
 export const runDownloadIar = async () => {
-  console.log('Starting IAR download with process.argv:', process.argv);
+  console.log('runDownloadIar : All process.env:', process.env);
+  console.log('runDownloadIar : All process.argv:', process.argv);
 
   try {
     const url = process.argv[2]
