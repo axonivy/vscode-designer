@@ -9,11 +9,23 @@ const downloadIar = async (
   targetFilename: string,
   logger: (message: string) => void
 ): Promise<void> => {
+  logger('ZIP URL: ' + urlZipContainingIars);
+  logger('IAR filename pattern: ' + patternIarFilename);
+  logger('Target directory: ' + targetDir);
+  logger('Target filename: ' + targetFilename);
+
   const targetPath = path.join(process.cwd(), targetDir, targetFilename + '.iar');
-  const response: Response = await fetch(urlZipContainingIars);
+
+  logger('Target path for IAR file: ' + targetPath);
+
+  const response = await fetch(urlZipContainingIars);
   if (!response.ok) {
     return Promise.reject(`Download IAR failed with status code ${response.status}`);
   }
+
+  logger('Response object: ' + JSON.stringify(response));
+  logger('Response status: ' + response.status);
+  logger('Response URL: ' + response.url);
 
   const zipBuffer = await response.arrayBuffer();
   const zip = await JSZip.loadAsync(zipBuffer);
