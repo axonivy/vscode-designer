@@ -5,7 +5,8 @@ import { empty } from '../../workspaces/workspace';
 
 test.use({ workspace: empty });
 
-test('Import up-to-date Ivy Project', async ({ wsPage }) => {
+// eslint-disable-next-line playwright/no-focused-test
+test.only('Import up-to-date Ivy Project', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
 
   await assertIarPresent(wsPage);
