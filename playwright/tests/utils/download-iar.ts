@@ -1,21 +1,18 @@
 import fs from 'fs';
 import JSZip from 'jszip';
 import path from 'path';
+import { emptyDownloadIarFilenameUptodate as targetIarFilename, empty as targetIarPath } from '../workspaces/workspace';
 
 const downloadIar = async (
   urlZipContainingIars: string,
   filenameMustContain: string[],
-  targetDir: string,
-  targetFilename: string,
   logger: (message: string) => void
 ): Promise<void> => {
   logger('CWD: ' + process.cwd());
   logger('ZIP URL: ' + urlZipContainingIars);
   logger('IAR filename must contain patterns: ' + filenameMustContain);
-  logger('Target directory: ' + targetDir);
-  logger('Target filename: ' + targetFilename);
 
-  const targetPath = path.join(process.cwd(), targetDir, targetFilename + '.iar');
+  const targetPath = path.join(targetIarPath, targetIarFilename);
 
   logger('Target path for IAR file: ' + targetPath);
 
@@ -76,9 +73,7 @@ export const runDownloadIar = async () => {
       .split(',')
       .map(s => s.trim())
       .filter(Boolean);
-    const targetDir = process.argv[4] ? process.argv[4] : 'tests/workspaces/empty/resources';
-    const targetFilename = process.argv[5] ? process.argv[5] : 'ivy-project-up-to-date';
-    await downloadIar(url, patterns, targetDir, targetFilename, console.log);
+    await downloadIar(url, patterns, console.log);
   } catch (error) {
     console.error('Failed to download IAR:', error);
   }
