@@ -9,6 +9,7 @@ const downloadIar = async (
   targetFilename: string,
   logger: (message: string) => void
 ): Promise<void> => {
+  logger('CWD: ' + process.cwd());
   logger('ZIP URL: ' + urlZipContainingIars);
   logger('IAR filename must contain patterns: ' + filenameMustContain);
   logger('Target directory: ' + targetDir);
