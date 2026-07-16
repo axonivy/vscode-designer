@@ -13,8 +13,9 @@ export default defineConfig({
   expect: { timeout: 30_000 },
   reporter: process.env.CI ? [['junit', { outputFile: 'report.xml' }], ['list']] : 'html',
   projects: [
-    { name: 'integration-parallel', testDir: './tests/integration', grepInvert: /@serial/ },
-    { name: 'integration-serial', testDir: './tests/integration', grep: /@serial/, workers: 1 },
+    { name: 'setup-test', testMatch: /test\.setup\.ts/, testDir: './tests' },
+    { name: 'integration-parallel', testDir: './tests/integration', grepInvert: /@serial/, dependencies: ['setup-test'] },
+    { name: 'integration-serial', testDir: './tests/integration', grep: /@serial/, workers: 1, dependencies: ['setup-test'] },
     { name: 'performance', testDir: './tests/performance', timeout: 120_000, expect: { timeout: 60_000 } }
   ]
 });

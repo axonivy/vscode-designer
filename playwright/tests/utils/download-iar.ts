@@ -62,7 +62,7 @@ const downloadIar = async (
   }
 };
 
-const run = async () => {
+export const runDownloadIar = async () => {
   try {
     const url = process.argv[2]
       ? process.argv[2]
@@ -79,5 +79,3 @@ const run = async () => {
     console.error('Failed to download IAR:', error);
   }
 };
-
-run();

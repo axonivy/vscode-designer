@@ -27,8 +27,6 @@
     "test:ci": "pnpm run -r test:ci",
     "test:playwright": "pnpm run --filter @axonivy/vscode-designer-playwright test:ui --project=integration-serial --project=integration-parallel",
     "test:playwright:browser": "RUN_IN_BROWSER=true pnpm run --filter @axonivy/vscode-designer-playwright test:ui",
-    "test:playwright:download:vscode": "pnpm run --filter @axonivy/vscode-designer-playwright download:vscode",
-    "test:playwright:download:iar": "pnpm run --filter @axonivy/vscode-designer-playwright download:iar",
     "test:playwright:performance": "pnpm run --filter @axonivy/vscode-designer-playwright test:ui --project=performance",
     "type": "pnpm run -r type",
     "update:axonivy:next": "pnpm update -r @axonivy",
