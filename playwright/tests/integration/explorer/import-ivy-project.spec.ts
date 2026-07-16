@@ -4,8 +4,7 @@ import { empty, emptyDownloadIarFilenameUptodate } from '../../workspaces/worksp
 
 test.use({ workspace: empty });
 
-// eslint-disable-next-line playwright/no-focused-test
-test.only('Import up-to-date Ivy Project', async ({ wsPage }) => {
+test('Import up-to-date Ivy Project', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.hasNodeExact(emptyDownloadIarFilenameUptodate);
   await wsPage.executeCommand('Axon Ivy: Import Ivy Project');
