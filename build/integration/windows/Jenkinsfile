@@ -45,6 +45,7 @@ pipeline {
           catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
             bat 'start AxonIvyEngine/bin/AxonIvyEngine.exe'
             bat 'pnpm run test:playwright:download:vscode'
+            bat 'pnpm run test:playwright:download:iar'
             bat 'pnpm run test:playwright'
             bat 'start AxonIvyEngine/bin/AxonIvyEngine.exe stop'
           }

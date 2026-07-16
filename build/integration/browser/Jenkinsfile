@@ -24,6 +24,7 @@ pipeline {
             pnpm run build:production
             pnpm run package
             pnpm run engine:download ${params.engineDownloadUrl}
+            pnpm run test:playwright:download:iar
             nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
             code-server --install-extension vscjava.vscode-java-pack
             code-server --install-extension extension/vscode-designer*.vsix
