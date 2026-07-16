@@ -16,6 +16,6 @@ export default defineConfig({
     { name: 'setup-test', testMatch: /test\.setup\.ts/, testDir: './tests' },
     { name: 'integration-parallel', testDir: './tests/integration', grepInvert: /@serial/, dependencies: ['setup-test'] },
     { name: 'integration-serial', testDir: './tests/integration', grep: /@serial/, workers: 1, dependencies: ['setup-test'] },
-    { name: 'performance', testDir: './tests/performance', timeout: 120_000, expect: { timeout: 60_000 } }
+    { name: 'performance', testDir: './tests/performance', timeout: 120_000, expect: { timeout: 60_000 }, dependencies: ['setup-test'] }
   ]
 });
