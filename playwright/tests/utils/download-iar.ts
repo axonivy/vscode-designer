@@ -1,11 +1,48 @@
-export const downloadIar = async (url: string, targetDir: string, logger: (message: string) => void): Promise<void> => {
-  const response = await fetch(url);
+import fs from 'fs';
+import JSZip from 'jszip';
+import path from 'path';
+
+export const downloadIar = async (
+  urlZipContainingIars: string,
+  patternIarFilename: RegExp,
+  targetDir: string,
+  targetFilename: string,
+  logger: (message: string) => void
+): Promise<void> => {
+  const response: Response = await fetch(urlZipContainingIars);
   if (!response.ok) {
     return Promise.reject(`Download IAR failed with status code ${response.status}`);
   }
-  console.log(response);
-  console.log(targetDir);
-  logger('Test log');
+
+  const zipBuffer = await response.arrayBuffer();
+  const zip = await JSZip.loadAsync(zipBuffer);
+
+  let iarFileToCopy = null;
+  for (const [zipPath, zipEntry] of Object.entries(zip.files)) {
+    const zipPathFilename = path.basename(zipPath);
+    if (zipEntry.dir) continue;
+    if (!zipPath.toLowerCase().endsWith('.iar')) continue;
+    if (patternIarFilename.test(zipPathFilename)) {
+      logger(`Found matching IAR file: ${zipPath} with filename ${zipPathFilename}`);
+
+      iarFileToCopy = {
+        path: zipPath,
+        filename: zipPathFilename,
+        content: await zipEntry.async('uint8array')
+      };
+    }
+  }
+
+  if (!iarFileToCopy) {
+    throw new Error(`No IAR file matching pattern ${patternIarFilename} found in the zip.`);
+  }
+
+  const targetPath = path.join(process.cwd(), targetDir, targetFilename + '.iar');
+  logger('Creating directory for IAR file if not exist: ' + targetPath);
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+
+  logger(`Writing IAR file to: ${targetPath}`);
+  await fs.promises.writeFile(targetPath, Buffer.from(iarFileToCopy.content));
 };
 
 // const run = () => {
