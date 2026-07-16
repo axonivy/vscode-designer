@@ -8,23 +8,11 @@ const downloadIar = async (
   filenameMustContain: string[],
   logger: (message: string) => void
 ): Promise<void> => {
-  logger('CWD: ' + process.cwd());
-  logger('ZIP URL: ' + urlZipContainingIars);
-  logger('IAR filename must contain patterns: ' + filenameMustContain);
-
   const targetPath = path.join(targetIarPath, targetIarFilename);
-
-  logger('Target path for IAR file: ' + targetPath);
-
   const response = await fetch(urlZipContainingIars);
   if (!response.ok) {
     return Promise.reject(`Download IAR failed with status code ${response.status}`);
   }
-
-  logger('Response object: ' + JSON.stringify(response));
-  logger('Response status: ' + response.status);
-  logger('Response URL: ' + response.url);
-
   const zipBuffer = await response.arrayBuffer();
   const zip = await JSZip.loadAsync(zipBuffer);
   let iarFileToCopy = null;
@@ -47,34 +35,33 @@ const downloadIar = async (
   }
 
   try {
-    logger('Creating directory for IAR file if not exist: ' + targetPath);
-    fs.mkdirSync(path.dirname(targetPath), { recursive: true });
     logger(`Writing IAR file to: ${targetPath}`);
+    fs.mkdirSync(path.dirname(targetPath), { recursive: true });
     await fs.promises.writeFile(targetPath, Buffer.from(iarFileToCopy.content));
   } catch (error) {
     const systemError = error as NodeJS.ErrnoException;
     const errorCode = systemError.code ? ` (${systemError.code})` : '';
-    throw new Error(`Failed to create directory or write IAR at ${targetPath}${errorCode}: ${systemError.message}`, {
+    throw new Error(`Failed to write IAR at ${targetPath}${errorCode}: ${systemError.message}`, {
       cause: error
     });
   }
 };
 
 export const runDownloadIar = async () => {
-  console.log('runDownloadIar : All process.env:', process.env);
-  console.log('runDownloadIar : All process.argv:', process.argv);
-
+  const url = process.argv[2]
+    ? process.argv[2]
+    : 'https://jenkins.ivyteam.io/job/demo-projects/job/master/lastSuccessfulBuild/artifact/connectivity/connectivity-demos/target/*zip*/target.zip';
+  const rawPattern = process.argv[3] ? process.argv[3] : 'connectivity-demos,SNAPSHOT';
   try {
-    const url = process.argv[2]
-      ? process.argv[2]
-      : 'https://jenkins.ivyteam.io/job/demo-projects/job/master/lastSuccessfulBuild/artifact/connectivity/connectivity-demos/target/*zip*/target.zip';
-    const rawPattern = process.argv[3] ? process.argv[3] : 'connectivity-demos,SNAPSHOT';
     const patterns = rawPattern
       .split(',')
       .map(s => s.trim())
       .filter(Boolean);
     await downloadIar(url, patterns, console.log);
   } catch (error) {
-    console.error('Failed to download IAR:', error);
+    console.error('Failed to download IAR');
+    console.error('URL: ' + url);
+    console.error('Filename patterns: ' + rawPattern);
+    console.error('Error:', error);
   }
 };
