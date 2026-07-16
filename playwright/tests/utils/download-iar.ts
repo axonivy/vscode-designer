@@ -9,6 +9,7 @@ export const downloadIar = async (
   targetFilename: string,
   logger: (message: string) => void
 ): Promise<void> => {
+  const targetPath = path.join(process.cwd(), targetDir, targetFilename + '.iar');
   const response: Response = await fetch(urlZipContainingIars);
   if (!response.ok) {
     return Promise.reject(`Download IAR failed with status code ${response.status}`);
@@ -16,7 +17,6 @@ export const downloadIar = async (
 
   const zipBuffer = await response.arrayBuffer();
   const zip = await JSZip.loadAsync(zipBuffer);
-
   let iarFileToCopy = null;
   for (const [zipPath, zipEntry] of Object.entries(zip.files)) {
     const zipPathFilename = path.basename(zipPath);
@@ -24,7 +24,6 @@ export const downloadIar = async (
     if (!zipPath.toLowerCase().endsWith('.iar')) continue;
     if (patternIarFilename.test(zipPathFilename)) {
       logger(`Found matching IAR file: ${zipPath} with filename ${zipPathFilename}`);
-
       iarFileToCopy = {
         path: zipPath,
         filename: zipPathFilename,
@@ -34,15 +33,21 @@ export const downloadIar = async (
   }
 
   if (!iarFileToCopy) {
-    throw new Error(`No IAR file matching pattern ${patternIarFilename} found in the zip.`);
+    throw new Error(`No IAR file matching pattern ${patternIarFilename} found in the ZIP.`);
   }
 
-  const targetPath = path.join(process.cwd(), targetDir, targetFilename + '.iar');
-  logger('Creating directory for IAR file if not exist: ' + targetPath);
-  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-
-  logger(`Writing IAR file to: ${targetPath}`);
-  await fs.promises.writeFile(targetPath, Buffer.from(iarFileToCopy.content));
+  try {
+    logger('Creating directory for IAR file if not exist: ' + targetPath);
+    fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+    logger(`Writing IAR file to: ${targetPath}`);
+    await fs.promises.writeFile(targetPath, Buffer.from(iarFileToCopy.content));
+  } catch (error) {
+    const systemError = error as NodeJS.ErrnoException;
+    const errorCode = systemError.code ? ` (${systemError.code})` : '';
+    throw new Error(`Failed to create directory or write IAR at ${targetPath}${errorCode}: ${systemError.message}`, {
+      cause: error
+    });
+  }
 };
 
 // const run = () => {
