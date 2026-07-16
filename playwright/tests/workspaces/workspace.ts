@@ -10,4 +10,4 @@ export const minimalProjectWorkspacePath = path.resolve(__dirname, './minimalPro
 export const outdatedProjectWorkspacePath = path.resolve(__dirname, './outdatedProject');
 export const portalPerformanceWorkspacePath = path.resolve(__dirname, './portalPerformance');
 export const multiRootWorkspacePath = path.resolve(__dirname, './multiProject/multiRootWorkspace.code-workspace');
-export const emptyDownloadIarFilenameUptodate = 'ivy-project-up-to-date.iar';
+export const emptyDownloadIarFilenameUpToDate = 'ivy-project-up-to-date.iar';

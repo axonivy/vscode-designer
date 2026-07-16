@@ -1,7 +1,7 @@
 import fs from 'fs';
 import JSZip from 'jszip';
 import path from 'path';
-import { emptyDownloadIarFilenameUptodate as targetIarFilename, empty as targetIarPath } from '../workspaces/workspace';
+import { emptyDownloadIarFilenameUpToDate as targetIarFilename, empty as targetIarPath } from '../workspaces/workspace';
 
 const downloadIar = async (
   urlZipContainingIars: string,
@@ -11,7 +11,7 @@ const downloadIar = async (
   const targetPath = path.join(targetIarPath, targetIarFilename);
   const response = await fetch(urlZipContainingIars);
   if (!response.ok) {
-    return Promise.reject(`Download IAR failed with status code ${response.status}`);
+    throw new Error(`Download IAR failed with status code ${response.status}`);
   }
   const zipBuffer = await response.arrayBuffer();
   const zip = await JSZip.loadAsync(zipBuffer);
