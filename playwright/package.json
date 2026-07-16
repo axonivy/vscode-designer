@@ -4,6 +4,7 @@
   "scripts": {
     "type": "tsc --noEmit",
     "download:vscode": "node tests/utils/download-vscode.ts",
+    "download:iar": "node tests/utils/download-iar.ts",
     "test:ui": "playwright test"
   },
   "devDependencies": {
