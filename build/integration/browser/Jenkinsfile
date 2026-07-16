@@ -12,30 +12,38 @@ pipeline {
 
   parameters {
     string(name: 'engineDownloadUrl', defaultValue: 'https://jenkins.ivyteam.io/job/core_product/job/master/lastSuccessfulBuild/artifact/workspace/ch.ivyteam.ivy.server.product/target/products/*_Slim_*.zip/*zip*/products.zip', description: 'engine that will be packaged')
+    string(name: 'iarDownloadUrl', defaultValue: 'https://jenkins.ivyteam.io/job/demo-projects/job/master/lastSuccessfulBuild/artifact/connectivity/connectivity-demos/target/*zip*/target.zip', description: 'ZIP file containing IAR files that will be imported')
+    string(name: 'iarFileMustContain', defaultValue: 'connectivity-demos,SNAPSHOT', description: 'Comma separated string that must be contained in the IAR filename to be imported. First match will be used')
   }
 
   stages {
     stage('Integration Test') {
       steps {
         script {
-          docker.build('node-webtest', '-f build/integration/Dockerfile --build-arg INSTALL_CODE_SERVER=true .').inside {
-            sh """
-            pnpm install && pnpm run update:axonivy:next
-            pnpm run build:production
-            pnpm run package
-            pnpm run engine:download ${params.engineDownloadUrl}
-            nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
-            code-server --install-extension vscjava.vscode-java-pack
-            code-server --install-extension extension/vscode-designer*.vsix
-            nohup code-server --bind-addr 0.0.0.0:3000 --auth none --disable-telemetry --disable-update-check --disable-workspace-trust &
-            """
-            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-              sh 'pnpm run test:playwright:browser --project=integration-parallel'
-            }
-            sh 'mv playwright/report.xml playwright/report-parallel.xml'
-            archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
-            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-              sh 'pnpm run test:playwright:browser --project=integration-serial'
+          withEnv([
+            "ENGINE_DOWNLOAD_URL=${params.engineDownloadUrl}",
+            "IAR_DOWNLOAD_URL=${params.iarDownloadUrl}",
+            "IAR_FILE_MUST_CONTAIN=${params.iarFileMustContain}"
+          ]) {
+            docker.build('node-webtest', '-f build/integration/Dockerfile --build-arg INSTALL_CODE_SERVER=true .').inside {
+              sh """
+              pnpm install && pnpm run update:axonivy:next
+              pnpm run build:production
+              pnpm run package
+              pnpm run engine:download ${params.engineDownloadUrl}
+              nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
+              code-server --install-extension vscjava.vscode-java-pack
+              code-server --install-extension extension/vscode-designer*.vsix
+              nohup code-server --bind-addr 0.0.0.0:3000 --auth none --disable-telemetry --disable-update-check --disable-workspace-trust &
+              """
+              catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                sh 'pnpm run test:playwright:browser --project=integration-parallel'
+              }
+              sh 'mv playwright/report.xml playwright/report-parallel.xml'
+              archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
+              catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                sh 'pnpm run test:playwright:browser --project=integration-serial'
+              }
             }
           }
           archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true

@@ -19,12 +19,16 @@ pipeline {
 
   parameters {
     string(name: 'engineDownloadUrl', defaultValue: 'https://jenkins.ivyteam.io/job/core_product/job/master/lastSuccessfulBuild/artifact/workspace/ch.ivyteam.ivy.server.product/target/products/*_Slim_*.zip/*zip*/products.zip', description: 'engine that will be packaged')
+    string(name: 'iarDownloadUrl', defaultValue: 'https://jenkins.ivyteam.io/job/demo-projects/job/master/lastSuccessfulBuild/artifact/connectivity/connectivity-demos/target/*zip*/target.zip', description: 'ZIP file containing IAR files that will be imported')
+    string(name: 'iarFileMustContain', defaultValue: 'connectivity-demos,SNAPSHOT', description: 'Comma separated string that must be contained in the IAR filename to be imported. First match will be used')
   }
 
   environment {
     JAVA_OPTS_IVY_SYSTEM = '-Ddev.mode=true -Divy.engine.testheadless=true'
     CI = 'true'
     RUN_STABLE_VERSION = 'true'
+    IAR_DOWNLOAD_URL = "${params.iarDownloadUrl}"
+    IAR_FILE_MUST_CONTAIN = "${params.iarFileMustContain}"
   }
 
   stages {
