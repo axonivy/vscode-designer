@@ -67,7 +67,7 @@ const run = async () => {
     const url = process.argv[2]
       ? process.argv[2]
       : 'https://jenkins.ivyteam.io/job/demo-projects/job/master/lastSuccessfulBuild/artifact/connectivity/connectivity-demos/target/*zip*/target.zip';
-    const rawPattern = process.argv[3] ? process.argv[3] : 'connectivity-demos,14,SNAPSHOT';
+    const rawPattern = process.argv[3] ? process.argv[3] : 'connectivity-demos,SNAPSHOT';
     const patterns = rawPattern
       .split(',')
       .map(s => s.trim())
