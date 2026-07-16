@@ -2,7 +2,7 @@ import fs from 'fs';
 import JSZip from 'jszip';
 import path from 'path';
 
-export const downloadIar = async (
+const downloadIar = async (
   urlZipContainingIars: string,
   patternIarFilename: RegExp,
   targetDir: string,
@@ -50,11 +50,14 @@ export const downloadIar = async (
   }
 };
 
-// const run = () => {
-//   const url = process.argv[2]
-//     ? process.argv[2]
-//     : 'https://jenkins.ivyteam.io/job/demo-projects/job/master/lastSuccessfulBuild/artifact/connectivity/connectivity-demos/target/';
-//   downloadIar(url, '', console.log);
-// };
+const run = () => {
+  const url = process.argv[2]
+    ? process.argv[2]
+    : 'https://jenkins.ivyteam.io/job/demo-projects/job/master/lastSuccessfulBuild/artifact/connectivity/connectivity-demos/target/';
+  const pattern = process.argv[3] ? new RegExp(process.argv[3]) : new RegExp('connectivity-demos.*');
+  const targetDir = process.argv[4] ? process.argv[4] : 'tests/workspaces/empty/resources';
+  const targetFilename = process.argv[5] ? process.argv[5] : 'ivy-project-up-to-date';
+  downloadIar(url, pattern, targetDir, targetFilename, console.log);
+};
 
-// run();
+run();
