@@ -14,8 +14,8 @@ export const importIvyProject = async (workspaceUri: Uri) => {
 const collectImportIvyProjectParams = async (): Promise<ImportProjectsBody | undefined> => {
   const ivyProjectFile = await window.showOpenDialog({
     canSelectMany: false,
-    title: 'Select Ivy Project .iar or .zip file to import',
-    openLabel: 'Import Ivy Project',
+    title: 'Select Ivy Project Archive .iar or .zip to import',
+    openLabel: 'Import Ivy Project Archive',
     filters: {
       'Ivy Project Files': ['iar', 'zip']
     }
