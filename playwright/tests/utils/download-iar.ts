@@ -4,13 +4,13 @@ import path from 'path';
 
 const downloadIar = async (
   urlZipContainingIars: string,
-  patternIarFilename: RegExp,
+  filenameMustContain: string[],
   targetDir: string,
   targetFilename: string,
   logger: (message: string) => void
 ): Promise<void> => {
   logger('ZIP URL: ' + urlZipContainingIars);
-  logger('IAR filename pattern: ' + patternIarFilename);
+  logger('IAR filename must contain patterns: ' + filenameMustContain);
   logger('Target directory: ' + targetDir);
   logger('Target filename: ' + targetFilename);
 
@@ -34,7 +34,7 @@ const downloadIar = async (
     const zipPathFilename = path.basename(zipPath);
     if (zipEntry.dir) continue;
     if (!zipPath.toLowerCase().endsWith('.iar')) continue;
-    if (patternIarFilename.test(zipPathFilename)) {
+    if (filenameMustContain.every(substr => zipPathFilename.includes(substr))) {
       logger(`Found matching IAR file: ${zipPath} with filename ${zipPathFilename}`);
       iarFileToCopy = {
         path: zipPath,
@@ -45,7 +45,7 @@ const downloadIar = async (
   }
 
   if (!iarFileToCopy) {
-    throw new Error(`No IAR file matching pattern ${patternIarFilename} found in the ZIP.`);
+    throw new Error(`No IAR file in ZIP found containing all patterns ${filenameMustContain}`);
   }
 
   try {
@@ -67,10 +67,14 @@ const run = async () => {
     const url = process.argv[2]
       ? process.argv[2]
       : 'https://jenkins.ivyteam.io/job/demo-projects/job/master/lastSuccessfulBuild/artifact/connectivity/connectivity-demos/target/*zip*/target.zip';
-    const pattern = process.argv[3] ? new RegExp(process.argv[3]) : new RegExp('connectivity-demos.*');
+    const rawPattern = process.argv[3] ? process.argv[3] : 'connectivity-demos,14,SNAPSHOT';
+    const patterns = rawPattern
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
     const targetDir = process.argv[4] ? process.argv[4] : 'tests/workspaces/empty/resources';
     const targetFilename = process.argv[5] ? process.argv[5] : 'ivy-project-up-to-date';
-    await downloadIar(url, pattern, targetDir, targetFilename, console.log);
+    await downloadIar(url, patterns, targetDir, targetFilename, console.log);
   } catch (error) {
     console.error('Failed to download IAR:', error);
   }
