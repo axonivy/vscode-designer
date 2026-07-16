@@ -38,6 +38,11 @@ abstract class ExplorerView {
     await expect(node).toBeVisible();
   }
 
+  async hasNodeExact(name: string) {
+    const node = this.view.getByText(name, { exact: true });
+    await expect(node).toBeVisible();
+  }
+
   async hasNoNode(name: string) {
     const node = this.view.getByText(name);
     await expect(node).not.toBeAttached();
