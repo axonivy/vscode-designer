@@ -29,6 +29,9 @@ export const test = base.extend<TestFixtures>({
   tmpWorkspace: async ({ workspace }, take) => {
     const tmpWs = await createTmpWorkspace(workspace);
     await take(tmpWs);
+    if (!process.env.CI) {
+      await removeTmpWorkspace(tmpWs.tmpWorkspacePath);
+    }
   },
   page: async ({ tmpWorkspace }, take) => {
     if (runInBrowser) {
@@ -106,4 +109,8 @@ const createTmpWorkspace = async (workspace: string) => {
   await fs.promises.cp(workspace, tmpWorkspace, { recursive: true });
   const tmpWsConfig = wsConfig ? path.join(tmpWorkspace, wsConfig) : undefined;
   return { tmpWorkspacePath: tmpWorkspace, tmpWsConfig: tmpWsConfig };
+};
+
+const removeTmpWorkspace = async (workspacePath: string) => {
+  await fs.promises.rm(workspacePath, { recursive: true, force: true, maxRetries: 3, retryDelay: 1000 });
 };
