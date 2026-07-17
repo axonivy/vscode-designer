@@ -36,12 +36,5 @@ export const runDownloadIar = async (targetPath: string, targetFilename: string,
     urlIar ??
     'https://jenkins.ivyteam.io/job/demo-projects/job/master/lastSuccessfulBuild/artifact/connectivity/connectivity-demos/target/connectivity-demos-14.0.0-SNAPSHOT.iar';
   const targetPathAbs = path.resolve(path.join(targetPath, targetFilename));
-  try {
-    await downloadIar(url, targetPathAbs, console.log);
-  } catch (error) {
-    console.error('Failed to download IAR');
-    console.error('URL: ' + url);
-    console.error('Target Path Absolute: ' + targetPathAbs);
-    console.error('Error:', error);
-  }
+  await downloadIar(url, targetPathAbs, console.log);
 };

@@ -5,13 +5,11 @@ import { empty, emptyDownloadIarFilenameUpToDate } from '../../workspaces/worksp
 
 test.use({ workspace: empty });
 
-// test.beforeEach(async () => {
-//   await runDownloadIar(empty, emptyDownloadIarFilenameUpToDate);
-// });
+test.beforeEach(async ({ tmpWorkspace }) => {
+  await runDownloadIar(tmpWorkspace.tmpWorkspacePath, emptyDownloadIarFilenameUpToDate);
+});
 
 test('Import up-to-date Ivy Project', async ({ wsPage }) => {
-  await runDownloadIar(empty, emptyDownloadIarFilenameUpToDate);
-
   const explorer = new FileExplorer(wsPage);
   await explorer.hasNodeExact(emptyDownloadIarFilenameUpToDate);
   await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
