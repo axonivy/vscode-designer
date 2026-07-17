@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import { test } from '~/fixtures/baseTest';
 import { FileExplorer } from '~/page-objects/explorer-view';
 import { runDownloadIar } from '~/utils/download-iar';
@@ -16,5 +17,5 @@ test('Import up-to-date Ivy Project', async ({ wsPage }) => {
   await wsPage.selectItemFromQuickPick(emptyDownloadIarFilenameUpToDate);
   await wsPage.executeCommand('Refresh Explorer');
   await explorer.hasNodeExact(emptyDownloadIarFilenameUpToDate.replace('.iar', ''));
-  await wsPage.hasNoLoggedErrors();
+  await expect(wsPage.toasts).toBeHidden();
 });

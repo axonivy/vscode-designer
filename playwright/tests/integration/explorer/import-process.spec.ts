@@ -9,5 +9,5 @@ test('Import BPMN Process', async ({ wsPage }) => {
   await wsPage.selectItemFromQuickPick('resources');
   await wsPage.selectItemFromQuickPick('all_elements_diagram.bpmn');
   await wsPage.executeCommand('Refresh Explorer');
-  await explorer.hasNode(`all_elements_diagram.p.json`);
+  await explorer.hasNodeExact(`all_elements_diagram.p.json`);
 });

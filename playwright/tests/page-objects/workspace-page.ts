@@ -49,10 +49,6 @@ export class WorkspacePage {
     return this.page.locator('div.notification-toast-container');
   }
 
-  async hasNoLoggedErrors() {
-    await expect(this.toasts).toBeHidden();
-  }
-
   get ivyStatusBar() {
     return this.page.locator('div.statusbar-item[id*="ivyStatusBarItem"]');
   }

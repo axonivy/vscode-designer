@@ -12,8 +12,8 @@ test.describe('Project Explorer', () => {
     const explorer = new ProjectExplorerView(wsPage);
     await explorer.openView();
 
-    await explorer.hasNode('ivy-project-1');
-    await explorer.hasNode('ivy-project-2');
+    await explorer.hasNodeExact('ivy-project-1');
+    await explorer.hasNodeExact('ivy-project-2');
     await explorer.hasNoNode('ivy-project-3');
     await explorer.hasNoNode('no-ivy-project');
     await explorer.hasNoNode('exclude-me');
@@ -85,8 +85,8 @@ test.describe('Multi root workspace', () => {
     const explorer = new ProjectExplorerView(wsPage);
     await explorer.openView();
 
-    await explorer.hasNode('ivy-project-1');
-    await explorer.hasNode('connector');
+    await explorer.hasNodeExact('ivy-project-1');
+    await explorer.hasNodeExact('connector');
     await explorer.hasNoNode('ivy-project-2');
   });
 });
