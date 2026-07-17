@@ -3,11 +3,15 @@ import { runDownloadIar } from './utils/download-iar';
 import { runDownloadAndUnzipVSCode } from './utils/download-vscode';
 
 setup('Setup', async ({}) => {
-  console.log('test.setup.ts: process.argv: ' + process.argv.join('\n'));
-  console.log('test.setup.ts: process.env: ' + JSON.stringify(process.env, null, 2));
-
+  const skipVSCodeDownload = process.env.RUN_IN_BROWSER ? true : false;
   const skipIarDownload = process.env.SKIP_IAR_DOWNLOAD ? true : false;
-  await runDownloadAndUnzipVSCode();
+
+  if (!skipVSCodeDownload) {
+    await runDownloadAndUnzipVSCode();
+  } else {
+    console.log('Skipping VSCode download as RUN_IN_BROWSER is set to true');
+  }
+
   if (!skipIarDownload) {
     await runDownloadIar();
   } else {

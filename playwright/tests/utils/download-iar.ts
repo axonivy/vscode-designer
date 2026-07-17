@@ -48,9 +48,6 @@ const downloadIar = async (
 };
 
 export const runDownloadIar = async () => {
-  console.log('runDownloadIar: process.argv: ' + process.argv.join('\n'));
-  console.log('runDownloadIar: process.env: ' + JSON.stringify(process.env, null, 2));
-
   const url = process.env.IAR_DOWNLOAD_URL
     ? process.env.IAR_DOWNLOAD_URL
     : 'https://jenkins.ivyteam.io/job/demo-projects/job/master/lastSuccessfulBuild/artifact/connectivity/connectivity-demos/target/*zip*/target.zip';

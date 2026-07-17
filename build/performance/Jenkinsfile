@@ -20,6 +20,7 @@ pipeline {
   environment {
     CI = 'true'
     RUN_STABLE_VERSION = 'true'
+    SKIP_IAR_DOWNLOAD = 'true'
   }
 
   stages {
