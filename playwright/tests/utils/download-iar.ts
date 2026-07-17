@@ -3,9 +3,23 @@ import { mkdir } from 'node:fs/promises';
 import { pipeline } from 'node:stream/promises';
 import path from 'path';
 
-const downloadIar = async (url: string, targetPathAbs: string, logger: (message: string) => void): Promise<void> => {
-  const response = await fetch(url);
+export const downloadIar = async (
+  targetPath: string,
+  targetFilename: string,
+  url?: string,
+  logger?: (message: string) => void
+): Promise<void> => {
+  logger = logger ?? console.log;
+  if (path.extname(targetFilename) !== '.iar') {
+    throw new Error(`Target filename must have .iar extension: ${targetFilename}`);
+  }
+  const targetPathAbs = path.resolve(path.join(targetPath, targetFilename));
 
+  url =
+    url ??
+    'https://jenkins.ivyteam.io/job/demo-projects/job/master/lastSuccessfulBuild/artifact/connectivity/connectivity-demos/target/connectivity-demos-14.0.0-SNAPSHOT.iar';
+
+  const response = await fetch(url);
   if (!response.ok || !response.body) {
     throw new Error(`Download IAR failed with status code ${response.status} ${response.statusText}`);
   }
@@ -26,15 +40,4 @@ const downloadIar = async (url: string, targetPathAbs: string, logger: (message:
       cause: error
     });
   }
-};
-
-export const runDownloadIar = async (targetPath: string, targetFilename: string, urlIar?: string) => {
-  if (path.extname(targetFilename) !== '.iar') {
-    throw new Error(`Target filename must have .iar extension: ${targetFilename}`);
-  }
-  const url =
-    urlIar ??
-    'https://jenkins.ivyteam.io/job/demo-projects/job/master/lastSuccessfulBuild/artifact/connectivity/connectivity-demos/target/connectivity-demos-14.0.0-SNAPSHOT.iar';
-  const targetPathAbs = path.resolve(path.join(targetPath, targetFilename));
-  await downloadIar(url, targetPathAbs, console.log);
 };
