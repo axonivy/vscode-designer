@@ -33,11 +33,6 @@ abstract class ExplorerView {
     await expect(this.view).toBeHidden();
   }
 
-  async hasNode(name: string) {
-    const node = this.view.getByText(name);
-    await expect(node).toBeVisible();
-  }
-
   async hasNodeExact(name: string) {
     const node = this.view.getByText(name, { exact: true });
     await expect(node).toBeVisible();
