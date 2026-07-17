@@ -206,10 +206,6 @@ importers:
         version: 4.1.10(@types/node@24.13.3)(vite@8.1.4(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
 
   playwright:
-    dependencies:
-      jszip:
-        specifier: ^3.10.1
-        version: 3.10.1
     devDependencies:
       '@playwright/test':
         specifier: 1.61.1
@@ -217,6 +213,9 @@ importers:
       '@vscode/test-electron':
         specifier: 3.0.0
         version: 3.0.0
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@types/node@24.13.3)(vite@8.1.4(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
 
   webviews/browser:
     dependencies:
