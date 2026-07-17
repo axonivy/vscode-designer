@@ -15,7 +15,6 @@ pipeline {
   }
 
   environment {
-    ENGINE_DOWNLOAD_URL = "${params.engineDownloadUrl}"
     RUN_IN_BROWSER = 'true'
   }
 

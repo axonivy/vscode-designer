@@ -14,10 +14,6 @@ pipeline {
     string(name: 'engineDownloadUrl', defaultValue: 'https://jenkins.ivyteam.io/job/core_product/job/master/lastSuccessfulBuild/artifact/workspace/ch.ivyteam.ivy.server.product/target/products/*_Slim_*.zip/*zip*/products.zip', description: 'engine that will be packaged')    
   }
 
-  environment {
-    ENGINE_DOWNLOAD_URL = "${params.engineDownloadUrl}"
-  }
-
   stages {
     stage('Integration Test') {
       steps {
@@ -26,7 +22,7 @@ pipeline {
             sh """
             pnpm install && pnpm run update:axonivy:next
             pnpm run build:production
-            pnpm run engine:download "$ENGINE_DOWNLOAD_URL"
+            pnpm run engine:download ${params.engineDownloadUrl}
             nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
             """
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
