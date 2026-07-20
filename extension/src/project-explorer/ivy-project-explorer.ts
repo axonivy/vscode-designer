@@ -295,15 +295,6 @@ export class IvyProjectExplorer {
     await addNewDataClass('Entity Class', addCommandContext);
   }
 
-  public async setProjectExplorerContext({ hasIvyProjects, isStarted }: { hasIvyProjects?: boolean; isStarted?: boolean }) {
-    if (hasIvyProjects !== undefined) {
-      await executeCommand('setContext', 'ivy:hasIvyProjects', hasIvyProjects);
-    }
-    if (isStarted !== undefined) {
-      await executeCommand('setContext', 'ivy:isStarted', isStarted);
-    }
-  }
-
   public async selectCmsEntry(projectPath: string) {
     if (!this.treeView.visible) {
       return;

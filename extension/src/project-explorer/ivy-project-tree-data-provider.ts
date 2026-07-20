@@ -14,7 +14,7 @@ import {
   type TreeDataProvider,
   type Command as VSCodeCommand
 } from 'vscode';
-import type { Command } from '../base/commands';
+import { executeCommand, type Command } from '../base/commands';
 import { config } from '../base/configurations';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyProjectExplorer } from './ivy-project-explorer';
@@ -99,7 +99,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
         });
       }
     });
-    await IvyProjectExplorer.instance.setProjectExplorerContext({ hasIvyProjects: validProjects.length > 0 });
+    await executeCommand('setContext', 'ivy:hasIvyProjects', validProjects.length > 0);
     return { projects: validProjects.sort(), diagnostics };
   }
 
