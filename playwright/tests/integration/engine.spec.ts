@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { execSync } from 'node:child_process';
 import { test } from '../fixtures/baseTest';
 import { OutputView } from '../page-objects/output-view';
 import { SettingsView } from '../page-objects/settings-view';
@@ -10,6 +11,16 @@ test.describe('Engine run by extension', () => {
   test('check if extension can download and start engine', async ({ wsPage }) => {
     const outputview = new OutputView(wsPage);
     await outputview.checkIfEngineStarted();
+  });
+
+  test('Java processes are terminated with extension reload', async ({ wsPage }) => {
+    const outputview = new OutputView(wsPage);
+    await outputview.checkIfEngineStarted();
+    const numOfJavaProcesses = execSync('jps -q | wc -l', { encoding: 'utf-8' });
+    await wsPage.executeCommand('Developer: Reload Window');
+    await outputview.checkIfEngineStarted();
+    const numOfJavaProcessesAfterReload = execSync('jps -q | wc -l', { encoding: 'utf-8' });
+    expect(numOfJavaProcesses).toBe(numOfJavaProcessesAfterReload);
   });
 });
 
