@@ -13,10 +13,10 @@ export const importNewProcess = async (projectDir: string) => {
 const collectImportBpmnProcessParams = async (projectDir: string): Promise<ImportProcessBody | undefined> => {
   const bpmnXmlFile = await window.showOpenDialog({
     canSelectMany: false,
-    title: 'Select BPMN .bpmn file to import',
+    title: 'Select BPMN .bpmn or .xml file to import',
     openLabel: 'Import BPMN Process',
     filters: {
-      'BPMN Files': ['bpmn']
+      'BPMN Files': ['bpmn', 'xml']
     }
   });
   if (!bpmnXmlFile || bpmnXmlFile.length === 0 || !bpmnXmlFile[0]) {
