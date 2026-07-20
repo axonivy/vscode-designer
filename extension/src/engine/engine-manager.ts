@@ -234,9 +234,6 @@ export class IvyEngineManager {
   }
 
   public async createProject(newProjectParams: NewProjectParams & { path: string }) {
-    if (!this.started) {
-      await this.start();
-    }
     return await StatusBar.withStatusBarProgress({ text: 'Creating and deploying new project' }, async () => {
       const projectBean = await this.ivyEngineApi?.createProject(newProjectParams);
       await IvyProjectExplorer.instance.setProjectExplorerContext({ hasIvyProjects: true });

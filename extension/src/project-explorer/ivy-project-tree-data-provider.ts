@@ -99,6 +99,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
         });
       }
     });
+    await IvyProjectExplorer.instance.setProjectExplorerContext({ hasIvyProjects: validProjects.length > 0 });
     return { projects: validProjects.sort(), diagnostics };
   }
 
