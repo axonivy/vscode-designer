@@ -65,7 +65,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   private readonly excludePattern: string;
   private readonly maxResults: number;
 
-  constructor(readonly initPromise: Promise<void> | undefined) {
+  constructor(readonly activateEnginePromise: Promise<void>) {
     this.excludePattern = config.projectExcludePattern() ?? '';
     this.maxResults = config.projectMaximumNumber() ?? 50;
     this.ivyProjects = this.findIvyProjects();
@@ -153,7 +153,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   }
 
   async getChildren(element?: Entry): Promise<Entry[]> {
-    await this.initPromise;
+    await this.activateEnginePromise;
     if (element) {
       return [this.cmsEntry(element)];
     }

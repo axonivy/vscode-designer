@@ -26,10 +26,10 @@ export class IvyProjectExplorer {
   private static _instance: IvyProjectExplorer;
   private readonly treeDataProvider: IvyProjectTreeDataProvider;
   private readonly treeView: TreeView<Entry>;
-  private initPromise: Promise<void> | undefined;
 
   private constructor(context: ExtensionContext) {
-    this.treeDataProvider = new IvyProjectTreeDataProvider(this.initPromise);
+    const activateEnginePromise = this.activateEngineIfNeeded();
+    this.treeDataProvider = new IvyProjectTreeDataProvider(activateEnginePromise);
     this.treeView = window.createTreeView(VIEW_ID, { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
     context.subscriptions.push(this.treeView);
     this.treeView.onDidChangeVisibility((event: TreeViewVisibilityChangeEvent) => {
@@ -40,6 +40,13 @@ export class IvyProjectExplorer {
         }
       }
     });
+    this.registerCommands(context);
+    this.defineFileWatchers(context);
+    context.subscriptions.push(
+      workspace.onDidChangeWorkspaceFolders(async () => {
+        await this.refresh();
+      })
+    );
   }
 
   static async init(context: ExtensionContext) {
@@ -47,12 +54,6 @@ export class IvyProjectExplorer {
       throw new Error('IvyProjectExplorer has already been initialized');
     }
     IvyProjectExplorer._instance = new IvyProjectExplorer(context);
-    IvyProjectExplorer._instance.initPromise = IvyProjectExplorer._instance.activateEngineIfNeeded();
-    IvyProjectExplorer._instance.registerCommands(context);
-    IvyProjectExplorer._instance.defineFileWatchers(context);
-    workspace.onDidChangeWorkspaceFolders(async () => {
-      await IvyProjectExplorer._instance.refresh();
-    });
   }
 
   private async activateEngineIfNeeded() {
