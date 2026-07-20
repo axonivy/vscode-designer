@@ -2,7 +2,7 @@ import path from 'path';
 import { ProgressLocation, Uri, window, type CancellationToken, type Progress } from 'vscode';
 import { showExtensionLog } from '../base/extension-output-channel';
 import { runJavaProjectConfigurationUpdate } from '../base/java-extension-api';
-import { logErrorMessage, logInformationMessage } from '../base/logging-util';
+import { logErrorMessage, logInformationMessage, logInformationMessageWithActions } from '../base/logging-util';
 import { IvyEngineManager } from '../engine/engine-manager';
 
 export let isProjectConversionRunning = false;
@@ -59,14 +59,8 @@ const conversionTask = async (
   if (projectsToReload.length > 0) {
     await runJavaProjectConfigurationUpdate(projectsToReload);
   }
-  window
-    .showInformationMessage(
-      `Converted ${convertedCount} of ${numOfProjects} Axon Ivy project(s).${failedProjects.length > 0 ? ` ${failedProjects.length} project(s) failed to convert.` : ''}`,
-      'Go to Extension Log'
-    )
-    .then(selection => {
-      if (selection === 'Go to Extension Log') {
-        showExtensionLog();
-      }
-    });
+  logInformationMessageWithActions(
+    `Converted ${convertedCount} of ${numOfProjects} Axon Ivy project(s).${failedProjects.length > 0 ? ` ${failedProjects.length} project(s) failed to convert.` : ''}`,
+    { 'Show Extension Log': () => showExtensionLog() }
+  );
 };

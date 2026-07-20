@@ -1,4 +1,5 @@
 import { XMLParser } from 'fast-xml-parser';
+import fs from 'node:fs';
 import path from 'path';
 import type { FileStat } from 'vscode';
 import { FileType, Uri, window, workspace } from 'vscode';
@@ -106,6 +107,18 @@ export const validateNamespace = (value: string) => {
     return;
   }
   return 'Enter Namespace separated by "/" -- Only letters, numbers, and underscores are allowed -- Spaces allowed within words -- Empty allowed.';
+};
+
+export const validateExportPath = (fileName: string, folderPath: Uri, ext: '.iar' | '.zip'): string | undefined => {
+  const fileNameValid = validateProjectName(fileName);
+  if (fileNameValid !== undefined) {
+    return fileNameValid;
+  }
+  const filePath = path.join(folderPath.fsPath, `${fileName}${ext}`);
+  if (fs.existsSync(filePath)) {
+    return `File already exists: ${filePath}. Please choose a different folder or file name.`;
+  }
+  return undefined;
 };
 
 export const sanitizeProjectName = (fileName: string) => {
