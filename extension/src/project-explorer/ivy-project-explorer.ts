@@ -26,9 +26,10 @@ export class IvyProjectExplorer {
   private static _instance: IvyProjectExplorer;
   private readonly treeDataProvider: IvyProjectTreeDataProvider;
   private readonly treeView: TreeView<Entry>;
+  private initPromise: Promise<void> | undefined;
 
   private constructor(context: ExtensionContext) {
-    this.treeDataProvider = new IvyProjectTreeDataProvider();
+    this.treeDataProvider = new IvyProjectTreeDataProvider(this.initPromise);
     this.treeView = window.createTreeView(VIEW_ID, { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
     context.subscriptions.push(this.treeView);
     this.treeView.onDidChangeVisibility((event: TreeViewVisibilityChangeEvent) => {
@@ -43,10 +44,10 @@ export class IvyProjectExplorer {
 
   static async init(context: ExtensionContext) {
     if (IvyProjectExplorer._instance) {
-      return IvyProjectExplorer._instance;
+      throw new Error('IvyProjectExplorer has already been initialized');
     }
     IvyProjectExplorer._instance = new IvyProjectExplorer(context);
-    await IvyProjectExplorer._instance.activateEngineIfNeeded();
+    IvyProjectExplorer._instance.initPromise = IvyProjectExplorer._instance.activateEngineIfNeeded();
     IvyProjectExplorer._instance.registerCommands(context);
     IvyProjectExplorer._instance.defineFileWatchers(context);
     workspace.onDidChangeWorkspaceFolders(async () => {
@@ -55,8 +56,6 @@ export class IvyProjectExplorer {
   }
 
   private async activateEngineIfNeeded() {
-    const hasIvyProjects = await this.hasIvyProjects();
-    await this.setProjectExplorerContext({ hasIvyProjects: hasIvyProjects });
     const workspaceHasOpenFolders = workspace.workspaceFolders && workspace.workspaceFolders.length > 0;
     if (!workspaceHasOpenFolders) {
       return;
