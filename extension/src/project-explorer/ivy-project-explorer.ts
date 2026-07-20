@@ -1,7 +1,6 @@
-import fs from 'fs';
 import path from 'path';
 import type { ExtensionContext, TreeView, TreeViewVisibilityChangeEvent } from 'vscode';
-import { Uri, commands, window, workspace } from 'vscode';
+import { Uri, window, workspace } from 'vscode';
 import { executeCommand, registerCommand, type Command } from '../base/commands';
 import { debouncedAction } from '../base/debounce';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
@@ -10,6 +9,7 @@ import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { installLocalMarketProduct, installMarketProduct } from '../market/import-market';
+import { exportIvyProject } from './export-ivy-project';
 import { importIvyProject } from './import-ivy-project';
 import { importNewProcess } from './import-process';
 import { IVY_PROJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject, type Entry } from './ivy-project-tree-data-provider';
@@ -267,15 +267,9 @@ export class IvyProjectExplorer {
     if (!projectPath) {
       logErrorMessage('Export Axon Ivy Project: No valid Axon Ivy Project selected.');
       return;
-    } else {
-      const projectPomPath = path.join(projectPath, 'pom.xml');
-      if (fs.existsSync(projectPomPath)) {
-        await commands.executeCommand('maven.goal.package', { pomPath: projectPomPath });
-      } else {
-        logErrorMessage(`Export Axon Ivy Project: No pom.xml found in the root of the selected project path: ${projectPath}`);
-      }
-      return;
     }
+    await exportIvyProject(projectPath);
+    return;
   }
 
   private async installLocalMarketProduct(selection: TreeSelection) {
