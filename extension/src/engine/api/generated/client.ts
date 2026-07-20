@@ -4,8 +4,8 @@
  * Axon Ivy OpenAPI
  * OpenAPI spec version: 0.0.1
  */
-import axios from 'axios';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios from 'axios';
 
 export interface ProjectIdentifier {
   app: string;

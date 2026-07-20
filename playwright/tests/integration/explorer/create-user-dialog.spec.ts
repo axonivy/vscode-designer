@@ -10,9 +10,9 @@ const userDialogName = 'testCreateUserDialog';
 test('Add Html Dialog', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.addUserDialog(userDialogName, 'ch.ivyteam.test', 'Html Dialog (JSF)');
-  await explorer.hasNode(`${userDialogName}.xhtml`);
-  await explorer.hasNode(`${userDialogName}Data.d.json`);
-  await explorer.hasNode(`${userDialogName}Process.p.json`);
+  await explorer.hasNodeExact(`${userDialogName}.xhtml`);
+  await explorer.hasNodeExact(`${userDialogName}Data.d.json`);
+  await explorer.hasNodeExact(`${userDialogName}Process.p.json`);
   await wsPage.isTabWithNameVisible(userDialogName + '.xhtml');
   const processEditor = new ProcessEditor(wsPage, `${userDialogName}Process.p.json`);
   await expect(processEditor.content).toContainText('>Html Dialog</a>');
@@ -24,9 +24,9 @@ test('Add Html Dialog', async ({ wsPage }) => {
 test('Add Offline Dialog', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.addUserDialog(userDialogName, 'ch.ivyteam.test.offline', 'Offline Dialog (JSF)');
-  await explorer.hasNode(`${userDialogName}.xhtml`);
-  await explorer.hasNode(`${userDialogName}Data.d.json`);
-  await explorer.hasNode(`${userDialogName}Process.p.json`);
+  await explorer.hasNodeExact(`${userDialogName}.xhtml`);
+  await explorer.hasNodeExact(`${userDialogName}Data.d.json`);
+  await explorer.hasNodeExact(`${userDialogName}Process.p.json`);
   await wsPage.isTabWithNameVisible(userDialogName + '.xhtml');
   const processEditor = new ProcessEditor(wsPage, `${userDialogName}Process.p.json`);
   await expect(processEditor.content).toContainText('>Offline Html Dialog</a>');
@@ -38,9 +38,9 @@ test('Add Offline Dialog', async ({ wsPage }) => {
 test('Add Form Dialog', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.addUserDialog(userDialogName, 'ch.ivyteam.test.form', 'Dialog Form');
-  await explorer.hasNode(`${userDialogName}.f.json`);
-  await explorer.hasNode(`${userDialogName}Data.d.json`);
-  await explorer.hasNode(`${userDialogName}Process.p.json`);
+  await explorer.hasNodeExact(`${userDialogName}.f.json`);
+  await explorer.hasNodeExact(`${userDialogName}Data.d.json`);
+  await explorer.hasNodeExact(`${userDialogName}Process.p.json`);
   await wsPage.isTabWithNameVisible(userDialogName + '.f.json');
   const formEditor = new FormEditor(wsPage, `${userDialogName}.f.json`);
   await formEditor.expectWebViewVisible();

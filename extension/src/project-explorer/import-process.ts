@@ -1,5 +1,5 @@
+import path from 'path';
 import { window, workspace } from 'vscode';
-import { logErrorMessage } from '../base/logging-util';
 import type { ImportProcessBody } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 
@@ -10,18 +10,21 @@ export const importNewProcess = async (projectDir: string) => {
   }
 };
 
-const collectImportBpmnProcessParams = async (projectDir: string): Promise<ImportProcessBody> => {
+const collectImportBpmnProcessParams = async (projectDir: string): Promise<ImportProcessBody | undefined> => {
   const bpmnXmlFile = await window.showOpenDialog({
     canSelectMany: false,
-    openLabel: 'Select BPMN XML File to Import'
+    title: 'Select BPMN .bpmn file to import',
+    openLabel: 'Import BPMN Process',
+    filters: {
+      'BPMN Files': ['bpmn']
+    }
   });
   if (!bpmnXmlFile || bpmnXmlFile.length === 0 || !bpmnXmlFile[0]) {
-    logErrorMessage('Cannot pick BPMN or XML file.');
-    return Promise.reject(new Error('BPMN or XML file not selected'));
+    return undefined;
   }
   const fileData = await workspace.fs.readFile(bpmnXmlFile[0]);
   const regularArray = new Uint8Array(fileData);
-  const fileName = bpmnXmlFile[0].fsPath.split('/').pop();
+  const fileName = bpmnXmlFile[0].fsPath.split(path.sep).pop();
   const fileObj = new File([regularArray.buffer], fileName ? fileName : 'bpmn.xml', { type: 'application/xml' });
   return { projectDir, file: fileObj };
 };

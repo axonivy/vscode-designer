@@ -9,6 +9,7 @@ import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { installLocalMarketProduct, installMarketProduct } from '../market/import-market';
+import { importIvyProject } from './import-ivy-project';
 import { importNewProcess } from './import-process';
 import { IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject, type Entry } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
@@ -74,6 +75,7 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.addCallableSubProcess`, (s: TreeSelection) => this.addProcess(s, 'Callable Sub Process'));
     registerCmd(`${VIEW_ID}.addWebServiceProcess`, (s: TreeSelection) => this.addProcess(s, 'Web Service Process'));
     registerCmd(`${VIEW_ID}.importBpmnProcess`, (s: TreeSelection) => this.importBpmnProcess(s));
+    registerCmd(`${VIEW_ID}.importIvyProject`, (s: TreeSelection) => this.importIvyProject(s));
     registerCmd(`${VIEW_ID}.installLocalMarketProduct`, (s: TreeSelection) => this.installLocalMarketProduct(s));
     registerCmd(`${VIEW_ID}.installMarketProduct`, (s: TreeSelection) =>
       this.installMarketProduct(s, context.extension.packageJSON.version)
@@ -198,11 +200,10 @@ export class IvyProjectExplorer {
     return debouncedAction(() => action(project), `${project}:actionKey:${actionKey}`, 1_000)();
   }
 
-  public async addProject(selection: TreeSelection) {
-    const treeSelectionUri = await treeSelectionToUri(selection);
-    const selectedUri = (await isDirectory(treeSelectionUri)) ? treeSelectionUri : await getWorkspaceFolder();
+  private async addProject(selection: TreeSelection) {
+    const selectedUri = await this.selectWorkspace(selection);
     if (!selectedUri) {
-      logInformationMessage('No valid directory selected');
+      logInformationMessage('No valid workspace selected, dialog aborted.');
       return;
     }
     const existingIvyProjects = await this.getIvyProjects();
@@ -231,7 +232,7 @@ export class IvyProjectExplorer {
     await addNewCaseMap(addCommandContext);
   }
 
-  public async importBpmnProcess(selection: TreeSelection) {
+  private async importBpmnProcess(selection: TreeSelection) {
     const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
     if (!uri) {
       logErrorMessage('Import BPMN Process: no valid Axon Ivy Project selected.');
@@ -245,7 +246,16 @@ export class IvyProjectExplorer {
     logErrorMessage('Import BPMN Process: no valid Axon Ivy Project selected.');
   }
 
-  public async installLocalMarketProduct(selection: TreeSelection) {
+  private async importIvyProject(selection: TreeSelection) {
+    const selectedWorkspaceUri = await this.selectWorkspace(selection);
+    if (!selectedWorkspaceUri) {
+      logInformationMessage('No valid workspace selected, dialog aborted.');
+      return;
+    }
+    await importIvyProject(selectedWorkspaceUri);
+  }
+
+  private async installLocalMarketProduct(selection: TreeSelection) {
     const addCommandContext = await this.getAddCommandSelectionContext(selection, false);
     if (!addCommandContext) {
       return;
@@ -253,7 +263,7 @@ export class IvyProjectExplorer {
     await installLocalMarketProduct(addCommandContext);
   }
 
-  public async installMarketProduct(selection: TreeSelection, extensionVersion?: string) {
+  private async installMarketProduct(selection: TreeSelection, extensionVersion?: string) {
     const addCommandContext = await this.getAddCommandSelectionContext(selection, false);
     if (!addCommandContext) {
       return;
@@ -332,16 +342,22 @@ export class IvyProjectExplorer {
     });
   }
 
-  async getIvyProjects() {
+  public async getIvyProjects() {
     return this.treeDataProvider.getIvyProjects();
   }
 
-  async getDiagnostics() {
+  public async getDiagnostics() {
     return this.treeDataProvider.getDiagnostics();
   }
 
   private async hasIvyProjects() {
     return this.treeDataProvider.hasIvyProjects();
+  }
+
+  private async selectWorkspace(selection: TreeSelection): Promise<Uri | undefined> {
+    const treeSelectionUri = await treeSelectionToUri(selection);
+    const selectedWorkspaceUri = (await isDirectory(treeSelectionUri)) ? treeSelectionUri : await getWorkspaceFolder();
+    return selectedWorkspaceUri;
   }
 
   private async getAddCommandSelectionContext(

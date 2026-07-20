@@ -8,7 +8,7 @@ test('Add new Data Class', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   const dataClassName = 'testCreateData';
   await explorer.addDataClass(dataClassName, 'ch.ivyteam.test.data');
-  await explorer.hasNode(`${dataClassName}.d.json`);
+  await explorer.hasNodeExact(`${dataClassName}.d.json`);
   const dataClassEditor = new DataClassEditor(wsPage, `${dataClassName}.d.json`);
   await dataClassEditor.expectWebViewVisible();
   const javaEditor = new TextEditor(wsPage, `${dataClassName}.java`);
@@ -21,7 +21,7 @@ test('Add new Entity Class', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   const entityClassName = 'testCreateEntity';
   await explorer.addEntityClass(entityClassName, 'ch.ivyteam.test.data');
-  await explorer.hasNode(`${entityClassName}.d.json`);
+  await explorer.hasNodeExact(`${entityClassName}.d.json`);
   const dataClassEditor = new DataClassEditor(wsPage, `${entityClassName}.d.json`);
   await dataClassEditor.expectEntityViewVisible();
   const javaEditor = new TextEditor(wsPage, `${entityClassName}.java`);

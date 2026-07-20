@@ -12,7 +12,7 @@ test('Add Project and execute init Process', { tag: '@serial' }, async ({ wsPage
   const explorer = new FileExplorer(wsPage);
   await explorer.addNestedProject('parent', projectName);
   await wsPage.hasReadyStatusMessage();
-  await explorer.hasNode(`parent${path.sep}${projectName}`);
+  await explorer.hasNodeExact(`parent${path.sep}${projectName}`);
 
   const problemsView = await ProblemsView.initProblemsView(wsPage);
   await problemsView.hasNoMarker();

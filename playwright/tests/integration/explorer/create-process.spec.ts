@@ -8,7 +8,7 @@ const processName = 'testCreateProcess';
 test('Add business process, execute, edit and redeploy', { tag: '@serial' }, async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.addProcess(processName, 'Business Process');
-  await explorer.hasNode(`${processName}.p.json`);
+  await explorer.hasNodeExact(`${processName}.p.json`);
   const processEditor = new ProcessEditor(wsPage, `${processName}.p.json`);
   const start = processEditor.elementByType('start:requestStart');
   const end = processEditor.elementByType('end:taskEnd');
@@ -26,9 +26,9 @@ test('Add business process, execute, edit and redeploy', { tag: '@serial' }, asy
 test('Add nested business process', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.addProcess(processName, 'Business Process', 'parent1/parent2');
-  await explorer.hasNode('parent1');
-  await explorer.hasNode('parent2');
-  await explorer.hasNode(`${processName}.p.json`);
+  await explorer.hasNodeExact('parent1');
+  await explorer.hasNodeExact('parent2');
+  await explorer.hasNodeExact(`${processName}.p.json`);
   const processEditor = new ProcessEditor(wsPage, `${processName}.p.json`);
   const start = processEditor.elementByType('start:requestStart');
   await expect(start).toBeVisible();
@@ -37,7 +37,7 @@ test('Add nested business process', async ({ wsPage }) => {
 test('Add callable sub process', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.addProcess(processName, 'Callable Sub Process');
-  await explorer.hasNode(`${processName}.p.json`);
+  await explorer.hasNodeExact(`${processName}.p.json`);
   const processEditor = new ProcessEditor(wsPage, `${processName}.p.json`);
   const start = processEditor.elementByType('start:callSubStart');
   await expect(start).toBeVisible();
@@ -46,7 +46,7 @@ test('Add callable sub process', async ({ wsPage }) => {
 test('Add web service process', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.addProcess(processName, 'Web Service Process');
-  await explorer.hasNode(`${processName}.p.json`);
+  await explorer.hasNodeExact(`${processName}.p.json`);
   const processEditor = new ProcessEditor(wsPage, `${processName}.p.json`);
   const start = processEditor.elementByType('start:webserviceStart');
   await expect(start).toBeVisible();

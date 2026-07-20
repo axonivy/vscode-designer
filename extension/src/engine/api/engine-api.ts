@@ -10,6 +10,7 @@ import {
   type CaseMapInit,
   type DataClassInit,
   type ImportProcessBody,
+  type ImportProjectsBody,
   type NewProjectParams,
   type ProductInstallParams,
   type WorkspaceBean,
@@ -27,6 +28,7 @@ import {
   findOrCreatePmv,
   getVersion,
   importProcess,
+  importProjects,
   installMarketProduct,
   invalidateClassLoader,
   processDebugger,
@@ -95,6 +97,12 @@ export class IvyEngineApi {
 
   public async createProcessFromBpmn(params: ImportProcessBody) {
     return importProcess(params, { baseURL: this.baseURL, ...options })
+      .then(res => res.data)
+      .catch(handleAxiosError);
+  }
+
+  public async importIvyProject(workspaceId: string, params: ImportProjectsBody) {
+    return importProjects(workspaceId, params, { baseURL: this.engineURL, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }

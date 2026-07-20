@@ -14,6 +14,10 @@ pipeline {
     string(name: 'engineDownloadUrl', defaultValue: 'https://jenkins.ivyteam.io/job/core_product/job/master/lastSuccessfulBuild/artifact/workspace/ch.ivyteam.ivy.server.product/target/products/*_Slim_*.zip/*zip*/products.zip', description: 'engine that will be packaged')
   }
 
+  environment {
+    RUN_IN_BROWSER = 'true'
+  }
+
   stages {
     stage('Integration Test') {
       steps {

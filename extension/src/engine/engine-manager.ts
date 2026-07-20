@@ -29,7 +29,14 @@ import { extensionVersion } from '../version/extension-version';
 import { IvyBrowserViewProvider } from '../views/browser/ivy-browser-view-provider';
 import { RuntimeLogViewProvider } from '../views/runtimelog-view';
 import { IvyEngineApi } from './api/engine-api';
-import type { CaseMapInit, DataClassInit, ImportProcessBody, NewProjectParams, ProductInstallParams } from './api/generated/client';
+import type {
+  CaseMapInit,
+  DataClassInit,
+  ImportProcessBody,
+  ImportProjectsBody,
+  NewProjectParams,
+  ProductInstallParams
+} from './api/generated/client';
 import { IvyDiagnostics } from './diagnostics';
 import { EngineDownloader } from './engine-downloader';
 import { engineOutputChannel } from './engine-output-channel';
@@ -195,6 +202,15 @@ export class IvyEngineManager {
       { text: 'Importing BPMN process' },
       async () => await this.ivyEngineApi?.createProcessFromBpmn(input)
     );
+  }
+
+  public async importIvyProject(workspaceId: string, input: ImportProjectsBody) {
+    await StatusBar.withStatusBarProgress(
+      { text: 'Importing Ivy project' },
+      async () => await this.ivyEngineApi?.importIvyProject(workspaceId, input)
+    );
+    await this.importJavaProjects();
+    await IvyProjectExplorer.instance.refresh();
   }
 
   public async installMarketProduct(input: ProductInstallParams) {
