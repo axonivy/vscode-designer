@@ -117,8 +117,8 @@ export class IvyEngineManager {
       return;
     }
     this.started = true;
-    await IvyProjectExplorer.instance.setProjectExplorerContext({ isStarted: true });
     this.resolvedEngineUrl = await this.resolveEngineUrl();
+    await executeCommand('setContext', 'ivy:isStarted', 'true');
     this.ivyEngineApi = await IvyEngineApi.init(this.resolvedEngineUrl.toString());
     let devContextPath = this.ivyEngineApi.devContextPath;
     IvyBrowserViewProvider.register(this.context, this.resolvedEngineUrl, devContextPath);
@@ -234,12 +234,8 @@ export class IvyEngineManager {
   }
 
   public async createProject(newProjectParams: NewProjectParams & { path: string }) {
-    if (!this.started) {
-      await this.start();
-    }
     return await StatusBar.withStatusBarProgress({ text: 'Creating and deploying new project' }, async () => {
       const projectBean = await this.ivyEngineApi?.createProject(newProjectParams);
-      await IvyProjectExplorer.instance.setProjectExplorerContext({ hasIvyProjects: true });
       await this.importJavaProjects();
       await this.createAndOpenProcess({
         name: 'BusinessProcess',

@@ -56,7 +56,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     IvyDiagnostics.init(context);
     conditionalWelcomePage(context);
 
-    await IvyProjectExplorer.init(context);
+    IvyProjectExplorer.init(context);
     registerAddDependencyHandler(context);
     StatusBar.refreshStatusBar();
     return messenger.diagnosticApi();
