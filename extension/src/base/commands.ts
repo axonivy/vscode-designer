@@ -37,6 +37,7 @@ type ProjectViewCommand =
   | 'ivyProjects.addWebServiceProcess'
   | 'ivyProjects.importBpmnProcess'
   | 'ivyProjects.importIvyProject'
+  | 'ivyProjects.exportIvyProject'
   | 'ivyProjects.installLocalMarketProduct'
   | 'ivyProjects.installMarketProduct'
   | 'ivyProjects.addNewProject'

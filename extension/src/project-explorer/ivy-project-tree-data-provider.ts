@@ -34,7 +34,7 @@ export interface Entry {
   command?: IvyCommand;
 }
 
-export const IVY_RPOJECT_FILE_PATTERN = '**/{.ivyproject,.project}';
+export const IVY_PROJECT_FILE_PATTERN = '**/{.ivyproject,.project}';
 const IVY_PROJECT_CONTEXT_VALUE = 'ivyProject';
 
 export const isIvyProject = (projectFile: Uri) => {
@@ -80,7 +80,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   }
 
   private async findIvyProjects() {
-    const projectFiles = await workspace.findFiles(IVY_RPOJECT_FILE_PATTERN, this.excludePattern, this.maxResults);
+    const projectFiles = await workspace.findFiles(IVY_PROJECT_FILE_PATTERN, this.excludePattern, this.maxResults);
     const distinctProjectDirs = [...new Set(projectFiles.filter(p => isIvyProject(p)).map(p => path.dirname(p.fsPath)))];
     const projectsPerBaseName = new Map<string, string[]>();
     for (const projectDir of distinctProjectDirs) {

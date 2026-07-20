@@ -1,6 +1,7 @@
+import fs from 'fs';
 import path from 'path';
 import type { ExtensionContext, TreeView, TreeViewVisibilityChangeEvent } from 'vscode';
-import { Uri, window, workspace } from 'vscode';
+import { Uri, commands, window, workspace } from 'vscode';
 import { executeCommand, registerCommand, type Command } from '../base/commands';
 import { debouncedAction } from '../base/debounce';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
@@ -11,7 +12,7 @@ import { IvyEngineManager } from '../engine/engine-manager';
 import { installLocalMarketProduct, installMarketProduct } from '../market/import-market';
 import { importIvyProject } from './import-ivy-project';
 import { importNewProcess } from './import-process';
-import { IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject, type Entry } from './ivy-project-tree-data-provider';
+import { IVY_PROJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject, type Entry } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
 import { addNewDataClass } from './new-data-class';
 import { addNewProcess, type ProcessKind } from './new-process';
@@ -76,6 +77,7 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.addWebServiceProcess`, (s: TreeSelection) => this.addProcess(s, 'Web Service Process'));
     registerCmd(`${VIEW_ID}.importBpmnProcess`, (s: TreeSelection) => this.importBpmnProcess(s));
     registerCmd(`${VIEW_ID}.importIvyProject`, (s: TreeSelection) => this.importIvyProject(s));
+    registerCmd(`${VIEW_ID}.exportIvyProject`, (s: TreeSelection) => this.exportIvyProject(s));
     registerCmd(`${VIEW_ID}.installLocalMarketProduct`, (s: TreeSelection) => this.installLocalMarketProduct(s));
     registerCmd(`${VIEW_ID}.installMarketProduct`, (s: TreeSelection) =>
       this.installMarketProduct(s, context.extension.packageJSON.version)
@@ -98,7 +100,7 @@ export class IvyProjectExplorer {
   }
 
   private defineFileWatchers(context: ExtensionContext) {
-    const ivyProjectFileWatcher = workspace.createFileSystemWatcher(IVY_RPOJECT_FILE_PATTERN, false, true, true);
+    const ivyProjectFileWatcher = workspace.createFileSystemWatcher(IVY_PROJECT_FILE_PATTERN, false, true, true);
     ivyProjectFileWatcher.onDidCreate(async projectFile => {
       if (isIvyProject(projectFile)) {
         await this.refresh();
@@ -235,7 +237,7 @@ export class IvyProjectExplorer {
   private async importBpmnProcess(selection: TreeSelection) {
     const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
     if (!uri) {
-      logErrorMessage('Import BPMN Process: no valid Axon Ivy Project selected.');
+      logErrorMessage('Import BPMN Process: No valid Axon Ivy Project selected.');
       return;
     }
     const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
@@ -243,7 +245,7 @@ export class IvyProjectExplorer {
       await importNewProcess(projectPath);
       return;
     }
-    logErrorMessage('Import BPMN Process: no valid Axon Ivy Project selected.');
+    logErrorMessage('Import BPMN Process: No valid Axon Ivy Project selected.');
   }
 
   private async importIvyProject(selection: TreeSelection) {
@@ -253,6 +255,27 @@ export class IvyProjectExplorer {
       return;
     }
     await importIvyProject(selectedWorkspaceUri);
+  }
+
+  private async exportIvyProject(selection: TreeSelection) {
+    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
+    if (!uri) {
+      logErrorMessage('Export Axon Ivy Project: No valid Axon Ivy Project selected.');
+      return;
+    }
+    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
+    if (!projectPath) {
+      logErrorMessage('Export Axon Ivy Project: No valid Axon Ivy Project selected.');
+      return;
+    } else {
+      const projectPomPath = path.join(projectPath, 'pom.xml');
+      if (fs.existsSync(projectPomPath)) {
+        await commands.executeCommand('maven.goal.package', { pomPath: projectPomPath });
+      } else {
+        logErrorMessage(`Export Axon Ivy Project: No pom.xml found in the root of the selected project path: ${projectPath}`);
+      }
+      return;
+    }
   }
 
   private async installLocalMarketProduct(selection: TreeSelection) {
