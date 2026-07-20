@@ -13,15 +13,21 @@ test.describe('Engine run by extension', () => {
     await outputview.checkIfEngineStarted();
   });
 
-  test('Java processes are terminated with extension reload', async ({ wsPage }) => {
+  test('Java processes are terminated with extension reload', { tag: '@serial' }, async ({ wsPage }) => {
     const outputview = new OutputView(wsPage);
     await outputview.checkIfEngineStarted();
-    const numOfJavaProcesses = execSync('jps -q | wc -l', { encoding: 'utf-8' });
+    await checkNumberOfJavaProcesses();
     await wsPage.executeCommand('Developer: Reload Window');
     await outputview.checkIfEngineStarted();
-    const numOfJavaProcessesAfterReload = execSync('jps -q | wc -l', { encoding: 'utf-8' });
-    expect(numOfJavaProcesses).toBe(numOfJavaProcessesAfterReload);
+    await checkNumberOfJavaProcesses();
   });
+
+  const checkNumberOfJavaProcesses = async () => {
+    await expect(async () => {
+      const numOfJavaProcesses = execSync('jps -q | wc -l', { encoding: 'utf-8' }).trim();
+      expect(numOfJavaProcesses).toBe('3');
+    }).toPass();
+  };
 });
 
 test.describe('Engine noProjectWorkspacePath', () => {
