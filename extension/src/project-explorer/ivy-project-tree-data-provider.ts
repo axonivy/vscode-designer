@@ -14,7 +14,7 @@ import {
   type TreeDataProvider,
   type Command as VSCodeCommand
 } from 'vscode';
-import type { Command } from '../base/commands';
+import { executeCommand, type Command } from '../base/commands';
 import { config } from '../base/configurations';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyProjectExplorer } from './ivy-project-explorer';
@@ -65,7 +65,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   private readonly excludePattern: string;
   private readonly maxResults: number;
 
-  constructor() {
+  constructor(readonly activateEnginePromise: Promise<void>) {
     this.excludePattern = config.projectExcludePattern() ?? '';
     this.maxResults = config.projectMaximumNumber() ?? 50;
     this.ivyProjects = this.findIvyProjects();
@@ -99,6 +99,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
         });
       }
     });
+    await executeCommand('setContext', 'ivy:hasIvyProjects', validProjects.length > 0);
     return { projects: validProjects.sort(), diagnostics };
   }
 
@@ -152,6 +153,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   }
 
   async getChildren(element?: Entry): Promise<Entry[]> {
+    await this.activateEnginePromise;
     if (element) {
       return [this.cmsEntry(element)];
     }

@@ -28,7 +28,8 @@ export class IvyProjectExplorer {
   private readonly treeView: TreeView<Entry>;
 
   private constructor(context: ExtensionContext) {
-    this.treeDataProvider = new IvyProjectTreeDataProvider();
+    const activateEnginePromise = this.activateEngineIfNeeded();
+    this.treeDataProvider = new IvyProjectTreeDataProvider(activateEnginePromise);
     this.treeView = window.createTreeView(VIEW_ID, { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
     context.subscriptions.push(this.treeView);
     this.treeView.onDidChangeVisibility((event: TreeViewVisibilityChangeEvent) => {
@@ -39,24 +40,23 @@ export class IvyProjectExplorer {
         }
       }
     });
+    this.registerCommands(context);
+    this.defineFileWatchers(context);
+    context.subscriptions.push(
+      workspace.onDidChangeWorkspaceFolders(async () => {
+        await this.refresh();
+      })
+    );
   }
 
   static async init(context: ExtensionContext) {
     if (IvyProjectExplorer._instance) {
-      return IvyProjectExplorer._instance;
+      throw new Error('IvyProjectExplorer has already been initialized');
     }
     IvyProjectExplorer._instance = new IvyProjectExplorer(context);
-    await IvyProjectExplorer._instance.activateEngineIfNeeded();
-    IvyProjectExplorer._instance.registerCommands(context);
-    IvyProjectExplorer._instance.defineFileWatchers(context);
-    workspace.onDidChangeWorkspaceFolders(async () => {
-      await IvyProjectExplorer._instance.refresh();
-    });
   }
 
   private async activateEngineIfNeeded() {
-    const hasIvyProjects = await this.hasIvyProjects();
-    await this.setProjectExplorerContext({ hasIvyProjects: hasIvyProjects });
     const workspaceHasOpenFolders = workspace.workspaceFolders && workspace.workspaceFolders.length > 0;
     if (!workspaceHasOpenFolders) {
       return;
@@ -294,15 +294,6 @@ export class IvyProjectExplorer {
       return;
     }
     await addNewDataClass('Entity Class', addCommandContext);
-  }
-
-  public async setProjectExplorerContext({ hasIvyProjects, isStarted }: { hasIvyProjects?: boolean; isStarted?: boolean }) {
-    if (hasIvyProjects !== undefined) {
-      await executeCommand('setContext', 'ivy:hasIvyProjects', hasIvyProjects);
-    }
-    if (isStarted !== undefined) {
-      await executeCommand('setContext', 'ivy:isStarted', isStarted);
-    }
   }
 
   public async selectCmsEntry(projectPath: string) {
