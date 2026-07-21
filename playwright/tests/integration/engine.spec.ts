@@ -24,10 +24,11 @@ test.describe.only('Engine run by extension', () => {
   });
 
   const checkNumberOfJavaProcesses = async () => {
+    const numberOfExpectedJavaProcesses = 5;
     await expect(async () => {
       const output = execSync('jps -q', { encoding: 'utf8' }).trim();
       const numOfJavaProcesses = output ? output.split(/\r?\n/).length : 0;
-      expect(numOfJavaProcesses).toBe('5');
+      expect(numOfJavaProcesses).toBe(numberOfExpectedJavaProcesses);
     }).toPass();
   };
 });
