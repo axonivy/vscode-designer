@@ -5,7 +5,8 @@ import { OutputView } from '../page-objects/output-view';
 import { SettingsView } from '../page-objects/settings-view';
 import { embeddedEngineWorkspace, noEngineWorkspacePath, noProjectWorkspacePath } from '../workspaces/workspace';
 
-test.describe('Engine run by extension', () => {
+// eslint-disable-next-line playwright/no-focused-test
+test.describe.only('Engine run by extension', () => {
   test.use({ workspace: embeddedEngineWorkspace });
 
   test('check if extension can download and start engine', async ({ wsPage }) => {
@@ -24,7 +25,8 @@ test.describe('Engine run by extension', () => {
 
   const checkNumberOfJavaProcesses = async () => {
     await expect(async () => {
-      const numOfJavaProcesses = execSync('jps -q | wc -l', { encoding: 'utf-8' }).trim();
+      const output = execSync('jps -q', { encoding: 'utf8' }).trim();
+      const numOfJavaProcesses = output ? output.split(/\r?\n/).length : 0;
       expect(numOfJavaProcesses).toBe('5');
     }).toPass();
   };
