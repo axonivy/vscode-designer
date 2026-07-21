@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 import { execSync } from 'node:child_process';
+import Os from 'os';
 import { test } from '../fixtures/baseTest';
 import { OutputView } from '../page-objects/output-view';
 import { SettingsView } from '../page-objects/settings-view';
@@ -24,7 +25,7 @@ test.describe.only('Engine run by extension', () => {
   });
 
   const checkNumberOfJavaProcesses = async () => {
-    const numberOfExpectedJavaProcesses = 5;
+    const numberOfExpectedJavaProcesses = Os.platform() === 'win32' ? 6 : 5;
     await expect(async () => {
       const output = execSync('jps -q', { encoding: 'utf8' }).trim();
       const numOfJavaProcesses = output ? output.split(/\r?\n/).length : 0;
