@@ -23,7 +23,7 @@ export class EngineRunner {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.childProcess?.stdout?.on('data', (data: any) => {
         const output = data.toString() as string;
-        if (output && output.startsWith('Go to http')) {
+        if (output && output.includes('Go to http') && output.includes(' to see')) {
           this._engineUrl = output.split('Go to ')[1]?.split(' to see')[0];
           resolve();
         }
