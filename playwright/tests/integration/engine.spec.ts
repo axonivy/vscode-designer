@@ -1,4 +1,6 @@
 import { expect } from '@playwright/test';
+import { execSync } from 'node:child_process';
+import Os from 'os';
 import { test } from '../fixtures/baseTest';
 import { OutputView } from '../page-objects/output-view';
 import { SettingsView } from '../page-objects/settings-view';
@@ -11,6 +13,24 @@ test.describe('Engine run by extension', () => {
     const outputview = new OutputView(wsPage);
     await outputview.checkIfEngineStarted();
   });
+
+  test('Java processes are terminated with extension reload', { tag: '@serial' }, async ({ wsPage }) => {
+    const outputview = new OutputView(wsPage);
+    await outputview.checkIfEngineStarted();
+    await checkNumberOfJavaProcesses();
+    await wsPage.executeCommand('Developer: Reload Window');
+    await outputview.checkIfEngineStarted();
+    await checkNumberOfJavaProcesses();
+  });
+
+  const checkNumberOfJavaProcesses = async () => {
+    const numberOfExpectedJavaProcesses = Os.platform() === 'win32' ? 6 : 5;
+    await expect(async () => {
+      const output = execSync('jps -q', { encoding: 'utf8' }).trim();
+      const numOfJavaProcesses = output ? output.split(/\r?\n/).length : 0;
+      expect(numOfJavaProcesses).toBe(numberOfExpectedJavaProcesses);
+    }).toPass();
+  };
 });
 
 test.describe('Engine noProjectWorkspacePath', () => {
