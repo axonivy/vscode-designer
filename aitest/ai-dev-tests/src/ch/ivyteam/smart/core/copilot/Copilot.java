@@ -10,7 +10,7 @@ public class Copilot {
 
   private final CopilotContainer container;
 
-  private Copilot(CopilotContainer container) {
+  public Copilot(CopilotContainer container) {
     this.container = container;
   }
 
@@ -33,11 +33,14 @@ public class Copilot {
     return resource;
   }
 
-  static Copilot create(CopilotContainer container, String smartCoreMcpUrl) {
+  public void addMcp(String smartCoreMcpUrl) {
     container.copyFileToContainer(
         Transferable.of(smartCoreMcpServerConfig(smartCoreMcpUrl)),
         "/root/.copilot/mcp-config.json");
-    return new Copilot(container);
+  }
+
+  public void otlpEndpoint(String endpoint) {
+    container.withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", endpoint);
   }
 
   private static String smartCoreMcpServerConfig(String smartCoreMcpUrl) {
