@@ -16,9 +16,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Install Copilot CLI
-        run: npm install -g @github/copilot
-      - name: Run Copilot
-        run: copilot --yolo -p "Summarize the changes in this commit"
+      - name: Setup Java JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: 25
+          distribution: temurin
+      - name: Setup Maven
+        uses: stCarolas/setup-maven@v5.1
+        with:
+          maven-version: 3.9.13
+      - name: Build with Maven
+        run: |
+          cd aitest       
+          mvn clean verify -ntp
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VSCODE_MCP_URI: http://127.0.0.1:32140/mcp
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            */target/*-reports/*.xml
+            !*/target/*-reports/failsafe-summary.xml
+          action_fail: true
+      # - name: Install Copilot CLI
+      #   run: npm install -g @github/copilot
+      # - name: Run Copilot
+      #   run: copilot --yolo -p "Summarize the changes in this commit"
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

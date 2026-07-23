@@ -109,38 +109,6 @@
     </dependency>
   </dependencies>
 
-  <profiles>
-    <profile>
-      <id>COPILOT_TESTS</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>copilot-integration-tests</id>
-                <phase>integration-test</phase>
-                <goals>
-                  <goal>test</goal>
-                </goals>
-                <configuration>
-                  <includes>
-                    <include>**/*Test.java</include>
-                  </includes>
-                  <argLine>${maven.surefire.argLine}</argLine>
-                  <reuseForks>false</reuseForks>
-                  <testClassesDirectory>${project.build.outputDirectory}</testClassesDirectory>
-                  <testFailureIgnore>true</testFailureIgnore>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
-
   <!-- skip running in unit test suite -->
   <build>
     <sourceDirectory>src</sourceDirectory>
@@ -157,12 +125,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-test</id>
-            <phase>never</phase>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
