@@ -13,22 +13,31 @@ test('debounce deploy', async () => {
   const values: string[] = [];
   debouncedAction(
     () => {
-      values.push('Deploy executed');
+      values.push('project1 deploy executed');
     },
     'deploy',
-    'test'
+    'project1'
   )();
   debouncedAction(
     () => {
       values.push('Other executed');
     },
     'deploy',
-    'test'
+    'project1'
+  )();
+  debouncedAction(
+    () => {
+      values.push('project2 deploy executed');
+    },
+    'deploy',
+    'project2'
   )();
   expect(values).toEqual([]);
   expect(hasDeployActionInQueue()).toBe(true);
   await vi.advanceTimersByTimeAsync(1_000);
-  expect(values).toContain('Deploy executed');
+  expect(values.length).toBe(2);
+  expect(values).toContain('project1 deploy executed');
+  expect(values).toContain('project2 deploy executed');
 });
 
 test('debounce invalidate', async () => {
