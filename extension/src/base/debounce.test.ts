@@ -35,9 +35,7 @@ test('debounce deploy', async () => {
   expect(values).toEqual([]);
   expect(hasDeployActionInQueue()).toBe(true);
   await vi.advanceTimersByTimeAsync(1_000);
-  expect(values.length).toBe(2);
-  expect(values).toContain('project1 deploy executed');
-  expect(values).toContain('project2 deploy executed');
+  expect(values).toEqual(['project1 deploy executed', 'project2 deploy executed']);
 });
 
 test('debounce invalidate', async () => {
@@ -59,5 +57,23 @@ test('debounce invalidate', async () => {
   expect(values).toEqual([]);
   expect(hasDeployActionInQueue()).toBe(false);
   await vi.advanceTimersByTimeAsync(1_000);
-  expect(values).toContain('Invalidate executed');
+  expect(values).toEqual(['Invalidate executed']);
+});
+
+test('debounce resets', async () => {
+  const values: string[] = [];
+  debouncedAction(() => {
+    values.push('push1');
+  }, 'deploy')();
+  debouncedAction(() => {
+    values.push('push2');
+  }, 'deploy')();
+  await vi.advanceTimersByTimeAsync(800);
+  debouncedAction(() => {
+    values.push('push3');
+  }, 'deploy')();
+  await vi.advanceTimersByTimeAsync(800);
+  expect(values).toEqual([]);
+  await vi.advanceTimersByTimeAsync(10_000);
+  expect(values).toEqual(['push1']);
 });
