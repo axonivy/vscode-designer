@@ -1,0 +1,24 @@
+name: AI-build
+on:
+  schedule:
+    - cron: '0 1 * * 0' # 1 AM on Sunday
+  push:
+    branches:
+      - ai.tests
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  copilot-requests: write
+
+jobs:
+  copilot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Copilot CLI
+        run: npm install -g @github/copilot
+      - name: Run Copilot
+        run: copilot --yolo -p "Summarize the changes in this commit"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
