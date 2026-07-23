@@ -2,7 +2,7 @@ import path from 'path';
 import type { ExtensionContext, TreeView, TreeViewVisibilityChangeEvent } from 'vscode';
 import { Uri, window, workspace } from 'vscode';
 import { executeCommand, registerCommand, type Command } from '../base/commands';
-import { debouncedAction } from '../base/debounce';
+import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base/debounce';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { logErrorMessage, logInformationMessage, logWarningMessage } from '../base/logging-util';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
@@ -125,8 +125,12 @@ export class IvyProjectExplorer {
     m2eDepsWatcher.onDidCreate(deployProject);
     m2eDepsWatcher.onDidChange(deployProject);
     const targetWatcher = workspace.createFileSystemWatcher('**/target/classes/**/*.*');
-    const invalidateClassLoader = (uri: Uri) =>
+    const invalidateClassLoader = (uri: Uri) => {
+      if (hasDeployActionInQueue()) {
+        return;
+      }
       this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.invalidateClassLoader(d), 'invalidate', uri);
+    };
     targetWatcher.onDidChange(invalidateClassLoader);
     targetWatcher.onDidCreate(invalidateClassLoader);
     targetWatcher.onDidDelete(invalidateClassLoader);
@@ -192,12 +196,13 @@ export class IvyProjectExplorer {
     action(project);
   }
 
-  private async runEngineActionDebounced(action: (projectDir: string) => Promise<void>, actionKey: 'deploy' | 'invalidate', uri?: Uri) {
+  private async runEngineActionDebounced(action: (projectDir: string) => Promise<void>, actionKey: ActionKey, uri?: Uri) {
     const project = await treeUriToProjectPath(uri, this.getIvyProjects());
     if (!project) {
       return;
     }
-    return debouncedAction(() => action(project), `${project}:actionKey:${actionKey}`, 1_000)();
+    const keyPrefix = actionKey === 'invalidate' ? undefined : project;
+    return debouncedAction(() => action(project), actionKey, keyPrefix)();
   }
 
   private async addProject(selection: TreeSelection) {
