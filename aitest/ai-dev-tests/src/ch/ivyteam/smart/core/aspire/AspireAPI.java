@@ -22,7 +22,6 @@ public class AspireAPI {
     try (var response = request.get()) {
       var json = response.readEntity(String.class);
       var span = MAPPER.readTree(json);
-      System.out.println("Spans of resource " + resource + ": " + span.toPrettyString());
       return span
           .get("data")
           .get("resourceSpans").get(0)
