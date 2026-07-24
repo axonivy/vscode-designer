@@ -54,6 +54,7 @@ public class Runtime {
     copilot.otlpEndpoint("http://aspire:18890");
     
     aspireApi = AspireAPI.create("http://" + aspireContainer.getHost() + ":" + aspireContainer.getMappedPort(18888));
+    System.out.println("Aspire dashboard bound: " + aspireApi);
   }
 
   @SuppressWarnings("resource")

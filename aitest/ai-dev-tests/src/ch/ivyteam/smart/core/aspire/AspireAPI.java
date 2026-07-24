@@ -1,7 +1,7 @@
 package ch.ivyteam.smart.core.aspire;
 
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.WebTarget;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -22,7 +22,8 @@ public class AspireAPI {
         .queryParam("resource", resource)
         .request();
     try (var response = request.get()) {
-      return MAPPER.readTree(response.readEntity(String.class))
+      var raw = response.readEntity(String.class);
+      return MAPPER.readTree(raw)
           .get("data")
           .get("resourceSpans").get(0)
           .get("scopeSpans").get(0)
@@ -36,5 +37,10 @@ public class AspireAPI {
             .target(baseUrl)
             .path("api")
             .path("telemetry"));
+  }
+
+  @Override
+  public String toString() {
+    return target.getUri().toString();
   }
 }
