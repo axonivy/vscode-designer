@@ -45,12 +45,14 @@ public class Copilot {
 
   private static String smartCoreMcpServerConfig(String smartCoreMcpUrl) {
     smartCoreMcpUrl = smartCoreMcpUrl.replace("localhost", "host.docker.internal");
+    smartCoreMcpUrl = smartCoreMcpUrl.replace("127.0.0.1", "host.docker.internal");
     return String.format("""
       {
         "mcpServers": {
-          "smart-core": {
+          "axonivy-designer": {
+            "type": "http",
             "url": "%s",
-            "type": "http"
+            "tools": "*"
           }
         }
       }""",
