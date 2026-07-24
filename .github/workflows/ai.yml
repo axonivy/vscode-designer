@@ -42,6 +42,9 @@ jobs:
           code-server --extensions-dir "$PWD/.ci-extensions" --install-extension vscjava.vscode-java-pack
           code-server --extensions-dir "$PWD/.ci-extensions" --install-extension extension/vscode-designer*.vsix
           code-server --extensions-dir "$PWD/.ci-extensions" --list-extensions
+      - name: Install Axon Ivy Engine
+        run: |
+          pnpm run engine:download https://dev.axonivy.com/permalink/sprint/axonivy-engine.zip
       - name: Start VS Code host with extension and MCP
         run: |
           mkdir -p .ci-user-data/User
@@ -57,6 +60,8 @@ jobs:
 
           echo "JAVA_HOME=$JAVA_HOME"
           cat "$JAVA_HOME/release" || true
+
+          nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
 
           nohup code-server --bind-addr 127.0.0.1:3000 --auth none --disable-telemetry --disable-update-check --disable-workspace-trust --extensions-dir "$PWD/.ci-extensions" --user-data-dir "$PWD/.ci-user-data" "$PWD" > code-server.out 2>&1 &
 
