@@ -3,10 +3,12 @@ package ch.ivyteam.smart.core.aspire;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.WebTarget;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 public class AspireAPI {
 
   private final WebTarget target;
+  private static final ObjectMapper MAPPER = new ObjectMapper();
 
   private AspireAPI(WebTarget target) {
     this.target = target;
@@ -18,7 +20,8 @@ public class AspireAPI {
         .queryParam("resource", resource)
         .request();
     try (var response = request.get()) {
-      var span = response.readEntity(JsonNode.class);
+      var json = response.readEntity(String.class);
+      var span = MAPPER.readTree(json);
       return span
           .get("data")
           .get("resourceSpans").get(0)

@@ -26,7 +26,7 @@ public class CopilotIntegrationTest {
 
   @Test
   void createProject() throws Exception {
-    var resource = rt.copilot().prompt("create an axon ivy project");
+    var resource = rt.copilot().prompt("create an axon ivy project for a flight-simulator");
     var spans = rt.aspire().spansOfResource(resource);
     var tokenUsage = TelemetryUtils.tokenUsage(spans);
     assertThat(tokenUsage.input()).isLessThan(150000);
