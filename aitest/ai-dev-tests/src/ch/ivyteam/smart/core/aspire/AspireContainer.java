@@ -8,6 +8,7 @@ public class AspireContainer extends GenericContainer<AspireContainer> {
 
   public AspireContainer() {
     super(DockerImageName.parse("mcr.microsoft.com/dotnet/aspire-dashboard:latest"));
+    withEnv("DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS", "true");
     waitingFor(Wait.forLogMessage(".*Now listening on: http:\\/\\/\\[::\\]:18888.*", 1));
   }
 }
