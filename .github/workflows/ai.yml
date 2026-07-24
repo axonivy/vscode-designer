@@ -38,13 +38,16 @@ jobs:
       - name: Install code-server
         run: |
           curl -fsSL https://code-server.dev/install.sh | sh
-          code-server --install-extension vscjava.vscode-java-pack
-          code-server --install-extension extension/vscode-designer*.vsix
+          mkdir -p .ci-extensions
+          code-server --extensions-dir "$PWD/.ci-extensions" --install-extension vscjava.vscode-java-pack
+          code-server --extensions-dir "$PWD/.ci-extensions" --install-extension extension/vscode-designer*.vsix
+          code-server --extensions-dir "$PWD/.ci-extensions" --list-extensions
       - name: Start VS Code host with extension and MCP
         run: |
           mkdir -p .ci-user-data/User
-          cat > .ci-user-data/User/settings.json << 'EOF'
+          cat > .ci-user-data/User/settings.json << EOF
           {
+            "java.jdt.ls.java.home": "${JAVA_HOME}",
             "axonivy.localMcp.enabled": true,
             "axonivy.localMcp.host": "127.0.0.1",
             "axonivy.localMcp.port": 32140,
@@ -52,7 +55,10 @@ jobs:
           }
           EOF
 
-          nohup code-server --bind-addr 127.0.0.1:3000 --auth none --disable-telemetry --disable-update-check --disable-workspace-trust --user-data-dir "$PWD/.ci-user-data" "$PWD" > code-server.out 2>&1 &
+          echo "JAVA_HOME=$JAVA_HOME"
+          cat "$JAVA_HOME/release" || true
+
+          nohup code-server --bind-addr 127.0.0.1:3000 --auth none --disable-telemetry --disable-update-check --disable-workspace-trust --extensions-dir "$PWD/.ci-extensions" --user-data-dir "$PWD/.ci-user-data" "$PWD" > code-server.out 2>&1 &
 
           for i in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:32140/health > /dev/null; then
