@@ -36,9 +36,11 @@ public class Copilot {
   public void addMcp(String smartCoreMcpUrl) {
     String mcp = smartCoreMcpServerConfig(smartCoreMcpUrl);
     System.out.println("Adding MCP config to Copilot container: " + mcp);
+    //container.execInContainer("mkdir", "-p", "/root/.copilot/");
     container.copyFileToContainer(
         Transferable.of(mcp),
         "/root/.copilot/mcp-config.json");
+    System.out.println("copilot container: "+ container.getContainerId());
   }
 
   public void otlpEndpoint(String endpoint) {
@@ -46,19 +48,22 @@ public class Copilot {
   }
 
   private static String smartCoreMcpServerConfig(String smartCoreMcpUrl) {
-    smartCoreMcpUrl = smartCoreMcpUrl.replace("localhost", "host.docker.internal");
+    // On Linux, use the Docker bridge gateway; on Docker Desktop, host-gateway works via extra host mapping
+    String hostIp = "host.docker.internal";
+    smartCoreMcpUrl = smartCoreMcpUrl.replace("localhost", hostIp);
     // keep IP URI -> fallback for local dev exec.
-    // smartCoreMcpUrl = smartCoreMcpUrl.replace("127.0.0.1", "host.docker.internal"); 
+    smartCoreMcpUrl = smartCoreMcpUrl.replace("127.0.0.1", hostIp); 
     return String.format("""
       {
         "mcpServers": {
           "axonivy-designer": {
             "type": "http",
             "url": "%s",
-            "tools": "*"
+            "tools": [ "*" ]
           }
         }
       }""",
         smartCoreMcpUrl);
   }
+
 }

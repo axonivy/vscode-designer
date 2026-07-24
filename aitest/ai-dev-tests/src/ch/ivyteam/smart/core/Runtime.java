@@ -10,6 +10,8 @@ import ch.ivyteam.smart.core.copilot.Copilot;
 import ch.ivyteam.smart.core.copilot.CopilotContainer;
 
 public class Runtime {
+  private static final String DEFAULT_MCP_URI = "http://127.0.0.1:32140/mcp";
+
   /*
   * To keep Aspire alive and observe the traces in its dashboard,
   * set this flag and start your own Aspire instance:
@@ -75,9 +77,10 @@ public class Runtime {
     }
     copilotContainer.start();
     String mcpUri = System.getenv("VSCODE_MCP_URI");
-    if (mcpUri != null) {
-      copilot.addMcp(mcpUri);
+    if (mcpUri == null || mcpUri.isBlank()) {
+      mcpUri = DEFAULT_MCP_URI;
     }
+    copilot.addMcp(mcpUri);
   }
 
   public void stop() {
