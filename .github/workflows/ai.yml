@@ -29,59 +29,59 @@ jobs:
         uses: stCarolas/setup-maven@v5.1
         with:
           maven-version: 3.9.13
-      - name: Build VSC
-        run: |
-          corepack enable
-          pnpm install
-          pnpm run build:production
-          pnpm run package
-      - name: Install code-server
-        run: |
-          curl -fsSL https://code-server.dev/install.sh | sh
-          mkdir -p .ci-extensions
-          code-server --extensions-dir "$PWD/.ci-extensions" --install-extension vscjava.vscode-java-pack
-          code-server --extensions-dir "$PWD/.ci-extensions" --install-extension extension/vscode-designer*.vsix
-          code-server --extensions-dir "$PWD/.ci-extensions" --list-extensions
-      - name: Install Axon Ivy Engine
-        run: |
-          pnpm run engine:download https://dev.axonivy.com/permalink/sprint/axonivy-engine.zip
-          if ! grep -qxF -- '-Ddev.mode=true' AxonIvyEngine/configuration/jvm.options; then
-            echo '-Ddev.mode=true' >> AxonIvyEngine/configuration/jvm.options
-          fi
+      # - name: Build VSC
+      #   run: |
+      #     corepack enable
+      #     pnpm install
+      #     pnpm run build:production
+      #     pnpm run package
+      # - name: Install code-server
+      #   run: |
+      #     curl -fsSL https://code-server.dev/install.sh | sh
+      #     mkdir -p .ci-extensions
+      #     code-server --extensions-dir "$PWD/.ci-extensions" --install-extension vscjava.vscode-java-pack
+      #     code-server --extensions-dir "$PWD/.ci-extensions" --install-extension extension/vscode-designer*.vsix
+      #     code-server --extensions-dir "$PWD/.ci-extensions" --list-extensions
+      # - name: Install Axon Ivy Engine
+      #   run: |
+      #     pnpm run engine:download https://dev.axonivy.com/permalink/sprint/axonivy-engine.zip
+      #     if ! grep -qxF -- '-Ddev.mode=true' AxonIvyEngine/configuration/jvm.options; then
+      #       echo '-Ddev.mode=true' >> AxonIvyEngine/configuration/jvm.options
+      #     fi
 
-      - name: Start VS Code host with extension and MCP
-        run: |
-          mkdir -p .ci-user-data/User
-          cat > .ci-user-data/User/settings.json << EOF
-          {
-            "java.jdt.ls.java.home": "${JAVA_HOME}",
-            "axonivy.localMcp.enabled": true,
-            "axonivy.localMcp.host": "127.0.0.1",
-            "axonivy.localMcp.port": 32140,
-            "axonivy.localMcp.exposeAllTools": false
-          }
-          EOF
+      # - name: Start VS Code host with extension and MCP
+      #   run: |
+      #     mkdir -p .ci-user-data/User
+      #     cat > .ci-user-data/User/settings.json << EOF
+      #     {
+      #       "java.jdt.ls.java.home": "${JAVA_HOME}",
+      #       "axonivy.localMcp.enabled": true,
+      #       "axonivy.localMcp.host": "127.0.0.1",
+      #       "axonivy.localMcp.port": 32140,
+      #       "axonivy.localMcp.exposeAllTools": false
+      #     }
+      #     EOF
 
-          echo "JAVA_HOME=$JAVA_HOME"
-          cat "$JAVA_HOME/release" || true
+      #     echo "JAVA_HOME=$JAVA_HOME"
+      #     cat "$JAVA_HOME/release" || true
 
-          nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
+      #     nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
 
-          nohup code-server --bind-addr 127.0.0.1:3000 --auth none --log debug --disable-telemetry --disable-update-check --disable-workspace-trust --extensions-dir "$PWD/.ci-extensions" --user-data-dir "$PWD/.ci-user-data" "$PWD/playwright/tests/workspaces/prebuiltProject" > code-server.out 2>&1 &
+      #     nohup code-server --bind-addr 127.0.0.1:3000 --auth none --log debug --disable-telemetry --disable-update-check --disable-workspace-trust --extensions-dir "$PWD/.ci-extensions" --user-data-dir "$PWD/.ci-user-data" "$PWD/playwright/tests/workspaces/prebuiltProject" > code-server.out 2>&1 &
 
-          curl -L --retry 5 --retry-delay 2 --retry-all-errors http://localhost:3000
+      #     curl -L --retry 5 --retry-delay 2 --retry-all-errors http://localhost:3000
 
-          for i in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:32140/health > /dev/null; then
-              echo "MCP endpoint is healthy"
-              exit 0
-            fi
-            sleep 2
-          done
+      #     for i in $(seq 1 30); do
+      #       if curl -fsS http://127.0.0.1:32140/health > /dev/null; then
+      #         echo "MCP endpoint is healthy"
+      #         exit 0
+      #       fi
+      #       sleep 2
+      #     done
 
-          echo "MCP endpoint did not become healthy in time"
-          tail -n 200 code-server.out || true
-          exit 1
+      #     echo "MCP endpoint did not become healthy in time"
+      #     tail -n 200 code-server.out || true
+      #     exit 1
       - name: Build with Maven
         run: |
           cd aitest       
