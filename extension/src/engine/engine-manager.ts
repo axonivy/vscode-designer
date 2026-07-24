@@ -2,7 +2,7 @@ import type { ExtensionContext } from 'vscode';
 import { Uri, extensions } from 'vscode';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
-import { logErrorMessage, logWarningMessage } from '../base/logging-util';
+import { logErrorMessage, logInformationMessage, logWarningMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { StatusBar } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
@@ -204,11 +204,13 @@ export class IvyEngineManager {
     );
   }
 
-  public async importIvyProject(workspaceId: string, input: ImportProjectsBody) {
-    await StatusBar.withStatusBarProgress(
-      { text: 'Importing Ivy project' },
-      async () => await this.ivyEngineApi?.importIvyProject(workspaceId, input)
-    );
+  public async importIvyProject(workspaceId: string, input: ImportProjectsBody, filename: string) {
+    await StatusBar.withStatusBarProgress({ text: 'Importing Ivy project' }, async () => {
+      logInformationMessage(`Importing file ${filename} to workspace ${workspaceId} ...`);
+      const result = await this.ivyEngineApi?.importIvyProject(workspaceId, input);
+      console.log('Import result:', result);
+      logInformationMessage(`Successfully imported file ${filename} to workspace ${workspaceId}.`);
+    });
     await this.importJavaProjects();
     await IvyProjectExplorer.instance.refresh();
   }
