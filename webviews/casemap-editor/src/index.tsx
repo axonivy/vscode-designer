@@ -26,7 +26,7 @@ export async function start({ file }: InitializeConnection) {
         <ClientContextProvider client={client}>
           <QueryProvider client={queryClient}>
             <HotkeysProvider initiallyActiveScopes={['global']}>
-              <CaseMapEditor context={{ app: '', pmv: '', file }} />
+              <CaseMapEditor context={{ app: '', project: '', file }} />
               <Toaster closeButton={true} />
             </HotkeysProvider>
           </QueryProvider>

@@ -20,7 +20,7 @@ import type { SelectedElement } from '../../base/process-editor-connector';
 import { ProcessBreakpointHandler } from './process-breakpoint-handler';
 import ProcessEditorProvider from './process-editor-provider';
 
-type IvyGlspClient = GlspVscodeClient & { app: string; pmv: string };
+type IvyGlspClient = GlspVscodeClient & { app: string; project: string };
 const severityMap = new Map([
   ['info', DiagnosticSeverity.Information],
   ['warning', DiagnosticSeverity.Warning],
@@ -69,7 +69,7 @@ export class ProcessVscodeConnector extends GlspVscodeConnector {
   private newSelectedElement(client: IvyGlspClient, pid: string): SelectedElement {
     return {
       app: client.app,
-      pmv: client.pmv,
+      project: client.project,
       pid: pid
     };
   }
@@ -121,9 +121,9 @@ export class ProcessVscodeConnector extends GlspVscodeConnector {
         const action = message.action;
         const client = this.clientMap.get(message.clientId);
         const ivyClient = client as IvyGlspClient;
-        const newRoot = action.newRoot as GModelRootSchema & { args: { app: string; pmv: string } };
+        const newRoot = action.newRoot as GModelRootSchema & { args: { app: string; project: string } };
         ivyClient.app = newRoot.args.app;
-        ivyClient.pmv = newRoot.args.pmv;
+        ivyClient.project = newRoot.args.project;
         syncBreakpointsAfterMessage = origin === MessageOrigin.SERVER;
       }
       if (SetBreakpointAction.is(message.action)) {

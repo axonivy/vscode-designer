@@ -23,7 +23,7 @@ export async function start({ file }: InitializeConnection): Promise<void> {
     throw new Error('Root element not found');
   }
   initTranslation();
-  const context = { app: '', pmv: '', file };
+  const context = { app: '', project: '', file };
   client.initialize(context);
   createRoot(rootElement).render(
     <React.StrictMode>

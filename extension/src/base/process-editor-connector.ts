@@ -1,6 +1,6 @@
 export type ElementId = {
   app: string;
-  pmv: string;
+  project: string;
   pid: string;
 };
 
