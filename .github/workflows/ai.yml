@@ -16,6 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
       - name: Setup Java JDK
         uses: actions/setup-java@v5
         with:
@@ -25,6 +29,42 @@ jobs:
         uses: stCarolas/setup-maven@v5.1
         with:
           maven-version: 3.9.13
+      - name: Build VSC
+        run: |
+          corepack enable
+          pnpm install
+          pnpm run build:production
+          pnpm run package
+      - name: Install code-server
+        run: |
+          curl -fsSL https://code-server.dev/install.sh | sh
+          code-server --install-extension vscjava.vscode-java-pack
+          code-server --install-extension extension/vscode-designer*.vsix
+      - name: Start VS Code host with extension and MCP
+        run: |
+          mkdir -p .ci-user-data/User
+          cat > .ci-user-data/User/settings.json << 'EOF'
+          {
+            "axonivy.localMcp.enabled": true,
+            "axonivy.localMcp.host": "127.0.0.1",
+            "axonivy.localMcp.port": 32140,
+            "axonivy.localMcp.exposeAllTools": false
+          }
+          EOF
+
+          nohup code-server --bind-addr 127.0.0.1:3000 --auth none --disable-telemetry --disable-update-check --disable-workspace-trust --user-data-dir "$PWD/.ci-user-data" "$PWD" > code-server.out 2>&1 &
+
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:32140/health > /dev/null; then
+              echo "MCP endpoint is healthy"
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "MCP endpoint did not become healthy in time"
+          tail -n 200 code-server.out || true
+          exit 1
       - name: Build with Maven
         run: |
           cd aitest       
@@ -32,6 +72,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VSCODE_MCP_URI: http://127.0.0.1:32140/mcp
+      - name: Print VS Code host logs on failure
+        if: failure()
+        run: |
+          echo "=== code-server.out ==="
+          tail -n 300 code-server.out || true
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
