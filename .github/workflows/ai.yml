@@ -48,7 +48,7 @@ jobs:
           if ! grep -qxF -- '-Ddev.mode=true' AxonIvyEngine/configuration/jvm.options; then
             echo '-Ddev.mode=true' >> AxonIvyEngine/configuration/jvm.options
           fi
-          
+
       - name: Start VS Code host with extension and MCP
         run: |
           mkdir -p .ci-user-data/User
@@ -67,7 +67,7 @@ jobs:
 
           nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
 
-          nohup code-server --bind-addr 127.0.0.1:3000 --auth none --disable-telemetry --disable-update-check --disable-workspace-trust --extensions-dir "$PWD/.ci-extensions" --user-data-dir "$PWD/.ci-user-data" "$PWD/playwright/tests/workspaces/prebuiltProject" > code-server.out 2>&1 &
+          nohup code-server --bind-addr 127.0.0.1:3000 --auth none --log debug --disable-telemetry --disable-update-check --disable-workspace-trust --extensions-dir "$PWD/.ci-extensions" --user-data-dir "$PWD/.ci-user-data" "$PWD/playwright/tests/workspaces/prebuiltProject" > code-server.out 2>&1 &
 
           for i in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:32140/health > /dev/null; then
