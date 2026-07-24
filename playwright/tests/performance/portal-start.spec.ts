@@ -1,7 +1,16 @@
+import { OutputView } from '~/page-objects/output-view';
 import { expect, test } from '../fixtures/baseTest';
 import { BrowserView } from '../page-objects/browser-view';
 import { ProcessEditor } from '../page-objects/process-editor';
-import { portalPerformanceWorkspacePath } from '../workspaces/workspace';
+import { embeddedEngineWorkspace, portalPerformanceWorkspacePath } from '../workspaces/workspace';
+
+test('Dummy test to download embedded engine', () => {
+  test.use({ workspace: embeddedEngineWorkspace });
+
+  test('Download, unpack and start engine', async ({ wsPage }) => {
+    await new OutputView(wsPage).checkIfEngineStarted();
+  });
+});
 
 test.describe('Portal performance', () => {
   test.use({ workspace: portalPerformanceWorkspacePath });
