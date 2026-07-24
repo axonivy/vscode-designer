@@ -8,6 +8,7 @@ public class CopilotContainer extends GenericContainer<CopilotContainer> {
   public CopilotContainer() {
     super(new ImageFromDockerfile().withDockerfileFromBuilder(builder -> builder
         .from("node:24-slim")
+        .run("apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*")
         .run("npm install -g @github/copilot")
         .build()));
     withExtraHost("host.docker.internal", "host-gateway");
