@@ -45,6 +45,10 @@ jobs:
       - name: Install Axon Ivy Engine
         run: |
           pnpm run engine:download https://dev.axonivy.com/permalink/sprint/axonivy-engine.zip
+          if ! grep -qxF -- '-Ddev.mode=true' AxonIvyEngine/configuration/jvm.options; then
+            echo '-Ddev.mode=true' >> AxonIvyEngine/configuration/jvm.options
+          fi
+          
       - name: Start VS Code host with extension and MCP
         run: |
           mkdir -p .ci-user-data/User
