@@ -73,7 +73,10 @@ public class Runtime {
       initTestcontainersAspire(copilot);
     }
     copilotContainer.start();
-    copilot.addMcp(System.getenv("VSCODE_MCP_URI"));
+    String mcpUri = System.getenv("VSCODE_MCP_URI");
+    if (mcpUri != null) {
+      copilot.addMcp(mcpUri);
+    }
   }
 
   public void stop() {
