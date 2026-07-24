@@ -69,6 +69,8 @@ jobs:
 
           nohup code-server --bind-addr 127.0.0.1:3000 --auth none --log debug --disable-telemetry --disable-update-check --disable-workspace-trust --extensions-dir "$PWD/.ci-extensions" --user-data-dir "$PWD/.ci-user-data" "$PWD/playwright/tests/workspaces/prebuiltProject" > code-server.out 2>&1 &
 
+          curl -L --retry 5 --retry-delay 2 --retry-all-errors http://localhost:3000
+
           for i in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:32140/health > /dev/null; then
               echo "MCP endpoint is healthy"
