@@ -34,8 +34,10 @@ public class Copilot {
   }
 
   public void addMcp(String smartCoreMcpUrl) {
+    String mcp = smartCoreMcpServerConfig(smartCoreMcpUrl);
+    System.out.println("Adding MCP config to Copilot container: " + mcp);
     container.copyFileToContainer(
-        Transferable.of(smartCoreMcpServerConfig(smartCoreMcpUrl)),
+        Transferable.of(mcp),
         "/root/.copilot/mcp-config.json");
   }
 
@@ -45,7 +47,8 @@ public class Copilot {
 
   private static String smartCoreMcpServerConfig(String smartCoreMcpUrl) {
     smartCoreMcpUrl = smartCoreMcpUrl.replace("localhost", "host.docker.internal");
-    smartCoreMcpUrl = smartCoreMcpUrl.replace("127.0.0.1", "host.docker.internal");
+    // keep IP URI -> fallback for local dev exec.
+    // smartCoreMcpUrl = smartCoreMcpUrl.replace("127.0.0.1", "host.docker.internal"); 
     return String.format("""
       {
         "mcpServers": {
