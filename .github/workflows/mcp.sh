@@ -113,17 +113,28 @@ VSCODE_PID=$!
 echo "VS Code launcher PID: ${VSCODE_PID}"
 echo "${VSCODE_PID}" > "${CODE_INSIDERS_PID_FILE}"
 echo "PID file: ${CODE_INSIDERS_PID_FILE}"
+echo "Process snapshot right after launch:"
+pgrep -af "${CODE_INSIDERS_BIN}|code-insiders|Code - Insiders|electron" || true
 
 wait_for_mcp() {
+	local seen_vscode_process=0
 	local deadline=$((SECONDS + MCP_START_TIMEOUT_SEC))
 	while (( SECONDS < deadline )); do
-		if ! kill -0 "${VSCODE_PID}" 2>/dev/null; then
-			echo "VS Code Insiders process exited before MCP became available." >&2
-			return 1
-		fi
 		if curl -fsS "${MCP_HEALTH_URL}" >/dev/null 2>&1; then
 			return 0
 		fi
+
+		# code-insiders may hand off to a child process and exit quickly.
+		# Track real VS Code processes tied to this user-data-dir before deciding failure.
+		if pgrep -af "code-insiders|Code - Insiders|electron" | grep -F -- "--user-data-dir=${USER_DATA_DIR}" >/dev/null 2>&1; then
+			seen_vscode_process=1
+		elif kill -0 "${VSCODE_PID}" 2>/dev/null; then
+			seen_vscode_process=1
+		elif (( seen_vscode_process == 1 )); then
+			echo "VS Code process disappeared before MCP became available." >&2
+			return 1
+		fi
+
 		sleep 2
 	done
 	echo "Timed out after ${MCP_START_TIMEOUT_SEC}s waiting for ${MCP_HEALTH_URL}" >&2
@@ -133,7 +144,7 @@ wait_for_mcp() {
 if ! wait_for_mcp; then
 	echo "==== VS Code process status ===="
 	ps -fp "${VSCODE_PID}" || true
-	pgrep -af 'code-insiders|code-insider|Code - Insiders|electron' || true
+	pgrep -af "${CODE_INSIDERS_BIN}|code-insiders|code-insider|Code - Insiders|electron" || true
 
 	echo "==== code-insiders.log (tail) ===="
 	tail -n 200 "${CODE_INSIDERS_LOG}" || true

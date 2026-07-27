@@ -46,8 +46,14 @@ jobs:
             exit 1
           fi
           VSCODE_PID="$(cat "$PID_FILE")"
-          if ! kill -0 "$VSCODE_PID" 2>/dev/null; then
-            echo "VS Code process is not alive (PID: $VSCODE_PID)" >&2
+          if kill -0 "$VSCODE_PID" 2>/dev/null; then
+            echo "Launcher PID still alive: $VSCODE_PID"
+          else
+            echo "Launcher PID exited (handoff is possible): $VSCODE_PID"
+          fi
+          if ! pgrep -af 'code-insiders|Code - Insiders|electron' | grep -F -- '--user-data-dir=' >/dev/null 2>&1; then
+            echo "No VS Code/Electron process with user-data-dir marker found" >&2
+            pgrep -af 'code-insiders|Code - Insiders|electron' || true
             exit 1
           fi
           grep -q '"url": "http://127.0.0.1:32140/mcp"' "$PWD/aitest/.mcp.json"
