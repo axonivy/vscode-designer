@@ -171,7 +171,7 @@ export class IvyEngineManager {
       },
       async () => {
         for (const projectDir of ivyProjectDirectories) {
-          await this.ivyEngineApi?.findOrCreatePmv(projectDir);
+          await this.ivyEngineApi?.findOrCreateProject(projectDir);
         }
         await this.ivyEngineApi?.deployProjects(ivyProjectDirectories);
       }

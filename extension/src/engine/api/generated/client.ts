@@ -4,12 +4,12 @@
  * Axon Ivy OpenAPI
  * OpenAPI spec version: 0.0.1
  */
-import axios from 'axios';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios from 'axios';
 
 export interface ProjectIdentifier {
   app: string;
-  pmv: string;
+  project: string;
   isIar?: boolean;
 }
 
@@ -188,12 +188,12 @@ export type DataClassesParams = {
 export type ComponentFormParams = {
   componentId?: string;
   app?: string;
-  pmv?: string;
+  project?: string;
 };
 
 export type ImportProcessBody = {
   app?: string;
-  pmv?: string;
+  project?: string;
   projectDir?: string;
   file?: Blob;
 };
@@ -205,24 +205,24 @@ export type ProjectsParams = {
 export type ConvertProjectParams = {
   projectDir?: string;
   app?: string;
-  pmv?: string;
+  project?: string;
 };
 
 export type DeleteProjectParams = {
   projectDir?: string;
   app?: string;
-  pmv?: string;
+  project?: string;
 };
 
 export type InvalidateClassLoaderParams = {
   app?: string;
-  pmv?: string;
+  project?: string;
   projectDir?: string;
 };
 
 export type StopBpmEngineParams = {
   app?: string;
-  pmv?: string;
+  project?: string;
   projectDir?: string;
 };
 
@@ -305,8 +305,8 @@ export const importProcess = (importProcessBody?: ImportProcessBody, options?: A
   if (importProcessBody?.app !== undefined) {
     formData.append(`app`, importProcessBody.app);
   }
-  if (importProcessBody?.pmv !== undefined) {
-    formData.append(`pmv`, importProcessBody.pmv);
+  if (importProcessBody?.project !== undefined) {
+    formData.append(`project`, importProcessBody.project);
   }
   if (importProcessBody?.projectDir !== undefined) {
     formData.append(`projectDir`, importProcessBody.projectDir);
@@ -352,14 +352,14 @@ export const convertProject = (params?: ConvertProjectParams, options?: AxiosReq
   });
 };
 
-export const createPmvAndProjectFiles = (
+export const createProjectAndProjectFiles = (
   newProjectParams?: NewProjectParams,
   options?: AxiosRequestConfig
 ): Promise<AxiosResponse<ProjectBean>> => {
   return axios.post(`/web-ide/project/new`, newProjectParams, options);
 };
 
-export const findOrCreatePmv = (projectParams?: ProjectParams, options?: AxiosRequestConfig): Promise<AxiosResponse<unknown>> => {
+export const findOrCreateProject = (projectParams?: ProjectParams, options?: AxiosRequestConfig): Promise<AxiosResponse<unknown>> => {
   return axios.post(`/web-ide/project`, projectParams, options);
 };
 
@@ -387,27 +387,27 @@ export const stopBpmEngine = (params?: StopBpmEngineParams, options?: AxiosReque
   });
 };
 
-export const dependencies = (app: string, pmv: string, options?: AxiosRequestConfig): Promise<AxiosResponse<ProjectIdentifier[]>> => {
-  return axios.get(`/web-ide/project/${app}/${pmv}/dependencies`, options);
+export const dependencies = (app: string, project: string, options?: AxiosRequestConfig): Promise<AxiosResponse<ProjectIdentifier[]>> => {
+  return axios.get(`/web-ide/project/${app}/${project}/dependencies`, options);
 };
 
 export const addDependency = (
   app: string,
-  pmv: string,
+  project: string,
   projectIdentifier?: ProjectIdentifier,
   options?: AxiosRequestConfig
 ): Promise<AxiosResponse<unknown>> => {
-  return axios.post(`/web-ide/project/${app}/${pmv}/dependency`, projectIdentifier, options);
+  return axios.post(`/web-ide/project/${app}/${project}/dependency`, projectIdentifier, options);
 };
 
 export const removeDependency = (
   app: string,
-  pmv: string,
+  project: string,
   dependencyApp: string,
-  dependencyPmv: string,
+  dependencyProject: string,
   options?: AxiosRequestConfig
 ): Promise<AxiosResponse<unknown>> => {
-  return axios.delete(`/web-ide/project/${app}/${pmv}/dependency/${dependencyApp}/${dependencyPmv}`, options);
+  return axios.delete(`/web-ide/project/${app}/${project}/dependency/${dependencyApp}/${dependencyProject}`, options);
 };
 
 /**
@@ -489,8 +489,8 @@ export type DeployProjectsResult = AxiosResponse<unknown>;
 export type ProjectsResult = AxiosResponse<ProjectBean[]>;
 export type RefreshProjectStatusesResult = AxiosResponse<ProjectBean[]>;
 export type ConvertProjectResult = AxiosResponse<unknown>;
-export type CreatePmvAndProjectFilesResult = AxiosResponse<ProjectBean>;
-export type FindOrCreatePmvResult = AxiosResponse<unknown>;
+export type CreateProjectAndProjectFilesResult = AxiosResponse<ProjectBean>;
+export type FindOrCreateProjectResult = AxiosResponse<unknown>;
 export type DeleteProjectResult = AxiosResponse<unknown>;
 export type InvalidateClassLoaderResult = AxiosResponse<unknown>;
 export type StopBpmEngineResult = AxiosResponse<unknown>;
