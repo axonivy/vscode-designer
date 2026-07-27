@@ -4,7 +4,7 @@ import { BrowserView } from '../page-objects/browser-view';
 import { ProcessEditor } from '../page-objects/process-editor';
 import { embeddedEngineWorkspace, portalPerformanceWorkspacePath } from '../workspaces/workspace';
 
-test('Dummy test to download embedded engine', () => {
+test.describe('Dummy test to download embedded engine', () => {
   test.use({ workspace: embeddedEngineWorkspace });
 
   test('Download, unpack and start engine', async ({ wsPage }) => {
