@@ -1,7 +1,5 @@
 package ch.ivyteam.smart.core;
 
-import static dev.langchain4j.model.openai.OpenAiChatModelName.GPT_5_MINI;
-
 import org.testcontainers.containers.Network;
 
 import ch.ivyteam.smart.core.aspire.AspireAPI;
@@ -35,7 +33,7 @@ public class Runtime {
       // .withEnv("COPILOT_PROVIDER_BASE_URL", OPENAI_API_URL)
       // .withEnv("COPILOT_PROVIDER_API_KEY", OPENAI_API_KEY)
       .withEnv("COPILOT_GITHUB_TOKEN", System.getenv("GITHUB_TOKEN"))
-      .withEnv("COPILOT_MODEL", GPT_5_MINI.toString())
+      .withEnv("COPILOT_MODEL", "gpt-5-mini")
       .withEnv("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "true");
 
   static Copilot copilot;
