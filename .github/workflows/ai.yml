@@ -35,23 +35,23 @@ jobs:
           pnpm install
           pnpm run build:production
           pnpm run package
-      # - name: Install code-server
-      #   run: |
-      #     curl -fsSL https://code-server.dev/install.sh | sh
-      #     mkdir -p .ci-extensions
-      #     code-server --extensions-dir "$PWD/.ci-extensions" --install-extension vscjava.vscode-java-pack
-      #     code-server --extensions-dir "$PWD/.ci-extensions" --install-extension extension/vscode-designer*.vsix
-      #     code-server --extensions-dir "$PWD/.ci-extensions" --list-extensions
-      # - name: Install Axon Ivy Engine
-      #   run: |
-      #     pnpm run engine:download https://dev.axonivy.com/permalink/sprint/axonivy-engine.zip
-      #     if ! grep -qxF -- '-Ddev.mode=true' AxonIvyEngine/configuration/jvm.options; then
-      #       echo '-Ddev.mode=true' >> AxonIvyEngine/configuration/jvm.options
-      #     fi
-
       - name: Start VS Code host with extension and MCP
         run: |
           bash .github/workflows/mcp.sh $PWD/playwright/tests/workspaces
+      - name: Verify VS Code MCP is still alive
+        run: |
+          PID_FILE="$PWD/ci-user-data/code-insiders.pid"
+          if [ ! -f "$PID_FILE" ]; then
+            echo "Missing VS Code PID file: $PID_FILE" >&2
+            exit 1
+          fi
+          VSCODE_PID="$(cat "$PID_FILE")"
+          if ! kill -0 "$VSCODE_PID" 2>/dev/null; then
+            echo "VS Code process is not alive (PID: $VSCODE_PID)" >&2
+            exit 1
+          fi
+          grep -q '"url": "http://127.0.0.1:32140/mcp"' "$PWD/aitest/.mcp.json"
+          curl -fsS --retry 10 --retry-delay 2 --retry-all-errors http://127.0.0.1:32140/health
       - name: Build with Maven
         run: |
           cd aitest       

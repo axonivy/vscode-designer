@@ -52,6 +52,10 @@ echo "Installing extensions ..."
 "${CODE_INSIDERS_BIN}" --list-extensions  --extensions-dir "${EXTENSIONS_DIR}"
 "${CODE_INSIDERS_BIN}" --install-extension vscjava.vscode-java-pack --extensions-dir "${EXTENSIONS_DIR}"
 "${CODE_INSIDERS_BIN}" --install-extension ${REPO_ROOT}/extension/vscode-designer*.vsix --extensions-dir "${EXTENSIONS_DIR}"
+if ! "${CODE_INSIDERS_BIN}" --list-extensions --extensions-dir "${EXTENSIONS_DIR}" | grep -q '^axonivy.vscode-designer-14$'; then
+	echo "Expected extension axonivy.vscode-designer-14 is not installed in ${EXTENSIONS_DIR}" >&2
+	exit 1
+fi
 
 
 # SETTINGS_DIR="$(mktemp -d -t vscode-insiders-settings-XXXXXX)"
@@ -69,30 +73,85 @@ cat > "${SETTINGS_FILE}" << EOF
 EOF
 
 CODE_INSIDERS_LOG="${USER_DATA_DIR}/code-insiders.log"
+CODE_INSIDERS_PID_FILE="${USER_DATA_DIR}/code-insiders.pid"
+MCP_HEALTH_URL="http://127.0.0.1:32140/health"
+MCP_START_TIMEOUT_SEC="90"
+
+launch_vscode() {
+	local -a args
+	args=(
+		--disable-dev-shm-usage
+		--disable-telemetry
+		--disable-gpu
+		--disable-updates
+		--skip-welcome
+		--skip-release-notes
+		--disable-workspace-trust
+		"--extensionDevelopmentPath=${REPO_ROOT}/extension"
+		"--extensions-dir=${EXTENSIONS_DIR}"
+		"--user-data-dir=${USER_DATA_DIR}"
+		"${WORKSPACE_PATH}"
+	)
+
+	# CI runners may not expose DISPLAY; xvfb-run keeps Electron alive in that case.
+	if [[ -z "${DISPLAY:-}" ]] && command -v xvfb-run >/dev/null 2>&1; then
+		xvfb-run -a --server-args='-screen 0 1920x1080x24' "${CODE_INSIDERS_BIN}" "${args[@]}" >> "${CODE_INSIDERS_LOG}" 2>&1 &
+	else
+		"${CODE_INSIDERS_BIN}" "${args[@]}" >> "${CODE_INSIDERS_LOG}" 2>&1 &
+	fi
+}
 
 echo "Launching VS Code Insiders..."
 echo "Workspace: ${WORKSPACE_PATH}"
 echo "Extensions dir: ${EXTENSIONS_DIR}"
 echo "User data dir: ${USER_DATA_DIR}"
 echo "Log file: ${CODE_INSIDERS_LOG}"
-exec "${CODE_INSIDERS_BIN}" \
-	--disable-dev-shm-usage \
-	--disable-telemetry \
-	--disable-gpu \
-	--disable-animation \
-	--disable-updates \
-	--skip-welcome \
-	--skip-release-notes \
-	--disable-workspace-trust \
-	--extensionDevelopmentPath="${REPO_ROOT}/extension" \
-	--extensions-dir="${EXTENSIONS_DIR}" \
-	--user-data-dir="${USER_DATA_DIR}" \
-	"${WORKSPACE_PATH}" >> "${CODE_INSIDERS_LOG}" &
 
-sleep 5
-echo "Logs: "
-cat "${CODE_INSIDERS_LOG}"
+rm -f "${CODE_INSIDERS_LOG}"
+launch_vscode
+VSCODE_PID=$!
+echo "VS Code launcher PID: ${VSCODE_PID}"
+echo "${VSCODE_PID}" > "${CODE_INSIDERS_PID_FILE}"
+echo "PID file: ${CODE_INSIDERS_PID_FILE}"
 
-ps aux | grep insiders
+wait_for_mcp() {
+	local deadline=$((SECONDS + MCP_START_TIMEOUT_SEC))
+	while (( SECONDS < deadline )); do
+		if ! kill -0 "${VSCODE_PID}" 2>/dev/null; then
+			echo "VS Code Insiders process exited before MCP became available." >&2
+			return 1
+		fi
+		if curl -fsS "${MCP_HEALTH_URL}" >/dev/null 2>&1; then
+			return 0
+		fi
+		sleep 2
+	done
+	echo "Timed out after ${MCP_START_TIMEOUT_SEC}s waiting for ${MCP_HEALTH_URL}" >&2
+	return 1
+}
 
-curl -L --retry 5 --retry-delay 2 --retry-all-errors http://127.0.0.1:32140/health
+if ! wait_for_mcp; then
+	echo "==== VS Code process status ===="
+	ps -fp "${VSCODE_PID}" || true
+	pgrep -af 'code-insiders|code-insider|Code - Insiders|electron' || true
+
+	echo "==== code-insiders.log (tail) ===="
+	tail -n 200 "${CODE_INSIDERS_LOG}" || true
+
+	echo "==== exthost logs (tail) ===="
+	LATEST_EXT_LOG_DIR="$(find "${USER_DATA_DIR}/logs" -type d -path '*/window*/exthost' 2>/dev/null | sort | tail -n 1 || true)"
+	if [[ -n "${LATEST_EXT_LOG_DIR}" ]]; then
+		find "${LATEST_EXT_LOG_DIR}" -maxdepth 2 -type f -name '*.log' -print -exec tail -n 80 {} \; || true
+	else
+		echo "No exthost logs found under ${USER_DATA_DIR}/logs"
+	fi
+
+	echo "==== display/xvfb diagnostics ===="
+	echo "DISPLAY=${DISPLAY:-<unset>}"
+	command -v xvfb-run >/dev/null 2>&1 && xvfb-run --help >/dev/null 2>&1 && echo "xvfb-run available" || echo "xvfb-run not available"
+
+	exit 1
+fi
+
+echo "MCP health endpoint is reachable at ${MCP_HEALTH_URL}"
+curl -fsS "${MCP_HEALTH_URL}"
