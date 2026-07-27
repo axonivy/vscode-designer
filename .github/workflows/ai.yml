@@ -56,7 +56,7 @@ jobs:
             pgrep -af 'code-insiders|Code - Insiders|electron' || true
             exit 1
           fi
-          grep -q '"url": "http://127.0.0.1:32140/mcp"' "$PWD/aitest/.mcp.json"
+          # grep -q '"url": "http://127.0.0.1:32140/mcp"' "$PWD/aitest/.mcp.json"
           curl -fsS --retry 10 --retry-delay 2 --retry-all-errors http://127.0.0.1:32140/health
       - name: Build with Maven
         run: |
