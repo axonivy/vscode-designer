@@ -87,7 +87,7 @@ exec "${CODE_INSIDERS_BIN}" \
 	--extensionDevelopmentPath="${REPO_ROOT}/extension" \
 	--extensions-dir="${EXTENSIONS_DIR}" \
 	--user-data-dir="${USER_DATA_DIR}" \
-	"${WORKSPACE_PATH}" >> "${CODE_INSIDERS_LOG}" 2>&1 &
+	"${WORKSPACE_PATH}" >> "${CODE_INSIDERS_LOG}" &
 
 sleep 5
 echo "Logs: "
