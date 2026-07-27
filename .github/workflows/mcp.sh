@@ -45,6 +45,15 @@ if [[ -z "${CODE_INSIDERS_BIN}" || ! -x "${CODE_INSIDERS_BIN}" ]]; then
 	exit 1
 fi
 
+echo "VS Code Insiders binary: ${CODE_INSIDERS_BIN}"
+if ! "${CODE_INSIDERS_BIN}" --version >/tmp/code-insiders-version.txt 2>&1; then
+	echo "VS Code Insiders binary preflight failed:" >&2
+	cat /tmp/code-insiders-version.txt >&2 || true
+	exit 1
+fi
+echo "VS Code Insiders version:"
+cat /tmp/code-insiders-version.txt
+
 EXTENSIONS_DIR="$(mktemp -d -t vscode-insiders-ext-XXXXXX)"
 USER_DATA_DIR="${REPO_ROOT}/ci-user-data"
 
@@ -73,11 +82,34 @@ cat > "${SETTINGS_FILE}" << EOF
 EOF
 
 CODE_INSIDERS_LOG="${USER_DATA_DIR}/code-insiders.log"
+XVFB_ERROR_LOG="${USER_DATA_DIR}/xvfb-errors.log"
 CODE_INSIDERS_PID_FILE="${USER_DATA_DIR}/code-insiders.pid"
 MCP_HEALTH_URL="http://127.0.0.1:32140/health"
 MCP_START_TIMEOUT_SEC="90"
 
 launch_vscode() {
+	local -a args
+	args=(
+		--headless
+		--disable-dev-shm-usage
+		--disable-telemetry
+		--disable-gpu
+		--disable-updates
+		--skip-welcome
+		--skip-release-notes
+		--disable-workspace-trust
+		--verbose
+		"--extensionDevelopmentPath=${REPO_ROOT}/extension"
+		"--extensions-dir=${EXTENSIONS_DIR}"
+		"--user-data-dir=${USER_DATA_DIR}"
+		"${WORKSPACE_PATH}"
+	)
+
+	# Prefer native headless mode in CI. xvfb-run often fails silently when Xvfb/xauth setup is incomplete.
+	"${CODE_INSIDERS_BIN}" "${args[@]}" >> "${CODE_INSIDERS_LOG}" 2>&1 &
+}
+
+launch_vscode_with_xvfb() {
 	local -a args
 	args=(
 		--disable-dev-shm-usage
@@ -87,18 +119,14 @@ launch_vscode() {
 		--skip-welcome
 		--skip-release-notes
 		--disable-workspace-trust
+		--verbose
 		"--extensionDevelopmentPath=${REPO_ROOT}/extension"
 		"--extensions-dir=${EXTENSIONS_DIR}"
 		"--user-data-dir=${USER_DATA_DIR}"
 		"${WORKSPACE_PATH}"
 	)
 
-	# CI runners may not expose DISPLAY; xvfb-run keeps Electron alive in that case.
-	if [[ -z "${DISPLAY:-}" ]] && command -v xvfb-run >/dev/null 2>&1; then
-		xvfb-run -a --server-args='-screen 0 1920x1080x24' "${CODE_INSIDERS_BIN}" "${args[@]}" >> "${CODE_INSIDERS_LOG}" 2>&1 &
-	else
-		"${CODE_INSIDERS_BIN}" "${args[@]}" >> "${CODE_INSIDERS_LOG}" 2>&1 &
-	fi
+	xvfb-run -e "${XVFB_ERROR_LOG}" -a --server-args='-screen 0 1920x1080x24' "${CODE_INSIDERS_BIN}" "${args[@]}" >> "${CODE_INSIDERS_LOG}" 2>&1 &
 }
 
 echo "Launching VS Code Insiders..."
@@ -106,8 +134,10 @@ echo "Workspace: ${WORKSPACE_PATH}"
 echo "Extensions dir: ${EXTENSIONS_DIR}"
 echo "User data dir: ${USER_DATA_DIR}"
 echo "Log file: ${CODE_INSIDERS_LOG}"
+echo "Xvfb error log: ${XVFB_ERROR_LOG}"
 
 rm -f "${CODE_INSIDERS_LOG}"
+rm -f "${XVFB_ERROR_LOG}"
 launch_vscode
 VSCODE_PID=$!
 echo "VS Code launcher PID: ${VSCODE_PID}"
@@ -115,6 +145,16 @@ echo "${VSCODE_PID}" > "${CODE_INSIDERS_PID_FILE}"
 echo "PID file: ${CODE_INSIDERS_PID_FILE}"
 echo "Process snapshot right after launch:"
 pgrep -af "${CODE_INSIDERS_BIN}|code-insiders|Code - Insiders|electron" || true
+
+sleep 3
+if ! kill -0 "${VSCODE_PID}" 2>/dev/null && [[ -z "${DISPLAY:-}" ]] && command -v xvfb-run >/dev/null 2>&1; then
+	echo "Headless launch exited immediately; retrying once with xvfb-run ..."
+	launch_vscode_with_xvfb
+	VSCODE_PID=$!
+	echo "VS Code launcher PID (xvfb fallback): ${VSCODE_PID}"
+	echo "${VSCODE_PID}" > "${CODE_INSIDERS_PID_FILE}"
+	pgrep -af "${CODE_INSIDERS_BIN}|code-insiders|Code - Insiders|electron" || true
+fi
 
 wait_for_mcp() {
 	local seen_vscode_process=0
@@ -149,6 +189,9 @@ if ! wait_for_mcp; then
 	echo "==== code-insiders.log (tail) ===="
 	tail -n 200 "${CODE_INSIDERS_LOG}" || true
 
+	echo "==== xvfb-errors.log (tail) ===="
+	tail -n 200 "${XVFB_ERROR_LOG}" || true
+
 	echo "==== exthost logs (tail) ===="
 	LATEST_EXT_LOG_DIR="$(find "${USER_DATA_DIR}/logs" -type d -path '*/window*/exthost' 2>/dev/null | sort | tail -n 1 || true)"
 	if [[ -n "${LATEST_EXT_LOG_DIR}" ]]; then
@@ -160,6 +203,8 @@ if ! wait_for_mcp; then
 	echo "==== display/xvfb diagnostics ===="
 	echo "DISPLAY=${DISPLAY:-<unset>}"
 	command -v xvfb-run >/dev/null 2>&1 && xvfb-run --help >/dev/null 2>&1 && echo "xvfb-run available" || echo "xvfb-run not available"
+	command -v Xvfb >/dev/null 2>&1 && echo "Xvfb binary available" || echo "Xvfb binary not available"
+	command -v xauth >/dev/null 2>&1 && echo "xauth binary available" || echo "xauth binary not available"
 
 	exit 1
 fi
