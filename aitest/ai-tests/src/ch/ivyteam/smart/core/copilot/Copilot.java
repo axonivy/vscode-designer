@@ -36,7 +36,11 @@ public class Copilot {
   public void addMcp(String smartCoreMcpUrl) {
     String mcp = smartCoreMcpServerConfig(smartCoreMcpUrl);
     System.out.println("Adding MCP config to Copilot container: " + mcp);
-    //container.execInContainer("mkdir", "-p", "/root/.copilot/");
+    try {
+      container.execInContainer("mkdir", "-p", "/root/.copilot/");
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to create Copilot MCP config directory", e);
+    }
     container.copyFileToContainer(
         Transferable.of(mcp),
         "/root/.copilot/mcp-config.json");
@@ -68,14 +72,17 @@ public class Copilot {
 
   public void mcpCheck() {
     try {
-      var result = container.execInContainer("sh", "-c", "copilot", "mcp", "list");
-      System.out.println("MCP list: " + result.getStdout());
+      var listResult = container.execInContainer("sh", "-c", "copilot mcp list");
+      System.out.println("MCP list exit=" + listResult.getExitCode());
+      System.out.println("MCP list stdout: " + listResult.getStdout());
+      System.out.println("MCP list stderr: " + listResult.getStderr());
 
-      var result2 = container.execInContainer("sh", "-c", "copilot", "mcp", "get", "axonivy-designer");
-      System.out.println("MCP get: " + result2.getStdout());
+      var getResult = container.execInContainer("sh", "-c", "copilot mcp get axonivy-designer");
+      System.out.println("MCP get exit=" + getResult.getExitCode());
+      System.out.println("MCP get stdout: " + getResult.getStdout());
+      System.out.println("MCP get stderr: " + getResult.getStderr());
     } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      throw new RuntimeException("MCP check failed", e);
     }
   }
 
