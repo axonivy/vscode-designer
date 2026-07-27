@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import ch.ivyteam.smart.core.Runtime;
@@ -24,6 +25,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Disabled("wait 4 stable MCP")
   void createProject() throws Exception {
     var resource = rt.copilot().prompt("create an axon ivy project for a flight-simulator");
     var spans = rt.aspire().spansOfResource(resource);
@@ -34,6 +36,7 @@ public class CopilotIntegrationTest {
 
   @Test
   void mcpON() throws Exception {
+    rt.copilot().mcpCheck();
     var resource = rt.copilot().prompt("name all available tools from current MCP setup");
     var spans = rt.aspire().spansOfResource(resource);
 

@@ -66,4 +66,17 @@ public class Copilot {
         smartCoreMcpUrl);
   }
 
+  public void mcpCheck() {
+    try {
+      var result = container.execInContainer("sh", "-c", "copilot", "mcp", "list");
+      System.out.println("MCP list: " + result.getStdout());
+
+      var result2 = container.execInContainer("sh", "-c", "copilot", "mcp", "get", "axonivy-designer");
+      System.out.println("MCP get: " + result2.getStdout());
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
 }
