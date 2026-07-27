@@ -90,10 +90,10 @@ MCP_START_TIMEOUT_SEC="90"
 launch_vscode() {
 	local -a args
 	args=(
-		--headless
 		--disable-dev-shm-usage
 		--disable-telemetry
 		--disable-gpu
+		--no-sandbox
 		--disable-updates
 		--skip-welcome
 		--skip-release-notes
@@ -105,28 +105,16 @@ launch_vscode() {
 		"${WORKSPACE_PATH}"
 	)
 
-	# Prefer native headless mode in CI. xvfb-run often fails silently when Xvfb/xauth setup is incomplete.
+	if [[ -z "${DISPLAY:-}" ]]; then
+		if ! command -v xvfb-run >/dev/null 2>&1; then
+			echo "DISPLAY is unset and xvfb-run is not available; cannot launch VS Code UI process." >&2
+			exit 1
+		fi
+		xvfb-run -e "${XVFB_ERROR_LOG}" -a --server-args='-screen 0 1920x1080x24' "${CODE_INSIDERS_BIN}" "${args[@]}" >> "${CODE_INSIDERS_LOG}" 2>&1 &
+		return
+	fi
+
 	"${CODE_INSIDERS_BIN}" "${args[@]}" >> "${CODE_INSIDERS_LOG}" 2>&1 &
-}
-
-launch_vscode_with_xvfb() {
-	local -a args
-	args=(
-		--disable-dev-shm-usage
-		--disable-telemetry
-		--disable-gpu
-		--disable-updates
-		--skip-welcome
-		--skip-release-notes
-		--disable-workspace-trust
-		--verbose
-		"--extensionDevelopmentPath=${REPO_ROOT}/extension"
-		"--extensions-dir=${EXTENSIONS_DIR}"
-		"--user-data-dir=${USER_DATA_DIR}"
-		"${WORKSPACE_PATH}"
-	)
-
-	xvfb-run -e "${XVFB_ERROR_LOG}" -a --server-args='-screen 0 1920x1080x24' "${CODE_INSIDERS_BIN}" "${args[@]}" >> "${CODE_INSIDERS_LOG}" 2>&1 &
 }
 
 echo "Launching VS Code Insiders..."
@@ -145,16 +133,6 @@ echo "${VSCODE_PID}" > "${CODE_INSIDERS_PID_FILE}"
 echo "PID file: ${CODE_INSIDERS_PID_FILE}"
 echo "Process snapshot right after launch:"
 pgrep -af "${CODE_INSIDERS_BIN}|code-insiders|Code - Insiders|electron" || true
-
-sleep 3
-if ! kill -0 "${VSCODE_PID}" 2>/dev/null && [[ -z "${DISPLAY:-}" ]] && command -v xvfb-run >/dev/null 2>&1; then
-	echo "Headless launch exited immediately; retrying once with xvfb-run ..."
-	launch_vscode_with_xvfb
-	VSCODE_PID=$!
-	echo "VS Code launcher PID (xvfb fallback): ${VSCODE_PID}"
-	echo "${VSCODE_PID}" > "${CODE_INSIDERS_PID_FILE}"
-	pgrep -af "${CODE_INSIDERS_BIN}|code-insiders|Code - Insiders|electron" || true
-fi
 
 wait_for_mcp() {
 	local seen_vscode_process=0
