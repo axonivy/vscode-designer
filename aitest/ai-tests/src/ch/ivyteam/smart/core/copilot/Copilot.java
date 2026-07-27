@@ -9,6 +9,7 @@ import org.testcontainers.images.builder.Transferable;
 public class Copilot {
 
   private final CopilotContainer container;
+  private String configuredMcpUrl;
 
   public Copilot(CopilotContainer container) {
     this.container = container;
@@ -34,7 +35,8 @@ public class Copilot {
   }
 
   public void addMcp(String smartCoreMcpUrl) {
-    String mcp = smartCoreMcpServerConfig(smartCoreMcpUrl);
+    configuredMcpUrl = normalizeMcpUrl(smartCoreMcpUrl);
+    String mcp = smartCoreMcpServerConfig(configuredMcpUrl);
     System.out.println("Adding MCP config to Copilot container: " + mcp);
     try {
       container.execInContainer("mkdir", "-p", "/root/.copilot/");
@@ -52,11 +54,6 @@ public class Copilot {
   }
 
   private static String smartCoreMcpServerConfig(String smartCoreMcpUrl) {
-    // On Linux, use the Docker bridge gateway; on Docker Desktop, host-gateway works via extra host mapping
-    String hostIp = "host.docker.internal";
-    smartCoreMcpUrl = smartCoreMcpUrl.replace("localhost", hostIp);
-    // keep IP URI -> fallback for local dev exec.
-    smartCoreMcpUrl = smartCoreMcpUrl.replace("127.0.0.1", hostIp); 
     return String.format("""
       {
         "mcpServers": {
@@ -70,6 +67,14 @@ public class Copilot {
         smartCoreMcpUrl);
   }
 
+  private static String normalizeMcpUrl(String smartCoreMcpUrl) {
+    // On Linux, use the Docker bridge gateway; on Docker Desktop, host-gateway works via extra host mapping
+    String hostIp = "host.docker.internal";
+    smartCoreMcpUrl = smartCoreMcpUrl.replace("localhost", hostIp);
+    // keep IP URI -> fallback for local dev exec.
+    return smartCoreMcpUrl.replace("127.0.0.1", hostIp);
+  }
+
   public void mcpCheck() {
     try {
       var listResult = container.execInContainer("sh", "-c", "copilot mcp list");
@@ -81,9 +86,26 @@ public class Copilot {
       System.out.println("MCP get exit=" + getResult.getExitCode());
       System.out.println("MCP get stdout: " + getResult.getStdout());
       System.out.println("MCP get stderr: " + getResult.getStderr());
+
+      if (configuredMcpUrl != null && !configuredMcpUrl.isBlank()) {
+        var endpointResult = container.execInContainer("sh", "-c",
+            "if command -v curl >/dev/null 2>&1; then "
+                + "curl -sS -o /dev/null -w '%{http_code}' \"$0\"; "
+                + "else echo 'curl-not-installed'; fi",
+            configuredMcpUrl);
+        System.out.println("MCP endpoint probe exit=" + endpointResult.getExitCode());
+        System.out.println("MCP endpoint probe: " + endpointResult.getStdout());
+        System.out.println("MCP endpoint probe stderr: " + endpointResult.getStderr());
+      }
     } catch (Exception e) {
       throw new RuntimeException("MCP check failed", e);
     }
+  }
+
+  public String promptWithRequiredMcpTool(String prompt) throws InterruptedException, IOException {
+    String forcedPrompt = "You must call at least one MCP tool from the 'axonivy-designer' server before answering. "
+        + "If tool invocation fails, explain the exact failure. User request: " + prompt;
+    return prompt(forcedPrompt);
   }
 
 }

@@ -37,7 +37,7 @@ public class CopilotIntegrationTest {
   @Test
   void mcpON() throws Exception {
     rt.copilot().mcpCheck();
-    var resource = rt.copilot().prompt("name all available tools from current MCP setup");
+    var resource = rt.copilot().promptWithRequiredMcpTool("name all available tools from current MCP setup");
     var spans = rt.aspire().spansOfResource(resource);
 
     assertThat(spans.tools().names())
