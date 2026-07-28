@@ -36,7 +36,7 @@ public class Runtime {
   * Enabled by default for local development, disabled in CI.
   * https://java.testcontainers.org/features/reuse/
   */
-  static boolean reuseContainers = !"false".equalsIgnoreCase(System.getenv("TESTCONTAINERS_REUSE_CONTAINERS"));
+  static boolean reuseContainers = !"false".equalsIgnoreCase(System.getenv("TESTCONTAINERS_REUSE_ENABLE"));
 
   static Network network;
   static AspireContainer aspireContainer;
