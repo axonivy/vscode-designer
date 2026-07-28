@@ -40,8 +40,7 @@ jobs:
       #     bash .github/workflows/mcp.sh $PWD/playwright/tests/workspaces
       - name: Build with Maven
         run: |
-          cd aitest       
-          mvn clean verify -ntp
+          mvn clean verify -f aitest/pom.xml -ntp
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TESTCONTAINERS_REUSE_ENABLE: 'false'
