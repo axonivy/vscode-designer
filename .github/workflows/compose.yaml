@@ -1,0 +1,68 @@
+services:
+  designer-service:
+    image: mcr.microsoft.com/playwright:v1.54.2-noble
+    working_dir: /workspace
+    environment:
+      JAVA_HOME: ${JAVA_HOME:?Set JAVA_HOME in your shell before running compose}
+    volumes:
+      - ../..:/workspace
+      - ${JAVA_HOME:?Set JAVA_HOME in your shell before running compose}:${JAVA_HOME:?Set JAVA_HOME in your shell before running compose}:ro
+    ports:
+      - "32140:32140"
+    shm_size: "2gb"
+    command:
+      - bash
+      - -lc
+      - |
+        set -euo pipefail
+        ./.github/workflows/mcp.sh vscode-designer.code-workspace
+        exec tail -f /dev/null
+
+  aspire:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:latest
+    environment:
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
+      Dashboard__Api__Enabled: "true"
+    ports:
+      - "18888:18888"
+      - "18890:18890"
+
+  copilot:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM node:24-slim
+        RUN apt-get update \
+          && apt-get install -y --no-install-recommends ca-certificates \
+          && rm -rf /var/lib/apt/lists/*
+        RUN npm install -g @github/copilot
+    environment:
+      COPILOT_GITHUB_TOKEN: ${GITHUB_TOKEN:?Set GITHUB_TOKEN in your shell or .env}
+      COPILOT_MODEL: gpt-5-mini
+      OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://aspire:18890
+      VSCODE_MCP_URI: ${VSCODE_MCP_URI:-http://designer-service:32140/mcp}
+    depends_on:
+      - designer-service
+      - aspire
+    command:
+      - sh
+      - -lc
+      - |
+        set -eu
+        echo "$$VSCODE_MCP_URI"
+        mkdir -p /root/.copilot
+        mcp_url="$$VSCODE_MCP_URI"
+        echo "mcp: $${mcp_url}"
+        cat > /root/.copilot/mcp-config.json <<EOF
+        {
+          "mcpServers": {
+            "axonivy-designer": {
+              "type": "http",
+              "url": "$${mcp_url}",
+              "tools": ["*"]
+            }
+          }
+        }
+        EOF
+        exec sleep infinity

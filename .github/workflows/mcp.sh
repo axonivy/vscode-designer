@@ -45,8 +45,21 @@ if [[ -z "${CODE_INSIDERS_BIN}" || ! -x "${CODE_INSIDERS_BIN}" ]]; then
 	exit 1
 fi
 
+USER_DATA_DIR="${REPO_ROOT}/ci-user-data"
+mkdir -p "${USER_DATA_DIR}"
+
+declare -a CODE_INSIDERS_GLOBAL_ARGS=()
+if [[ "$(id -u)" -eq 0 ]]; then
+	# Running Chromium/Electron as root requires no-sandbox and an explicit user-data-dir.
+	CODE_INSIDERS_GLOBAL_ARGS+=(--no-sandbox "--user-data-dir=${USER_DATA_DIR}")
+fi
+
+run_code_insiders() {
+	"${CODE_INSIDERS_BIN}" "${CODE_INSIDERS_GLOBAL_ARGS[@]}" "$@"
+}
+
 echo "VS Code Insiders binary: ${CODE_INSIDERS_BIN}"
-if ! "${CODE_INSIDERS_BIN}" --version >/tmp/code-insiders-version.txt 2>&1; then
+if ! run_code_insiders --version >/tmp/code-insiders-version.txt 2>&1; then
 	echo "VS Code Insiders binary preflight failed:" >&2
 	cat /tmp/code-insiders-version.txt >&2 || true
 	exit 1
@@ -55,13 +68,12 @@ echo "VS Code Insiders version:"
 cat /tmp/code-insiders-version.txt
 
 EXTENSIONS_DIR="$(mktemp -d -t vscode-insiders-ext-XXXXXX)"
-USER_DATA_DIR="${REPO_ROOT}/ci-user-data"
 
 echo "Installing extensions ..."
-"${CODE_INSIDERS_BIN}" --list-extensions  --extensions-dir "${EXTENSIONS_DIR}"
-"${CODE_INSIDERS_BIN}" --install-extension vscjava.vscode-java-pack --extensions-dir "${EXTENSIONS_DIR}"
-"${CODE_INSIDERS_BIN}" --install-extension ${REPO_ROOT}/extension/vscode-designer*.vsix --extensions-dir "${EXTENSIONS_DIR}"
-if ! "${CODE_INSIDERS_BIN}" --list-extensions --extensions-dir "${EXTENSIONS_DIR}" | grep -q '^axonivy.vscode-designer-14$'; then
+run_code_insiders --list-extensions  --extensions-dir "${EXTENSIONS_DIR}"
+run_code_insiders --install-extension vscjava.vscode-java-pack --extensions-dir "${EXTENSIONS_DIR}"
+run_code_insiders --install-extension ${REPO_ROOT}/extension/vscode-designer*.vsix --extensions-dir "${EXTENSIONS_DIR}"
+if ! run_code_insiders --list-extensions --extensions-dir "${EXTENSIONS_DIR}" | grep -q '^axonivy.vscode-designer-14$'; then
 	echo "Expected extension axonivy.vscode-designer-14 is not installed in ${EXTENSIONS_DIR}" >&2
 	exit 1
 fi
