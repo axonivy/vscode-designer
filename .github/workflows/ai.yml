@@ -62,9 +62,3 @@ jobs:
             */target/*-reports/*.xml
             !*/target/*-reports/failsafe-summary.xml
           action_fail: true
-      # - name: Install Copilot CLI
-      #   run: npm install -g @github/copilot
-      # - name: Run Copilot
-      #   run: copilot --yolo -p "Summarize the changes in this commit"
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
