@@ -107,6 +107,7 @@ public class Runtime {
 
   public void start() {
     copilot = new Copilot(copilotContainer);
+    System.out.println("Container reuse: " + reuseContainers);
     if (manualAspire) {
       initManualAspire(copilot);
     } else {
@@ -121,17 +122,20 @@ public class Runtime {
   }
 
   public void stop() {
-    if (!reuseContainers) {
-      copilotContainer.stop();
-      if (aspireContainer != null) {
-        aspireContainer.stop();
-      }
-      if (designerMcpContainer != null) {
-        designerMcpContainer.stop();
-      }
-      if (network != null) {
-        network.close();
-      }
+    if (reuseContainers) {
+      System.out.println("Reusing containers: not stopping them!");
+      return;
+    }
+    System.out.println("Stopping containers...");
+    copilotContainer.stop();
+    if (aspireContainer != null) {
+      aspireContainer.stop();
+    }
+    if (designerMcpContainer != null) {
+      designerMcpContainer.stop();
+    }
+    if (network != null) {
+      network.close();
     }
   }
 

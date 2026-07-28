@@ -35,9 +35,9 @@ jobs:
           pnpm install
           pnpm run build:production
           pnpm run package
-      - name: Start VS Code host with extension and MCP
-        run: |
-          bash .github/workflows/mcp.sh $PWD/playwright/tests/workspaces
+      # - name: Start VS Code host with extension and MCP
+      #   run: |
+      #     bash .github/workflows/mcp.sh $PWD/playwright/tests/workspaces
       - name: Build with Maven
         run: |
           cd aitest       
@@ -45,7 +45,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VSCODE_MCP_URI: http://127.0.0.1:32140/mcp
-          TESTCONTAINERS_REUSE_CONTAINERS: 'false'
+          TESTCONTAINERS_REUSE_ENABLE: 'false'
       - name: Archive test reports
         uses: actions/upload-artifact@v7
         if: failure()
