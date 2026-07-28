@@ -17,6 +17,7 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
     }
 
     withWorkingDirectory("/workspace");
+    configureContainerUser();
     withFileSystemBind(workspaceRoot, "/workspace", BindMode.READ_WRITE);
     withFileSystemBind(javaHome, javaHome, BindMode.READ_ONLY);
     withEnv("JAVA_HOME", javaHome);
@@ -26,5 +27,13 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
         "set -euo pipefail\n"
             + "./.github/workflows/mcp.sh vscode-designer.code-workspace\n"
             + "exec tail -f /dev/null");
+  }
+
+  private void configureContainerUser() {
+    String uid = System.getenv("HOST_UID");
+    String gid = System.getenv("HOST_GID");
+    if (uid != null && !uid.isBlank() && gid != null && !gid.isBlank()) {
+      withCreateContainerCmdModifier(cmd -> cmd.withUser(uid + ":" + gid));
+    }
   }
 }

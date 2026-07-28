@@ -40,10 +40,19 @@ jobs:
       #     bash .github/workflows/mcp.sh $PWD/playwright/tests/workspaces
       - name: Build with Maven
         run: |
+          export HOST_UID="$(id -u)"
+          export HOST_GID="$(id -g)"
           mvn clean verify -f aitest/pom.xml -ntp
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TESTCONTAINERS_REUSE_ENABLE: 'false'
+      - name: Normalize CI user-data permissions
+        if: failure()
+        run: |
+          if [ -d ci-user-data ]; then
+            chmod -R u+rwX ci-user-data || true
+            chown -R "$(id -u):$(id -g)" ci-user-data || true
+          fi
       - name: Archive test reports
         uses: actions/upload-artifact@v7
         if: failure()
@@ -51,8 +60,9 @@ jobs:
           name: test-reports
           retention-days: 5
           path: |
-            chown -R $(whoami):$(whoami) ci-user-data
             ci-user-data/logs/**/*
+            ci-user-data/code-insiders.log
+            ci-user-data/xvfb-errors.log
             **/*.log
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
