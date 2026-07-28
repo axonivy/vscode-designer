@@ -1,14 +1,19 @@
 package ch.ivyteam.smart.core;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.testcontainers.containers.Network;
 
 import ch.ivyteam.smart.core.aspire.AspireAPI;
 import ch.ivyteam.smart.core.aspire.AspireContainer;
 import ch.ivyteam.smart.core.copilot.Copilot;
 import ch.ivyteam.smart.core.copilot.CopilotContainer;
+import ch.ivyteam.smart.core.copilot.DesignerMcpContainer;
 
 public class Runtime {
   private static final String DEFAULT_MCP_URI = "http://127.0.0.1:32140/mcp";
+  private static final String DESIGNER_MCP_URI = "http://designer-mcp:32140/mcp";
 
   /*
   * To keep Aspire alive and observe the traces in its dashboard,
@@ -28,6 +33,7 @@ public class Runtime {
 
   static Network network;
   static AspireContainer aspireContainer;
+  static DesignerMcpContainer designerMcpContainer;
   @SuppressWarnings("resource")
   static CopilotContainer copilotContainer = new CopilotContainer()
       // .withEnv("COPILOT_PROVIDER_BASE_URL", OPENAI_API_URL)
@@ -46,13 +52,16 @@ public class Runtime {
 
   private static void initTestcontainersAspire(Copilot copilot) {
     network = Network.newNetwork();
-    
+
     aspireContainer = initAspireContainer();
     aspireContainer.start();
-    
+
+    designerMcpContainer = initDesignerMcpContainer();
+    designerMcpContainer.start();
+
     copilotContainer.withNetwork(network);
     copilot.otlpEndpoint("http://aspire:18890");
-    
+
     aspireApi = AspireAPI.create("http://" + aspireContainer.getHost() + ":" + aspireContainer.getMappedPort(18888));
     System.out.println("Aspire dashboard bound: " + aspireApi);
   }
@@ -66,6 +75,26 @@ public class Runtime {
         .withEnv("Dashboard__Api__Enabled", "true");
   }
 
+  @SuppressWarnings("resource")
+  private static DesignerMcpContainer initDesignerMcpContainer() {
+    String workspaceRoot = findWorkspaceRoot().toString();
+    String javaHome = System.getenv("JAVA_HOME");
+    return new DesignerMcpContainer(workspaceRoot, javaHome)
+        .withNetwork(network)
+        .withNetworkAliases(DesignerMcpContainer.NETWORK_ALIAS);
+  }
+
+  private static Path findWorkspaceRoot() {
+    Path current = Path.of(System.getProperty("user.dir")).toAbsolutePath();
+    while (current != null) {
+      if (Files.exists(current.resolve(".github/workflows/mcp.sh"))) {
+        return current;
+      }
+      current = current.getParent();
+    }
+    throw new IllegalStateException("Could not locate workspace root containing .github/workflows/mcp.sh");
+  }
+
   public void start() {
     copilot = new Copilot(copilotContainer);
     if (manualAspire) {
@@ -76,7 +105,7 @@ public class Runtime {
     copilotContainer.start();
     String mcpUri = System.getenv("VSCODE_MCP_URI");
     if (mcpUri == null || mcpUri.isBlank()) {
-      mcpUri = DEFAULT_MCP_URI;
+      mcpUri = designerMcpContainer != null ? DESIGNER_MCP_URI : DEFAULT_MCP_URI;
     }
     copilot.addMcp(mcpUri);
   }
@@ -85,6 +114,9 @@ public class Runtime {
     copilotContainer.stop();
     if (aspireContainer != null) {
       aspireContainer.stop();
+    }
+    if (designerMcpContainer != null) {
+      designerMcpContainer.stop();
     }
     if (network != null) {
       network.close();
