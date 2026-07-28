@@ -52,6 +52,7 @@ jobs:
           name: test-reports
           retention-days: 5
           path: |
+            chown -R $(whoami):$(whoami) ci-user-data
             ci-user-data/logs/**/*
             **/*.log
       - name: Publish Test Results
