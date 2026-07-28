@@ -31,6 +31,13 @@ public class Runtime {
   */
   static boolean manualAspire = System.getenv("MANUAL_ASPIRE") != null;
 
+  /*
+  * Reuse containers between test runs to speed up development.
+  * Enabled by default for local development, disabled in CI.
+  * https://java.testcontainers.org/features/reuse/
+  */
+  static boolean reuseContainers = !"false".equalsIgnoreCase(System.getenv("TESTCONTAINERS_REUSE_CONTAINERS"));
+
   static Network network;
   static AspireContainer aspireContainer;
   static DesignerMcpContainer designerMcpContainer;
@@ -40,7 +47,8 @@ public class Runtime {
       // .withEnv("COPILOT_PROVIDER_API_KEY", OPENAI_API_KEY)
       .withEnv("COPILOT_GITHUB_TOKEN", System.getenv("GITHUB_TOKEN"))
       .withEnv("COPILOT_MODEL", "gpt-5-mini")
-      .withEnv("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "true");
+      .withEnv("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "true")
+      .withReuse(reuseContainers);
 
   static Copilot copilot;
   static AspireAPI aspireApi;
@@ -72,7 +80,8 @@ public class Runtime {
         .withNetwork(network)
         .withNetworkAliases("aspire")
         .withExposedPorts(18888, 18890)
-        .withEnv("Dashboard__Api__Enabled", "true");
+        .withEnv("Dashboard__Api__Enabled", "true")
+        .withReuse(reuseContainers);
   }
 
   @SuppressWarnings("resource")
@@ -81,7 +90,8 @@ public class Runtime {
     String javaHome = System.getenv("JAVA_HOME");
     return new DesignerMcpContainer(workspaceRoot, javaHome)
         .withNetwork(network)
-        .withNetworkAliases(DesignerMcpContainer.NETWORK_ALIAS);
+        .withNetworkAliases(DesignerMcpContainer.NETWORK_ALIAS)
+        .withReuse(reuseContainers);
   }
 
   private static Path findWorkspaceRoot() {
@@ -111,15 +121,17 @@ public class Runtime {
   }
 
   public void stop() {
-    copilotContainer.stop();
-    if (aspireContainer != null) {
-      aspireContainer.stop();
-    }
-    if (designerMcpContainer != null) {
-      designerMcpContainer.stop();
-    }
-    if (network != null) {
-      network.close();
+    if (!reuseContainers) {
+      copilotContainer.stop();
+      if (aspireContainer != null) {
+        aspireContainer.stop();
+      }
+      if (designerMcpContainer != null) {
+        designerMcpContainer.stop();
+      }
+      if (network != null) {
+        network.close();
+      }
     }
   }
 

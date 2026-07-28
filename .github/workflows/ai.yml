@@ -45,6 +45,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VSCODE_MCP_URI: http://127.0.0.1:32140/mcp
+          TESTCONTAINERS_REUSE_CONTAINERS: 'false'
       - name: Archive test reports
         uses: actions/upload-artifact@v7
         if: failure()
