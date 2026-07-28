@@ -332,9 +332,13 @@ export class StatusBar {
         id: 'installLocalMarketProduct',
         callback: () => executeCommand('ivyProjects.installLocalMarketProduct')
       },
-
       { label: 'New ...', kind: QuickPickItemKind.Separator },
-      { label: '$(repo-create) New Project', id: 'newProject', callback: () => executeCommand('ivyProjects.addNewProject') }
+      { label: '$(repo-create) New Project', id: 'newProject', callback: () => executeCommand('ivyProjects.addNewProject') },
+      {
+        label: '$(repo-create) Import Axon Ivy Project',
+        id: 'importProject',
+        callback: () => executeCommand('ivyProjects.importIvyProject')
+      }
     ];
 
     const shownQuickPickOptions =
