@@ -1,10 +1,11 @@
 import path from 'path';
 import type { ExtensionContext, TreeView, TreeViewVisibilityChangeEvent } from 'vscode';
 import { Uri, window, workspace } from 'vscode';
-import { executeCommand, registerCommand, type Command } from '../base/commands';
+import { registerCommand, type Command } from '../base/commands';
 import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base/debounce';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
-import { logErrorMessage, logInformationMessage, logWarningMessage } from '../base/logging-util';
+import { runJavaCleanWorkspace, runJavaProjectImport } from '../base/java-extension-api';
+import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -150,7 +151,7 @@ export class IvyProjectExplorer {
     for (const project of ivyProjects) {
       if (project === projectToBeDeleted) {
         await IvyEngineManager.instance.deleteProject(projectToBeDeleted);
-        await executeCommand('java.clean.workspace'); // if project was deleted java workspace should be cleaned
+        await runJavaCleanWorkspace();
         await this.refresh();
         return;
       }
@@ -172,11 +173,7 @@ export class IvyProjectExplorer {
 
     await IvyEngineManager.instance.initProjects(projectsToBeDeployed);
     if (projectsToBeDeployed.length > 0) {
-      try {
-        await executeCommand('java.project.import.command');
-      } catch {
-        logWarningMessage('Java extension could not import project. Java support will not be available.');
-      }
+      await runJavaProjectImport();
     }
   }
 
