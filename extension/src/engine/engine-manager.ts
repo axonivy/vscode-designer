@@ -2,6 +2,7 @@ import type { ExtensionContext } from 'vscode';
 import { Uri, extensions } from 'vscode';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
+import { runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage, logWarningMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { StatusBar } from '../base/status-bar';
@@ -344,13 +345,7 @@ export class IvyEngineManager {
   private async importJavaProjects() {
     const javaExt = extensions.getExtension('redhat.java');
     if (javaExt !== undefined && javaExt.isActive) {
-      try {
-        await executeCommand('java.project.import.command');
-      } catch {
-        logWarningMessage(
-          'Java extension could not import projects. Java support will not be available. Please clean Java workspace and import Java projects manually.'
-        );
-      }
+      await runJavaProjectImport();
     } else {
       try {
         await javaExt?.activate();
