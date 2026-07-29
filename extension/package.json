@@ -548,10 +548,56 @@
             ],
             "markdownDescription": "Specify process animation mode."
           },
-          "axonivy.validation.xhtml": {
-            "type": "boolean",
-            "default": true,
-            "markdownDescription": "Enable workspace-wide validation of XHTML files. When enabled, all XHTML files in the workspace are validated, not only files that are currently open."
+          "axonivy.workspaceValidation": {
+            "type": "object",
+            "default": {
+              "xhtml": true,
+              "form": true,
+              "dataclass": true
+            },
+            "properties": {
+              "xhtml": {
+                "type": "boolean",
+                "description": "XHTML files (*.xhtml)"
+              },
+              "form": {
+                "type": "boolean",
+                "description": "Dialog forms (*.f.json)"              },
+              "dataclass": {
+                "type": "boolean",
+                "description": "Dataclass files (*.d.json)"
+              },
+              "database": {
+                "type": "boolean",
+                "description": "databases.yaml"
+              },
+              "restclient": {
+                "type": "boolean",
+                "description": "rest-clients.yaml"
+              },
+              "variable": {
+                "type": "boolean",
+                "description": "variables.yaml"
+              },
+              "role": {
+                "type": "boolean",
+                "description": "roles.yaml"
+              },
+              "webserviceclient": {
+                "type": "boolean",
+                "description": "webservice-clients.yaml"
+              },
+              "process": {
+                "type": "boolean",
+                "description": "Process files (*.p.json)"
+              },
+              "user": {
+                "type": "boolean",
+                "description": "users.yaml"
+              }
+            },
+            "markdownDescription": "Configure which validators are enabled workspace-wide. Individual validators can be disabled in the respective editor settings.",
+            "additionalProperties": false
           }
         }
       }
