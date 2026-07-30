@@ -1,6 +1,6 @@
 import path from 'path';
 import type { ExtensionContext, TreeView, TreeViewVisibilityChangeEvent } from 'vscode';
-import { Uri, window, workspace } from 'vscode';
+import { ProgressLocation, Uri, window, workspace } from 'vscode';
 import { registerCommand, type KnownCommand } from '../base/commands';
 import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base/debounce';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
@@ -325,14 +325,52 @@ export class IvyProjectExplorer {
     quickPick.selectedItems = quickPick.items.filter(item => item.detail === projectPath);
     quickPick.show();
     quickPick.onDidAccept(async () => {
-      const projectsToConvert = quickPick.selectedItems.map(item => item.detail).filter((detail): detail is string => !!detail);
-      for (const project of projectsToConvert) {
-        await IvyEngineManager.instance.convertProject(project);
-      }
-      await runJavaProjectConfigurationUpdate(projectsToConvert.map(p => Uri.file(p)));
-      IvyDiagnostics.instance.refresh();
       quickPick.dispose();
+      const projectsToConvert = quickPick.selectedItems.map(item => item.detail).filter((detail): detail is string => !!detail);
+      await this.runProjectConversion(projectsToConvert);
+      IvyDiagnostics.instance.refresh();
     });
+  }
+
+  private async runProjectConversion(projectsToConvert: string[]) {
+    if (projectsToConvert.length === 0) {
+      return;
+    }
+    await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        cancellable: true,
+        title: 'Axon Ivy Project Conversion'
+      },
+      async (progress, token) => {
+        let convertedCount = 0;
+        const numOfProjects = projectsToConvert.length;
+        for (const project of projectsToConvert) {
+          if (token.isCancellationRequested) {
+            logInformationMessage(`Project conversion cancelled by user.`);
+            return;
+          }
+          progress.report({
+            message: `Converted ${convertedCount} of ${numOfProjects} project(s).`
+          });
+          try {
+            await IvyEngineManager.instance.convertProject(project);
+            convertedCount++;
+          } catch (error) {
+            logErrorMessage(`Failed to convert project ${project}: ${error}`);
+          }
+          progress.report({
+            increment: (1 / numOfProjects) * 100
+          });
+        }
+        await runJavaProjectConfigurationUpdate(projectsToConvert.map(p => Uri.file(p)));
+
+        const numOfErrors = numOfProjects - convertedCount;
+        window.showInformationMessage(
+          `Converted ${convertedCount} of ${numOfProjects} Axon Ivy project(s).${numOfErrors > 0 ? ` ${numOfErrors} project(s) failed to convert.` : ''}`
+        );
+      }
+    );
   }
 
   public async getIvyProjects() {
