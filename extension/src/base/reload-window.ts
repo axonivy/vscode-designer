@@ -1,4 +1,5 @@
-import { commands, window } from 'vscode';
+import { window } from 'vscode';
+import { executeCommand } from './commands';
 
 export const askToReloadWindow = async (reason: string) => {
   const selection = await window.showQuickPick([{ label: 'Reload Window', detail: 'Unsaved changes will be lost' }, { label: 'Cancel' }], {
@@ -6,6 +7,6 @@ export const askToReloadWindow = async (reason: string) => {
     title: `${reason} - reload window to apply new settings and restart the engine`
   });
   if (selection?.label === 'Reload Window') {
-    await commands.executeCommand('workbench.action.reloadWindow');
+    await executeCommand('workbench.action.reloadWindow');
   }
 };

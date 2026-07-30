@@ -2,15 +2,15 @@ import type { ExtensionContext } from 'vscode';
 import { commands } from 'vscode';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function executeCommand(command: Command, ...rest: any[]) {
+export async function executeCommand(command: KnownCommand, ...rest: any[]) {
   return commands.executeCommand(command, ...rest);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function registerCommand(command: Command, context: ExtensionContext, callback: (...args: any[]) => any) {
+export async function registerCommand(command: KnownCommand, context: ExtensionContext, callback: (...args: any[]) => any) {
   context.subscriptions.push(commands.registerCommand(command, callback));
 }
-export type Command =
+export type KnownCommand =
   | VSCodeCommand
   | EngineCommand
   | DebugCommand
@@ -21,7 +21,7 @@ export type Command =
   | EditorCommand
   | 'ivy.addDevContainer'
   | 'ivy.showStatusBarQuickPick';
-type VSCodeCommand = 'setContext' | 'vscode.open' | 'copyFilePath' | 'workbench.action.openSettings';
+type VSCodeCommand = 'setContext' | 'vscode.open' | 'copyFilePath' | 'workbench.action.openSettings' | 'workbench.action.reloadWindow';
 type EngineCommand =
   | 'engine.deployProjects'
   | 'engine.switchEngineReleaseTrain'
