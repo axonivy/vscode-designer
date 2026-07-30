@@ -107,3 +107,15 @@ export const validateNamespace = (value: string) => {
   }
   return 'Enter Namespace separated by "/" -- Only letters, numbers, and underscores are allowed -- Spaces allowed within words -- Empty allowed.';
 };
+
+export const sanitizeProjectName = (fileName: string) => {
+  /**
+   * Sanitize logic is duplicated from core ProjectService.java sanitizeProjectName
+   * Must be kept in sync with that logic
+   */
+  const sanitized = fileName
+    .replace(/\.iar/gi, '') // remove ALL .iar, also in the middle of the filename
+    .replace(/\./g, '-')
+    .replace(/[^\w-]/g, '_');
+  return sanitized.slice(0, 40);
+};
