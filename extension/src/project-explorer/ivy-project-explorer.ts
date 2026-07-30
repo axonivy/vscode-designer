@@ -4,7 +4,7 @@ import { Uri, window, workspace } from 'vscode';
 import { registerCommand, type Command } from '../base/commands';
 import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base/debounce';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
-import { runJavaCleanWorkspace, runJavaProjectImport } from '../base/java-extension-api';
+import { runJavaCleanWorkspace, runJavaProjectConfigurationUpdate, runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
@@ -325,11 +325,11 @@ export class IvyProjectExplorer {
     quickPick.selectedItems = quickPick.items.filter(item => item.detail === projectPath);
     quickPick.show();
     quickPick.onDidAccept(async () => {
-      for (const item of quickPick.selectedItems) {
-        if (item.detail) {
-          await IvyEngineManager.instance.convertProject(item.detail);
-        }
+      const projectsToConvert = quickPick.selectedItems.map(item => item.detail).filter((detail): detail is string => !!detail);
+      for (const project of projectsToConvert) {
+        await IvyEngineManager.instance.convertProject(project);
       }
+      await runJavaProjectConfigurationUpdate(projectsToConvert.map(p => Uri.file(p)));
       IvyDiagnostics.instance.refresh();
       quickPick.dispose();
     });
