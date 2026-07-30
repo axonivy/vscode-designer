@@ -228,6 +228,7 @@ export type StopBpmEngineParams = {
 
 export type ImportProjectsBody = {
   file?: Blob;
+  targetPath: string,
   dependentProject?: Blob;
   doConvert?: string;
 };
@@ -444,6 +445,9 @@ export const importProjects = (
   const formData = new FormData();
   if (importProjectsBody?.file !== undefined) {
     formData.append(`file`, importProjectsBody.file);
+  }
+  if (importProjectsBody?.targetPath !== undefined) {
+    formData.append(`targetPath`, importProjectsBody.targetPath);
   }
   if (importProjectsBody?.dependentProject !== undefined) {
     formData.append(`dependentProject`, importProjectsBody.dependentProject);

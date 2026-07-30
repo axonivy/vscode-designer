@@ -3,15 +3,21 @@ import { Uri, window, workspace } from 'vscode';
 import type { ImportProjectsBody } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 
-export const importIvyProject = async (workspaceUri: Uri) => {
-  const workspaceId = path.basename(workspaceUri.fsPath);
+export const importIvyProject = async (selectedWorkspaceUri: Uri) => {
+  const workspaceId = await IvyEngineManager.instance.getWorkspaceId();
+  if (!workspaceId) {
+    window.showErrorMessage('No workspace is currently selected. Please select a workspace before importing an Ivy project.');
+    return;
+  }
+  const selectedTargetPath = selectedWorkspaceUri.fsPath;
   const input = await collectImportIvyProjectParams();
+  const importProjectParams: ImportProjectsBody = { ...input, targetPath: selectedTargetPath };
   if (input) {
-    await IvyEngineManager.instance.importIvyProject(workspaceId, input);
+    await IvyEngineManager.instance.importIvyProject(workspaceId, importProjectParams);
   }
 };
 
-const collectImportIvyProjectParams = async (): Promise<ImportProjectsBody | undefined> => {
+const collectImportIvyProjectParams = async () => {
   const ivyProjectFile = await window.showOpenDialog({
     canSelectMany: false,
     title: 'Select Ivy Project Archive .iar or .zip to import',
