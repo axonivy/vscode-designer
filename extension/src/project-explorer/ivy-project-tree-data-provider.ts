@@ -14,14 +14,14 @@ import {
   type TreeDataProvider,
   type Command as VSCodeCommand
 } from 'vscode';
-import { executeCommand, type Command } from '../base/commands';
+import { executeCommand, type KnownCommand } from '../base/commands';
 import { config } from '../base/configurations';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyProjectExplorer } from './ivy-project-explorer';
 
 const __dirname = import.meta.dirname;
 interface IvyCommand extends VSCodeCommand {
-  command: Command;
+  command: KnownCommand;
 }
 
 export interface Entry {

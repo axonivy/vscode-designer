@@ -1,7 +1,7 @@
 import path from 'path';
 import type { ExtensionContext, TreeView, TreeViewVisibilityChangeEvent } from 'vscode';
 import { Uri, window, workspace } from 'vscode';
-import { registerCommand, type Command } from '../base/commands';
+import { registerCommand, type KnownCommand } from '../base/commands';
 import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base/debounce';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { runJavaCleanWorkspace, runJavaProjectConfigurationUpdate, runJavaProjectImport } from '../base/java-extension-api';
@@ -68,7 +68,7 @@ export class IvyProjectExplorer {
   private registerCommands(context: ExtensionContext) {
     const engineManager = IvyEngineManager.instance;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const registerCmd = (command: Command, callback: (...args: any[]) => any) => registerCommand(command, context, callback);
+    const registerCmd = (command: KnownCommand, callback: (...args: any[]) => any) => registerCommand(command, context, callback);
     registerCmd(`${VIEW_ID}.refreshEntry`, () => this.refresh());
     registerCmd(`${VIEW_ID}.deployProject`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.deployProjects(d), s));
     registerCmd(`${VIEW_ID}.stopBpmEngine`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.stopBpmEngine(d), s));
