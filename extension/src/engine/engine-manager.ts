@@ -22,6 +22,7 @@ import { UserEditorProvider } from '../editors/user-editor/user-editor-provider'
 import { VariableEditorProvider } from '../editors/variable-editor/variable-editor-provider';
 import { WebServiceEditorProvider } from '../editors/webservice-editor/webservice-editor-provider';
 import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language-client';
+import { isProjectConversionRunning } from '../project-explorer/ivy-project-conversion';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import type { NewProcessParams } from '../project-explorer/new-process';
 import type { NewUserDialogParams } from '../project-explorer/new-user-dialog';
@@ -180,6 +181,9 @@ export class IvyEngineManager {
   }
 
   public async deployProjects(ivyProjectDirectory?: string) {
+    if (isProjectConversionRunning) {
+      return;
+    }
     const ivyProjectDirectories = ivyProjectDirectory ? [ivyProjectDirectory] : await this.ivyProjectDirectories();
     await StatusBar.withStatusBarProgress(
       { text: 'Deploying projects' },
@@ -316,6 +320,9 @@ export class IvyEngineManager {
   }
 
   public async invalidateClassLoader(ivyProjectDirectory: string) {
+    if (isProjectConversionRunning) {
+      return;
+    }
     return await StatusBar.withStatusBarProgress(
       { text: 'Invalidating class loader' },
       async () => await this.ivyEngineApi?.invalidateClassLoader(ivyProjectDirectory)

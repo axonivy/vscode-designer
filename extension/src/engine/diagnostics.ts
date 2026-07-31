@@ -42,11 +42,7 @@ export class IvyDiagnostics {
         if (!fs.existsSync(uri.fsPath)) {
           uri = Uri.joinPath(Uri.file(project.projectDirectory), POM_FILE);
         }
-        let severity = DiagnosticSeverity.Error;
-        if (project.errorMessage?.startsWith(CONVERSION_OUTDATED_MESSAGE_PREFIX)) {
-          severity = DiagnosticSeverity.Warning;
-        }
-        const diagnostic = new Diagnostic(new Range(1, 0, 1, 0), project.errorMessage, severity);
+        const diagnostic = new Diagnostic(new Range(1, 0, 1, 0), project.errorMessage, DiagnosticSeverity.Error);
         diagnostic.source = DIAGNOSTIC_SOURCE;
         this.diagnostics.set(uri, [diagnostic]);
       });

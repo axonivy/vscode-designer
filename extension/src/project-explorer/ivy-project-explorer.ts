@@ -4,7 +4,7 @@ import { Uri, window, workspace } from 'vscode';
 import { registerCommand, type KnownCommand } from '../base/commands';
 import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base/debounce';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
-import { runJavaCleanWorkspace, runJavaProjectConfigurationUpdate, runJavaProjectImport } from '../base/java-extension-api';
+import { runJavaCleanWorkspace, runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
@@ -12,6 +12,7 @@ import { IvyEngineManager } from '../engine/engine-manager';
 import { installLocalMarketProduct, installMarketProduct } from '../market/import-market';
 import { importIvyProject } from './import-ivy-project';
 import { importNewProcess } from './import-process';
+import { runProjectConversion } from './ivy-project-conversion';
 import { IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject, type Entry } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
 import { addNewDataClass } from './new-data-class';
@@ -325,13 +326,10 @@ export class IvyProjectExplorer {
     quickPick.selectedItems = quickPick.items.filter(item => item.detail === projectPath);
     quickPick.show();
     quickPick.onDidAccept(async () => {
-      const projectsToConvert = quickPick.selectedItems.map(item => item.detail).filter((detail): detail is string => !!detail);
-      for (const project of projectsToConvert) {
-        await IvyEngineManager.instance.convertProject(project);
-      }
-      await runJavaProjectConfigurationUpdate(projectsToConvert.map(p => Uri.file(p)));
-      IvyDiagnostics.instance.refresh();
       quickPick.dispose();
+      const projectsToConvert = quickPick.selectedItems.map(item => item.detail).filter((detail): detail is string => !!detail);
+      await runProjectConversion(projectsToConvert);
+      IvyDiagnostics.instance.refresh();
     });
   }
 
