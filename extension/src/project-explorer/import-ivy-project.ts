@@ -1,5 +1,6 @@
 import path from 'path';
 import { Uri, window, workspace } from 'vscode';
+import { logErrorMessage } from '../base/logging-util';
 import type { ImportProjectsBody } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { listRootsInAllWorkspaces, sanitizeProjectName } from './utils/util';
@@ -14,10 +15,15 @@ export const importIvyProject = async (selectedWorkspaceUri: Uri, allIvyProjectP
   if (!selectedFile || !selectedFile.file) {
     return;
   }
-  const sanitizedFileName = sanitizeProjectName(selectedFile.fileName);
+  const fileName = path.basename(selectedFile.filePath);
+  const sanitizedFileName = sanitizeProjectName(fileName);
+  if (!validateAgainstExistingProjects(sanitizedFileName, fileName, selectedFile.filePath, allIvyProjectPaths)) {
+    return;
+  }
   const sanitizedFilePath = path.join(selectedTargetPath, sanitizedFileName);
-  validateAgainstExistingProjects(sanitizedFileName, selectedFile.fileName, allIvyProjectPaths);
-  await validateAgainstExistingPaths(sanitizedFilePath, selectedFile.fileName);
+  if (!(await validateAgainstExistingPaths(sanitizedFilePath, fileName))) {
+    return;
+  }
   const importProjectParams: ImportProjectsBody = { ...selectedFile, targetPath: selectedTargetPath };
   await IvyEngineManager.instance.importIvyProject(workspaceId, importProjectParams);
 };
@@ -36,28 +42,37 @@ const collectImportIvyArchiveFile = async () => {
   }
   const fileUri = ivyProjectFile[0];
   const filePath = fileUri.fsPath;
-  const fileName = path.basename(filePath);
   const fileData = await workspace.fs.readFile(fileUri);
   const regularArray = new Uint8Array(fileData);
-  const fileObj = new File([regularArray.buffer], fileName, { type: 'application/zip' });
-  return { file: fileObj, filePath, fileName };
+  const fileObj = new File([regularArray.buffer], path.basename(filePath), { type: 'application/zip' });
+  return { file: fileObj, filePath };
 };
 
-const validateAgainstExistingProjects = (fileToImportNameSanitized: string, fileImportName: string, existingIvyProjectPaths: string[]) => {
+const validateAgainstExistingProjects = (
+  fileToImportNameSanitized: string,
+  fileImportName: string,
+  fileImportPath: string,
+  existingIvyProjectPaths: string[]
+) => {
   const existingProjectNames = existingIvyProjectPaths.map(projectPath => path.basename(projectPath));
   if (existingProjectNames.includes(fileToImportNameSanitized)) {
-    window.showErrorMessage(
-      `File ${fileImportName} resolves to project name ${fileToImportNameSanitized}. ` +
-        `Axon Ivy Project with ${fileToImportNameSanitized} already exists in the workspace. Please either rename the import file ${fileImportName} or delete/rename the existing project.`
+    logErrorMessage(
+      `File ${fileImportPath} resolves to project name "${fileToImportNameSanitized}".
+Axon Ivy Project with name "${fileToImportNameSanitized}" already exists in the workspace.
+Please either rename the import file ${fileImportName} or delete/rename the existing project.`
     );
+    return false;
   }
+  return true;
 };
 
 const validateAgainstExistingPaths = async (targetImportPath: string, fileImportName: string) => {
   const existingRootPaths = (await listRootsInAllWorkspaces()).map(folder => folder.fsPath);
   if (existingRootPaths.includes(targetImportPath)) {
-    window.showErrorMessage(
-      `Import target after project name resolving is ${targetImportPath} which exists already in your workspace. Please either rename the import file ${fileImportName} or delete/rename the existing folder.`
+    logErrorMessage(
+      `Import target folder after project name resolution is ${targetImportPath} which already exists in your workspace.\nPlease either rename the import file ${fileImportName} or delete/rename the existing folder.`
     );
+    return false;
   }
+  return true;
 };

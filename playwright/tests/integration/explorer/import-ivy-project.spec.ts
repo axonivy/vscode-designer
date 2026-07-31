@@ -5,6 +5,7 @@ import { downloadIar } from '~/utils/download-iar';
 import { empty } from '../../workspaces/workspace';
 
 const ivyProjectIar = 'ivy-project.iar';
+const ivyProjectIarDuplicateSanitized = 'ivy.project.iar';
 
 test.use({ workspace: empty });
 
@@ -20,4 +21,25 @@ test('Import up-to-date Ivy Project', async ({ wsPage }) => {
   await wsPage.executeCommand('Refresh Explorer');
   await explorer.hasNodeExact(ivyProjectIar.replace('.iar', ''));
   await expect(wsPage.toasts).toBeHidden();
+});
+
+test('Import same project error', async ({ wsPage, tmpWorkspace }) => {
+  const explorer = new FileExplorer(wsPage);
+  await explorer.hasNodeExact(ivyProjectIar);
+  await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
+  await wsPage.selectItemFromQuickPick(ivyProjectIar);
+  await wsPage.executeCommand('Refresh Explorer');
+  await explorer.hasNodeExact(ivyProjectIar.replace('.iar', ''));
+  await expect(wsPage.toasts).toBeHidden();
+
+  await downloadIar(tmpWorkspace.tmpWorkspacePath, ivyProjectIarDuplicateSanitized);
+  await explorer.hasNodeExact(ivyProjectIarDuplicateSanitized);
+  await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
+  await wsPage.selectItemFromQuickPick(ivyProjectIarDuplicateSanitized);
+
+  await expect(wsPage.toasts).toHaveText(
+    `File ${tmpWorkspace.tmpWorkspacePath}/${ivyProjectIarDuplicateSanitized} resolves to project name "ivy-project".
+Axon Ivy Project with name "ivy-project" already exists in the workspace.
+Please either rename the import file ${ivyProjectIarDuplicateSanitized} or delete/rename the existing project.`
+  );
 });
