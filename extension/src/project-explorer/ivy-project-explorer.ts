@@ -206,7 +206,7 @@ export class IvyProjectExplorer {
   private async addProject(selection: TreeSelection) {
     const selectedUri = await this.selectWorkspace(selection);
     if (!selectedUri) {
-      logInformationMessage('No valid workspace selected, dialog aborted.');
+      logInformationMessage('No valid workspace selected.');
       return;
     }
     const existingIvyProjects = await this.getIvyProjects();
@@ -250,12 +250,13 @@ export class IvyProjectExplorer {
   }
 
   private async importIvyProject(selection: TreeSelection) {
+    const allIvyProjectPaths = await this.getIvyProjects();
     const selectedWorkspaceUri = await this.selectWorkspace(selection);
     if (!selectedWorkspaceUri) {
-      logInformationMessage('No valid workspace selected, dialog aborted.');
+      logInformationMessage('No valid workspace selected.');
       return;
     }
-    await importIvyProject(selectedWorkspaceUri);
+    await importIvyProject(selectedWorkspaceUri, allIvyProjectPaths);
   }
 
   private async installLocalMarketProduct(selection: TreeSelection) {
