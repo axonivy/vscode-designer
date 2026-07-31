@@ -41,7 +41,7 @@ const conversionTask = async (
       return;
     }
     progress.report({
-      message: `converting ${path.basename(project)} - ${convertedCount} of ${numOfProjects} project(s) converted.${failedProjects.length > 0 ? ` ${failedProjects.length} project(s) failed to convert.` : ''}`
+      message: `Converting ${path.basename(project)} - ${convertedCount} of ${numOfProjects} project(s) converted.${failedProjects.length > 0 ? ` ${failedProjects.length} project(s) failed to convert.` : ''}`
     });
     try {
       await IvyEngineManager.instance.convertProject(project);
