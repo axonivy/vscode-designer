@@ -246,7 +246,7 @@ export class IvyEngineManager {
         name: 'BusinessProcess',
         kind: 'Business Process',
         path: newProjectParams.path,
-        namespace: await resolveDefaultNamespace(newProjectParams.path, 'processes')
+        namespace: await resolveDefaultNamespace(newProjectParams.path, 'process')
       });
       return projectBean;
     });
