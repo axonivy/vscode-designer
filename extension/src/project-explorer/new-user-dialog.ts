@@ -103,7 +103,7 @@ const prepareAndValidateFinalState: (
 };
 
 export const addNewUserDialog = async (selectionContext: AddCommandSelectionContext, type: DialogType, pid?: string) => {
-  const resourceDirectoryTarget: ResourceDirectoryTarget = 'src_hd';
+  const resourceDirectoryTarget: ResourceDirectoryTarget = 'dialog';
   const existingProjects = selectionContext.existingIvyProjects;
   const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(
     selectionContext,

@@ -22,7 +22,7 @@ interface NewCaseMapState extends MSStateBase {
 }
 
 export const addNewCaseMap = async (selectionContext: AddCommandSelectionContext) => {
-  const resourceDirectoryTarget: ResourceDirectoryTarget = 'processes';
+  const resourceDirectoryTarget: ResourceDirectoryTarget = 'process';
   const existingProjects = selectionContext.existingIvyProjects;
   const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(
     selectionContext,
