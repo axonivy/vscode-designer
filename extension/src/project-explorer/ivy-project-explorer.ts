@@ -250,13 +250,12 @@ export class IvyProjectExplorer {
   }
 
   private async importIvyProject(selection: TreeSelection) {
-    const allIvyProjectPaths = await this.getIvyProjects();
     const selectedWorkspaceUri = await this.selectWorkspace(selection);
     if (!selectedWorkspaceUri) {
       logInformationMessage('No valid workspace selected.');
       return;
     }
-    await importIvyProject(selectedWorkspaceUri, allIvyProjectPaths);
+    await importIvyProject(selectedWorkspaceUri);
   }
 
   private async installLocalMarketProduct(selection: TreeSelection) {
