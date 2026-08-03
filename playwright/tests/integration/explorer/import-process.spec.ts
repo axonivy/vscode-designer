@@ -3,7 +3,7 @@ import { FileExplorer } from '~/page-objects/explorer-view';
 
 test('Import BPMN Process', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
-  await explorer.selectNode('processes');
+  await explorer.selectNode('process');
 
   await wsPage.executeCommand('Axon Ivy: Import BPMN Process');
   await wsPage.selectItemFromQuickPick('resources');

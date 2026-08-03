@@ -29,13 +29,13 @@ export const dialogPreviewUrl = async (devContextPath: string) => {
     return undefined;
   }
 
-  const sourceDirectory = path.join(projectPath, 'src_hd');
+  const sourceDirectory = path.join(projectPath, 'dialog');
   if (!isWithinDirectory(document.uri.fsPath, sourceDirectory)) {
-    logErrorMessage('Dialog preview is only available for .xhtml or .f.json files located in src_hd.');
+    logErrorMessage('Dialog preview is only available for .xhtml or .f.json files located in dialog.');
     return undefined;
   }
 
-  const namespace = await resolveNamespaceFromPath(document.uri, projectPath, 'src_hd');
+  const namespace = await resolveNamespaceFromPath(document.uri, projectPath, 'dialog');
   if (!namespace || !dialogName) {
     logErrorMessage('Failed to derive preview information from the active dialog file.');
     return undefined;
@@ -70,7 +70,7 @@ export const isDialogPreviewSupported = async () => {
     return false;
   }
 
-  const sourceDirectory = path.join(projectPath, 'src_hd');
+  const sourceDirectory = path.join(projectPath, 'dialog');
   return isWithinDirectory(document.uri.fsPath, sourceDirectory);
 };
 

@@ -9,6 +9,7 @@ import * as path from 'path';
 import type { TextDocument, WebviewPanel } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
+import { runJavaProjectConfigurationUpdate } from '../../base/java-extension-api';
 import { logErrorMessage, logInformationMessage } from '../../base/logging-util';
 import { updateTextDocumentContent } from '../content-writer';
 import { pickFile } from '../file-picker';
@@ -24,7 +25,6 @@ import {
   WebviewReadyNotification
 } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
-import { BuildSourcePathHelper } from './build-source-path-helper';
 import { runMavenCommand } from './maven-runner';
 
 const RestClientWebSocketMessage: NotificationType<unknown> = { method: 'restClientWebSocketMessage' };
@@ -113,10 +113,7 @@ async function generateClient(openapi: OpenApiGeneratorConfig, document: TextDoc
     await runMavenCommand(projectPath, command);
     logInformationMessage(`${openapi.clientName} OpenAPI client generated successfully`);
 
-    const sourcePathAdded = await new BuildSourcePathHelper().ensureGeneratedSourcePath(projectPath, outputDir);
-    if (sourcePathAdded) {
-      logInformationMessage(`Added ${openapi.clientName} client source path to pom.xml.`);
-    }
+    await runJavaProjectConfigurationUpdate(document.uri);
 
     return {
       success: true,

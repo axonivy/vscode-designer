@@ -27,7 +27,7 @@ interface NewDataClassState extends MSStateBase {
 }
 
 export const addNewDataClass = async (type: DataClassType, selectionContext: AddCommandSelectionContext) => {
-  const resourceDirectoryTarget: ResourceDirectoryTarget = 'dataclasses';
+  const resourceDirectoryTarget: ResourceDirectoryTarget = 'dataclass';
   const existingProjects = selectionContext.existingIvyProjects;
   const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(
     selectionContext,

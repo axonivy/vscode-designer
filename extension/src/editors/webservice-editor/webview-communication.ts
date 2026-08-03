@@ -11,6 +11,7 @@ import * as path from 'path';
 import type { TextDocument, WebviewPanel } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
+import { runJavaProjectConfigurationUpdate } from '../../base/java-extension-api';
 import { logErrorMessage, logInformationMessage } from '../../base/logging-util';
 import { updateTextDocumentContent } from '../content-writer';
 import { pickFile } from '../file-picker';
@@ -25,7 +26,6 @@ import {
   openUrlExternally,
   WebviewReadyNotification
 } from '../notification-helper';
-import { BuildSourcePathHelper } from '../restclient-editor/build-source-path-helper';
 import { runMavenCommand } from '../restclient-editor/maven-runner';
 import { WebSocketForwarder } from '../websocket-forwarder';
 
@@ -119,10 +119,7 @@ async function generateClient(codegen: WsGeneratorConfig, document: TextDocument
 
     await runMavenCommand(projectPath, command);
 
-    const sourcePathAdded = await new BuildSourcePathHelper().ensureGeneratedSourcePath(projectPath, outputDir);
-    if (sourcePathAdded) {
-      logInformationMessage(`Added ${codegen.clientName} client source path to pom.xml.`);
-    }
+    await runJavaProjectConfigurationUpdate(document.uri);
 
     const serviceJson = path.join(projectPath, outputDir, 'service.json');
     const serviceContent = await promises.readFile(serviceJson, 'utf-8');

@@ -8,6 +8,7 @@ import {
   window,
   type Command,
   type ExtensionContext,
+  type QuickPickItem,
   type StatusBarItem
 } from 'vscode';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -15,7 +16,7 @@ import { showEngineLog } from '../engine/engine-output-channel';
 import { onWebIdeWebSocketStateChange, type WebSocketReadyState } from '../engine/web-ide-ws/web-ide-websocket-provider';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { showRuntimeLog } from '../views/runtimelog-view';
-import { executeCommand } from './commands';
+import { executeCommand, type KnownCommand } from './commands';
 import { animationSettings, config, onAnimationSettingsChange } from './configurations';
 import { showExtensionLog } from './extension-output-channel';
 import { logErrorMessageWithActions } from './logging-util';
@@ -31,7 +32,69 @@ const DEFAULT_TRUSTED_COMMANDS_MARKDOWN = [
   'engine.activateAnimation',
   'engine.deactivateAnimation',
   'workbench.action.openSettings'
-];
+] as const satisfies Array<KnownCommand>;
+
+type StatusQuickPickItem = QuickPickItem & { id?: string; command?: KnownCommand; commandArgs?: unknown[]; hidden?: boolean };
+
+const QUICK_PICK_OPTIONS = [
+  { label: '$(refresh) Reload Window', id: 'reloadWindow', command: 'workbench.action.reloadWindow', hidden: true },
+  { label: 'Animation', kind: QuickPickItemKind.Separator },
+  {
+    label: animationSettings().animate ? '$(eye-closed) Deactivate Animation' : '$(eye) Activate Animation',
+    id: 'toggleAnimation',
+    command: animationSettings().animate ? 'engine.deactivateAnimation' : 'engine.activateAnimation'
+  },
+
+  { label: 'Settings', kind: QuickPickItemKind.Separator },
+  {
+    label: '$(settings-gear) Open Axon Ivy Settings',
+    id: 'openSettings',
+    command: 'workbench.action.openSettings',
+    commandArgs: ['@ext:axonivy.vscode-designer-14']
+  },
+
+  { label: 'Logs', kind: QuickPickItemKind.Separator },
+  {
+    label: '$(list-filter) Open Axon Ivy Runtime Log',
+    id: 'openRuntimeLog',
+    command: 'ivyPanelView.openRuntimeLog'
+  },
+  {
+    label: '$(list-filter) Open Axon Ivy Extension Log',
+    id: 'openExtensionLog',
+    command: 'ivyPanelView.openExtensionLog'
+  },
+  {
+    label: '$(list-filter) Open Axon Ivy Engine Log',
+    id: 'openEngineLog',
+    command: 'ivyPanelView.openEngineLog'
+  },
+
+  { label: 'Deployment', kind: QuickPickItemKind.Separator },
+  { label: '$(layers) Deploy all Axon Ivy Projects', id: 'deployAllProjects', command: 'engine.deployProjects' },
+  { label: '$(layers-dot) Deploy Axon Ivy Project', id: 'deployProject', command: 'ivyProjects.deployProject' },
+
+  { label: 'Market', kind: QuickPickItemKind.Separator },
+  {
+    label: '$(gift) Install Market Product',
+    id: 'installMarketProduct',
+    command: 'ivyProjects.installMarketProduct'
+  },
+  {
+    label: '$(gift) Install Local Market Product',
+    id: 'installLocalMarketProduct',
+    command: 'ivyProjects.installLocalMarketProduct'
+  },
+  { label: 'New ...', kind: QuickPickItemKind.Separator },
+  { label: '$(repo-create) New Project', id: 'newProject', command: 'ivyProjects.addNewProject' },
+  {
+    label: '$(repo-create) Import Axon Ivy Project',
+    id: 'importProject',
+    command: 'ivyProjects.importIvyProject'
+  }
+] as const satisfies Array<StatusQuickPickItem>;
+
+export type QuickPickOptionId = Extract<(typeof QUICK_PICK_OPTIONS)[number], { id: string }>['id'];
 
 type StatusBarIcon = '$(loading~spin)' | '$(error)' | '$(check)' | '$(plug)' | '$(debug-disconnect)' | '';
 
@@ -41,7 +104,7 @@ interface OverrideStatusBar {
   icon: StatusBarIcon;
   isError?: boolean;
   isClickable?: boolean;
-  visibleOptions?: string[];
+  visibleOptions?: QuickPickOptionId[];
 }
 
 interface StatusBarProgressOptions {
@@ -52,15 +115,12 @@ interface StatusBarProgressOptions {
   successMsgDuration?: number;
 }
 
-export const newMarkdownString = (text: string, additionalTrustedCommands: string[] = []) => {
+export const newMarkdownString = (text: string) => {
   const markdown = new MarkdownString(text, true);
   markdown.supportThemeIcons = true;
-  const trustedCommands = DEFAULT_TRUSTED_COMMANDS_MARKDOWN.concat(additionalTrustedCommands);
-  if (trustedCommands.length > 0) {
-    markdown.isTrusted = {
-      enabledCommands: trustedCommands
-    };
-  }
+  markdown.isTrusted = {
+    enabledCommands: DEFAULT_TRUSTED_COMMANDS_MARKDOWN
+  };
   return markdown;
 };
 
@@ -96,7 +156,7 @@ export class StatusBar {
     StatusBar.getInstance().refreshStatusBar();
   }
 
-  public static showStatusBarQuickPick(visibleOptions?: string[]) {
+  public static showStatusBarQuickPick(visibleOptions?: QuickPickOptionId[]) {
     StatusBar.getInstance().showStatusBarQuickPick(visibleOptions);
   }
 
@@ -133,10 +193,10 @@ export class StatusBar {
     let statusLabel: string = '';
     let statusIcon: StatusBarIcon = '';
     let statusBackgroundColor: ThemeColor | undefined;
-    let command: string | Command = {
+    let command: 'ivy.showStatusBarQuickPick' | Command = {
       title: 'Show Axon Ivy actions',
       command: 'ivy.showStatusBarQuickPick',
-      arguments: [['openRuntimeLog', 'openExtensionLog', 'openEngineLog', 'openSettings']]
+      arguments: [['reloadWindow', 'openRuntimeLog', 'openExtensionLog', 'openEngineLog', 'openSettings']]
     };
 
     switch (this.readyState) {
@@ -283,74 +343,18 @@ export class StatusBar {
     item.show();
   }
 
-  private showStatusBarQuickPick(visibleOptions?: string[]) {
-    const animationIsOn = animationSettings().animate;
-    const quickPickOptions = [
-      { label: 'Animation', kind: QuickPickItemKind.Separator },
-      {
-        label: animationIsOn ? '$(eye-closed) Deactivate Animation' : '$(eye) Activate Animation',
-        id: 'toggleAnimation',
-        callback: () => executeCommand(animationIsOn ? 'engine.deactivateAnimation' : 'engine.activateAnimation')
-      },
+  private showStatusBarQuickPick(visibleOptions?: QuickPickOptionId[]) {
+    let shownQuickPickOptions: Array<StatusQuickPickItem> = [...QUICK_PICK_OPTIONS];
+    if (visibleOptions && visibleOptions.length > 0) {
+      shownQuickPickOptions = shownQuickPickOptions
+        .filter(option => option.id && visibleOptions.includes(option.id as QuickPickOptionId))
+        .map(option => ({ ...option, hidden: false }));
+    }
+    shownQuickPickOptions = shownQuickPickOptions.filter(option => !option.hidden);
 
-      { label: 'Settings', kind: QuickPickItemKind.Separator },
-      {
-        label: '$(settings-gear) Open Axon Ivy Settings',
-        id: 'openSettings',
-        callback: () => executeCommand('workbench.action.openSettings', '@ext:axonivy.vscode-designer-14')
-      },
-
-      { label: 'Logs', kind: QuickPickItemKind.Separator },
-      {
-        label: '$(list-filter) Open Axon Ivy Runtime Log',
-        id: 'openRuntimeLog',
-        callback: () => executeCommand('ivyPanelView.openRuntimeLog')
-      },
-      {
-        label: '$(list-filter) Open Axon Ivy Extension Log',
-        id: 'openExtensionLog',
-        callback: () => executeCommand('ivyPanelView.openExtensionLog')
-      },
-      {
-        label: '$(list-filter) Open Axon Ivy Engine Log',
-        id: 'openEngineLog',
-        callback: () => executeCommand('ivyPanelView.openEngineLog')
-      },
-
-      { label: 'Deployment', kind: QuickPickItemKind.Separator },
-      { label: '$(layers) Deploy all Axon Ivy Projects', id: 'deployAllProjects', callback: () => executeCommand('engine.deployProjects') },
-      { label: '$(layers-dot) Deploy Axon Ivy Project', id: 'deployProject', callback: () => executeCommand('ivyProjects.deployProject') },
-
-      { label: 'Market', kind: QuickPickItemKind.Separator },
-      {
-        label: '$(gift) Install Market Product',
-        id: 'installMarketProduct',
-        callback: () => executeCommand('ivyProjects.installMarketProduct')
-      },
-      {
-        label: '$(gift) Install Local Market Product',
-        id: 'installLocalMarketProduct',
-        callback: () => executeCommand('ivyProjects.installLocalMarketProduct')
-      },
-
-      { label: 'New ...', kind: QuickPickItemKind.Separator },
-      { label: '$(repo-create) New Project', id: 'newProject', callback: () => executeCommand('ivyProjects.addNewProject') }
-    ];
-
-    const shownQuickPickOptions =
-      !visibleOptions || visibleOptions.length === 0
-        ? quickPickOptions
-        : quickPickOptions.filter(option => visibleOptions.includes(option.id ?? ''));
-
-    window.showQuickPick(shownQuickPickOptions, { ignoreFocusOut: true, canPickMany: false }).then(selection => {
-      if (!selection) {
-        return;
-      }
-      if (selection.callback) {
-        selection.callback();
-        return;
-      }
-    });
+    window
+      .showQuickPick<StatusQuickPickItem>(shownQuickPickOptions, { ignoreFocusOut: true, canPickMany: false })
+      .then(selection => selection?.command && executeCommand(selection.command, ...(selection.commandArgs ?? [])));
   }
 
   async withStatusBarProgress<R>(options: StatusBarProgressOptions, action: () => Promise<R>): Promise<R | undefined> {

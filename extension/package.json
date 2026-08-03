@@ -49,7 +49,7 @@
     "@eclipse-glsp/protocol": "2.7.0",
     "@eclipse-glsp/vscode-integration": "2.7.0",
     "@modelcontextprotocol/sdk": "^1.12.1",
-    "axios": "1.18.1",
+    "axios": "1.19.0",
     "dom-serializer": "3.1.1",
     "domhandler": "6.0.1",
     "fast-xml-parser": "5.10.1",
@@ -881,6 +881,10 @@
         {
           "command": "engine.deployProjects",
           "when": "view == ivyProjects || view == workbench.explorer.fileView"
+        },
+        {
+          "command": "ivyProjects.importIvyProject",
+          "when": "view == ivyProjects || view == workbench.explorer.fileView"
         }
       ],
       "explorer/context": [
@@ -992,6 +996,10 @@
         {
           "command": "ivyProjects.addNewProject",
           "group": "5_new@1"
+        },
+        {
+          "command": "ivyProjects.importIvyProject",
+          "group": "6_new@1"
         }
       ],
       "explorer.run": [

@@ -9,7 +9,7 @@ import { showExtensionLog } from './base/extension-output-channel';
 import { validateAndSyncJavaVersion } from './base/java-version-validation';
 import { logInformationMessage, logWarningMessage } from './base/logging-util';
 import { askToReloadWindow } from './base/reload-window';
-import { newMarkdownString, StatusBar } from './base/status-bar';
+import { newMarkdownString, StatusBar, type QuickPickOptionId } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
 import { IvyDiagnostics } from './engine/diagnostics';
@@ -48,7 +48,9 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     registerCommand('ivyPanelView.openExtensionLog', context, () => showExtensionLog());
     registerCommand('ivyPanelView.openEngineLog', context, () => showEngineLog());
     registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
-    registerCommand('ivy.showStatusBarQuickPick', context, (visibleOptions?: string[]) => StatusBar.showStatusBarQuickPick(visibleOptions));
+    registerCommand('ivy.showStatusBarQuickPick', context, (visibleOptions?: QuickPickOptionId[]) =>
+      StatusBar.showStatusBarQuickPick(visibleOptions)
+    );
 
     registerTools(context);
     startLocalMcpServer();

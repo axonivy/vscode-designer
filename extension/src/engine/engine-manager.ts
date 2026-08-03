@@ -2,6 +2,7 @@ import type { ExtensionContext } from 'vscode';
 import { Uri, extensions } from 'vscode';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
+import { runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage, logWarningMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { StatusBar } from '../base/status-bar';
@@ -21,6 +22,7 @@ import { UserEditorProvider } from '../editors/user-editor/user-editor-provider'
 import { VariableEditorProvider } from '../editors/variable-editor/variable-editor-provider';
 import { WebServiceEditorProvider } from '../editors/webservice-editor/webservice-editor-provider';
 import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language-client';
+import { isProjectConversionRunning } from '../project-explorer/ivy-project-conversion';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import type { NewProcessParams } from '../project-explorer/new-process';
 import type { NewUserDialogParams } from '../project-explorer/new-user-dialog';
@@ -171,7 +173,7 @@ export class IvyEngineManager {
       },
       async () => {
         for (const projectDir of ivyProjectDirectories) {
-          await this.ivyEngineApi?.findOrCreatePmv(projectDir);
+          await this.ivyEngineApi?.findOrCreateProject(projectDir);
         }
         await this.ivyEngineApi?.deployProjects(ivyProjectDirectories);
       }
@@ -179,6 +181,9 @@ export class IvyEngineManager {
   }
 
   public async deployProjects(ivyProjectDirectory?: string) {
+    if (isProjectConversionRunning) {
+      return;
+    }
     const ivyProjectDirectories = ivyProjectDirectory ? [ivyProjectDirectory] : await this.ivyProjectDirectories();
     await StatusBar.withStatusBarProgress(
       { text: 'Deploying projects' },
@@ -243,7 +248,7 @@ export class IvyEngineManager {
         name: 'BusinessProcess',
         kind: 'Business Process',
         path: newProjectParams.path,
-        namespace: await resolveDefaultNamespace(newProjectParams.path, 'processes')
+        namespace: await resolveDefaultNamespace(newProjectParams.path, 'process')
       });
       return projectBean;
     });
@@ -317,6 +322,9 @@ export class IvyEngineManager {
   }
 
   public async invalidateClassLoader(ivyProjectDirectory: string) {
+    if (isProjectConversionRunning) {
+      return;
+    }
     return await StatusBar.withStatusBarProgress(
       { text: 'Invalidating class loader' },
       async () => await this.ivyEngineApi?.invalidateClassLoader(ivyProjectDirectory)
@@ -346,13 +354,7 @@ export class IvyEngineManager {
   private async importJavaProjects() {
     const javaExt = extensions.getExtension('redhat.java');
     if (javaExt !== undefined && javaExt.isActive) {
-      try {
-        await executeCommand('java.project.import.command');
-      } catch {
-        logWarningMessage(
-          'Java extension could not import projects. Java support will not be available. Please clean Java workspace and import Java projects manually.'
-        );
-      }
+      await runJavaProjectImport();
     } else {
       try {
         await javaExt?.activate();

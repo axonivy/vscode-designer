@@ -1,16 +1,18 @@
 import path from 'path';
 import type { ExtensionContext, TreeView, TreeViewVisibilityChangeEvent } from 'vscode';
 import { Uri, window, workspace } from 'vscode';
-import { executeCommand, registerCommand, type Command } from '../base/commands';
+import { registerCommand, type KnownCommand } from '../base/commands';
 import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base/debounce';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
-import { logErrorMessage, logInformationMessage, logWarningMessage } from '../base/logging-util';
+import { runJavaCleanWorkspace, runJavaProjectImport } from '../base/java-extension-api';
+import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { installLocalMarketProduct, installMarketProduct } from '../market/import-market';
 import { importIvyProject } from './import-ivy-project';
 import { importNewProcess } from './import-process';
+import { runProjectConversion } from './ivy-project-conversion';
 import { IVY_RPOJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject, type Entry } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
 import { addNewDataClass } from './new-data-class';
@@ -67,7 +69,7 @@ export class IvyProjectExplorer {
   private registerCommands(context: ExtensionContext) {
     const engineManager = IvyEngineManager.instance;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const registerCmd = (command: Command, callback: (...args: any[]) => any) => registerCommand(command, context, callback);
+    const registerCmd = (command: KnownCommand, callback: (...args: any[]) => any) => registerCommand(command, context, callback);
     registerCmd(`${VIEW_ID}.refreshEntry`, () => this.refresh());
     registerCmd(`${VIEW_ID}.deployProject`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.deployProjects(d), s));
     registerCmd(`${VIEW_ID}.stopBpmEngine`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.stopBpmEngine(d), s));
@@ -150,7 +152,7 @@ export class IvyProjectExplorer {
     for (const project of ivyProjects) {
       if (project === projectToBeDeleted) {
         await IvyEngineManager.instance.deleteProject(projectToBeDeleted);
-        await executeCommand('java.clean.workspace'); // if project was deleted java workspace should be cleaned
+        await runJavaCleanWorkspace();
         await this.refresh();
         return;
       }
@@ -172,11 +174,7 @@ export class IvyProjectExplorer {
 
     await IvyEngineManager.instance.initProjects(projectsToBeDeployed);
     if (projectsToBeDeployed.length > 0) {
-      try {
-        await executeCommand('java.project.import.command');
-      } catch {
-        logWarningMessage('Java extension could not import project. Java support will not be available.');
-      }
+      await runJavaProjectImport();
     }
   }
 
@@ -328,13 +326,10 @@ export class IvyProjectExplorer {
     quickPick.selectedItems = quickPick.items.filter(item => item.detail === projectPath);
     quickPick.show();
     quickPick.onDidAccept(async () => {
-      for (const item of quickPick.selectedItems) {
-        if (item.detail) {
-          await IvyEngineManager.instance.convertProject(item.detail);
-        }
-      }
-      IvyDiagnostics.instance.refresh();
       quickPick.dispose();
+      const projectsToConvert = quickPick.selectedItems.map(item => item.detail).filter((detail): detail is string => !!detail);
+      await runProjectConversion(projectsToConvert);
+      IvyDiagnostics.instance.refresh();
     });
   }
 
