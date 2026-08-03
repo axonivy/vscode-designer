@@ -6,8 +6,8 @@ import { IvyEngineManager } from '../engine/engine-manager';
 import { listRootsInAllWorkspaces, sanitizeProjectName } from './utils/util';
 
 export const importIvyProject = async (selectedWorkspaceUri: Uri) => {
-  const workspaceId = await IvyEngineManager.instance.getWorkspaceId();
-  if (!workspaceId) {
+  const activeWorkspaceId = await IvyEngineManager.instance.getWorkspaceId();
+  if (!activeWorkspaceId) {
     return;
   }
   const selectedTargetPath = selectedWorkspaceUri.fsPath;
@@ -15,12 +15,12 @@ export const importIvyProject = async (selectedWorkspaceUri: Uri) => {
   if (!selectedFile || !selectedFile.file) {
     return;
   }
-  const existingIvyProjectNames = ((await IvyEngineManager.instance.projects(false)) ?? []).map(pIdentifier => pIdentifier.id.project);
   const fileImportPath = selectedFile.filePath;
-  const fileImportName = path.basename(selectedFile.filePath);
+  const fileImportName = path.basename(fileImportPath);
   const sanitizedFileName = sanitizeProjectName(fileImportName);
-  const sanitizedFilePath = path.join(selectedTargetPath, sanitizedFileName);
+  const targetImportFolderPath = path.join(selectedTargetPath, sanitizedFileName);
 
+  const existingIvyProjectNames = ((await IvyEngineManager.instance.projects(false)) ?? []).map(pIdentifier => pIdentifier.id.project);
   if (existingIvyProjectNames.includes(sanitizedFileName)) {
     logErrorMessage(
       `File ${fileImportPath} resolves to project name "${sanitizedFileName}".
@@ -31,17 +31,16 @@ Please either rename the import file ${fileImportName} or delete/rename the exis
   }
 
   const existingRootPaths = (await listRootsInAllWorkspaces()).map(folder => folder.fsPath);
-
-  if (existingRootPaths.includes(sanitizedFilePath)) {
+  if (existingRootPaths.includes(targetImportFolderPath)) {
     logErrorMessage(
-      `Import target folder after project name resolution is ${sanitizedFilePath} which already exists in your workspace.
+      `Import target folder after project name resolution is ${targetImportFolderPath} which already exists in your workspace.
 Please either rename the import file ${fileImportName} or delete/rename the existing folder.`
     );
     return;
   }
 
   const importProjectParams: ImportProjectsBody = { ...selectedFile, targetPath: selectedTargetPath };
-  await IvyEngineManager.instance.importIvyProject(workspaceId, importProjectParams);
+  await IvyEngineManager.instance.importIvyProject(activeWorkspaceId, importProjectParams);
 };
 
 const collectImportIvyArchiveFile = async () => {
