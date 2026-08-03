@@ -47,7 +47,10 @@ export const test = base.extend<TestFixtures>({
     async ({ page, wsPage, closeWelcomePage }, take) => {
       await wsPage.hasReadyStatusMessage();
       if (closeWelcomePage) {
-        await page.getByRole('tab', { name: 'Axon Ivy PRO Designer' }).getByRole('button', { name: 'Close' }).click({ delay: 100 });
+        await page
+          .getByRole('tab', { name: 'Axon Ivy PRO Designer' })
+          .getByRole('button', { name: 'Close' })
+          .click({ delay: 100, force: true });
       }
       await take();
     },
