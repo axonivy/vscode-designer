@@ -13,7 +13,7 @@ export const importIvyProject = async (selectedWorkspaceUri: Uri) => {
   }
   const selectedTargetPath = selectedWorkspaceUri.fsPath;
   const selectedFile = await collectImportIvyArchiveFile();
-  if (!selectedFile || !selectedFile.filePath) {
+  if (!selectedFile) {
     return;
   }
   const fileImportPath = selectedFile.filePath;
