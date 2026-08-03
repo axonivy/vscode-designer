@@ -76,21 +76,6 @@ export const getWorkspaceFolder = async () => {
   return await window.showWorkspaceFolderPick().then(folder => folder?.uri);
 };
 
-export const listRootsInAllWorkspaces = async () => {
-  const workspaceFolders = workspace.workspaceFolders ?? [];
-  const roots = await Promise.all(
-    workspaceFolders.map(async folder => {
-      try {
-        const entries = await workspace.fs.readDirectory(folder.uri);
-        return entries.filter(([, type]) => type === FileType.Directory).map(([name]) => Uri.joinPath(folder.uri, name));
-      } catch {
-        return [];
-      }
-    })
-  );
-  return roots.flat();
-};
-
 export const validateProjectArtifactName = (value: string) => {
   const pattern = /^[a-zA-Z_][\w]*$/;
   if (pattern.test(value)) {

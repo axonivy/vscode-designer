@@ -1,9 +1,10 @@
+import fs from 'fs';
 import path from 'path';
 import { Uri, window, workspace } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { ImportProjectsBody } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { listRootsInAllWorkspaces, sanitizeProjectName } from './utils/util';
+import { sanitizeProjectName } from './utils/util';
 
 export const importIvyProject = async (selectedWorkspaceUri: Uri) => {
   const activeWorkspaceId = await IvyEngineManager.instance.getWorkspaceId();
@@ -12,7 +13,7 @@ export const importIvyProject = async (selectedWorkspaceUri: Uri) => {
   }
   const selectedTargetPath = selectedWorkspaceUri.fsPath;
   const selectedFile = await collectImportIvyArchiveFile();
-  if (!selectedFile || !selectedFile.file) {
+  if (!selectedFile || !selectedFile.filePath) {
     return;
   }
   const fileImportPath = selectedFile.filePath;
@@ -30,8 +31,7 @@ Please either rename the import file ${fileImportName} or delete/rename the exis
     return;
   }
 
-  const existingRootPaths = (await listRootsInAllWorkspaces()).map(folder => folder.fsPath);
-  if (existingRootPaths.includes(targetImportFolderPath)) {
+  if (fs.existsSync(targetImportFolderPath)) {
     logErrorMessage(
       `Import target folder after project name resolution is ${targetImportFolderPath} which already exists in your workspace.
 Please either rename the import file ${fileImportName} or delete/rename the existing folder.`
