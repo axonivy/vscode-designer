@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { Uri, window, workspace } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
+import { StatusBar } from '../base/status-bar';
 import type { ImportProjectsBody } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { sanitizeProjectName } from './utils/util';
@@ -40,7 +41,11 @@ Please either rename the import file ${fileImportName} or delete/rename the exis
   }
 
   const importProjectParams: ImportProjectsBody = { ...selectedFile, targetPath: selectedTargetPath };
-  await IvyEngineManager.instance.importIvyProject(activeWorkspaceId, importProjectParams);
+
+  StatusBar.withStatusBarProgress(
+    { text: 'Importing Ivy Archive ...' },
+    async () => await IvyEngineManager.instance.importIvyProject(activeWorkspaceId, importProjectParams)
+  );
 };
 
 const collectImportIvyArchiveFile = async () => {
