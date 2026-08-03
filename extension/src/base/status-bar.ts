@@ -387,15 +387,10 @@ export class StatusBar {
         tooltip: previousTooltip.appendMarkdown(`${DEFAULT_TOOLTIP_DIVIDER}\n\n**Success last operation: ${textDuring}**`),
         icon: '$(check)'
       });
-
       this.temporaryTimeout = setTimeout(async () => {
         await this.refreshStatusBar();
         this.temporaryTimeout = undefined;
       }, successMsgDuration);
-
-      // await new Promise(resolve => setTimeout(resolve, successMsgDuration));
-      // await this.refreshStatusBar();
-
       return result;
     } catch (error) {
       const errorString = error instanceof Error ? error.message : String(error);
