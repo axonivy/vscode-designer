@@ -1,10 +1,12 @@
 import { AxiosError } from 'axios';
 import { logErrorMessage } from '../../base/logging-util';
 
-export const handleAxiosError = (error: unknown) => {
+export const handleAxiosError = (error: unknown, logError: boolean = true) => {
   if (error instanceof AxiosError) {
     const message = error.response?.data.errorMessage ?? error;
-    logErrorMessage(message);
+    if (logError) {
+      logErrorMessage(message);
+    }
     throw message;
   }
   throw error;
