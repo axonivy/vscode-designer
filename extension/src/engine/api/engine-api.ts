@@ -183,6 +183,10 @@ export class IvyEngineApi {
       .catch(handleAxiosError);
   }
 
+  public async getWorkspaceId() {
+    return this.workspace.id;
+  }
+
   public async processDebugServerPort() {
     return processDebugger({ baseURL: this.engineURL })
       .then(res => res.data)

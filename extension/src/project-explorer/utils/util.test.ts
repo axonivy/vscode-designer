@@ -1,5 +1,5 @@
 import { expect, test, vi } from 'vitest';
-import { validateDotSeparatedName, validateNamespace, validateProjectArtifactName, validateProjectName } from './util';
+import { sanitizeProjectName, validateDotSeparatedName, validateNamespace, validateProjectArtifactName, validateProjectName } from './util';
 
 vi.mock('vscode', () => ({
   FileType: { File: 1, Directory: 2 },
@@ -228,5 +228,37 @@ test.describe('validateProjectArtifactName', () => {
     expect(validateProjectArtifactName(' ab')).toBeTruthy();
     expect(validateProjectArtifactName('ab ')).toBeTruthy();
     expect(validateProjectArtifactName('a b')).toBeTruthy();
+  });
+});
+
+test.describe('sanitizeProjectName', () => {
+  test('removes a trailing .iar extension', () => {
+    expect(sanitizeProjectName('MyProject.iar')).toBe('MyProject');
+  });
+
+  test('removes all .iar occurences', () => {
+    expect(sanitizeProjectName('My.iarProject.iar')).toBe('MyProject');
+  });
+
+  test('replaces dots with hyphens', () => {
+    expect(sanitizeProjectName('my.project.name.iar')).toBe('my-project-name');
+  });
+
+  test('replaces invalid characters with underscores', () => {
+    expect(sanitizeProjectName('my project@name!.iar')).toBe('my_project_name_');
+  });
+
+  test('keeps letters, digits, underscores, and hyphens', () => {
+    expect(sanitizeProjectName('abc_123-XYZ.iar')).toBe('abc_123-XYZ');
+  });
+
+  test('truncates to 40 characters', () => {
+    const longName = 'abcdefghijklmnopqrstuvwxyz0123456789-extra-chars.iar';
+    expect(sanitizeProjectName(longName)).toHaveLength(40);
+    expect(sanitizeProjectName(longName)).toBe('abcdefghijklmnopqrstuvwxyz0123456789-ext');
+  });
+
+  test('does not modify strings without special characters', () => {
+    expect(sanitizeProjectName('CleanName')).toBe('CleanName');
   });
 });

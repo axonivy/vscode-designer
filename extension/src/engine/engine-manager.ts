@@ -337,6 +337,13 @@ export class IvyEngineManager {
     return engineInfo.version;
   }
 
+  public async getWorkspaceId() {
+    if (!this.ivyEngineApi) {
+      return;
+    }
+    return this.ivyEngineApi.getWorkspaceId();
+  }
+
   public async projects(withDependencies = false) {
     return this.ivyEngineApi?.projects(withDependencies);
   }
