@@ -4,8 +4,8 @@
  * Axon Ivy OpenAPI
  * OpenAPI spec version: 0.0.1
  */
-import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
+import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 export interface ProjectIdentifier {
   app: string;
@@ -228,6 +228,7 @@ export type StopBpmEngineParams = {
 
 export type ImportProjectsBody = {
   file?: Blob;
+  targetPath?: string;
   dependentProject?: Blob;
   doConvert?: string;
 };
@@ -444,6 +445,9 @@ export const importProjects = (
   const formData = new FormData();
   if (importProjectsBody?.file !== undefined) {
     formData.append(`file`, importProjectsBody.file);
+  }
+  if (importProjectsBody?.targetPath !== undefined) {
+    formData.append(`targetPath`, importProjectsBody.targetPath);
   }
   if (importProjectsBody?.dependentProject !== undefined) {
     formData.append(`dependentProject`, importProjectsBody.dependentProject);
