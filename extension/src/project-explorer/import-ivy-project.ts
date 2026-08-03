@@ -70,7 +70,8 @@ const validateAgainstExistingPaths = async (targetImportPath: string, fileImport
   const existingRootPaths = (await listRootsInAllWorkspaces()).map(folder => folder.fsPath);
   if (existingRootPaths.includes(targetImportPath)) {
     logErrorMessage(
-      `Import target folder after project name resolution is ${targetImportPath} which already exists in your workspace.\nPlease either rename the import file ${fileImportName} or delete/rename the existing folder.`
+      `Import target folder after project name resolution is ${targetImportPath} which already exists in your workspace.
+Please either rename the import file ${fileImportName} or delete/rename the existing folder.`
     );
     return false;
   }
