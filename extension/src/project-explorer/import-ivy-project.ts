@@ -31,9 +31,6 @@ export const importIvyProject = async (selectedWorkspaceUri: Uri) => {
       return;
     }
     iarFilesToCheck = iarFilesInZip;
-    logInformationRuntimeLog(
-      `Zip file ${selectedFilePath} contains ${iarFilesInZip.length} potential .iar files:\n${iarFilesInZip.map(p => path.basename(p)).join('\n')}`
-    );
   } else {
     iarFilesToCheck = [selectedFilePath];
   }
@@ -63,11 +60,14 @@ Please either rename the import file ${fileName} or delete/rename the existing f
   }
 
   if (selectedFileIsZip) {
-    logInformationMessageWithActions(`Trying to import the full ZIP file ${selectedFilePath}`, {
-      'Show Extension Log': () => {
-        showExtensionLog();
+    logInformationMessageWithActions(
+      `Starting to import ZIP file ${selectedFilePath}\nIdentified ${iarFilesToCheck.length} potential .iar files:\n${iarFilesToCheck.map(p => path.basename(p)).join('\n')}`,
+      {
+        'Show Extension Log': () => {
+          showExtensionLog();
+        }
       }
-    });
+    );
   }
 
   const importProjectParams: ImportProjectsBody = { ...selectedFile, targetPath: selectedTargetPath };
