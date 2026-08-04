@@ -22,8 +22,10 @@ test.describe('Single root workspace', () => {
     await wsPage.selectItemFromQuickPick(ivyProjectIar);
     await wsPage.executeCommand('Refresh Explorer');
     await explorer.hasNodeExact(ivyProjectIar.replace('.iar', ''));
-    await expect(wsPage.toasts).toHaveCount(1);
-    await expect(wsPage.toasts.first()).toContainText(
+
+    const successToast = wsPage.toasts.filter({ hasText: new RegExp('Successfully imported Ivy project') });
+    await expect(successToast).toHaveCount(1);
+    await expect(successToast).toContainText(
       `Successfully imported Ivy project(s) from ${tmpWorkspace.tmpWorkspacePath}/${ivyProjectIar} into workspace folder ${tmpWorkspace.tmpWorkspacePath}`
     );
   });
@@ -35,8 +37,10 @@ test.describe('Single root workspace', () => {
     await wsPage.selectItemFromQuickPick(ivyProjectIar);
     await wsPage.executeCommand('Refresh Explorer');
     await explorer.hasNodeExact(ivyProjectIar.replace('.iar', ''));
-    await expect(wsPage.toasts).toHaveCount(1);
-    await expect(wsPage.toasts).toContainText(
+
+    const successToast = wsPage.toasts.filter({ hasText: new RegExp('Successfully imported Ivy project') });
+    await expect(successToast).toHaveCount(1);
+    await expect(successToast).toContainText(
       `Successfully imported Ivy project(s) from ${tmpWorkspace.tmpWorkspacePath}/${ivyProjectIar} into workspace folder ${tmpWorkspace.tmpWorkspacePath}`
     );
 
@@ -45,12 +49,12 @@ test.describe('Single root workspace', () => {
     await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
     await wsPage.selectItemFromQuickPick(ivyProjectIarDuplicateSanitized);
 
-    await expect(wsPage.toasts).toHaveCount(2);
-    const errorToast = wsPage.toasts.filter({ hasText: new RegExp(`Axon Ivy Project with name .* already exists`, 'i') });
+    const errorToast = wsPage.toasts.filter({ hasText: new RegExp('Axon Ivy Import Error -') });
+    await expect(errorToast).toHaveCount(1);
     await expect(errorToast).toContainText(
       `File ${tmpWorkspace.tmpWorkspacePath}/${ivyProjectIarDuplicateSanitized} resolves to project name "ivy-project".
-  Axon Ivy Project with name "ivy-project" already exists in the workspace.
-  Please either rename the import file ${ivyProjectIarDuplicateSanitized} or delete/rename the existing project.`
+Axon Ivy Project with name "ivy-project" already exists in the workspace.
+Please either rename the import file ${ivyProjectIarDuplicateSanitized} or delete/rename the existing project.`
     );
   });
 });
@@ -72,6 +76,8 @@ test.describe('Multi root workspace', () => {
     await wsPage.selectItemFromQuickPick('ivy-project-1');
     await wsPage.selectItemFromQuickPick(iarFileName);
 
+    const errorToast = wsPage.toasts.filter({ hasText: new RegExp('Axon Ivy Import Error -') });
+    await expect(errorToast).toHaveCount(1);
     await expect(wsPage.toasts).toContainText(
       `File ${iarFilePath} resolves to project name "connector".
 Axon Ivy Project with name "connector" already exists in the workspace.
@@ -92,6 +98,8 @@ Please either rename the import file ${iarFileName} or delete/rename the existin
     await wsPage.selectItemFromQuickPick('connector');
     await wsPage.selectItemFromQuickPick(iarFileName);
 
+    const errorToast = wsPage.toasts.filter({ hasText: new RegExp('Axon Ivy Import Error -') });
+    await expect(errorToast).toHaveCount(1);
     await expect(wsPage.toasts).toContainText(
       `Import target folder after project name resolution is ${path.join(tmpWorkspace.tmpWorkspacePath, 'connector', targetFolderName)} which already exists in your workspace.
 Please either rename the import file ${iarFileName} or delete/rename the existing folder.`

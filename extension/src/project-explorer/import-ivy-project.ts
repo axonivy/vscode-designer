@@ -27,7 +27,7 @@ export const importIvyProject = async (selectedWorkspaceUri: Uri) => {
   if (selectedFileIsZip) {
     const iarFilesInZip = await inspectAppZip(selectedFilePath);
     if (iarFilesInZip.length === 0) {
-      logErrorRuntimeLog(`Zip file ${selectedFilePath} does not contain any valid .iar files in the root.`);
+      logErrorIvyImport(`Zip file ${selectedFilePath} does not contain any valid .iar files in the root.`);
       return;
     }
     iarFilesToCheck = iarFilesInZip;
@@ -42,8 +42,8 @@ export const importIvyProject = async (selectedWorkspaceUri: Uri) => {
     const targetImportFolderPath = path.join(selectedTargetPath, sanitizedFileName);
 
     if (existingIvyProjectNames.includes(sanitizedFileName)) {
-      logErrorRuntimeLog(
-        `File ${iarFile} resolves to project name "${sanitizedFileName}".
+      logErrorIvyImport(
+        `Axon Ivy Import Error: File ${iarFile} resolves to project name "${sanitizedFileName}".
 Axon Ivy Project with name "${sanitizedFileName}" already exists in the workspace.
 Please either rename the import file ${fileName} or delete/rename the existing project.`
       );
@@ -51,7 +51,7 @@ Please either rename the import file ${fileName} or delete/rename the existing p
     }
 
     if (fs.existsSync(targetImportFolderPath)) {
-      logErrorRuntimeLog(
+      logErrorIvyImport(
         `Import target folder after project name resolution is ${targetImportFolderPath} which already exists in your workspace.
 Please either rename the import file ${fileName} or delete/rename the existing folder.`
       );
@@ -60,7 +60,7 @@ Please either rename the import file ${fileName} or delete/rename the existing f
   }
 
   if (selectedFileIsZip) {
-    logInformationRuntimeLog(
+    logInfoIvyImport(
       `Starting to import ZIP file ${selectedFilePath}\nIdentified ${iarFilesToCheck.length} potential .iar files:\n${iarFilesToCheck.map(p => path.basename(p)).join('\n')}`
     );
   }
@@ -68,7 +68,7 @@ Please either rename the import file ${fileName} or delete/rename the existing f
   const importProjectParams: ImportProjectsBody = { ...selectedFile, targetPath: selectedTargetPath };
   await StatusBar.withStatusBarProgress({ text: 'Importing Ivy Archive' }, async () => {
     await IvyEngineManager.instance.importIvyProject(activeWorkspaceId, importProjectParams);
-    logInformationRuntimeLog(`Successfully imported Ivy project(s) from ${selectedFilePath} into workspace folder ${selectedTargetPath}`);
+    logInfoIvyImport(`Successfully imported Ivy project(s) from ${selectedFilePath} into workspace folder ${selectedTargetPath}`);
   });
 };
 
@@ -102,7 +102,7 @@ const inspectAppZip = async (filePath: string): Promise<string[]> => {
     .map(entry => path.join(filePath, entry.entryName));
 };
 
-const logInformationRuntimeLog = (message: string) => {
+const logInfoIvyImport = (message: string) => {
   logInformationMessageWithActions(message, {
     'Show Extension Log': () => {
       showExtensionLog();
@@ -110,8 +110,9 @@ const logInformationRuntimeLog = (message: string) => {
   });
 };
 
-const logErrorRuntimeLog = (message: string) => {
-  logErrorMessageWithActions(message, {
+const logErrorIvyImport = (message: string) => {
+  const msg = `Axon Ivy Import Error - ${message}`;
+  logErrorMessageWithActions(msg, {
     'Show Extension Log': () => {
       showExtensionLog();
     }
