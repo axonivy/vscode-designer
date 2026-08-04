@@ -26,6 +26,7 @@ export class WorkspacePage {
   async provideUserInput(input?: string) {
     if (input) {
       const textBox = this.quickInputBox.getByRole('textbox');
+      await expect(textBox).toBeFocused();
       await textBox.fill(input);
       await expect(textBox).toHaveValue(input);
       await textBox.press('Enter', { delay: 100 });
