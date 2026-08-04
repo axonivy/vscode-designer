@@ -7,11 +7,13 @@ export const exportIvyProject = async (projectPath: string) => {
   if (!fs.existsSync(projectPomPath)) {
     throw new Error(`Export Axon Ivy Project: No pom.xml found in the root of the selected project path: ${projectPath}`);
   }
+
   const outputPath = await window.showOpenDialog({
     canSelectFolders: true,
+    canSelectFiles: false,
     canSelectMany: false,
-    title: 'Select output folder for exported Axon Ivy Project',
-    openLabel: 'Export to .iar'
+    title: 'Select output folder',
+    openLabel: 'Select output folder'
   });
   if (!outputPath || outputPath.length === 0 || !outputPath[0]) {
     return undefined;
