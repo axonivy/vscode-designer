@@ -59,7 +59,7 @@ test.describe('Multi root workspace', () => {
   test.use({ workspace: multiRootWorkspacePath });
   test.skip(process.env.RUN_IN_BROWSER === 'true');
 
-  test('Import existing project by name into multi-root workspace', async ({ wsPage, tmpWorkspace }) => {
+  test('Import existing project by name into multi-root workspace error', async ({ wsPage, tmpWorkspace }) => {
     const iarFileName = 'connector.iar';
     const targetFolderName = iarFileName.replace('.iar', '');
     const iarFilePath = path.join(tmpWorkspace.tmpWorkspacePath, targetFolderName, iarFileName);
@@ -79,7 +79,7 @@ Please either rename the import file ${iarFileName} or delete/rename the existin
     );
   });
 
-  test('Import existing folder into multi-root workspace', async ({ wsPage, tmpWorkspace }) => {
+  test('Import existing folder into multi-root workspacee error', async ({ wsPage, tmpWorkspace }) => {
     const iarFileName = 'dummy.iar';
     const targetFolderName = iarFileName.replace('.iar', '');
 

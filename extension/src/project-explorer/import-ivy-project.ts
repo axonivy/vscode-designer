@@ -60,13 +60,8 @@ Please either rename the import file ${fileName} or delete/rename the existing f
   }
 
   if (selectedFileIsZip) {
-    logInformationMessageWithActions(
-      `Starting to import ZIP file ${selectedFilePath}\nIdentified ${iarFilesToCheck.length} potential .iar files:\n${iarFilesToCheck.map(p => path.basename(p)).join('\n')}`,
-      {
-        'Show Extension Log': () => {
-          showExtensionLog();
-        }
-      }
+    logInformationRuntimeLog(
+      `Starting to import ZIP file ${selectedFilePath}\nIdentified ${iarFilesToCheck.length} potential .iar files:\n${iarFilesToCheck.map(p => path.basename(p)).join('\n')}`
     );
   }
 
