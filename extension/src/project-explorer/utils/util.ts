@@ -17,7 +17,7 @@ const defaultNamespaceOf = (projecDir: string) => {
   );
 };
 
-export type ResourceDirectoryTarget = 'processes' | 'src_hd' | 'dataclasses';
+export type ResourceDirectoryTarget = 'process' | 'dialog' | 'dataclass';
 
 export const resolveNamespaceFromPath = async (selectedUri: Uri, projectDir: string, target: ResourceDirectoryTarget) => {
   let fileStat: FileStat;
@@ -32,16 +32,16 @@ export const resolveNamespaceFromPath = async (selectedUri: Uri, projectDir: str
     return resolveDefaultNamespace(projectDir, target);
   }
 
-  const pattern = target === 'processes' ? /(^\/*|\/*$)/g : /(^\.*|\.*$)/g;
+  const pattern = target === 'process' ? /(^\/*|\/*$)/g : /(^\.*|\.*$)/g;
   return selectedPath
     .replaceAll(targetDir, '')
-    .replaceAll(path.sep, target === 'processes' ? '/' : '.')
+    .replaceAll(path.sep, target === 'process' ? '/' : '.')
     .replaceAll(pattern, '');
 };
 
 const getDirectory = (filePath: string, target: ResourceDirectoryTarget) => {
   let directory = path.dirname(filePath);
-  if (target === 'src_hd') {
+  if (target === 'dialog') {
     directory = path.dirname(directory);
   }
   return directory;
@@ -49,7 +49,7 @@ const getDirectory = (filePath: string, target: ResourceDirectoryTarget) => {
 
 export const resolveDefaultNamespace = async (projectDir: string, target: ResourceDirectoryTarget) => {
   const defaultNamespace = (await defaultNamespaceOf(projectDir)).replaceAll('-', '.');
-  return target === 'processes' ? defaultNamespace.replaceAll('.', '/') : defaultNamespace;
+  return target === 'process' ? defaultNamespace.replaceAll('.', '/') : defaultNamespace;
 };
 
 export const isDirectory = async (uri?: Uri) => {
@@ -106,4 +106,16 @@ export const validateNamespace = (value: string) => {
     return;
   }
   return 'Enter Namespace separated by "/" -- Only letters, numbers, and underscores are allowed -- Spaces allowed within words -- Empty allowed.';
+};
+
+export const sanitizeProjectName = (fileName: string) => {
+  /**
+   * Sanitize logic is duplicated from core ProjectService.java sanitizeProjectName
+   * Must be kept in sync with that logic
+   */
+  const sanitized = fileName
+    .replace(/\.iar/gi, '') // remove ALL .iar, also in the middle of the filename
+    .replace(/\./g, '-')
+    .replace(/[^\w-]/g, '_');
+  return sanitized.slice(0, 40);
 };

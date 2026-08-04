@@ -11,9 +11,9 @@ const { mockOutputChannel, mockLm, mockCreateNewProject, mockCreateNewDataClass,
       invokeTool: vi.fn()
     },
     mockCreateNewProject: vi.fn().mockResolvedValue('Project created successfully'),
-    mockCreateNewDataClass: vi.fn().mockResolvedValue("Data Class created successfully at '/tmp/ivy/src_hd/my/pkg/Demo.ivyClass'"),
-    mockCreateNewProcess: vi.fn().mockResolvedValue("Business Process created successfully at '/tmp/ivy/processes/MyProcess.p.json'"),
-    mockCreateNewDialog: vi.fn().mockResolvedValue("Form Dialog created successfully at '/tmp/ivy/dialogs/MyDialog.xhtml'")
+    mockCreateNewDataClass: vi.fn().mockResolvedValue("Data Class created successfully at '/tmp/ivy/dataclass/my/pkg/Demo.d.json'"),
+    mockCreateNewProcess: vi.fn().mockResolvedValue("Business Process created successfully at '/tmp/ivy/process/MyProcess.p.json'"),
+    mockCreateNewDialog: vi.fn().mockResolvedValue("Form Dialog created successfully at '/tmp/ivy/dialog/MyDialog.xhtml'")
   })
 );
 
@@ -56,11 +56,11 @@ afterEach(async () => {
   mockCreateNewProject.mockReset();
   mockCreateNewProject.mockResolvedValue('Project created successfully');
   mockCreateNewDataClass.mockReset();
-  mockCreateNewDataClass.mockResolvedValue("Data Class created successfully at '/tmp/ivy/src_hd/my/pkg/Demo.ivyClass'");
+  mockCreateNewDataClass.mockResolvedValue("Data Class created successfully at '/tmp/ivy/dataclass/my/pkg/Demo.d.json'");
   mockCreateNewProcess.mockReset();
-  mockCreateNewProcess.mockResolvedValue("Business Process created successfully at '/tmp/ivy/processes/MyProcess.p.json'");
+  mockCreateNewProcess.mockResolvedValue("Business Process created successfully at '/tmp/ivy/process/MyProcess.p.json'");
   mockCreateNewDialog.mockReset();
-  mockCreateNewDialog.mockResolvedValue("Form Dialog created successfully at '/tmp/ivy/dialogs/MyDialog.xhtml'");
+  mockCreateNewDialog.mockResolvedValue("Form Dialog created successfully at '/tmp/ivy/dialog/MyDialog.xhtml'");
 });
 
 async function getFreePort(): Promise<number> {
@@ -355,6 +355,6 @@ test('executes additional own tools headlessly in MCP mode', async () => {
   };
   expect(payload.result?.content[0]).toEqual({
     type: 'text',
-    text: "Data Class created successfully at '/tmp/ivy/src_hd/my/pkg/Demo.ivyClass'"
+    text: "Data Class created successfully at '/tmp/ivy/dataclass/my/pkg/Demo.d.json'"
   });
 });

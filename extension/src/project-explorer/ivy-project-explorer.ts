@@ -1,10 +1,11 @@
 import path from 'path';
 import type { ExtensionContext, TreeView, TreeViewVisibilityChangeEvent } from 'vscode';
 import { Uri, window, workspace } from 'vscode';
-import { executeCommand, registerCommand, type Command } from '../base/commands';
-import { debouncedAction } from '../base/debounce';
+import { registerCommand, type KnownCommand } from '../base/commands';
+import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base/debounce';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
-import { logErrorMessage, logInformationMessage, logWarningMessage } from '../base/logging-util';
+import { runJavaCleanWorkspace, runJavaProjectImport } from '../base/java-extension-api';
+import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -12,6 +13,7 @@ import { installLocalMarketProduct, installMarketProduct } from '../market/impor
 import { exportIvyProject } from './export-ivy-project';
 import { importIvyProject } from './import-ivy-project';
 import { importNewProcess } from './import-process';
+import { runProjectConversion } from './ivy-project-conversion';
 import { IVY_PROJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject, type Entry } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
 import { addNewDataClass } from './new-data-class';
@@ -68,7 +70,7 @@ export class IvyProjectExplorer {
   private registerCommands(context: ExtensionContext) {
     const engineManager = IvyEngineManager.instance;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const registerCmd = (command: Command, callback: (...args: any[]) => any) => registerCommand(command, context, callback);
+    const registerCmd = (command: KnownCommand, callback: (...args: any[]) => any) => registerCommand(command, context, callback);
     registerCmd(`${VIEW_ID}.refreshEntry`, () => this.refresh());
     registerCmd(`${VIEW_ID}.deployProject`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.deployProjects(d), s));
     registerCmd(`${VIEW_ID}.stopBpmEngine`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.stopBpmEngine(d), s));
@@ -127,8 +129,12 @@ export class IvyProjectExplorer {
     m2eDepsWatcher.onDidCreate(deployProject);
     m2eDepsWatcher.onDidChange(deployProject);
     const targetWatcher = workspace.createFileSystemWatcher('**/target/classes/**/*.*');
-    const invalidateClassLoader = (uri: Uri) =>
+    const invalidateClassLoader = (uri: Uri) => {
+      if (hasDeployActionInQueue()) {
+        return;
+      }
       this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.invalidateClassLoader(d), 'invalidate', uri);
+    };
     targetWatcher.onDidChange(invalidateClassLoader);
     targetWatcher.onDidCreate(invalidateClassLoader);
     targetWatcher.onDidDelete(invalidateClassLoader);
@@ -148,7 +154,7 @@ export class IvyProjectExplorer {
     for (const project of ivyProjects) {
       if (project === projectToBeDeleted) {
         await IvyEngineManager.instance.deleteProject(projectToBeDeleted);
-        await executeCommand('java.clean.workspace'); // if project was deleted java workspace should be cleaned
+        await runJavaCleanWorkspace();
         await this.refresh();
         return;
       }
@@ -170,11 +176,7 @@ export class IvyProjectExplorer {
 
     await IvyEngineManager.instance.initProjects(projectsToBeDeployed);
     if (projectsToBeDeployed.length > 0) {
-      try {
-        await executeCommand('java.project.import.command');
-      } catch {
-        logWarningMessage('Java extension could not import project. Java support will not be available.');
-      }
+      await runJavaProjectImport();
     }
   }
 
@@ -194,18 +196,19 @@ export class IvyProjectExplorer {
     action(project);
   }
 
-  private async runEngineActionDebounced(action: (projectDir: string) => Promise<void>, actionKey: 'deploy' | 'invalidate', uri?: Uri) {
+  private async runEngineActionDebounced(action: (projectDir: string) => Promise<void>, actionKey: ActionKey, uri?: Uri) {
     const project = await treeUriToProjectPath(uri, this.getIvyProjects());
     if (!project) {
       return;
     }
-    return debouncedAction(() => action(project), `${project}:actionKey:${actionKey}`, 1_000)();
+    const keyPrefix = actionKey === 'invalidate' ? undefined : project;
+    return debouncedAction(() => action(project), actionKey, keyPrefix)();
   }
 
   private async addProject(selection: TreeSelection) {
     const selectedUri = await this.selectWorkspace(selection);
     if (!selectedUri) {
-      logInformationMessage('No valid workspace selected, dialog aborted.');
+      logInformationMessage('No valid workspace selected.');
       return;
     }
     const existingIvyProjects = await this.getIvyProjects();
@@ -251,7 +254,7 @@ export class IvyProjectExplorer {
   private async importIvyProject(selection: TreeSelection) {
     const selectedWorkspaceUri = await this.selectWorkspace(selection);
     if (!selectedWorkspaceUri) {
-      logInformationMessage('No valid workspace selected, dialog aborted.');
+      logInformationMessage('No valid workspace selected.');
       return;
     }
     await importIvyProject(selectedWorkspaceUri);
@@ -340,13 +343,10 @@ export class IvyProjectExplorer {
     quickPick.selectedItems = quickPick.items.filter(item => item.detail === projectPath);
     quickPick.show();
     quickPick.onDidAccept(async () => {
-      for (const item of quickPick.selectedItems) {
-        if (item.detail) {
-          await IvyEngineManager.instance.convertProject(item.detail);
-        }
-      }
-      IvyDiagnostics.instance.refresh();
       quickPick.dispose();
+      const projectsToConvert = quickPick.selectedItems.map(item => item.detail).filter((detail): detail is string => !!detail);
+      await runProjectConversion(projectsToConvert);
+      IvyDiagnostics.instance.refresh();
     });
   }
 

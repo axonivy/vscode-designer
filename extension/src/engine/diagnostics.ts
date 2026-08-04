@@ -5,7 +5,7 @@ import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { IvyEngineManager } from './engine-manager';
 
 const DIAGNOSTIC_SOURCE = 'Axon Ivy';
-const CONVERSION_TOO_OLD_MESSAGE_PREFIX = 'Project is too old. Needs to be converted in Axon Ivy Designer.';
+const CONVERSION_TOO_OLD_MESSAGE_PREFIX = 'Project is too old and needs to be converted in VS Code.';
 const CONVERSION_OUTDATED_MESSAGE_PREFIX = 'Project is outdated and needs to be converted.';
 const IVY_PROJECT_FILE = '.ivyproject';
 const POM_FILE = 'pom.xml';
@@ -42,11 +42,7 @@ export class IvyDiagnostics {
         if (!fs.existsSync(uri.fsPath)) {
           uri = Uri.joinPath(Uri.file(project.projectDirectory), POM_FILE);
         }
-        let severity = DiagnosticSeverity.Error;
-        if (project.errorMessage?.startsWith(CONVERSION_OUTDATED_MESSAGE_PREFIX)) {
-          severity = DiagnosticSeverity.Warning;
-        }
-        const diagnostic = new Diagnostic(new Range(1, 0, 1, 0), project.errorMessage, severity);
+        const diagnostic = new Diagnostic(new Range(1, 0, 1, 0), project.errorMessage, DiagnosticSeverity.Error);
         diagnostic.source = DIAGNOSTIC_SOURCE;
         this.diagnostics.set(uri, [diagnostic]);
       });

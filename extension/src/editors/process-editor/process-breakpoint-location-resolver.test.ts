@@ -17,7 +17,7 @@ beforeEach(() => {
 test('resolves lines for top-level, embedded, boundary, and deeply nested pids', async () => {
   vi.mocked(workspace.fs.readFile).mockResolvedValue(new TextEncoder().encode(processJsonFixture));
 
-  const processUri = { fsPath: '/processes/test.p.json' } as Uri;
+  const processUri = { fsPath: '/process/test.p.json' } as Uri;
 
   await expect(lineOfPid(processUri, '184BD5B00AD6A83D-S20')).resolves.toBe(4);
   await expect(lineOfPid(processUri, '184BD5B00AD6A83D-S20-f5')).resolves.toBe(7);

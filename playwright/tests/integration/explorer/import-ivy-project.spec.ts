@@ -1,23 +1,91 @@
 import { expect } from '@playwright/test';
+import path from 'path';
 import { test } from '~/fixtures/baseTest';
 import { FileExplorer } from '~/page-objects/explorer-view';
 import { downloadIar } from '~/utils/download-iar';
-import { empty } from '../../workspaces/workspace';
+import { empty, multiRootWorkspacePath } from '../../workspaces/workspace';
 
 const ivyProjectIar = 'ivy-project.iar';
+const ivyProjectIarDuplicateSanitized = 'ivy.project.iar';
 
-test.use({ workspace: empty });
+test.describe('Single root workspace', () => {
+  test.use({ workspace: empty });
 
-test.beforeEach(async ({ tmpWorkspace }) => {
-  await downloadIar(tmpWorkspace.tmpWorkspacePath, ivyProjectIar);
+  test.beforeEach(async ({ tmpWorkspace }) => {
+    await downloadIar(tmpWorkspace.tmpWorkspacePath, ivyProjectIar);
+  });
+
+  test('Import up-to-date Ivy Project', async ({ wsPage }) => {
+    const explorer = new FileExplorer(wsPage);
+    await explorer.hasNodeExact(ivyProjectIar);
+    await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
+    await wsPage.selectItemFromQuickPick(ivyProjectIar);
+    await wsPage.executeCommand('Refresh Explorer');
+    await explorer.hasNodeExact(ivyProjectIar.replace('.iar', ''));
+    await expect(wsPage.toasts).toBeHidden();
+  });
+
+  test('Import same project error', async ({ wsPage, tmpWorkspace }) => {
+    const explorer = new FileExplorer(wsPage);
+    await explorer.hasNodeExact(ivyProjectIar);
+    await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
+    await wsPage.selectItemFromQuickPick(ivyProjectIar);
+    await wsPage.executeCommand('Refresh Explorer');
+    await explorer.hasNodeExact(ivyProjectIar.replace('.iar', ''));
+    await expect(wsPage.toasts).toBeHidden();
+
+    await downloadIar(tmpWorkspace.tmpWorkspacePath, ivyProjectIarDuplicateSanitized);
+    await explorer.hasNodeExact(ivyProjectIarDuplicateSanitized);
+    await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
+    await wsPage.selectItemFromQuickPick(ivyProjectIarDuplicateSanitized);
+
+    await expect(wsPage.toasts).toHaveText(
+      `File ${tmpWorkspace.tmpWorkspacePath}/${ivyProjectIarDuplicateSanitized} resolves to project name "ivy-project".
+  Axon Ivy Project with name "ivy-project" already exists in the workspace.
+  Please either rename the import file ${ivyProjectIarDuplicateSanitized} or delete/rename the existing project.`
+    );
+  });
 });
 
-test('Import up-to-date Ivy Project', async ({ wsPage }) => {
-  const explorer = new FileExplorer(wsPage);
-  await explorer.hasNodeExact(ivyProjectIar);
-  await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
-  await wsPage.selectItemFromQuickPick(ivyProjectIar);
-  await wsPage.executeCommand('Refresh Explorer');
-  await explorer.hasNodeExact(ivyProjectIar.replace('.iar', ''));
-  await expect(wsPage.toasts).toBeHidden();
+test.describe('Multi root workspace', () => {
+  test.use({ workspace: multiRootWorkspacePath });
+  test.skip(process.env.RUN_IN_BROWSER === 'true');
+
+  test('Import existing project by name into multi-root workspace', async ({ wsPage, tmpWorkspace }) => {
+    const iarFileName = 'connector.iar';
+    const targetFolderName = iarFileName.replace('.iar', '');
+
+    const explorer = new FileExplorer(wsPage);
+    await downloadIar(path.join(tmpWorkspace.tmpWorkspacePath, targetFolderName), iarFileName);
+
+    await explorer.hasNodeExact(iarFileName);
+    await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
+    await wsPage.selectItemFromQuickPick('ivy-project-1');
+    await wsPage.selectItemFromQuickPick(iarFileName);
+
+    await expect(wsPage.toasts).toHaveText(
+      `File ${tmpWorkspace.tmpWorkspacePath}/${targetFolderName}/${iarFileName} resolves to project name "connector".
+Axon Ivy Project with name "connector" already exists in the workspace.
+Please either rename the import file ${iarFileName} or delete/rename the existing project.`
+    );
+  });
+
+  test('Import existing folder into multi-root workspace', async ({ wsPage, tmpWorkspace }) => {
+    const iarFileName = 'dummy.iar';
+    const targetFolderName = iarFileName.replace('.iar', '');
+
+    const explorer = new FileExplorer(wsPage);
+    await downloadIar(path.join(tmpWorkspace.tmpWorkspacePath, 'connector'), iarFileName);
+
+    await explorer.addFolder(targetFolderName);
+    await explorer.hasNodeExact(targetFolderName);
+    await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
+    await wsPage.selectItemFromQuickPick('connector');
+    await wsPage.selectItemFromQuickPick(iarFileName);
+
+    await expect(wsPage.toasts).toHaveText(
+      `Import target folder after project name resolution is ${tmpWorkspace.tmpWorkspacePath}/connector/${targetFolderName} which already exists in your workspace.
+Please either rename the import file ${iarFileName} or delete/rename the existing folder.`
+    );
+  });
 });

@@ -1,0 +1,177 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/process-1.json",
+  "id" : "15254DCE818AD7A2",
+  "config" : {
+    "data" : "prebuiltProject.Data"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "RequestStart",
+      "name" : "start.ivp",
+      "config" : {
+        "signature" : "start",
+        "request" : {
+          "category" : "human",
+          "customFields" : [
+            { "name" : "cssIcon", "value" : "fa fa-female" }
+          ]
+        },
+        "permission" : {
+          "anonymous" : false
+        },
+        "task" : {
+          "category" : "Input/Procurement"
+        },
+        "case" : {
+          "category" : "Procurement/Request",
+          "attachToBusinessCase" : false
+        }
+      },
+      "tags" : [
+        "demo"
+      ],
+      "visual" : {
+        "at" : { "x" : 96, "y" : 192 },
+        "labelOffset" : { "x" : 12, "y" : 37 }
+      },
+      "connect" : [
+        { "id" : "f4", "to" : "f3" }
+      ]
+    }, {
+      "id" : "f1",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 928, "y" : 192 }
+      }
+    }, {
+      "id" : "f3",
+      "type" : "DialogCall",
+      "name" : "Enter Request",
+      "visual" : {
+        "at" : { "x" : 224, "y" : 192 }
+      },
+      "connect" : [
+        { "id" : "f12", "to" : "f5" }
+      ]
+    }, {
+      "id" : "f7",
+      "type" : "UserTask",
+      "name" : "Accept Request",
+      "config" : {
+        "task" : {
+          "category" : "Accept/Procurement"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 640, "y" : 448 }
+      },
+      "connect" : [
+        { "id" : "f10", "to" : "f9", "via" : [ { "x" : 800, "y" : 448 } ], "condition" : "ivp==\"TaskA.ivp\"" }
+      ]
+    }, {
+      "id" : "f9",
+      "type" : "EMail",
+      "name" : "Notify Requester",
+      "config" : {
+        "message" : {
+          "contentType" : "text/html"
+        },
+        "exceptionHandler" : ">> Ignore Exception"
+      },
+      "visual" : {
+        "at" : { "x" : 800, "y" : 192 },
+        "size" : { "height" : 48 }
+      },
+      "connect" : [
+        { "id" : "f2", "to" : "f1" }
+      ]
+    }, {
+      "id" : "f11",
+      "type" : "Alternative",
+      "name" : "Verified?",
+      "visual" : {
+        "at" : { "x" : 512, "y" : 384 },
+        "labelOffset" : { "x" : 61, "y" : 13 }
+      },
+      "connect" : [
+        { "id" : "f8", "to" : "f7", "via" : [ { "x" : 512, "y" : 448 } ], "label" : {
+            "name" : "Yes",
+            "segment" : 0.85,
+            "offset" : { "x" : 15, "y" : -1 }
+          }, "var" : "in1" },
+        { "id" : "f13", "to" : "f14", "via" : [ { "x" : 512, "y" : 192 } ], "label" : {
+            "name" : "No",
+            "segment" : 1.06,
+            "offset" : { "x" : 3, "y" : 13 }
+          } }
+      ]
+    }, {
+      "id" : "f16",
+      "type" : "ProcessAnnotation",
+      "name" : [
+        "This example shows the usage of a User Task Activity.",
+        "A procurement request is made by an employee, verified by the manager and accepted by an executive.",
+        "The User Task step is used instead of a Task Switch and a User Dialog step."
+      ],
+      "visual" : {
+        "at" : { "x" : 352, "y" : 48 },
+        "size" : { "width" : 576 }
+      }
+    }, {
+      "id" : "f5",
+      "type" : "SubProcessCall",
+      "name" : "Call the Sub",
+      "visual" : {
+        "at" : { "x" : 376, "y" : 192 }
+      },
+      "connect" : [
+        { "id" : "f6", "to" : "f17" }
+      ]
+    }, {
+      "id" : "f14",
+      "type" : "DialogCall",
+      "name" : "Other Dialog",
+      "visual" : {
+        "at" : { "x" : 640, "y" : 192 }
+      },
+      "connect" : [
+        { "id" : "f15", "to" : "f9", "color" : "default" }
+      ]
+    }, {
+      "id" : "f17",
+      "type" : "UserTask",
+      "name" : "User Task",
+      "visual" : {
+        "at" : { "x" : 376, "y" : 288 }
+      },
+      "connect" : [
+        { "id" : "f18", "to" : "f11", "via" : [ { "x" : 376, "y" : 384 } ], "color" : "default" }
+      ]
+    }, {
+      "id" : "f19",
+      "type" : "SubProcessCall",
+      "config" : {
+        "processCall" : "CallMe:call()"
+      },
+      "visual" : {
+        "at" : { "x" : 224, "y" : 288 }
+      }
+    } ],
+  "layout" : {
+    "lanes" : [ {
+        "name" : "Procurement Request",
+        "offset" : 128,
+        "size" : 360,
+        "lanes" : [ {
+            "name" : "Employee",
+            "size" : 128
+          }, {
+            "name" : "Manager",
+            "size" : 120
+          }, {
+            "name" : "Executive",
+            "size" : 112
+          } ]
+      } ]
+  }
+}

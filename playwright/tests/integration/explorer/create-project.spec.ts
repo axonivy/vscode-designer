@@ -19,7 +19,7 @@ test('Add Project and execute init Process', { tag: '@serial' }, async ({ wsPage
 
   const processEditor = new ProcessEditor(wsPage, 'BusinessProcess.p.json');
   await processEditor.expectWebViewVisible();
-  await processEditor.expectHasBreadCrumbs('parent', projectName, 'processes', projectName, 'BusinessProcess.p.json');
+  await processEditor.expectHasBreadCrumbs('parent', projectName, 'process', projectName, 'BusinessProcess.p.json');
   const start = processEditor.elementByType('start:requestStart');
   const end = processEditor.elementByType('end:taskEnd');
   await processEditor.startProcessAndAssertExecuted(start, end);

@@ -20,12 +20,12 @@ import {
   createDataClass,
   createEntityClass,
   createHd,
-  createPmvAndProjectFiles,
   createProcess,
+  createProjectAndProjectFiles,
   createWorkspace,
   deleteProject,
   deployProjects,
-  findOrCreatePmv,
+  findOrCreateProject,
   getVersion,
   importProcess,
   importProjects,
@@ -72,10 +72,10 @@ export class IvyEngineApi {
     });
   }
 
-  public async findOrCreatePmv(projectDir: string) {
+  public async findOrCreateProject(projectDir: string) {
     const name = path.basename(projectDir);
     const params = { name, path: projectDir };
-    await findOrCreatePmv(params, { baseURL: this.baseURL, ...options }).catch(handleAxiosError);
+    await findOrCreateProject(params, { baseURL: this.baseURL, ...options }).catch(handleAxiosError);
   }
 
   public async deployProjects(ivyProjectDirectories: string[]) {
@@ -102,6 +102,7 @@ export class IvyEngineApi {
   }
 
   public async importIvyProject(workspaceId: string, params: ImportProjectsBody) {
+    params = { ...params, doConvert: 'false' };
     return importProjects(workspaceId, params, { baseURL: this.engineURL, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
@@ -114,7 +115,7 @@ export class IvyEngineApi {
   }
 
   public async createProject(newProjectParams: NewProjectParams) {
-    return await createPmvAndProjectFiles(newProjectParams, { baseURL: this.baseURL, ...options })
+    return await createProjectAndProjectFiles(newProjectParams, { baseURL: this.baseURL, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
@@ -166,8 +167,8 @@ export class IvyEngineApi {
     await invalidateClassLoader({ projectDir }, { baseURL: this.baseURL, ...options }).catch(handleAxiosError);
   }
 
-  public async getComponentForm(componentId: string, app: string, pmv: string) {
-    return componentForm({ componentId, app, pmv }, { baseURL: this.baseURL, ...options })
+  public async getComponentForm(componentId: string, app: string, project: string) {
+    return componentForm({ componentId, app, project }, { baseURL: this.baseURL, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
@@ -180,6 +181,10 @@ export class IvyEngineApi {
     return getVersion({ baseURL: this.engineURL })
       .then(res => res.data)
       .catch(handleAxiosError);
+  }
+
+  public async getWorkspaceId() {
+    return this.workspace.id;
   }
 
   public async processDebugServerPort() {

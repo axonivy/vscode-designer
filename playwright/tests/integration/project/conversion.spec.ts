@@ -12,7 +12,7 @@ test('Convert project', async ({ wsPage }) => {
   await editor.open();
   await expect(editor.content).toContainText(`PROJECT_VERSION=120001`);
   const problemsView = await ProblemsView.initProblemsView(wsPage);
-  await problemsView.hasError('Project is too old. Needs to be converted in Axon Ivy Designer.');
+  await problemsView.hasError('Project is too old and needs to be converted in VS Code.');
 
   await wsPage.executeCommand('Axon Ivy: Convert Project');
   const quickPick = wsPage.page.locator('div.quick-input-widget');
