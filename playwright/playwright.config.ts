@@ -8,7 +8,7 @@ export default defineConfig({
     screenshot: 'only-on-failure'
   },
   workers: process.env.RUN_IN_BROWSER ? 3 : 1,
-  retries: process.env.CI ? 1 : 0,
+  retries: 0,
   timeout: 40_000,
   expect: { timeout: 30_000 },
   reporter: process.env.CI ? [['junit', { outputFile: 'report.xml' }], ['list']] : 'html',
