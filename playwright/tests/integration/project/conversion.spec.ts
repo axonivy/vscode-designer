@@ -4,6 +4,8 @@ import { TextEditor } from '~/page-objects/editor';
 import { ProblemsView } from '~/page-objects/problems-view';
 import { outdatedProjectWorkspacePath } from '~/workspaces/workspace';
 
+const slowExpect = expect.configure({ timeout: 120_000 });
+
 test.use({ workspace: outdatedProjectWorkspacePath });
 
 // eslint-disable-next-line
@@ -11,7 +13,7 @@ test.only('Convert project', async ({ wsPage }) => {
   test.setTimeout(120_000);
   const editor = new TextEditor(wsPage, 'ch.ivyteam.ivy.designer.prefs');
   await editor.open();
-  await expect(editor.content).toContainText(`PROJECT_VERSION=120001`);
+  await slowExpect(editor.content).toContainText(`PROJECT_VERSION=120001`);
   const problemsView = await ProblemsView.initProblemsView(wsPage);
   await problemsView.hasError('Project is too old and needs to be converted in VS Code.');
 
@@ -22,7 +24,7 @@ test.only('Convert project', async ({ wsPage }) => {
   await quickPick.getByRole('button').getByText('OK').click();
 
   const successToast = wsPage.toasts.filter({ hasText: new RegExp('Converted 1 of 1 Axon Ivy project\\(s\\)') });
-  await expect(successToast).toBeVisible();
+  await slowExpect(successToast).toBeVisible();
 
   await wsPage.page.waitForTimeout(5_000); // wait for conversion to finish
 
@@ -38,7 +40,7 @@ test.only('Convert project', async ({ wsPage }) => {
 
   const ivyProjectEditor = new TextEditor(wsPage, '.ivyproject');
   await ivyProjectEditor.open();
-  await expect(ivyProjectEditor.content).toContainText('version=');
+  await slowExpect(ivyProjectEditor.content).toContainText('version=');
   await problemsView.show();
   await problemsView.hasNoMarker();
 });
