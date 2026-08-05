@@ -72,8 +72,7 @@ test('Open Help', async ({ wsPage }) => {
   await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*user-dialogs\/form-editor\.html/);
 });
 
-// eslint-disable-next-line playwright/no-focused-test
-test.only('Preview', async ({ wsPage }) => {
+test('Preview', async ({ wsPage }) => {
   const editor = new FormEditor(wsPage);
   await editor.open();
   const browserView = new BrowserView(wsPage, 1);
