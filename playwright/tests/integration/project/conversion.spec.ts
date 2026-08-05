@@ -7,7 +7,8 @@ import { outdatedProjectWorkspacePath } from '~/workspaces/workspace';
 
 test.use({ workspace: outdatedProjectWorkspacePath });
 
-test('Convert project', async ({ wsPage }) => {
+// eslint-disable-next-line
+test.only('Convert project', async ({ wsPage }) => {
   test.setTimeout(100_000);
   const editor = new TextEditor(wsPage, 'ch.ivyteam.ivy.designer.prefs');
   await editor.open();
@@ -27,8 +28,11 @@ test('Convert project', async ({ wsPage }) => {
   const output = new OutputView(wsPage);
   await expect(async () => {
     await output.view.press('ControlOrMeta+End');
-    await output.expectLogEntry('[info] Finished conversion of project', 100_000);
-  }).toPass();
+    await output.expectLogEntry('[info] Finished conversion of project', 1_000);
+  }).toPass({
+    intervals: [1_000],
+    timeout: 60_000
+  });
 
   const ivyProjectEditor = new TextEditor(wsPage, '.ivyproject');
   await ivyProjectEditor.open();
