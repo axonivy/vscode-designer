@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { commands, Uri, window, workspace } from 'vscode';
-import { logErrorMessage } from '../base/logging-util';
+import { commands, Uri, window } from 'vscode';
+import { validateProjectName } from './utils/util';
 
 export const exportIvyProject = async (projectPath: string) => {
   const projectPomPath = path.join(projectPath, 'pom.xml');
@@ -9,21 +9,38 @@ export const exportIvyProject = async (projectPath: string) => {
     throw new Error(`Export Axon Ivy Project: No pom.xml found in the root of the selected project path: ${projectPath}`);
   }
 
-  let saveDefaultPath: Uri | undefined;
-  let outputUri: Uri | undefined;
+  let outputPath: string;
   while (true) {
-    outputUri = await selectOutputFilePath(saveDefaultPath);
-    if (!outputUri) {
-      return;
+    const outputFolder = await window.showOpenDialog({
+      canSelectFolders: true,
+      canSelectFiles: false,
+      canSelectMany: false,
+      title: 'Select output folder',
+      openLabel: 'Select output folder'
+    });
+    if (!outputFolder || outputFolder.length === 0 || !outputFolder[0]) {
+      return undefined;
     }
-    try {
-      await workspace.fs.stat(outputUri);
-      saveDefaultPath = Uri.file(path.dirname(outputUri.fsPath));
-      logErrorMessage(`Axon Ivy Export Error - File already exists: ${outputUri.fsPath}. Please choose a different path or name.`);
-    } catch {
-      break;
+    const outputFolderUri: Uri = outputFolder[0];
+    if (!outputFolderUri) {
+      return undefined;
     }
+
+    const outputFileName = await window.showInputBox({
+      ignoreFocusOut: true,
+      placeHolder: 'my-project-export',
+      prompt: 'Enter the output file name (without .iar extension)',
+      title: 'Export Axon Ivy Project',
+      validateInput: (value: string) => {
+        return validateOutputFileName(value, outputFolderUri, '.iar');
+      }
+    });
+
+    outputPath = path.join(outputFolderUri.fsPath, `${outputFileName}.iar`);
+    break;
   }
+
+  console.log(outputPath);
 
   try {
     await commands.executeCommand('maven.goal.package', { pomPath: projectPomPath });
@@ -34,13 +51,16 @@ export const exportIvyProject = async (projectPath: string) => {
       error instanceof Error ? { cause: error } : undefined
     );
   }
-
 };
 
-const selectOutputFilePath = async (saveDefaultPath?: Uri): Promise<Uri | undefined> => {
-  return window.showSaveDialog({
-    title: 'Select output file path for the exported file',
-    saveLabel: 'Export',
-    defaultUri: saveDefaultPath,
-  });
-}
+const validateOutputFileName = (fileName: string, folderPath: Uri, extension: string): string | undefined => {
+  const nameValid = validateProjectName(fileName);
+  if (nameValid !== undefined) {
+    return nameValid;
+  }
+  const filePath = path.join(folderPath.fsPath, `${fileName}${extension}`);
+  if (fs.existsSync(filePath)) {
+    return `File already exists: ${filePath}`;
+  }
+  return undefined;
+};
