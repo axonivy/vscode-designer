@@ -21,7 +21,7 @@ test.only('Convert project', async ({ wsPage }) => {
   await firstQuickPickItem.click();
   await quickPick.getByRole('button').getByText('OK').click();
 
-  const successToast = wsPage.toasts.filter({ hasText: new RegExp('Converted 1 of 1 Axon Ivy project(s)') });
+  const successToast = wsPage.toasts.filter({ hasText: new RegExp('Converted 1 of 1 Axon Ivy project\\(s\\)') });
   await expect(successToast).toBeVisible();
 
   const output = new OutputView(wsPage);
