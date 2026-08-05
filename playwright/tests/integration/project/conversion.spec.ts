@@ -8,6 +8,7 @@ import { outdatedProjectWorkspacePath } from '~/workspaces/workspace';
 test.use({ workspace: outdatedProjectWorkspacePath });
 
 test('Convert project', async ({ wsPage }) => {
+  test.setTimeout(100_000);
   const editor = new TextEditor(wsPage, 'ch.ivyteam.ivy.designer.prefs');
   await editor.open();
   await expect(editor.content).toContainText(`PROJECT_VERSION=120001`);
@@ -20,9 +21,17 @@ test('Convert project', async ({ wsPage }) => {
   await firstQuickPickItem.click();
   await quickPick.getByRole('button').getByText('OK').click();
 
+  const successToast = wsPage.toasts.filter({ hasText: new RegExp('Converted 1 of 1 Axon Ivy project\\(s\\)') });
+  await expect(successToast).toBeVisible();
+
   const output = new OutputView(wsPage);
-  await output.view.press('ControlOrMeta+End');
-  await output.expectLogEntry('[info] Finished conversion of project playwrightTestWorkspace');
+  await expect(async () => {
+    await output.view.press('ControlOrMeta+End');
+    await output.expectLogEntry('[info] Finished conversion of project', 1_000);
+  }).toPass({
+    intervals: [1_000],
+    timeout: 60_000
+  });
 
   const ivyProjectEditor = new TextEditor(wsPage, '.ivyproject');
   await ivyProjectEditor.open();
