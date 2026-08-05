@@ -7,8 +7,7 @@ import { outdatedProjectWorkspacePath } from '~/workspaces/workspace';
 
 test.use({ workspace: outdatedProjectWorkspacePath });
 
-// eslint-disable-next-line
-test.only('Convert project', async ({ wsPage }) => {
+test('Convert project', async ({ wsPage }) => {
   test.setTimeout(100_000);
   const editor = new TextEditor(wsPage, 'ch.ivyteam.ivy.designer.prefs');
   await editor.open();
