@@ -23,7 +23,6 @@ pipeline {
             pnpm install && pnpm run update:axonivy:next
             pnpm run build:production
             pnpm run engine:download ${params.engineDownloadUrl}
-            cp -f log4j2.xml AxonIvyEngine/configuration/log4j2.xml
             nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
             """
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
