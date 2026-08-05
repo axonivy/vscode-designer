@@ -80,7 +80,6 @@ test.only('Preview', async ({ wsPage }) => {
   await browserView.openDevWfUi();
   const browser = browserView.content;
   await expect(browser.locator('.layout-topbar-logo')).toBeVisible();
-  await browserView.moveToSecondaryPanel();
 
   await expect(editor.main.locator('.selected')).toHaveCount(0);
   await editor.toolbar.getByRole('button', { name: 'Open Dialog Preview' }).click();

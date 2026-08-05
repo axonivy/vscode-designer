@@ -25,14 +25,11 @@ test.only('xhtml preview', async ({ wsPage }) => {
   const editor = new XhtmlEditor(wsPage);
   await editor.open();
   await wsPage.activateExpensiveJavaStandardMode();
-  await wsPage.executeCommand('Axon Ivy: Deploy all Projects');
-  await wsPage.hasStatusMessage('Axon Ivy: Success: Deploying projects');
   await wsPage.hasReadyStatusMessage();
   const browserView = new BrowserView(wsPage);
   await browserView.openDevWfUi();
   const browser = browserView.content;
   await expect(browser.locator('.layout-topbar-logo')).toBeVisible();
-  await browserView.moveToSecondaryPanel();
 
   await wsPage.executeCommand('Axon Ivy: Open Dialog Preview');
   const frame = browser.frameLocator('iframe');
