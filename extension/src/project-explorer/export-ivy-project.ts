@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { commands, window } from 'vscode';
+import { commands, Uri, window, workspace } from 'vscode';
+import { logErrorMessage } from '../base/logging-util';
 
 export const exportIvyProject = async (projectPath: string) => {
   const projectPomPath = path.join(projectPath, 'pom.xml');
@@ -8,24 +9,38 @@ export const exportIvyProject = async (projectPath: string) => {
     throw new Error(`Export Axon Ivy Project: No pom.xml found in the root of the selected project path: ${projectPath}`);
   }
 
-  const outputPath = await window.showOpenDialog({
-    canSelectFolders: true,
-    canSelectFiles: false,
-    canSelectMany: false,
-    title: 'Select output folder',
-    openLabel: 'Select output folder'
-  });
-  if (!outputPath || outputPath.length === 0 || !outputPath[0]) {
-    return undefined;
+  let saveDefaultPath: Uri | undefined;
+  let outputUri: Uri | undefined;
+  while (true) {
+    outputUri = await selectOutputFilePath(saveDefaultPath);
+    if (!outputUri) {
+      return;
+    }
+    try {
+      await workspace.fs.stat(outputUri);
+      saveDefaultPath = Uri.file(path.dirname(outputUri.fsPath));
+      logErrorMessage(`Axon Ivy Export Error - File already exists: ${outputUri.fsPath}. Please choose a different path or name.`);
+    } catch {
+      break;
+    }
   }
+
   try {
     await commands.executeCommand('maven.goal.package', { pomPath: projectPomPath });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `Export Axon Ivy Project: Failed to execute Maven package goal. Error: ${message}`,
+      `Axon Ivy Export Error - Failed to execute Maven package goal. Error: ${message}`,
       error instanceof Error ? { cause: error } : undefined
     );
   }
-  // TODO: Find the output path of the generated .iar file and copy to outputPath
+
 };
+
+const selectOutputFilePath = async (saveDefaultPath?: Uri): Promise<Uri | undefined> => {
+  return window.showSaveDialog({
+    title: 'Select output file path for the exported file',
+    saveLabel: 'Export',
+    defaultUri: saveDefaultPath,
+  });
+}
