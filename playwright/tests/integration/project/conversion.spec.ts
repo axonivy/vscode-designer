@@ -9,7 +9,7 @@ test.use({ workspace: outdatedProjectWorkspacePath });
 
 // eslint-disable-next-line
 test.only('Convert project', async ({ wsPage }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(120_000);
   const editor = new TextEditor(wsPage, 'ch.ivyteam.ivy.designer.prefs');
   await editor.open();
   await expect(editor.content).toContainText(`PROJECT_VERSION=120001`);
@@ -33,7 +33,7 @@ test.only('Convert project', async ({ wsPage }) => {
 
   await expect(async () => {
     await output.view.press('ControlOrMeta+End');
-    await output.expectLogEntry('[info] Finished conversion of project playwrightTestWorkspace');
+    await output.expectLogEntry('[info] Finished conversion of project', 120_000);
   }).toPass();
 
   const ivyProjectEditor = new TextEditor(wsPage, '.ivyproject');

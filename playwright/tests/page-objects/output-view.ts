@@ -31,7 +31,7 @@ export class OutputView {
     await this.sourceSelection.selectOption({ label: name });
   }
 
-  async expectLogEntry(entry: string | RegExp) {
-    await expect(this.logEntries).toContainText(entry);
+  async expectLogEntry(entry: string | RegExp, timeout?: number) {
+    await expect(this.logEntries).toContainText(entry, { timeout });
   }
 }
