@@ -5,8 +5,7 @@ import { FileExplorer } from '~/page-objects/explorer-view';
 import { downloadIar } from '~/utils/download-iar';
 import { empty, multiRootWorkspacePath } from '../../workspaces/workspace';
 
-// eslint-disable-next-line
-test.describe.only('Single root workspace', () => {
+test.describe('Single root workspace', () => {
   const iarFileName = 'ivy-project.iar';
   const iarFileNameDuplicateAfterSanitization = 'ivy.project.iar';
   const iarProjectName = 'ivy-project';
@@ -55,8 +54,7 @@ test.describe.only('Single root workspace', () => {
   });
 });
 
-// eslint-disable-next-line
-test.describe.only('Multi root workspace', () => {
+test.describe('Multi root workspace', () => {
   test.use({ workspace: multiRootWorkspacePath });
   test.skip(process.env.RUN_IN_BROWSER === 'true');
 
