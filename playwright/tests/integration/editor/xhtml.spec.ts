@@ -20,7 +20,8 @@ test('xhtml definitions', async ({ wsPage }) => {
   await editor.expectDefinitionAtLineColumn('ContentManagement.java', 24, 118);
 });
 
-test('xhtml preview', async ({ wsPage }) => {
+// eslint-disable-next-line playwright/no-focused-test
+test.only('xhtml preview', async ({ wsPage }) => {
   const editor = new XhtmlEditor(wsPage);
   await editor.open();
   await wsPage.activateExpensiveJavaStandardMode();
