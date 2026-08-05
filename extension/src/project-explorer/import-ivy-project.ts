@@ -43,7 +43,7 @@ export const importIvyProject = async (selectedWorkspaceUri: Uri) => {
 
     if (existingIvyProjectNames.includes(sanitizedFileName)) {
       logErrorIvyImport(
-        `Axon Ivy Import Error: File ${iarFile} resolves to project name "${sanitizedFileName}".
+        `File ${iarFile} resolves to project name "${sanitizedFileName}".
 Axon Ivy Project with name "${sanitizedFileName}" already exists in the workspace.
 Please either rename the import file ${fileName} or delete/rename the existing project.`
       );
