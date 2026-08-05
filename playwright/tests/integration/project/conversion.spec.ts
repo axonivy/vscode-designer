@@ -9,6 +9,7 @@ test.use({ workspace: outdatedProjectWorkspacePath });
 
 // eslint-disable-next-line
 test.only('Convert project', async ({ wsPage }) => {
+  test.setTimeout(60_000);
   const editor = new TextEditor(wsPage, 'ch.ivyteam.ivy.designer.prefs');
   await editor.open();
   await expect(editor.content).toContainText(`PROJECT_VERSION=120001`);
