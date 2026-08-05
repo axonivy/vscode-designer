@@ -1,19 +1,21 @@
 import { expect } from '@playwright/test';
 import { test } from '~/fixtures/baseTest';
 import { TextEditor } from '~/page-objects/editor';
+import { OutputView } from '~/page-objects/output-view';
 import { ProblemsView } from '~/page-objects/problems-view';
 import { outdatedProjectWorkspacePath } from '~/workspaces/workspace';
 
-const slowExpect = expect.configure({ timeout: 120_000 });
+const TEST_TIMEOUT = 150_000;
+const EXPECT_TIMEOUT = 120_000;
 
 test.use({ workspace: outdatedProjectWorkspacePath });
 
 // eslint-disable-next-line
 test.only('Convert project', async ({ wsPage }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(TEST_TIMEOUT);
   const editor = new TextEditor(wsPage, 'ch.ivyteam.ivy.designer.prefs');
   await editor.open();
-  await slowExpect(editor.content).toContainText(`PROJECT_VERSION=120001`);
+  await expect(editor.content).toContainText(`PROJECT_VERSION=120001`);
   const problemsView = await ProblemsView.initProblemsView(wsPage);
   await problemsView.hasError('Project is too old and needs to be converted in VS Code.');
 
@@ -24,23 +26,23 @@ test.only('Convert project', async ({ wsPage }) => {
   await quickPick.getByRole('button').getByText('OK').click();
 
   const successToast = wsPage.toasts.filter({ hasText: new RegExp('Converted 1 of 1 Axon Ivy project\\(s\\)') });
-  await slowExpect(successToast).toBeVisible();
+  await expect(successToast).toBeVisible();
 
-  await wsPage.page.waitForTimeout(5_000); // wait for conversion to finish
+  // await wsPage.page.waitForTimeout(5_000); // wait for conversion to finish
 
-  // const output = new OutputView(wsPage);
+  const output = new OutputView(wsPage);
 
   // await output.view.press('ControlOrMeta+End');
   // await output.expectLogEntry('[info] Finished conversion of project playwrightTestWorkspace');
 
-  // await expect(async () => {
-  //   await output.view.press('ControlOrMeta+End');
-  //   await output.expectLogEntry('[info] Finished conversion of project', 120_000);
-  // }).toPass();
+  await expect(async () => {
+    await output.view.press('ControlOrMeta+End');
+    await output.expectLogEntry('[info] Finished conversion of project', EXPECT_TIMEOUT);
+  }).toPass();
 
   const ivyProjectEditor = new TextEditor(wsPage, '.ivyproject');
   await ivyProjectEditor.open();
-  await slowExpect(ivyProjectEditor.content).toContainText('version=');
+  await expect(ivyProjectEditor.content).toContainText('version=');
   await problemsView.show();
   await problemsView.hasNoMarker();
 });
