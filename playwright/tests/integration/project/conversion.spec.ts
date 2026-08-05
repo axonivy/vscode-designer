@@ -5,14 +5,11 @@ import { OutputView } from '~/page-objects/output-view';
 import { ProblemsView } from '~/page-objects/problems-view';
 import { outdatedProjectWorkspacePath } from '~/workspaces/workspace';
 
-const TEST_TIMEOUT = 150_000;
-const EXPECT_TIMEOUT = 120_000;
-
 test.use({ workspace: outdatedProjectWorkspacePath });
 
 // eslint-disable-next-line
 test.only('Convert project', async ({ wsPage }) => {
-  test.setTimeout(TEST_TIMEOUT);
+  test.setTimeout(100_000);
   const editor = new TextEditor(wsPage, 'ch.ivyteam.ivy.designer.prefs');
   await editor.open();
   await expect(editor.content).toContainText(`PROJECT_VERSION=120001`);
@@ -28,16 +25,10 @@ test.only('Convert project', async ({ wsPage }) => {
   const successToast = wsPage.toasts.filter({ hasText: new RegExp('Converted 1 of 1 Axon Ivy project\\(s\\)') });
   await expect(successToast).toBeVisible();
 
-  // await wsPage.page.waitForTimeout(5_000); // wait for conversion to finish
-
   const output = new OutputView(wsPage);
-
-  // await output.view.press('ControlOrMeta+End');
-  // await output.expectLogEntry('[info] Finished conversion of project playwrightTestWorkspace');
-
   await expect(async () => {
     await output.view.press('ControlOrMeta+End');
-    await output.expectLogEntry('[info] Finished conversion of project', EXPECT_TIMEOUT);
+    await output.expectLogEntry('[info] Finished conversion of project', 100_000);
   }).toPass();
 
   const ivyProjectEditor = new TextEditor(wsPage, '.ivyproject');
