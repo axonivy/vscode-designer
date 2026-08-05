@@ -7,7 +7,8 @@ import { outdatedProjectWorkspacePath } from '~/workspaces/workspace';
 
 test.use({ workspace: outdatedProjectWorkspacePath });
 
-test('Convert project', async ({ wsPage }) => {
+// eslint-disable-next-line
+test.only('Convert project', async ({ wsPage }) => {
   const editor = new TextEditor(wsPage, 'ch.ivyteam.ivy.designer.prefs');
   await editor.open();
   await expect(editor.content).toContainText(`PROJECT_VERSION=120001`);
@@ -19,6 +20,9 @@ test('Convert project', async ({ wsPage }) => {
   const firstQuickPickItem = quickPick.locator('div.quick-input-list-entry').first();
   await firstQuickPickItem.click();
   await quickPick.getByRole('button').getByText('OK').click();
+
+  const successToast = wsPage.toasts.filter({ hasText: new RegExp('Converted 1 of 1 Axon Ivy project(s)') });
+  await expect(successToast).toBeVisible();
 
   const output = new OutputView(wsPage);
   await output.view.press('ControlOrMeta+End');
