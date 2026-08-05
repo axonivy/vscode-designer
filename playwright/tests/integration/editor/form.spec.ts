@@ -74,9 +74,6 @@ test('Open Help', async ({ wsPage }) => {
 
 // eslint-disable-next-line playwright/no-focused-test
 test.only('Preview', async ({ wsPage }) => {
-  await wsPage.page.waitForTimeout(3_000);
-  await wsPage.executeCommand('Axon Ivy: Deploy all Projects');
-  await wsPage.hasStatusMessage('Axon Ivy: Success: Deploying projects');
   const editor = new FormEditor(wsPage);
   await editor.open();
   const browserView = new BrowserView(wsPage, 1);

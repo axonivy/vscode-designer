@@ -21,7 +21,6 @@ import { RoleEditorProvider } from '../editors/role-editor/role-editor-provider'
 import { UserEditorProvider } from '../editors/user-editor/user-editor-provider';
 import { VariableEditorProvider } from '../editors/variable-editor/variable-editor-provider';
 import { WebServiceEditorProvider } from '../editors/webservice-editor/webservice-editor-provider';
-import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language-client';
 import { isProjectConversionRunning } from '../project-explorer/ivy-project-conversion';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import type { NewProcessParams } from '../project-explorer/new-process';
@@ -143,7 +142,7 @@ export class IvyEngineManager {
 
     RuntimeLogViewProvider(websocketUrl);
     WebIdeWebSocketProvider(websocketUrl);
-    XhtmlLanguageClientProvider(websocketUrl);
+    // XhtmlLanguageClientProvider(websocketUrl);
     registerProcessDebugging(this.context, this.ivyEngineApi);
 
     await IvyDiagnostics.instance.refresh();
