@@ -20,10 +20,6 @@ export class BrowserView {
     await this.wsPage.executeCommand('Open Developer Workflow UI');
   }
 
-  async moveToSecondaryPanel() {
-    await this.wsPage.executeCommand('View: Move View', 'Browser', 'New Secondary Side Bar Entry');
-  }
-
   get back() {
     return this.header.locator('.back-button');
   }
