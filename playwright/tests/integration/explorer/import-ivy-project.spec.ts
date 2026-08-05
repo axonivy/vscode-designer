@@ -80,15 +80,14 @@ test.describe.only('Multi root workspace', () => {
   });
 
   test('Import existing folder into multi-root workspace error', async ({ wsPage, tmpWorkspace }) => {
-    const iarFileName = 'dummy.iar';
+    const iarFileName = 'alreadyPresent.iar';
     const downloadIarFolder = 'connector';
-    const targetFolderName = 'dummy';
+    const existingFolder = 'alreadyPresent';
 
     const explorer = new FileExplorer(wsPage);
     await downloadIar(path.join(tmpWorkspace.tmpWorkspacePath, downloadIarFolder), iarFileName);
 
-    await explorer.addFolder(targetFolderName);
-    await explorer.hasNodeExact(targetFolderName);
+    await explorer.hasNodeExact(existingFolder);
     await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
     await wsPage.selectItemFromQuickPick(downloadIarFolder);
     await wsPage.selectItemFromQuickPick(iarFileName);
