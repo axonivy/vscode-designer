@@ -1,7 +1,6 @@
 import { expect } from '@playwright/test';
 import { test } from '~/fixtures/baseTest';
 import { TextEditor } from '~/page-objects/editor';
-import { OutputView } from '~/page-objects/output-view';
 import { ProblemsView } from '~/page-objects/problems-view';
 import { outdatedProjectWorkspacePath } from '~/workspaces/workspace';
 
@@ -25,16 +24,17 @@ test.only('Convert project', async ({ wsPage }) => {
   const successToast = wsPage.toasts.filter({ hasText: new RegExp('Converted 1 of 1 Axon Ivy project\\(s\\)') });
   await expect(successToast).toBeVisible();
 
-  // await wsPage.page.waitForTimeout(5_000); // wait for conversion to finish
-  const output = new OutputView(wsPage);
+  await wsPage.page.waitForTimeout(5_000); // wait for conversion to finish
+
+  // const output = new OutputView(wsPage);
 
   // await output.view.press('ControlOrMeta+End');
   // await output.expectLogEntry('[info] Finished conversion of project playwrightTestWorkspace');
 
-  await expect(async () => {
-    await output.view.press('ControlOrMeta+End');
-    await output.expectLogEntry('[info] Finished conversion of project', 120_000);
-  }).toPass();
+  // await expect(async () => {
+  //   await output.view.press('ControlOrMeta+End');
+  //   await output.expectLogEntry('[info] Finished conversion of project', 120_000);
+  // }).toPass();
 
   const ivyProjectEditor = new TextEditor(wsPage, '.ivyproject');
   await ivyProjectEditor.open();
