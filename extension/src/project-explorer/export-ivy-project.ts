@@ -97,6 +97,9 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
     if (!state.targetFolderUri) {
       throw new MultiStepCancelledError('Target folder not selected. Export cancelled.');
     }
+    if (state.ext == '.iar' && state.projects.length === 1 && state.projects[0] !== undefined) {
+      state.targetFilename = state.projects[0].label;
+    }
     const targetFolderPath = (state.targetFolderUri as Uri).fsPath;
     const buildTargetPathPrompt = (typedValue: string) => `Target path: ${path.join(targetFolderPath, typedValue + state.ext)}`;
 
