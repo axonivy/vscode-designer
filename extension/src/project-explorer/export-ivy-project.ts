@@ -1,66 +1,86 @@
-import fs from 'fs';
 import path from 'path';
-import { commands, Uri, window } from 'vscode';
+import { logErrorMessage } from '../base/logging-util';
+import type { AddCommandSelectionContext } from './ivy-project-explorer';
+import { MultiStepCancelledError, MultiStepInput, type InputStep, type MSStateBase, type ProjectSelection } from './utils/multi-step-input';
 import { validateProjectName } from './utils/util';
 
-export const exportIvyProject = async (projectPath: string) => {
-  const projectPomPath = path.join(projectPath, 'pom.xml');
-  if (!fs.existsSync(projectPomPath)) {
-    throw new Error(`Export Axon Ivy Project: No pom.xml found in the root of the selected project path: ${projectPath}`);
-  }
+interface ExportProjectsState extends MSStateBase {
+  projects: ProjectSelection[];
+  targetFolder?: string | undefined;
+  targetFilename?: string | undefined;
+}
 
-  let outputPath: string;
-  while (true) {
-    const outputFolder = await window.showOpenDialog({
-      canSelectFolders: true,
-      canSelectFiles: false,
-      canSelectMany: false,
-      title: 'Select output folder',
-      openLabel: 'Select output folder'
+export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSelectionContext) => {
+  const existingProjects = addCommandSelectionContext.existingIvyProjects;
+  let selectedProjects: ProjectSelection[] = [];
+
+  const stepProjects: InputStep<ExportProjectsState> = async (input: MultiStepInput<ExportProjectsState>, state: ExportProjectsState) => {
+    state.projects = await input.showQuickPick<ProjectSelection, true>({
+      canSelectMany: true,
+      title: state.dialogTitle,
+      titleSuffix: ' - Choose projects to export',
+      placeholder: 'Select projects',
+      currentStep: state.currentStep,
+      totalSteps: state.totalSteps,
+      selectedItems: selectedProjects,
+      items: existingProjects.map(project => {
+        return {
+          label: path.basename(project),
+          description: project,
+          path: project
+        };
+      })
     });
-    if (!outputFolder || outputFolder.length === 0 || !outputFolder[0]) {
-      return undefined;
-    }
-    const outputFolderUri: Uri = outputFolder[0];
-    if (!outputFolderUri) {
-      return undefined;
-    }
+    selectedProjects = state.projects;
+  };
 
-    const outputFileName = await window.showInputBox({
-      ignoreFocusOut: true,
-      placeHolder: 'my-project-export',
-      prompt: 'Enter the output file name (without .iar extension)',
-      title: 'Export Axon Ivy Project',
-      validateInput: (value: string) => {
-        return validateOutputFileName(value, outputFolderUri, '.iar');
+  const stepFileName: InputStep<ExportProjectsState> = async (input: MultiStepInput<ExportProjectsState>, state: ExportProjectsState) => {
+    state.targetFilename = await input.showTextInput({
+      title: state.dialogTitle,
+      titleSuffix: ' - Choose name of export file',
+      placeholder: 'Enter a name. Must start with a letter or underscore. Allowed characters: a-z, A-Z, 0-9, _',
+      currentStep: state.currentStep,
+      totalSteps: state.totalSteps,
+      value: state.targetFilename,
+      validationFunction: validateProjectName,
+      onBack: (typedValue: string) => {
+        state.targetFilename = typedValue;
       }
     });
+  };
 
-    outputPath = path.join(outputFolderUri.fsPath, `${outputFileName}.iar`);
-    break;
-  }
+  // Define step order
+  const steps: InputStep<ExportProjectsState>[] = [stepProjects, stepFileName];
 
-  console.log(outputPath);
+  const exportProjectData: ExportProjectsState = {
+    dialogTitle: `Export Axon Ivy Projects`,
+    currentStep: 1,
+    totalSteps: steps.length,
+    projects: []
+  };
 
   try {
-    await commands.executeCommand('maven.goal.package', { pomPath: projectPomPath });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(
-      `Axon Ivy Export Error - Failed to execute Maven package goal. Error: ${message}`,
-      error instanceof Error ? { cause: error } : undefined
-    );
+    await new MultiStepInput<ExportProjectsState>().stepThrough(steps, exportProjectData);
+  } catch (err) {
+    if (err instanceof MultiStepCancelledError) {
+      logErrorMessage(err.message);
+      return;
+    } else {
+      throw err;
+    }
   }
+
+  console.log(exportProjectData);
 };
 
-const validateOutputFileName = (fileName: string, folderPath: Uri, extension: string): string | undefined => {
-  const nameValid = validateProjectName(fileName);
-  if (nameValid !== undefined) {
-    return nameValid;
-  }
-  const filePath = path.join(folderPath.fsPath, `${fileName}${extension}`);
-  if (fs.existsSync(filePath)) {
-    return `File already exists: ${filePath}`;
-  }
-  return undefined;
-};
+// const validateOutputFileName = (fileName: string, folderPath: Uri, extension: string): string | undefined => {
+//   const nameValid = validateProjectName(fileName);
+//   if (nameValid !== undefined) {
+//     return nameValid;
+//   }
+//   const filePath = path.join(folderPath.fsPath, `${fileName}${extension}`);
+//   if (fs.existsSync(filePath)) {
+//     return `File already exists: ${filePath}`;
+//   }
+//   return undefined;
+// };

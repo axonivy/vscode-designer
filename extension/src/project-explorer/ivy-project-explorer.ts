@@ -10,7 +10,7 @@ import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { installLocalMarketProduct, installMarketProduct } from '../market/import-market';
-import { exportIvyProject } from './export-ivy-project';
+import { exportIvyProjects } from './export-ivy-project';
 import { importIvyProject } from './import-ivy-project';
 import { importNewProcess } from './import-process';
 import { runProjectConversion } from './ivy-project-conversion';
@@ -261,18 +261,11 @@ export class IvyProjectExplorer {
   }
 
   private async exportIvyProject(selection: TreeSelection) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
-    if (!uri) {
-      logErrorMessage('Export Axon Ivy Project: No valid Axon Ivy Project selected.');
+    const addCommandSelectionContext = await this.getAddCommandSelectionContext(selection);
+    if (!addCommandSelectionContext) {
       return;
     }
-    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (!projectPath) {
-      logErrorMessage('Export Axon Ivy Project: No valid Axon Ivy Project selected.');
-      return;
-    }
-    await exportIvyProject(projectPath);
-    return;
+    await exportIvyProjects(addCommandSelectionContext);
   }
 
   private async installLocalMarketProduct(selection: TreeSelection) {
