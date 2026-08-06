@@ -75,6 +75,12 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
   };
 
   const stepFileName: InputStep<ExportProjectsState> = async (input: MultiStepInput<ExportProjectsState>, state: ExportProjectsState) => {
+    if (!state.targetFolderUri) {
+      throw new MultiStepCancelledError('Target folder not selected. Export cancelled.');
+    }
+    const targetFolderPath = (state.targetFolderUri as Uri).fsPath;
+    const buildTargetPathPrompt = (typedValue: string) => `Target path: ${path.join(targetFolderPath, typedValue + state.ext)}`;
+
     state.targetFilename = await input.showTextInput({
       title: state.dialogTitle,
       titleSuffix: ` - Choose name of export file (without extension ${state.ext})`,
@@ -82,9 +88,14 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.targetFilename,
+      prompt: buildTargetPathPrompt(state.targetFilename ?? ''),
       validationFunction: (value: string) => validateExportPath(value, state.targetFolderUri as Uri, state.ext),
       onBack: (typedValue: string) => {
         state.targetFilename = typedValue;
+      },
+      onChange: (typedValue: string, textInputBoxObject) => {
+        const targetPathPrompt = buildTargetPathPrompt(typedValue);
+        textInputBoxObject.prompt = targetPathPrompt;
       }
     });
   };

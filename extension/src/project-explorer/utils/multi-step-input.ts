@@ -1,5 +1,5 @@
 import path from 'path';
-import type { QuickInput, QuickPickItem } from 'vscode';
+import type { InputBox, QuickInput, QuickPickItem } from 'vscode';
 import { Disposable, QuickInputButtons, Uri, window } from 'vscode';
 import { logErrorMessage } from '../../base/logging-util';
 import { type AddCommandSelectionContext } from '../ivy-project-explorer';
@@ -102,6 +102,7 @@ interface TextInputParameters {
   placeholder?: string;
   validationFunction?: (value: string) => string | undefined;
   onBack?: (typedValue: string) => void;
+  onChange?: (typedValue: string, input: InputBox) => void;
   ignoreFocusOut?: boolean;
 }
 
@@ -176,6 +177,7 @@ export class MultiStepInput<T extends MSStateBase> {
     prompt,
     validationFunction,
     onBack,
+    onChange,
     ignoreFocusOut,
     placeholder
   }: TextInputParameters): Promise<string> {
@@ -221,6 +223,7 @@ export class MultiStepInput<T extends MSStateBase> {
           } else {
             input.validationMessage = '';
           }
+          onChange?.(input.value, input);
         })
       );
       if (this.current) {
