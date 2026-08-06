@@ -83,6 +83,8 @@ test('Preview', async ({ wsPage }) => {
   const input = frame.getByRole('textbox');
   const timeout = { timeout: 3_000 };
   await expect(async () => {
+    await wsPage.executeCommand('Axon Ivy: Deploy All Projects');
+    await wsPage.hasStatusMessage('Axon Ivy: Success: Deploying projects');
     await editor.toolbar.getByRole('button', { name: 'Open Dialog Preview' }).click();
     await expect(browser.locator('#iFrameForm\\:frameTaskName')).toHaveText('Preview', timeout);
     await browserView.reload.click();
