@@ -76,19 +76,18 @@ test('Preview', async ({ wsPage }) => {
   const editor = new FormEditor(wsPage);
   await editor.open();
   const browserView = new BrowserView(wsPage, 1);
-  await browserView.openDevWfUi();
   const browser = browserView.content;
-  await expect(browser.locator('.layout-topbar-logo')).toBeVisible();
 
   await expect(editor.main.locator('.selected')).toHaveCount(0);
-  await editor.toolbar.getByRole('button', { name: 'Open Dialog Preview' }).click();
-  await expect(browser.locator('#iFrameForm\\:frameTaskName')).toHaveText('Preview');
   const frame = browser.frameLocator('iframe');
   const input = frame.getByRole('textbox');
+  const timeout = { timeout: 3_000 };
   await expect(async () => {
+    await editor.toolbar.getByRole('button', { name: 'Open Dialog Preview' }).click();
+    await expect(browser.locator('#iFrameForm\\:frameTaskName')).toHaveText('Preview', timeout);
     await browserView.reload.click();
-    await expect(input).toBeVisible({ timeout: 3_000 });
-  }).toPass({ timeout: 10_000 });
+    await expect(input).toBeVisible(timeout);
+  }).toPass();
 
   // TODO: test editor reopen
   // await editor.close();

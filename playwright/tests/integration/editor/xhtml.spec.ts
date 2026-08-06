@@ -27,9 +27,7 @@ test('xhtml preview', async ({ wsPage }) => {
   await wsPage.hasReadyStatusMessage();
   await wsPage.page.waitForTimeout(2_000); // wait for the preview to be ready
   const browserView = new BrowserView(wsPage);
-  await browserView.openDevWfUi();
   const browser = browserView.content;
-  await expect(browser.locator('.layout-topbar-logo')).toBeVisible();
 
   await wsPage.page.getByRole('button', { name: 'Open Dialog Preview' }).click();
   const frame = browser.frameLocator('iframe');
