@@ -61,9 +61,7 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
       canSelectFiles: false,
       canSelectFolders: true,
       canSelectMany: false,
-      // defaultUri: state.targetFolderUri,
-      // TODO: REMOVE, just for testing
-      defaultUri: Uri.file('/home/dominik/Desktop/testExport'),
+      defaultUri: state.targetFolderUri,
       title: `Target folder for ${state.ext} file`,
       openLabel: 'Select folder'
     });
@@ -129,9 +127,7 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
     currentStep: 1,
     totalSteps: steps.length,
     projects: [],
-    ext: '.iar',
-    // TODO: REMOVE, just for testing
-    targetFilename: 'asdf'
+    ext: '.iar'
   };
 
   try {
@@ -157,11 +153,13 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
 
   // Should not happen, for safety
   // TODO: Instead of error, allow duplicte, warn after last step (with Back/Continue buttons) and warn+overwrite if user continues
+  // This would require a new MultiStepInput step "showConfirmationDialog" that shows a modal dialog with Back/Continue buttons and returns true/false depending on user choice.
   if (fs.existsSync(targetFilePath)) {
     logErrorMessage(`Export Axon Ivy Project: Target file already exists at path: ${targetFilePath}. Export cancelled.`);
     return;
   }
 
+  // TODO: Can be removed
   if (exportProjectData.ext === '.zip') {
     await window.showInformationMessage(
       'WARNING:\n\nCreating a .zip file will not automatically include all Axon Ivy dependencies of the selected projects.\n\nYou are responsible for ensuring that all necessary dependencies are selected.',
@@ -206,6 +204,15 @@ const exportIar = async (
   // Run Maven command
   try {
     // TODO: Use command.executeCommand() instead of runMavenCommand to use VSCode specific mvn binary. Problem: Find out created file path from mvn output?
+    // Execute command like this
+    // NEED: goal should supply parameter to specify output file by path.
+    // For iar we can simply write to targetFilePath, no need to copy from target/
+    // await commands.executeCommand(
+    //   'maven.goal.custom',
+    //   path.join(projectToExport.path, 'pom.xml'),
+    //   '-B -ntp com.axonivy.ivy.ci:project-build-plugin:pack-iar'
+    // );
+
     mvnOutput = await runMavenCommand(projectToExport.path, MVN_COMMAND, outputChannel);
   } catch (error) {
     logErrorIvyExport(`Failed to run Maven command for project ${projectToExport.label}: ${(error as Error).message}`);
@@ -258,6 +265,15 @@ const exportZip = async (
       // Run Maven command
       try {
         // TODO: Use command.executeCommand() instead of runMavenCommand to use VSCode specific mvn binary. Problem: Find out created file path from mvn output?
+        // Execute command like this
+        // NEED: goal should supply parameter to specify output file by path.
+        // For zip we can simply write to temp folder, no need to copy from target/ to temp folder.
+        // await commands.executeCommand(
+        //   'maven.goal.custom',
+        //   path.join(projectToExport.path, 'pom.xml'),
+        //   '-B -ntp com.axonivy.ivy.ci:project-build-plugin:pack-iar'
+        // );
+
         mvnOutput = await runMavenCommand(projectToExport.path, MVN_COMMAND, outputChannel);
       } catch (error) {
         logErrorIvyExport(`Failed to run Maven command for project ${projectToExport.label}: ${(error as Error).message}`);
