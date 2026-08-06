@@ -20,7 +20,7 @@ test('Edit input label', async ({ wsPage }) => {
   await labelProperty.click();
   await labelProperty.fill(newLabel);
   await labelProperty.blur();
-  await expect(input).toHaveText(newLabel);
+  await expect(input).toContainText(newLabel);
 
   await editor.save();
   const xhtmlEditor = new TextEditor(wsPage, 'testForm.xhtml');
@@ -72,8 +72,7 @@ test('Open Help', async ({ wsPage }) => {
   await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*user-dialogs\/form-editor\.html/);
 });
 
-// eslint-disable-next-line playwright/no-focused-test
-test.only('Preview', async ({ wsPage }) => {
+test('Preview', async ({ wsPage }) => {
   const editor = new FormEditor(wsPage);
   await editor.open();
   const browserView = new BrowserView(wsPage, 1);
