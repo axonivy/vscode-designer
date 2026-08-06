@@ -31,7 +31,7 @@ test('xhtml preview', async ({ wsPage }) => {
   const browser = browserView.content;
   await expect(browser.locator('.layout-topbar-logo')).toBeVisible();
 
-  await wsPage.executeCommand('Axon Ivy: Open Dialog Preview');
+  await wsPage.page.getByRole('button', { name: 'Open Dialog Preview' }).click();
   const frame = browser.frameLocator('iframe');
   const button = frame.getByRole('button', { name: 'Proceed' });
   await expect(button).toBeVisible();

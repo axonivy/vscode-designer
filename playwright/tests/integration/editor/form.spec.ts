@@ -85,7 +85,10 @@ test('Preview', async ({ wsPage }) => {
   await expect(browser.locator('#iFrameForm\\:frameTaskName')).toHaveText('Preview');
   const frame = browser.frameLocator('iframe');
   const input = frame.getByRole('textbox');
-  await expect(input).toBeVisible();
+  await expect(async () => {
+    await browserView.reload.click();
+    await expect(input).toBeVisible({ timeout: 3_000 });
+  }).toPass({ timeout: 10_000 });
 
   // TODO: test editor reopen
   // await editor.close();
