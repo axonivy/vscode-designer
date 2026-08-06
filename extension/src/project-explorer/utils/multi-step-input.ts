@@ -1,6 +1,7 @@
 import path from 'path';
 import type { QuickInput, QuickPickItem } from 'vscode';
 import { Disposable, QuickInputButtons, Uri, window } from 'vscode';
+import { logErrorMessage } from '../../base/logging-util';
 import { type AddCommandSelectionContext } from '../ivy-project-explorer';
 import { resolveNamespaceFromPath, type ResourceDirectoryTarget } from './util';
 
@@ -24,10 +25,9 @@ export interface MSStateBase {
   totalSteps: number;
 }
 
-const enum InputFlowAction {
+export const enum InputFlowAction {
   back,
-  cancel,
-  abortEmptySelection
+  cancel
 }
 
 export interface ProjectSelection extends QuickPickItem {
@@ -156,9 +156,6 @@ export class MultiStepInput<T extends MSStateBase> {
           this.currentStep = steps[stepIndex];
         } else if (err == InputFlowAction.cancel) {
           throw new MultiStepCancelledError('Dialog cancelled by the user');
-        } else if (err == InputFlowAction.abortEmptySelection) {
-          this.current?.hide();
-          throw new MultiStepCancelledError('Selection was empty, dialog aborted');
         } else {
           this.current?.hide();
           throw err;
@@ -273,7 +270,7 @@ export class MultiStepInput<T extends MSStateBase> {
         input.onDidAccept(() => {
           if (params.canSelectMany) {
             if (input.selectedItems.length === 0) {
-              reject(InputFlowAction.abortEmptySelection);
+              logErrorMessage('No items selected. Please select at least one item or press ESC to cancel.');
               return;
             }
             resolve(input.selectedItems as QuickPickResult<T, M>);
