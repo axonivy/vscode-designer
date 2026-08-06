@@ -10,6 +10,8 @@ import type { AddCommandSelectionContext } from './ivy-project-explorer';
 import { MultiStepCancelledError, MultiStepInput, type InputStep, type MSStateBase, type ProjectSelection } from './utils/multi-step-input';
 import { validateExportPath } from './utils/util';
 
+const MVN_COMMAND = 'mvn -B -ntp com.axonivy.ivy.ci:project-build-plugin:pack-iar';
+
 const outputChannel = window.createOutputChannel('Axon Ivy Export');
 
 const showExportLog = () => {
@@ -59,7 +61,9 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
       canSelectFiles: false,
       canSelectFolders: true,
       canSelectMany: false,
-      defaultUri: state.targetFolderUri,
+      // defaultUri: state.targetFolderUri,
+      // TODO: REMOVE, just for testing
+      defaultUri: Uri.file('/home/dominik/Desktop/testExport'),
       title: `Target folder for ${state.ext} file`,
       openLabel: 'Select folder'
     });
@@ -122,7 +126,9 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
     currentStep: 1,
     totalSteps: steps.length,
     projects: [],
-    ext: '.iar'
+    ext: '.iar',
+    // TODO: REMOVE, just for testing
+    targetFilename: 'asdf'
   };
 
   try {
@@ -196,7 +202,8 @@ const exportIar = async (
 
   // Run Maven command
   try {
-    mvnOutput = await runMavenCommand(projectToExport.path, 'mvn -B -ntp package', outputChannel);
+    // TODO: Use command.executeCommand() instead of runMavenCommand to use VSCode specific mvn binary. Problem: Find out created file path from mvn output?
+    mvnOutput = await runMavenCommand(projectToExport.path, MVN_COMMAND, outputChannel);
   } catch (error) {
     logErrorIvyExport(`Failed to run Maven command for project ${projectToExport.label}: ${(error as Error).message}`);
     return;
@@ -247,7 +254,7 @@ const exportZip = async (
 
       // Run Maven command
       try {
-        mvnOutput = await runMavenCommand(projectToExport.path, 'mvn -B -ntp package', outputChannel);
+        mvnOutput = await runMavenCommand(projectToExport.path, MVN_COMMAND, outputChannel);
       } catch (error) {
         logErrorIvyExport(`Failed to run Maven command for project ${projectToExport.label}: ${(error as Error).message}`);
         return;
