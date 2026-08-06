@@ -23,7 +23,8 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
       canSelectMany: true,
       title: state.dialogTitle,
       titleSuffix: ' - Choose projects to export',
-      placeholder: 'Select projects',
+      placeholder:
+        'If you select multiple projects, they will be exported as a single .zip file. If you select only one project, it will be exported as a .iar file.',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       selectedItems: selectedProjects,
@@ -122,4 +123,7 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
   }
 
   logInformationMessage(JSON.stringify(exportProjectData));
+
+  // Execute Maven Command
+  //
 };
