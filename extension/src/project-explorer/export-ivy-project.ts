@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'path';
-import type { Uri } from 'vscode';
-import { window } from 'vscode';
+import type { Progress, Uri } from 'vscode';
+import { commands, ProgressLocation, window } from 'vscode';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import type { AddCommandSelectionContext } from './ivy-project-explorer';
 import { MultiStepCancelledError, MultiStepInput, type InputStep, type MSStateBase, type ProjectSelection } from './utils/multi-step-input';
@@ -16,19 +16,21 @@ interface ExportProjectsState extends MSStateBase {
 
 export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSelectionContext) => {
   const existingProjects = addCommandSelectionContext.existingIvyProjects;
-  let selectedProjects: ProjectSelection[] = [];
+  const existingProjectsWithPom = existingProjects.filter(project => {
+    return fs.existsSync(path.join(project, 'pom.xml'));
+  });
 
   const stepProjects: InputStep<ExportProjectsState> = async (input: MultiStepInput<ExportProjectsState>, state: ExportProjectsState) => {
-    state.projects = await input.showQuickPick<ProjectSelection, true>({
+    const selectedProjects = await input.showQuickPick<ProjectSelection, true>({
       canSelectMany: true,
       title: state.dialogTitle,
-      titleSuffix: ' - Choose projects to export',
+      titleSuffix: ' - Choose projects to export (must contain pom.xml file in root)',
       placeholder:
         'If you select multiple projects, they will be exported as a single .zip file. If you select only one project, it will be exported as a .iar file.',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
-      selectedItems: selectedProjects,
-      items: existingProjects.map(project => {
+      selectedItems: state.projects,
+      items: existingProjectsWithPom.map(project => {
         return {
           label: path.basename(project),
           description: project,
@@ -36,7 +38,7 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
         };
       })
     });
-    selectedProjects = state.projects;
+    state.projects = selectedProjects;
     state.ext = selectedProjects.length > 1 ? '.zip' : '.iar';
   };
 
@@ -122,8 +124,38 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
     }
   }
 
-  logInformationMessage(JSON.stringify(exportProjectData));
+  if (!exportProjectData.targetFolderUri || !exportProjectData.targetFilename) {
+    logErrorMessage('Export Axon Ivy Project: Target folder or filename not selected. Export cancelled.');
+    return;
+  }
+  await window.withProgress(
+    {
+      location: ProgressLocation.Notification,
+      cancellable: false,
+      title: `Axon Ivy Export`
+    },
+    async progress => await exportTask(exportProjectData.projects, progress)
+  );
+};
 
-  // Execute Maven Command
-  //
+const exportTask = async (projectsToExport: ProjectSelection[], progress: Progress<{ message?: string; increment?: number }>) => {
+  let exportedCount = 0;
+  const failedProjects: ProjectSelection[] = [];
+  const numOfProjects = projectsToExport.length;
+  for (const project of projectsToExport) {
+    progress.report({
+      message: `Exporting ${exportedCount + 1} of ${numOfProjects} project(s)\n\n${failedProjects.length > 0 ? `Failed to export ${failedProjects.length} project(s).` : ''}`
+    });
+    const projectPomPath = path.join(project.path, 'pom.xml');
+    try {
+      await commands.executeCommand('maven.goal.package', { pomPath: projectPomPath });
+      exportedCount++;
+    } catch (error) {
+      logErrorMessage(`Failed to export project ${project.path}: ${error}`);
+      failedProjects.push(project);
+    }
+    progress.report({
+      increment: (1 / numOfProjects) * 100
+    });
+  }
 };
