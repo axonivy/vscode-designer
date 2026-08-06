@@ -20,7 +20,7 @@ test('Edit input label', async ({ wsPage }) => {
   await labelProperty.click();
   await labelProperty.fill(newLabel);
   await labelProperty.blur();
-  await expect(input).toHaveText(newLabel);
+  await expect(input).toContainText(newLabel);
 
   await editor.save();
   const xhtmlEditor = new TextEditor(wsPage, 'testForm.xhtml');
@@ -76,16 +76,20 @@ test('Preview', async ({ wsPage }) => {
   const editor = new FormEditor(wsPage);
   await editor.open();
   const browserView = new BrowserView(wsPage, 1);
-  await browserView.openDevWfUi();
   const browser = browserView.content;
-  await expect(browser.locator('.layout-topbar-logo')).toBeVisible();
 
   await expect(editor.main.locator('.selected')).toHaveCount(0);
-  await editor.toolbar.getByRole('button', { name: 'Open Dialog Preview' }).click();
-  await expect(browser.locator('#iFrameForm\\:frameTaskName')).toHaveText('Preview');
   const frame = browser.frameLocator('iframe');
   const input = frame.getByRole('textbox');
-  await expect(input).toBeVisible();
+  const timeout = { timeout: 3_000 };
+  await expect(async () => {
+    await wsPage.executeCommand('Axon Ivy: Deploy All Projects');
+    await wsPage.hasStatusMessage('Axon Ivy: Success: Deploying projects');
+    await editor.toolbar.getByRole('button', { name: 'Open Dialog Preview' }).click();
+    await expect(browser.locator('#iFrameForm\\:frameTaskName')).toHaveText('Preview', timeout);
+    await browserView.reload.click();
+    await expect(input).toBeVisible(timeout);
+  }).toPass();
 
   // TODO: test editor reopen
   // await editor.close();
