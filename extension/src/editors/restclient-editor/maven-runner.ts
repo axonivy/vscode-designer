@@ -1,3 +1,5 @@
+// TODO: Move this utility function to a shared location so that it can be used in other parts of the extension as well. E.g. used in export-ivy-project.ts
+
 import { exec } from 'child_process';
 import { window, type OutputChannel } from 'vscode';
 
