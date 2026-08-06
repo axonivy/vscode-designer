@@ -257,19 +257,20 @@ const exportZip = async (
 
       // Run Maven command
       try {
+        // TODO: Use command.executeCommand() instead of runMavenCommand to use VSCode specific mvn binary. Problem: Find out created file path from mvn output?
         mvnOutput = await runMavenCommand(projectToExport.path, MVN_COMMAND, outputChannel);
       } catch (error) {
         logErrorIvyExport(`Failed to run Maven command for project ${projectToExport.label}: ${(error as Error).message}`);
         return;
       }
 
-      // Extract exported file path and copy to tmp folder
+      // Extract exported file path and copy to tmp folder with project name as filename
       try {
         const exportedFilePath = extractExportedFilePath(mvnOutput);
-        const exportedFileName = path.basename(exportedFilePath);
-        const tempExportedFilePath = path.join(tmpDir, exportedFileName);
+        const tempExportedFilePath = path.join(tmpDir, `${projectToExport.label}.iar`); // name the .iar files after the project name, not the original export name from mvn cmd
         await copyFile(exportedFilePath, tempExportedFilePath);
         exportedFiles.push(tempExportedFilePath);
+        outputChannel.appendLine(`Copied export file ${exportedFilePath} to temporary folder: ${tempExportedFilePath}`);
       } catch (error) {
         logErrorIvyExport(`Failed to export project ${projectToExport.label}: ${(error as Error).message}`);
         failedProjects.push(projectToExport);
