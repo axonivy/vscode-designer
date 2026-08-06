@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { copyFile, mkdtemp } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'path';
-import { ProgressLocation, Uri, window, type Progress } from 'vscode';
+import { commands, ProgressLocation, Uri, window, type Progress } from 'vscode';
 import { logErrorMessage, logErrorMessageWithActions, logInformationMessage, logInformationMessageWithActions } from '../base/logging-util';
 import { runMavenCommand } from '../editors/restclient-editor/maven-runner';
 import type { AddCommandSelectionContext } from './ivy-project-explorer';
@@ -185,7 +185,7 @@ const exportTask = async (
 
 const exportIar = async (
   projectToExport: ProjectSelection,
-  targetPath: string,
+  targetFilePath: string,
   progress: Progress<{ message?: string; increment?: number }>
 ) => {
   progress.report({
@@ -205,7 +205,7 @@ const exportIar = async (
   // Extract exported file path and copy to target path
   try {
     const exportedFilePath = extractExportedFilePath(mvnOutput);
-    await copyFile(exportedFilePath, targetPath);
+    await copyFile(exportedFilePath, targetFilePath);
     progress.report({
       increment: 100
     });
@@ -214,7 +214,18 @@ const exportIar = async (
     return;
   }
 
-  logInfoIvyExport(`Exported project ${projectToExport.label} to ${targetPath}`);
+  logInformationMessageWithActions(`Exported project ${projectToExport.label} to ${targetFilePath}`, {
+    'Show Export Log': () => {
+      showExportLog();
+    },
+    'Reveal in Explorer': () => {
+      try {
+        commands.executeCommand('revealFileInOS', Uri.file(targetFilePath));
+      } catch {
+        return;
+      }
+    }
+  });
 };
 
 const exportZip = async (
@@ -277,7 +288,18 @@ const exportZip = async (
         return;
       }
     }
-    logInfoIvyExport(`Exported ${exportedFiles.length} projects to ${targetFilePath}`);
+    logInformationMessageWithActions(`Exported ${exportedFiles.length} projects to ${targetFilePath}`, {
+      'Show Export Log': () => {
+        showExportLog();
+      },
+      'Reveal in Explorer': () => {
+        try {
+          commands.executeCommand('revealFileInOS', Uri.file(targetFilePath));
+        } catch {
+          return;
+        }
+      }
+    });
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
@@ -298,14 +320,6 @@ const extractExportedFilePath = (mvnOutput: string): string => {
     );
   }
   return exportedFilePath;
-};
-
-const logInfoIvyExport = (message: string) => {
-  logInformationMessageWithActions(message, {
-    'Show Export Log': () => {
-      showExportLog();
-    }
-  });
 };
 
 const logErrorIvyExport = (message: string) => {
