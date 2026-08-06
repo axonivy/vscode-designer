@@ -1,17 +1,24 @@
+import AdmZip from 'adm-zip';
 import fs from 'node:fs';
+import { copyFile, mkdtemp } from 'node:fs/promises';
 import path from 'path';
-import type { Progress, Uri } from 'vscode';
-import { commands, ProgressLocation, window } from 'vscode';
+import { ProgressLocation, Uri, window, type Progress } from 'vscode';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
+import { runMavenCommand } from '../editors/restclient-editor/maven-runner';
 import type { AddCommandSelectionContext } from './ivy-project-explorer';
 import { MultiStepCancelledError, MultiStepInput, type InputStep, type MSStateBase, type ProjectSelection } from './utils/multi-step-input';
 import { validateExportPath } from './utils/util';
+
+const outputChannel = window.createOutputChannel('Axon Ivy Export');
+
+type ExtensionType = '.iar' | '.zip';
+const ALLOWED_EXTENSIONS = ['.iar', '.zip'] as const;
 
 interface ExportProjectsState extends MSStateBase {
   projects: ProjectSelection[];
   targetFolderUri?: Uri | undefined;
   targetFilename?: string | undefined;
-  ext: '.iar' | '.zip';
+  ext: ExtensionType;
 }
 
 export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSelectionContext) => {
@@ -47,7 +54,9 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
       canSelectFiles: false,
       canSelectFolders: true,
       canSelectMany: false,
-      defaultUri: state.targetFolderUri,
+      // defaultUri: state.targetFolderUri,
+      // TODO: REMOVE LATER
+      defaultUri: Uri.file('/home/dominik/Desktop/testExport'),
       title: `Target folder for ${state.ext} file`,
       openLabel: 'Select folder'
     });
@@ -90,7 +99,9 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
       placeholder: 'Enter a name. Must start with a letter or underscore. Allowed characters: a-z, A-Z, 0-9, _',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
-      value: state.targetFilename,
+      // value: state.targetFilename,
+      // TODO: REMOVE LATER
+      value: 'asdf',
       prompt: buildTargetPathPrompt(state.targetFilename ?? ''),
       validationFunction: (value: string) => validateExportPath(value, state.targetFolderUri as Uri, state.ext),
       onBack: (typedValue: string) => {
@@ -128,34 +139,125 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
     logErrorMessage('Export Axon Ivy Project: Target folder or filename not selected. Export cancelled.');
     return;
   }
+  const targetFilePath = path.join(exportProjectData.targetFolderUri.fsPath, exportProjectData.targetFilename + exportProjectData.ext);
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
       cancellable: false,
-      title: `Axon Ivy Export`
+      title: `Axon Ivy Export ${exportProjectData.ext}`
     },
-    async progress => await exportTask(exportProjectData.projects, progress)
+    async progress => await exportTask(exportProjectData.projects, targetFilePath, progress)
   );
 };
 
-const exportTask = async (projectsToExport: ProjectSelection[], progress: Progress<{ message?: string; increment?: number }>) => {
+const exportTask = async (
+  projectsToExport: ProjectSelection[],
+  targetFilePath: string,
+  progress: Progress<{ message?: string; increment?: number }>
+) => {
+  if (projectsToExport.length === 0) {
+    logErrorMessage('No projects selected for export. Export cancelled.');
+    return;
+  }
+
+  if (projectsToExport.length === 1) {
+    const projectToExport = projectsToExport[0] as ProjectSelection;
+    await exportIar(projectToExport, targetFilePath, progress);
+  } else {
+    await exportZip(projectsToExport, targetFilePath, progress);
+  }
+};
+
+const exportZip = async (
+  projectsToExport: ProjectSelection[],
+  targetFilePath: string,
+  progress: Progress<{ message?: string; increment?: number }>
+) => {
+  const numOfProjects = projectsToExport.length;
   let exportedCount = 0;
   const failedProjects: ProjectSelection[] = [];
-  const numOfProjects = projectsToExport.length;
-  for (const project of projectsToExport) {
-    progress.report({
-      message: `Exporting ${exportedCount + 1} of ${numOfProjects} project(s)\n\n${failedProjects.length > 0 ? `Failed to export ${failedProjects.length} project(s).` : ''}`
-    });
-    const projectPomPath = path.join(project.path, 'pom.xml');
-    try {
-      await commands.executeCommand('maven.goal.package', { pomPath: projectPomPath });
+  const exportedFiles: string[] = [];
+  const tmpDir = await mkdtemp('axon-ivy-export-');
+
+  logInformationMessage(`tmpDir: ${tmpDir}`);
+
+  try {
+    for (const project of projectsToExport) {
+      progress.report({
+        message: `Exporting ${exportedCount + 1} of ${numOfProjects} project(s) - ${project.label}\n\n${failedProjects.length > 0 ? `Failed to export ${failedProjects.length} project(s).` : ''}`
+      });
+      try {
+        const outputMvnCommand = await runMavenCommand(project.path, 'mvn -B -ntp package', outputChannel);
+        const matchMvnOutput = outputMvnCommand.match(new RegExp(String.raw`^\[INFO\]\s+Building zip:\s+(.+)$`, 'm'));
+        if (!matchMvnOutput || !matchMvnOutput[1]) {
+          throw new Error(`Exported file path not found in Maven output. Output:\n${outputMvnCommand}`);
+        }
+        const exportedFilePath = matchMvnOutput[1].trim();
+        if (!fs.existsSync(exportedFilePath)) {
+          throw new Error(`Exported file does not exist on disk at path: ${exportedFilePath}`);
+        }
+        if (!ALLOWED_EXTENSIONS.includes(path.extname(exportedFilePath) as ExtensionType)) {
+          throw new Error(
+            `Exported file has an invalid extension: ${path.extname(exportedFilePath)}. Allowed extensions are: ${ALLOWED_EXTENSIONS.join(', ')}`
+          );
+        }
+        const exportedFileName = path.basename(exportedFilePath);
+        const tempExportedFilePath = path.join(tmpDir, exportedFileName);
+        await copyFile(exportedFilePath, tempExportedFilePath);
+        exportedFiles.push(tempExportedFilePath);
+      } catch (error) {
+        logErrorMessage(`Failed to export project ${project.label}: ${(error as Error).message}`);
+        failedProjects.push(project);
+      }
       exportedCount++;
-    } catch (error) {
-      logErrorMessage(`Failed to export project ${project.path}: ${error}`);
-      failedProjects.push(project);
+      progress.report({
+        increment: (1 / numOfProjects) * 100
+      });
+
+      if (failedProjects.length > 0) {
+        throw new Error(`Failed to export ${failedProjects.length} project(s). Export cancelled.`);
+      }
+
+      const zip = new AdmZip();
+      exportedFiles.forEach(file => {
+        zip.addLocalFile(file);
+      });
+      zip.writeZip(targetFilePath);
     }
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+};
+
+const exportIar = async (
+  projectToExport: ProjectSelection,
+  targetPath: string,
+  progress: Progress<{ message?: string; increment?: number }>
+) => {
+  progress.report({
+    message: `Exporting project - ${projectToExport.label}`
+  });
+  try {
+    const outputMvnCommand = await runMavenCommand(projectToExport.path, 'mvn -B -ntp package', outputChannel);
+    const matchMvnOutput = outputMvnCommand.match(new RegExp(String.raw`^\[INFO\]\s+Building zip:\s+(.+)$`, 'm'));
+    if (!matchMvnOutput || !matchMvnOutput[1]) {
+      throw new Error(`Exported file path not found in Maven output. Output:\n${outputMvnCommand}`);
+    }
+    const exportedFilePath = matchMvnOutput[1].trim();
+    if (!fs.existsSync(exportedFilePath)) {
+      throw new Error(`Exported file does not exist on disk at path: ${exportedFilePath}`);
+    }
+    if (!ALLOWED_EXTENSIONS.includes(path.extname(exportedFilePath) as ExtensionType)) {
+      throw new Error(
+        `Exported file has an invalid extension: ${path.extname(exportedFilePath)}. Allowed extensions are: ${ALLOWED_EXTENSIONS.join(', ')}`
+      );
+    }
+    await copyFile(exportedFilePath, targetPath);
     progress.report({
-      increment: (1 / numOfProjects) * 100
+      increment: 100
     });
+  } catch (error) {
+    logErrorMessage(`Failed to export project ${projectToExport.label}: ${(error as Error).message}`);
+    throw error;
   }
 };
