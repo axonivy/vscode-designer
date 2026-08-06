@@ -1,6 +1,7 @@
 import AdmZip from 'adm-zip';
 import fs from 'node:fs';
 import { copyFile, mkdtemp } from 'node:fs/promises';
+import os from 'node:os';
 import path from 'path';
 import { ProgressLocation, Uri, window, type Progress } from 'vscode';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
@@ -54,9 +55,7 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
       canSelectFiles: false,
       canSelectFolders: true,
       canSelectMany: false,
-      // defaultUri: state.targetFolderUri,
-      // TODO: REMOVE LATER
-      defaultUri: Uri.file('/home/dominik/Desktop/testExport'),
+      defaultUri: state.targetFolderUri,
       title: `Target folder for ${state.ext} file`,
       openLabel: 'Select folder'
     });
@@ -99,9 +98,7 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
       placeholder: 'Enter a name. Must start with a letter or underscore. Allowed characters: a-z, A-Z, 0-9, _',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
-      // value: state.targetFilename,
-      // TODO: REMOVE LATER
-      value: 'asdf',
+      value: state.targetFilename,
       prompt: buildTargetPathPrompt(state.targetFilename ?? ''),
       validationFunction: (value: string) => validateExportPath(value, state.targetFolderUri as Uri, state.ext),
       onBack: (typedValue: string) => {
@@ -139,7 +136,16 @@ export const exportIvyProjects = async (addCommandSelectionContext: AddCommandSe
     logErrorMessage('Export Axon Ivy Project: Target folder or filename not selected. Export cancelled.');
     return;
   }
+
   const targetFilePath = path.join(exportProjectData.targetFolderUri.fsPath, exportProjectData.targetFilename + exportProjectData.ext);
+
+  if (exportProjectData.ext === '.zip') {
+    await window.showInformationMessage(
+      'Creating a .zip file will not automatically include all Axon Ivy dependencies of the selected projects.\nYou are responsible for ensuring that all necessary dependencies are selected',
+      { modal: true } // blocks until user chooses/dismisses
+    );
+  }
+
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
@@ -177,10 +183,7 @@ const exportZip = async (
   let exportedCount = 0;
   const failedProjects: ProjectSelection[] = [];
   const exportedFiles: string[] = [];
-  const tmpDir = await mkdtemp('axon-ivy-export-');
-
-  logInformationMessage(`tmpDir: ${tmpDir}`);
-
+  const tmpDir = await mkdtemp(path.join(os.tmpdir(), 'axon-ivy-export-'));
   try {
     for (const project of projectsToExport) {
       progress.report({
