@@ -2,7 +2,7 @@ import { XMLParser } from 'fast-xml-parser';
 import fs from 'node:fs';
 import path from 'path';
 import type { FileStat } from 'vscode';
-import { FileType, Uri, window, workspace } from 'vscode';
+import { FileType, InputBoxValidationSeverity, Uri, window, workspace } from 'vscode';
 
 const defaultNamespaceOf = (projecDir: string) => {
   const designerPrefs = Uri.joinPath(Uri.file(projecDir), 'pom.xml');
@@ -112,7 +112,10 @@ export const validateNamespace = (value: string) => {
 export const validateExportPath = (fileName: string, folderPath: Uri) => {
   const filePath = path.join(folderPath.fsPath, `${fileName}.iar`);
   if (fs.existsSync(filePath)) {
-    return `File already exists: ${filePath}. Please choose a different folder or file name.`;
+    return {
+      message: `File already exists: ${filePath}. File will be overwritten if you proceed.`,
+      severity: InputBoxValidationSeverity.Warning
+    };
   }
 };
 

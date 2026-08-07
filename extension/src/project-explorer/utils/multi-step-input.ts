@@ -1,6 +1,6 @@
 import path from 'path';
-import type { InputBox, QuickInput, QuickPickItem } from 'vscode';
-import { Disposable, QuickInputButtons, Uri, window } from 'vscode';
+import type { InputBox, InputBoxValidationMessage, QuickInput, QuickPickItem } from 'vscode';
+import { Disposable, InputBoxValidationSeverity, QuickInputButtons, Uri, window } from 'vscode';
 import { logErrorMessage } from '../../base/logging-util';
 import { type AddCommandSelectionContext } from '../ivy-project-explorer';
 import { resolveNamespaceFromPath, type ResourceDirectoryTarget } from './util';
@@ -100,7 +100,7 @@ interface TextInputParameters {
   value?: string;
   prompt?: string;
   placeholder?: string;
-  validationFunction?: (value: string) => string | undefined;
+  validationFunction?: (value: string) => string | InputBoxValidationMessage | undefined;
   onBack?: (typedValue: string) => void;
   onChange?: (typedValue: string, input: InputBox) => void;
   ignoreFocusOut?: boolean;
@@ -205,7 +205,7 @@ export class MultiStepInput<T extends MSStateBase> {
           input.enabled = false;
           input.busy = true;
           const validationResult = validationFunction ? validationFunction(input.value) : '';
-          if (validationResult) {
+          if (typeof validationResult === 'string' ? validationResult : validationResult?.severity === InputBoxValidationSeverity.Error) {
             input.validationMessage = validationResult;
           } else {
             resolve(input.value);

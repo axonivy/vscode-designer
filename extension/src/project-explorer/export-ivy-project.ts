@@ -114,11 +114,6 @@ export const exportIvyProject = async (addCommandSelectionContext: AddCommandSel
   const targetFileName = exportProjectData.targetFilename;
   const targetFilePath = path.join(targetFolder, targetFileName + '.iar');
 
-  if (fs.existsSync(targetFilePath)) {
-    logErrorMessage(`Export Axon Ivy Project: Target file already exists at path: ${targetFilePath}. Export cancelled.`);
-    return;
-  }
-
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
