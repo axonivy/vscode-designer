@@ -390,6 +390,11 @@
         "category": "Axon Ivy"
       },
       {
+        "command": "ivyProjects.exportIvyProject",
+        "title": "Export Axon Ivy Project Archive (.iar)",
+        "category": "Axon Ivy"
+      },
+      {
         "command": "ivyProjects.installLocalMarketProduct",
         "title": "Install Local Market Product",
         "category": "Axon Ivy"
@@ -885,6 +890,10 @@
         {
           "command": "ivyProjects.importIvyProject",
           "when": "view == ivyProjects || view == workbench.explorer.fileView"
+        },
+        {
+          "command": "ivyProjects.exportIvyProject",
+          "when": "view == ivyProjects || view == workbench.explorer.fileView"
         }
       ],
       "explorer/context": [
@@ -1021,6 +1030,11 @@
         {
           "command": "ivyProjects.addDependency",
           "group": "run@5",
+          "when": "ivy:hasIvyProjects"
+        },
+        {
+          "command": "ivyProjects.exportIvyProject",
+          "group": "run@6",
           "when": "ivy:hasIvyProjects"
         }
       ]
