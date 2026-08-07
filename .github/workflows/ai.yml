@@ -1,0 +1,74 @@
+name: AI-build
+on:
+  schedule:
+    - cron: '0 1 * * 0' # 1 AM on Sunday
+  push:
+    branches:
+      - ai.tests
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  copilot-requests: write
+
+jobs:
+  copilot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Setup Java JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: 25
+          distribution: temurin
+      - name: Setup Maven
+        uses: stCarolas/setup-maven@v5.1
+        with:
+          maven-version: 3.9.13
+      - name: Build VSC
+        run: |
+          corepack enable
+          pnpm install
+          pnpm run build:production
+          pnpm run package
+      # - name: Start VS Code host with extension and MCP
+      #   run: |
+      #     bash .github/workflows/mcp.sh $PWD/playwright/tests/workspaces
+      - name: Build with Maven
+        run: |
+          export HOST_UID="$(id -u)"
+          export HOST_GID="$(id -g)"
+          mvn clean verify -f aitest/pom.xml -ntp
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TESTCONTAINERS_REUSE_ENABLE: 'false'
+      - name: Normalize CI user-data permissions
+        if: failure()
+        run: |
+          if [ -d ci-user-data ]; then
+            chmod -R u+rwX ci-user-data || true
+            chown -R "$(id -u):$(id -g)" ci-user-data || true
+          fi
+      - name: Archive test reports
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: test-reports
+          retention-days: 5
+          path: |
+            ci-user-data/logs/**/*
+            ci-user-data/code-insiders.log
+            ci-user-data/xvfb-errors.log
+            **/*.log
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            */target/*-reports/*.xml
+            !*/target/*-reports/failsafe-summary.xml
+          action_fail: true
