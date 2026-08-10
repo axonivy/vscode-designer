@@ -15,12 +15,12 @@ export const engineReleaseTrain = () => {
   return extensionVersion.isPreview ? 'nightly' : `${extensionVersion.major}.${extensionVersion.minor}`;
 };
 
-export const engineDirFromGlobalState = (contentx: ExtensionContext, releaseTrain: string) => {
-  return contentx.globalState.get<string>(`axonivy.${releaseTrain}`);
+export const engineDirFromGlobalState = (context: ExtensionContext, releaseTrain: string) => {
+  return context.globalState.get<string>(`axonivy.${releaseTrain}`);
 };
 
-export const updateGlobalStateEngineDir = async (contentx: ExtensionContext, releaseTrain: string, engineDir: string) => {
-  await contentx.globalState.update(`axonivy.${releaseTrain}`, engineDir);
+export const updateGlobalStateEngineDir = async (context: ExtensionContext, releaseTrain: string, engineDir: string) => {
+  await context.globalState.update(`axonivy.${releaseTrain}`, engineDir);
 };
 
 export const switchEngineReleaseTrain = async (reason?: string) => {

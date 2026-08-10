@@ -85,7 +85,7 @@ export class IvyEngineManager {
     const engineDownloader = new EngineDownloader(this.context);
     const globalStateEngineDir = engineDirFromGlobalState(this.context, releaseTrain);
     if (globalStateEngineDir && (await releaseTrainValidator.isValidEngineDir(globalStateEngineDir)).valid) {
-      engineDownloader.tryToUpdateDevEngine(releaseTrain);
+      engineDownloader.tryToUpdateDevEngine(releaseTrain, globalStateEngineDir);
       this.resolvedEngineDir = globalStateEngineDir;
       return globalStateEngineDir;
     }
