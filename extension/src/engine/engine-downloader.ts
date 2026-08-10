@@ -33,7 +33,7 @@ export class EngineDownloader {
     );
   };
 
-  tryToUpdateDevEngine = async (releaseTrain: string) => {
+  tryToUpdateDevEngine = async (releaseTrain: string, globalStateEngineDir: string) => {
     try {
       const url = this.downloadUrl(releaseTrain);
       const response = await fetch(url);
@@ -43,6 +43,11 @@ export class EngineDownloader {
       const zipName = path.basename(response.url);
       const enginePath = path.join(this.globalEngieStoragePath, zipName.replace('.zip', ''));
       if (fs.existsSync(enginePath)) {
+        if (globalStateEngineDir !== enginePath) {
+          engineOutputChannel.appendLine(`New Dev Axon Ivy Engine Version available locally, updating engine path to ${enginePath}`);
+          await updateGlobalStateEngineDir(this.context, releaseTrain, enginePath);
+          await askToReloadWindow('Axon Ivy Engine updated');
+        }
         return;
       }
       const selection = await logInformationMessage(
