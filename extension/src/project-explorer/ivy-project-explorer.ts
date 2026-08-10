@@ -125,9 +125,10 @@ export class IvyProjectExplorer {
     configWatcher.onDidChange(deployProject);
     const pomWatcher = workspace.createFileSystemWatcher('**/pom.xml', true, false, true);
     pomWatcher.onDidChange(deployProject);
-    const m2eDepsWatcher = workspace.createFileSystemWatcher('**/target/m2e.deps', false, false, true);
-    m2eDepsWatcher.onDidCreate(deployProject);
-    m2eDepsWatcher.onDidChange(deployProject);
+    const mvnDepsWatcher = workspace.createFileSystemWatcher('**/target/lib/mvn-deps/*.jar');
+    mvnDepsWatcher.onDidCreate(deployProject);
+    mvnDepsWatcher.onDidChange(deployProject);
+    mvnDepsWatcher.onDidDelete(deployProject);
     const targetWatcher = workspace.createFileSystemWatcher('**/target/classes/**/*.*');
     const invalidateClassLoader = (uri: Uri) => {
       if (hasDeployActionInQueue()) {
@@ -144,7 +145,7 @@ export class IvyProjectExplorer {
       webContentWatcher,
       configWatcher,
       pomWatcher,
-      m2eDepsWatcher,
+      mvnDepsWatcher,
       targetWatcher
     );
   }
