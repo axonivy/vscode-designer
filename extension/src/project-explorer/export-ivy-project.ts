@@ -139,7 +139,7 @@ const exportIar = async (
     await commands.executeCommand(
       'maven.goal.custom',
       path.join(projectToExport.path, 'pom.xml'),
-      `com.axonivy.ivy.ci:project-build-plugin:pack-iar -Divy.output.directory="${targetFolder}" -Divy.final.name="${fileName}"`
+      `com.axonivy.ivy.ci:project-build-plugin:pack-iar "-Divy.output.directory=${targetFolder}" "-Divy.final.name=${fileName}"`
     );
   } catch (error) {
     logErrorMessage(`Failed to run Maven command for project ${projectToExport.label}: ${(error as Error).message}`);
