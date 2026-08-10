@@ -26,14 +26,16 @@ test.describe('Engine run by extension', () => {
 
   const readNumberOfJavaProcesses = async (wsPage: WorkspacePage) => {
     // make sure we wait for the processes to terminate before checking again, so read the number of processes until it is stable for 2 seconds
-    let numOfJavaProcesses = -1;
+    let numOfJavaProcesses = -100;
     while (true) {
       const output = execSync('jps -q', { encoding: 'utf8' }).trim();
-      const newValue = output ? output.split(/\r?\n/).length : 0;
+      const newValue = output.split(/\r?\n/).length;
       if (newValue === numOfJavaProcesses) {
         return newValue;
       }
-      numOfJavaProcesses = newValue;
+      if (newValue > 1) {
+        numOfJavaProcesses = newValue;
+      }
       await wsPage.page.waitForTimeout(2_000);
     }
   };
