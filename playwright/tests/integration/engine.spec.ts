@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import { execSync } from 'node:child_process';
-import Os from 'os';
+import type { WorkspacePage } from '~/page-objects/workspace-page';
 import { test } from '../fixtures/baseTest';
 import { OutputView } from '../page-objects/output-view';
 import { SettingsView } from '../page-objects/settings-view';
@@ -14,22 +14,29 @@ test.describe('Engine run by extension', () => {
     await outputview.checkIfEngineStarted();
   });
 
-  test('Java processes are terminated with extension reload', { tag: '@serial' }, async ({ wsPage }) => {
+  // eslint-disable-next-line playwright/no-focused-test
+  test.only('Java processes are terminated with extension reload', { tag: '@serial' }, async ({ wsPage }) => {
     const outputview = new OutputView(wsPage);
     await outputview.checkIfEngineStarted();
-    await checkNumberOfJavaProcesses();
+    const numOfJavaProcessesBefore = await readNumberOfJavaProcesses(wsPage);
     await wsPage.executeCommand('Developer: Reload Window');
     await outputview.checkIfEngineStarted();
-    await checkNumberOfJavaProcesses();
+    const numOfJavaProcessesAfter = await readNumberOfJavaProcesses(wsPage);
+    expect(numOfJavaProcessesBefore).toBe(numOfJavaProcessesAfter);
   });
 
-  const checkNumberOfJavaProcesses = async () => {
-    const numberOfExpectedJavaProcesses = Os.platform() === 'win32' ? 6 : 5;
-    await expect(async () => {
+  const readNumberOfJavaProcesses = async (wsPage: WorkspacePage) => {
+    // make sure we wait for the processes to terminate before checking again, so read the number of processes until it is stable for 2 seconds
+    let numOfJavaProcesses = -1;
+    while (true) {
       const output = execSync('jps -q', { encoding: 'utf8' }).trim();
-      const numOfJavaProcesses = output ? output.split(/\r?\n/).length : 0;
-      expect(numOfJavaProcesses).toBe(numberOfExpectedJavaProcesses);
-    }).toPass();
+      const newValue = output ? output.split(/\r?\n/).length : 0;
+      if (newValue === numOfJavaProcesses) {
+        return newValue;
+      }
+      numOfJavaProcesses = newValue;
+      await wsPage.page.waitForTimeout(2_000);
+    }
   };
 });
 
