@@ -16,6 +16,9 @@ pipeline {
 
   parameters {
     booleanParam(name: 'publishToMarket', defaultValue: false, description: 'Publish to VS Code Marketplace?')
+    string(name: 'qualifier',
+      description: "Optional qualifier (e.g. m7 for Sprint 7). Empty publishes with the date timestamp.",
+      defaultValue: '')
   }
 
   stages {
@@ -43,9 +46,7 @@ pipeline {
       }
       steps {
         withCredentials([string(credentialsId: 'marketplace.visualstudio.com', variable: 'VSCE_PAT')]) {
-          script {
-            sh 'pnpm run publish:next'
-          }
+          sh "QUALIFIER='${params.qualifier}' pnpm run publish:next"
         }
       }
     }
@@ -53,7 +54,7 @@ pipeline {
     stage('Package') {
       steps {
         script {
-          sh 'pnpm run package'
+          sh "QUALIFIER='${params.qualifier}' pnpm run package"
           archiveArtifacts 'extension/**/*.vsix'
         }
       }
