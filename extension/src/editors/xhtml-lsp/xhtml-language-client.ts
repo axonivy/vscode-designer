@@ -35,6 +35,4 @@ export const XhtmlLanguageClientProvider = async (webSocketUrl: URL) => {
   languageClient.start();
 
   languageClient.onRequest(ExecuteClientCommandRequest, params => onExecuteClientCommand(languageClient, params));
-
-  return languageClient;
 };

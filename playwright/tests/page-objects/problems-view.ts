@@ -20,9 +20,18 @@ export class ProblemsView {
   }
 
   private async hasMaker(message: string, type: 'error' | 'warning', pid?: string) {
-    const marker = this.view.locator(`div.monaco-tl-row:has-text("${message}")`).first();
+    let marker = this.view.locator(`div.monaco-tl-row:has-text("${message}")`);
+
+    if (pid) {
+      marker = marker.filter({ hasText: pid });
+    } else {
+      marker = marker.first();
+    }
+
+    await expect(marker).toHaveCount(1);
     await expect(marker).toBeVisible();
     await expect(marker.locator(`div.marker-icon.${type}`)).toBeVisible();
+
     if (pid) {
       await expect(marker).toContainText(pid);
     }
