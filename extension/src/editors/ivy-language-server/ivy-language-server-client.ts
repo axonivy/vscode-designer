@@ -1,4 +1,11 @@
-import { LanguageClient, RequestType, type ExecuteCommandParams, type StreamInfo } from 'vscode-languageclient/node';
+import { workspace } from 'vscode';
+import {
+  LanguageClient,
+  RequestType,
+  type ExecuteCommandParams,
+  type LanguageClientOptions,
+  type StreamInfo
+} from 'vscode-languageclient/node';
 import { createWebSocket, toSocketConnection } from '../../engine/ws-client';
 import { onExecuteClientCommand } from '../xhtml-lsp/client-commands';
 
@@ -16,7 +23,13 @@ export const IvyLanguageServerClientProvider = async (webSocketUrl: URL) => {
     });
   };
 
-  const languageClient = new LanguageClient('Axon Ivy Language Server', serverOptions, {});
+  const clientOptions: LanguageClientOptions = {
+    synchronize: {
+      fileEvents: [workspace.createFileSystemWatcher('**/*.{f,d,p}.json'), workspace.createFileSystemWatcher('**/config/*.yaml')]
+    }
+  };
+
+  const languageClient = new LanguageClient('Axon Ivy Language Server', serverOptions, clientOptions);
   languageClient.start();
 
   languageClient.onRequest(ExecuteClientCommandRequest, params => onExecuteClientCommand(languageClient, params));
