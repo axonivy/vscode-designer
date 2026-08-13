@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'path';
-import { commands, env, ProgressLocation, Uri, window, type Progress } from 'vscode';
+import { commands, env, ProgressLocation, Uri, window, workspace, type Progress } from 'vscode';
 import { showExtensionLog } from '../base/extension-output-channel';
 import { logErrorMessage, logInformationMessageWithActions } from '../base/logging-util';
 import type { AddCommandSelectionContext } from './ivy-project-explorer';
@@ -12,6 +12,8 @@ interface ExportProjectsState extends MSStateBase {
   targetFolderUri?: Uri;
   targetFilename?: string;
 }
+
+let lastTargetFolderUri: Uri | undefined;
 
 export const exportIvyProject = async (addCommandSelectionContext: AddCommandSelectionContext) => {
   const stepProjects: InputStep<ExportProjectsState> = async (input: MultiStepInput<ExportProjectsState>, state: ExportProjectsState) => {
@@ -52,6 +54,7 @@ export const exportIvyProject = async (addCommandSelectionContext: AddCommandSel
         throw new MultiStepCancelledError('Selected target is not a directory. Export cancelled.');
       }
       state.targetFolderUri = selectedUri[0];
+      lastTargetFolderUri = state.targetFolderUri;
     } catch (error) {
       throw new MultiStepCancelledError(`Error accessing target folder. Export cancelled. ${error}`);
     }
@@ -89,7 +92,8 @@ export const exportIvyProject = async (addCommandSelectionContext: AddCommandSel
     dialogTitle: `Export Axon Ivy Project`,
     currentStep: 1,
     totalSteps: steps.length,
-    project: undefined
+    project: undefined,
+    targetFolderUri: lastTargetFolderUri ?? workspace.workspaceFolders?.[0]?.uri
   };
 
   try {
