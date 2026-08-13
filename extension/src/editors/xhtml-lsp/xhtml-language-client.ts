@@ -27,7 +27,7 @@ export const XhtmlLanguageClientProvider = async (webSocketUrl: URL) => {
     documentSelector: [{ language: 'html', scheme: 'file', pattern: '**/*.xhtml' }],
 
     synchronize: {
-      fileEvents: workspace.createFileSystemWatcher('**/*.xhtml')
+      fileEvents: [workspace.createFileSystemWatcher('**/*.{d,p}.json'), workspace.createFileSystemWatcher('**/*.xhtml')]
     }
   };
 
