@@ -14,6 +14,7 @@ test('xhtml definitions', async ({ wsPage }) => {
   const editor = new XhtmlEditor(wsPage);
   await editor.open();
   await wsPage.activateExpensiveJavaStandardMode();
+  await wsPage.hasStatusMessage('Axon Ivy: Success: Invalidating class loader');
   await editor.expectDefinitionAtLineColumn('WorkflowBean.java', 24, 64);
   await editor.expectDefinitionAtLineColumn('IvyJsf.java', 24, 111);
   await editor.expectDefinitionAtLineColumn('IvyJsf.java', 24, 115);
