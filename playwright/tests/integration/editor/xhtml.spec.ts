@@ -25,14 +25,18 @@ test('xhtml preview', async ({ wsPage }) => {
   await editor.open();
   await wsPage.activateExpensiveJavaStandardMode();
   await wsPage.hasReadyStatusMessage();
-  await wsPage.page.waitForTimeout(2_000); // wait for the preview to be ready
   const browserView = new BrowserView(wsPage);
   const browser = browserView.content;
 
-  await wsPage.page.getByRole('button', { name: 'Open Dialog Preview' }).click();
   const frame = browser.frameLocator('iframe');
   const button = frame.getByRole('button', { name: 'Proceed' });
-  await expect(button).toBeVisible();
+
+  await expect(async () => {
+    await wsPage.executeCommand('Axon Ivy: Deploy All Projects');
+    await wsPage.hasStatusMessage('Axon Ivy: Success: Deploying projects');
+    await wsPage.page.getByRole('button', { name: 'Open Dialog Preview' }).click();
+    await expect(button).toBeVisible({ timeout: 3_000 });
+  }).toPass();
 
   await wsPage.closeAllTabs();
 
