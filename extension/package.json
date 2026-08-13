@@ -884,8 +884,8 @@
         "label": "Axon Ivy New..."
       },
       {
-        "id": "explorer.run",
-        "label": "Axon Ivy Run..."
+        "id": "explorer.actions",
+        "label": "Axon Ivy Actions..."
       }
     ],
     "menus": {
@@ -956,7 +956,7 @@
           "group": "1@1"
         },
         {
-          "submenu": "explorer.run",
+          "submenu": "explorer.actions",
           "group": "1@2"
         }
       ],
@@ -1059,36 +1059,41 @@
         {
           "command": "ivyProjects.addNewProject",
           "group": "5_new@1"
-        },
-        {
-          "command": "ivyProjects.importIvyProject",
-          "group": "6_new@1"
         }
       ],
-      "explorer.run": [
+      "explorer.actions": [
         {
-          "command": "ivy.debug.attachProcess",
-          "group": "run@1",
+          "command": "ivyProjects.importIvyProject",
+          "group": "1_actions@1"
+        },
+        {
+          "command": "ivyProjects.exportIvyProject",
+          "group": "1_actions@2",
+          "when": "ivy:hasIvyProjects"
+        },
+        {
+          "command": "ivyProjects.convertProject",
+          "group": "2_actions@1",
           "when": "ivy:hasIvyProjects"
         },
         {
           "command": "ivyProjects.deployProject",
-          "group": "run@2",
-          "when": "ivy:hasIvyProjects"
-        },
-        {
-          "command": "ivyProjects.stopBpmEngine",
-          "group": "run@4",
+          "group": "2_actions@2",
           "when": "ivy:hasIvyProjects"
         },
         {
           "command": "ivyProjects.addDependency",
-          "group": "run@5",
+          "group": "2_actions@3",
           "when": "ivy:hasIvyProjects"
         },
         {
-          "command": "ivyProjects.exportIvyProject",
-          "group": "run@6",
+          "command": "ivyProjects.stopBpmEngine",
+          "group": "2_actions@4",
+          "when": "ivy:hasIvyProjects"
+        },
+        {
+          "command": "ivy.debug.attachProcess",
+          "group": "3_actions@1",
           "when": "ivy:hasIvyProjects"
         }
       ]
