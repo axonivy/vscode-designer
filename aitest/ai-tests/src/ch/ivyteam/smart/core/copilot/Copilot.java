@@ -77,7 +77,7 @@ public class Copilot {
 
   public void mcpCheck() {
     try {
-      var listResult = container.execInContainer("sh", "-c", "copilot mcp list");
+      var listResult = container.execInContainer("sh", "-c", "copilot mcp list --json");
       System.out.println("MCP list exit=" + listResult.getExitCode());
       System.out.println("MCP list stdout: " + listResult.getStdout());
       System.out.println("MCP list stderr: " + listResult.getStderr());
@@ -92,7 +92,7 @@ public class Copilot {
             "if command -v curl >/dev/null 2>&1; then "
                 + "curl -sS -o /dev/null -w '%{http_code}' \"$0\"; "
                 + "else echo 'curl-not-installed'; fi",
-            configuredMcpUrl);
+            configuredMcpUrl.replace("/mcp", "/health"));
         System.out.println("MCP endpoint probe exit=" + endpointResult.getExitCode());
         System.out.println("MCP endpoint probe: " + endpointResult.getStdout());
         System.out.println("MCP endpoint probe stderr: " + endpointResult.getStderr());
