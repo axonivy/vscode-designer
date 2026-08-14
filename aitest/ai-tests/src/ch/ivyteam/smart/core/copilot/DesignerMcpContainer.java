@@ -65,4 +65,8 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
     }
   }
 
+  public String getMcpUri() {
+    return "http://" + NETWORK_ALIAS + ":" + MCP_PORT + "/mcp";
+  }
+
 }

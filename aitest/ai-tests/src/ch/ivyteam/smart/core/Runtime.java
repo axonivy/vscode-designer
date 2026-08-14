@@ -114,11 +114,8 @@ public class Runtime {
       initTestcontainersAspire(copilot);
     }
     copilotContainer.start();
-    String mcpUri = System.getenv("VSCODE_MCP_URI");
-    if (mcpUri == null || mcpUri.isBlank()) {
-      mcpUri = designerMcpContainer != null ? DESIGNER_MCP_URI : DEFAULT_MCP_URI;
-    }
-    copilot.addMcp(mcpUri);
+    //String mcpUri = "http://"+DesignerMcpContainer.NETWORK_ALIAS+":"+DesignerMcpContainer.MCP_PORT+"/mcp";
+    copilot.addMcp(designerMcpContainer.getMcpUri());
   }
 
   public void stop() {
