@@ -4,9 +4,10 @@ import java.time.Duration;
 
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
+
+import ch.ivyteam.smart.core.SysoutLogger;
 
 public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer> {
 
@@ -35,15 +36,7 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
         .forListeningPorts(MCP_PORT)
         .withStartupTimeout(Duration.ofSeconds(600)));
 
-    withLogConsumer(frame -> {
-      if (frame.getType() == OutputFrame.OutputType.END) {
-        return;
-      }
-      String text = frame.getUtf8String();
-      if (!text.isEmpty()) {
-        System.out.print("[DESIGNER:" + frame.getType().name() + "] " + text);
-      }
-    });
+    withLogConsumer(new SysoutLogger(NETWORK_ALIAS));
 
     withCreateContainerCmdModifier(command -> command.withAliases(DesignerMcpContainer.NETWORK_ALIAS));
     withCommand(
@@ -52,6 +45,7 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
             + "./.github/workflows/mcp.sh vscode-designer.code-workspace\n"
             + "exec tail -f /dev/null");
   }
+
 
   private void configureContainerUser() {
     String uid = System.getenv("HOST_UID");
