@@ -48,13 +48,6 @@ jobs:
           COPILOT_TOKEN: ${{ secrets.COPILOT_TOKEN || secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_TOKEN }}
           TESTCONTAINERS_REUSE_ENABLE: 'false'
-      - name: Normalize CI user-data permissions
-        if: failure()
-        run: |
-          if [ -d ci-user-data ]; then
-            chmod -R u+rwX ci-user-data || true
-            chown -R "$(id -u):$(id -g)" ci-user-data || true
-          fi
       - name: Archive test reports
         uses: actions/upload-artifact@v7
         #  if: failure()
