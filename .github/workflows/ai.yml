@@ -69,6 +69,6 @@ jobs:
         if: always()
         with:
           files: |
-            */target/*-reports/*.xml
-            !*/target/*-reports/failsafe-summary.xml
+            aitest/*/target/*-reports/*.xml
+            !aitest/*/target/*-reports/failsafe-summary.xml
           action_fail: true
