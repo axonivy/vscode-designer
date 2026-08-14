@@ -67,11 +67,11 @@ jobs:
             ci-user-data/xvfb-errors.log
             ci-user-data/process*.log
             **/*.log
-      - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
-        with:
-          files: |
-            aitest/*/target/*-reports/*.xml
-            !aitest/*/target/*-reports/failsafe-summary.xml
-          action_fail: true
+      # - name: Publish Test Results
+      #   uses: EnricoMi/publish-unit-test-result-action@v2
+      #   if: always()
+      #   with:
+      #     files: |
+      #       aitest/*/target/*-reports/*.xml
+      #       !aitest/*/target/*-reports/failsafe-summary.xml
+      #     action_fail: true
