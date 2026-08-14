@@ -10,8 +10,8 @@ import org.testcontainers.utility.DockerImageName;
 
 public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer> {
 
-  public static final String NETWORK_ALIAS = "designer-mcp";
-  public static final int MCP_PORT = 32140;
+  private static final String NETWORK_ALIAS = "designer-mcp";
+  private static final int MCP_PORT = 32140;
 
   public DesignerMcpContainer(String workspaceRoot, String javaHome) {
 
@@ -45,7 +45,7 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
       }
     });
 
-
+    withCreateContainerCmdModifier(command -> command.withAliases(DesignerMcpContainer.NETWORK_ALIAS));
     withCommand(
         "bash", "-lc", ""
       //  "set -euo pipefail\n"

@@ -30,22 +30,6 @@ public class Runtime {
   static Copilot copilot;
   static AspireAPI aspireApi;
 
-  private static void initTestcontainersAspire(Copilot copilot) {
-    ensureNetworkExists();
-
-    designerMcpContainer = initDesignerMcpContainer();
-    designerMcpContainer.start();
-    aspireContainer = initAspireContainer();
-    aspireContainer.start();
-
-    copilotContainer = initCopilotContainer();
-    copilotContainer.withNetworkMode(NETWORK_NAME);
-    copilot.otlpEndpoint("http://aspire:18890");
-
-    aspireApi = AspireAPI.create("http://" + aspireContainer.getHost() + ":" + aspireContainer.getMappedPort(18888));
-    System.out.println("Aspire dashboard bound: " + aspireApi);
-  }
-
   @SuppressWarnings("resource")
   private static AspireContainer initAspireContainer() {
     return new AspireContainer()
@@ -60,7 +44,6 @@ public class Runtime {
     String javaHome = System.getenv("JAVA_HOME");
     return new DesignerMcpContainer(workspaceRoot, javaHome)
       .withNetworkMode(NETWORK_NAME)
-      .withCreateContainerCmdModifier(command -> command.withAliases(DesignerMcpContainer.NETWORK_ALIAS))
       .withReuse(reuseContainers);
   }
 
@@ -91,10 +74,23 @@ public class Runtime {
   }
 
   public void start() {
-    copilot = new Copilot(copilotContainer);
     System.out.println("Container reuse: " + reuseContainers);
-    initTestcontainersAspire(copilot);
+    ensureNetworkExists();
+    
+    designerMcpContainer = initDesignerMcpContainer();
+    designerMcpContainer.start();
+    
+    aspireContainer = initAspireContainer();
+    aspireContainer.start();
+    aspireApi = AspireAPI.create("http://" + aspireContainer.getHost() + ":" + aspireContainer.getMappedPort(18888));
+    System.out.println("Aspire dashboard bound: " + aspireApi);
+    
+    copilotContainer = initCopilotContainer();
+    copilotContainer.withNetworkMode(NETWORK_NAME);
     copilotContainer.start();
+    
+    copilot = new Copilot(copilotContainer);
+    copilot.otlpEndpoint("http://aspire:18890");
     copilot.addMcp(designerMcpContainer.getMcpUri());
   }
 
