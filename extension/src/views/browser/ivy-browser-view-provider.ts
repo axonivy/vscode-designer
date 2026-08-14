@@ -1,6 +1,7 @@
 import type { ExtensionContext, Webview, WebviewView, WebviewViewProvider } from 'vscode';
 import { Uri, env, l10n, window } from 'vscode';
 import { executeCommand, registerCommand } from '../../base/commands';
+import { config } from '../../base/configurations';
 import { logErrorMessage } from '../../base/logging-util';
 import { findRootEntry, parseBuildManifest } from '../../editors/build-manifest';
 import { dialogPreviewUrl, isDialogPreviewSupported } from './dialog-preview/dialog-preview-url';
@@ -32,13 +33,12 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
         webviewOptions: { retainContextWhenHidden: true }
       })
     );
-    registerCommand('ivyBrowserView.open', context, (url?: string) => provider.open(url));
     registerCommand('ivyBrowserView.openDevWfUi', context, () => provider.openDevWfUi());
-    registerCommand('ivyBrowserView.openEngineCockpit', context, () => provider.openEngineRelativeUrlExternally('system/engine-cockpit'));
-    registerCommand('ivyBrowserView.openNEO', context, () => provider.openEngineRelativeUrlExternally('neo'));
+    registerCommand('ivyBrowserView.openEngineCockpit', context, () => provider.openEngineRelativeUrl('system/engine-cockpit'));
+    registerCommand('ivyBrowserView.openNEO', context, () => provider.openEngineRelativeUrl('neo'));
     registerCommand('ivyBrowserView.openPreview', context, () => provider.openPreview());
-    context.subscriptions.push(window.tabGroups.onDidChangeTabs(() => void provider.updateDialogPreviewContext()));
-    void provider.updateDialogPreviewContext();
+    context.subscriptions.push(window.tabGroups.onDidChangeTabs(() => provider.updateDialogPreviewContext()));
+    provider.updateDialogPreviewContext();
   }
 
   resolveWebviewView(webviewView: WebviewView) {
@@ -66,22 +66,11 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
   async openEngineRelativeUrl(input: string) {
     // code-server (used for integration browser test) does not support env.asExternalUri
     const engineUrl = env.appName === 'code-server' ? this.engineUri.toString() : (await env.asExternalUri(this.engineUri)).toString();
-    this.refreshWebviewHtml(new URL(input, engineUrl).toString());
+    this.openInBrowser(new URL(input, engineUrl).toString());
   }
 
-  async openEngineRelativeUrlExternally(input: string) {
-    env.openExternal(this.engineUri.with({ path: input }));
-  }
-
-  async open(url?: string) {
-    if (!url) {
-      url =
-        (await window.showInputBox({
-          prompt: 'Enter url',
-          value: 'https://dev.axonivy.com/'
-        })) ?? '';
-    }
-    this.refreshWebviewHtml(url);
+  async open(url: string) {
+    this.openInBrowser(url);
   }
 
   private async openDevWfUi() {
@@ -100,15 +89,28 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
     await executeCommand('setContext', 'ivy:dialogPreviewSupported', await isDialogPreviewSupported());
   }
 
-  private refreshWebviewHtml(url: string) {
-    this.url = url;
-    if (this.view) {
-      this.view.webview.html = this.getWebviewContent(this.view.webview);
+  private openInBrowser(url: string) {
+    switch (config.browser()) {
+      case 'ivyBrowser':
+        this.url = url;
+        if (this.view) {
+          this.view.webview.html = this.getWebviewContent(this.view.webview);
+        }
+        executeCommand(`${IvyBrowserViewProvider.viewType}.focus`);
+        break;
+      case 'externalBrowser':
+        env.openExternal(Uri.parse(url));
+        break;
+      case 'vscodeBrowser':
+      default:
+        executeCommand('workbench.action.browser.open', url);
     }
-    executeCommand(`${IvyBrowserViewProvider.viewType}.focus`);
   }
 
   private getWebviewContent(webview: Webview) {
+    if (config.browser() !== 'ivyBrowser') {
+      return 'internal ivy browser is disabled, see settings: axonivy.browser';
+    }
     const browserCss = this.extensionResourceUrl(webview, 'src', 'views', 'browser', 'media', 'browser.css');
     const root = this.extensionResourceUrl(webview, 'dist', 'webviews', 'browser');
     const manifest = parseBuildManifest(root);

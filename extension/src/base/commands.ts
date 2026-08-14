@@ -21,7 +21,13 @@ export type KnownCommand =
   | EditorCommand
   | 'ivy.addDevContainer'
   | 'ivy.showStatusBarQuickPick';
-type VSCodeCommand = 'setContext' | 'vscode.open' | 'copyFilePath' | 'workbench.action.openSettings' | 'workbench.action.reloadWindow';
+type VSCodeCommand =
+  | 'setContext'
+  | 'vscode.open'
+  | 'copyFilePath'
+  | 'workbench.action.openSettings'
+  | 'workbench.action.reloadWindow'
+  | 'workbench.action.browser.open';
 type EngineCommand =
   | 'engine.deployProjects'
   | 'engine.switchEngineReleaseTrain'
@@ -52,7 +58,6 @@ type ProjectViewCommand =
   | 'ivyProjects.addDependency';
 type ViewCommand =
   | 'ivyBrowserView.focus'
-  | 'ivyBrowserView.open'
   | 'ivyBrowserView.openDevWfUi'
   | 'ivyBrowserView.openEngineCockpit'
   | 'ivyBrowserView.openNEO'

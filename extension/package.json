@@ -95,7 +95,8 @@
         "https://json-schema.axonivy.com/": true
       },
       "html.suggest.html5": false,
-      "java.configuration.updateBuildConfiguration": "automatic"
+      "java.configuration.updateBuildConfiguration": "automatic",
+      "workbench.browser.newTabPlacement": "sideGroup"
     },
     "customEditors": [
       {
@@ -269,11 +270,6 @@
         "category": "Axon Ivy",
         "icon": "$(play)",
         "enablement": "ivy:hasIvyProjects && ivy:dialogPreviewSupported"
-      },
-      {
-        "command": "ivyBrowserView.open",
-        "title": "Open Ivy Browser",
-        "category": "Axon Ivy"
       },
       {
         "command": "ivyPanelView.openRuntimeLog",
@@ -611,6 +607,16 @@
             },
             "markdownDescription": "Configure which validators are enabled workspace-wide. Individual validators can be disabled in the respective editor settings.",
             "additionalProperties": false
+          },
+          "axonivy.browser": {
+            "type": "string",
+            "default": "vscodeBrowser",
+            "enum": [
+              "vscodeBrowser",
+              "ivyBrowser",
+              "externalBrowser"
+            ],
+            "markdownDescription": "Specify which browser to use for opening Axon Ivy content."
           }
         }
       }
