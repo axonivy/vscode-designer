@@ -52,6 +52,7 @@ public class CopilotContainer extends GenericContainer<CopilotContainer> {
       System.out.println(
           "Copilot in GitHub mode: using GitHub token from environment variable COPILOT_TOKEN or GITHUB_TOKEN");
       copilot.withEnv("COPILOT_GITHUB_TOKEN", copilotToken);
+      return;
     }
     throw new IllegalStateException("No OpenAI API key or GitHub token found in environment variables. \n" +
         "Please set OPENAI_API_KEY or COPILOT_TOKEN/GITHUB_TOKEN.");
