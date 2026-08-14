@@ -47,7 +47,7 @@ public class Runtime {
   static CopilotContainer copilotContainer = new CopilotContainer(findWorkspaceRoot().toString())
       // .withEnv("COPILOT_PROVIDER_BASE_URL", OPENAI_API_URL)
       // .withEnv("COPILOT_PROVIDER_API_KEY", OPENAI_API_KEY)
-      .withEnv("COPILOT_GITHUB_TOKEN", System.getenv("GITHUB_TOKEN"))
+      .withEnv("COPILOT_GITHUB_TOKEN", copilotToken())
       .withEnv("COPILOT_MODEL", "gpt-5-mini")
       .withEnv("GITHUB_COPILOT_PROMPT_MODE_WORKSPACE_MCP", "true")
       .withEnv("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "true")
@@ -114,6 +114,11 @@ public class Runtime {
       current = current.getParent();
     }
     throw new IllegalStateException("Could not locate workspace root containing .github/workflows/mcp.sh");
+  }
+
+  private static String copilotToken() {
+    String token = System.getenv("COPILOT_TOKEN");
+    return token == null || token.isBlank() ? System.getenv("GITHUB_TOKEN") : token;
   }
 
   public void start() {

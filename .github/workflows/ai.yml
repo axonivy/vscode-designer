@@ -45,6 +45,7 @@ jobs:
           mvn clean verify -f aitest/pom.xml -ntp
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COPILOT_TOKEN: ${{ secrets.COPILOT_TOKEN || secrets.GITHUB_TOKEN }}
           TESTCONTAINERS_REUSE_ENABLE: 'false'
       - name: Normalize CI user-data permissions
         if: failure()
