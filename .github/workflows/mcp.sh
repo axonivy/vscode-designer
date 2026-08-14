@@ -46,6 +46,7 @@ if [[ -z "${CODE_INSIDERS_BIN}" || ! -x "${CODE_INSIDERS_BIN}" ]]; then
 fi
 
 USER_DATA_DIR="${REPO_ROOT}/ci-user-data"
+echo "Using user-data-dir: ${USER_DATA_DIR}"
 mkdir -p "${USER_DATA_DIR}"
 
 declare -a CODE_INSIDERS_GLOBAL_ARGS=()
@@ -97,7 +98,7 @@ CODE_INSIDERS_LOG="${USER_DATA_DIR}/code-insiders.log"
 XVFB_ERROR_LOG="${USER_DATA_DIR}/xvfb-errors.log"
 CODE_INSIDERS_PID_FILE="${USER_DATA_DIR}/code-insiders.pid"
 MCP_HEALTH_URL="http://127.0.0.1:32140/health"
-MCP_START_TIMEOUT_SEC="90"
+MCP_START_TIMEOUT_SEC="290"
 
 launch_vscode() {
 	local -a args

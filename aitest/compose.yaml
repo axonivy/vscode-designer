@@ -5,7 +5,7 @@ services:
     environment:
       JAVA_HOME: ${JAVA_HOME:?Set JAVA_HOME in your shell before running compose}
     volumes:
-      - ../..:/workspace
+      - ..:/workspace
       - ${JAVA_HOME:?Set JAVA_HOME in your shell before running compose}:${JAVA_HOME:?Set JAVA_HOME in your shell before running compose}:ro
     ports:
       - "32140:32140"
@@ -15,7 +15,7 @@ services:
       - -lc
       - |
         set -euo pipefail
-        ./.github/workflows/mcp.sh vscode-designer.code-workspace
+        /workspace/.github/workflows/mcp.sh vscode-designer.code-workspace
         exec tail -f /dev/null
 
   aspire:
