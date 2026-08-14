@@ -25,7 +25,7 @@ public class Copilot {
             + "cd \"$0\" && "
             + "OTEL_SERVICE_NAME=\"$1\" "
             + "copilot -p \"$2\" "
-            + "--no-ask-user --allow-all-tools -s",
+            + "--no-ask-user --allow-all-tools --allow-all-paths --allow-all-urls -s",
         containerWorkspace, resource, prompt);
     if (result.getExitCode() != 0) {
       throw new RuntimeException("Copilot command failed: " + result.getStderr());
