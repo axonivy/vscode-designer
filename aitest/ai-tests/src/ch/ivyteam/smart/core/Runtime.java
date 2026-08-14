@@ -59,8 +59,8 @@ public class Runtime {
   }
 
   private static void initTestcontainersAspire(Copilot copilot) {
-    network = Network.newNetwork();
-
+    //network = Network.SHARED;
+    network = Network.builder().enableIpv6(true).id("smart-test-network").build();
     
     designerMcpContainer = initDesignerMcpContainer();
     designerMcpContainer.start();
