@@ -17,22 +17,6 @@ public class Runtime {
   private static final String NETWORK_NAME = "smart-test-network";
 
   /*
-  * To keep Aspire alive and observe the traces in its dashboard,
-  * set this flag and start your own Aspire instance:
-  *
-  * ```
-  * docker run -d \
-  * -p 18888:18888 \
-  * -p 4318:18890 \
-  * -e DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true \
-  * -e Dashboard__Api__Enabled=true \
-  * --name aspire \
-  * mcr.microsoft.com/dotnet/aspire-dashboard:latest
-  * ```
-  */
-  static boolean manualAspire = System.getenv("MANUAL_ASPIRE") != null;
-
-  /*
   * Reuse containers between test runs to speed up development.
   * Enabled by default for local development, disabled in CI.
   * https://java.testcontainers.org/features/reuse/
@@ -41,16 +25,10 @@ public class Runtime {
 
   static AspireContainer aspireContainer;
   static DesignerMcpContainer designerMcpContainer;
-  @SuppressWarnings("resource")
-  static CopilotContainer copilotContainer = initCopilotContainer();
+  static CopilotContainer copilotContainer;
 
   static Copilot copilot;
   static AspireAPI aspireApi;
-
-  private static void initManualAspire(Copilot copilot) {
-    copilot.otlpEndpoint("http://host.docker.internal:4318");
-    aspireApi = AspireAPI.create("http://localhost:18888");
-  }
 
   private static void initTestcontainersAspire(Copilot copilot) {
     ensureNetworkExists();
@@ -60,6 +38,7 @@ public class Runtime {
     aspireContainer = initAspireContainer();
     aspireContainer.start();
 
+    copilotContainer = initCopilotContainer();
     copilotContainer.withNetworkMode(NETWORK_NAME);
     copilot.otlpEndpoint("http://aspire:18890");
 
@@ -144,13 +123,8 @@ public class Runtime {
   public void start() {
     copilot = new Copilot(copilotContainer);
     System.out.println("Container reuse: " + reuseContainers);
-    if (manualAspire) {
-      initManualAspire(copilot);
-    } else {
-      initTestcontainersAspire(copilot);findWorkspaceRoot().toString();
-    }
+    initTestcontainersAspire(copilot);
     copilotContainer.start();
-    //String mcpUri = "http://"+DesignerMcpContainer.NETWORK_ALIAS+":"+DesignerMcpContainer.MCP_PORT+"/mcp";
     copilot.addMcp(designerMcpContainer.getMcpUri());
   }
 
