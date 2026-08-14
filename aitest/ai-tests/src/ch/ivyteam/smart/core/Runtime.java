@@ -61,11 +61,11 @@ public class Runtime {
   private static void initTestcontainersAspire(Copilot copilot) {
     network = Network.newNetwork();
 
-    aspireContainer = initAspireContainer();
-    aspireContainer.start();
-
+    
     designerMcpContainer = initDesignerMcpContainer();
     designerMcpContainer.start();
+    aspireContainer = initAspireContainer();
+    aspireContainer.start();
 
     copilotContainer.withNetwork(network);
     copilot.otlpEndpoint("http://aspire:18890");

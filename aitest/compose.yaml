@@ -1,6 +1,7 @@
 services:
   designer-service:
     image: mcr.microsoft.com/playwright:v1.54.2-noble
+    user: "$UID"
     working_dir: /workspace
     environment:
       JAVA_HOME: ${JAVA_HOME:?Set JAVA_HOME in your shell before running compose}
