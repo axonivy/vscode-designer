@@ -63,6 +63,7 @@ jobs:
             ci-user-data/logs/**/*
             ci-user-data/code-insiders.log
             ci-user-data/xvfb-errors.log
+            ci-user-data/process*.log
             **/*.log
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2

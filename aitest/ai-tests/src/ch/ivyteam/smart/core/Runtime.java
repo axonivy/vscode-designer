@@ -44,7 +44,7 @@ public class Runtime {
   static AspireContainer aspireContainer;
   static DesignerMcpContainer designerMcpContainer;
   @SuppressWarnings("resource")
-  static CopilotContainer copilotContainer = new CopilotContainer()
+  static CopilotContainer copilotContainer = new CopilotContainer(findWorkspaceRoot().toString())
       // .withEnv("COPILOT_PROVIDER_BASE_URL", OPENAI_API_URL)
       // .withEnv("COPILOT_PROVIDER_API_KEY", OPENAI_API_KEY)
       .withEnv("COPILOT_GITHUB_TOKEN", System.getenv("GITHUB_TOKEN"))
@@ -121,7 +121,7 @@ public class Runtime {
     if (manualAspire) {
       initManualAspire(copilot);
     } else {
-      initTestcontainersAspire(copilot);
+      initTestcontainersAspire(copilot);findWorkspaceRoot().toString();
     }
     copilotContainer.start();
     //String mcpUri = "http://"+DesignerMcpContainer.NETWORK_ALIAS+":"+DesignerMcpContainer.MCP_PORT+"/mcp";

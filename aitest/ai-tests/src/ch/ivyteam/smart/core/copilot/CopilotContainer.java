@@ -6,6 +6,7 @@ import java.util.concurrent.Future;
 import com.github.dockerjava.api.exception.NotFoundException;
 
 import org.testcontainers.DockerClientFactory;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
@@ -13,9 +14,9 @@ public class CopilotContainer extends GenericContainer<CopilotContainer> {
 
   private static final String IMAGE_NAME = "ivy-copilot:local";
 
-  public CopilotContainer() {
+  public CopilotContainer(String workspaceRoot) {
     super(copilotImage());
-    withExtraHost("host.docker.internal", "host-gateway");
+    withFileSystemBind(workspaceRoot, "/workspace", BindMode.READ_WRITE);
     withCommand("sleep", "infinity");
   }
 
