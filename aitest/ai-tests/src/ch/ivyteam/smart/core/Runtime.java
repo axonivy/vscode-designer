@@ -51,9 +51,7 @@ public class Runtime {
     return new AspireContainer()
       .withNetworkMode(NETWORK_NAME)
       .withCreateContainerCmdModifier(command -> command.withAliases("aspire"))
-        .withExposedPorts(18888, 18890)
-        .withEnv("Dashboard__Api__Enabled", "true")
-        .withReuse(reuseContainers);
+      .withReuse(reuseContainers);
   }
 
   @SuppressWarnings("resource")
@@ -61,38 +59,15 @@ public class Runtime {
     String workspaceRoot = findWorkspaceRoot().toString();
     String javaHome = System.getenv("JAVA_HOME");
     return new DesignerMcpContainer(workspaceRoot, javaHome)
-        .withNetworkMode(NETWORK_NAME)
-        .withCreateContainerCmdModifier(command -> command.withAliases(DesignerMcpContainer.NETWORK_ALIAS))
-        .withReuse(reuseContainers);
+      .withNetworkMode(NETWORK_NAME)
+      .withCreateContainerCmdModifier(command -> command.withAliases(DesignerMcpContainer.NETWORK_ALIAS))
+      .withReuse(reuseContainers);
   }
 
   @SuppressWarnings("resource")
   private static CopilotContainer initCopilotContainer() {
-    var copilot = new CopilotContainer(findWorkspaceRoot().toString())
-    .withEnv("COPILOT_MODEL", "gpt-5-mini")
-    .withEnv("GITHUB_COPILOT_PROMPT_MODE_WORKSPACE_MCP", "true")
-    .withEnv("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "true")
-    .withReuse(reuseContainers);
-    authorize(copilot);
-    return copilot;
-  }
-
-  private static void authorize(CopilotContainer copilot) {
-    String openAiKey = System.getenv("OPENAI_API_KEY");
-    if (openAiKey != null && !openAiKey.isBlank()) {
-      System.out.println("Copilot in BYOM mode: using OpenAI API key from environment variable OPENAI_API_KEY");
-      copilot
-        .withEnv("COPILOT_PROVIDER_BASE_URL", "https://api.openai.com/v1")
-        .withEnv("COPILOT_PROVIDER_API_KEY", openAiKey);
-      return;
-    }
-    var copilotToken = copilotToken();
-    if (copilotToken != null && !copilotToken.isBlank()) {
-      System.out.println("Copilot in GitHub mode: using GitHub token from environment variable COPILOT_TOKEN or GITHUB_TOKEN");
-      copilot.withEnv("COPILOT_GITHUB_TOKEN", copilotToken);
-    }
-    throw new IllegalStateException("No OpenAI API key or GitHub token found in environment variables. \n" +
-      "Please set OPENAI_API_KEY or COPILOT_TOKEN/GITHUB_TOKEN.");
+    return new CopilotContainer(findWorkspaceRoot().toString())
+      .withReuse(reuseContainers);
   }
 
   private static void ensureNetworkExists() {
@@ -115,11 +90,6 @@ public class Runtime {
     throw new IllegalStateException("Could not locate workspace root containing .github/workflows/mcp.sh");
   }
 
-  private static String copilotToken() {
-    String token = System.getenv("COPILOT_TOKEN");
-    return token == null || token.isBlank() ? System.getenv("GITHUB_TOKEN") : token;
-  }
-
   public void start() {
     copilot = new Copilot(copilotContainer);
     System.out.println("Container reuse: " + reuseContainers);
@@ -134,12 +104,14 @@ public class Runtime {
       return;
     }
     System.out.println("Stopping containers...");
-    copilotContainer.stop();
     if (aspireContainer != null) {
       aspireContainer.stop();
     }
     if (designerMcpContainer != null) {
       designerMcpContainer.stop();
+    }
+    if (copilotContainer != null) {
+      copilotContainer.stop();
     }
   }
 
