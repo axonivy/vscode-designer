@@ -3,9 +3,9 @@ package ch.ivyteam.smart.core;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import com.github.dockerjava.api.exception.NotFoundException;
-
 import org.testcontainers.DockerClientFactory;
+
+import com.github.dockerjava.api.exception.NotFoundException;
 
 import ch.ivyteam.smart.core.aspire.AspireAPI;
 import ch.ivyteam.smart.core.aspire.AspireContainer;
@@ -14,8 +14,6 @@ import ch.ivyteam.smart.core.copilot.CopilotContainer;
 import ch.ivyteam.smart.core.copilot.DesignerMcpContainer;
 
 public class Runtime {
-  private static final String DEFAULT_MCP_URI = "http://127.0.0.1:32140/mcp";
-  private static final String DESIGNER_MCP_URI = "http://designer-mcp:32140/mcp";
   private static final String NETWORK_NAME = "smart-test-network";
 
   /*
@@ -44,14 +42,7 @@ public class Runtime {
   static AspireContainer aspireContainer;
   static DesignerMcpContainer designerMcpContainer;
   @SuppressWarnings("resource")
-  static CopilotContainer copilotContainer = new CopilotContainer(findWorkspaceRoot().toString())
-      // .withEnv("COPILOT_PROVIDER_BASE_URL", OPENAI_API_URL)
-      // .withEnv("COPILOT_PROVIDER_API_KEY", OPENAI_API_KEY)
-      .withEnv("COPILOT_GITHUB_TOKEN", copilotToken())
-      .withEnv("COPILOT_MODEL", "gpt-5-mini")
-      .withEnv("GITHUB_COPILOT_PROMPT_MODE_WORKSPACE_MCP", "true")
-      .withEnv("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "true")
-      .withReuse(reuseContainers);
+  static CopilotContainer copilotContainer = initCopilotContainer();
 
   static Copilot copilot;
   static AspireAPI aspireApi;
@@ -94,6 +85,35 @@ public class Runtime {
         .withNetworkMode(NETWORK_NAME)
         .withCreateContainerCmdModifier(command -> command.withAliases(DesignerMcpContainer.NETWORK_ALIAS))
         .withReuse(reuseContainers);
+  }
+
+  @SuppressWarnings("resource")
+  private static CopilotContainer initCopilotContainer() {
+    var copilot = new CopilotContainer(findWorkspaceRoot().toString())
+    .withEnv("COPILOT_MODEL", "gpt-5-mini")
+    .withEnv("GITHUB_COPILOT_PROMPT_MODE_WORKSPACE_MCP", "true")
+    .withEnv("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "true")
+    .withReuse(reuseContainers);
+    authorize(copilot);
+    return copilot;
+  }
+
+  private static void authorize(CopilotContainer copilot) {
+    String openAiKey = System.getenv("OPENAI_API_KEY");
+    if (openAiKey != null && !openAiKey.isBlank()) {
+      System.out.println("Copilot in BYOM mode: using OpenAI API key from environment variable OPENAI_API_KEY");
+      copilot
+        .withEnv("COPILOT_PROVIDER_BASE_URL", "https://api.openai.com/v1")
+        .withEnv("COPILOT_PROVIDER_API_KEY", openAiKey);
+      return;
+    }
+    var copilotToken = copilotToken();
+    if (copilotToken != null && !copilotToken.isBlank()) {
+      System.out.println("Copilot in GitHub mode: using GitHub token from environment variable COPILOT_TOKEN or GITHUB_TOKEN");
+      copilot.withEnv("COPILOT_GITHUB_TOKEN", copilotToken);
+    }
+    throw new IllegalStateException("No OpenAI API key or GitHub token found in environment variables. \n" +
+      "Please set OPENAI_API_KEY or COPILOT_TOKEN/GITHUB_TOKEN.");
   }
 
   private static void ensureNetworkExists() {
