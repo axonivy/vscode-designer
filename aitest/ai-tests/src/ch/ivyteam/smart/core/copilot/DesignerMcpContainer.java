@@ -23,6 +23,7 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
     }
 
     withWorkingDirectory("/workspace");
+    
     configureContainerUser();
     System.out.println("Starting designer-mcp container with workspace root: " + workspaceRoot);
     withFileSystemBind(workspaceRoot, "/workspace", BindMode.READ_WRITE);
@@ -40,7 +41,7 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
       }
       String text = frame.getUtf8String();
       if (!text.isEmpty()) {
-        System.out.print("[LOG:" + frame.getType().name() + "] " + text);
+        System.out.print("[DESIGNER:" + frame.getType().name() + "] " + text);
       }
     });
 
@@ -53,8 +54,8 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
   }
 
   private void configureContainerUser() {
-    String uid = System.getenv("UID");
-    String gid = System.getenv("GID");
+    String uid = System.getenv("HOST_UID");
+    String gid = System.getenv("HOST_GID");
     String user = uid + ":" + gid;
     System.out.println("Configuring designer-mcp container to run as user: " + user);
     if (uid != null && !uid.isBlank() && gid != null && !gid.isBlank()) {

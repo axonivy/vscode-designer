@@ -98,7 +98,7 @@ CODE_INSIDERS_LOG="${USER_DATA_DIR}/code-insiders.log"
 XVFB_ERROR_LOG="${USER_DATA_DIR}/xvfb-errors.log"
 CODE_INSIDERS_PID_FILE="${USER_DATA_DIR}/code-insiders.pid"
 MCP_HEALTH_URL="http://127.0.0.1:32140/health"
-MCP_START_TIMEOUT_SEC="290"
+MCP_START_TIMEOUT_SEC="30"
 
 launch_vscode() {
 	local -a args
