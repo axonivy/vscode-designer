@@ -49,6 +49,7 @@ public class Runtime {
       // .withEnv("COPILOT_PROVIDER_API_KEY", OPENAI_API_KEY)
       .withEnv("COPILOT_GITHUB_TOKEN", System.getenv("GITHUB_TOKEN"))
       .withEnv("COPILOT_MODEL", "gpt-5-mini")
+      .withEnv("GITHUB_COPILOT_PROMPT_MODE_WORKSPACE_MCP", "true")
       .withEnv("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "true")
       .withReuse(reuseContainers);
 
