@@ -1,7 +1,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="jakarta.faces.core"
   xmlns:h="jakarta.faces.html" xmlns:ui="jakarta.faces.facelets"
-  xmlns:ic="http://ivyteam.ch/jsf/component" xmlns:p="http://primefaces.org/ui"
-  xmlns:pe="http://primefaces.org/ui/extensions">
+  xmlns:ic="http://ivyteam.ch/jsf/component" xmlns:p="primefaces"
+  xmlns:pe="primefaces.extensions">
 <h:body>
   <ui:composition template="/ivy-form/layouts/form.xhtml">
     <ui:define name="title"></ui:define>
@@ -11,7 +11,7 @@
           <h:outputText value="This is my test" styleClass="" />
           <h:panelGroup layout="block" styleClass="i-flex i-gap i-flex-col ui-fluid ">
             <p:outputLabel id="input2-label" for="input2" value="" />
-            <p:inputText id="input2" value="">
+            <p:inputText id="input2" value="placeholder value">
               <p:ajax event="change" />
             </p:inputText>
           </h:panelGroup>
