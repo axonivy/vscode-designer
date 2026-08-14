@@ -33,6 +33,7 @@ test('xhtml preview', async ({ wsPage }) => {
   const button = frame.getByRole('button', { name: 'Proceed' });
 
   await expect(async () => {
+    await wsPage.hasReadyStatusMessage();
     await wsPage.executeCommand('Axon Ivy: Deploy All Projects');
     await wsPage.hasStatusMessage('Axon Ivy: Success: Deploying projects');
     await wsPage.page.getByRole('button', { name: 'Open Dialog Preview' }).click();
