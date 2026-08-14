@@ -4,6 +4,7 @@ import java.time.Duration;
 
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
@@ -28,17 +29,19 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
     withFileSystemBind(javaHome, javaHome, BindMode.READ_ONLY);
     withEnv("JAVA_HOME", javaHome);
     withExposedPorts(MCP_PORT);
+    System.out.println("Waiting for MCP port " + MCP_PORT + " to be available in designer-mcp container...");
     waitingFor(Wait
         .forListeningPorts(MCP_PORT)
-        .withStartupTimeout(Duration.ofSeconds(300)));
+        .withStartupTimeout(Duration.ofSeconds(600)));
 
-    followOutput(frame -> {
-      // include stream prefix info and actual line
-      String prefix = "LOG:"+frame.getType().name(); // STDOUT/STDERR
-      frame.getUtf8String().lines().forEach(line -> {
-        System.out.println("[" + prefix + "] " + line);
-      });
-      System.out.print("[" + prefix + "] " + frame.getUtf8String());
+    withLogConsumer(frame -> {
+      if (frame.getType() == OutputFrame.OutputType.END) {
+        return;
+      }
+      String text = frame.getUtf8String();
+      if (!text.isEmpty()) {
+        System.out.print("[LOG:" + frame.getType().name() + "] " + text);
+      }
     });
 
 
@@ -61,8 +64,4 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
     }
   }
 
-  @Override
-  public String getContainerId() {
-    return "designer-mcp-test";
-  }
 }
