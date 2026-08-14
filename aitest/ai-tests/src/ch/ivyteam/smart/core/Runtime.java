@@ -86,10 +86,9 @@ public class Runtime {
     System.out.println("Aspire dashboard bound: " + aspireApi);
     
     copilotContainer = initCopilotContainer();
-    copilotContainer.start();
-    
     copilot = new Copilot(copilotContainer);
     copilot.otlpEndpoint(aspireContainer.getAspireEndpoint());
+    copilotContainer.start();
     copilot.addMcp(designerMcpContainer.getMcpUri());
   }
 
