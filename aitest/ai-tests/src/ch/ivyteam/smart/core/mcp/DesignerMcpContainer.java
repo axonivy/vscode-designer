@@ -1,4 +1,4 @@
-package ch.ivyteam.smart.core.copilot;
+package ch.ivyteam.smart.core.mcp;
 
 import java.time.Duration;
 

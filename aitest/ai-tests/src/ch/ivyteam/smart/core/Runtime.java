@@ -14,7 +14,7 @@ import ch.ivyteam.smart.core.aspire.AspireAPI;
 import ch.ivyteam.smart.core.aspire.AspireContainer;
 import ch.ivyteam.smart.core.copilot.Copilot;
 import ch.ivyteam.smart.core.copilot.CopilotContainer;
-import ch.ivyteam.smart.core.copilot.DesignerMcpContainer;
+import ch.ivyteam.smart.core.mcp.DesignerMcpContainer;
 
 public class Runtime {
   private static final String NETWORK_NAME = "smart-test-network";
