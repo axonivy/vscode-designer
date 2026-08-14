@@ -34,7 +34,6 @@ public class Runtime {
   private static AspireContainer initAspireContainer() {
     return new AspireContainer()
       .withNetworkMode(NETWORK_NAME)
-      .withCreateContainerCmdModifier(command -> command.withAliases("aspire"))
       .withReuse(reuseContainers);
   }
 
@@ -50,6 +49,7 @@ public class Runtime {
   @SuppressWarnings("resource")
   private static CopilotContainer initCopilotContainer() {
     return new CopilotContainer(findWorkspaceRoot().toString())
+      .withNetworkMode(NETWORK_NAME)
       .withReuse(reuseContainers);
   }
 
@@ -86,11 +86,10 @@ public class Runtime {
     System.out.println("Aspire dashboard bound: " + aspireApi);
     
     copilotContainer = initCopilotContainer();
-    copilotContainer.withNetworkMode(NETWORK_NAME);
     copilotContainer.start();
     
     copilot = new Copilot(copilotContainer);
-    copilot.otlpEndpoint("http://aspire:18890");
+    copilot.otlpEndpoint(aspireContainer.getAspireEndpoint());
     copilot.addMcp(designerMcpContainer.getMcpUri());
   }
 
