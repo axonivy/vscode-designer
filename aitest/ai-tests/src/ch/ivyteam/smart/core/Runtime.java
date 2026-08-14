@@ -3,7 +3,9 @@ package ch.ivyteam.smart.core;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.testcontainers.containers.Network;
+import com.github.dockerjava.api.exception.NotFoundException;
+
+import org.testcontainers.DockerClientFactory;
 
 import ch.ivyteam.smart.core.aspire.AspireAPI;
 import ch.ivyteam.smart.core.aspire.AspireContainer;
@@ -14,6 +16,7 @@ import ch.ivyteam.smart.core.copilot.DesignerMcpContainer;
 public class Runtime {
   private static final String DEFAULT_MCP_URI = "http://127.0.0.1:32140/mcp";
   private static final String DESIGNER_MCP_URI = "http://designer-mcp:32140/mcp";
+  private static final String NETWORK_NAME = "smart-test-network";
 
   /*
   * To keep Aspire alive and observe the traces in its dashboard,
@@ -38,7 +41,6 @@ public class Runtime {
   */
   static boolean reuseContainers = !"false".equalsIgnoreCase(System.getenv("TESTCONTAINERS_REUSE_ENABLE"));
 
-  static Network network;
   static AspireContainer aspireContainer;
   static DesignerMcpContainer designerMcpContainer;
   @SuppressWarnings("resource")
@@ -59,15 +61,14 @@ public class Runtime {
   }
 
   private static void initTestcontainersAspire(Copilot copilot) {
-    //network = Network.SHARED;
-    network = Network.builder().enableIpv6(true).id("smart-test-network").build();
-    
+    ensureNetworkExists();
+
     designerMcpContainer = initDesignerMcpContainer();
     designerMcpContainer.start();
     aspireContainer = initAspireContainer();
     aspireContainer.start();
 
-    copilotContainer.withNetwork(network);
+    copilotContainer.withNetworkMode(NETWORK_NAME);
     copilot.otlpEndpoint("http://aspire:18890");
 
     aspireApi = AspireAPI.create("http://" + aspireContainer.getHost() + ":" + aspireContainer.getMappedPort(18888));
@@ -77,8 +78,8 @@ public class Runtime {
   @SuppressWarnings("resource")
   private static AspireContainer initAspireContainer() {
     return new AspireContainer()
-        .withNetwork(network)
-        .withNetworkAliases("aspire")
+      .withNetworkMode(NETWORK_NAME)
+      .withCreateContainerCmdModifier(command -> command.withAliases("aspire"))
         .withExposedPorts(18888, 18890)
         .withEnv("Dashboard__Api__Enabled", "true")
         .withReuse(reuseContainers);
@@ -89,9 +90,18 @@ public class Runtime {
     String workspaceRoot = findWorkspaceRoot().toString();
     String javaHome = System.getenv("JAVA_HOME");
     return new DesignerMcpContainer(workspaceRoot, javaHome)
-        .withNetwork(network)
-        .withNetworkAliases(DesignerMcpContainer.NETWORK_ALIAS)
+        .withNetworkMode(NETWORK_NAME)
+        .withCreateContainerCmdModifier(command -> command.withAliases(DesignerMcpContainer.NETWORK_ALIAS))
         .withReuse(reuseContainers);
+  }
+
+  private static void ensureNetworkExists() {
+    var dockerClient = DockerClientFactory.instance().client();
+    try {
+      dockerClient.inspectNetworkCmd().withNetworkId(NETWORK_NAME).exec();
+    } catch (NotFoundException exception) {
+      dockerClient.createNetworkCmd().withName(NETWORK_NAME).withEnableIpv6(true).exec();
+    }
   }
 
   private static Path findWorkspaceRoot() {
@@ -130,9 +140,6 @@ public class Runtime {
     }
     if (designerMcpContainer != null) {
       designerMcpContainer.stop();
-    }
-    if (network != null) {
-      network.close();
     }
   }
 
