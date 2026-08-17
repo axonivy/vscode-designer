@@ -1,5 +1,5 @@
 import type { ExtensionContext, Webview, WebviewView, WebviewViewProvider } from 'vscode';
-import { Uri, env, l10n, window } from 'vscode';
+import { UIKind, Uri, env, l10n, window } from 'vscode';
 import { executeCommand, registerCommand } from '../../base/commands';
 import { config } from '../../base/configurations';
 import { logErrorMessage } from '../../base/logging-util';
@@ -90,7 +90,12 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
   }
 
   private openInBrowser(url: string) {
-    switch (config.browser()) {
+    let browserConfig = config.browser();
+    // Web UI does not support integrated browser, so we switch to external browser in this case
+    if (env.uiKind === UIKind.Web && browserConfig === 'vscodeBrowser') {
+      browserConfig = 'externalBrowser';
+    }
+    switch (browserConfig) {
       case 'ivyBrowser':
         this.url = url;
         if (this.view) {
