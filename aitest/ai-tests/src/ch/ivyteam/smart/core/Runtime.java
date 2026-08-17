@@ -17,6 +17,7 @@ import ch.ivyteam.smart.core.aspire.AspireContainer;
 import ch.ivyteam.smart.core.copilot.Copilot;
 import ch.ivyteam.smart.core.copilot.CopilotContainer;
 import ch.ivyteam.smart.core.mcp.DesignerMcpContainer;
+import ch.ivyteam.smart.core.mcp.IvyEngine;
 import ch.ivyteam.smart.core.mcp.IvyWorkspace;
 
 public class Runtime {
@@ -34,6 +35,7 @@ public class Runtime {
   static Copilot copilot;
   static AspireAPI aspireApi;
   static Path ivyWorkspace;
+  static Path userData;
 
   public void start() {
     System.out.println("Container reuse: " + reuseContainers);
@@ -43,7 +45,7 @@ public class Runtime {
     Path extensionDir = workspaceRoot.resolve("extension");
     ivyWorkspace = workspaceRoot.resolve("aitest/ai-dev-tests/ivy");
     Path mcp = workspaceRoot.resolve("aitest/mcp.sh");
-    Path userData = workspaceRoot.resolve("ci-user-data");
+    userData = workspaceRoot.resolve("ci-user-data");
     try {
       Files.createDirectories(userData);
     } catch (IOException ex) {
@@ -93,6 +95,12 @@ public class Runtime {
 
   public IvyWorkspace ivyWorkspace() {
     return new IvyWorkspace(ivyWorkspace);
+  }
+
+  public IvyEngine ivyEngine() {
+    Path engines = userData.resolve("User").resolve("globalStorage").resolve("axonivy.vscode-designer-14").resolve("engines");
+    var firstEngine = engines.toFile().listFiles()[0].toPath();
+    return new IvyEngine(firstEngine);
   }
 
   private static void ensureNetworkExists() {

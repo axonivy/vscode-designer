@@ -38,6 +38,9 @@ public class CopilotIntegrationTest {
     assertThat(flightSimulator)
       .as("project created in workspace")
       .exists();
+    assertThat(rt.ivyEngine().ivyLog())
+      .as("no-errors in log")
+      .isEmpty();
   }
 
   @Test
