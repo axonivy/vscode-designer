@@ -34,7 +34,15 @@ public class CopilotIntegrationTest {
 
   @Test
   void mcpON() throws Exception {
-    rt.copilot().mcpCheck();
+    assertThat(rt.copilot().listMcp())
+      .as("MCP is configured for Copilot user")
+      .contains(
+        "\"type\": \"http\"",
+        "\"url\": \"http://designer-mcp:32140/mcp\"");
+    assertThat(rt.copilot().mcpHealth())
+      .as("MCP answers health with 200 OK")
+      .isEqualTo(200);
+
     rt.copilot().prompt("name all available tools from current MCP setup", "mcp-tools");
     var spans = rt.aspire().spansOfResource("mcp-tools");
 

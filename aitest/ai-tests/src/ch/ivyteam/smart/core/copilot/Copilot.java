@@ -29,9 +29,9 @@ public class Copilot {
     return containerWorkspace;
   }
 
-  public void addMcp(String smartCoreMcpUrl) {
-    configuredMcpUrl = normalizeMcpUrl(smartCoreMcpUrl);
-    String mcp = smartCoreMcpServerConfig(configuredMcpUrl);
+  public void addMcp(String designerMcp) {
+    this.configuredMcpUrl = designerMcp;
+    String mcp = smartCoreMcpServerConfig(designerMcp);
     System.out.println("Adding MCP config to Copilot container: " + mcp);
     try {
       container.execInContainer("mkdir", "-p", "/root/.copilot/");
@@ -62,38 +62,28 @@ public class Copilot {
         smartCoreMcpUrl);
   }
 
-  private static String normalizeMcpUrl(String smartCoreMcpUrl) {
-    // On Linux, use the Docker bridge gateway; on Docker Desktop, host-gateway works via extra host mapping
-    String hostIp = "host.docker.internal";
-    smartCoreMcpUrl = smartCoreMcpUrl.replace("localhost", hostIp);
-    // keep IP URI -> fallback for local dev exec.
-    return smartCoreMcpUrl.replace("127.0.0.1", hostIp);
-  }
-
-  public void mcpCheck() {
+  public String listMcp() {
     try {
       var listResult = container.execInContainer("sh", "-c", "copilot mcp list --json");
-      System.out.println("MCP list exit=" + listResult.getExitCode());
-      System.out.println("MCP list stdout: " + listResult.getStdout());
-      System.out.println("MCP list stderr: " + listResult.getStderr());
-
-      var getResult = container.execInContainer("sh", "-c", "copilot mcp get axonivy-designer");
-      System.out.println("MCP get exit=" + getResult.getExitCode());
-      System.out.println("MCP get stdout: " + getResult.getStdout());
-      System.out.println("MCP get stderr: " + getResult.getStderr());
-
-      if (configuredMcpUrl != null && !configuredMcpUrl.isBlank()) {
-        var endpointResult = container.execInContainer("sh", "-c",
-            "if command -v curl >/dev/null 2>&1; then "
-                + "curl -sS -o /dev/null -w '%{http_code}' \"$0\"; "
-                + "else echo 'curl-not-installed'; fi",
-            configuredMcpUrl.replace("/mcp", "/health"));
-        System.out.println("MCP endpoint probe exit=" + endpointResult.getExitCode());
-        System.out.println("MCP endpoint probe: " + endpointResult.getStdout());
-        System.out.println("MCP endpoint probe stderr: " + endpointResult.getStderr());
+      if (listResult.getExitCode() != 0) {
+        throw new RuntimeException("Copilot MCP list command failed: " + listResult.getStderr());
       }
+      return listResult.getStdout();
     } catch (Exception e) {
-      throw new RuntimeException("MCP check failed", e);
+      throw new RuntimeException("Failed to list MCP servers in Copilot container", e);
+    }
+  }
+
+  public int mcpHealth() {
+    try{
+      var endpointResult = container.execInContainer("sh", "-c",
+          "if command -v curl >/dev/null 2>&1; then "
+              + "curl -sS -o /dev/null -w '%{http_code}' \"$0\"; "
+              + "else echo 'curl-not-installed'; fi",
+          configuredMcpUrl.replace("/mcp", "/health"));
+      return Integer.parseInt(endpointResult.getStdout());
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to check MCP health in Copilot container", e);
     }
   }
 
