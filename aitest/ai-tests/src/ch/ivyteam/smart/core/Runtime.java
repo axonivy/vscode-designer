@@ -17,6 +17,7 @@ import ch.ivyteam.smart.core.aspire.AspireContainer;
 import ch.ivyteam.smart.core.copilot.Copilot;
 import ch.ivyteam.smart.core.copilot.CopilotContainer;
 import ch.ivyteam.smart.core.mcp.DesignerMcpContainer;
+import ch.ivyteam.smart.core.mcp.IvyWorkspace;
 
 public class Runtime {
   private static final String NETWORK_NAME = "smart-test-network";
@@ -32,6 +33,7 @@ public class Runtime {
 
   static Copilot copilot;
   static AspireAPI aspireApi;
+  static Path ivyWorkspace;
 
   public void start() {
     System.out.println("Container reuse: " + reuseContainers);
@@ -39,7 +41,7 @@ public class Runtime {
     
     Path workspaceRoot = findWorkspaceRoot();
     Path extensionDir = workspaceRoot.resolve("extension");
-    Path ivyWorkspace = workspaceRoot.resolve("aitest/ai-dev-tests/ivy");
+    ivyWorkspace = workspaceRoot.resolve("aitest/ai-dev-tests/ivy");
     Path mcp = workspaceRoot.resolve("aitest/mcp.sh");
     Path userData = workspaceRoot.resolve("ci-user-data");
     try {
@@ -87,6 +89,10 @@ public class Runtime {
 
   public AspireAPI aspire() {
     return aspireApi;
+  }
+
+  public IvyWorkspace ivyWorkspace() {
+    return new IvyWorkspace(ivyWorkspace);
   }
 
   private static void ensureNetworkExists() {

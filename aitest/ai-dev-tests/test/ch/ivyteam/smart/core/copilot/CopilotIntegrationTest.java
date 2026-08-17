@@ -2,7 +2,10 @@ package ch.ivyteam.smart.core.copilot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.nio.file.Path;
+
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +33,11 @@ public class CopilotIntegrationTest {
     var tokenUsage = spans.tokenUsage();
     assertThat(tokenUsage.input()).isLessThan(150_000);
     assertThat(tokenUsage.output()).isLessThan(10_000);
+
+    var flightSimulator = rt.ivyWorkspace().path().resolve("flight-simulator");
+    assertThat(flightSimulator)
+      .as("project created in workspace")
+      .exists();
   }
 
   @Test
