@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read
-  copilot-requests: write
 
 jobs:
   copilot:
@@ -41,13 +40,10 @@ jobs:
           export HOST_GID="$(id -g)"
           mvn clean verify -f aitest/pom.xml -ntp
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COPILOT_TOKEN: ${{ secrets.COPILOT_TOKEN || secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_TOKEN }}
           TESTCONTAINERS_REUSE_ENABLE: 'false'
       - name: Archive test reports
         uses: actions/upload-artifact@v7
-        #  if: failure()
         with:
           name: test-reports
           retention-days: 5
