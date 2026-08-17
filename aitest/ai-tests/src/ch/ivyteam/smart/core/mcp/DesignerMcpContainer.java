@@ -55,8 +55,8 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
 
 
   private void configureContainerUser() {
-    String uid = System.getenv("HOST_UID");
-    String gid = System.getenv("HOST_GID");
+    String uid = System.getenv().getOrDefault("HOST_UID", "1000");
+    String gid = System.getenv().getOrDefault("HOST_GID", "1000");
     String user = uid + ":" + gid;
     System.out.println("Configuring designer-mcp container to run as user: " + user);
     if (uid != null && !uid.isBlank() && gid != null && !gid.isBlank()) {
