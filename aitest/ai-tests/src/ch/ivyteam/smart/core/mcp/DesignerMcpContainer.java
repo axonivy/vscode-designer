@@ -1,5 +1,6 @@
 package ch.ivyteam.smart.core.mcp;
 
+import java.nio.file.Path;
 import java.time.Duration;
 
 import org.testcontainers.containers.BindMode;
@@ -28,6 +29,8 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
     configureContainerUser();
     System.out.println("Starting designer-mcp container with workspace root: " + workspaceRoot);
     withFileSystemBind(workspaceRoot, "/workspace", BindMode.READ_WRITE);
+    withFileSystemBind(Path.of(workspaceRoot).resolve("extension").toString(), 
+      "/extension", BindMode.READ_ONLY);
     withFileSystemBind(javaHome, javaHome, BindMode.READ_ONLY);
     withEnv("JAVA_HOME", javaHome);
     withExposedPorts(MCP_PORT);

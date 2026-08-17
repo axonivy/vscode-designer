@@ -73,7 +73,7 @@ EXTENSIONS_DIR="$(mktemp -d -t vscode-insiders-ext-XXXXXX)"
 echo "Installing extensions ..."
 run_code_insiders --list-extensions  --extensions-dir "${EXTENSIONS_DIR}"
 run_code_insiders --install-extension vscjava.vscode-java-pack --extensions-dir "${EXTENSIONS_DIR}"
-run_code_insiders --install-extension ${REPO_ROOT}/extension/vscode-designer*.vsix --extensions-dir "${EXTENSIONS_DIR}"
+run_code_insiders --install-extension /extension/vscode-designer*.vsix --extensions-dir "${EXTENSIONS_DIR}"
 if ! run_code_insiders --list-extensions --extensions-dir "${EXTENSIONS_DIR}" | grep -q '^axonivy.vscode-designer-14$'; then
 	echo "Expected extension axonivy.vscode-designer-14 is not installed in ${EXTENSIONS_DIR}" >&2
 	exit 1
