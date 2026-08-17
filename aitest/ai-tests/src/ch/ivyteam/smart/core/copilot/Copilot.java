@@ -14,7 +14,7 @@ public class Copilot {
     this.container = container;
   }
 
-  public String prompt(String prompt, String testName) throws InterruptedException, IOException {
+  public void prompt(String prompt, String testName) throws InterruptedException, IOException {
     var containerWorkspace = "/workspace";
     var result = container.execInContainer(
         "sh", "-c", ""
@@ -26,7 +26,6 @@ public class Copilot {
     if (result.getExitCode() != 0) {
       throw new RuntimeException("Copilot command failed: " + result.getStderr());
     }
-    return containerWorkspace;
   }
 
   public void addMcp(String designerMcp) {
