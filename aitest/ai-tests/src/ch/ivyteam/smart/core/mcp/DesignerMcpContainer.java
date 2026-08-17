@@ -46,7 +46,7 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
     withCreateContainerCmdModifier(command -> command.withAliases(DesignerMcpContainer.NETWORK_ALIAS));
     withCommand(
         "bash", "-lc", ""
-            + "aitest/mcp.sh vscode-designer.code-workspace\n"
+            + "aitest/mcp.sh\n"
             + "exec tail -f /dev/null");
   }
 

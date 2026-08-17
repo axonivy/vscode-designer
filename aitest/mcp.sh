@@ -3,24 +3,9 @@
 set -euo pipefail
 
 # Launch VS Code Insiders similarly to playwright/tests/fixtures/baseTest.ts:runElectronAppTest
-# Usage:
-#   aitest/mcp.sh [workspace-or-code-workspace]
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
-WORKSPACE_INPUT="${1:-${REPO_ROOT}}"
-if [[ "${WORKSPACE_INPUT}" = /* ]]; then
-	WORKSPACE_PATH="${WORKSPACE_INPUT}"
-else
-	WORKSPACE_PATH="${REPO_ROOT}/${WORKSPACE_INPUT}"
-fi
-
-if [[ ! -e "${WORKSPACE_PATH}" ]]; then
-	echo "Workspace path does not exist: ${WORKSPACE_PATH}" >&2
-	exit 1
-fi
-
+WORKSPACE_PATH="/workspace"
 CACHE_DIR="${HOME}/.cache/vscode-insiders"
 DOWNLOAD_DIR="${CACHE_DIR}/download"
 INSTALL_DIR="${CACHE_DIR}/install"
