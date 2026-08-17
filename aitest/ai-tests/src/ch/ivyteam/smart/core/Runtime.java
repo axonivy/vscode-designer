@@ -37,8 +37,11 @@ public class Runtime {
     System.out.println("Container reuse: " + reuseContainers);
     ensureNetworkExists();
     
-    Path workspace = findWorkspaceRoot();
-    Path userData = workspace.resolve("ci-user-data");
+    Path workspaceRoot = findWorkspaceRoot();
+    Path extensionDir = workspaceRoot.resolve("extension");
+    Path ivyWorkspace = workspaceRoot.resolve("aitest/ai-dev-tests/ivy");
+    Path mcp = workspaceRoot.resolve("aitest/mcp.sh");
+    Path userData = workspaceRoot.resolve("ci-user-data");
     try {
       Files.createDirectories(userData);
     } catch (IOException ex) {
@@ -46,7 +49,7 @@ public class Runtime {
     }
 
     String javaHome = System.getenv("JAVA_HOME");
-    var designerMcpContainer = new DesignerMcpContainer(workspace, userData, javaHome);
+    var designerMcpContainer = new DesignerMcpContainer(ivyWorkspace, extensionDir, userData, javaHome, mcp);
     startContainer(designerMcpContainer);
     
     var aspireContainer = new AspireContainer();
@@ -54,7 +57,7 @@ public class Runtime {
     aspireApi = AspireAPI.create("http://" + aspireContainer.getHost() + ":" + aspireContainer.getMappedPort(18888));
     System.out.println("Aspire dashboard bound: " + aspireApi);
     
-    var copilotContainer = new CopilotContainer(workspace, userData);
+    var copilotContainer = new CopilotContainer(ivyWorkspace, userData);
     copilot = new Copilot(copilotContainer);
     copilot.otlpEndpoint(aspireContainer.getAspireEndpoint());
     startContainer(copilotContainer);

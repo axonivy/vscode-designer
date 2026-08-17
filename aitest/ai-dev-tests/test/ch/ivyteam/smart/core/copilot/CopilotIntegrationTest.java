@@ -25,8 +25,8 @@ public class CopilotIntegrationTest {
 
   @Test
   void createProject() throws Exception {
-    var resource = rt.copilot().prompt("create an axon ivy project for a flight-simulator");
-    var spans = rt.aspire().spansOfResource(resource);
+    rt.copilot().prompt("create an axon ivy project for a flight-simulator", "create-project");
+    var spans = rt.aspire().spansOfResource("create-project");
     var tokenUsage = spans.tokenUsage();
     assertThat(tokenUsage.input()).isLessThan(150_000);
     assertThat(tokenUsage.output()).isLessThan(10_000);
@@ -35,8 +35,8 @@ public class CopilotIntegrationTest {
   @Test
   void mcpON() throws Exception {
     rt.copilot().mcpCheck();
-    var resource = rt.copilot().promptWithRequiredMcpTool("name all available tools from current MCP setup");
-    var spans = rt.aspire().spansOfResource(resource);
+    rt.copilot().prompt("name all available tools from current MCP setup", "mcp-tools");
+    var spans = rt.aspire().spansOfResource("mcp-tools");
 
     assertThat(spans.tools().names())
       .as("tools from vscode-designer MCP are propagated to harness")

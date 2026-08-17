@@ -2,7 +2,6 @@ package ch.ivyteam.smart.core.copilot;
 
 
 import java.io.IOException;
-import java.util.UUID;
 
 import org.testcontainers.images.builder.Transferable;
 
@@ -15,23 +14,19 @@ public class Copilot {
     this.container = container;
   }
 
-  public String prompt(String prompt) throws InterruptedException, IOException {
-    var resource = "copilot-cli-" + UUID.randomUUID();
-    var containerWorkspace = "/" + resource;
-
+  public String prompt(String prompt, String testName) throws InterruptedException, IOException {
+    var containerWorkspace = "/workspace";
     var result = container.execInContainer(
-        "sh", "-c",
-        "mkdir \"$0\" && "
+        "sh", "-c", ""
             + "cd \"$0\" && "
             + "OTEL_SERVICE_NAME=\"$1\" "
             + "copilot -p \"$2\" "
             + "--no-ask-user --yolo --allow-all-mcp-server-instructions --log-dir /user-data -s",
-        containerWorkspace, resource, prompt);
+        containerWorkspace, testName, prompt);
     if (result.getExitCode() != 0) {
       throw new RuntimeException("Copilot command failed: " + result.getStderr());
     }
-
-    return resource;
+    return containerWorkspace;
   }
 
   public void addMcp(String smartCoreMcpUrl) {
@@ -100,12 +95,6 @@ public class Copilot {
     } catch (Exception e) {
       throw new RuntimeException("MCP check failed", e);
     }
-  }
-
-  public String promptWithRequiredMcpTool(String prompt) throws InterruptedException, IOException {
-    String forcedPrompt = "You must call at least one MCP tool from the 'axonivy-designer' server before answering. "
-        + "If tool invocation fails, explain the exact failure. User request: " + prompt;
-    return prompt(forcedPrompt);
   }
 
 }

@@ -15,7 +15,7 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
   private static final String NETWORK_ALIAS = "designer-mcp";
   private static final int MCP_PORT = 32140;
 
-  public DesignerMcpContainer(Path workspaceRoot, Path userData, String javaHome) {
+  public DesignerMcpContainer(Path ivyWorkspace, Path extensionDir, Path userData, String javaHome, Path mcp) {
 
     //super("mcr.microsoft.com/playwright:v1.54.2-noble");
     super(DockerImageName.parse("mcr.microsoft.com/playwright:v1.54.2-noble"));
@@ -27,12 +27,15 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
     withWorkingDirectory("/workspace");
     
     configureContainerUser();
-    System.out.println("Starting designer-mcp container with workspace root: " + workspaceRoot);
-    withFileSystemBind(workspaceRoot.toString(), "/workspace", BindMode.READ_WRITE);
-    withFileSystemBind(workspaceRoot.resolve("extension").toString(), 
+    System.out.println("Starting designer-mcp container with workspace root: " + ivyWorkspace);
+    withFileSystemBind(ivyWorkspace.toString(), 
+      "/workspace", BindMode.READ_WRITE);
+    withFileSystemBind(extensionDir.toString(), 
       "/extension", BindMode.READ_ONLY);
     withFileSystemBind(userData.toString(),
       "/user-data", BindMode.READ_WRITE);
+    withFileSystemBind(mcp.toString(),
+      "/mcp.sh", BindMode.READ_ONLY);
     withFileSystemBind(javaHome, javaHome, BindMode.READ_ONLY);
     withEnv("JAVA_HOME", javaHome);
     withExposedPorts(MCP_PORT);
@@ -46,7 +49,7 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
     withCreateContainerCmdModifier(command -> command.withAliases(DesignerMcpContainer.NETWORK_ALIAS));
     withCommand(
         "bash", "-lc", ""
-            + "aitest/mcp.sh\n"
+            + "/mcp.sh\n"
             + "exec tail -f /dev/null");
   }
 
