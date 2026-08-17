@@ -1,5 +1,7 @@
 package ch.ivyteam.smart.core;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -35,9 +37,16 @@ public class Runtime {
     System.out.println("Container reuse: " + reuseContainers);
     ensureNetworkExists();
     
-    String workspaceRoot = findWorkspaceRoot().toString();
+    Path workspace = findWorkspaceRoot();
+    Path userData = workspace.resolve("ci-user-data");
+    try {
+      Files.createDirectories(userData);
+    } catch (IOException ex) {
+      throw new UncheckedIOException("Failed to create directory: " + userData.toString(), ex);
+    }
+
     String javaHome = System.getenv("JAVA_HOME");
-    var designerMcpContainer = new DesignerMcpContainer(workspaceRoot, javaHome);
+    var designerMcpContainer = new DesignerMcpContainer(workspace, userData, javaHome);
     startContainer(designerMcpContainer);
     
     var aspireContainer = new AspireContainer();
@@ -45,7 +54,7 @@ public class Runtime {
     aspireApi = AspireAPI.create("http://" + aspireContainer.getHost() + ":" + aspireContainer.getMappedPort(18888));
     System.out.println("Aspire dashboard bound: " + aspireApi);
     
-    var copilotContainer = new CopilotContainer(workspaceRoot);
+    var copilotContainer = new CopilotContainer(workspace, userData);
     copilot = new Copilot(copilotContainer);
     copilot.otlpEndpoint(aspireContainer.getAspireEndpoint());
     startContainer(copilotContainer);

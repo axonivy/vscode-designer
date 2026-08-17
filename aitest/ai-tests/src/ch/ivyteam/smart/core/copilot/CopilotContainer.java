@@ -1,5 +1,6 @@
 package ch.ivyteam.smart.core.copilot;
 
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -14,9 +15,10 @@ public class CopilotContainer extends GenericContainer<CopilotContainer> {
 
   private static final String IMAGE_NAME = "ivy-copilot:local";
 
-  public CopilotContainer(String workspaceRoot) {
+  public CopilotContainer(Path workspace, Path userData) {
     super(copilotImage());
-    withFileSystemBind(workspaceRoot, "/workspace", BindMode.READ_WRITE);
+    withFileSystemBind(workspace.toString(), "/workspace", BindMode.READ_WRITE);
+    withFileSystemBind(userData.toString(), "/user-data", BindMode.READ_WRITE);
     withEnv("COPILOT_MODEL", "gpt-5-mini");
     withEnv("GITHUB_COPILOT_PROMPT_MODE_WORKSPACE_MCP", "true");
     withEnv("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "true");

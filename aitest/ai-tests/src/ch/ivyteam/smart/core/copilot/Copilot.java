@@ -25,7 +25,7 @@ public class Copilot {
             + "cd \"$0\" && "
             + "OTEL_SERVICE_NAME=\"$1\" "
             + "copilot -p \"$2\" "
-            + "--no-ask-user --yolo --allow-all-mcp-server-instructions --log-dir /workspace/ci-user-data -s",
+            + "--no-ask-user --yolo --allow-all-mcp-server-instructions --log-dir /user-data -s",
         containerWorkspace, resource, prompt);
     if (result.getExitCode() != 0) {
       throw new RuntimeException("Copilot command failed: " + result.getStderr());

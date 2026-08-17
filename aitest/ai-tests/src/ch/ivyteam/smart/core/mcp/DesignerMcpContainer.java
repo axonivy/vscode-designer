@@ -15,7 +15,7 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
   private static final String NETWORK_ALIAS = "designer-mcp";
   private static final int MCP_PORT = 32140;
 
-  public DesignerMcpContainer(String workspaceRoot, String javaHome) {
+  public DesignerMcpContainer(Path workspaceRoot, Path userData, String javaHome) {
 
     //super("mcr.microsoft.com/playwright:v1.54.2-noble");
     super(DockerImageName.parse("mcr.microsoft.com/playwright:v1.54.2-noble"));
@@ -28,9 +28,11 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
     
     configureContainerUser();
     System.out.println("Starting designer-mcp container with workspace root: " + workspaceRoot);
-    withFileSystemBind(workspaceRoot, "/workspace", BindMode.READ_WRITE);
-    withFileSystemBind(Path.of(workspaceRoot).resolve("extension").toString(), 
+    withFileSystemBind(workspaceRoot.toString(), "/workspace", BindMode.READ_WRITE);
+    withFileSystemBind(workspaceRoot.resolve("extension").toString(), 
       "/extension", BindMode.READ_ONLY);
+    withFileSystemBind(userData.toString(),
+      "/user-data", BindMode.READ_WRITE);
     withFileSystemBind(javaHome, javaHome, BindMode.READ_ONLY);
     withEnv("JAVA_HOME", javaHome);
     withExposedPorts(MCP_PORT);

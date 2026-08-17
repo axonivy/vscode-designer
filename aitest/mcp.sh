@@ -45,7 +45,7 @@ if [[ -z "${CODE_INSIDERS_BIN}" || ! -x "${CODE_INSIDERS_BIN}" ]]; then
 	exit 1
 fi
 
-USER_DATA_DIR="${REPO_ROOT}/ci-user-data"
+USER_DATA_DIR="/user-data"
 echo "Using user-data-dir: ${USER_DATA_DIR}"
 mkdir -p "${USER_DATA_DIR}"
 
