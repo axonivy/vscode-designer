@@ -26,7 +26,11 @@ public class TestAspireSpans {
   }
 
   private AspireSpans read(String resource) {
-    try(var in = TestAspireSpans.class.getResourceAsStream(resource)) {
+    var in = TestAspireSpans.class.getResourceAsStream(resource);
+    if (in == null) {
+      throw new IllegalArgumentException("Resource not found: " + resource);
+    }
+    try (in) {
       return AspireSpans.of(new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8));
     } catch (IOException e) {
       throw new UncheckedIOException(e);

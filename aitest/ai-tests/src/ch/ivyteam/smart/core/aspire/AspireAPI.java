@@ -20,6 +20,10 @@ public class AspireAPI {
         .request();
     try (var response = request.get()) {
       var json = response.readEntity(String.class);
+      if (response.getStatus() / 100 != 2) {
+        throw new IllegalStateException(
+            "Aspire spans request failed (" + response.getStatus() + "): " + json);
+      }
       var span = MAPPER.readTree(json);
       var spans = span
           .get("data")

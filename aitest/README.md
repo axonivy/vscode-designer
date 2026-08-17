@@ -1,7 +1,7 @@
 # AI Tests
 
 Tests the native tools and skills of the vscode-designer.
-The focus is one asserting the effectiveness of a real-world prompt.
+The focus is on asserting the effectiveness of a real-world prompt.
 
 ## Docker
 

@@ -99,7 +99,11 @@ public class Runtime {
 
   public IvyEngine ivyEngine() {
     Path engines = userData.resolve("User").resolve("globalStorage").resolve("axonivy.vscode-designer-14").resolve("engines");
-    var firstEngine = engines.toFile().listFiles()[0].toPath();
+    var engineDirs = engines.toFile().listFiles();
+    if (engineDirs == null || engineDirs.length == 0) {
+      throw new IllegalStateException("No Ivy engines found under " + engines);
+    }
+    var firstEngine = engineDirs[0].toPath();
     return new IvyEngine(firstEngine);
   }
 
