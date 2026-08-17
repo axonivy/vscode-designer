@@ -69,10 +69,6 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
     this.openInBrowser(new URL(input, engineUrl).toString());
   }
 
-  async open(url: string) {
-    this.openInBrowser(url);
-  }
-
   private async openDevWfUi() {
     this.openEngineRelativeUrl(this.devContextPath);
   }
@@ -89,7 +85,7 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
     await executeCommand('setContext', 'ivy:dialogPreviewSupported', await isDialogPreviewSupported());
   }
 
-  private openInBrowser(url: string) {
+  openInBrowser(url: string) {
     let browserConfig = config.browser();
     // Web UI does not support integrated browser, so we switch to external browser in this case
     if (env.uiKind === UIKind.Web && browserConfig === 'vscodeBrowser') {
