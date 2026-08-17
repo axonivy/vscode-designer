@@ -112,7 +112,6 @@ launch_vscode() {
 		--skip-release-notes
 		--disable-workspace-trust
 		--verbose
-		"--extensionDevelopmentPath=${REPO_ROOT}/extension"
 		"--extensions-dir=${EXTENSIONS_DIR}"
 		"--user-data-dir=${USER_DATA_DIR}"
 		"${WORKSPACE_PATH}"
