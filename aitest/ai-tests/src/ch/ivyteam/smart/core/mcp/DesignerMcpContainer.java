@@ -16,9 +16,7 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
   private static final int MCP_PORT = 32140;
 
   public DesignerMcpContainer(Path ivyWorkspace, Path extensionDir, Path userData, String javaHome, Path mcp) {
-
-    //super("mcr.microsoft.com/playwright:v1.54.2-noble");
-    super(DockerImageName.parse("mcr.microsoft.com/playwright:v1.54.2-noble"));
+    super(DockerImageName.parse("mcr.microsoft.com/playwright:v1.61.1-noble"));
 
     if (javaHome == null || javaHome.isBlank()) {
       throw new IllegalStateException("JAVA_HOME must be set to run designer-mcp container");
