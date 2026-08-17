@@ -16,7 +16,7 @@ services:
       - -lc
       - |
         set -euo pipefail
-        /workspace/.github/workflows/mcp.sh vscode-designer.code-workspace
+        /workspace/aitest/mcp.sh vscode-designer.code-workspace
         exec tail -f /dev/null
 
   aspire:

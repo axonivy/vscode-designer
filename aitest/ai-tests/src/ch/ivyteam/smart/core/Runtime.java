@@ -89,11 +89,11 @@ public class Runtime {
   private static Path findWorkspaceRoot() {
     Path current = Path.of(System.getProperty("user.dir")).toAbsolutePath();
     while (current != null) {
-      if (Files.exists(current.resolve(".github/workflows/mcp.sh"))) {
+      if (Files.exists(current.resolve(".github/workflows/ai.yml"))) {
         return current;
       }
       current = current.getParent();
     }
-    throw new IllegalStateException("Could not locate workspace root containing .github/workflows/mcp.sh");
+    throw new IllegalStateException("Could not locate workspace root containing .github/workflows/ai.yml");
   }
 }

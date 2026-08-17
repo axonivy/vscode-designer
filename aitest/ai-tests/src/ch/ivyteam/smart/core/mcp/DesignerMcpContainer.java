@@ -41,8 +41,7 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
     withCreateContainerCmdModifier(command -> command.withAliases(DesignerMcpContainer.NETWORK_ALIAS));
     withCommand(
         "bash", "-lc", ""
-      //  "set -euo pipefail\n"
-            + "./.github/workflows/mcp.sh vscode-designer.code-workspace\n"
+            + "aitest/mcp.sh vscode-designer.code-workspace\n"
             + "exec tail -f /dev/null");
   }
 

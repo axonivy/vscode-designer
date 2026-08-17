@@ -4,10 +4,10 @@ set -euo pipefail
 
 # Launch VS Code Insiders similarly to playwright/tests/fixtures/baseTest.ts:runElectronAppTest
 # Usage:
-#   .github/workflows/mcp.sh [workspace-or-code-workspace]
+#   aitest/mcp.sh [workspace-or-code-workspace]
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
 WORKSPACE_INPUT="${1:-${REPO_ROOT}}"
 if [[ "${WORKSPACE_INPUT}" = /* ]]; then
