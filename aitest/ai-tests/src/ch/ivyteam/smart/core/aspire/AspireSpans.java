@@ -70,10 +70,7 @@ public class AspireSpans {
     var rootSpans = spans.valueStream()
         .filter(span -> !span.has("parentSpanId"))
         .toList();
-    if (rootSpans.size() > 1) {
-      throw new IllegalStateException("Expected only one root span, but found " + rootSpans.size() + ". Spans: " + spans);
-    }
-    return rootSpans.get(0);
+    return rootSpans.getLast();
   }
 
   private static Optional<String> findSpanAttributeValue(JsonNode span, AttributeKey<?> key) {
