@@ -5,9 +5,9 @@
       "type": "java",
       "name": "Remote Debug (Attach)",
       "request": "attach",
-      "hostName": "localhost", // e.g., "192.168.1.100" or "my-server.cloud.com"
-      "port": 8000, // Debug port (match remote JVM port)
-      "projectName": "ai-tests" // Name of your Java project (from pom.xml or build.gradle)
+      "hostName": "localhost",
+      "port": 5005, // Debug port (predefined to match surefire)
+      "projectName": "ai-tests"
     }
   ]
 }
