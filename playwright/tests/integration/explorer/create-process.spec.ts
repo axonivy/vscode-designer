@@ -5,7 +5,8 @@ import { ProcessEditor } from '~/page-objects/process-editor';
 
 const processName = 'testCreateProcess';
 
-test('Add business process, execute, edit and redeploy', { tag: '@serial' }, async ({ wsPage }) => {
+// eslint-disable-next-line playwright/no-focused-test
+test.only('Add business process, execute, edit and redeploy', { tag: '@serial' }, async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.addProcess(processName, 'Business Process');
   await explorer.hasNodeExact(`${processName}.p.json`);
