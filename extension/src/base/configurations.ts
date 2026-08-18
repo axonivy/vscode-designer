@@ -2,6 +2,7 @@ import { workspace, type Disposable } from 'vscode';
 import type { McpOptions } from '../ai/tools/local-mcp';
 
 type AnimationFollowMode = 'all' | 'currentProcess' | 'openProcesses' | 'noDialogProcesses' | 'noEmbeddedProcesses';
+type Browser = 'vscodeBrowser' | 'ivyBrowser' | 'externalBrowser';
 
 const configs = () => workspace.getConfiguration();
 
@@ -23,6 +24,7 @@ export const config = {
   processAnimationAnimate: () => configs().get<boolean>('axonivy.process.animation.animate'),
   processAnimationSpeed: () => configs().get<number>('axonivy.process.animation.speed'),
   processAnimationMode: () => configs().get<AnimationFollowMode>('axonivy.process.animation.mode'),
+  browser: () => configs().get<Browser>('axonivy.browser'),
 
   setProcessAnimationAnimate: async (animate: boolean) => {
     await configs().update('axonivy.process.animation.animate', animate);

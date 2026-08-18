@@ -51,7 +51,7 @@ class FormEditorWebSocketForwarder extends WebSocketForwarder {
           openUrlExternally(message.params.payload);
           break;
         case 'openPreview':
-          IvyBrowserViewProvider.instance.open(message.params.payload);
+          IvyBrowserViewProvider.instance.openInBrowser(message.params.payload);
           break;
         case 'openProcess':
           commands.executeCommand('vscode.open', Uri.parse(`${path}Process.p.json`));
