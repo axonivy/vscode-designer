@@ -4,7 +4,7 @@ on:
     - cron: '0 1 * * 0' # 1 AM on Sunday
   push:
     branches:
-      - ai.tests
+      - ai.*
   workflow_dispatch:
 
 permissions:
