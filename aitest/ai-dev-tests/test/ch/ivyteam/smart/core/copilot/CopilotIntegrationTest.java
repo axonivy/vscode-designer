@@ -2,18 +2,15 @@ package ch.ivyteam.smart.core.copilot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.nio.file.Path;
-
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import ch.ivyteam.smart.core.Runtime;
+import ch.ivyteam.smart.core.AgentRuntime;
 
 public class CopilotIntegrationTest {
 
-  private static Runtime rt = new Runtime();
+  private static AgentRuntime rt = new AgentRuntime();
 
   @BeforeAll
   public static void beforeAll() {

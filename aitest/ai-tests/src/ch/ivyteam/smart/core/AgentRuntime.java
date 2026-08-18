@@ -20,7 +20,7 @@ import ch.ivyteam.smart.core.mcp.DesignerMcpContainer;
 import ch.ivyteam.smart.core.mcp.IvyEngine;
 import ch.ivyteam.smart.core.mcp.IvyWorkspace;
 
-public class Runtime {
+public class AgentRuntime {
   private static final String NETWORK_NAME = "smart-test-network";
 
   /*
