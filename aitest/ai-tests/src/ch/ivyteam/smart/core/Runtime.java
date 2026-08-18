@@ -28,7 +28,7 @@ public class Runtime {
   * Enabled by default for local development, disabled in CI.
   * https://java.testcontainers.org/features/reuse/
   */
-  static boolean reuseContainers = !"false".equalsIgnoreCase(System.getenv("TESTCONTAINERS_REUSE_ENABLE"));
+  static boolean reuseContainers = Boolean.parseBoolean(System.getenv().getOrDefault("TESTCONTAINERS_REUSE_ENABLE", Boolean.TRUE.toString()));
 
   static List<GenericContainer<?>> containers = new ArrayList<>();
 
