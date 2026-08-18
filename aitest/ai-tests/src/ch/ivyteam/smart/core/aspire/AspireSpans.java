@@ -31,12 +31,10 @@ public class AspireSpans {
 
   public TokenUsage tokenUsage() {
     var rootSpan = rootSpan(spans);
-    var inputTokens = findSpanAttributeValue(rootSpan, GEN_AI_USAGE_INPUT_TOKENS)
-    .map(Integer::parseInt)
-    .orElse(-1);
-    var outputTokens = findSpanAttributeValue(rootSpan, GEN_AI_USAGE_OUTPUT_TOKENS)
-    .map(Integer::parseInt)
-    .orElse(-1);
+    var inputTokens = findSpanAttributeIntValue(rootSpan, GEN_AI_USAGE_INPUT_TOKENS)
+      .orElseThrow(() -> new IllegalStateException("Missing attribute "+ GEN_AI_USAGE_INPUT_TOKENS.getKey() +" in root span"));
+    var outputTokens = findSpanAttributeIntValue(rootSpan, GEN_AI_USAGE_OUTPUT_TOKENS)
+      .orElseThrow(() -> new IllegalStateException("Missing attribute "+ GEN_AI_USAGE_OUTPUT_TOKENS.getKey() +" in root span"));
     return new TokenUsage(inputTokens, outputTokens);
   }
   
@@ -81,5 +79,15 @@ public class AspireSpans {
       return Optional.empty();
     }
     return Optional.of(attribute.get("value").get("stringValue").asString());
+  }
+
+  private static Optional<Integer> findSpanAttributeIntValue(JsonNode span, AttributeKey<?> key) {
+    return findSpanAttributeValue(span, key).map(val -> {
+      try {
+        return Integer.parseInt(val);
+      } catch (NumberFormatException ex) {
+        throw new RuntimeException("Failed to parse integer attribute " + key.getKey(), ex);
+      }
+    });
   }
 }
