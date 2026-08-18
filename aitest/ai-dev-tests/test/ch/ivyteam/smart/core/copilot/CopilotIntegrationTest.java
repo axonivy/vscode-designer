@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import ch.ivyteam.smart.core.AgentRuntime;
 
@@ -24,9 +25,10 @@ public class CopilotIntegrationTest {
   }
 
   @Test
-  void createProject() throws Exception {
-    rt.copilot().prompt("create an axon ivy project for a flight-simulator", "create-project");
-    var spans = rt.aspire().spansOfResource("create-project");
+  void createProject(TestInfo testInfo) throws Exception {
+    var resourceName = testInfo.getTestMethod().orElseThrow().getName();
+    rt.copilot().prompt("create an axon ivy project for a flight-simulator", resourceName);
+    var spans = rt.aspire().spansOfResource(resourceName);
     var tokenUsage = spans.tokenUsage();
     assertThat(tokenUsage.input()).isLessThan(150_000);
     assertThat(tokenUsage.output()).isLessThan(10_000);

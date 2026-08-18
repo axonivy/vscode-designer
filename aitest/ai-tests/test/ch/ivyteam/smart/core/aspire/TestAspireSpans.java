@@ -8,10 +8,11 @@ import java.io.UncheckedIOException;
 import org.junit.jupiter.api.Test;
 
 public class TestAspireSpans {
+
+  private final AspireSpans spans = read("spans-copilot.json");
   
   @Test
   void tools() {
-    var spans = read("spans-copilot.json");
     assertThat(spans.tools()
         .names())
         .contains("axonivy-designer-new_axon_ivy_project");
@@ -21,8 +22,15 @@ public class TestAspireSpans {
   void tokenUsage() {
     var spans = read("spans-copilot.json");
     var tokenUsage = spans.tokenUsage();
-    assertThat(tokenUsage.input()).isEqualTo(142337);
-    assertThat(tokenUsage.output()).isEqualTo(4092);
+    assertThat(tokenUsage.input()).isEqualTo(38517);
+    assertThat(tokenUsage.output()).isEqualTo(765);
+  }
+
+  @Test
+  void usedTools() {
+    assertThat(spans.usedTools()).hasSize(1);
+    assertThat(spans.usedTools().get(0).name())
+      .isEqualTo("axonivy-designer-new_axon_ivy_project");
   }
 
   private AspireSpans read(String resource) {
