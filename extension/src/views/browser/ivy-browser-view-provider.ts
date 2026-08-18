@@ -35,7 +35,6 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
     );
     registerCommand('ivyBrowserView.openDevWfUi', context, () => provider.openDevWfUi());
     registerCommand('ivyBrowserView.openEngineCockpit', context, () => provider.openEngineRelativeUrl('system/engine-cockpit'));
-    registerCommand('ivyBrowserView.openNEO', context, () => provider.openEngineRelativeUrl('neo'));
     registerCommand('ivyBrowserView.openPreview', context, () => provider.openPreview());
     context.subscriptions.push(window.tabGroups.onDidChangeTabs(() => provider.updateDialogPreviewContext()));
     provider.updateDialogPreviewContext();

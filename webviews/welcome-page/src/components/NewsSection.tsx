@@ -12,7 +12,7 @@ export const NewsSection = () => {
   return (
     <Flex direction='column' gap={4} className='h-full'>
       <Flex direction='row' justifyContent='space-between'>
-        <h2 className='text-lg font-bold'>{t('News')}</h2>
+        <h2 className='text-lg font-bold'>{t('label.news')}</h2>
         <SectionButton onClick={() => openUrl('https://www.axonivy.com/blog')}>{t('welcomePage.showAll')}</SectionButton>
       </Flex>
       <div className='grid h-full grid-cols-3 gap-3'>

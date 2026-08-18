@@ -10,7 +10,7 @@ export const CommandSection = () => {
 
   return (
     <Flex direction='column' gap={4} className='w-full'>
-      <h2 className='text-lg font-bold'>{t('Start')}</h2>
+      <h2 className='text-lg font-bold'>{t('label.start')}</h2>
       <div className='grid grid-cols-2 gap-3'>
         <Command
           title={t('commands.newProject')}
@@ -45,13 +45,6 @@ export const CommandSection = () => {
           value={'engine.downloadDevEngine'}
           description={t('commands.downloadDevEngineDescr')}
           icon={IvyIcons.Ivy}
-          onClick={executeCommand}
-        />
-        <Command
-          title={t('commands.openNeo')}
-          value={'ivyBrowserView.openNEO'}
-          description={t('commands.openNeoDescr')}
-          icon={IvyIcons.Edit}
           onClick={executeCommand}
         />
       </div>
