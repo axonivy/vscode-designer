@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import ch.ivyteam.smart.core.AgentRuntime;
+import ch.ivyteam.smart.core.aspire.AspireSpans.UsedTool;
 
 public class CopilotIntegrationTest {
 
@@ -40,6 +41,10 @@ public class CopilotIntegrationTest {
     assertThat(rt.ivyEngine().ivyLog())
       .as("no-errors in log")
       .isEmpty();
+    assertThat(spans.usedTools())
+      .as("new_axon_ivy_project tool was used")
+      .extracting(UsedTool::name)
+      .contains("axonivy-designer-new_axon_ivy_project");
   }
 
   @Test
