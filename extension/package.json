@@ -96,7 +96,12 @@
       },
       "html.suggest.html5": false,
       "java.configuration.updateBuildConfiguration": "automatic",
-      "workbench.browser.newTabPlacement": "sideGroup"
+      "workbench.browser.newTabPlacement": "sideGroup",
+      "java.diagnostic.filter": [
+        "**/target/completion/ivy-script.java",
+        "**/src_generated/**",
+        "**/target/generated-sources/**"
+      ]
     },
     "customEditors": [
       {
