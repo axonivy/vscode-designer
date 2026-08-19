@@ -74,7 +74,8 @@ const runBrowserTest = async (tmpWorkspace: TmpWorkspace, take: (r: Page) => Pro
 const runElectronAppTest = async (tmpWorkspace: TmpWorkspace, take: (r: Page) => Promise<void>) => {
   const vscodePath = await downloadAndUnzipVSCode(downloadVersion);
   const [cliPath] = resolveCliArgsFromVSCodeExecutablePath(vscodePath);
-  const extensionDir = 'test-extension-dir';
+  const extensionDir = path.resolve(process.cwd(), 'test-extension-dir');
+  const userDataDir = path.resolve(process.cwd(), 'test-user-data-dir');
   execSync(`"${cliPath}" --install-extension vscjava.vscode-java-pack --extensions-dir ${extensionDir}`);
   const electronApp = await _electron.launch({
     executablePath: vscodePath,
@@ -89,7 +90,7 @@ const runElectronAppTest = async (tmpWorkspace: TmpWorkspace, take: (r: Page) =>
       '--disable-workspace-trust',
       `--extensionDevelopmentPath=${path.resolve(__dirname, '../../../extension/')}`,
       `--extensions-dir=${extensionDir}`,
-      `--user-data-dir=test-user-data-dir`,
+      `--user-data-dir=${userDataDir}`,
       tmpWorkspace.tmpWsConfig ?? tmpWorkspace.tmpWorkspacePath
     ]
   });
