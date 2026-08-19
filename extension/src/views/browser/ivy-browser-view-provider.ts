@@ -108,9 +108,6 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
   }
 
   private getWebviewContent(webview: Webview) {
-    if (config.browser() !== 'ivyBrowser') {
-      return 'internal ivy browser is disabled, see settings: axonivy.browser';
-    }
     const browserCss = this.extensionResourceUrl(webview, 'src', 'views', 'browser', 'media', 'browser.css');
     const root = this.extensionResourceUrl(webview, 'dist', 'webviews', 'browser');
     const manifest = parseBuildManifest(root);
