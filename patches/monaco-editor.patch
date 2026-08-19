@@ -1,16 +1,8 @@
 diff --git a/esm/external/monaco-lsp-client/out/index.js b/esm/external/monaco-lsp-client/out/index.js
-index e3ace9c821b14855e093f40e17fa7a63d330e000..187ea430fecee900e6aedbe24bc6b198320c2e79 100644
+index 6f98ad23..3f473435 100644
 --- a/esm/external/monaco-lsp-client/out/index.js
 +++ b/esm/external/monaco-lsp-client/out/index.js
-@@ -2620,7 +2620,6 @@ var LspDiagnosticsFeature = class extends Disposable {
-         relatedDocumentSupport: true
-       }
-     } }));
--    debugger;
-     this._register(this._connection.connection.registerNotificationHandler(api.client.textDocumentPublishDiagnostics, (params) => this._handlePublishDiagnostics(params)));
-     this._register(this._connection.capabilities.registerCapabilityHandler(capabilities.textDocumentDiagnostic, true, (capability) => {
-       const disposables = new DisposableStore();
-@@ -2951,7 +2950,7 @@ var TextDocumentSynchronizer = class extends Disposable {
+@@ -2933,7 +2933,7 @@ var TextDocumentSynchronizer = class extends Disposable {
    }
    _getOrCreateManagedModel(m) {
      if (!this._started) throw new Error("Not started");
@@ -19,7 +11,7 @@ index e3ace9c821b14855e093f40e17fa7a63d330e000..187ea430fecee900e6aedbe24bc6b198
      let mm = this._managedModels.get(m);
      if (!mm) {
        mm = new ManagedModel(m, this._server);
-@@ -2966,7 +2965,7 @@ var TextDocumentSynchronizer = class extends Disposable {
+@@ -2948,7 +2948,7 @@ var TextDocumentSynchronizer = class extends Disposable {
      return mm;
    }
    translateBack(textDocument, position) {
@@ -28,7 +20,7 @@ index e3ace9c821b14855e093f40e17fa7a63d330e000..187ea430fecee900e6aedbe24bc6b198
      const textModel = this._managedModelsReverse.get(uri);
      if (!textModel) throw new Error(`No text model for uri ${uri}`);
      return {
-@@ -2975,7 +2974,7 @@ var TextDocumentSynchronizer = class extends Disposable {
+@@ -2957,7 +2957,7 @@ var TextDocumentSynchronizer = class extends Disposable {
      };
    }
    translateBackRange(textDocument, range) {
@@ -37,7 +29,7 @@ index e3ace9c821b14855e093f40e17fa7a63d330e000..187ea430fecee900e6aedbe24bc6b198
      const textModel = this._managedModelsReverse.get(uri);
      if (!textModel) throw new Error(`No text model for uri ${uri}`);
      return {
-@@ -3010,7 +3009,7 @@ var ManagedModel = class extends Disposable {
+@@ -2992,7 +2992,7 @@ var ManagedModel = class extends Disposable {
      super();
      this._textModel = _textModel;
      this._api = _api;
