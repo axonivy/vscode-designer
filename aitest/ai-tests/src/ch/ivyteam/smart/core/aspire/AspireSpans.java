@@ -5,28 +5,35 @@ import static io.opentelemetry.semconv.incubating.GenAiIncubatingAttributes.GEN_
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import io.opentelemetry.api.common.AttributeKey;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class AspireSpans {
 
   static final ObjectMapper MAPPER = new ObjectMapper();
 
-  private JsonNode spans;
+  private ArrayNode spans;
 
   public static AspireSpans of(String spans) {
     try {
-      return new AspireSpans(MAPPER.readTree(spans));
+      var inlineSpans = MAPPER.readTree(spans)
+        .get("data")
+        .get("resourceSpans").get(0)
+        .get("scopeSpans").get(0)
+        .get("spans");
+      return new AspireSpans(inlineSpans);
     } catch (Exception ex) {
       throw new RuntimeException("Failed to parse spans", ex);
     }
   }
 
   public AspireSpans(JsonNode spans) {
-    this.spans = spans;
+    this.spans = (ArrayNode) spans;
   }
 
   public TokenUsage tokenUsage() {
@@ -64,11 +71,42 @@ public class AspireSpans {
 
   }
 
-  private static JsonNode rootSpan(JsonNode spans) {
+  public List<UsedTool> usedTools() {
+    return childSpans()
+      .filter(span -> findSpanAttributeValue(span, AttributeKey.stringKey("gen_ai.tool.name")).isPresent())
+      .map(UsedTool::new)
+      .toList();
+  }
+
+  private Stream<JsonNode> childSpans() {
+    var rootSpan = rootSpan(spans);
+    var id = rootSpan.get("spanId").asString();
+    return spans.valueStream()
+      .filter(span -> id.equals(parentSpanId(span)));
+  }
+
+  private static String parentSpanId(JsonNode span) {
+    JsonNode parent = span.get("parentSpanId");
+    if (parent == null) {
+      return null;
+    }
+    return parent.asString();
+  }
+
+  public static record UsedTool(JsonNode span) {
+    
+    public String name() {
+      return findSpanAttributeValue(span, AttributeKey.stringKey("gen_ai.tool.name")).get();
+    }
+  }
+
+  private static ObjectNode rootSpan(JsonNode spans) {
     var rootSpans = spans.valueStream()
+        .filter(ObjectNode.class::isInstance)
+        .map(ObjectNode.class::cast)
         .filter(span -> !span.has("parentSpanId"))
         .toList();
-    return rootSpans.getLast();
+    return rootSpans.get(rootSpans.size() - 1);
   }
 
   private static Optional<String> findSpanAttributeValue(JsonNode span, AttributeKey<?> key) {
