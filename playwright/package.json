@@ -1,6 +1,7 @@
 {
   "private": true,
   "name": "@axonivy/vscode-designer-playwright",
+  "version": "14.0.0",
   "scripts": {
     "type": "tsc --noEmit",
     "test:ui": "playwright test"
@@ -9,5 +10,5 @@
     "@playwright/test": "1.62.1",
     "@vscode/test-electron": "3.1.0"
   },
-  "version": "14.0.0"
+  "type": "module"
 }

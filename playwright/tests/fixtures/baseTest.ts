@@ -1,4 +1,4 @@
-import { _electron, test as base, chromium, type Page } from '@playwright/test';
+import { _electron, test as base, chromium, type ElectronApplication, type Page } from '@playwright/test';
 import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath } from '@vscode/test-electron';
 import { execSync } from 'child_process';
 import fs from 'fs';
@@ -17,6 +17,7 @@ type TestFixtures = {
   workspace: string;
   closeWelcomePage: boolean;
   tmpWorkspace: TmpWorkspace;
+  electronApp?: ElectronApplication;
   page: Page;
   wsPage: WorkspacePage;
   // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
@@ -33,11 +34,18 @@ export const test = base.extend<TestFixtures>({
       await removeTmpWorkspace(tmpWs.tmpWorkspacePath);
     }
   },
-  page: async ({ tmpWorkspace }, take) => {
-    if (runInBrowser) {
-      await runBrowserTest(tmpWorkspace, take);
-    } else {
+  electronApp: async ({ tmpWorkspace }, take) => {
+    if (!runInBrowser) {
       await runElectronAppTest(tmpWorkspace, take);
+    } else {
+      await take(undefined);
+    }
+  },
+  page: async ({ tmpWorkspace, electronApp }, take) => {
+    if (electronApp) {
+      await pageOfElectronAppTest(electronApp, take);
+    } else {
+      await runBrowserTest(tmpWorkspace, take);
     }
   },
   wsPage: async ({ page }, take) => {
@@ -71,7 +79,7 @@ const runBrowserTest = async (tmpWorkspace: TmpWorkspace, take: (r: Page) => Pro
   await browser.close();
 };
 
-const runElectronAppTest = async (tmpWorkspace: TmpWorkspace, take: (r: Page) => Promise<void>) => {
+const runElectronAppTest = async (tmpWorkspace: TmpWorkspace, take: (r: ElectronApplication) => Promise<void>) => {
   const vscodePath = await downloadAndUnzipVSCode(downloadVersion);
   const [cliPath] = resolveCliArgsFromVSCodeExecutablePath(vscodePath);
   const extensionDir = path.resolve(process.cwd(), 'test-extension-dir');
@@ -88,19 +96,23 @@ const runElectronAppTest = async (tmpWorkspace: TmpWorkspace, take: (r: Page) =>
       '--skip-welcome',
       '--skip-release-notes',
       '--disable-workspace-trust',
-      `--extensionDevelopmentPath=${path.resolve(__dirname, '../../../extension/')}`,
+      `--extensionDevelopmentPath=${path.resolve(import.meta.dirname, '../../../extension/')}`,
       `--extensions-dir=${extensionDir}`,
       `--user-data-dir=${userDataDir}`,
       tmpWorkspace.tmpWsConfig ?? tmpWorkspace.tmpWorkspacePath
     ]
   });
+  await take(electronApp);
+  await electronApp.close();
+};
+
+const pageOfElectronAppTest = async (electronApp: ElectronApplication, take: (r: Page) => Promise<void>) => {
   const page = await electronApp.firstWindow();
   if (process.env.CI) {
     await page.setViewportSize({ width: 1920, height: 1080 });
   }
   await page.context().tracing.start({ screenshots: true, snapshots: true, title: test.info().title });
   await take(page);
-  await electronApp.close();
 };
 
 const createTmpWorkspace = async (workspace: string) => {

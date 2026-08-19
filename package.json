@@ -28,6 +28,7 @@
     "test:playwright": "pnpm run --filter @axonivy/vscode-designer-playwright test:ui --project=integration-serial --project=integration-parallel",
     "test:playwright:browser": "pnpm run --filter @axonivy/vscode-designer-playwright test:ui",
     "test:playwright:performance": "pnpm run --filter @axonivy/vscode-designer-playwright test:ui --project=performance",
+    "test:playwright:screenshots": "pnpm run --filter @axonivy/vscode-designer-playwright test:ui --project=screenshots",
     "type": "pnpm run -r type",
     "update:axonivy:next": "pnpm update -r @axonivy",
     "raise:version": "lerna version --allow-peer-dependencies-update --no-git-tag-version --no-push --ignore-scripts --exact --yes",
