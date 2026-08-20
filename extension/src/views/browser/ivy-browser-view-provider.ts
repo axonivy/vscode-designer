@@ -102,8 +102,7 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
         env.openExternal(Uri.parse(url));
         break;
       case 'vscodeBrowser':
-      default:
-        executeCommand('workbench.action.browser.open', url);
+        executeCommand('workbench.action.browser.closeAll').then(() => executeCommand('workbench.action.browser.open', url));
     }
   }
 

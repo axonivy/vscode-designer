@@ -27,7 +27,8 @@ type VSCodeCommand =
   | 'copyFilePath'
   | 'workbench.action.openSettings'
   | 'workbench.action.reloadWindow'
-  | 'workbench.action.browser.open';
+  | 'workbench.action.browser.open'
+  | 'workbench.action.browser.closeAll';
 type EngineCommand =
   | 'engine.deployProjects'
   | 'engine.switchEngineReleaseTrain'
