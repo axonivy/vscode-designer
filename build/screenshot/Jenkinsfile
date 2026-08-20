@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   options {
-    buildDiscarder(logRotator(numToKeepStr: '60', artifactNumToKeepStr: '2'))
+    buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '2'))
     disableConcurrentBuilds()
   }
 
@@ -15,7 +15,7 @@ pipeline {
   }
 
   stages {
-    stage('Integration Test') {
+    stage('Screenshots') {
       steps {
         script {
           docker.build('node-webtest', '-f build/Dockerfile.playwright .').inside {
@@ -26,23 +26,31 @@ pipeline {
             nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
             """
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-              sh 'xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" pnpm run test:playwright'
+              sh 'xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" pnpm run test:playwright:screenshots'
             }
           }
           archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
           archiveArtifacts artifacts: 'AxonIvyEngine/logs/ivy.log', allowEmptyArchive: true
           archiveArtifacts artifacts: 'ivy-engine-console.out', allowEmptyArchive: true
-          withChecks('WebTests') {
+          archiveArtifacts artifacts: 'playwright/tests/screenshots/target/screenshots/**', allowEmptyArchive: true
+          withChecks('Screenshots') {
             junit testDataPublishers: [[$class: 'StabilityTestDataPublisher']], testResults: '**/node_modules/**/report.xml'
           }
         }
       }
     }
-  }
-
-  post {
-    success {
-      cleanWs()
+    stage('Deploy') {
+      when {
+        expression { isReleasingBranch() && currentBuild.currentResult == 'SUCCESS' }
+      }
+      steps {
+        script {
+          docker.build('maven-build', '-f build/Dockerfile.maven .').inside {
+            maven cmd: '-ntp -f playwright/tests/screenshots deploy -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
+          }
+          archiveArtifacts 'playwright/tests/screenshots/target/vscode-designer-screenshots-*.zip'
+        }
+      }
     }
   }
 }

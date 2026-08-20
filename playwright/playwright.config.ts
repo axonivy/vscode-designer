@@ -23,6 +23,7 @@ export default defineConfig({
       expect: { timeout: 60_000 },
       dependencies: ['setup-test'],
       retries: 0
-    }
+    },
+    { name: 'screenshots', testDir: './tests/screenshots', retries: 0 }
   ]
 });

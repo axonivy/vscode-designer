@@ -14,7 +14,7 @@ pipeline {
       steps {
         script {
           if (isReleasingBranch()) {
-            docker.build('node', '-f build/Dockerfile .').inside {
+            docker.build('node', '-f build/Dockerfile.node .').inside {
               withCredentials([string(credentialsId: 'dependency-track', variable: 'API_KEY')]) {
                 sh 'pnpm install && pnpm run update:axonivy:next'
                 sh 'pnpm run sbom:dev'
