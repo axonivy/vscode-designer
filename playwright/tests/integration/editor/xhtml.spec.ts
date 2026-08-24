@@ -1,5 +1,5 @@
 import { expect, test } from '~/fixtures/baseTest';
-import { BrowserView } from '~/page-objects/browser-view';
+import { VsCodeBrowser } from '~/page-objects/vscode-browser';
 import { XhtmlEditor } from '~/page-objects/xhtml-editor';
 
 test('xhtml completions', async ({ wsPage }) => {
@@ -21,34 +21,36 @@ test('xhtml definitions', async ({ wsPage }) => {
   await editor.expectDefinitionAtLineColumn('ContentManagement.java', 24, 118);
 });
 
-test('xhtml preview', async ({ wsPage }) => {
+test('xhtml preview', async ({ wsPage, electronApp }) => {
   const editor = new XhtmlEditor(wsPage);
   await editor.open();
-  await wsPage.activateExpensiveJavaStandardMode();
   await wsPage.hasReadyStatusMessage();
-  const browserView = new BrowserView(wsPage);
-  const browser = browserView.content;
 
-  const frame = browser.frameLocator('iframe');
+  const timeout = { timeout: 3_000 };
+  await wsPage.hasReadyStatusMessage();
+  await wsPage.executeCommand('Axon Ivy: Deploy All Projects');
+  await wsPage.hasStatusMessage('Axon Ivy: Success: Deploying projects');
+  const vscodeBrowser = await VsCodeBrowser.openBrowser(() => wsPage.page.getByRole('button', { name: 'Open Dialog Preview' }).click(), {
+    electronApp,
+    page: wsPage.page
+  });
+  const frame = vscodeBrowser.browserPage.frameLocator('iframe');
   const button = frame.getByRole('button', { name: 'Proceed' });
-
+  await expect(vscodeBrowser.browserPage.locator('#iFrameForm\\:frameTaskName')).toHaveText('Preview', timeout);
   await expect(async () => {
-    await wsPage.hasReadyStatusMessage();
-    await wsPage.executeCommand('Axon Ivy: Deploy All Projects');
-    await wsPage.hasStatusMessage('Axon Ivy: Success: Deploying projects');
-    await wsPage.page.getByRole('button', { name: 'Open Dialog Preview' }).click();
-    await expect(button).toBeVisible({ timeout: 3_000 });
+    await vscodeBrowser.reload();
+    await expect(button).toBeVisible(timeout);
   }).toPass();
 
-  await wsPage.closeAllTabs();
+  await editor.close();
 
   const overlay = frame.locator('#selectionOverlay');
   await expect(overlay).toHaveCount(0);
-  await browser.locator('#iFrameForm\\:previewElementPicker').click();
+  await vscodeBrowser.browserPage.locator('#iFrameForm\\:previewElementPicker').click();
   await expect(overlay).toHaveCount(1);
   await button.click();
   await expect(overlay).toHaveCount(1);
-  await browser.locator('#iFrameForm\\:previewElementPicker').click();
+  await vscodeBrowser.browserPage.locator('#iFrameForm\\:previewElementPicker').click();
   await expect(overlay).toHaveCount(0);
 
   await editor.expectTabVisible();
