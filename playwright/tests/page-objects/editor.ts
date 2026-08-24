@@ -16,7 +16,7 @@ abstract class Editor {
 
   async close() {
     await this.expectTabActive();
-    await this.wsPage.executeCommand('View: Close Editor');
+    await this.tab.getByRole('button', { name: 'Close' }).click();
     await expect(this.tab).toBeHidden();
   }
 
@@ -24,6 +24,7 @@ abstract class Editor {
     if (!options?.force) {
       await this.expectTabDirty();
     }
+    await this.tab.click();
     await this.wsPage.executeCommand('File: Save');
     await this.expectTabNotDirty();
   }

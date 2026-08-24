@@ -88,7 +88,7 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
     let browserConfig = config.browser();
     // Web UI does not support integrated browser, so we switch to external browser in this case
     if (env.uiKind === UIKind.Web && browserConfig === 'vscodeBrowser') {
-      browserConfig = env.appName === 'code-server' ? 'ivyBrowser' : 'externalBrowser';
+      browserConfig = 'externalBrowser';
     }
     switch (browserConfig) {
       case 'ivyBrowser':
