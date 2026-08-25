@@ -94,7 +94,7 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     const projectItems = parseAvailableProjectItems(product);
     let initialProjectSelection: ProductProjectSelection[] | undefined = undefined;
     if (!state.changedProjectSelection) {
-      initialProjectSelection = projectItems;
+      initialProjectSelection = projectItems.filter(project => project.isPicked);
       state.changedProjectSelection = true;
     }
 
@@ -437,7 +437,7 @@ const parseAvailableProjectItems = (product: MarketProduct): ProductProjectSelec
             mavenType: 'maven-dependency' as const,
             artifactId: dependency.artifactId ?? '',
             groupId: dependency.groupId ?? '',
-            isPicked: true
+            isPicked: typeof dependency.optional !== 'boolean' ? true : !dependency.optional
           })) ?? [])
         );
         break;
