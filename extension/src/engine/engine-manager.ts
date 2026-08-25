@@ -178,7 +178,7 @@ export class IvyEngineManager {
         for (const projectDir of ivyProjectDirectories) {
           await this.ivyEngineApi?.findOrCreateProject(projectDir);
         }
-        await this.ivyEngineApi?.deployProjects(ivyProjectDirectories);
+        await this.ivyEngineApi?.deployProjects({ projectDirs: ivyProjectDirectories });
       }
     );
   }
@@ -190,14 +190,14 @@ export class IvyEngineManager {
     const ivyProjectDirectories = ivyProjectDirectory ? [ivyProjectDirectory] : await this.ivyProjectDirectories();
     await StatusBar.withStatusBarProgress(
       { text: 'Deploying projects' },
-      async () => await this.ivyEngineApi?.deployProjects(ivyProjectDirectories)
+      async () => await this.ivyEngineApi?.deployProjects({ projectDirs: ivyProjectDirectories })
     );
   }
 
   public async stopBpmEngine(ivyProjectDirectory: string) {
     await StatusBar.withStatusBarProgress(
       { text: 'Stopping BPM Engine' },
-      async () => await this.ivyEngineApi?.stopBpmEngine(ivyProjectDirectory)
+      async () => await this.ivyEngineApi?.stopBpmEngine({ projectDir: ivyProjectDirectory })
     );
   }
 
@@ -301,14 +301,14 @@ export class IvyEngineManager {
   public async deleteProject(ivyProjectDirectory: string) {
     await StatusBar.withStatusBarProgress(
       { text: 'Deleting project' },
-      async () => await this.ivyEngineApi?.deleteProject(ivyProjectDirectory)
+      async () => await this.ivyEngineApi?.deleteProject({ projectDir: ivyProjectDirectory })
     );
   }
 
   public async convertProject(ivyProjectDirectory: string) {
     await StatusBar.withStatusBarProgress(
       { text: 'Converting project' },
-      async () => await this.ivyEngineApi?.convertProject(ivyProjectDirectory)
+      async () => await this.ivyEngineApi?.convertProject({ projectDir: ivyProjectDirectory })
     );
   }
 
@@ -325,7 +325,7 @@ export class IvyEngineManager {
     }
     return await StatusBar.withStatusBarProgress(
       { text: 'Invalidating class loader' },
-      async () => await this.ivyEngineApi?.invalidateClassLoader(ivyProjectDirectory)
+      async () => await this.ivyEngineApi?.invalidateClassLoader({ projectDir: ivyProjectDirectory })
     );
   }
 
@@ -345,7 +345,7 @@ export class IvyEngineManager {
   }
 
   public async projects(withDependencies = false) {
-    return this.ivyEngineApi?.projects(withDependencies);
+    return this.ivyEngineApi?.projects({ withDependencies });
   }
 
   async ivyProjectDirectories() {

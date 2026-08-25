@@ -80,7 +80,7 @@ class FormEditorWebSocketForwarder extends WebSocketForwarder {
 }
 
 const openComponent = async (action: FormActionArgs) => {
-  IvyEngineManager.instance.engineApi?.getComponentForm(action.payload, action.context.app, action.context.project).then(form => {
+  IvyEngineManager.instance.engineApi?.getComponentForm({ componentId: action.payload, project: action.context.project }).then(form => {
     commands.executeCommand('vscode.open', Uri.parse(form.uri ?? ''));
   });
 };
