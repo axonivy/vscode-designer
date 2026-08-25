@@ -12,7 +12,13 @@ import {
   type MSStateBase,
   type ProjectSelection
 } from '../project-explorer/utils/multi-step-input';
-import type { Dependency, Installer, MarketProduct, MavenDependencyInstaller, MavenProjectInstaller } from './generated/market-product';
+import type {
+  Installer,
+  MarketProduct,
+  MavenDependencyInstaller,
+  MavenProjectInstaller,
+  ProjectDependency
+} from './generated/market-product';
 import { fetchInstaller, getAvailableVersions, getBestVersion, searchMarketProduct } from './market-client';
 
 interface ProductSelection extends QuickPickItem {
@@ -466,7 +472,7 @@ const markProjectsForImport = (productJson: string, selectedProjects: ProductPro
       }
       case 'maven-dependency': {
         const dataDependencyInstaller = installer.data as MavenDependencyInstaller;
-        const selectedDependencies: Dependency[] = [];
+        const selectedDependencies: ProjectDependency[] = [];
         const allDependencies = dataDependencyInstaller.dependencies ?? [];
         allDependencies.forEach(dependency => {
           const isSelected = selectedProjects.some(sp => sp.artifactId === dependency.artifactId && sp.groupId === dependency.groupId);
