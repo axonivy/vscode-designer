@@ -29,41 +29,43 @@ export interface MarketProduct {
 }
 /**
  * This interface was referenced by `MarketProduct`'s JSON-Schema
- * via the `definition` "Dependency".
- */
-export interface Dependency {
-  artifactId?: string;
-  classifier?: string;
-  exclusions?: Exclusion[];
-  groupId?: string;
-  managementKey?: string;
-  optional?: string;
-  scope?: string;
-  systemPath?: string;
-  type?: string;
-  version?: string;
-}
-/**
- * This interface was referenced by `MarketProduct`'s JSON-Schema
- * via the `definition` "Exclusion".
- */
-export interface Exclusion {
-  artifactId?: string;
-  groupId?: string;
-}
-/**
- * This interface was referenced by `MarketProduct`'s JSON-Schema
  * via the `definition` "MavenDependencyInstaller".
  */
 export interface MavenDependencyInstaller {
   /**
    * ivy projects as maven dependencies
    */
-  dependencies?: Dependency[];
+  dependencies?: ProjectDependency[];
   /**
    * maven repositories where the projects are available
    */
   repositories?: Repository[];
+}
+/**
+ * This interface was referenced by `MarketProduct`'s JSON-Schema
+ * via the `definition` "ProjectDependency".
+ */
+export interface ProjectDependency {
+  /**
+   * maven artifact id
+   */
+  artifactId?: string;
+  /**
+   * maven group id
+   */
+  groupId?: string;
+  /**
+   * Hint to mark the dependency as optional
+   */
+  optional?: boolean;
+  /**
+   * maven type
+   */
+  type?: string;
+  /**
+   * maven version
+   */
+  version?: string;
 }
 /**
  * This interface was referenced by `MarketProduct`'s JSON-Schema

@@ -19,7 +19,7 @@ tsGen.DEFAULT_OPTIONS.unreachableDefinitions = true;
 
 const tsOut = path.resolve('./src/market/generated/market-product.ts');
 var schemaUri =
-  'https://jenkins.ivyteam.io/job/core_json-schema/job/master/lastSuccessfulBuild/artifact/workspace/ch.ivyteam.ivy.market.schema/target/schema/market/10.0.0/product.json';
+  'https://jenkins.ivyteam.io/job/core_json-schema/job/master/lastSuccessfulBuild/artifact/workspace/ch.ivyteam.ivy.market.schema/target/schema/market/14.0.0/product.json';
 
 const args = process.argv.slice(2);
 if (args.length > 0) {

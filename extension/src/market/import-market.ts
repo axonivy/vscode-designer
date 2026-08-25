@@ -12,7 +12,13 @@ import {
   type MSStateBase,
   type ProjectSelection
 } from '../project-explorer/utils/multi-step-input';
-import type { Dependency, Installer, MarketProduct, MavenDependencyInstaller, MavenProjectInstaller } from './generated/market-product';
+import type {
+  Installer,
+  MarketProduct,
+  MavenDependencyInstaller,
+  MavenProjectInstaller,
+  ProjectDependency
+} from './generated/market-product';
 import { fetchInstaller, getAvailableVersions, getBestVersion, searchMarketProduct } from './market-client';
 
 interface ProductSelection extends QuickPickItem {
@@ -94,7 +100,7 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     const projectItems = parseAvailableProjectItems(product);
     let initialProjectSelection: ProductProjectSelection[] | undefined = undefined;
     if (!state.changedProjectSelection) {
-      initialProjectSelection = projectItems;
+      initialProjectSelection = projectItems.filter(project => project.isPicked);
       state.changedProjectSelection = true;
     }
 
@@ -437,7 +443,7 @@ const parseAvailableProjectItems = (product: MarketProduct): ProductProjectSelec
             mavenType: 'maven-dependency' as const,
             artifactId: dependency.artifactId ?? '',
             groupId: dependency.groupId ?? '',
-            isPicked: true
+            isPicked: typeof dependency.optional !== 'boolean' ? true : !dependency.optional
           })) ?? [])
         );
         break;
@@ -466,7 +472,7 @@ const markProjectsForImport = (productJson: string, selectedProjects: ProductPro
       }
       case 'maven-dependency': {
         const dataDependencyInstaller = installer.data as MavenDependencyInstaller;
-        const selectedDependencies: Dependency[] = [];
+        const selectedDependencies: ProjectDependency[] = [];
         const allDependencies = dataDependencyInstaller.dependencies ?? [];
         allDependencies.forEach(dependency => {
           const isSelected = selectedProjects.some(sp => sp.artifactId === dependency.artifactId && sp.groupId === dependency.groupId);
