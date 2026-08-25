@@ -13,7 +13,10 @@ To configure it:
   "java.format.settings.url": "https://raw.githubusercontent.com/axonivy/vscode-designer/refs/heads/master/java-formatter/eclipse-formatter.xml",
   "java.format.settings.profile": "ivyteam",
   "[java]": {
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
   }
 }
 ```
