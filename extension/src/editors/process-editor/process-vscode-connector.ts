@@ -164,6 +164,10 @@ export class ProcessVscodeConnector extends GlspVscodeConnector {
     return { processedMessage: undefined, messageChanged: true };
   }
 
+  public override async revertDocument() {
+    return;
+  }
+
   protected override handleSetMarkersAction(
     message: ActionMessage<SetMarkersAction>,
     client: GlspVscodeClient | undefined,
