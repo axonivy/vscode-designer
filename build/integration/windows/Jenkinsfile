@@ -94,7 +94,7 @@ pipeline {
                 curl -o schema.zip %devSchema%'
               '''
               bat 'powershell -Command "Expand-Archive -Path schema.zip -DestinationPath . -Force"'
-              bat 'move 10.0.0\\product.json marketProduct.json'
+              bat 'move 14.0.0\\product.json marketProduct.json'
               bat 'pnpm run market:generate %cd%\\marketProduct.json'
               bat 'pnpm run type && pnpm run lint:ci'
             }
