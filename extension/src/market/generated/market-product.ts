@@ -59,9 +59,9 @@ export interface ProjectDependency {
    */
   optional?: boolean;
   /**
-   * Group the dependency where one is required to be installed
+   * Defines the depenendency group. For all dependencies with the same 'group', the installation of at least one dependency is expected.
    */
-  requiredOneOf?: string;
+  requireOneOfGroup?: string;
   /**
    * maven type
    */
