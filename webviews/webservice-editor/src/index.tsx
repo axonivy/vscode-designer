@@ -20,13 +20,15 @@ export async function start({ file }: InitializeConnection) {
     throw new Error('Root element not found');
   }
   initTranslation();
+  const context = { app: '', project: '', file };
+  await client.initialize(context);
   createRoot(rootElement).render(
     <React.StrictMode>
       <ThemeProvider disabled={true}>
         <ClientContextProvider client={client}>
           <QueryProvider client={queryClient}>
             <HotkeysProvider initiallyActiveScopes={['global']}>
-              <App context={{ app: '', project: '', file }} />
+              <App context={context} />
               <Toaster closeButton={true} />
             </HotkeysProvider>
           </QueryProvider>

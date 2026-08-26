@@ -24,7 +24,7 @@ export async function start({ file }: InitializeConnection): Promise<void> {
   }
   initTranslation();
   const context = { app: '', project: '', file };
-  client.initialize(context);
+  await client.initialize(context);
   createRoot(rootElement).render(
     <React.StrictMode>
       <ThemeProvider disabled={true}>
