@@ -8,11 +8,18 @@ import { handleProjectConversionLog } from '../project-conversion-log';
 import { handleAxiosError } from './axios-error-handler';
 import {
   type CaseMapInit,
+  type ComponentFormParams,
+  type ConvertProjectParams,
   type DataClassInit,
+  type DeleteProjectParams,
+  type DeployProjectsRequest,
   type ImportProcessBody,
   type ImportProjectsBody,
+  type InvalidateClassLoaderParams,
   type NewProjectParams,
   type ProductInstallParams,
+  type ProjectsParams,
+  type StopBpmEngineParams,
   type WorkspaceBean,
   componentForm,
   convertProject,
@@ -44,112 +51,120 @@ const options = { headers, paramsSerializer: { indexes: null } };
 export class IvyEngineApi {
   constructor(
     private readonly workspace: WorkspaceBean,
-    private readonly baseURL: string,
+    private readonly designerUrl: string,
     private readonly engineURL: string
   ) {}
 
   static async init(rawEngineUrl: string) {
-    const workspace = await IvyEngineApi.createWorkspace(rawEngineUrl).catch(handleAxiosError);
+    const designerUrl = new URL(path.join('designer/api'), rawEngineUrl).toString();
+    await pollWithProgress(rawEngineUrl, 'Waiting for Axon Ivy Engine to be ready.');
+    const workspace = await IvyEngineApi.createWorkspace(designerUrl).catch(handleAxiosError);
     const engineUrl = new URL('api', rawEngineUrl).toString();
     if (!workspace) {
       throw new Error('Failed to create workspace');
     }
-    const baseURL = new URL(path.join(workspace.baseUrl, 'api'), engineUrl).toString();
-    return new IvyEngineApi(workspace, baseURL, engineUrl);
+    return new IvyEngineApi(workspace, designerUrl, engineUrl);
   }
 
-  private static async createWorkspace(engineUrl: string) {
-    await pollWithProgress(engineUrl, 'Waiting for Axon Ivy Engine to be ready.');
-    const baseURL = new URL(path.join('api'), engineUrl).toString();
+  private static async createWorkspace(designerUrl: string) {
     const workspaces = workspace.workspaceFolders;
     const workspaceFolder = workspaces?.at(0);
     if (!workspaces || !workspaceFolder) {
       throw new Error('No workspace available');
     }
     return StatusBar.withStatusBarProgress({ text: 'Creating workspace' }, async () => {
-      const response = await createWorkspace({ name: workspaceFolder.name, path: workspaceFolder.uri.fsPath }, { baseURL, ...options });
+      const response = await createWorkspace(
+        { name: workspaceFolder.name, path: workspaceFolder.uri.fsPath },
+        { baseURL: designerUrl, ...options }
+      );
       return response.data;
     });
   }
 
   public async findOrCreateProject(projectDir: string) {
     const name = path.basename(projectDir);
-    const params = { name, path: projectDir };
-    await findOrCreateProject(params, { baseURL: this.baseURL, ...options }).catch(handleAxiosError);
+    await findOrCreateProject({ workspaceId: this.workspace.id, name, path: projectDir }, { baseURL: this.designerUrl, ...options }).catch(
+      handleAxiosError
+    );
   }
 
-  public async deployProjects(ivyProjectDirectories: string[]) {
-    await deployProjects(ivyProjectDirectories, { baseURL: this.baseURL, ...options }).catch(handleAxiosError);
+  public async deployProjects(params: Omit<DeployProjectsRequest, 'workspaceId'>) {
+    await deployProjects({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options }).catch(handleAxiosError);
   }
 
-  public async stopBpmEngine(projectDir: string) {
+  public async stopBpmEngine(params: Omit<StopBpmEngineParams, 'workspaceId'>) {
     await stopBpmEngine(
-      { projectDir },
-      { baseURL: this.baseURL, ...options, headers: { ...headers, 'Content-Type': 'application/json' } }
+      { workspaceId: this.workspace.id, ...params },
+      { baseURL: this.designerUrl, ...options, headers: { ...headers, 'Content-Type': 'application/json' } }
     ).catch(handleAxiosError);
   }
 
-  public async createProcess(newProcessParams: NewProcessParams) {
-    return createProcess(newProcessParams, { baseURL: this.baseURL, ...options })
+  public async createProcess(newProcessParams: Omit<NewProcessParams, 'workspaceId'>) {
+    return createProcess({ workspaceId: this.workspace.id, ...newProcessParams }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
-  public async createProcessFromBpmn(params: ImportProcessBody) {
-    return importProcess(params, { baseURL: this.baseURL, ...options })
+  public async createProcessFromBpmn(params: Omit<ImportProcessBody, 'workspaceId'>) {
+    return importProcess({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
   public async importIvyProject(workspaceId: string, params: ImportProjectsBody) {
-    params = { ...params, doConvert: 'false' };
     return importProjects(workspaceId, params, { baseURL: this.engineURL, ...options })
       .then(res => res.data)
       .catch(error => handleAxiosError(error, false));
   }
 
-  public async installMarketProduct(params: ProductInstallParams) {
-    return installMarketProduct(this.workspace.id, params, { baseURL: this.engineURL, ...options })
+  public async installMarketProduct(params: Omit<ProductInstallParams, 'workspaceId'>) {
+    return installMarketProduct(this.workspace.id, params, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
-  public async createProject(newProjectParams: NewProjectParams) {
-    return await createProjectAndProjectFiles(newProjectParams, { baseURL: this.baseURL, ...options })
+  public async createProject(newProjectParams: Omit<NewProjectParams, 'workspaceId'>) {
+    return await createProjectAndProjectFiles(
+      { workspaceId: this.workspace.id, ...newProjectParams },
+      { baseURL: this.designerUrl, ...options }
+    )
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
-  public async createUserDialog(newUserDialogParams: NewUserDialogParams) {
-    return createHd(newUserDialogParams, { baseURL: this.baseURL, ...options })
+  public async createUserDialog(newUserDialogParams: Omit<NewUserDialogParams, 'workspaceId'>) {
+    return createHd({ workspaceId: this.workspace.id, ...newUserDialogParams }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
-  public async createDataClass(params: DataClassInit) {
-    return createDataClass(params, { baseURL: this.baseURL, ...options })
+  public async createDataClass(params: Omit<DataClassInit, 'workspaceId'>) {
+    return createDataClass({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
-  public async createEntityClass(params: DataClassInit) {
-    return createEntityClass(params, { baseURL: this.baseURL, ...options })
+  public async createEntityClass(params: Omit<DataClassInit, 'workspaceId'>) {
+    return createEntityClass({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
-  public async createCaseMap(params: CaseMapInit) {
-    return createCaseMap(params, { baseURL: this.baseURL, ...options })
+  public async createCaseMap(params: Omit<CaseMapInit, 'workspaceId'>) {
+    return createCaseMap({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
-  public async deleteProject(projectDir: string) {
-    await deleteProject({ projectDir }, { baseURL: this.baseURL, ...options }).catch(handleAxiosError);
+  public async deleteProject(params: Omit<DeleteProjectParams, 'workspaceId'>) {
+    await deleteProject({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options }).catch(handleAxiosError);
   }
 
-  public async convertProject(projectDir: string) {
-    const data = await convertProject({ projectDir }, { baseURL: this.baseURL, ...options, responseType: 'stream' })
+  public async convertProject(params: Omit<ConvertProjectParams, 'workspaceId'>) {
+    const data = await convertProject(
+      { workspaceId: this.workspace.id, ...params },
+      { baseURL: this.designerUrl, ...options, responseType: 'stream' }
+    )
       .catch(handleAxiosError)
       .then(res => res.data);
     if (data instanceof IncomingMessage) {
@@ -158,23 +173,25 @@ export class IvyEngineApi {
   }
 
   public async refreshProjectStatuses() {
-    return refreshProjectStatuses({ baseURL: this.baseURL, ...options })
+    return refreshProjectStatuses({ workspaceId: this.workspace.id }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
-  public async invalidateClassLoader(projectDir: string) {
-    await invalidateClassLoader({ projectDir }, { baseURL: this.baseURL, ...options }).catch(handleAxiosError);
+  public async invalidateClassLoader(params: Omit<InvalidateClassLoaderParams, 'workspaceId'>) {
+    await invalidateClassLoader({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options }).catch(
+      handleAxiosError
+    );
   }
 
-  public async getComponentForm(componentId: string, app: string, project: string) {
-    return componentForm({ componentId, app, project }, { baseURL: this.baseURL, ...options })
+  public async getComponentForm(params: Omit<ComponentFormParams, 'workspaceId'>) {
+    return componentForm({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
-  public async projects(withDependencies = false) {
-    return (await projects({ withDependencies }, { baseURL: this.baseURL, ...options })).data;
+  public async projects(params: Omit<ProjectsParams, 'workspaceId'> = { withDependencies: false }) {
+    return (await projects({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })).data;
   }
 
   public async getEngineVersion() {

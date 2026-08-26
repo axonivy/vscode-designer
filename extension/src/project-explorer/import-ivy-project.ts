@@ -36,6 +36,7 @@ export const importIvyProject = async (selectedWorkspaceUri: Uri) => {
   }
 
   const existingIvyProjectNames = ((await IvyEngineManager.instance.projects(false)) ?? []).map(pIdentifier => pIdentifier.id.project);
+
   for (const iarFile of iarFilesToCheck) {
     const fileName = path.basename(iarFile);
     const sanitizedFileName = sanitizeProjectName(fileName);

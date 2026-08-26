@@ -168,7 +168,6 @@ const createTextDocument = (text: string) =>
   }) as TextDocument;
 
 const createHdBean = (uri?: string): HdBean => ({
-  identifier: {} as HdBean['identifier'],
   name: 'test',
   path: 'dialogs/test.xhtml',
   uri
