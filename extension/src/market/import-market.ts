@@ -35,6 +35,7 @@ interface ProductProjectSelection extends QuickPickItem {
   artifactId?: string;
   groupId?: string;
   isPicked: boolean;
+  requiredOneOf?: string;
 }
 
 interface InstallMarketProductState extends MSStateBase {
@@ -97,29 +98,66 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     state: InstallMarketProductState
   ) => {
     const product = parseProduct(state.productJson ?? '');
-    const projectItems = parseAvailableProjectItems(product);
+    const allItems = parseAvailableProjectItems(product);
+    const projectItems = allItems.filter(item => !item.requiredOneOf);
     let initialProjectSelection: ProductProjectSelection[] | undefined = undefined;
     if (!state.changedProjectSelection) {
       initialProjectSelection = projectItems.filter(project => project.isPicked);
       state.changedProjectSelection = true;
     }
 
-    state.projects = await input.showQuickPick<ProductProjectSelection, true>({
+    const selectedProjects = await input.showQuickPick<ProductProjectSelection, true>({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose Projects of Product to Import',
+      titleSuffix: ' - Choose Projects and Dependencies to Import',
       placeholder: 'Select projects to import',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       canSelectMany: true,
       value: state.projectsSearchString,
       items: projectItems,
-      selectedItems: initialProjectSelection ?? state.projects ?? [],
+      selectedItems: initialProjectSelection ?? state.projects?.filter(p => !p.requiredOneOf) ?? [],
       onBack: (typedValue: string, selectedItems: ProductProjectSelection[]) => {
         state.projectsSearchString = typedValue;
-        state.projects = selectedItems;
+        state.projects = [...selectedItems, ...(state.projects?.filter(p => p.requiredOneOf) ?? [])];
       }
     });
-    state.productJson = markProjectsForImport(state.productJson ?? '', state.projects ?? []);
+    state.projects = [...selectedProjects, ...(state.projects?.filter(p => p.requiredOneOf) ?? [])];
+  };
+
+  const stepRequiredDependencies: InputStep<InstallMarketProductState> = async (
+    input: MultiStepInput<InstallMarketProductState>,
+    state: InstallMarketProductState
+  ) => {
+    const product = parseProduct(state.productJson ?? '');
+    const allItems = parseAvailableProjectItems(product);
+    const requiredItems = allItems.filter(item => item.requiredOneOf);
+    if (requiredItems.length === 0) {
+      state.productJson = markProjectsForImport(state.productJson ?? '', state.projects ?? []);
+      return;
+    }
+
+    const selectedRequired = await input.showQuickPick<ProductProjectSelection, true>({
+      title: state.dialogTitle,
+      titleSuffix: ' - Choose Required Dependencies',
+      placeholder: 'Select required dependencies',
+      currentStep: state.currentStep,
+      totalSteps: state.totalSteps,
+      canSelectMany: true,
+      value: state.projectsSearchString,
+      items: requiredItems,
+      selectedItems: state.projects?.some(p => p.requiredOneOf)
+        ? state.projects.filter(p => p.requiredOneOf)
+        : requiredItems.filter(item => item.isPicked),
+      validationFunction: (_typedValue: string, selectedItems: ProductProjectSelection[]) => {
+        return validateDependencySelection(requiredItems, selectedItems);
+      },
+      onBack: (typedValue: string, selectedItems: ProductProjectSelection[]) => {
+        state.projectsSearchString = typedValue;
+        state.projects = [...(state.projects?.filter(p => !p.requiredOneOf) ?? []), ...selectedItems];
+      }
+    });
+    state.projects = [...(state.projects?.filter(p => !p.requiredOneOf) ?? []), ...selectedRequired];
+    state.productJson = markProjectsForImport(state.productJson ?? '', state.projects);
   };
 
   const stepDependentProject: InputStep<InstallMarketProductState> = async (
@@ -157,7 +195,7 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
   };
 
   const productJsonSelection = await stepSelectJson();
-  const steps: InputStep<InstallMarketProductState>[] = [stepProjects, stepDependentProject];
+  const steps: InputStep<InstallMarketProductState>[] = [stepProjects, stepRequiredDependencies, stepDependentProject];
   if (productJsonSelection.includes('${version}')) {
     steps.unshift(stepVersion);
   }
@@ -284,28 +322,66 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
   ) => {
     const productJson = await fetchInstaller(state.product?.id ?? '', state.version ?? '');
     const product = parseProduct(productJson ?? '');
-    const projectItems = parseAvailableProjectItems(product);
+    const allItems = parseAvailableProjectItems(product);
+    const projectItems = allItems.filter(item => !item.requiredOneOf);
     let initialProjectSelection: ProductProjectSelection[] | undefined = undefined;
     if (!state.changedProjectSelection) {
       initialProjectSelection = projectItems.filter(project => project.isPicked);
       state.changedProjectSelection = true;
     }
-    state.projects = await input.showQuickPick<ProductProjectSelection, true>({
+    const selectedProjects = await input.showQuickPick<ProductProjectSelection, true>({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose Projects of Product to Import',
+      titleSuffix: ' - Choose Projects and Dependencies to Import',
       placeholder: 'Select projects to import',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       canSelectMany: true,
       value: state.projectsSearchString,
       items: projectItems,
-      selectedItems: initialProjectSelection ?? state.projects ?? [],
+      selectedItems: initialProjectSelection ?? state.projects?.filter(p => !p.requiredOneOf) ?? [],
       onBack: (typedValue: string, selectedItems: ProductProjectSelection[]) => {
         state.projectsSearchString = typedValue;
-        state.projects = selectedItems;
+        state.projects = [...selectedItems, ...(state.projects?.filter(p => p.requiredOneOf) ?? [])];
       }
     });
-    state.productJson = markProjectsForImport(productJson, state.projects ?? []);
+    state.projects = [...selectedProjects, ...(state.projects?.filter(p => p.requiredOneOf) ?? [])];
+  };
+
+  const stepRequiredDependencies: InputStep<InstallMarketProductState> = async (
+    input: MultiStepInput<InstallMarketProductState>,
+    state: InstallMarketProductState
+  ) => {
+    const productJson = await fetchInstaller(state.product?.id ?? '', state.version ?? '');
+    const product = parseProduct(productJson ?? '');
+    const allItems = parseAvailableProjectItems(product);
+    const requiredItems = allItems.filter(item => item.requiredOneOf);
+    if (requiredItems.length === 0) {
+      state.productJson = markProjectsForImport(productJson, state.projects ?? []);
+      return;
+    }
+
+    const selectedRequired = await input.showQuickPick<ProductProjectSelection, true>({
+      title: state.dialogTitle,
+      titleSuffix: ' - Choose Required Dependencies',
+      placeholder: 'Select required dependencies',
+      currentStep: state.currentStep,
+      totalSteps: state.totalSteps,
+      canSelectMany: true,
+      value: state.projectsSearchString,
+      items: requiredItems,
+      selectedItems: state.projects?.some(p => p.requiredOneOf)
+        ? state.projects.filter(p => p.requiredOneOf)
+        : requiredItems.filter(item => item.isPicked),
+      validationFunction: (_typedValue: string, selectedItems: ProductProjectSelection[]) => {
+        return validateDependencySelection(requiredItems, selectedItems);
+      },
+      onBack: (typedValue: string, selectedItems: ProductProjectSelection[]) => {
+        state.projectsSearchString = typedValue;
+        state.projects = [...(state.projects?.filter(p => !p.requiredOneOf) ?? []), ...selectedItems];
+      }
+    });
+    state.projects = [...(state.projects?.filter(p => !p.requiredOneOf) ?? []), ...selectedRequired];
+    state.productJson = markProjectsForImport(productJson, state.projects);
   };
 
   const stepDependentProject: InputStep<InstallMarketProductState> = async (
@@ -347,7 +423,13 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
     });
   };
 
-  const steps: InputStep<InstallMarketProductState>[] = [stepProduct, stepVersion, stepProjects, stepDependentProject];
+  const steps: InputStep<InstallMarketProductState>[] = [
+    stepProduct,
+    stepVersion,
+    stepProjects,
+    stepRequiredDependencies,
+    stepDependentProject
+  ];
 
   const installMarketProductData: InstallMarketProductState = {
     dialogTitle: 'Install Market Product',
@@ -443,7 +525,8 @@ const parseAvailableProjectItems = (product: MarketProduct): ProductProjectSelec
             mavenType: 'maven-dependency' as const,
             artifactId: dependency.artifactId ?? '',
             groupId: dependency.groupId ?? '',
-            isPicked: typeof dependency.optional !== 'boolean' ? true : !dependency.optional
+            isPicked: typeof dependency.optional !== 'boolean' ? true : !dependency.optional,
+            requiredOneOf: dependency.requiredOneOf
           })) ?? [])
         );
         break;
@@ -453,6 +536,31 @@ const parseAvailableProjectItems = (product: MarketProduct): ProductProjectSelec
     }
   }
   return sortAvailableProjects(availableProjects);
+};
+
+const validateDependencySelection = (
+  allProjects: ProductProjectSelection[],
+  selectedProjects: ProductProjectSelection[]
+): string | undefined => {
+  if (selectedProjects.length === 0) {
+    return 'Select at least one dependency to import.';
+  }
+
+  const requiredGroups = new Set(
+    allProjects.map(project => project.requiredOneOf?.trim()).filter((requiredOneOf): requiredOneOf is string => Boolean(requiredOneOf))
+  );
+
+  const selectedRequiredGroups = new Set(
+    selectedProjects
+      .map(project => project.requiredOneOf?.trim())
+      .filter((requiredOneOf): requiredOneOf is string => Boolean(requiredOneOf))
+  );
+
+  const missingGroups = [...requiredGroups].filter(group => !selectedRequiredGroups.has(group));
+  if (missingGroups.length > 0) {
+    return `Select at least one dependency from each required group: ${missingGroups.join(', ')}.`;
+  }
+  return undefined;
 };
 
 const markProjectsForImport = (productJson: string, selectedProjects: ProductProjectSelection[]): string => {

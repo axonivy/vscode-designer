@@ -59,6 +59,10 @@ export interface ProjectDependency {
    */
   optional?: boolean;
   /**
+   * Group the dependency where one is required to be installed
+   */
+  requiredOneOf?: string;
+  /**
    * maven type
    */
   type?: string;

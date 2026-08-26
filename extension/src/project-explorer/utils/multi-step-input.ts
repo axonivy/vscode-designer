@@ -119,6 +119,7 @@ interface BaseQuickPickParameters<P extends QuickPickItem> {
   ignoreFocusOut?: boolean;
   matchOnDescription?: boolean;
   matchOnDetail?: boolean;
+  validationFunction?: (typedValue: string, selectedItems: P[]) => string | undefined;
   onBack?: (typedValue: string, selectedItems: P[]) => void;
 }
 
@@ -273,7 +274,12 @@ export class MultiStepInput<T extends MSStateBase> {
         input.onDidAccept(() => {
           if (params.canSelectMany) {
             if (input.selectedItems.length === 0) {
-              logErrorMessage('No items selected. Please select at least one item or press ESC to cancel.');
+              logErrorMessage('No items selected. Please select at least one item.');
+              return;
+            }
+            const validationMessage = params.validationFunction?.(input.value, input.selectedItems as T[]);
+            if (validationMessage) {
+              logErrorMessage(validationMessage);
               return;
             }
             resolve(input.selectedItems as QuickPickResult<T, M>);
