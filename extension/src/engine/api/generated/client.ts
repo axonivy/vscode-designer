@@ -197,7 +197,6 @@ export type StopBpmEngineParams = {
 export type ImportProjectsBody = {
   file?: Blob;
   targetPath?: string;
-  dependentProject?: Blob;
 };
 
 export const processDebugger = (options?: AxiosRequestConfig): Promise<AxiosResponse<number>> => {
@@ -335,9 +334,6 @@ export const importProjects = (
   }
   if (importProjectsBody?.targetPath !== undefined) {
     formData.append(`targetPath`, importProjectsBody.targetPath);
-  }
-  if (importProjectsBody?.dependentProject !== undefined) {
-    formData.append(`dependentProject`, importProjectsBody.dependentProject);
   }
 
   return axios.post(`/web-ide/workspace/${id}`, formData, options);
