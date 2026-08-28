@@ -10,7 +10,7 @@ import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 export interface CaseMapInit {
   name: string;
   namespace: string;
-  workspaceId?: string;
+  workspaceId: string;
   projectDir: string;
 }
 
@@ -21,7 +21,7 @@ export interface CaseMapBean {
 
 export interface DataClassInit {
   name: string;
-  workspaceId?: string;
+  workspaceId: string;
   projectDir: string;
 }
 
@@ -57,7 +57,7 @@ export interface HdInit {
   type?: string;
   template?: string;
   layout?: string;
-  workspaceId?: string;
+  workspaceId: string;
   projectDir: string;
   pid?: string;
   dataClassName?: string;
@@ -66,7 +66,7 @@ export interface HdInit {
 export interface ProcessInit {
   name: string;
   namespace: string;
-  workspaceId?: string;
+  workspaceId: string;
   path: string;
   kind: string;
   pid?: string;
@@ -94,8 +94,8 @@ export interface ProcessBean {
 }
 
 export interface DeployProjectsRequest {
-  workspaceId?: string;
-  projectDirs?: string[];
+  workspaceId: string;
+  projectDirs: string[];
 }
 
 export interface ProjectIdentifier {
@@ -118,11 +118,11 @@ export interface ProjectBean {
 }
 
 export interface RefreshProjectStatusesRequest {
-  workspaceId?: string;
+  workspaceId: string;
 }
 
 export interface NewProjectParams {
-  workspaceId?: string;
+  workspaceId: string;
   name: string;
   groupId: string;
   projectId: string;
@@ -130,9 +130,9 @@ export interface NewProjectParams {
 }
 
 export interface ProjectParams {
-  workspaceId?: string;
-  name?: string;
-  path?: string;
+  workspaceId: string;
+  name: string;
+  path: string;
 }
 
 export interface WorkspaceInit {
@@ -160,7 +160,6 @@ export type ComponentFormParams = {
   workspaceId?: string;
   project?: string;
   componentId?: string;
-  app?: string;
 };
 
 export type ImportProcessBody = {
@@ -250,10 +249,6 @@ export const importProcess = (importProcessBody?: ImportProcessBody, options?: A
 
 export const createProcess = (processInit?: ProcessInit, options?: AxiosRequestConfig): Promise<AxiosResponse<ProcessBean>> => {
   return axios.post(`/web-ide/process`, processInit, options);
-};
-
-export const deploy1 = (deploy1Body?: string[], options?: AxiosRequestConfig): Promise<AxiosResponse<unknown>> => {
-  return axios.post(`/web-ide/projects/deploy`, deploy1Body, options);
 };
 
 export const deployProjects = (
@@ -356,7 +351,6 @@ export type ComponentFormResult = AxiosResponse<HdBean>;
 export type CreateHdResult = AxiosResponse<HdBean>;
 export type ImportProcessResult = AxiosResponse<unknown>;
 export type CreateProcessResult = AxiosResponse<ProcessBean>;
-export type Deploy1Result = AxiosResponse<unknown>;
 export type DeployProjectsResult = AxiosResponse<unknown>;
 export type ProjectsResult = AxiosResponse<ProjectBean[]>;
 export type RefreshProjectStatusesResult = AxiosResponse<ProjectBean[]>;

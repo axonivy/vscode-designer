@@ -10,7 +10,7 @@ import {
   type ProviderResult,
   Uri
 } from 'vscode';
-import type { HdInit } from '../../engine/api/generated/client';
+import type { CreateUserDialogParams } from '../../engine/api/engine-api';
 import { IvyEngineManager } from '../../engine/engine-manager';
 
 type NewDialogToolArgs = {
@@ -63,7 +63,7 @@ export const createNewDialog = async (input: NewDialogToolArgs): Promise<string>
 };
 
 const resolvedParams = (args: NewDialogToolArgs) => {
-  const params: HdInit = {
+  const params: CreateUserDialogParams = {
     name: args.name,
     namespace: args.namespace,
     projectDir: args.projectPath,

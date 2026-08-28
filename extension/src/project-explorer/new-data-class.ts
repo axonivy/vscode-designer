@@ -1,6 +1,6 @@
 import path from 'path';
 import { logErrorMessage } from '../base/logging-util';
-import { type DataClassInit } from '../engine/api/generated/client';
+import type { CreateDataClassParams } from '../engine/api/engine-api';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { type AddCommandSelectionContext } from './ivy-project-explorer';
 import {
@@ -16,8 +16,6 @@ import {
 import { validateDotSeparatedName, validateProjectArtifactName, type ResourceDirectoryTarget } from './utils/util';
 
 type DataClassType = 'Data Class' | 'Entity Class';
-
-type NewDataClassParams = DataClassInit;
 
 interface NewDataClassState extends MSStateBase {
   project?: ProjectSelection | undefined;
@@ -115,7 +113,7 @@ export const addNewDataClass = async (type: DataClassType, selectionContext: Add
     newDataClassDialogData.namespace !== undefined &&
     newDataClassDialogData.project !== undefined
   ) {
-    const createDataClassInput: NewDataClassParams = {
+    const createDataClassInput: CreateDataClassParams = {
       name: `${newDataClassDialogData.namespace}.${newDataClassDialogData.name}`,
       projectDir: newDataClassDialogData.project.path
     };

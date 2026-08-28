@@ -1,7 +1,7 @@
 import path from 'path';
 import { Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
-import type { NewProjectParams } from '../engine/api/generated/client';
+import type { CreateProjectParams } from '../engine/api/engine-api';
 import { IvyEngineManager } from '../engine/engine-manager';
 import {
   type InputStep,
@@ -110,7 +110,7 @@ export const addNewProject = async (selectedUri: Uri) => {
     newProjectData.projectId !== undefined &&
     newProjectData.projectPath !== undefined
   ) {
-    const createProjectInput: NewProjectParams & { path: string } = {
+    const createProjectInput: CreateProjectParams = {
       name: newProjectData.projectName,
       groupId: newProjectData.groupId,
       projectId: newProjectData.projectId,

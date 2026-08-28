@@ -25,21 +25,20 @@ import { WebServiceEditorProvider } from '../editors/webservice-editor/webservic
 import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language-client';
 import { isProjectConversionRunning } from '../project-explorer/ivy-project-conversion';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
-import type { NewProcessParams } from '../project-explorer/new-process';
-import type { NewUserDialogParams } from '../project-explorer/new-user-dialog';
 import { resolveDefaultNamespace } from '../project-explorer/utils/util';
 import { extensionVersion } from '../version/extension-version';
 import { IvyBrowserViewProvider } from '../views/browser/ivy-browser-view-provider';
 import { RuntimeLogViewProvider } from '../views/runtimelog-view';
-import { IvyEngineApi } from './api/engine-api';
-import type {
-  CaseMapInit,
-  DataClassInit,
-  ImportProcessBody,
-  ImportProjectsBody,
-  NewProjectParams,
-  ProductInstallParams
-} from './api/generated/client';
+import {
+  IvyEngineApi,
+  type CreateCaseMapParams,
+  type CreateDataClassParams,
+  type CreateProcessFromBpmnParams,
+  type CreateProcessParams,
+  type CreateProjectParams,
+  type CreateUserDialogParams
+} from './api/engine-api';
+import type { ImportProjectsBody, ProductInstallParams } from './api/generated/client';
 import { IvyDiagnostics } from './diagnostics';
 import { EngineDownloader } from './engine-downloader';
 import { engineOutputChannel } from './engine-output-channel';
@@ -201,19 +200,19 @@ export class IvyEngineManager {
     );
   }
 
-  public async createProcess(newProcessParams: NewProcessParams) {
+  public async createProcess(newProcessParams: CreateProcessParams) {
     return await this.createAndOpenProcess(newProcessParams);
   }
 
-  public async createProcessFromBpmn(input: ImportProcessBody) {
+  public async createProcessFromBpmn(input: CreateProcessFromBpmnParams) {
     await StatusBar.withStatusBarProgress(
       { text: 'Importing BPMN process' },
       async () => await this.ivyEngineApi?.createProcessFromBpmn(input)
     );
   }
 
-  public async importIvyProject(workspaceId: string, input: ImportProjectsBody) {
-    await this.ivyEngineApi?.importIvyProject(workspaceId, input);
+  public async importIvyProject(input: ImportProjectsBody) {
+    await this.ivyEngineApi?.importIvyProject(input);
     await this.importJavaProjects();
     await IvyProjectExplorer.instance.refresh();
   }
@@ -227,7 +226,7 @@ export class IvyEngineManager {
     await IvyProjectExplorer.instance.refresh();
   }
 
-  public async createUserDialog(newUserDialogParams: NewUserDialogParams) {
+  public async createUserDialog(newUserDialogParams: CreateUserDialogParams) {
     const hdBean = await StatusBar.withStatusBarProgress(
       { text: 'Creating new User Dialog' },
       async () => await this.ivyEngineApi?.createUserDialog(newUserDialogParams)
@@ -238,7 +237,7 @@ export class IvyEngineManager {
     return hdBean;
   }
 
-  public async createProject(newProjectParams: NewProjectParams & { path: string }) {
+  public async createProject(newProjectParams: CreateProjectParams) {
     return await StatusBar.withStatusBarProgress({ text: 'Creating and deploying new project' }, async () => {
       const projectBean = await this.ivyEngineApi?.createProject(newProjectParams);
       await this.importJavaProjects();
@@ -252,7 +251,7 @@ export class IvyEngineManager {
     });
   }
 
-  public async createDataClass(params: DataClassInit) {
+  public async createDataClass(params: CreateDataClassParams) {
     const dataClassBean = await StatusBar.withStatusBarProgress(
       { text: 'Creating new Data Class' },
       async () => await this.ivyEngineApi?.createDataClass(params)
@@ -264,7 +263,7 @@ export class IvyEngineManager {
     return dataClassBean;
   }
 
-  public async createEntityClass(params: DataClassInit) {
+  public async createEntityClass(params: CreateDataClassParams) {
     const dataClassBean = await StatusBar.withStatusBarProgress(
       { text: 'Creating new Entity Class' },
       async () => await this.ivyEngineApi?.createEntityClass(params)
@@ -276,7 +275,7 @@ export class IvyEngineManager {
     return dataClassBean;
   }
 
-  public async createCaseMap(params: CaseMapInit) {
+  public async createCaseMap(params: CreateCaseMapParams) {
     const caseMapBean = await StatusBar.withStatusBarProgress(
       { text: 'Creating new Case Map' },
       async () => await this.ivyEngineApi?.createCaseMap(params)
@@ -287,7 +286,7 @@ export class IvyEngineManager {
     }
   }
 
-  private async createAndOpenProcess(newProcessParams: NewProcessParams) {
+  private async createAndOpenProcess(newProcessParams: CreateProcessParams) {
     const processBean = await StatusBar.withStatusBarProgress(
       { text: 'Creating new Process' },
       async () => await this.ivyEngineApi?.createProcess(newProcessParams)

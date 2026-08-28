@@ -1,6 +1,6 @@
 import path from 'path';
 import { logErrorMessage } from '../base/logging-util';
-import type { ProcessInit } from '../engine/api/generated/client';
+import type { CreateProcessParams } from '../engine/api/engine-api';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { type AddCommandSelectionContext } from './ivy-project-explorer';
 import {
@@ -16,8 +16,6 @@ import {
 import { validateNamespace, validateProjectArtifactName, type ResourceDirectoryTarget } from './utils/util';
 
 export type ProcessKind = 'Business Process' | 'Callable Sub Process' | 'Web Service Process' | '';
-
-export type NewProcessParams = ProcessInit;
 
 interface NewProcessState extends MSStateBase {
   project?: ProjectSelection | undefined;
@@ -112,7 +110,7 @@ export const addNewProcess = async (selectionContext: AddCommandSelectionContext
   }
 
   if (newProcessData.project != undefined && newProcessData.name !== undefined && newProcessData.namespace !== undefined) {
-    const createProcessInput: NewProcessParams = {
+    const createProcessInput: CreateProcessParams = {
       name: newProcessData.name,
       namespace: newProcessData.namespace,
       path: newProcessData.project.path,
