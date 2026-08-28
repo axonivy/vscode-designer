@@ -12,6 +12,13 @@ export class MultiStepCancelledError extends Error {
   }
 }
 
+export class MultiStepForceBack extends Error {
+  constructor(message?: string) {
+    super(message ?? '');
+    this.name = 'MultiStepForceBack';
+  }
+}
+
 export class MultiStepInvalidStateError extends Error {
   constructor(message: string) {
     super(message);
@@ -158,6 +165,10 @@ export class MultiStepInput<T extends MSStateBase> {
           this.currentStep = steps[stepIndex];
         } else if (err == InputFlowAction.cancel) {
           throw new MultiStepCancelledError('Dialog cancelled by the user');
+        } else if (err instanceof MultiStepForceBack) {
+          stepIndex = Math.max(0, stepIndex - 1);
+          state.currentStep = stepIndex + 1;
+          this.currentStep = steps[stepIndex];
         } else {
           this.current?.hide();
           throw err;

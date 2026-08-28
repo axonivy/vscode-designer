@@ -6,6 +6,7 @@ import { IvyEngineManager } from '../engine/engine-manager';
 import type { AddCommandSelectionContext } from '../project-explorer/ivy-project-explorer';
 import {
   MultiStepCancelledError,
+  MultiStepForceBack,
   MultiStepInput,
   MultiStepInvalidStateError,
   type InputStep,
@@ -46,6 +47,7 @@ interface InstallMarketProductState extends MSStateBase {
   version?: string;
   projects?: ProductProjectSelection[];
   projectsSearchString?: string;
+  forceBackRequiredStep: boolean;
   changedProjectSelection?: boolean;
   dependentProject?: ProjectSelection;
   dependentProjectFilterText?: string;
@@ -99,6 +101,8 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     input: MultiStepInput<InstallMarketProductState>,
     state: InstallMarketProductState
   ) => {
+    state.forceBackRequiredStep = false;
+
     const product = parseProduct(productJsonSelection);
     const allItems = parseAvailableProjectItems(product);
     const projectItems = allItems.filter(item => !item.requireOneOfGroup);
@@ -130,6 +134,9 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     input: MultiStepInput<InstallMarketProductState>,
     state: InstallMarketProductState
   ) => {
+    if (state.forceBackRequiredStep) {
+      throw new MultiStepForceBack();
+    }
     const product = parseProduct(productJsonSelection);
     const allItems = parseAvailableProjectItems(product);
     const requiredItems = allItems.filter(item => item.requireOneOfGroup);
@@ -193,6 +200,7 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
       }),
       onBack: (typedValue: string) => {
         state.dependentProjectFilterText = typedValue;
+        state.forceBackRequiredStep = true;
       }
     });
   };
@@ -206,7 +214,8 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     dialogTitle: 'Install Local Market Product',
     currentStep: 1,
     totalSteps: steps.length,
-    productJson: productJsonSelection
+    productJson: productJsonSelection,
+    forceBackRequiredStep: false
   };
   try {
     await new MultiStepInput<InstallMarketProductState>().stepThrough(steps, installLocalMarketProductData);
@@ -327,6 +336,8 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
     input: MultiStepInput<InstallMarketProductState>,
     state: InstallMarketProductState
   ) => {
+    state.forceBackRequiredStep = false;
+
     const sourceProductJson = state.sourceProductJson ?? (await fetchInstaller(state.product?.id ?? '', state.version ?? ''));
     state.sourceProductJson = sourceProductJson;
     const product = parseProduct(sourceProductJson);
@@ -359,6 +370,9 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
     input: MultiStepInput<InstallMarketProductState>,
     state: InstallMarketProductState
   ) => {
+    if (state.forceBackRequiredStep) {
+      throw new MultiStepForceBack();
+    }
     const sourceProductJson = state.sourceProductJson ?? (await fetchInstaller(state.product?.id ?? '', state.version ?? ''));
     state.sourceProductJson = sourceProductJson;
     const product = parseProduct(sourceProductJson);
@@ -429,6 +443,7 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
       }),
       onBack: (typedValue: string) => {
         state.dependentProjectFilterText = typedValue;
+        state.forceBackRequiredStep = true;
       }
     });
   };
@@ -445,7 +460,8 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
     dialogTitle: 'Install Market Product',
     currentStep: 1,
     totalSteps: steps.length,
-    changedProjectSelection: false
+    changedProjectSelection: false,
+    forceBackRequiredStep: false
   };
 
   try {
