@@ -99,7 +99,7 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     input: MultiStepInput<InstallMarketProductState>,
     state: InstallMarketProductState
   ) => {
-    const product = parseProduct(productJsonSelection);
+    const product = parseProduct(state.productJson ?? '');
     const allItems = parseAvailableProjectItems(product);
     const projectItems = allItems.filter(item => !item.requireOneOfGroup);
     let initialProjectSelection: ProductProjectSelection[] | undefined = undefined;
@@ -130,11 +130,11 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     input: MultiStepInput<InstallMarketProductState>,
     state: InstallMarketProductState
   ) => {
-    const product = parseProduct(productJsonSelection);
+    const product = parseProduct(state.productJson ?? '');
     const allItems = parseAvailableProjectItems(product);
     const requiredItems = allItems.filter(item => item.requireOneOfGroup);
     if (requiredItems.length === 0) {
-      state.productJson = markProjectsForImport(productJsonSelection, state.projects ?? []);
+      state.productJson = markProjectsForImport(state.productJson ?? '', state.projects ?? []);
       return;
     }
 
@@ -160,7 +160,7 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
       }
     });
     state.projects = [...(state.projects?.filter(p => !p.requireOneOfGroup) ?? []), ...selectedRequired];
-    state.productJson = markProjectsForImport(productJsonSelection, state.projects);
+    state.productJson = markProjectsForImport(state.productJson ?? '', state.projects);
   };
 
   const stepDependentProject: InputStep<InstallMarketProductState> = async (
