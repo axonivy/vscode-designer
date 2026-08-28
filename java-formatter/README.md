@@ -4,9 +4,8 @@ This repository contains the `ivyteam` Eclipse formatter profile exported from t
 
 To configure it:
 
-1. Install the Extension Pack for Java.
-2. Run `Preferences: Open User Settings (JSON)` from the Command Palette.
-3. Add the following settings to `settings.json`, merging them with any existing settings:
+1. Run `Preferences: Open User Settings (JSON)` from the Command Palette.
+2. Add the following settings to `settings.json`, merging them with any existing settings:
 
 ```json
 {
@@ -14,6 +13,8 @@ To configure it:
   "java.format.settings.profile": "ivyteam",
   "[java]": {
     "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
     "editor.codeActionsOnSave": {
       "source.organizeImports": "explicit"
     }
