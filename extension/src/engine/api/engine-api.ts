@@ -2,8 +2,6 @@ import { IncomingMessage } from 'http';
 import path from 'path';
 import { workspace } from 'vscode';
 import { StatusBar } from '../../base/status-bar';
-import type { NewProcessParams } from '../../project-explorer/new-process';
-import type { NewUserDialogParams } from '../../project-explorer/new-user-dialog';
 import { handleProjectConversionLog } from '../project-conversion-log';
 import { handleAxiosError } from './axios-error-handler';
 import {
@@ -13,10 +11,12 @@ import {
   type DataClassInit,
   type DeleteProjectParams,
   type DeployProjectsRequest,
+  type HdInit,
   type ImportProcessBody,
   type ImportProjectsBody,
   type InvalidateClassLoaderParams,
   type NewProjectParams,
+  type ProcessInit,
   type ProductInstallParams,
   type ProjectsParams,
   type StopBpmEngineParams,
@@ -47,6 +47,13 @@ import { pollWithProgress } from './poll';
 
 const headers = { 'X-Requested-By': 'web-ide' };
 const options = { headers, paramsSerializer: { indexes: null } };
+
+export type CreateDataClassParams = Omit<DataClassInit, 'workspaceId'>;
+export type CreateProjectParams = Omit<NewProjectParams, 'workspaceId'> & { path: string };
+export type CreateProcessParams = Omit<ProcessInit, 'workspaceId'>;
+export type CreateProcessFromBpmnParams = Omit<ImportProcessBody, 'workspaceId'>;
+export type CreateUserDialogParams = Omit<HdInit, 'workspaceId'>;
+export type CreateCaseMapParams = Omit<CaseMapInit, 'workspaceId'>;
 
 export class IvyEngineApi {
   constructor(
@@ -97,20 +104,20 @@ export class IvyEngineApi {
     ).catch(handleAxiosError);
   }
 
-  public async createProcess(newProcessParams: Omit<NewProcessParams, 'workspaceId'>) {
+  public async createProcess(newProcessParams: CreateProcessParams) {
     return createProcess({ workspaceId: this.workspace.id, ...newProcessParams }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
-  public async createProcessFromBpmn(params: Omit<ImportProcessBody, 'workspaceId'>) {
+  public async createProcessFromBpmn(params: CreateProcessFromBpmnParams) {
     return importProcess({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
-  public async importIvyProject(workspaceId: string, params: ImportProjectsBody) {
-    return importProjects(workspaceId, params, { baseURL: this.designerUrl, ...options })
+  public async importIvyProject(params: ImportProjectsBody) {
+    return importProjects(this.workspace.id, params, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(error => handleAxiosError(error, false));
   }
@@ -121,7 +128,7 @@ export class IvyEngineApi {
       .catch(handleAxiosError);
   }
 
-  public async createProject(newProjectParams: Omit<NewProjectParams, 'workspaceId'>) {
+  public async createProject(newProjectParams: CreateProjectParams) {
     return await createProjectAndProjectFiles(
       { workspaceId: this.workspace.id, ...newProjectParams },
       { baseURL: this.designerUrl, ...options }
@@ -130,25 +137,25 @@ export class IvyEngineApi {
       .catch(handleAxiosError);
   }
 
-  public async createUserDialog(newUserDialogParams: Omit<NewUserDialogParams, 'workspaceId'>) {
+  public async createUserDialog(newUserDialogParams: CreateUserDialogParams) {
     return createHd({ workspaceId: this.workspace.id, ...newUserDialogParams }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
-  public async createDataClass(params: Omit<DataClassInit, 'workspaceId'>) {
+  public async createDataClass(params: CreateDataClassParams) {
     return createDataClass({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
-  public async createEntityClass(params: Omit<DataClassInit, 'workspaceId'>) {
+  public async createEntityClass(params: CreateDataClassParams) {
     return createEntityClass({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
 
-  public async createCaseMap(params: Omit<CaseMapInit, 'workspaceId'>) {
+  public async createCaseMap(params: CreateCaseMapParams) {
     return createCaseMap({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);

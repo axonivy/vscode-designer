@@ -1,7 +1,7 @@
 import path from 'path';
 import { type QuickPickItem } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
-import type { HdInit } from '../engine/api/generated/client';
+import type { CreateUserDialogParams } from '../engine/api/engine-api';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { type AddCommandSelectionContext } from './ivy-project-explorer';
 import {
@@ -37,8 +37,6 @@ type Template = (typeof templates)[number];
 interface TemplatePick extends QuickPickItem {
   label: Template;
 }
-
-export type NewUserDialogParams = HdInit;
 
 interface NewUserDialogState extends MSStateBase {
   project?: ProjectSelection | undefined;
@@ -245,7 +243,7 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
 
   // Let potential errors propagate without catching
   prepareAndValidateFinalState(type, newUserDialogData);
-  const createDialogInput: NewUserDialogParams = {
+  const createDialogInput: CreateUserDialogParams = {
     type,
     name: newUserDialogData.name,
     namespace: newUserDialogData.namespace,

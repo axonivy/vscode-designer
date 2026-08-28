@@ -10,10 +10,6 @@ import { IvyEngineManager } from '../engine/engine-manager';
 import { sanitizeProjectName } from './utils/util';
 
 export const importIvyProject = async (selectedWorkspaceUri: Uri) => {
-  const activeWorkspaceId = await IvyEngineManager.instance.getWorkspaceId();
-  if (!activeWorkspaceId) {
-    return;
-  }
   const selectedTargetPath = selectedWorkspaceUri.fsPath;
   const selectedFile = await collectImportIvyArchiveFile();
   if (!selectedFile) {
@@ -68,7 +64,7 @@ Please either rename the import file ${fileName} or delete/rename the existing f
 
   const importProjectParams: ImportProjectsBody = { ...selectedFile, targetPath: selectedTargetPath };
   await StatusBar.withStatusBarProgress({ text: 'Importing Ivy Archive' }, async () => {
-    await IvyEngineManager.instance.importIvyProject(activeWorkspaceId, importProjectParams);
+    await IvyEngineManager.instance.importIvyProject(importProjectParams);
     logInfoIvyImport(`Successfully imported Ivy project(s) from ${selectedFilePath} into workspace folder ${selectedTargetPath}`);
   });
 };
