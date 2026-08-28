@@ -38,7 +38,7 @@ const addDependencyHandler = async (uri: Uri) => {
   }
   const possibleDeps = projectBeans
     ?.filter(p => p !== targetProjectBean)
-    .filter(p => targetProjectBean.dependencies.find(d => d.app === p.id.app && d.project === p.id.project) === undefined)
+    .filter(p => targetProjectBean.dependencies.find(d => d.id === p.id.id) === undefined)
     .filter(p => isNotCircular(targetProjectBean, projectBeans, p));
   const newDependency = await showDependencyPick(possibleDeps ?? []);
   if (!newDependency) {
@@ -55,7 +55,7 @@ const addDependencyHandler = async (uri: Uri) => {
 
 const isNotCircular = (targetProjectBean: ProjectBean, projectBeans: ProjectBean[], possibleDependency: ProjectBean) => {
   const dependencyProjectBeans = possibleDependency.dependencies
-    .map(d => projectBeans?.find(p => p.id.app === d.app && p.id.project === d.project))
+    .map(d => projectBeans?.find(p => p.id.id === d.id))
     .filter(p => p !== undefined);
   if (dependencyProjectBeans.includes(targetProjectBean)) {
     return false;
