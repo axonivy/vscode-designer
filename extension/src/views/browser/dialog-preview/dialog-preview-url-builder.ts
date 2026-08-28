@@ -1,6 +1,8 @@
-export const buildDialogPreviewUrl = (devContextPath: string, app: string, previewProject: string, previewDialogId: string) => {
+export const buildDialogPreviewUrl = (devContextPath: string, projectId: string, previewDialogId: string) => {
   const baseContextPath = stripDevWorkflowUiSuffix(normalizeContextPath(devContextPath));
-  const taskUrl = [baseContextPath, app, '1', 'preview', previewProject, previewDialogId].map(stripSlashes).filter(Boolean).join('/');
+  const normalizedProjectId = stripSlashes(projectId);
+  const previewProjectId = normalizedProjectId.replace(/\/([^/]+)$/, '/preview/$1');
+  const taskUrl = [previewProjectId, previewDialogId].map(stripSlashes).filter(Boolean).join('/');
 
   return `${baseContextPath}/dev-workflow-ui/faces/frame.xhtml?taskUrl=${encodeTaskUrl(`/${taskUrl}`)}`;
 };

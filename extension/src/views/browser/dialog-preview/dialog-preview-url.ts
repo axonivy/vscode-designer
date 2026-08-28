@@ -50,8 +50,7 @@ export const dialogPreviewUrl = async (devContextPath: string) => {
   }
 
   const previewDialogId = `${namespace}.${dialogName}`;
-  const previewProject = path.basename(projectPath);
-  return buildDialogPreviewUrl(devContextPath, currentProject.id.app, previewProject, previewDialogId);
+  return buildDialogPreviewUrl(devContextPath, currentProject.id.id, previewDialogId);
 };
 
 export const isDialogPreviewSupported = async () => {

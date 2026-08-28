@@ -5,8 +5,7 @@ test('builds preview url from dev workflow ui context path', () => {
   expect(
     buildDialogPreviewUrl(
       '/~Developer-prebuiltproject/dev-workflow-ui',
-      'Developer-prebuiltproject',
-      'prebuiltProject',
+      '~Developer-prebuiltproject/Developer-prebuiltproject/1/prebuiltProject',
       'ch.form.test.testForm'
     )
   ).toBe(
@@ -16,7 +15,11 @@ test('builds preview url from dev workflow ui context path', () => {
 
 test('builds preview url from base developer context path', () => {
   expect(
-    buildDialogPreviewUrl('/~Developer-prebuiltproject', 'Developer-prebuiltproject', 'prebuiltProject', 'ch.xhtml.test.testXhtml')
+    buildDialogPreviewUrl(
+      '/~Developer-prebuiltproject',
+      '~Developer-prebuiltproject/Developer-prebuiltproject/1/prebuiltProject',
+      'ch.xhtml.test.testXhtml'
+    )
   ).toBe(
     '/~Developer-prebuiltproject/dev-workflow-ui/faces/frame.xhtml?taskUrl=%2F~Developer-prebuiltproject%2FDeveloper-prebuiltproject%2F1%2Fpreview%2FprebuiltProject%2Fch.xhtml.test.testXhtml'
   );
@@ -26,8 +29,7 @@ test('normalizes absolute dev workflow ui url', () => {
   expect(
     buildDialogPreviewUrl(
       'http://localhost:8080/~Developer-prebuiltproject/dev-workflow-ui',
-      'Developer-prebuiltproject',
-      'prebuiltProject',
+      '~Developer-prebuiltproject/Developer-prebuiltproject/1/prebuiltProject',
       'ch.xhtml.test.testXhtml'
     )
   ).toBe(
