@@ -51,19 +51,17 @@ const options = { headers, paramsSerializer: { indexes: null } };
 export class IvyEngineApi {
   constructor(
     private readonly workspace: WorkspaceBean,
-    private readonly designerUrl: string,
-    private readonly engineURL: string
+    private readonly designerUrl: string
   ) {}
 
   static async init(rawEngineUrl: string) {
     const designerUrl = new URL(path.join('designer/api'), rawEngineUrl).toString();
     await pollWithProgress(rawEngineUrl, 'Waiting for Axon Ivy Engine to be ready.');
     const workspace = await IvyEngineApi.createWorkspace(designerUrl).catch(handleAxiosError);
-    const engineUrl = new URL('api', rawEngineUrl).toString();
     if (!workspace) {
       throw new Error('Failed to create workspace');
     }
-    return new IvyEngineApi(workspace, designerUrl, engineUrl);
+    return new IvyEngineApi(workspace, designerUrl);
   }
 
   private static async createWorkspace(designerUrl: string) {
@@ -205,7 +203,7 @@ export class IvyEngineApi {
   }
 
   public async processDebugServerPort() {
-    return processDebugger({ baseURL: this.engineURL })
+    return processDebugger({ baseURL: this.designerUrl })
       .then(res => res.data)
       .catch(handleAxiosError);
   }
