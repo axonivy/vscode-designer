@@ -12,6 +12,7 @@ import type { MessageParticipant, NotificationType } from 'vscode-messenger-comm
 import { runJavaProjectConfigurationUpdate } from '../../base/java-extension-api';
 import { logErrorMessage, logInformationMessage } from '../../base/logging-util';
 import { updateTextDocumentContent } from '../content-writer';
+import { EditorWebSocketForwarder } from '../editor-websocket-forwarder';
 import { pickFile } from '../file-picker';
 import {
   createJsonRpcSuccessResponse,
@@ -24,7 +25,6 @@ import {
   openUrlExternally,
   WebviewReadyNotification
 } from '../notification-helper';
-import { WebSocketForwarder } from '../websocket-forwarder';
 import { runMavenCommand } from './maven-runner';
 
 const RestClientWebSocketMessage: NotificationType<unknown> = { method: 'restClientWebSocketMessage' };
@@ -37,19 +37,14 @@ export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webv
       WebviewReadyNotification,
       () => messenger.sendNotification(InitializeConnectionRequest, messageParticipant, { file: document.fileName }),
       { sender: messageParticipant }
-    )
+    ),
+    webviewPanel.onDidDispose(() => toDispose.dispose())
   );
-  webviewPanel.onDidDispose(() => toDispose.dispose());
 };
 
-class RestClientWebSocketForwarder extends WebSocketForwarder {
-  constructor(
-    websocketUrl: URL,
-    messenger: Messenger,
-    messageParticipant: MessageParticipant,
-    readonly document: TextDocument
-  ) {
-    super(websocketUrl, 'ivy-restclient-lsp', messenger, messageParticipant, RestClientWebSocketMessage);
+class RestClientWebSocketForwarder extends EditorWebSocketForwarder {
+  constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: TextDocument) {
+    super(websocketUrl, 'ivy-restclient-lsp', messenger, messageParticipant, RestClientWebSocketMessage, document);
   }
 
   protected override handleClientMessage(message: unknown) {

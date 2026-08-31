@@ -4,7 +4,7 @@ import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { createWebSocket } from '../engine/ws-client';
 
-type Endpoint =
+export type Endpoint =
   | 'ivy-inscription-lsp'
   | 'ivy-script-lsp'
   | 'ivy-form-lsp'

@@ -5,6 +5,7 @@ import { commands, Uri } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { updateTextDocumentContent } from '../content-writer';
+import { EditorWebSocketForwarder } from '../editor-websocket-forwarder';
 import { JavaCompletion } from '../java-completion';
 import {
   hasEditorFileContent,
@@ -16,7 +17,6 @@ import {
   openUrlExternally,
   WebviewReadyNotification
 } from '../notification-helper';
-import { WebSocketForwarder } from '../websocket-forwarder';
 
 const DataClassWebSocketMessage: NotificationType<unknown> = { method: 'dataclassWebSocketMessage' };
 
@@ -28,23 +28,18 @@ export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webv
       WebviewReadyNotification,
       () => messenger.sendNotification(InitializeConnectionRequest, messageParticipant, { file: document.fileName }),
       { sender: messageParticipant }
-    )
+    ),
+    webviewPanel.onDidDispose(() => toDispose.dispose())
   );
-  webviewPanel.onDidDispose(() => toDispose.dispose());
 };
 
-class DataClassEditorWebSocketForwarder extends WebSocketForwarder {
+class DataClassEditorWebSocketForwarder extends EditorWebSocketForwarder {
   currentTypeSearch: { type: string; id: number } | undefined;
 
   readonly javaCompletion: JavaCompletion;
 
-  constructor(
-    websocketUrl: URL,
-    messenger: Messenger,
-    messageParticipant: MessageParticipant,
-    readonly document: TextDocument
-  ) {
-    super(websocketUrl, 'ivy-data-class-lsp', messenger, messageParticipant, DataClassWebSocketMessage);
+  constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: TextDocument) {
+    super(websocketUrl, 'ivy-data-class-lsp', messenger, messageParticipant, DataClassWebSocketMessage, document);
     this.javaCompletion = new JavaCompletion(document.uri, 'data-class');
   }
 

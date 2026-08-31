@@ -7,6 +7,7 @@ import type { MessageParticipant, NotificationType } from 'vscode-messenger-comm
 import { IvyEngineManager } from '../../engine/engine-manager';
 import { IvyBrowserViewProvider } from '../../views/browser/ivy-browser-view-provider';
 import { updateTextDocumentContent } from '../content-writer';
+import { EditorWebSocketForwarder } from '../editor-websocket-forwarder';
 import {
   hasEditorFileContent,
   InitializeConnectionRequest,
@@ -15,7 +16,6 @@ import {
   openUrlExternally,
   WebviewReadyNotification
 } from '../notification-helper';
-import { WebSocketForwarder } from '../websocket-forwarder';
 
 const FormWebSocketMessage: NotificationType<unknown> = { method: 'formWebSocketMessage' };
 
@@ -27,19 +27,14 @@ export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webv
       WebviewReadyNotification,
       () => messenger.sendNotification(InitializeConnectionRequest, messageParticipant, { file: document.fileName }),
       { sender: messageParticipant }
-    )
+    ),
+    webviewPanel.onDidDispose(() => toDispose.dispose())
   );
-  webviewPanel.onDidDispose(() => toDispose.dispose());
 };
 
-class FormEditorWebSocketForwarder extends WebSocketForwarder {
-  constructor(
-    websocketUrl: URL,
-    messenger: Messenger,
-    messageParticipant: MessageParticipant,
-    readonly document: TextDocument
-  ) {
-    super(websocketUrl, 'ivy-form-lsp', messenger, messageParticipant, FormWebSocketMessage);
+class FormEditorWebSocketForwarder extends EditorWebSocketForwarder {
+  constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: TextDocument) {
+    super(websocketUrl, 'ivy-form-lsp', messenger, messageParticipant, FormWebSocketMessage, document);
   }
 
   protected override handleClientMessage(message: unknown) {
