@@ -12,6 +12,13 @@ export class MultiStepCancelledError extends Error {
   }
 }
 
+export class MultiStepForceBack extends Error {
+  constructor(message?: string) {
+    super(message ?? '');
+    this.name = 'MultiStepForceBack';
+  }
+}
+
 export class MultiStepInvalidStateError extends Error {
   constructor(message: string) {
     super(message);
@@ -119,6 +126,7 @@ interface BaseQuickPickParameters<P extends QuickPickItem> {
   ignoreFocusOut?: boolean;
   matchOnDescription?: boolean;
   matchOnDetail?: boolean;
+  validationFunction?: (selectedItems: P[]) => string | undefined;
   onBack?: (typedValue: string, selectedItems: P[]) => void;
 }
 
@@ -157,6 +165,10 @@ export class MultiStepInput<T extends MSStateBase> {
           this.currentStep = steps[stepIndex];
         } else if (err == InputFlowAction.cancel) {
           throw new MultiStepCancelledError('Dialog cancelled by the user');
+        } else if (err instanceof MultiStepForceBack) {
+          stepIndex = Math.max(0, stepIndex - 1);
+          state.currentStep = stepIndex + 1;
+          this.currentStep = steps[stepIndex];
         } else {
           this.current?.hide();
           throw err;
@@ -247,7 +259,21 @@ export class MultiStepInput<T extends MSStateBase> {
 
     const p = new Promise<QuickPickResult<T, M>>((resolve, reject) => {
       const input = window.createQuickPick<T>();
-      input.title = params.title + (params.titleSuffix ?? '');
+      const baseTitle = params.title + (params.titleSuffix ?? '');
+      const getSelectionValidationMessage = (): string | undefined => {
+        if (!params.canSelectMany) {
+          return undefined;
+        }
+        if (input.selectedItems.length === 0) {
+          return params.validationFunction?.([]) ?? 'No items selected. Please select at least one item.';
+        }
+        return params.validationFunction?.(input.selectedItems as T[]);
+      };
+      const updateSelectionValidationTitle = () => {
+        const validationMessage = getSelectionValidationMessage();
+        input.title = validationMessage ? `${baseTitle} - ${validationMessage}` : baseTitle;
+      };
+      input.title = baseTitle;
       input.step = params.currentStep;
       input.totalSteps = params.totalSteps;
       input.ignoreFocusOut = params.ignoreFocusOut ?? true;
@@ -261,6 +287,7 @@ export class MultiStepInput<T extends MSStateBase> {
         if (params.selectedItems) {
           input.selectedItems = params.items.filter(item => params.selectedItems?.some(selected => selected.label === item.label));
         }
+        updateSelectionValidationTitle();
       }
       input.buttons = params.currentStep > 1 ? [QuickInputButtons.Back] : [];
       disposables.push(
@@ -272,8 +299,10 @@ export class MultiStepInput<T extends MSStateBase> {
         }),
         input.onDidAccept(() => {
           if (params.canSelectMany) {
-            if (input.selectedItems.length === 0) {
-              logErrorMessage('No items selected. Please select at least one item or press ESC to cancel.');
+            const validationMessage = getSelectionValidationMessage();
+            updateSelectionValidationTitle();
+            if (validationMessage) {
+              logErrorMessage(validationMessage);
               return;
             }
             resolve(input.selectedItems as QuickPickResult<T, M>);
@@ -283,6 +312,7 @@ export class MultiStepInput<T extends MSStateBase> {
           if (!params.canSelectMany && items.length === 1 && items[0]) {
             resolve(items[0] as QuickPickResult<T, M>);
           } else if (params.canSelectMany) {
+            updateSelectionValidationTitle();
             return;
           } else {
             return;
