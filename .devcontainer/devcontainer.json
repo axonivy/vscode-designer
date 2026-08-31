@@ -1,5 +1,5 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:24",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:26",
   "postCreateCommand": "mkdir -p container-workspace && pnpm install",
   "containerEnv": {
     "CONTAINER_WORKSPACE": "${workspaceFolder}/container-workspace"
