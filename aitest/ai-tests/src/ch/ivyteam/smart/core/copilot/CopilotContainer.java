@@ -4,12 +4,12 @@ import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import com.github.dockerjava.api.exception.NotFoundException;
-
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
+
+import com.github.dockerjava.api.exception.NotFoundException;
 
 public class CopilotContainer extends GenericContainer<CopilotContainer> {
 
@@ -19,6 +19,7 @@ public class CopilotContainer extends GenericContainer<CopilotContainer> {
     super(copilotImage());
     withFileSystemBind(workspace.toString(), "/workspace", BindMode.READ_WRITE);
     withFileSystemBind(userData.toString(), "/user-data", BindMode.READ_WRITE);
+    withEnv("COPILOT_AUTO_UPDATE", "false");
     withEnv("COPILOT_MODEL", "gpt-5-mini");
     withEnv("GITHUB_COPILOT_PROMPT_MODE_WORKSPACE_MCP", "true");
     withEnv("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "true");
@@ -32,10 +33,11 @@ public class CopilotContainer extends GenericContainer<CopilotContainer> {
       dockerClient.inspectImageCmd(IMAGE_NAME).exec();
       return CompletableFuture.completedFuture(IMAGE_NAME);
     } catch (NotFoundException exception) {
-      return new ImageFromDockerfile(IMAGE_NAME, false).withDockerfileFromBuilder(builder -> builder
+      return new ImageFromDockerfile(IMAGE_NAME, false)
+        .withDockerfileFromBuilder(builder -> builder
           .from("node:24.18-slim")
           .run("apt-get update && apt-get install -y --no-install-recommends ca-certificates curl && rm -rf /var/lib/apt/lists/*")
-          .run("npm install -g @github/copilot@1.0.80")
+              .run("COPILOT_AUTO_UPDATE=false npm install -g @github/copilot@1.0.80")
           .build());
     }
   }
