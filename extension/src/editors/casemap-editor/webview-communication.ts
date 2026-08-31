@@ -4,6 +4,7 @@ import type { TextDocument, WebviewPanel } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { updateTextDocumentContent } from '../content-writer';
+import { EditorWebSocketForwarder } from '../editor-websocket-forwarder';
 import {
   hasEditorFileContent,
   InitializeConnectionRequest,
@@ -12,7 +13,6 @@ import {
   openUrlExternally,
   WebviewReadyNotification
 } from '../notification-helper';
-import { WebSocketForwarder } from '../websocket-forwarder';
 
 const CaseMapWebSocketMessage: NotificationType<unknown> = { method: 'caseMapWebSocketMessage' };
 
@@ -24,19 +24,14 @@ export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webv
       WebviewReadyNotification,
       () => messenger.sendNotification(InitializeConnectionRequest, messageParticipant, { file: document.fileName }),
       { sender: messageParticipant }
-    )
+    ),
+    webviewPanel.onDidDispose(() => toDispose.dispose())
   );
-  webviewPanel.onDidDispose(() => toDispose.dispose());
 };
 
-class CaseMapEditorWebSocketForwarder extends WebSocketForwarder {
-  constructor(
-    websocketUrl: URL,
-    messenger: Messenger,
-    messageParticipant: MessageParticipant,
-    readonly document: TextDocument
-  ) {
-    super(websocketUrl, 'ivy-case-map-lsp', messenger, messageParticipant, CaseMapWebSocketMessage);
+class CaseMapEditorWebSocketForwarder extends EditorWebSocketForwarder {
+  constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: TextDocument) {
+    super(websocketUrl, 'ivy-case-map-lsp', messenger, messageParticipant, CaseMapWebSocketMessage, document);
   }
 
   protected override handleClientMessage(message: unknown) {
