@@ -70,7 +70,7 @@ const isNotCircular = (targetProjectBean: ProjectBean, projectBeans: ProjectBean
 
 const showDependencyPick = async (projects: ProjectBean[]) => {
   const items = projects.map(project => ({
-    label: project.id.project,
+    label: project.id.name,
     project: project
   }));
   const selected = await window.showQuickPick(items, {

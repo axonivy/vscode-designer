@@ -99,8 +99,8 @@ export interface DeployProjectsRequest {
 }
 
 export interface ProjectIdentifier {
-  app: string;
   id: string;
+  name: string;
   project: string;
   isIar?: boolean;
 }
