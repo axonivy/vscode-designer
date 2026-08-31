@@ -33,7 +33,7 @@ public class CopilotContainer extends GenericContainer<CopilotContainer> {
       return CompletableFuture.completedFuture(IMAGE_NAME);
     } catch (NotFoundException exception) {
       return new ImageFromDockerfile(IMAGE_NAME, false).withDockerfileFromBuilder(builder -> builder
-          .from("node:24-slim")
+          .from("node:24.18-slim")
           .run("apt-get update && apt-get install -y --no-install-recommends ca-certificates curl && rm -rf /var/lib/apt/lists/*")
           .run("npm install -g @github/copilot")
           .build());
