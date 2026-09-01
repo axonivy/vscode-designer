@@ -121,10 +121,6 @@ export class IvyProjectExplorer {
     webContentWatcher.onDidChange(deployProject);
     webContentWatcher.onDidDelete(deployProject);
     webContentWatcher.onDidCreate(deployProject);
-    const configWatcher = workspace.createFileSystemWatcher('**/config/{custom-fields.yaml,overrides.any}', true, false, true);
-    configWatcher.onDidChange(deployProject);
-    const pomWatcher = workspace.createFileSystemWatcher('**/pom.xml', true, false, true);
-    pomWatcher.onDidChange(deployProject);
     const mvnDepsWatcher = workspace.createFileSystemWatcher('**/target/lib/mvn-deps/*.jar');
     mvnDepsWatcher.onDidCreate(deployProject);
     mvnDepsWatcher.onDidChange(deployProject);
@@ -139,15 +135,7 @@ export class IvyProjectExplorer {
     targetWatcher.onDidChange(invalidateClassLoader);
     targetWatcher.onDidCreate(invalidateClassLoader);
     targetWatcher.onDidDelete(invalidateClassLoader);
-    context.subscriptions.push(
-      ivyProjectFileWatcher,
-      deleteProjectWatcher,
-      webContentWatcher,
-      configWatcher,
-      pomWatcher,
-      mvnDepsWatcher,
-      targetWatcher
-    );
+    context.subscriptions.push(ivyProjectFileWatcher, deleteProjectWatcher, webContentWatcher, mvnDepsWatcher, targetWatcher);
   }
 
   private async deleteProjectOnEngine(projectToBeDeleted: string) {
