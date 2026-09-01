@@ -13,7 +13,7 @@ export const engineReleaseTrain = () => {
     return train;
   }
   return extensionVersion.isPreview
-    ? extensionVersion.patch > 1_000_000_000
+    ? extensionVersion.patch > 1_000_000_000 || extensionVersion.patch == 0
       ? 'nightly'
       : 'milestone'
     : `${extensionVersion.major}.${extensionVersion.minor}`;
