@@ -13,7 +13,8 @@ export const engineReleaseTrain = () => {
     return train;
   }
   return extensionVersion.isPreview
-    ? extensionVersion.patch > 1_000_000_000 || extensionVersion.patch == 0
+    ? // FIXME: Ugly workaround classifies each extension version with a patch > 0 and not a YYYYMMDD as a milestone release. Could lead to problems in the future.
+      extensionVersion.patch > 1_000_000_000 || extensionVersion.patch == 0
       ? 'nightly'
       : 'milestone'
     : `${extensionVersion.major}.${extensionVersion.minor}`;
