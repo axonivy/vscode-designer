@@ -4,7 +4,7 @@ import { config } from '../base/configurations';
 import { extensionVersion } from '../version/extension-version';
 import { ReleaseTrainValidator } from './release-train-validator';
 
-export const PREVIEW_TRAINS = ['nightly', 'dev', 'sprint'];
+export const PREVIEW_TRAINS = ['nightly', 'dev', 'milestone'];
 export const stableTrains = (major: number) => [`${major}`, `nightly-${major}`];
 
 export const engineReleaseTrain = () => {
@@ -12,7 +12,9 @@ export const engineReleaseTrain = () => {
   if (train) {
     return train;
   }
-  return extensionVersion.isPreview ? 'nightly' : `${extensionVersion.major}.${extensionVersion.minor}`;
+  return extensionVersion.isPreview
+    ? engineReleaseTrainDefault(extensionVersion.patch)
+    : `${extensionVersion.major}.${extensionVersion.minor}`;
 };
 
 export const engineDirFromGlobalState = (context: ExtensionContext, releaseTrain: string) => {
@@ -52,6 +54,10 @@ export const switchEngineReleaseTrain = async (reason?: string) => {
     await config.setReleaseTrainOnWorkspaceLevel(selectedTrain);
   }
   return selectedTrain;
+};
+
+const engineReleaseTrainDefault = (patch: number): string => {
+  patch;
 };
 
 const toItem = (trainSelection: string, currentTrain?: string) => {

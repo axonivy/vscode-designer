@@ -56,7 +56,7 @@ test('invalid when util lib is missing', async () => {
 test('preview train', async () => {
   expect((await validator.validate('dev')).valid).toBeTruthy();
   expect((await validator.validate('nightly')).valid).toBeTruthy();
-  expect((await validator.validate('sprint')).valid).toBeTruthy();
+  expect((await validator.validate('milestone')).valid).toBeTruthy();
 
   expect(await validator.validate('Dev')).toEqual({
     valid: false,
@@ -85,7 +85,7 @@ test('lts train', async () => {
   expect((await customValidator.validate('nightly-14.0')).valid).toBeFalsy();
   expect((await customValidator.validate('dev')).valid).toBeFalsy();
   expect((await customValidator.validate('nightly')).valid).toBeFalsy();
-  expect((await customValidator.validate('sprint')).valid).toBeFalsy();
+  expect((await customValidator.validate('milestone')).valid).toBeFalsy();
   expect((await customValidator.validate('Dev')).valid).toBeFalsy();
   expect((await customValidator.validate('13')).valid).toBeFalsy();
   expect((await customValidator.validate('13.2')).valid).toBeFalsy();
