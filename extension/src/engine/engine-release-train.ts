@@ -13,7 +13,9 @@ export const engineReleaseTrain = () => {
     return train;
   }
   return extensionVersion.isPreview
-    ? engineReleaseTrainDefault(extensionVersion.patch)
+    ? extensionVersion.patch > 1_000_000_000
+      ? 'nightly'
+      : 'milestone'
     : `${extensionVersion.major}.${extensionVersion.minor}`;
 };
 
@@ -56,8 +58,11 @@ export const switchEngineReleaseTrain = async (reason?: string) => {
   return selectedTrain;
 };
 
-const engineReleaseTrainDefault = (patch: number): string => {
-  patch;
+export const permalinkVersionFromReleaseTrain = (releaseTrain: string) => {
+  if (releaseTrain == 'milestone') {
+    return `${extensionVersion.major}.${extensionVersion.minor}.0-m${extensionVersion.patch}`;
+  }
+  return releaseTrain;
 };
 
 const toItem = (trainSelection: string, currentTrain?: string) => {

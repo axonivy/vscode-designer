@@ -6,7 +6,7 @@ import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { downloadEngine } from './download';
 import { engineOutputChannel } from './engine-output-channel';
-import { updateGlobalStateEngineDir } from './engine-release-train';
+import { permalinkVersionFromReleaseTrain, updateGlobalStateEngineDir } from './engine-release-train';
 
 export class EngineDownloader {
   private readonly globalEngieStoragePath: string;
@@ -67,7 +67,11 @@ export class EngineDownloader {
     await askToReloadWindow('Axon Ivy Engine updated');
   };
 
-  private downloadUrl = (version: string) => {
-    return `https://dev.axonivy.com/permalink/${version}/axonivy-engine-slim.zip`;
+  private downloadUrl = (releaseTrain: string) => {
+    const permalinkVersion = permalinkVersionFromReleaseTrain(releaseTrain);
+    // return `https://dev.axonivy.com/permalink/${permalinkVersion}/axonivy-engine-slim.zip`;
+    const url = `https://dev.axonivy.com/permalink/${permalinkVersion}/axonivy-engine-slim.zip`;
+    console.log(url);
+    return url;
   };
 }
