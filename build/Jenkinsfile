@@ -17,7 +17,7 @@ pipeline {
   parameters {
     booleanParam(name: 'publishToMarket', defaultValue: false, description: 'Publish to VS Code Marketplace?')
     string(name: 'qualifier',
-      description: "Optional qualifier (e.g. m7 for Sprint 7). Empty publishes with the date timestamp.",
+      description: "Optional qualifier (e.g. 7 for Sprint 7). Empty publishes with the date timestamp.",
       defaultValue: '')
   }
 
