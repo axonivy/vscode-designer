@@ -38,7 +38,7 @@ const versionNumberToInt = (rawVersion: string, value?: string) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const parseMilestone = (milestonePackageJson: any) => {
+export const parseMilestone = (milestonePackageJson: any) => {
   if (milestonePackageJson == undefined) {
     return { isMilestone: false, milestone: 0 };
   }
