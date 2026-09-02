@@ -4,7 +4,7 @@ import { ReleaseTrainValidator } from './release-train-validator';
 
 vi.mock('vscode', () => ({}));
 
-const extensionVersion = { major: 13, minor: 2, patch: 999, rawVersion: '13.2.999', isPreview: true };
+const extensionVersion = { major: 13, minor: 2, patch: 999, rawVersion: '13.2.999', isPreview: true, isMilestone: true, milestone: 999 };
 const validator = new ReleaseTrainValidator(extensionVersion);
 
 const testDir = (engineDir: string) => path.join(__dirname, 'release-train-validator-test', engineDir);
@@ -14,7 +14,7 @@ test('valid sample', async () => {
 });
 
 test('wrong major', async () => {
-  const customValidator = new ReleaseTrainValidator({ major: 14, minor: 2, patch: 0, isPreview: false });
+  const customValidator = new ReleaseTrainValidator({ ...extensionVersion, major: 14 });
   expect(await customValidator.validate(testDir('engine'))).toEqual({
     valid: false,
     isDirectory: true,
@@ -23,7 +23,7 @@ test('wrong major', async () => {
 });
 
 test('wrong minor', async () => {
-  const customValidator = new ReleaseTrainValidator({ major: 13, minor: 3, patch: 0, isPreview: false });
+  const customValidator = new ReleaseTrainValidator({ ...extensionVersion, minor: 3 });
   expect(await customValidator.validate(testDir('engine'))).toEqual({
     valid: false,
     isDirectory: true,
@@ -68,7 +68,7 @@ test('preview train', async () => {
 });
 
 test('lts train', async () => {
-  const customValidator = new ReleaseTrainValidator({ major: 14, minor: 0, patch: 10, isPreview: false });
+  const customValidator = new ReleaseTrainValidator({ ...extensionVersion, major: 14, minor: 0, patch: 10, isPreview: false });
   expect((await customValidator.validate('nightly-14')).valid).toBeTruthy();
   expect((await customValidator.validate('14')).valid).toBeTruthy();
   expect((await customValidator.validate('14.0.0')).valid).toBeTruthy();
