@@ -12,9 +12,13 @@ export const engineReleaseTrain = () => {
   if (train) {
     return train;
   }
+  // FIXME: Ugly workaround classifies each extension version with a patch > 0 and not a YYYYMMDDHH as a milestone release.
+  // Could lead to problems in the future when we use real patch versions, e.g. 14.1.1
+  const isTimestampPatch = (patch: number) => {
+    return patch >= 2_000_000_000 && patch < 3_000_000_000;
+  };
   return extensionVersion.isPreview
-    ? // FIXME: Ugly workaround classifies each extension version with a patch > 0 and not a YYYYMMDDHH as a milestone release. Could lead to problems in the future.
-      extensionVersion.patch > 1_000_000_000 || extensionVersion.patch == 0
+    ? isTimestampPatch(extensionVersion.patch)
       ? 'nightly'
       : 'milestone'
     : `${extensionVersion.major}.${extensionVersion.minor}`;
