@@ -69,9 +69,6 @@ export class EngineDownloader {
 
   private downloadUrl = (releaseTrain: string) => {
     const permalinkVersion = permalinkVersionFromReleaseTrain(releaseTrain);
-    // return `https://dev.axonivy.com/permalink/${permalinkVersion}/axonivy-engine-slim.zip`;
-    const url = `https://dev.axonivy.com/permalink/${permalinkVersion}/axonivy-engine-slim.zip`;
-    console.log(url);
-    return url;
+    return `https://dev.axonivy.com/permalink/${permalinkVersion}/axonivy-engine-slim.zip`;
   };
 }
