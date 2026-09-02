@@ -317,11 +317,14 @@ export class IvyProjectExplorer {
   private async convertProject(selection: TreeSelection) {
     const uri = await treeSelectionToUri(selection);
     const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
-    const projects = IvyDiagnostics.instance.projectsToBeConverted();
     const quickPick = window.createQuickPick();
     quickPick.title = 'Convert Projects - Select Axon Ivy projects to be converted (1/1)';
     quickPick.canSelectMany = true;
-    quickPick.items = projects.map(pom => path.dirname(pom)).map(project => ({ label: path.basename(project), detail: project }));
+    quickPick.items = IvyDiagnostics.instance
+      .projectsToBeConverted()
+      .filter(projectFile => !projectFile.endsWith('.iar'))
+      .map(projectFile => path.dirname(projectFile))
+      .map(project => ({ label: path.basename(project), detail: project }));
     quickPick.selectedItems = quickPick.items.filter(item => item.detail === projectPath);
     quickPick.show();
     quickPick.onDidAccept(async () => {

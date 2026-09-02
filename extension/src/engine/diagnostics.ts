@@ -38,9 +38,13 @@ export class IvyDiagnostics {
     projects
       ?.filter(p => p && p.errorMessage)
       .forEach(project => {
-        let uri = Uri.joinPath(Uri.file(project.projectDirectory), IVY_PROJECT_FILE);
-        if (!fs.existsSync(uri.fsPath)) {
-          uri = Uri.joinPath(Uri.file(project.projectDirectory), POM_FILE);
+        const projectUri = Uri.file(project.projectDirectory);
+        let uri = projectUri;
+        if (fs.statSync(uri.fsPath).isDirectory()) {
+          uri = Uri.joinPath(projectUri, IVY_PROJECT_FILE);
+          if (!fs.existsSync(uri.fsPath)) {
+            uri = Uri.joinPath(projectUri, POM_FILE);
+          }
         }
         const diagnostic = new Diagnostic(new Range(1, 0, 1, 0), project.errorMessage, DiagnosticSeverity.Error);
         diagnostic.source = DIAGNOSTIC_SOURCE;
