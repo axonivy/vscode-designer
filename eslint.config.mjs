@@ -18,7 +18,7 @@ export default config.defineConfig(
   {
     name: 'ignore-files',
     ignores: [
-      '**/scripts/download-*',
+      '**/scripts/*.mts',
       '**/.vscode-test/*',
       '**/generated/client*',
       '**/market/generated/*',
