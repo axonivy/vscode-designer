@@ -25,7 +25,11 @@ export const IvyLanguageServerClientProvider = async (webSocketUrl: URL) => {
 
   const clientOptions: LanguageClientOptions = {
     synchronize: {
-      fileEvents: [workspace.createFileSystemWatcher('**/*.{f,d,p}.json'), workspace.createFileSystemWatcher('**/config/*.yaml')]
+      fileEvents: [
+        workspace.createFileSystemWatcher('**/*.{f,d,p}.json'),
+        workspace.createFileSystemWatcher('**/config/*.yaml'),
+        workspace.createFileSystemWatcher('**/target/classes/META-INF/jandex.idx')
+      ]
     }
   };
 
