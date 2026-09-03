@@ -57,12 +57,12 @@ test('preview train', async () => {
   expect(await validator.validate('dev')).toEqual({
     valid: false,
     reason:
-      'Release train setting mismatch. Extension Version is a \'milestone\' release, but there is a Workspace or User VS Code setting override "axonivy.engine.releaseTrain": "dev". Change the releaseTrain in the settings to a compatible version.'
+      'Release train setting mismatch. Extension Version is a \'milestone\' release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "dev". Switch the releaseTrain to a compatible version or chose another extension version.'
   });
   expect(await validator.validate('nightly')).toEqual({
     valid: false,
     reason:
-      'Release train setting mismatch. Extension Version is a \'milestone\' release, but there is a Workspace or User VS Code setting override "axonivy.engine.releaseTrain": "nightly". Change the releaseTrain in the settings to a compatible version.'
+      'Release train setting mismatch. Extension Version is a \'milestone\' release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "nightly". Switch the releaseTrain to a compatible version or chose another extension version.'
   });
   expect((await validator.validate('milestone')).valid).toBeTruthy();
 
@@ -83,7 +83,7 @@ test('non-milestone preview train', async () => {
   expect(await validatorNotMilestone.validate('milestone')).toEqual({
     valid: false,
     reason:
-      'Release train setting mismatch. Extension Version is not a \'milestone\' release, but there is a Workspace or User VS Code setting override "axonivy.engine.releaseTrain": "milestone". Change the releaseTrain in the settings to a compatible version.'
+      'Release train setting mismatch. Extension Version is not a \'milestone\' release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "milestone". Switch the releaseTrain to a compatible version or chose another extension version.'
   });
   expect(await validatorNotMilestone.validate('path/to/nowhere')).toEqual({
     valid: false,
