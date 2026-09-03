@@ -21,7 +21,7 @@ test('throws error for non-numeric major version', () => {
   expect(() => toVersion('a.2.3')).toThrow('Invalid version part a in version a.2.3');
 });
 
-test.each([undefined, null])('parses absent milestone %s', milestone => {
+test.each([undefined, null, '', ' '])('parses absent milestone %s', milestone => {
   expect(parseMilestone(milestone)).toEqual({ isMilestone: false, milestone: 0 });
 });
 
@@ -29,7 +29,7 @@ test.each([32, true, {}])('throws error for non-string milestone %s', milestone 
   expect(() => parseMilestone(milestone)).toThrow(`Invalid milestone ${milestone}. Must be a string.`);
 });
 
-test.each(['', ' ', 'abc', '0', '-1'])('throws error for invalid milestone %s', milestone => {
+test.each(['abc', '0', '-1'])('throws error for invalid milestone %s', milestone => {
   expect(() => parseMilestone(milestone)).toThrow(`Invalid milestone ${milestone.trim()}. Must be a valid number greater than 0.`);
 });
 

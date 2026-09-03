@@ -46,6 +46,9 @@ export const parseMilestone = (milestonePackageJson: any) => {
     throw new Error(`Invalid milestone ${milestonePackageJson}. Must be a string.`);
   }
   const milestone = milestonePackageJson.trim();
+  if (milestone === '') {
+    return { isMilestone: false, milestone: 0 };
+  }
   const int = parseInt(milestone);
   if (isNaN(int) || int <= 0) {
     throw new Error(`Invalid milestone ${milestone}. Must be a valid number greater than 0.`);
