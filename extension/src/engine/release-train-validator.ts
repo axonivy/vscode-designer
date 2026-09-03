@@ -79,10 +79,16 @@ export class ReleaseTrainValidator {
       if (!PREVIEW_TRAINS.includes(releaseTrain)) {
         return { valid: false };
       }
-      if ((releaseTrain == 'milestone') !== this.extensionVersion.isMilestone) {
+      if (this.extensionVersion.isMilestone && releaseTrain != 'milestone') {
         return {
           valid: false,
-          reason: `Release train setting mismatch. Extension Version is ${this.extensionVersion.isMilestone ? "a 'milestone'" : "not a 'milestone'"} release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "${releaseTrain}". Switch the releaseTrain to a compatible version or choose another extension version.`
+          reason: `Release train setting mismatch. Extension Version is a milestone release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "${releaseTrain}". Switch the releaseTrain to 'milestone' or install a non-milestone version of the extension.`
+        };
+      }
+      if (!this.extensionVersion.isMilestone && releaseTrain == 'milestone') {
+        return {
+          valid: false,
+          reason: `Release train setting mismatch. Extension Version is not a milestone release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "milestone". Switch the releaseTrain to 'nightly' or 'dev', or install a milestone version of the extension.`
         };
       }
       return { valid: true };

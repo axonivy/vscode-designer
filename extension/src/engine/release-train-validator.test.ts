@@ -57,12 +57,12 @@ test('preview train', async () => {
   expect(await validator.validate('dev')).toEqual({
     valid: false,
     reason:
-      'Release train setting mismatch. Extension Version is a \'milestone\' release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "dev". Switch the releaseTrain to a compatible version or choose another extension version.'
+      'Release train setting mismatch. Extension Version is a milestone release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "dev". Switch the releaseTrain to \'milestone\' or install a non-milestone version of the extension.'
   });
   expect(await validator.validate('nightly')).toEqual({
     valid: false,
     reason:
-      'Release train setting mismatch. Extension Version is a \'milestone\' release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "nightly". Switch the releaseTrain to a compatible version or choose another extension version.'
+      'Release train setting mismatch. Extension Version is a milestone release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "nightly". Switch the releaseTrain to \'milestone\' or install a non-milestone version of the extension.'
   });
   expect((await validator.validate('milestone')).valid).toBeTruthy();
 
@@ -83,7 +83,7 @@ test('non-milestone preview train', async () => {
   expect(await validatorNotMilestone.validate('milestone')).toEqual({
     valid: false,
     reason:
-      'Release train setting mismatch. Extension Version is not a \'milestone\' release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "milestone". Switch the releaseTrain to a compatible version or choose another extension version.'
+      'Release train setting mismatch. Extension Version is not a milestone release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "milestone". Switch the releaseTrain to \'nightly\' or \'dev\', or install a milestone version of the extension.'
   });
   expect(await validatorNotMilestone.validate('path/to/nowhere')).toEqual({
     valid: false,
