@@ -30,7 +30,7 @@ export const toVersion = (rawVersion: string) => {
 };
 
 const versionNumberToInt = (rawVersion: string, value?: string) => {
-  const int = parseInt(value ?? '');
+  const int = Number(value ?? '');
   if (isNaN(int)) {
     throw new Error(`Invalid version part ${value} in version ${rawVersion}`);
   }
@@ -43,15 +43,15 @@ export const parseMilestone = (milestonePackageJson: any) => {
     return { isMilestone: false, milestone: 0 };
   }
   if (typeof milestonePackageJson !== 'string') {
-    throw new Error(`Invalid milestone ${milestonePackageJson}. Must be a string.`);
+    throw new Error(`Invalid milestone ${milestonePackageJson}. Must be a string`);
   }
   const milestone = milestonePackageJson.trim();
   if (milestone === '') {
     return { isMilestone: false, milestone: 0 };
   }
-  const int = parseInt(milestone);
+  const int = Number(milestone);
   if (isNaN(int) || int <= 0) {
-    throw new Error(`Invalid milestone ${milestone}. Must be a valid number greater than 0.`);
+    throw new Error(`Invalid milestone ${milestone}. Must be a positive integer`);
   }
   return { isMilestone: true, milestone: int };
 };

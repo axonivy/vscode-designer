@@ -26,11 +26,15 @@ test.each([undefined, null, '', ' '])('parses absent milestone %s', milestone =>
 });
 
 test.each([32, true, {}])('throws error for non-string milestone %s', milestone => {
-  expect(() => parseMilestone(milestone)).toThrow(`Invalid milestone ${milestone}. Must be a string.`);
+  expect(() => parseMilestone(milestone)).toThrow(`Invalid milestone ${milestone}. Must be a string`);
 });
 
-test.each(['abc', '0', '-1'])('throws error for invalid milestone %s', milestone => {
-  expect(() => parseMilestone(milestone)).toThrow(`Invalid milestone ${milestone.trim()}. Must be a valid number greater than 0.`);
+test.each(['abc', 'a1', '1a', 'a1a', 'a 1 a'])('throws error for invalid milestone %s', milestone => {
+  expect(() => parseMilestone(milestone)).toThrow(`Invalid milestone ${milestone.trim()}. Must be a positive integer`);
+});
+
+test.each(['0', '-1'])('throws error for invalid milestone %s', milestone => {
+  expect(() => parseMilestone(milestone)).toThrow(`Invalid milestone ${milestone.trim()}. Must be a positive integer`);
 });
 
 test.each([
