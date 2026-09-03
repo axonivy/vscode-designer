@@ -54,8 +54,16 @@ test('invalid when util lib is missing', async () => {
 });
 
 test('preview train', async () => {
-  expect((await validator.validate('dev')).valid).toBeTruthy();
-  expect((await validator.validate('nightly')).valid).toBeTruthy();
+  expect(await validator.validate('dev')).toEqual({
+    valid: false,
+    reason:
+      'Release train setting mismatch. Extension Version is a \'milestone\' release, but there is a Workspace or User VS Code setting override "axonivy.engine.releaseTrain": "dev". Remove the override.'
+  });
+  expect(await validator.validate('nightly')).toEqual({
+    valid: false,
+    reason:
+      'Release train setting mismatch. Extension Version is a \'milestone\' release, but there is a Workspace or User VS Code setting override "axonivy.engine.releaseTrain": "nightly". Remove the override.'
+  });
   expect((await validator.validate('milestone')).valid).toBeTruthy();
 
   expect(await validator.validate('Dev')).toEqual({
@@ -65,6 +73,22 @@ test('preview train', async () => {
   expect((await validator.validate('13')).valid).toBeFalsy();
   expect((await validator.validate('13.2')).valid).toBeFalsy();
   expect((await validator.validate('13.2.0')).valid).toBeFalsy();
+});
+
+test('non-milestone preview train', async () => {
+  const validatorNotMilestone = new ReleaseTrainValidator({ ...extensionVersion, isMilestone: false, milestone: 0 });
+
+  expect((await validatorNotMilestone.validate('dev')).valid).toBeTruthy();
+  expect((await validatorNotMilestone.validate('nightly')).valid).toBeTruthy();
+  expect(await validatorNotMilestone.validate('milestone')).toEqual({
+    valid: false,
+    reason:
+      'Release train setting mismatch. Extension Version is not a \'milestone\' release, but there is a Workspace or User VS Code setting override "axonivy.engine.releaseTrain": "milestone". Remove the override.'
+  });
+  expect(await validatorNotMilestone.validate('path/to/nowhere')).toEqual({
+    valid: false,
+    reason: "Invalid release train tag or engine directory 'path/to/nowhere'"
+  });
 });
 
 test('lts train', async () => {

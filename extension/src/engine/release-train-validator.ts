@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import type { ExtensionVersion } from '../version/extension-version';
+import { type ExtensionVersion } from '../version/extension-version';
 import { PREVIEW_TRAINS, stableTrains } from './engine-release-train';
 
 const MIN_PATCH_VERSION = 0; // to be maintained manually
@@ -15,8 +15,9 @@ export class ReleaseTrainValidator {
   };
 
   public validate = async (releaseTrain: string): Promise<{ valid: boolean; isDirectory?: boolean; reason?: string }> => {
-    if (this.isValidReleaseTrainTag(releaseTrain)) {
-      return { valid: true };
+    const isValidReleaseTrainTag = this.isValidReleaseTrainTag(releaseTrain);
+    if (isValidReleaseTrainTag.valid || isValidReleaseTrainTag.reason) {
+      return isValidReleaseTrainTag;
     }
     return await this.isValidEngineDir(releaseTrain);
   };
@@ -73,17 +74,26 @@ export class ReleaseTrainValidator {
     return { valid: true };
   };
 
-  private isValidReleaseTrainTag = (train: string) => {
+  private isValidReleaseTrainTag = (releaseTrain: string) => {
     if (this.extensionVersion.isPreview) {
-      return PREVIEW_TRAINS.includes(train);
+      if (!PREVIEW_TRAINS.includes(releaseTrain)) {
+        return { valid: false };
+      }
+      if ((releaseTrain == 'milestone') !== this.extensionVersion.isMilestone) {
+        return {
+          valid: false,
+          reason: `Release train setting mismatch. Extension Version is ${this.extensionVersion.isMilestone ? "a 'milestone'" : "not a 'milestone'"} release, but there is a Workspace or User VS Code setting override "axonivy.engine.releaseTrain": "${releaseTrain}". Remove the override.`
+        };
+      }
+      return { valid: true };
     }
-    if (stableTrains(this.extensionVersion.major).includes(train)) {
-      return true;
+    if (stableTrains(this.extensionVersion.major).includes(releaseTrain)) {
+      return { valid: true };
     }
-    if (new RegExp(`^${this.extensionVersion.major}\\.${this.extensionVersion.minor}\\.(\\d+)$`).test(train)) {
-      return this.toInt(train.split('.')[2]) >= this.minPatchVersion;
+    if (new RegExp(`^${this.extensionVersion.major}\\.${this.extensionVersion.minor}\\.(\\d+)$`).test(releaseTrain)) {
+      return { valid: this.toInt(releaseTrain.split('.')[2]) >= this.minPatchVersion };
     }
-    return false;
+    return { valid: false };
   };
 
   private toInt = (value?: string) => parseInt(value ?? '');
