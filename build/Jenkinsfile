@@ -16,8 +16,8 @@ pipeline {
 
   parameters {
     booleanParam(name: 'publishToMarket', defaultValue: false, description: 'Publish to VS Code Marketplace?')
-    string(name: 'qualifier',
-      description: "Optional qualifier (e.g. 31 for Milestone 31). Empty publishes with the date timestamp.",
+    string(name: 'milestone',
+      description: "Optional milestone number (e.g. 31 for Milestone 31). Unset or empty publishes as a normal non-milestone release with the date timestamp.",
       defaultValue: '')
   }
 
@@ -46,7 +46,7 @@ pipeline {
       }
       steps {
         withCredentials([string(credentialsId: 'marketplace.visualstudio.com', variable: 'VSCE_PAT')]) {
-          sh "QUALIFIER='${params.qualifier}' pnpm run publish:next"
+          sh "MILESTONE='${params.milestone}' pnpm run publish:next"
         }
       }
     }
@@ -54,7 +54,7 @@ pipeline {
     stage('Package') {
       steps {
         script {
-          sh "QUALIFIER='${params.qualifier}' pnpm run package"
+          sh "MILESTONE='${params.milestone}' pnpm run package"
           archiveArtifacts 'extension/**/*.vsix'
         }
       }
