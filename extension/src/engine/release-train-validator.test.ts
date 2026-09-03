@@ -4,7 +4,7 @@ import { ReleaseTrainValidator } from './release-train-validator';
 
 vi.mock('vscode', () => ({}));
 
-const extensionVersion = { major: 13, minor: 2, patch: 999, rawVersion: '13.2.999', isPreview: true };
+const extensionVersion = { major: 13, minor: 2, patch: 999, rawVersion: '13.2.999', isPreview: true, isMilestone: true, milestone: 999 };
 const validator = new ReleaseTrainValidator(extensionVersion);
 
 const testDir = (engineDir: string) => path.join(__dirname, 'release-train-validator-test', engineDir);
@@ -14,7 +14,7 @@ test('valid sample', async () => {
 });
 
 test('wrong major', async () => {
-  const customValidator = new ReleaseTrainValidator({ major: 14, minor: 2, patch: 0, isPreview: false });
+  const customValidator = new ReleaseTrainValidator({ ...extensionVersion, major: 14 });
   expect(await customValidator.validate(testDir('engine'))).toEqual({
     valid: false,
     isDirectory: true,
@@ -23,7 +23,7 @@ test('wrong major', async () => {
 });
 
 test('wrong minor', async () => {
-  const customValidator = new ReleaseTrainValidator({ major: 13, minor: 3, patch: 0, isPreview: false });
+  const customValidator = new ReleaseTrainValidator({ ...extensionVersion, minor: 3 });
   expect(await customValidator.validate(testDir('engine'))).toEqual({
     valid: false,
     isDirectory: true,
@@ -54,9 +54,17 @@ test('invalid when util lib is missing', async () => {
 });
 
 test('preview train', async () => {
-  expect((await validator.validate('dev')).valid).toBeTruthy();
-  expect((await validator.validate('nightly')).valid).toBeTruthy();
-  expect((await validator.validate('sprint')).valid).toBeTruthy();
+  expect(await validator.validate('dev')).toEqual({
+    valid: false,
+    reason:
+      'Release train setting mismatch. Extension Version is a milestone release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "dev". Switch the releaseTrain to \'milestone\' or install a non-milestone version of the extension.'
+  });
+  expect(await validator.validate('nightly')).toEqual({
+    valid: false,
+    reason:
+      'Release train setting mismatch. Extension Version is a milestone release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "nightly". Switch the releaseTrain to \'milestone\' or install a non-milestone version of the extension.'
+  });
+  expect((await validator.validate('milestone')).valid).toBeTruthy();
 
   expect(await validator.validate('Dev')).toEqual({
     valid: false,
@@ -67,8 +75,24 @@ test('preview train', async () => {
   expect((await validator.validate('13.2.0')).valid).toBeFalsy();
 });
 
+test('non-milestone preview train', async () => {
+  const validatorNotMilestone = new ReleaseTrainValidator({ ...extensionVersion, isMilestone: false, milestone: 0 });
+
+  expect((await validatorNotMilestone.validate('dev')).valid).toBeTruthy();
+  expect((await validatorNotMilestone.validate('nightly')).valid).toBeTruthy();
+  expect(await validatorNotMilestone.validate('milestone')).toEqual({
+    valid: false,
+    reason:
+      'Release train setting mismatch. Extension Version is not a milestone release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "milestone". Switch the releaseTrain to \'nightly\' or \'dev\', or install a milestone version of the extension.'
+  });
+  expect(await validatorNotMilestone.validate('path/to/nowhere')).toEqual({
+    valid: false,
+    reason: "Invalid release train tag or engine directory 'path/to/nowhere'"
+  });
+});
+
 test('lts train', async () => {
-  const customValidator = new ReleaseTrainValidator({ major: 14, minor: 0, patch: 10, isPreview: false });
+  const customValidator = new ReleaseTrainValidator({ ...extensionVersion, major: 14, minor: 0, patch: 10, isPreview: false });
   expect((await customValidator.validate('nightly-14')).valid).toBeTruthy();
   expect((await customValidator.validate('14')).valid).toBeTruthy();
   expect((await customValidator.validate('14.0.0')).valid).toBeTruthy();
@@ -85,7 +109,7 @@ test('lts train', async () => {
   expect((await customValidator.validate('nightly-14.0')).valid).toBeFalsy();
   expect((await customValidator.validate('dev')).valid).toBeFalsy();
   expect((await customValidator.validate('nightly')).valid).toBeFalsy();
-  expect((await customValidator.validate('sprint')).valid).toBeFalsy();
+  expect((await customValidator.validate('milestone')).valid).toBeFalsy();
   expect((await customValidator.validate('Dev')).valid).toBeFalsy();
   expect((await customValidator.validate('13')).valid).toBeFalsy();
   expect((await customValidator.validate('13.2')).valid).toBeFalsy();

@@ -21,8 +21,8 @@
     "build:production": "node esbuild.mts --production",
     "clean": "rimraf lib dist *.tsbuildinfo",
     "generate:market": "node ./schemaCodegen.cjs",
-    "package": "bash -c 'vsce package --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version:0:4}.${QUALIFIER:-$(date \"+%y%m%d%H%M\")}'",
-    "publish:next": "bash -c 'vsce publish --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version:0:4}.${QUALIFIER:-$(date \"+%Y%m%d%H\")}'",
+    "package": "node ../scripts/set-milestone.mts && bash -c 'vsce package --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version%.*}.${MILESTONE:-$(date \"+%Y%m%d%H\")}'",
+    "publish:next": "node ../scripts/set-milestone.mts && bash -c 'vsce publish --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version%.*}.${MILESTONE:-$(date \"+%Y%m%d%H\")}'",
     "test": "vitest",
     "test:ci": "vitest run",
     "type": "tsc --noEmit",
@@ -482,7 +482,7 @@
           "axonivy.engine.releaseTrain": {
             "type": "string",
             "default": "",
-            "markdownDescription": "Release train of Axon Ivy Engine to be used as Developer Engine. Expected to be a release tag like '14.0' or an absoulute path to an existing Axon Ivy Engine.",
+            "markdownDescription": "Release train of Axon Ivy Engine to be used as Developer Engine. Expected to be a release tag like '14.0' or an absolute path to an existing Axon Ivy Engine.",
             "order": 1100
           },
           "axonivy.engine.url": {
