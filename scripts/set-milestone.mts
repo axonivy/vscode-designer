@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import { readFile, writeFile } from 'node:fs/promises';
 
 const milestone = process.env.MILESTONE;
