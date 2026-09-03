@@ -82,7 +82,7 @@ export class ReleaseTrainValidator {
       if ((releaseTrain == 'milestone') !== this.extensionVersion.isMilestone) {
         return {
           valid: false,
-          reason: `Release train setting mismatch. Extension Version is ${this.extensionVersion.isMilestone ? "a 'milestone'" : "not a 'milestone'"} release, but there is a Workspace or User VS Code setting override "axonivy.engine.releaseTrain": "${releaseTrain}". Remove the override.`
+          reason: `Release train setting mismatch. Extension Version is ${this.extensionVersion.isMilestone ? "a 'milestone'" : "not a 'milestone'"} release, but there is a Workspace or User VS Code setting override "axonivy.engine.releaseTrain": "${releaseTrain}". Change the releaseTrain in the settings to a compatible version.`
         };
       }
       return { valid: true };
