@@ -1,9 +1,9 @@
 import { expect } from '@playwright/test';
 import { test } from '~/fixtures/baseTest';
-import { BrowserView } from '~/page-objects/browser-view';
 import { TextEditor } from '~/page-objects/editor';
 import { FormEditor } from '~/page-objects/form-editor';
 import { OutputView } from '~/page-objects/output-view';
+import { VsCodeBrowser } from '~/page-objects/vscode-browser';
 
 test('Edit input label', async ({ wsPage }) => {
   const editor = new FormEditor(wsPage);
@@ -72,40 +72,38 @@ test('Open Help', async ({ wsPage }) => {
   await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*reference\/dialog\/form-editor\.html/);
 });
 
-test('Preview', async ({ wsPage }) => {
+test('Preview', async ({ wsPage, electronApp }) => {
   const editor = new FormEditor(wsPage);
   await editor.open();
-  const browserView = new BrowserView(wsPage, 1);
-  const browser = browserView.content;
 
   await expect(editor.main.locator('.selected')).toHaveCount(0);
-  const frame = browser.frameLocator('iframe');
-  const input = frame.getByRole('textbox');
   const timeout = { timeout: 3_000 };
+  await wsPage.executeCommand('Axon Ivy: Deploy All Projects');
+  await wsPage.hasStatusMessage('Axon Ivy: Success: Deploying projects');
+  const vscodeBrowser = await VsCodeBrowser.openBrowser(() => editor.toolbar.getByRole('button', { name: 'Open Dialog Preview' }).click(), {
+    electronApp,
+    page: wsPage.page
+  });
+  await expect(vscodeBrowser.browserPage.locator('#iFrameForm\\:frameTaskName')).toHaveText('Preview', timeout);
+  const frame = vscodeBrowser.browserPage.frameLocator('iframe');
+  const input = frame.getByRole('textbox');
   await expect(async () => {
-    await wsPage.executeCommand('Axon Ivy: Deploy All Projects');
-    await wsPage.hasStatusMessage('Axon Ivy: Success: Deploying projects');
-    await editor.toolbar.getByRole('button', { name: 'Open Dialog Preview' }).click();
-    await expect(browser.locator('#iFrameForm\\:frameTaskName')).toHaveText('Preview', timeout);
-    await browserView.reload.click();
+    await vscodeBrowser.reload();
     await expect(input).toBeVisible(timeout);
   }).toPass();
 
-  // TODO: test editor reopen
-  // await editor.close();
+  await editor.close();
 
   const overlay = frame.locator('#selectionOverlay');
   await expect(overlay).toHaveCount(0);
-  await browser.locator('#iFrameForm\\:previewElementPicker').click();
+  await vscodeBrowser.browserPage.locator('#iFrameForm\\:previewElementPicker').click();
   await expect(overlay).toHaveCount(1);
   await input.click();
-  // TODO: update browser webview locator
   await expect(overlay).toHaveCount(1);
-  await browser.locator('#iFrameForm\\:previewElementPicker').click();
+  await vscodeBrowser.browserPage.locator('#iFrameForm\\:previewElementPicker').click();
   await expect(overlay).toHaveCount(0);
 
-  // TODO: update editor webview locator
-  // editor.updateWebViewFrameLocator(1);
+  editor.updateWebViewFrameLocator(0);
   await editor.expectWebViewVisible();
   await expect(editor.main.locator('.selected')).toHaveCount(1);
 });
