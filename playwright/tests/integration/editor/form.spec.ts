@@ -69,7 +69,7 @@ test('Open Help', async ({ wsPage }) => {
   await editor.detail.getByRole('button', { name: /Help/ }).click();
   await wsPage.page.keyboard.press('Escape');
   await outputView.expectLogEntry('Opening URL externally');
-  await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*user-dialogs\/form-editor\.html/);
+  await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*reference\/dialog\/form-editor\.html/);
 });
 
 test('Preview', async ({ wsPage }) => {

@@ -24,5 +24,5 @@ test('Open help', async ({ wsPage }) => {
   await editor.helpButton.click();
   await wsPage.page.keyboard.press('Escape');
   await outputView.expectLogEntry('Opening URL externally');
-  await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*process-modeling\/casemap\.html/);
+  await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*reference\/casemap\/index\.html/);
 });

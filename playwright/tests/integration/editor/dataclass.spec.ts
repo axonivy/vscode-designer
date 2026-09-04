@@ -51,5 +51,5 @@ test('Open help', async ({ wsPage }) => {
   await editor.webViewFrame.getByRole('button', { name: /Help/ }).click();
   await wsPage.page.keyboard.press('Escape');
   await outputView.expectLogEntry('Opening URL externally');
-  await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*data-classes\/data-classes.html#data-class-editor/);
+  await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*reference\/data\/index.html#data-class-editor/);
 });
