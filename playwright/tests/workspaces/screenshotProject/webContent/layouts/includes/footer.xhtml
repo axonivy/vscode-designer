@@ -1,0 +1,19 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="jakarta.faces.core"
+	xmlns:h="jakarta.faces.html"
+	xmlns:ui="jakarta.faces.facelets"
+	xmlns:ic="http://ivyteam.ch/jsf/component"
+	xmlns:p="primefaces"
+	xmlns:pe="primefaces.extensions">
+<body>
+	<ui:composition>
+		<div id="layoutFooter">
+			<h:outputText value="Powered by " />
+			<h:outputLink value="https://developer.axonivy.com/">#{ivyAdvisor.applicationName}</h:outputLink>
+			<h:outputText value=" #{ivyAdvisor.buildVersion}" />
+			<h:outputText value=" - &#169; #{ivyAdvisor.vendorYear}-#{ivyAdvisor.currentYear} " />
+			<h:outputLink value="#{ivyAdvisor.vendorUrl}">#{ivyAdvisor.vendorName}</h:outputLink>
+		</div>
+	</ui:composition>
+</body>
+</html>
