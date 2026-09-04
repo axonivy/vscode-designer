@@ -12,8 +12,7 @@ test.describe('Engine run by extension', () => {
     await outputview.checkIfEngineStarted();
   });
 
-  // eslint-disable-next-line playwright/no-focused-test
-  test.only('Engine is terminated with extension reload', { tag: '@serial' }, async ({ wsPage }) => {
+  test('Engine is terminated with extension reload', { tag: '@serial' }, async ({ wsPage }) => {
     const outputview = new OutputView(wsPage);
     await outputview.checkIfEngineStarted();
     const engineUrl = await outputview.getEngineUrl();
