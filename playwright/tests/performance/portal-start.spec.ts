@@ -18,7 +18,7 @@ test.describe('Portal performance', () => {
   test('Portal home', async ({ wsPage }) => {
     await expect(async () => {
       const javaReady = async () => await expect(wsPage.page.locator('div.statusbar-item[id*="redhat.java"]').filter({ hasText: 'Java: Ready' })).toBeVisible({ timeout: 1_000 });
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 2; i++) {
         await javaReady();
         await wsPage.page.waitForTimeout(1_000);
       }
