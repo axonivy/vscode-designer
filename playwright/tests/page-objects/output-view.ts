@@ -25,6 +25,11 @@ export class OutputView {
     }).toPass();
   }
 
+  async getEngineUrl() {
+    const output = await this.view.textContent();
+    return output?.match(/https?:\/\/[^\s]+/)?.[0];
+  }
+
   async openLog(name: string) {
     await this.open();
     await this.sourceSelection.click();
