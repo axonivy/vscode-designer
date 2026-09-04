@@ -23,5 +23,5 @@ test('Open Help', async ({ wsPage }) => {
   await editor.webViewFrame.getByRole('button', { name: /Help/ }).click();
   await wsPage.page.keyboard.press('Escape');
   await outputView.expectLogEntry('Opening URL externally');
-  await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*data-modeling\/persistence\/persistence-configuration-editor\.html/);
+  await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*reference\/configuration\/persistence\.html/);
 });
