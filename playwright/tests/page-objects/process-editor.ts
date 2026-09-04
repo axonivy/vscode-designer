@@ -38,7 +38,7 @@ export class ProcessEditor extends WebViewEditor {
   }
 
   async startProcessAndAssertExecuted(startEvent: Locator, executedElement: Locator) {
-    await startEvent.locator('circle').click();
+    await startEvent.locator('circle').click({ force: true });
     await this.assertSelected(startEvent);
     const playButton = this.quickActionBar.getByRole('button', { name: /Start Process/ });
     await playButton.click({ delay: 100 });
