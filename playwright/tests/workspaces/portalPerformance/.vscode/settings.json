@@ -6,5 +6,16 @@
   "chat.disableAIFeatures": true,
   "axonivy.process.animation.animate": false,
   "redhat.telemetry.enabled": false,
-  "axonivy.validation.xhtml": false
+  "axonivy.workspaceValidation": {
+    "database": false,
+    "dataclass": false,
+    "form": false,
+    "process": false,
+    "restclient": false,
+    "role": false,
+    "variable": false,
+    "user": false,
+    "webserviceclient": false,
+    "xhtml": false
+  }
 }
