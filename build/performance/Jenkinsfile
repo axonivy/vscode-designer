@@ -36,7 +36,6 @@ pipeline {
           bat 'git -C playwright/tests/workspaces/portalPerformance/portal clean -fdx'
           bat 'git -C playwright/tests/workspaces/portalPerformance/portal checkout master'
           bat 'git -C playwright/tests/workspaces/portalPerformance/portal pull'
-          bat 'mvn clean validate -f playwright/tests/workspaces/portalPerformance/portal/pom.xml'
         }
       }
     }
