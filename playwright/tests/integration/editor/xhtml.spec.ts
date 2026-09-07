@@ -10,8 +10,7 @@ test('xhtml completions', async ({ wsPage }) => {
   await editor.expectCompletionAtLineColumn('h:body', 19, 10);
 });
 
-// eslint-disable-next-line playwright/no-focused-test
-test.only('xhtml definitions', async ({ wsPage }) => {
+test('xhtml definitions', async ({ wsPage }) => {
   test.setTimeout(60_000); // slow test due to java activation
   const editor = new XhtmlEditor(wsPage);
   await editor.open();
