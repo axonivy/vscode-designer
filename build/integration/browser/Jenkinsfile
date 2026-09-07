@@ -31,6 +31,7 @@ pipeline {
             nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
             code-server --install-extension vscjava.vscode-java-pack
             code-server --install-extension extension/vscode-designer*.vsix
+            export VSCODE_PROXY_URI=
             nohup code-server --bind-addr 0.0.0.0:3000 --auth none --disable-telemetry --disable-update-check --disable-workspace-trust &
             """
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {

@@ -4,7 +4,7 @@ import { ProcessEditor } from '~/page-objects/process-editor';
 
 test('with activated animation and reset afterwards', { tag: '@serial' }, async ({ wsPage }) => {
   const processEditor = new ProcessEditor(wsPage, 'Animation.p.json');
-  const callableEditor = new ProcessEditor(wsPage, 'Callable.p.json', 2);
+  const callableEditor = new ProcessEditor(wsPage, 'Callable.p.json', 1);
   await processEditor.open();
   const start = processEditor.elementByPID('190EEC366DECC66A-f0');
   await expect(start).toBeVisible();
