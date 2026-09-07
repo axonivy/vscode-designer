@@ -20,7 +20,9 @@ export class XhtmlEditor extends TextEditor {
 
   async expectDefinitionAtLineColumn(definition: string, line: number, column: number) {
     await this.goToLineColumn(line, column);
-    await this.wsPage.executeCommand('Peek Definition');
-    await expect(this.definitions.getByText(definition)).toBeVisible();
+    await expect(async () => {
+      await this.wsPage.executeCommand('Peek Definition');
+      await expect(this.definitions.getByText(definition)).toBeVisible({ timeout: 2_000 });
+    }).toPass();
   }
 }
