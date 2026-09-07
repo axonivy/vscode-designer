@@ -27,6 +27,7 @@ test.describe('Portal performance', () => {
     await wsPage.executeCommand('View: Hide Panel');
     await editor.open();
     const start = editor.elementByPID('1549F58C18A6C562-f28');
+    await wsPage.executeCommand('Notifications: Clear All Notifications');
     const vscodeBrowser = await VsCodeBrowser.openBrowser(() => editor.startProcessAndAssertExecuted(start, start), { electronApp });
     await expect(vscodeBrowser.browserPage.locator('span.default-welcome-image')).toBeVisible();
   });
