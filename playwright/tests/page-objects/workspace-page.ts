@@ -66,7 +66,11 @@ export class WorkspacePage {
     const javaStatusBar = this.page.locator('div.statusbar-item[id*="redhat.java"]');
     await javaStatusBar.filter({ hasText: 'Java: Lightweight Mode' }).click();
     await expect(javaStatusBar.filter({ hasText: 'Java: Building' })).toBeVisible();
-    await expect(javaStatusBar.filter({ hasText: 'Java: Ready' })).toBeVisible();
+    await expect(async () => {
+      await expect(javaStatusBar.filter({ hasText: 'Java: Ready' })).toBeVisible({ timeout: 500 });
+      await this.page.waitForTimeout(2_000);
+      await expect(javaStatusBar.filter({ hasText: 'Java: Ready' })).toBeVisible({ timeout: 500 });
+    }).toPass();
   }
 
   async hasReadyStatusMessage() {

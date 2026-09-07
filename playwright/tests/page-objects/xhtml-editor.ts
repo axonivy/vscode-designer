@@ -22,6 +22,5 @@ export class XhtmlEditor extends TextEditor {
     await this.goToLineColumn(line, column);
     await this.wsPage.executeCommand('Peek Definition');
     await expect(this.definitions.getByText(definition)).toBeVisible();
-    await this.wsPage.page.keyboard.press('Escape');
   }
 }
