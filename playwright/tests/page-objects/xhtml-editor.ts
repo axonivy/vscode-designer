@@ -20,8 +20,11 @@ export class XhtmlEditor extends TextEditor {
 
   async expectDefinitionAtLineColumn(definition: string, line: number, column: number) {
     await this.goToLineColumn(line, column);
-    await this.wsPage.executeCommand('Peek Definition');
-    await expect(this.definitions.getByText(definition)).toBeVisible();
-    await this.wsPage.page.keyboard.press('Escape');
+    await expect(async () => {
+      await this.wsPage.executeCommand('Peek Definition');
+      await expect(this.definitions.getByText(definition)).toBeVisible({ timeout: 2_000 });
+    }).toPass();
+    await this.definitions.getByRole('button', { name: 'Close' }).click();
+    await expect(this.definitions).toBeHidden();
   }
 }

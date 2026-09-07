@@ -71,7 +71,7 @@ export class TextEditor extends Editor {
   }
 
   async goToLineColumn(line: number, column: number) {
-    await this.wsPage.page.locator('#status\\.editor\\.selection').click();
+    await this.wsPage.page.locator('#status\\.editor\\.selection').click({ force: true });
     await this.wsPage.provideUserInput(`:${line}:${column}`);
     await expect(this.wsPage.page.locator('a.statusbar-item-label').getByText(`Ln ${line}, Col ${column}`)).toBeVisible();
   }
