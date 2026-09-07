@@ -1,0 +1,44 @@
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="jakarta.faces.core"
+  xmlns:h="jakarta.faces.html"
+  xmlns:ui="jakarta.faces.facelets"
+  xmlns:ic="http://ivyteam.ch/jsf/component"
+  xmlns:p="primefaces"
+  xmlns:pe="primefaces.extensions"
+>
+  <h:body>
+    <ui:composition template="/layouts/frame-10.xhtml">
+      <ui:define name="title">DemoDialog</ui:define>
+      <ui:define name="content">
+        <h3>Fieldset Demo</h3>
+
+        <h:form id="form">
+          <h:panelGroup layout="block" id="block">
+            <p:messages />
+            <p:fieldset id="player">
+              <p:outputLabel>
+                <b>Player</b>
+              </p:outputLabel>
+              <p:panelGrid
+                columns="2"
+                layout="grid"
+                style="width: 100%"
+                styleClass="ui-panelgrid-blanks ui-fluid"
+                columnClasses="ui-g-12 ui-md-3 ui-lg-1, ui-g-12 ui-md-9 ui-lg-10, ui-g-12 ui-md-3 ui-lg-2, ui-g-12 ui-md-9 ui-lg-4"
+              >
+                <p:outputLabel for="playerName" value="Name" />
+                <p:inputText id="playerName" value="Demo Player" required="true"> </p:inputText>
+                <p:outputLabel style="display: none" value="#{data.demoAttribute}"></p:outputLabel>
+              </p:panelGrid>
+            </p:fieldset>
+          </h:panelGroup>
+          <h:panelGrid columns="2">
+            <p:commandLink id="cancel" actionListener="#{ivyWorkflowView.cancel()}" value="Cancel " process="@this" />
+            <p:commandButton id="submit" actionListener="#{logic.close}" value="Submit" update="form" icon="pi pi-check" />
+          </h:panelGrid>
+        </h:form>
+      </ui:define>
+    </ui:composition>
+  </h:body>
+</html>

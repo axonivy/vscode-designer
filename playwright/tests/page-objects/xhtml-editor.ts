@@ -4,12 +4,18 @@ import type { WorkspacePage } from './workspace-page';
 
 export class XhtmlEditor extends TextEditor {
   readonly completions: Locator;
+  readonly main: Locator;
   readonly definitions: Locator;
 
   constructor(wsPage: WorkspacePage, fileName = 'testXhtml.xhtml') {
     super(wsPage, fileName);
+    this.main = wsPage.page.locator('#canvas');
     this.completions = wsPage.page.locator('.suggest-widget');
     this.definitions = wsPage.page.locator('.peekview-widget');
+  }
+
+  get toolbar() {
+    return this.main.locator('.toolbar');
   }
 
   async expectCompletionAtLineColumn(completion: string, line: number, column: number) {
