@@ -5,6 +5,7 @@ export const noEngineWorkspacePath = path.resolve(import.meta.dirname, './noEngi
 export const noProjectWorkspacePath = path.resolve(import.meta.dirname, './noProject');
 export const multiProjectWorkspacePath = path.resolve(import.meta.dirname, './multiProject');
 export const empty = path.resolve(import.meta.dirname, './empty');
+export const emptyWithFolder = path.resolve(import.meta.dirname, './emptyWithFolder');
 export const embeddedEngineWorkspace = path.resolve(import.meta.dirname, './embeddedEngine');
 export const minimalProjectWorkspacePath = path.resolve(import.meta.dirname, './minimalProject');
 export const outdatedProjectWorkspacePath = path.resolve(import.meta.dirname, './outdatedProject');
