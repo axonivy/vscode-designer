@@ -243,7 +243,7 @@ export class IvyProjectExplorer {
   private async importIvyProject(selection: TreeSelection) {
     const selectedUri = await this.selectWorkspace(selection);
     if (!selectedUri) {
-      logInformationMessage('Axon Ivy Import Error - No valid import directory selected.');
+      logInformationMessage('No valid import directory selected.');
       return;
     }
     const existingIvyProjects = await this.getIvyProjects();
