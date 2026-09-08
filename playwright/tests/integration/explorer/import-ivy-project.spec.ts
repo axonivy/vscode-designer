@@ -78,6 +78,9 @@ test.describe('Single root workspace', () => {
 
       const errorToast = wsPage.toasts.filter({ hasText: new RegExp('Axon Ivy Import Error -') });
       await expect(errorToast).toHaveCount(1);
+      await expect(errorToast).toContainText(
+        'Cannot import an Axon Ivy Project into an existing Axon Ivy Project. Select a valid directory which is not inside an existing Axon Ivy Project.'
+      );
     });
   });
 });
