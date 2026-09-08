@@ -241,12 +241,21 @@ export class IvyProjectExplorer {
   }
 
   private async importIvyProject(selection: TreeSelection) {
-    const selectedWorkspaceUri = await this.selectWorkspace(selection);
-    if (!selectedWorkspaceUri) {
-      logInformationMessage('No valid workspace selected.');
+    const selectedUri = await this.selectWorkspace(selection);
+    if (!selectedUri) {
+      logInformationMessage('No valid import directory selected.');
       return;
     }
-    await importIvyProject(selectedWorkspaceUri);
+    const existingIvyProjects = await this.getIvyProjects();
+    for (const existingProject of existingIvyProjects) {
+      if (isSubdirectoryOrEqual(existingProject, selectedUri.fsPath)) {
+        logErrorMessage(
+          'Axon Ivy Import Error - Cannot import an Axon Ivy Project into an existing Axon Ivy Project. Select a valid directory which is not inside an existing Axon Ivy Project.'
+        );
+        return;
+      }
+    }
+    await importIvyProject(selectedUri);
   }
 
   private async exportIvyProject(selection: TreeSelection) {
