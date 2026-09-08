@@ -36,7 +36,8 @@ export class IvyProjectExplorer {
     this.treeView.onDidChangeSelection(async (event: TreeViewSelectionChangeEvent<Entry>) => {
       if (event.selection && event.selection.length > 0 && event.selection[0]?.uri) {
         const projectUri = event.selection[0]?.uri;
-        await commands.executeCommand('revealInExplorer', projectUri);
+        await commands.executeCommand('revealInExplorer', projectUri); // reveal and focus in File Explorer
+        // await commands.executeCommand('revealFileInOS', projectUri); // open enclosing folder
       }
     });
     context.subscriptions.push(this.treeView);
