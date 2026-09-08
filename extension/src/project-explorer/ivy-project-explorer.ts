@@ -1,6 +1,6 @@
 import path from 'path';
-import type { ExtensionContext, TreeView } from 'vscode';
-import { Uri, window, workspace } from 'vscode';
+import type { ExtensionContext, TreeView, TreeViewSelectionChangeEvent } from 'vscode';
+import { commands, Uri, window, workspace } from 'vscode';
 import { registerCommand, type KnownCommand } from '../base/commands';
 import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base/debounce';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
@@ -13,7 +13,7 @@ import { exportIvyProject } from './export-ivy-project';
 import { importIvyProject } from './import-ivy-project';
 import { importNewProcess } from './import-process';
 import { runProjectConversion } from './ivy-project-conversion';
-import { IVY_PROJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject, type Entry } from './ivy-project-tree-data-provider';
+import { isIvyProject, IVY_PROJECT_FILE_PATTERN, IvyProjectTreeDataProvider, type Entry } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
 import { addNewDataClass } from './new-data-class';
 import { addNewProcess, type ProcessKind } from './new-process';
@@ -33,6 +33,12 @@ export class IvyProjectExplorer {
     const activateEnginePromise = this.activateEngineIfNeeded();
     this.treeDataProvider = new IvyProjectTreeDataProvider(activateEnginePromise);
     this.treeView = window.createTreeView(VIEW_ID, { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
+    this.treeView.onDidChangeSelection(async (event: TreeViewSelectionChangeEvent<Entry>) => {
+      if (event.selection && event.selection.length > 0 && event.selection[0]?.uri) {
+        const projectUri = event.selection[0]?.uri;
+        await commands.executeCommand('revealInExplorer', projectUri);
+      }
+    });
     context.subscriptions.push(this.treeView);
     this.registerCommands(context);
     this.defineFileWatchers(context);
