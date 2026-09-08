@@ -20,7 +20,7 @@ test.describe('Single root workspace', () => {
 
   test('Import up-to-date Ivy Project', async ({ wsPage }) => {
     const explorer = new FileExplorer(wsPage);
-    await explorer.hasNodeExact('nonIvyFolder');
+    await explorer.hasNodeExact('non-ivy-folder');
     await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
     await wsPage.selectItemFromQuickPick(iarFileName);
     await wsPage.executeCommand('Refresh Explorer');
@@ -33,11 +33,11 @@ test.describe('Single root workspace', () => {
 
   test('Import up-to-date Ivy Project nested non-ivy folder', async ({ wsPage }) => {
     const explorer = new FileExplorer(wsPage);
-    await explorer.hasNodeExact('nonIvyFolder');
-    await explorer.selectInContextMenuOfNode('nonIvyFolder', 'Axon Ivy New...', 'Import Axon Ivy Project Archive (.iar or .zip)');
+    await explorer.hasNodeExact('non-ivy-folder');
+    await explorer.selectInContextMenuOfNode('non-ivy-folder', 'Axon Ivy New...', 'Import Axon Ivy Project Archive (.iar or .zip)');
     await wsPage.selectItemFromQuickPick(iarFileName);
     await wsPage.executeCommand('Refresh Explorer');
-    await explorer.selectNode('nonIvyFolder');
+    await explorer.selectNode('non-ivy-folder');
     await explorer.hasNodeExact(iarProjectName);
 
     const successToast = wsPage.toasts.filter({ hasText: new RegExp('Successfully imported Ivy project') });
@@ -47,7 +47,7 @@ test.describe('Single root workspace', () => {
 
   test('Import same project error', async ({ wsPage, tmpWorkspace }) => {
     const explorer = new FileExplorer(wsPage);
-    await explorer.hasNodeExact('nonIvyFolder');
+    await explorer.hasNodeExact('non-ivy-folder');
     await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
     await wsPage.selectItemFromQuickPick(iarFileName);
     await wsPage.executeCommand('Refresh Explorer');
@@ -74,7 +74,6 @@ test.describe('Single root workspace', () => {
 
     test('Import nested inside ivy project error', async ({ wsPage }) => {
       await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
-      // await wsPage.selectItemFromQuickPick(iarFileName);
 
       const errorToast = wsPage.toasts.filter({ hasText: new RegExp('Axon Ivy Import Error -') });
       await expect(errorToast).toHaveCount(1);
@@ -97,7 +96,7 @@ test.describe('Multi root workspace', () => {
 
     const explorer = new FileExplorer(wsPage);
     await explorer.hasNodeExact(iarFileName);
-    await explorer.selectInContextMenuOfNode('nonIvyFolder', 'Axon Ivy New...', 'Import Axon Ivy Project Archive (.iar or .zip)');
+    await explorer.selectInContextMenuOfNode('non-ivy-folder', 'Axon Ivy New...', 'Import Axon Ivy Project Archive (.iar or .zip)');
     await wsPage.selectItemFromQuickPick(iarFileName);
 
     const errorToast = wsPage.toasts.filter({ hasText: new RegExp('Axon Ivy Import Error -') });
@@ -108,16 +107,13 @@ test.describe('Multi root workspace', () => {
   });
 
   test('Import existing folder into multi-root workspace error', async ({ wsPage, tmpWorkspace }) => {
-    const iarFileName = 'alreadyPresent.iar';
+    const iarFileName = 'already-present.iar';
     const downloadIarFolder = 'connector';
-    const existingFolder = 'alreadyPresent';
 
     const explorer = new FileExplorer(wsPage);
     await downloadIar(path.join(tmpWorkspace.tmpWorkspacePath, downloadIarFolder), iarFileName);
 
-    await explorer.hasNodeExact(existingFolder);
-    await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
-    await wsPage.selectItemFromQuickPick(downloadIarFolder);
+    await explorer.selectInContextMenuOfNode('non-ivy-folder', 'Axon Ivy New...', 'Import Axon Ivy Project Archive (.iar or .zip)');
     await wsPage.selectItemFromQuickPick(iarFileName);
 
     const errorToast = wsPage.toasts.filter({ hasText: new RegExp('Axon Ivy Import Error -') });
