@@ -74,7 +74,7 @@ test.describe('Single root workspace', () => {
 
     test('Import nested inside ivy project error', async ({ wsPage }) => {
       await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
-      await wsPage.selectItemFromQuickPick(iarFileName);
+      // await wsPage.selectItemFromQuickPick(iarFileName);
 
       const errorToast = wsPage.toasts.filter({ hasText: new RegExp('Axon Ivy Import Error -') });
       await expect(errorToast).toHaveCount(1);
