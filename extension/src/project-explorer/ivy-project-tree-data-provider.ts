@@ -16,8 +16,6 @@ import {
 } from 'vscode';
 import { executeCommand, type KnownCommand } from '../base/commands';
 import { config } from '../base/configurations';
-import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
-import { IvyProjectExplorer } from './ivy-project-explorer';
 
 const __dirname = import.meta.dirname;
 interface IvyCommand extends VSCodeCommand {
@@ -73,10 +71,6 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
 
   private cacheEntry(entry: Entry) {
     this.entryCache.set(entry.uri.fsPath, entry);
-  }
-
-  public findEntry(uri: Uri) {
-    return this.entryCache.get(uri.fsPath);
   }
 
   private async findIvyProjects() {
@@ -142,10 +136,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
     if (element.type !== FileType.Directory) {
       return TreeItemCollapsibleState.None;
     }
-    if (CmsEditorRegistry.find(element.uri.fsPath)?.active) {
-      return TreeItemCollapsibleState.Expanded;
-    }
-    return TreeItemCollapsibleState.Collapsed;
+    return TreeItemCollapsibleState.None;
   }
 
   async getParent(element: Entry): Promise<Entry | undefined> {
@@ -155,7 +146,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   async getChildren(element?: Entry): Promise<Entry[]> {
     await this.activateEnginePromise;
     if (element) {
-      return [this.cmsEntry(element)];
+      return [];
     }
     return (await this.ivyProjects).projects.map(dir => this.createAndCacheRoot(dir));
   }
@@ -168,26 +159,6 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
       contextValue: IVY_PROJECT_CONTEXT_VALUE
     };
     this.cacheEntry(entry);
-    return entry;
-  }
-
-  private cmsEntry(element: Entry) {
-    const uri = Uri.joinPath(element.uri, 'cms');
-    const entry: Entry = {
-      uri,
-      type: FileType.File,
-      parent: element,
-      collapsibleState: TreeItemCollapsibleState.None,
-      iconPath: {
-        light: Uri.file(path.join(__dirname, '..', 'assets', 'light', 'cms.svg')),
-        dark: Uri.file(path.join(__dirname, '..', 'assets', 'dark', 'cms.svg'))
-      },
-      command: { command: 'ivyEditor.openCmsEditor', title: 'Open CMS Editor', arguments: [uri] }
-    };
-    this.cacheEntry(entry);
-    if (CmsEditorRegistry.find(element.uri.fsPath)?.active) {
-      IvyProjectExplorer.instance.selectEntry(entry);
-    }
     return entry;
   }
 }

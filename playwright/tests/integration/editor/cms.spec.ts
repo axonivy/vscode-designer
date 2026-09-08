@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { test } from '~/fixtures/baseTest';
 import { CmsEditor } from '~/page-objects/cms-editor';
 import { TextEditor } from '~/page-objects/editor';
-import { FileExplorer, ProjectExplorerView } from '~/page-objects/explorer-view';
+import { FileExplorer } from '~/page-objects/explorer-view';
 import { OutputView } from '~/page-objects/output-view';
 
 test('Open by command', async ({ wsPage }) => {
@@ -51,10 +51,4 @@ test('Reuse and reveal existing panel', async ({ wsPage }) => {
 
   await explorer.doubleClickNode('pom.xml');
   await editor.expectTabInactive();
-  const projectExplorer = new ProjectExplorerView(wsPage);
-  await projectExplorer.openView();
-  await projectExplorer.selectNode('playwrightTestWorkspace');
-  await projectExplorer.selectNode('cms');
-  await editor.expectWebViewVisible();
-  await expect(editor.tab).toHaveCount(1);
 });

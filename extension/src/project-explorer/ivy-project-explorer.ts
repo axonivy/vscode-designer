@@ -1,12 +1,11 @@
 import path from 'path';
-import type { ExtensionContext, TreeView, TreeViewVisibilityChangeEvent } from 'vscode';
+import type { ExtensionContext, TreeView } from 'vscode';
 import { Uri, window, workspace } from 'vscode';
 import { registerCommand, type KnownCommand } from '../base/commands';
 import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base/debounce';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { runJavaCleanWorkspace, runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
-import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { installLocalMarketProduct, installMarketProduct } from '../market/import-market';
@@ -35,14 +34,6 @@ export class IvyProjectExplorer {
     this.treeDataProvider = new IvyProjectTreeDataProvider(activateEnginePromise);
     this.treeView = window.createTreeView(VIEW_ID, { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
     context.subscriptions.push(this.treeView);
-    this.treeView.onDidChangeVisibility((event: TreeViewVisibilityChangeEvent) => {
-      if (event.visible) {
-        const activeProjectCmsEditor = CmsEditorRegistry.findActive();
-        if (activeProjectCmsEditor) {
-          this.selectCmsEntry(activeProjectCmsEditor);
-        }
-      }
-    });
     this.registerCommands(context);
     this.defineFileWatchers(context);
     context.subscriptions.push(
@@ -305,15 +296,6 @@ export class IvyProjectExplorer {
       return;
     }
     await addNewDataClass('Entity Class', addCommandContext);
-  }
-
-  public async selectCmsEntry(projectPath: string) {
-    if (!this.treeView.visible) {
-      return;
-    }
-    const projectPathUri = Uri.file(projectPath);
-    await this.selectEntry(this.treeDataProvider.findEntry(projectPathUri));
-    this.selectEntry(this.treeDataProvider.findEntry(Uri.joinPath(projectPathUri, 'cms')));
   }
 
   public async selectEntry(entry?: Entry) {
