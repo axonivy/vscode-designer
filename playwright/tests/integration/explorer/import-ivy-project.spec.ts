@@ -97,8 +97,7 @@ test.describe('Multi root workspace', () => {
 
     const explorer = new FileExplorer(wsPage);
     await explorer.hasNodeExact(iarFileName);
-    await wsPage.executeCommand('Import Axon Ivy Project Archive (.iar or .zip)');
-    await wsPage.selectItemFromQuickPick('ivy-project-1');
+    await explorer.selectInContextMenuOfNode('nonIvyFolder', 'Axon Ivy New...', 'Import Axon Ivy Project Archive (.iar or .zip)');
     await wsPage.selectItemFromQuickPick(iarFileName);
 
     const errorToast = wsPage.toasts.filter({ hasText: new RegExp('Axon Ivy Import Error -') });
