@@ -37,7 +37,7 @@ test.describe('Single root workspace', () => {
     await explorer.selectInContextMenuOfNode('nonIvyFolder', 'Axon Ivy New...', 'Import Axon Ivy Project Archive (.iar or .zip)');
     await wsPage.selectItemFromQuickPick(iarFileName);
     await wsPage.executeCommand('Refresh Explorer');
-    await explorer.doubleClickNode('nonIvyFolder');
+    await explorer.selectNode('nonIvyFolder');
     await explorer.hasNodeExact(iarProjectName);
 
     const successToast = wsPage.toasts.filter({ hasText: new RegExp('Successfully imported Ivy project') });
