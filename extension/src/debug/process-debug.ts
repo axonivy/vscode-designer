@@ -1,5 +1,5 @@
 import type { ExtensionContext } from 'vscode';
-import { debug, workspace } from 'vscode';
+import { debug, window, workspace } from 'vscode';
 import { registerCommand } from '../base/commands';
 import { logWarningMessage } from '../base/logging-util';
 import type { IvyEngineApi } from '../engine/api/engine-api';
@@ -56,7 +56,17 @@ async function startProcessDebugging() {
   }
 
   hasRunningProcessDebugSession = true;
-  const workspaceFolder = workspace.workspaceFolders?.[0];
+
+  const workspaceFolders = workspace.workspaceFolders;
+  let workspaceFolder;
+  if (workspaceFolders?.length === 1 && workspaceFolders[0]) {
+    workspaceFolder = workspaceFolders[0];
+  } else {
+    workspaceFolder = await window.showWorkspaceFolderPick();
+    if (!workspaceFolder) {
+      return false;
+    }
+  }
   const started = await debug.startDebugging(workspaceFolder, {
     type: PROCESS_DEBUG_TYPE,
     request: 'attach',
