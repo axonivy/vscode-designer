@@ -20,6 +20,8 @@
     "build": "node esbuild.mts",
     "build:production": "node esbuild.mts --production",
     "clean": "rimraf lib dist *.tsbuildinfo",
+    "generate:icon-themes": "node scripts/generate-icon-themes.mts",
+    "icon-themes:ci": "pnpm run generate:icon-themes && git diff --exit-code -- assets/icon-themes/",
     "generate:market": "node ./schemaCodegen.cjs",
     "package": "node ../scripts/set-milestone.mts && bash -c 'vsce package --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version%.*}.${MILESTONE:-$(date \"+%Y%m%d%H\")}'",
     "publish:next": "node ../scripts/set-milestone.mts && bash -c 'vsce publish --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version%.*}.${MILESTONE:-$(date \"+%Y%m%d%H\")}'",
@@ -43,6 +45,7 @@
     "@axonivy/process-editor-protocol": "next-14.0.0",
     "@axonivy/restclient-editor-protocol": "next-14.0.0",
     "@axonivy/role-editor-protocol": "next-14.0.0",
+    "@axonivy/ui-icons": "next-14.0.0",
     "@axonivy/user-editor-protocol": "next-14.0.0",
     "@axonivy/variable-editor-protocol": "next-14.0.0",
     "@axonivy/webservice-editor-protocol": "next-14.0.0",
@@ -1135,16 +1138,16 @@
         "when": "activeCustomEditorId == 'ivy.glspDiagram'"
       }
     ],
-    "languages": [
+    "iconThemes": [
       {
-        "id": "ivy-process",
-        "icon": {
-          "light": "./assets/light/diagram-project-solid.svg",
-          "dark": "./assets/dark/diagram-project-solid.svg"
-        },
-        "extensions": [
-          ".p.json"
-        ]
+        "id": "ivy-icon-theme-monochrome",
+        "label": "Axon Ivy Icon Theme Monochrome",
+        "path": "./assets/icon-themes/ivy-icon-theme-monochrome.json"
+      },
+      {
+        "id": "ivy-icon-theme-colored",
+        "label": "Axon Ivy Icon Theme Colored",
+        "path": "./assets/icon-themes/ivy-icon-theme-colored.json"
       }
     ],
     "viewsWelcome": [
