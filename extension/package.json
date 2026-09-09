@@ -961,15 +961,15 @@
         },
         {
           "command": "engine.deployProjects",
-          "when": "view == ivyProjects || view == workbench.explorer.fileView"
+          "when": "view == ivyProjects"
         },
         {
           "command": "ivyProjects.importIvyProject",
-          "when": "view == ivyProjects || view == workbench.explorer.fileView"
+          "when": "view == ivyProjects"
         },
         {
           "command": "ivyProjects.exportIvyProject",
-          "when": "view == ivyProjects || view == workbench.explorer.fileView"
+          "when": "view == ivyProjects"
         }
       ],
       "explorer/context": [
