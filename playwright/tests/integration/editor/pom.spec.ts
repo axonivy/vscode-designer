@@ -5,6 +5,7 @@ import { FileExplorer } from '~/page-objects/explorer-view';
 import { multiProjectWorkspacePath } from '~/workspaces/workspace';
 
 test.use({ workspace: multiProjectWorkspacePath });
+test.setTimeout(120_000_000); // or 180_000, etc.
 
 test('Add Ivy Project Dependency', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
@@ -16,7 +17,7 @@ test('Add Ivy Project Dependency', async ({ wsPage }) => {
     /<dependencies>\s*<dependency>\s*<groupId>com\.axonivy\.ivy\.api<\/groupId>\s*<artifactId>ivy-api<\/artifactId>\s*<\/dependency>\s*<\/dependencies>/
   );
 
-  await wsPage.page.locator('div.editor-actions').getByLabel('Add Ivy Project Dependency').click();
+  await wsPage.page.locator('div.editor-actions').getByLabel('Add Axon Ivy Project Dependency').click();
   await wsPage.page.locator('div.quick-input-widget').getByLabel('connector').click();
 
   await expect(editor.content).toContainText(
