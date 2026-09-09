@@ -66,7 +66,6 @@ export class IvyProjectExplorer {
   }
 
   private registerCommands(context: ExtensionContext) {
-    const engineManager = IvyEngineManager.instance;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const registerCmd = (command: KnownCommand, callback: (...args: any[]) => any) => registerCommand(command, context, callback);
     registerCmd(`${VIEW_ID}.refreshEntry`, () => this.refresh());
@@ -85,15 +84,9 @@ export class IvyProjectExplorer {
     );
 
     registerCmd(`${VIEW_ID}.addNewProject`, (s: TreeSelection) => this.addProject(s));
-    registerCmd(`${VIEW_ID}.addNewHtmlDialog`, (s: TreeSelection, selections?: [TreeSelection], pid?: string) =>
-      this.addUserDialog(s, 'JSF', pid)
-    );
-    registerCmd(`${VIEW_ID}.addNewFormDialog`, (s: TreeSelection, selections?: [TreeSelection], pid?: string) =>
-      this.addUserDialog(s, 'Form', pid)
-    );
-    registerCmd(`${VIEW_ID}.addNewOfflineDialog`, (s: TreeSelection, selections?: [TreeSelection], pid?: string) =>
-      this.addUserDialog(s, 'JSFOffline', pid)
-    );
+    registerCmd(`${VIEW_ID}.addNewHtmlDialog`, (s: TreeSelection, pid?: string) => this.addUserDialog(s, 'JSF', pid));
+    registerCmd(`${VIEW_ID}.addNewFormDialog`, (s: TreeSelection, pid?: string) => this.addUserDialog(s, 'Form', pid));
+    registerCmd(`${VIEW_ID}.addNewOfflineDialog`, (s: TreeSelection, pid?: string) => this.addUserDialog(s, 'JSFOffline', pid));
     registerCmd(`${VIEW_ID}.addNewDataClass`, (s: TreeSelection) => this.addDataClass(s));
     registerCmd(`${VIEW_ID}.addNewEntityClass`, (s: TreeSelection) => this.addEntityClass(s));
     registerCmd(`${VIEW_ID}.addNewCaseMap`, (s: TreeSelection) => this.addCaseMap(s));
@@ -241,17 +234,15 @@ export class IvyProjectExplorer {
   }
 
   private async importBpmnProcess(selection: TreeSelection) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
-    if (!uri) {
-      logErrorMessage('Import BPMN Process: No valid Axon Ivy Project selected.');
+    const projectUri = await this.treeSelectionToProjectUri(selection);
+    if (!projectUri) {
       return;
     }
-    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (projectPath) {
-      await importNewProcess(projectPath);
+    const project = await treeUriToProjectPath(projectUri, this.getIvyProjects());
+    if (!project) {
       return;
     }
-    logErrorMessage('Import BPMN Process: No valid Axon Ivy Project selected.');
+    await importNewProcess(project);
   }
 
   private async importIvyProject(selection: TreeSelection) {
