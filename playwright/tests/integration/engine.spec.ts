@@ -34,7 +34,7 @@ test.describe('Engine noProjectWorkspacePath', () => {
     await settingsView.containsSetting('"axonivy.engine.runByExtension": true');
     await settingsView.containsSetting('"axonivy.engine.releaseTrain": ""');
     await settingsView.containsSetting('"axonivy.engine.url": "http://localhost:8080/"');
-    await settingsView.containsSetting('"axonivy.project.excludePattern": "**/target/**"');
+    await settingsView.containsSetting('"axonivy.project.excludePattern": "**/{target,bin}/**"');
     await settingsView.containsSetting('"axonivy.process.animation.animate": true');
     await settingsView.containsSetting('"axonivy.process.animation.mode": "all"');
     await settingsView.containsSetting('"axonivy.process.animation.speed": 50');
