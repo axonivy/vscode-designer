@@ -1,3 +1,4 @@
+import path from 'path';
 import type { ExtensionContext } from 'vscode';
 import { Uri, extensions } from 'vscode';
 import { executeCommand } from '../base/commands';
@@ -187,8 +188,14 @@ export class IvyEngineManager {
       return;
     }
     const ivyProjectDirectories = ivyProjectDirectory ? [ivyProjectDirectory] : await this.ivyProjectDirectories();
+    let statusMessage = 'Deploying projects';
+    if (ivyProjectDirectories.length === 1 && ivyProjectDirectories[0]) {
+      const projectPath = ivyProjectDirectories[0];
+      const projectName = path.basename(projectPath);
+      statusMessage = `Deploying project ${projectName}`;
+    }
     await StatusBar.withStatusBarProgress(
-      { text: 'Deploying projects' },
+      { text: statusMessage },
       async () => await this.ivyEngineApi?.deployProjects({ projectDirs: ivyProjectDirectories })
     );
   }

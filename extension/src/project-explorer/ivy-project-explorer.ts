@@ -71,7 +71,7 @@ export class IvyProjectExplorer {
     const registerCmd = (command: KnownCommand, callback: (...args: any[]) => any) => registerCommand(command, context, callback);
     registerCmd(`${VIEW_ID}.refreshEntry`, () => this.refresh());
     registerCmd(`${VIEW_ID}.revealInFileSystem`, async (s: TreeSelection) => this.revealInFileExplorer(s));
-    registerCmd(`${VIEW_ID}.deployProject`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.deployProjects(d), s));
+    registerCmd(`${VIEW_ID}.deployProject`, (s: TreeSelection) => this.deployProjects(s));
     registerCmd(`${VIEW_ID}.stopBpmEngine`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.stopBpmEngine(d), s));
     registerCmd(`${VIEW_ID}.addBusinessProcess`, (s: TreeSelection) => this.addProcess(s, 'Business Process'));
     registerCmd(`${VIEW_ID}.addCallableSubProcess`, (s: TreeSelection) => this.addProcess(s, 'Callable Sub Process'));
@@ -186,6 +186,7 @@ export class IvyProjectExplorer {
   private async runEngineActionForUri(action: (projectDir: string) => Promise<void>, uri?: Uri) {
     const project = await treeUriToProjectPath(uri, this.getIvyProjects());
     if (!project) {
+      logErrorMessage('No valid Axon Ivy Project selected.');
       return;
     }
     action(project);
@@ -198,6 +199,23 @@ export class IvyProjectExplorer {
     }
     const keyPrefix = actionKey === 'invalidate' ? undefined : project;
     return debouncedAction(() => action(project), actionKey, keyPrefix)();
+  }
+
+  private async deployProjects(selection: TreeSelection) {
+    let projectUri: Uri | undefined;
+    if (selection === undefined) {
+      projectUri = await selectIvyProjectDialog();
+    } else {
+      const selectionUri = await treeSelectionToUri(selection);
+      const selecitonProject = await treeUriToProjectPath(selectionUri, this.getIvyProjects());
+      if (!selecitonProject) {
+        projectUri = await selectIvyProjectDialog();
+      } else {
+        projectUri = selectionUri;
+      }
+    }
+    const project = await treeUriToProjectPath(projectUri, this.getIvyProjects());
+    IvyEngineManager.instance.deployProjects(project);
   }
 
   private async addProject(selection: TreeSelection) {
