@@ -17,7 +17,7 @@ test('Add Ivy Project Dependency', async ({ wsPage }) => {
     /<dependencies>\s*<dependency>\s*<groupId>com\.axonivy\.ivy\.api<\/groupId>\s*<artifactId>ivy-api<\/artifactId>\s*<\/dependency>\s*<\/dependencies>/
   );
 
-  await wsPage.page.locator('div.editor-actions').getByLabel('Add Axon Ivy Project Dependency').click();
+  await wsPage.page.locator('div.editor-actions').getByLabel('Add Project Dependency').click();
   await wsPage.page.locator('div.quick-input-widget').getByLabel('connector').click();
 
   await expect(editor.content).toContainText(
