@@ -202,7 +202,7 @@ export class IvyEngineManager {
 
   public async stopBpmEngine(ivyProjectDirectory: string) {
     await StatusBar.withStatusBarProgress(
-      { text: 'Stopping BPM Engine' },
+      { text: `Stopping BPM Engine of ${path.basename(ivyProjectDirectory)}` },
       async () => await this.ivyEngineApi?.stopBpmEngine({ projectDir: ivyProjectDirectory })
     );
   }

@@ -72,7 +72,7 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.refreshEntry`, () => this.refresh());
     registerCmd(`${VIEW_ID}.revealInFileSystem`, async (s: TreeSelection) => this.revealInFileExplorer(s));
     registerCmd(`${VIEW_ID}.deployProject`, (s: TreeSelection) => this.deployProjects(s));
-    registerCmd(`${VIEW_ID}.stopBpmEngine`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.stopBpmEngine(d), s));
+    registerCmd(`${VIEW_ID}.stopBpmEngine`, (s: TreeSelection) => this.stopBpmEngine(s));
     registerCmd(`${VIEW_ID}.addBusinessProcess`, (s: TreeSelection) => this.addProcess(s, 'Business Process'));
     registerCmd(`${VIEW_ID}.addCallableSubProcess`, (s: TreeSelection) => this.addProcess(s, 'Callable Sub Process'));
     registerCmd(`${VIEW_ID}.addWebServiceProcess`, (s: TreeSelection) => this.addProcess(s, 'Web Service Process'));
@@ -175,23 +175,6 @@ export class IvyProjectExplorer {
     }
   }
 
-  private async runEngineAction(action: (projectDir: string) => Promise<void>, selection: TreeSelection) {
-    let uri = await treeSelectionToUri(selection);
-    if (!uri) {
-      uri = await selectIvyProjectDialog();
-    }
-    this.runEngineActionForUri(action, uri);
-  }
-
-  private async runEngineActionForUri(action: (projectDir: string) => Promise<void>, uri?: Uri) {
-    const project = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (!project) {
-      logErrorMessage('No valid Axon Ivy Project selected.');
-      return;
-    }
-    action(project);
-  }
-
   private async runEngineActionDebounced(action: (projectDir: string) => Promise<void>, actionKey: ActionKey, uri?: Uri) {
     const project = await treeUriToProjectPath(uri, this.getIvyProjects());
     if (!project) {
@@ -202,20 +185,27 @@ export class IvyProjectExplorer {
   }
 
   private async deployProjects(selection: TreeSelection) {
-    let projectUri: Uri | undefined;
-    if (selection === undefined) {
-      projectUri = await selectIvyProjectDialog();
-    } else {
-      const selectionUri = await treeSelectionToUri(selection);
-      const selecitonProject = await treeUriToProjectPath(selectionUri, this.getIvyProjects());
-      if (!selecitonProject) {
-        projectUri = await selectIvyProjectDialog();
-      } else {
-        projectUri = selectionUri;
-      }
+    const projectUri = await this.treeSelectionToProjectUri(selection);
+    if (!projectUri) {
+      return;
     }
     const project = await treeUriToProjectPath(projectUri, this.getIvyProjects());
+    if (!project) {
+      return;
+    }
     IvyEngineManager.instance.deployProjects(project);
+  }
+
+  private async stopBpmEngine(selection: TreeSelection) {
+    const projectUri = await this.treeSelectionToProjectUri(selection);
+    if (!projectUri) {
+      return;
+    }
+    const project = await treeUriToProjectPath(projectUri, this.getIvyProjects());
+    if (!project) {
+      return;
+    }
+    IvyEngineManager.instance.stopBpmEngine(project);
   }
 
   private async addProject(selection: TreeSelection) {
@@ -375,6 +365,15 @@ export class IvyProjectExplorer {
     const treeSelectionUri = await treeSelectionToUri(selection);
     const selectedWorkspaceUri = (await isDirectory(treeSelectionUri)) ? treeSelectionUri : await getWorkspaceFolder();
     return selectedWorkspaceUri;
+  }
+
+  private async treeSelectionToProjectUri(selection: TreeSelection): Promise<Uri | undefined> {
+    const selectionUri = await treeSelectionToUri(selection);
+    const selectionProject = await treeUriToProjectPath(selectionUri, this.getIvyProjects());
+    if (selection === undefined || !selectionProject) {
+      return await selectIvyProjectDialog();
+    }
+    return selectionUri;
   }
 
   private async getAddCommandSelectionContext(
