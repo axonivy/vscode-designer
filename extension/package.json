@@ -989,6 +989,11 @@
           "group": "inline"
         },
         {
+          "command": "ivyProjects.deployProject",
+          "when": "view == ivyProjects && viewItem == ivyProject",
+          "group": "inline"
+        },
+        {
           "submenu": "ivyProjects.new",
           "when": "view == ivyProjects",
           "group": "ivyProjects@1"
