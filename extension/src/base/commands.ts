@@ -33,8 +33,7 @@ type EngineCommand =
   | 'engine.deployProjects'
   | 'engine.switchEngineReleaseTrain'
   | 'engine.deactivateAnimation'
-  | 'engine.activateAnimation'
-  | 'engine.restart';
+  | 'engine.activateAnimation';
 type DebugCommand = 'ivy.debug.attachProcess';
 type ProjectViewCommand =
   | 'ivyProjects.refreshEntry'

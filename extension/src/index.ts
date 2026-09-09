@@ -8,7 +8,6 @@ import { config } from './base/configurations';
 import { showExtensionLog } from './base/extension-output-channel';
 import { validateAndSyncJavaVersion } from './base/java-version-validation';
 import { logInformationMessage, logWarningMessage } from './base/logging-util';
-import { askToReloadWindow } from './base/reload-window';
 import { newMarkdownString, StatusBar, type QuickPickOptionId } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
@@ -42,7 +41,6 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     registerCommand('engine.switchEngineReleaseTrain', context, () => ivyEngineManager.switchEngineReleaseTrain());
     registerCommand('engine.activateAnimation', context, async () => await config.setProcessAnimationAnimate(true));
     registerCommand('engine.deactivateAnimation', context, async () => await config.setProcessAnimationAnimate(false));
-    registerCommand('engine.restart', context, async () => await askToReloadWindow('Engine restart'));
     registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));
     registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
     registerCommand('ivyPanelView.openExtensionLog', context, () => showExtensionLog());
