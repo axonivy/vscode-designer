@@ -898,10 +898,6 @@
         "label": "Diagram"
       },
       {
-        "id": "ivyProjects.new",
-        "label": "New"
-      },
-      {
         "id": "explorer.new",
         "label": "Axon Ivy New..."
       },
@@ -957,19 +953,12 @@
         {
           "command": "ivyProjects.refreshEntry",
           "when": "view == ivyProjects",
-          "group": "navigation@3"
+          "group": "navigation@1"
         },
         {
           "command": "engine.deployProjects",
-          "when": "view == ivyProjects"
-        },
-        {
-          "command": "ivyProjects.importIvyProject",
-          "when": "view == ivyProjects"
-        },
-        {
-          "command": "ivyProjects.exportIvyProject",
-          "when": "view == ivyProjects"
+          "when": "view == ivyProjects",
+          "group": "navigation@2"
         }
       ],
       "explorer/context": [
@@ -992,49 +981,6 @@
           "command": "ivyProjects.deployProject",
           "when": "view == ivyProjects && viewItem == ivyProject",
           "group": "inline"
-        },
-        {
-          "submenu": "ivyProjects.new",
-          "when": "view == ivyProjects",
-          "group": "ivyProjects@1"
-        }
-      ],
-      "ivyProjects.new": [
-        {
-          "command": "ivyProjects.addBusinessProcess",
-          "group": "1_new@1"
-        },
-        {
-          "command": "ivyProjects.addCallableSubProcess",
-          "group": "1_new@2"
-        },
-        {
-          "command": "ivyProjects.addWebServiceProcess",
-          "group": "1_new@2"
-        },
-        {
-          "command": "ivyProjects.addNewHtmlDialog",
-          "group": "2_new@1"
-        },
-        {
-          "command": "ivyProjects.addNewFormDialog",
-          "group": "2_new@2"
-        },
-        {
-          "command": "ivyProjects.addNewOfflineDialog",
-          "group": "2_new@3"
-        },
-        {
-          "command": "ivyProjects.addNewDataClass",
-          "group": "3_new@1"
-        },
-        {
-          "command": "ivyProjects.addNewEntityClass",
-          "group": "3_new@2"
-        },
-        {
-          "command": "ivyProjects.addNewCaseMap",
-          "group": "4_new@1"
         }
       ],
       "explorer.new": [
