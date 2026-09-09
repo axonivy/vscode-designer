@@ -142,7 +142,7 @@ export class IvyProjectExplorer {
     for (const project of ivyProjects) {
       if (project === projectToBeDeleted) {
         await IvyEngineManager.instance.deleteProject(projectToBeDeleted);
-        await runJavaCleanWorkspace();
+        runJavaCleanWorkspace();
         await this.refresh();
         return;
       }
