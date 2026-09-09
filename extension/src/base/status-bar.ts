@@ -37,17 +37,17 @@ const DEFAULT_TRUSTED_COMMANDS_MARKDOWN = [
 type StatusQuickPickItem = QuickPickItem & { id?: string; command?: KnownCommand; commandArgs?: unknown[]; hidden?: boolean };
 
 const QUICK_PICK_OPTIONS = [
-  { label: '$(refresh) Reload Window', id: 'reloadWindow', command: 'workbench.action.reloadWindow', hidden: true },
+  { label: '$(refresh)  Reload Window', id: 'reloadWindow', command: 'workbench.action.reloadWindow', hidden: true },
   { label: 'Animation', kind: QuickPickItemKind.Separator },
   {
-    label: animationSettings().animate ? '$(eye-closed) Deactivate Animation' : '$(eye) Activate Animation',
+    label: animationSettings().animate ? '$(eye-closed)  Deactivate Animation' : '$(eye)  Activate Animation',
     id: 'toggleAnimation',
     command: animationSettings().animate ? 'engine.deactivateAnimation' : 'engine.activateAnimation'
   },
 
   { label: 'Settings', kind: QuickPickItemKind.Separator },
   {
-    label: '$(settings-gear) Open Axon Ivy Settings',
+    label: '$(settings-gear)  Open Axon Ivy Settings',
     id: 'openSettings',
     command: 'workbench.action.openSettings',
     commandArgs: ['@ext:axonivy.vscode-designer-14']
@@ -55,40 +55,40 @@ const QUICK_PICK_OPTIONS = [
 
   { label: 'Logs', kind: QuickPickItemKind.Separator },
   {
-    label: '$(list-filter) Open Axon Ivy Runtime Log',
+    label: '$(list-filter)  Open Axon Ivy Runtime Log',
     id: 'openRuntimeLog',
     command: 'ivyPanelView.openRuntimeLog'
   },
   {
-    label: '$(list-filter) Open Axon Ivy Extension Log',
+    label: '$(list-filter)  Open Axon Ivy Extension Log',
     id: 'openExtensionLog',
     command: 'ivyPanelView.openExtensionLog'
   },
   {
-    label: '$(list-filter) Open Axon Ivy Engine Log',
+    label: '$(list-filter)  Open Axon Ivy Engine Log',
     id: 'openEngineLog',
     command: 'ivyPanelView.openEngineLog'
   },
 
   { label: 'Deployment', kind: QuickPickItemKind.Separator },
-  { label: '$(layers) Deploy all Axon Ivy Projects', id: 'deployAllProjects', command: 'engine.deployProjects' },
-  { label: '$(layers-dot) Deploy Axon Ivy Project', id: 'deployProject', command: 'ivyProjects.deployProject' },
+  { label: '$(cloud-upload)  Deploy all Axon Ivy Projects', id: 'deployAllProjects', command: 'engine.deployProjects' },
+  { label: '$(cloud-upload)  Deploy Axon Ivy Project', id: 'deployProject', command: 'ivyProjects.deployProject' },
 
   { label: 'Market', kind: QuickPickItemKind.Separator },
   {
-    label: '$(gift) Install Market Product',
+    label: '$(gift)  Install Market Product',
     id: 'installMarketProduct',
     command: 'ivyProjects.installMarketProduct'
   },
   {
-    label: '$(gift) Install Local Market Product',
+    label: '$(gift)  Install Local Market Product',
     id: 'installLocalMarketProduct',
     command: 'ivyProjects.installLocalMarketProduct'
   },
   { label: 'New ...', kind: QuickPickItemKind.Separator },
-  { label: '$(repo-create) New Project', id: 'newProject', command: 'ivyProjects.addNewProject' },
+  { label: '$(repo-create)  New Project', id: 'newProject', command: 'ivyProjects.addNewProject' },
   {
-    label: '$(repo-create) Import Axon Ivy Project',
+    label: '$(repo-create)  Import Axon Ivy Project',
     id: 'importProject',
     command: 'ivyProjects.importIvyProject'
   }

@@ -448,7 +448,7 @@
       },
       {
         "command": "ivyProjects.addDependency",
-        "title": "Add Ivy Project Dependency",
+        "title": "Add Axon Ivy Project Dependency",
         "category": "Axon Ivy",
         "icon": "$(add)",
         "enablement": "ivy:hasIvyProjects"
@@ -898,12 +898,36 @@
         "label": "Diagram"
       },
       {
-        "id": "explorer.new",
-        "label": "Axon Ivy New..."
+        "id": "explorer.ivy",
+        "label": "Axon Ivy"
       },
       {
-        "id": "explorer.run",
-        "label": "Axon Ivy Run..."
+        "id": "explorer.ivy.new",
+        "label": "New"
+      },
+      {
+        "id": "explorer.ivy.new.process",
+        "label": "New Process"
+      },
+      {
+        "id": "explorer.ivy.new.ui",
+        "label": "New UI"
+      },
+      {
+        "id": "explorer.ivy.new.data",
+        "label": "New Data"
+      },
+      {
+        "id": "explorer.ivy.runDebug",
+        "label": "Run & Debug"
+      },
+      {
+        "id": "explorer.ivy.projectSetup",
+        "label": "Project Setup"
+      },
+      {
+        "id": "explorer.ivy.importExport",
+        "label": "Import / Export"
       }
     ],
     "menus": {
@@ -961,16 +985,6 @@
           "group": "navigation@2"
         }
       ],
-      "explorer/context": [
-        {
-          "submenu": "explorer.new",
-          "group": "1@1"
-        },
-        {
-          "submenu": "explorer.run",
-          "group": "1@2"
-        }
-      ],
       "view/item/context": [
         {
           "command": "ivyProjects.revealInFileSystem",
@@ -983,86 +997,136 @@
           "group": "inline"
         }
       ],
-      "explorer.new": [
+      "explorer/context": [
+        {
+          "submenu": "explorer.ivy",
+          "label": "Axon Ivy ...",
+          "group": "1@1"
+        }
+      ],
+      "explorer.ivy": [
+        {
+          "submenu": "explorer.ivy.new",
+          "label": "New",
+          "group": "1@1"
+        },
+        {
+          "submenu": "explorer.ivy.runDebug",
+          "label": "Run & Debug",
+          "when": "ivy:hasIvyProjects",
+          "group": "1@2"
+        },
+        {
+          "submenu": "explorer.ivy.projectSetup",
+          "label": "Project Setup",
+          "when": "ivy:hasIvyProjects",
+          "group": "1@3"
+        },
+        {
+          "submenu": "explorer.ivy.importExport",
+          "label": "Import & Export",
+          "group": "1@4"
+        }
+      ],
+      "explorer.ivy.new": [
+        {
+          "command": "ivyProjects.addNewProject",
+          "group": "1@1"
+        },
+        {
+          "submenu": "explorer.ivy.new.process",
+          "label": "Process",
+          "when": "ivy:hasIvyProjects",
+          "group": "2@1"
+        },
+        {
+          "submenu": "explorer.ivy.new.ui",
+          "label": "UI",
+          "when": "ivy:hasIvyProjects",
+          "group": "2@2"
+        },
+        {
+          "submenu": "explorer.ivy.new.data",
+          "label": "Data",
+          "when": "ivy:hasIvyProjects",
+          "group": "2@3"
+        },
+        {
+          "command": "ivyProjects.addNewCaseMap",
+          "when": "ivy:hasIvyProjects",
+          "group": "3@1"
+        }
+      ],
+      "explorer.ivy.new.process": [
         {
           "command": "ivyProjects.addBusinessProcess",
-          "group": "1_new@1",
           "when": "ivy:hasIvyProjects"
         },
         {
           "command": "ivyProjects.addCallableSubProcess",
-          "group": "1_new@2",
           "when": "ivy:hasIvyProjects"
         },
         {
           "command": "ivyProjects.addWebServiceProcess",
-          "group": "1_new@2",
           "when": "ivy:hasIvyProjects"
-        },
+        }
+      ],
+      "explorer.ivy.new.ui": [
         {
           "command": "ivyProjects.addNewHtmlDialog",
-          "group": "2_new@1",
           "when": "ivy:hasIvyProjects"
         },
         {
           "command": "ivyProjects.addNewFormDialog",
-          "group": "2_new@2",
           "when": "ivy:hasIvyProjects"
         },
         {
           "command": "ivyProjects.addNewOfflineDialog",
-          "group": "2_new@3",
           "when": "ivy:hasIvyProjects"
-        },
+        }
+      ],
+      "explorer.ivy.new.data": [
         {
           "command": "ivyProjects.addNewDataClass",
-          "group": "3_new@1",
           "when": "ivy:hasIvyProjects"
         },
         {
           "command": "ivyProjects.addNewEntityClass",
-          "group": "3_new@2",
           "when": "ivy:hasIvyProjects"
-        },
-        {
-          "command": "ivyProjects.addNewCaseMap",
-          "group": "4_new@1",
-          "when": "ivy:hasIvyProjects"
-        },
-        {
-          "command": "ivyProjects.addNewProject",
-          "group": "5_new@1"
-        },
-        {
-          "command": "ivyProjects.importIvyProject",
-          "group": "6_new@1"
         }
       ],
-      "explorer.run": [
-        {
-          "command": "ivy.debug.attachProcess",
-          "group": "run@1",
-          "when": "ivy:hasIvyProjects"
-        },
+      "explorer.ivy.runDebug": [
         {
           "command": "ivyProjects.deployProject",
-          "group": "run@2",
-          "when": "ivy:hasIvyProjects"
+          "group": "1@1"
         },
         {
           "command": "ivyProjects.stopBpmEngine",
-          "group": "run@4",
-          "when": "ivy:hasIvyProjects"
+          "group": "1@2"
         },
         {
+          "command": "ivy.debug.attachProcess",
+          "group": "1@3"
+        }
+      ],
+      "explorer.ivy.projectSetup": [
+        {
           "command": "ivyProjects.addDependency",
-          "group": "run@5",
-          "when": "ivy:hasIvyProjects"
+          "group": "1@1"
+        },
+        {
+          "command": "ivyProjects.convertProject",
+          "group": "1@2"
+        }
+      ],
+      "explorer.ivy.importExport": [
+        {
+          "command": "ivyProjects.importIvyProject",
+          "group": "1@1"
         },
         {
           "command": "ivyProjects.exportIvyProject",
-          "group": "run@6",
-          "when": "ivy:hasIvyProjects"
+          "group": "1@2"
         }
       ]
     },
