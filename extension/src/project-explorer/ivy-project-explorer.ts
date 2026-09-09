@@ -70,6 +70,7 @@ export class IvyProjectExplorer {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const registerCmd = (command: KnownCommand, callback: (...args: any[]) => any) => registerCommand(command, context, callback);
     registerCmd(`${VIEW_ID}.refreshEntry`, () => this.refresh());
+    registerCmd(`${VIEW_ID}.revealInFileSystem`, async (s: TreeSelection) => this.revealInFileExplorer(s));
     registerCmd(`${VIEW_ID}.deployProject`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.deployProjects(d), s));
     registerCmd(`${VIEW_ID}.stopBpmEngine`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.stopBpmEngine(d), s));
     registerCmd(`${VIEW_ID}.addBusinessProcess`, (s: TreeSelection) => this.addProcess(s, 'Business Process'));
@@ -164,6 +165,13 @@ export class IvyProjectExplorer {
     await IvyEngineManager.instance.initProjects(projectsToBeDeployed);
     if (projectsToBeDeployed.length > 0) {
       await runJavaProjectImport();
+    }
+  }
+
+  private async revealInFileExplorer(selection: TreeSelection) {
+    const uri = await treeSelectionToUri(selection);
+    if (uri) {
+      await commands.executeCommand('revealFileInOS', uri);
     }
   }
 

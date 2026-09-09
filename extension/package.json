@@ -467,6 +467,12 @@
         "command": "engine.deactivateAnimation",
         "title": "Deactivate Process Animation",
         "category": "Axon Ivy"
+      },
+      {
+        "command": "ivyProjects.revealInFileSystem",
+        "title": "Reveal in File System",
+        "category": "Axon Ivy",
+        "icon": "$(file-directory)"
       }
     ],
     "configuration": [
@@ -978,7 +984,7 @@
       ],
       "view/item/context": [
         {
-          "command": "ivyProjects.deployProject",
+          "command": "ivyProjects.revealInFileSystem",
           "when": "view == ivyProjects && viewItem == ivyProject",
           "group": "inline"
         },

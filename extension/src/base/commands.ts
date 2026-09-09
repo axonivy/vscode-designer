@@ -38,6 +38,7 @@ type EngineCommand =
 type DebugCommand = 'ivy.debug.attachProcess';
 type ProjectViewCommand =
   | 'ivyProjects.refreshEntry'
+  | 'ivyProjects.revealInFileSystem'
   | 'ivyProjects.deployProject'
   | 'ivyProjects.addBusinessProcess'
   | 'ivyProjects.addCallableSubProcess'
