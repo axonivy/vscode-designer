@@ -1,5 +1,6 @@
 import { IVY_ICONS_CODEPOINTS, type IvyIconsId } from '@axonivy/ui-icons';
-import { copyFile, mkdir, writeFile } from 'node:fs/promises';
+import { createFont, woff2 } from 'fonteditor-core';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { IVY_FILE_EXTENSIONS, IVY_FILE_NAMES, IVY_FOLDER, IVY_FONT_ID, IVY_ICON_DEFINITIONS } from './generate-icon-themes-definitions.mts';
@@ -12,6 +13,7 @@ const IVY_ICON_THEME_MONOCHROME_NAME = 'ivy-icon-theme-monochrome' as const;
 const IVY_UI_ICONS_PACKAGE = '@axonivy/ui-icons' as const;
 const IVY_ICONS_SRC_GEN = 'src-gen' as const;
 const IVY_ICONS_FONT_FILE = 'ivy-icons.woff2' as const;
+const IVY_ICONS_HORIZONTAL_OFFSET = 47;
 
 const SETI_THEME_URL = 'https://raw.githubusercontent.com/microsoft/vscode/refs/heads/main/extensions/theme-seti/' as const;
 const SETI_THEME_LICENSE = 'ThirdPartyNotices.txt' as const;
@@ -136,6 +138,19 @@ function makeMonochrome(ivyIconThemeColored: IconTheme) {
   };
 }
 
+async function writeIvyIconsFont(ivyIconsFontSource: string) {
+  await woff2.init();
+  const font = createFont(await readFile(ivyIconsFontSource), { type: 'woff2' });
+  for (const glyph of font.get().glyf.filter(glyph => glyph.contours.length)) {
+    glyph.contours.flat().forEach(point => (point.x += IVY_ICONS_HORIZONTAL_OFFSET));
+    glyph.xMin += IVY_ICONS_HORIZONTAL_OFFSET;
+    glyph.xMax += IVY_ICONS_HORIZONTAL_OFFSET;
+    glyph.leftSideBearing += IVY_ICONS_HORIZONTAL_OFFSET;
+  }
+  const shiftedFont = font.write({ type: 'woff2', toBuffer: true });
+  return writeFile(resolve(outputDirectory, IVY_ICONS_FONT_FILE), shiftedFont);
+}
+
 export async function generateIconThemes() {
   const require = createRequire(import.meta.url);
   const ivyIconsPackage = require.resolve(`${IVY_UI_ICONS_PACKAGE}/package.json`);
@@ -146,7 +161,7 @@ export async function generateIconThemes() {
   const ivyIconThemeMonochrome = makeMonochrome(ivyIconThemeColored);
 
   await Promise.all([
-    copyFile(ivyIconsFontSource, resolve(outputDirectory, IVY_ICONS_FONT_FILE)),
+    writeIvyIconsFont(ivyIconsFontSource),
     writeIconTheme(ivyIconThemeColored, IVY_ICON_THEME_COLORED_NAME),
     writeIconTheme(ivyIconThemeMonochrome, IVY_ICON_THEME_MONOCHROME_NAME)
   ]);
