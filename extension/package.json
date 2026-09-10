@@ -893,6 +893,11 @@
         "label": "Diagram"
       },
       {
+        "id": "view.title.add",
+        "label": "Add",
+        "icon": "$(add)"
+      },
+      {
         "id": "explorer.ivy",
         "label": "Axon Ivy"
       },
@@ -982,6 +987,20 @@
           "command": "engine.deployProjects",
           "when": "view == ivyProjects",
           "group": "navigation@2"
+        },
+        {
+          "submenu": "view.title.add",
+          "group": "navigation@3"
+        }
+      ],
+      "view.title.add": [
+        {
+          "command": "ivyProjects.addNewProject",
+          "group": "1@1"
+        },
+        {
+          "command": "ivyProjects.importIvyProject",
+          "group": "1@2"
         }
       ],
       "view/item/context": [
