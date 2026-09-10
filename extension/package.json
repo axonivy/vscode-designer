@@ -332,6 +332,12 @@
         "icon": "$(refresh)"
       },
       {
+        "command": "ivyProjects.deployProject",
+        "title": "Deploy Project",
+        "category": "Axon Ivy",
+        "icon": "$(cloud-upload)"
+      },
+      {
         "command": "engine.deployProjects",
         "title": "Deploy all Projects",
         "category": "Axon Ivy",
@@ -348,12 +354,6 @@
         "category": "Axon Ivy",
         "icon": "$(debug-alt-small)",
         "enablement": "ivy:hasIvyProjects"
-      },
-      {
-        "command": "ivyProjects.deployProject",
-        "title": "Deploy Project",
-        "category": "Axon Ivy",
-        "icon": "$(cloud-upload)"
       },
       {
         "command": "ivyProjects.stopBpmEngine",
@@ -913,6 +913,10 @@
         "label": "Data"
       },
       {
+        "id": "explorer.ivy.open",
+        "label": "Open Config"
+      },
+      {
         "id": "explorer.ivy.runDebug",
         "label": "Run & Debug"
       },
@@ -1006,21 +1010,27 @@
           "group": "1@1"
         },
         {
+          "submenu": "explorer.ivy.open",
+          "label": "Open",
+          "when": "ivy:hasIvyProjects",
+          "group": "1@2"
+        },
+        {
           "submenu": "explorer.ivy.runDebug",
           "label": "Run & Debug",
           "when": "ivy:hasIvyProjects",
-          "group": "1@2"
+          "group": "1@3"
         },
         {
           "submenu": "explorer.ivy.projectSetup",
           "label": "Project Setup",
           "when": "ivy:hasIvyProjects",
-          "group": "1@3"
+          "group": "1@4"
         },
         {
           "submenu": "explorer.ivy.importExport",
           "label": "Import & Export",
-          "group": "1@4"
+          "group": "1@5"
         }
       ],
       "explorer.ivy.new": [
@@ -1088,6 +1098,32 @@
         {
           "command": "ivyProjects.addNewEntityClass",
           "when": "ivy:hasIvyProjects"
+        }
+      ],
+      "explorer.ivy.open": [
+        {
+          "command": "ivyEditor.openVariableEditor"
+        },
+        {
+          "command": "ivyEditor.openCmsEditor"
+        },
+        {
+          "command": "ivyEditor.openDatabaseEditor"
+        },
+        {
+          "command": "ivyEditor.openRoleEditor"
+        },
+        {
+          "command": "ivyEditor.openUserEditor"
+        },
+        {
+          "command": "ivyEditor.openRestClientEditor"
+        },
+        {
+          "command": "ivyEditor.openWebServiceClientEditor"
+        },
+        {
+          "command": "ivyEditor.openCustomFieldEditor"
         }
       ],
       "explorer.ivy.runDebug": [
