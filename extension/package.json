@@ -63,6 +63,7 @@
     "vscode-ws-jsonrpc": "3.5.0"
   },
   "devDependencies": {
+    "@axonivy/ui-icons": "next-14.0.0",
     "@types/vscode": "1.98.0",
     "@types/vscode-webview": "1.57.5",
     "@vscode/vsce": "3.9.2",
@@ -1135,16 +1136,16 @@
         "when": "activeCustomEditorId == 'ivy.glspDiagram'"
       }
     ],
-    "languages": [
+    "iconThemes": [
       {
-        "id": "ivy-process",
-        "icon": {
-          "light": "./assets/light/diagram-project-solid.svg",
-          "dark": "./assets/dark/diagram-project-solid.svg"
-        },
-        "extensions": [
-          ".p.json"
-        ]
+        "id": "ivy-icon-theme-monochrome",
+        "label": "Axon Ivy Icon Theme Monochrome",
+        "path": "./dist/icon-themes/ivy-icon-theme-monochrome.json"
+      },
+      {
+        "id": "ivy-icon-theme-colored",
+        "label": "Axon Ivy Icon Theme Colored",
+        "path": "./dist/icon-themes/ivy-icon-theme-colored.json"
       }
     ],
     "viewsWelcome": [
