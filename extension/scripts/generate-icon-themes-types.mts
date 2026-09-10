@@ -18,15 +18,17 @@ type Font = {
 };
 
 type IconDefinition = {
-  fontId: string;
+  fontId?: string;
   fontCharacter: string;
   fontColor: string;
 };
 
 type IconThemeDefinition = {
-  folder: string;
+  file: string;
+  folder?: string;
   fileExtensions: Record<string, string>;
   fileNames: Record<string, string>;
+  languageIds: Record<string, string>;
 };
 
 export type IconTheme = IconThemeDefinition & {

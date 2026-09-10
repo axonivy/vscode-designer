@@ -2,7 +2,6 @@ import { IvyIcons } from '@axonivy/ui-icons';
 import type { IvyIconDefinitions } from './generate-icon-themes-types.mts';
 
 export const IVY_FONT_ID = 'ivy' as const;
-export const IVY_ICONS_FONT_FILE = 'ivy-icons.woff2' as const;
 
 export const IVY_ICON_DEFINITIONS: IvyIconDefinitions = {
   _ivy_folder: {
