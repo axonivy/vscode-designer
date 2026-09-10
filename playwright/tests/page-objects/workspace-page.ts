@@ -81,6 +81,10 @@ export class WorkspacePage {
     await expect(this.ivyStatusBar).toHaveText(message, { timeout });
   }
 
+  async statusMessageContains(message: string, timeout?: number) {
+    await expect(this.ivyStatusBar).toContainText(message, { timeout });
+  }
+
   async closeAllTabs() {
     await this.executeCommand('View: Close All Editor Groups');
     await expect(this.page.locator('div.tab')).toBeHidden();
