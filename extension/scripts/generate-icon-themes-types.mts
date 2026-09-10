@@ -30,7 +30,6 @@ type IconThemeDefinition = {
 };
 
 export type IconTheme = IconThemeDefinition & {
-  information: string;
   fonts: Array<Font>;
   iconDefinitions: Record<string, IconDefinition>;
   light: IconThemeDefinition;

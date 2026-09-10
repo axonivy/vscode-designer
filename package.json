@@ -6,7 +6,7 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "check": "pnpm run type && pnpm run lint:ci && pnpm run test:ci && pnpm run icon-themes:ci",
+    "check": "pnpm run type && pnpm run lint:ci && pnpm run test:ci",
     "build": "pnpm run -r build",
     "build:production": "pnpm run -r build:production",
     "engine:download": "node scripts/download-engine.mts",
@@ -19,8 +19,6 @@
     "lint:ci": "eslint -o eslint.xml -f checkstyle",
     "lint:fix": "eslint --fix",
     "lint:inspect": "eslint --inspect-config",
-    "generate:icon-themes": "pnpm run --filter vscode-designer-14 generate:icon-themes",
-    "icon-themes:ci": "pnpm run --filter vscode-designer-14 icon-themes:ci",
     "package": "pnpm run -r package",
     "publish:next": "pnpm run -r publish:next",
     "sbom": "pnpm sbom --sbom-format cyclonedx --prod > bom.json",

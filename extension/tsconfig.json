@@ -1,6 +1,7 @@
 {
   "extends": "@axonivy/ts-config/base",
   "compilerOptions": {
+    "rewriteRelativeImportExtensions": true,
     "rootDir": ".",
     "outDir": "lib",
     "resolveJsonModule": true
