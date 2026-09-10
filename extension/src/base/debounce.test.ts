@@ -60,7 +60,7 @@ test('debounce invalidate', async () => {
   expect(values).toEqual(['Invalidate executed']);
 });
 
-test('debounce resets', async () => {
+test('debounce increases', async () => {
   const values: string[] = [];
   debouncedAction(() => {
     values.push('push1');
@@ -72,8 +72,8 @@ test('debounce resets', async () => {
   debouncedAction(() => {
     values.push('push3');
   }, 'deploy')();
-  await vi.advanceTimersByTimeAsync(800);
+  await vi.advanceTimersByTimeAsync(2_000);
   expect(values).toEqual([]);
   await vi.advanceTimersByTimeAsync(10_000);
-  expect(values).toEqual(['push1']);
+  expect(values).toEqual(['push3']);
 });

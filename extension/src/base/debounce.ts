@@ -5,20 +5,25 @@ export type ActionKey = 'deploy' | 'invalidate';
 export const debouncedAction = (action: () => void, actionKey: ActionKey, keyPrefix?: string) => {
   return () => {
     const key = `${keyPrefix}:${actionKey}`;
+    let delay = 1_000;
     let timer = timers.get(key);
     if (timer) {
-      timer.refresh();
-      return;
+      clearTimeout(timer);
+      delay = 3_000;
     }
-    timer = setTimeout(() => {
-      try {
-        action();
-      } finally {
-        timers.delete(key);
-      }
-    }, 1_000);
+    timer = createTimer(action, key, delay);
     timers.set(key, timer);
   };
+};
+
+const createTimer = (action: () => void, key: string, delay: number) => {
+  return setTimeout(() => {
+    try {
+      action();
+    } finally {
+      timers.delete(key);
+    }
+  }, delay);
 };
 
 export const hasDeployActionInQueue = () => {
