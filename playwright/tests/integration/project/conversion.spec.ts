@@ -33,6 +33,7 @@ test('Convert project', async ({ wsPage }) => {
     timeout: 60_000
   });
 
+  await expect(wsPage.page.locator('div.quick-input-widget')).toContainText('Project conversion finished - reload Java workspace and window to apply modifications');
   const ivyProjectEditor = new TextEditor(wsPage, '.ivyproject');
   await ivyProjectEditor.open();
   await expect(ivyProjectEditor.content).toContainText('version=');

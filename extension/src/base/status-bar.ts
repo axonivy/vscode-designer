@@ -80,11 +80,6 @@ const QUICK_PICK_OPTIONS = [
     id: 'installMarketProduct',
     command: 'ivyProjects.installMarketProduct'
   },
-  {
-    label: '$(gift)  Install Local Market Product',
-    id: 'installLocalMarketProduct',
-    command: 'ivyProjects.installLocalMarketProduct'
-  },
   { label: 'New ...', kind: QuickPickItemKind.Separator },
   { label: '$(repo-create)  New Project', id: 'newProject', command: 'ivyProjects.addNewProject' },
   {

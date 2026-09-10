@@ -1,4 +1,5 @@
 import { context, type Plugin } from 'esbuild';
+import { generateIconThemes } from './scripts/generate-icon-themes.mts';
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
@@ -21,6 +22,7 @@ const esbuildProblemMatcherPlugin: Plugin = {
 };
 
 async function main() {
+  await generateIconThemes();
   const ctx = await context({
     entryPoints: ['src/index.ts'],
     bundle: true,
