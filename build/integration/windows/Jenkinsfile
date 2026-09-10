@@ -54,6 +54,11 @@ pipeline {
           }
         }
       }
+      post {
+        always {
+          archiveArtifacts artifacts: 'AxonIvyEngine/logs/ivy.log', allowEmptyArchive: true
+        }
+      }
     }
 
     stage('Protocol:OpenAPI') {
