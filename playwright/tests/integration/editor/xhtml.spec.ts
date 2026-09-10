@@ -29,7 +29,7 @@ test('xhtml preview', async ({ wsPage, electronApp }) => {
   const timeout = { timeout: 3_000 };
   await wsPage.hasReadyStatusMessage();
   await wsPage.executeCommand('Axon Ivy: Deploy All Projects');
-  await wsPage.hasStatusMessage('Axon Ivy: Success: Deploying projects');
+  await expect(wsPage.ivyStatusBar).toContainText('Axon Ivy: Success: Deploying project');
   const vscodeBrowser = await VsCodeBrowser.openBrowser(() => wsPage.page.getByRole('button', { name: 'Open Dialog Preview' }).click(), {
     electronApp,
     page: wsPage.page
