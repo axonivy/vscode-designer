@@ -33,11 +33,11 @@ type EngineCommand =
   | 'engine.deployProjects'
   | 'engine.switchEngineReleaseTrain'
   | 'engine.deactivateAnimation'
-  | 'engine.activateAnimation'
-  | 'engine.restart';
+  | 'engine.activateAnimation';
 type DebugCommand = 'ivy.debug.attachProcess';
 type ProjectViewCommand =
   | 'ivyProjects.refreshEntry'
+  | 'ivyProjects.revealInFileSystem'
   | 'ivyProjects.deployProject'
   | 'ivyProjects.addBusinessProcess'
   | 'ivyProjects.addCallableSubProcess'
@@ -56,6 +56,7 @@ type ProjectViewCommand =
   | 'ivyProjects.addNewCaseMap'
   | 'ivyProjects.stopBpmEngine'
   | 'ivyProjects.convertProject'
+  | 'ivyProjects.convertAllProjects'
   | 'ivyProjects.addDependency';
 type ViewCommand =
   | 'ivyBrowserView.focus'

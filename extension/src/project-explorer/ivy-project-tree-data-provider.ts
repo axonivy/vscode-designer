@@ -7,7 +7,6 @@ import {
   FileType,
   Range,
   TreeItem,
-  TreeItemCollapsibleState,
   Uri,
   workspace,
   type IconPath,
@@ -16,8 +15,7 @@ import {
 } from 'vscode';
 import { executeCommand, type KnownCommand } from '../base/commands';
 import { config } from '../base/configurations';
-import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
-import { IvyProjectExplorer } from './ivy-project-explorer';
+import { IvyDiagnostics } from '../engine/diagnostics';
 
 const __dirname = import.meta.dirname;
 interface IvyCommand extends VSCodeCommand {
@@ -30,12 +28,12 @@ export interface Entry {
   iconPath?: string | IconPath;
   contextValue?: string;
   parent?: Entry;
-  collapsibleState?: TreeItemCollapsibleState;
   command?: IvyCommand;
 }
 
 export const IVY_PROJECT_FILE_PATTERN = '**/{.ivyproject,.project}';
 const IVY_PROJECT_CONTEXT_VALUE = 'ivyProject';
+const IVY_PROJECT_REQUIRES_CONVERSION_CONTEXT_VALUE = 'requiresConversion';
 
 export const isIvyProject = (projectFile: Uri) => {
   const projectFilePath = projectFile.fsPath;
@@ -73,10 +71,6 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
 
   private cacheEntry(entry: Entry) {
     this.entryCache.set(entry.uri.fsPath, entry);
-  }
-
-  public findEntry(uri: Uri) {
-    return this.entryCache.get(uri.fsPath);
   }
 
   private async findIvyProjects() {
@@ -121,8 +115,16 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   }
 
   getTreeItem(element: Entry): TreeItem {
-    const collapsibleState = this.collapsibleStateOf(element);
-    const treeItem = new TreeItem(element.uri, collapsibleState);
+    const projectNeedsConversion = IvyDiagnostics.instance
+      .projectFileUrisToBeConverted()
+      .map(uri => uri.fsPath)
+      .map(projectFile => path.dirname(projectFile))
+      .includes(element.uri.fsPath);
+
+    const treeItem = new TreeItem(element.uri);
+    if (projectNeedsConversion) {
+      treeItem.description = '(needs conversion)';
+    }
     if (element.command) {
       treeItem.command = element.command;
     }
@@ -130,22 +132,11 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
       treeItem.iconPath = element.iconPath;
     }
     if (element.contextValue) {
-      treeItem.contextValue = element.contextValue;
+      let itemContextValue = element.contextValue;
+      itemContextValue += projectNeedsConversion ? `+${IVY_PROJECT_REQUIRES_CONVERSION_CONTEXT_VALUE}` : '';
+      treeItem.contextValue = itemContextValue;
     }
     return treeItem;
-  }
-
-  private collapsibleStateOf(element: Entry): TreeItemCollapsibleState {
-    if (element.collapsibleState !== undefined) {
-      return element.collapsibleState;
-    }
-    if (element.type !== FileType.Directory) {
-      return TreeItemCollapsibleState.None;
-    }
-    if (CmsEditorRegistry.find(element.uri.fsPath)?.active) {
-      return TreeItemCollapsibleState.Expanded;
-    }
-    return TreeItemCollapsibleState.Collapsed;
   }
 
   async getParent(element: Entry): Promise<Entry | undefined> {
@@ -155,7 +146,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   async getChildren(element?: Entry): Promise<Entry[]> {
     await this.activateEnginePromise;
     if (element) {
-      return [this.cmsEntry(element)];
+      return [];
     }
     return (await this.ivyProjects).projects.map(dir => this.createAndCacheRoot(dir));
   }
@@ -168,26 +159,6 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
       contextValue: IVY_PROJECT_CONTEXT_VALUE
     };
     this.cacheEntry(entry);
-    return entry;
-  }
-
-  private cmsEntry(element: Entry) {
-    const uri = Uri.joinPath(element.uri, 'cms');
-    const entry: Entry = {
-      uri,
-      type: FileType.File,
-      parent: element,
-      collapsibleState: TreeItemCollapsibleState.None,
-      iconPath: {
-        light: Uri.file(path.join(__dirname, '..', 'assets', 'light', 'cms.svg')),
-        dark: Uri.file(path.join(__dirname, '..', 'assets', 'dark', 'cms.svg'))
-      },
-      command: { command: 'ivyEditor.openCmsEditor', title: 'Open CMS Editor', arguments: [uri] }
-    };
-    this.cacheEntry(entry);
-    if (CmsEditorRegistry.find(element.uri.fsPath)?.active) {
-      IvyProjectExplorer.instance.selectEntry(entry);
-    }
     return entry;
   }
 }

@@ -1,13 +1,21 @@
 import path from 'path';
 import { Uri } from 'vscode';
-import { logErrorMessage } from '../base/logging-util';
+import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import type { Entry } from './ivy-project-tree-data-provider';
 
 export type TreeSelection = Entry | Uri | undefined;
 
+export async function treeSelectionToProjectUri(selection: TreeSelection, ivyProjects: Promise<string[]>): Promise<Uri | undefined> {
+  const selectionUri = await treeSelectionToUri(selection);
+  const selectionProject = await treeUriToProjectPath(selectionUri, ivyProjects);
+  if (selection === undefined || !selectionProject) {
+    return await selectIvyProjectDialog();
+  }
+  return selectionUri;
+}
+
 export async function treeUriToProjectPath(uri: Uri | undefined, ivyProjects: Promise<string[]>): Promise<string | undefined> {
   if (!uri) {
-    logErrorMessage('No valid directory selected');
     return;
   }
   return findMatchingProject(ivyProjects, uri);

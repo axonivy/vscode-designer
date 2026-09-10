@@ -1,12 +1,10 @@
 import path from 'path';
-import type { ExtensionContext, TreeView, TreeViewVisibilityChangeEvent } from 'vscode';
-import { Uri, window, workspace } from 'vscode';
+import type { ExtensionContext, TreeView, TreeViewSelectionChangeEvent } from 'vscode';
+import { commands, Uri, window, workspace } from 'vscode';
 import { registerCommand, type KnownCommand } from '../base/commands';
 import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base/debounce';
-import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { askToRunJavaCleanWorkspace, runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
-import { CmsEditorRegistry } from '../editors/cms-editor/cms-editor-registry';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { installLocalMarketProduct, installMarketProduct } from '../market/import-market';
@@ -14,13 +12,13 @@ import { exportIvyProject } from './export-ivy-project';
 import { importIvyProject } from './import-ivy-project';
 import { importNewProcess } from './import-process';
 import { isProjectConversionRunning, runProjectConversion } from './ivy-project-conversion';
-import { IVY_PROJECT_FILE_PATTERN, IvyProjectTreeDataProvider, isIvyProject, type Entry } from './ivy-project-tree-data-provider';
+import { isIvyProject, IVY_PROJECT_FILE_PATTERN, IvyProjectTreeDataProvider, type Entry } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
 import { addNewDataClass } from './new-data-class';
 import { addNewProcess, type ProcessKind } from './new-process';
 import { addNewProject } from './new-project';
 import { addNewUserDialog, type DialogType } from './new-user-dialog';
-import { treeSelectionToUri, treeUriToProjectPath, type TreeSelection } from './tree-selection';
+import { treeSelectionToProjectUri, treeSelectionToUri, treeUriToProjectPath, type TreeSelection } from './tree-selection';
 import { getWorkspaceFolder, isDirectory, isSubdirectoryOrEqual } from './utils/util';
 
 export const VIEW_ID = 'ivyProjects';
@@ -33,16 +31,14 @@ export class IvyProjectExplorer {
   private constructor(context: ExtensionContext) {
     const activateEnginePromise = this.activateEngineIfNeeded();
     this.treeDataProvider = new IvyProjectTreeDataProvider(activateEnginePromise);
-    this.treeView = window.createTreeView(VIEW_ID, { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
-    context.subscriptions.push(this.treeView);
-    this.treeView.onDidChangeVisibility((event: TreeViewVisibilityChangeEvent) => {
-      if (event.visible) {
-        const activeProjectCmsEditor = CmsEditorRegistry.findActive();
-        if (activeProjectCmsEditor) {
-          this.selectCmsEntry(activeProjectCmsEditor);
-        }
+    this.treeView = window.createTreeView(VIEW_ID, { treeDataProvider: this.treeDataProvider });
+    this.treeView.onDidChangeSelection(async (event: TreeViewSelectionChangeEvent<Entry>) => {
+      if (event.selection && event.selection.length > 0 && event.selection[0]?.uri) {
+        const projectUri = event.selection[0]?.uri;
+        await commands.executeCommand('revealInExplorer', projectUri);
       }
     });
+    context.subscriptions.push(this.treeView);
     this.registerCommands(context);
     this.defineFileWatchers(context);
     context.subscriptions.push(
@@ -68,12 +64,12 @@ export class IvyProjectExplorer {
   }
 
   private registerCommands(context: ExtensionContext) {
-    const engineManager = IvyEngineManager.instance;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const registerCmd = (command: KnownCommand, callback: (...args: any[]) => any) => registerCommand(command, context, callback);
     registerCmd(`${VIEW_ID}.refreshEntry`, () => this.refresh());
-    registerCmd(`${VIEW_ID}.deployProject`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.deployProjects(d), s));
-    registerCmd(`${VIEW_ID}.stopBpmEngine`, (s: TreeSelection) => this.runEngineAction((d: string) => engineManager.stopBpmEngine(d), s));
+    registerCmd(`${VIEW_ID}.revealInFileSystem`, async (s: TreeSelection) => this.revealInFileExplorer(s));
+    registerCmd(`${VIEW_ID}.deployProject`, (s: TreeSelection) => this.deployProjects(s));
+    registerCmd(`${VIEW_ID}.stopBpmEngine`, (s: TreeSelection) => this.stopBpmEngine(s));
     registerCmd(`${VIEW_ID}.addBusinessProcess`, (s: TreeSelection) => this.addProcess(s, 'Business Process'));
     registerCmd(`${VIEW_ID}.addCallableSubProcess`, (s: TreeSelection) => this.addProcess(s, 'Callable Sub Process'));
     registerCmd(`${VIEW_ID}.addWebServiceProcess`, (s: TreeSelection) => this.addProcess(s, 'Web Service Process'));
@@ -86,19 +82,14 @@ export class IvyProjectExplorer {
     );
 
     registerCmd(`${VIEW_ID}.addNewProject`, (s: TreeSelection) => this.addProject(s));
-    registerCmd(`${VIEW_ID}.addNewHtmlDialog`, (s: TreeSelection, selections?: [TreeSelection], pid?: string) =>
-      this.addUserDialog(s, 'JSF', pid)
-    );
-    registerCmd(`${VIEW_ID}.addNewFormDialog`, (s: TreeSelection, selections?: [TreeSelection], pid?: string) =>
-      this.addUserDialog(s, 'Form', pid)
-    );
-    registerCmd(`${VIEW_ID}.addNewOfflineDialog`, (s: TreeSelection, selections?: [TreeSelection], pid?: string) =>
-      this.addUserDialog(s, 'JSFOffline', pid)
-    );
+    registerCmd(`${VIEW_ID}.addNewHtmlDialog`, (s: TreeSelection, pid?: string) => this.addUserDialog(s, 'JSF', pid));
+    registerCmd(`${VIEW_ID}.addNewFormDialog`, (s: TreeSelection, pid?: string) => this.addUserDialog(s, 'Form', pid));
+    registerCmd(`${VIEW_ID}.addNewOfflineDialog`, (s: TreeSelection, pid?: string) => this.addUserDialog(s, 'JSFOffline', pid));
     registerCmd(`${VIEW_ID}.addNewDataClass`, (s: TreeSelection) => this.addDataClass(s));
     registerCmd(`${VIEW_ID}.addNewEntityClass`, (s: TreeSelection) => this.addEntityClass(s));
     registerCmd(`${VIEW_ID}.addNewCaseMap`, (s: TreeSelection) => this.addCaseMap(s));
     registerCmd(`${VIEW_ID}.convertProject`, (s: TreeSelection) => this.convertProject(s));
+    registerCmd(`${VIEW_ID}.convertAllProjects`, (s: TreeSelection) => this.convertProject(s, true));
   }
 
   private defineFileWatchers(context: ExtensionContext) {
@@ -172,20 +163,11 @@ export class IvyProjectExplorer {
     }
   }
 
-  private async runEngineAction(action: (projectDir: string) => Promise<void>, selection: TreeSelection) {
-    let uri = await treeSelectionToUri(selection);
-    if (!uri) {
-      uri = await selectIvyProjectDialog();
+  private async revealInFileExplorer(selection: TreeSelection) {
+    const uri = await treeSelectionToUri(selection);
+    if (uri) {
+      await commands.executeCommand('revealFileInOS', uri);
     }
-    this.runEngineActionForUri(action, uri);
-  }
-
-  private async runEngineActionForUri(action: (projectDir: string) => Promise<void>, uri?: Uri) {
-    const project = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (!project) {
-      return;
-    }
-    action(project);
   }
 
   private async runEngineActionDebounced(action: (projectDir: string) => Promise<void>, actionKey: ActionKey, uri?: Uri) {
@@ -195,6 +177,30 @@ export class IvyProjectExplorer {
     }
     const keyPrefix = actionKey === 'invalidate' ? undefined : project;
     return debouncedAction(() => action(project), actionKey, keyPrefix)();
+  }
+
+  private async deployProjects(selection: TreeSelection) {
+    const projectUri = await treeSelectionToProjectUri(selection, this.getIvyProjects());
+    if (!projectUri) {
+      return;
+    }
+    const project = await treeUriToProjectPath(projectUri, this.getIvyProjects());
+    if (!project) {
+      return;
+    }
+    await IvyEngineManager.instance.deployProjects(project);
+  }
+
+  private async stopBpmEngine(selection: TreeSelection) {
+    const projectUri = await treeSelectionToProjectUri(selection, this.getIvyProjects());
+    if (!projectUri) {
+      return;
+    }
+    const project = await treeUriToProjectPath(projectUri, this.getIvyProjects());
+    if (!project) {
+      return;
+    }
+    await IvyEngineManager.instance.stopBpmEngine(project);
   }
 
   private async addProject(selection: TreeSelection) {
@@ -230,17 +236,15 @@ export class IvyProjectExplorer {
   }
 
   private async importBpmnProcess(selection: TreeSelection) {
-    const uri = (await treeSelectionToUri(selection)) ?? (await selectIvyProjectDialog());
-    if (!uri) {
-      logErrorMessage('Import BPMN Process: No valid Axon Ivy Project selected.');
+    const projectUri = await treeSelectionToProjectUri(selection, this.getIvyProjects());
+    if (!projectUri) {
       return;
     }
-    const projectPath = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (projectPath) {
-      await importNewProcess(projectPath);
+    const project = await treeUriToProjectPath(projectUri, this.getIvyProjects());
+    if (!project) {
       return;
     }
-    logErrorMessage('Import BPMN Process: No valid Axon Ivy Project selected.');
+    await importNewProcess(project);
   }
 
   private async importIvyProject(selection: TreeSelection) {
@@ -310,15 +314,6 @@ export class IvyProjectExplorer {
     await addNewDataClass('Entity Class', addCommandContext);
   }
 
-  public async selectCmsEntry(projectPath: string) {
-    if (!this.treeView.visible) {
-      return;
-    }
-    const projectPathUri = Uri.file(projectPath);
-    await this.selectEntry(this.treeDataProvider.findEntry(projectPathUri));
-    this.selectEntry(this.treeDataProvider.findEntry(Uri.joinPath(projectPathUri, 'cms')));
-  }
-
   public async selectEntry(entry?: Entry) {
     if (!entry) {
       return;
@@ -326,22 +321,25 @@ export class IvyProjectExplorer {
     this.treeView.reveal(entry, { select: true, expand: true });
   }
 
-  private async convertProject(selection: TreeSelection) {
+  private async convertProject(selection: TreeSelection, convertAll: boolean = false) {
     const uri = await treeSelectionToUri(selection);
     const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
     const quickPick = window.createQuickPick();
     quickPick.title = 'Convert Projects - Select Axon Ivy projects to be converted (1/1)';
     quickPick.canSelectMany = true;
     quickPick.items = IvyDiagnostics.instance
-      .projectsToBeConverted()
+      .projectFileUrisToBeConverted()
+      .map(projectFileUri => projectFileUri.fsPath)
       .filter(projectFile => !projectFile.endsWith('.iar'))
       .map(projectFile => path.dirname(projectFile))
-      .map(project => ({ label: path.basename(project), detail: project }));
-    quickPick.selectedItems = quickPick.items.filter(item => item.detail === projectPath);
+      .map(projectPath => ({ label: path.basename(projectPath), description: projectPath }));
+    quickPick.selectedItems = convertAll ? quickPick.items : quickPick.items.filter(item => item.description === projectPath);
     quickPick.show();
     quickPick.onDidAccept(async () => {
       quickPick.dispose();
-      const projectsToConvert = quickPick.selectedItems.map(item => item.detail).filter((detail): detail is string => !!detail);
+      const projectsToConvert = quickPick.selectedItems
+        .map(item => item.description)
+        .filter((description): description is string => !!description);
       await runProjectConversion(projectsToConvert);
       IvyDiagnostics.instance.refresh();
     });
