@@ -343,7 +343,6 @@ export class IvyProjectExplorer {
       quickPick.dispose();
       const projectsToConvert = quickPick.selectedItems.map(item => item.detail).filter((detail): detail is string => !!detail);
       await runProjectConversion(projectsToConvert);
-
       IvyDiagnostics.instance.refresh();
     });
   }
