@@ -326,15 +326,18 @@ export class IvyProjectExplorer {
     quickPick.title = 'Convert Projects - Select Axon Ivy projects to be converted (1/1)';
     quickPick.canSelectMany = true;
     quickPick.items = IvyDiagnostics.instance
-      .projectsToBeConverted()
+      .projectFileUrisToBeConverted()
+      .map(projectFileUri => projectFileUri.fsPath)
       .filter(projectFile => !projectFile.endsWith('.iar'))
       .map(projectFile => path.dirname(projectFile))
-      .map(project => ({ label: path.basename(project), detail: project }));
-    quickPick.selectedItems = convertAll ? quickPick.items : quickPick.items.filter(item => item.detail === projectPath);
+      .map(projectPath => ({ label: path.basename(projectPath), description: projectPath }));
+    quickPick.selectedItems = convertAll ? quickPick.items : quickPick.items.filter(item => item.description === projectPath);
     quickPick.show();
     quickPick.onDidAccept(async () => {
       quickPick.dispose();
-      const projectsToConvert = quickPick.selectedItems.map(item => item.detail).filter((detail): detail is string => !!detail);
+      const projectsToConvert = quickPick.selectedItems
+        .map(item => item.description)
+        .filter((description): description is string => !!description);
       await runProjectConversion(projectsToConvert);
       IvyDiagnostics.instance.refresh();
     });

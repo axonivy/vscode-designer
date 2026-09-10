@@ -57,14 +57,14 @@ export class IvyDiagnostics {
     });
   }
 
-  public projectsToBeConverted() {
-    const projects: string[] = [];
+  public projectFileUrisToBeConverted() {
+    const projectFileUris: Uri[] = [];
     this.diagnostics.forEach((uri, diagnostics) => {
       if (diagnostics.find(isConversionDiagnostic)) {
-        projects.push(uri.fsPath);
+        projectFileUris.push(uri);
       }
     });
-    return projects;
+    return projectFileUris;
   }
 
   static get instance() {

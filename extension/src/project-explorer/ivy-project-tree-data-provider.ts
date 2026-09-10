@@ -15,6 +15,7 @@ import {
 } from 'vscode';
 import { executeCommand, type KnownCommand } from '../base/commands';
 import { config } from '../base/configurations';
+import { IvyDiagnostics } from '../engine/diagnostics';
 
 const __dirname = import.meta.dirname;
 interface IvyCommand extends VSCodeCommand {
@@ -32,6 +33,7 @@ export interface Entry {
 
 export const IVY_PROJECT_FILE_PATTERN = '**/{.ivyproject,.project}';
 const IVY_PROJECT_CONTEXT_VALUE = 'ivyProject';
+const IVY_PROJECT_REQUIRES_CONVERSION_CONTEXT_VALUE = 'requiresConversion';
 
 export const isIvyProject = (projectFile: Uri) => {
   const projectFilePath = projectFile.fsPath;
@@ -114,14 +116,24 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
 
   getTreeItem(element: Entry): TreeItem {
     const treeItem = new TreeItem(element.uri);
+    let treeItemContextValue = element.contextValue ?? '';
+    const projectPathsToBeConverted = IvyDiagnostics.instance
+      .projectFileUrisToBeConverted()
+      .map(uri => uri.fsPath)
+      .map(projectFile => path.dirname(projectFile));
+
+    if (projectPathsToBeConverted.includes(element.uri.fsPath)) {
+      treeItemContextValue += `${IVY_PROJECT_REQUIRES_CONVERSION_CONTEXT_VALUE}`;
+    }
+
     if (element.command) {
       treeItem.command = element.command;
     }
     if (element.iconPath) {
       treeItem.iconPath = element.iconPath;
     }
-    if (element.contextValue) {
-      treeItem.contextValue = element.contextValue;
+    if (treeItemContextValue) {
+      treeItem.contextValue = treeItemContextValue;
     }
     return treeItem;
   }
