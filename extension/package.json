@@ -362,8 +362,15 @@
       },
       {
         "command": "ivyProjects.convertProject",
-        "title": "Convert Project",
-        "category": "Axon Ivy"
+        "title": "Convert Projects",
+        "category": "Axon Ivy",
+        "icon": "$(wrench)"
+      },
+      {
+        "command": "ivyProjects.convertAllProjects",
+        "title": "Convert All Projects",
+        "category": "Axon Ivy",
+        "icon": "$(wrench)"
       },
       {
         "command": "ivyProjects.addBusinessProcess",
@@ -980,17 +987,23 @@
       "view/title": [
         {
           "command": "ivyProjects.refreshEntry",
-          "when": "view == ivyProjects",
-          "group": "navigation@1"
-        },
-        {
-          "command": "engine.deployProjects",
-          "when": "view == ivyProjects",
-          "group": "navigation@2"
+          "group": "navigation@1",
+          "when": "view == ivyProjects"
         },
         {
           "submenu": "view.title.add",
-          "group": "navigation@3"
+          "group": "navigation@2",
+          "when": "view == ivyProjects"
+        },
+        {
+          "command": "engine.deployProjects",
+          "group": "navigation@3",
+          "when": "view == ivyProjects && ivy:hasIvyProjects"
+        },
+        {
+          "command": "ivyProjects.convertAllProjects",
+          "group": "navigation@4",
+          "when": "view == ivyProjects && ivy:hasIvyProjects"
         }
       ],
       "view.title.add": [

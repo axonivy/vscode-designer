@@ -90,6 +90,7 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.addNewEntityClass`, (s: TreeSelection) => this.addEntityClass(s));
     registerCmd(`${VIEW_ID}.addNewCaseMap`, (s: TreeSelection) => this.addCaseMap(s));
     registerCmd(`${VIEW_ID}.convertProject`, (s: TreeSelection) => this.convertProject(s));
+    registerCmd(`${VIEW_ID}.convertAllProjects`, (s: TreeSelection) => this.convertProject(s, true));
   }
 
   private defineFileWatchers(context: ExtensionContext) {
@@ -318,7 +319,7 @@ export class IvyProjectExplorer {
     this.treeView.reveal(entry, { select: true, expand: true });
   }
 
-  private async convertProject(selection: TreeSelection) {
+  private async convertProject(selection: TreeSelection, convertAll: boolean = false) {
     const uri = await treeSelectionToUri(selection);
     const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
     const quickPick = window.createQuickPick();
@@ -329,7 +330,7 @@ export class IvyProjectExplorer {
       .filter(projectFile => !projectFile.endsWith('.iar'))
       .map(projectFile => path.dirname(projectFile))
       .map(project => ({ label: path.basename(project), detail: project }));
-    quickPick.selectedItems = quickPick.items.filter(item => item.detail === projectPath);
+    quickPick.selectedItems = convertAll ? quickPick.items : quickPick.items.filter(item => item.detail === projectPath);
     quickPick.show();
     quickPick.onDidAccept(async () => {
       quickPick.dispose();

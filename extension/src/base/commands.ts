@@ -56,6 +56,7 @@ type ProjectViewCommand =
   | 'ivyProjects.addNewCaseMap'
   | 'ivyProjects.stopBpmEngine'
   | 'ivyProjects.convertProject'
+  | 'ivyProjects.convertAllProjects'
   | 'ivyProjects.addDependency';
 type ViewCommand =
   | 'ivyBrowserView.focus'
