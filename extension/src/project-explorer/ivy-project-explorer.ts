@@ -188,7 +188,7 @@ export class IvyProjectExplorer {
     if (!project) {
       return;
     }
-    IvyEngineManager.instance.deployProjects(project);
+    await IvyEngineManager.instance.deployProjects(project);
   }
 
   private async stopBpmEngine(selection: TreeSelection) {
@@ -200,7 +200,7 @@ export class IvyProjectExplorer {
     if (!project) {
       return;
     }
-    IvyEngineManager.instance.stopBpmEngine(project);
+    await IvyEngineManager.instance.stopBpmEngine(project);
   }
 
   private async addProject(selection: TreeSelection) {
