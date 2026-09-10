@@ -31,7 +31,7 @@ export class IvyProjectExplorer {
   private constructor(context: ExtensionContext) {
     const activateEnginePromise = this.activateEngineIfNeeded();
     this.treeDataProvider = new IvyProjectTreeDataProvider(activateEnginePromise);
-    this.treeView = window.createTreeView(VIEW_ID, { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
+    this.treeView = window.createTreeView(VIEW_ID, { treeDataProvider: this.treeDataProvider });
     this.treeView.onDidChangeSelection(async (event: TreeViewSelectionChangeEvent<Entry>) => {
       if (event.selection && event.selection.length > 0 && event.selection[0]?.uri) {
         const projectUri = event.selection[0]?.uri;

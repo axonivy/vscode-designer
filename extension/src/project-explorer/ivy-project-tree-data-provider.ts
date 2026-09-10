@@ -7,7 +7,6 @@ import {
   FileType,
   Range,
   TreeItem,
-  TreeItemCollapsibleState,
   Uri,
   workspace,
   type IconPath,
@@ -28,7 +27,6 @@ export interface Entry {
   iconPath?: string | IconPath;
   contextValue?: string;
   parent?: Entry;
-  collapsibleState?: TreeItemCollapsibleState;
   command?: IvyCommand;
 }
 
@@ -115,8 +113,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   }
 
   getTreeItem(element: Entry): TreeItem {
-    const collapsibleState = this.collapsibleStateOf(element);
-    const treeItem = new TreeItem(element.uri, collapsibleState);
+    const treeItem = new TreeItem(element.uri);
     if (element.command) {
       treeItem.command = element.command;
     }
@@ -127,16 +124,6 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
       treeItem.contextValue = element.contextValue;
     }
     return treeItem;
-  }
-
-  private collapsibleStateOf(element: Entry): TreeItemCollapsibleState {
-    if (element.collapsibleState !== undefined) {
-      return element.collapsibleState;
-    }
-    if (element.type !== FileType.Directory) {
-      return TreeItemCollapsibleState.None;
-    }
-    return TreeItemCollapsibleState.None;
   }
 
   async getParent(element: Entry): Promise<Entry | undefined> {
