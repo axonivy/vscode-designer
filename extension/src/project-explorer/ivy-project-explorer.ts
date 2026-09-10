@@ -3,7 +3,6 @@ import type { ExtensionContext, TreeView, TreeViewSelectionChangeEvent } from 'v
 import { commands, Uri, window, workspace } from 'vscode';
 import { registerCommand, type KnownCommand } from '../base/commands';
 import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base/debounce';
-import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { runJavaCleanWorkspace, runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { IvyDiagnostics } from '../engine/diagnostics';
@@ -19,7 +18,7 @@ import { addNewDataClass } from './new-data-class';
 import { addNewProcess, type ProcessKind } from './new-process';
 import { addNewProject } from './new-project';
 import { addNewUserDialog, type DialogType } from './new-user-dialog';
-import { treeSelectionToUri, treeUriToProjectPath, type TreeSelection } from './tree-selection';
+import { treeSelectionToProjectUri, treeSelectionToUri, treeUriToProjectPath, type TreeSelection } from './tree-selection';
 import { getWorkspaceFolder, isDirectory, isSubdirectoryOrEqual } from './utils/util';
 
 export const VIEW_ID = 'ivyProjects';
@@ -178,7 +177,7 @@ export class IvyProjectExplorer {
   }
 
   private async deployProjects(selection: TreeSelection) {
-    const projectUri = await this.treeSelectionToProjectUri(selection);
+    const projectUri = await treeSelectionToProjectUri(selection, this.getIvyProjects());
     if (!projectUri) {
       return;
     }
@@ -190,7 +189,7 @@ export class IvyProjectExplorer {
   }
 
   private async stopBpmEngine(selection: TreeSelection) {
-    const projectUri = await this.treeSelectionToProjectUri(selection);
+    const projectUri = await treeSelectionToProjectUri(selection, this.getIvyProjects());
     if (!projectUri) {
       return;
     }
@@ -234,7 +233,7 @@ export class IvyProjectExplorer {
   }
 
   private async importBpmnProcess(selection: TreeSelection) {
-    const projectUri = await this.treeSelectionToProjectUri(selection);
+    const projectUri = await treeSelectionToProjectUri(selection, this.getIvyProjects());
     if (!projectUri) {
       return;
     }
@@ -356,15 +355,6 @@ export class IvyProjectExplorer {
     const treeSelectionUri = await treeSelectionToUri(selection);
     const selectedWorkspaceUri = (await isDirectory(treeSelectionUri)) ? treeSelectionUri : await getWorkspaceFolder();
     return selectedWorkspaceUri;
-  }
-
-  private async treeSelectionToProjectUri(selection: TreeSelection): Promise<Uri | undefined> {
-    const selectionUri = await treeSelectionToUri(selection);
-    const selectionProject = await treeUriToProjectPath(selectionUri, this.getIvyProjects());
-    if (selection === undefined || !selectionProject) {
-      return await selectIvyProjectDialog();
-    }
-    return selectionUri;
   }
 
   private async getAddCommandSelectionContext(
