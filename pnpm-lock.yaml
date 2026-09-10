@@ -201,6 +201,9 @@ importers:
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
+      fonteditor-core:
+        specifier: 2.6.3
+        version: 2.6.3
       json-schema-to-typescript:
         specifier: ^16.0.0
         version: 16.0.0
@@ -3092,6 +3095,10 @@ packages:
     engines: {node: '>= 20'}
     hasBin: true
 
+  '@xmldom/xmldom@0.8.15':
+    resolution: {integrity: sha512-/5NV/vDALVFDXgLmfsy9TRCBlKwO2LNBFzpzvb9iIj+jR+eSc6DLYYvVOdivT/jm7MtU6TebYuRmzEOI7w40UA==}
+    engines: {node: '>=10.0.0'}
+
   abbrev@4.0.0:
     resolution: {integrity: sha512-a1wflyaL0tHtJSmLSOVybYhy22vRih4eduhhrkcjgrWGnRfrZtovJ2FRjxuTtkkj47O/baf0R86QU5OuYpz8fA==}
     engines: {node: ^20.17.0 || >=22.9.0}
@@ -3893,6 +3900,9 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
+
+  fonteditor-core@2.6.3:
+    resolution: {integrity: sha512-YUryIKjkenjZ41E7JvM3V+02Ak4mTHDDTwBWgs9KBzypzHqLZHuua1UDRevZNTKawmnq1dbBAa70Jddl2+F4FQ==}
 
   form-data@4.0.6:
     resolution: {integrity: sha512-vKatAh4SlVfgbv+YtmhiRjhEMJsYpsG1Y2rMQtR+SVSbytsSD1YGzDIcrAJmdFec88u/+VoGmxnl+80gL1tRCQ==}
@@ -8582,6 +8592,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@xmldom/xmldom@0.8.15': {}
+
   abbrev@4.0.0: {}
 
   accepts@2.0.0:
@@ -9498,6 +9510,10 @@ snapshots:
   follow-redirects@1.16.0(debug@4.4.3(supports-color@7.2.0)):
     optionalDependencies:
       debug: 4.4.3(supports-color@7.2.0)
+
+  fonteditor-core@2.6.3:
+    dependencies:
+      '@xmldom/xmldom': 0.8.15
 
   form-data@4.0.6:
     dependencies:
