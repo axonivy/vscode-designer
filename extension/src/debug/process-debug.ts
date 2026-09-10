@@ -54,9 +54,6 @@ async function startProcessDebugging() {
     await logWarningMessage('An Axon Ivy process debug session is already running. Stop it before starting another one.');
     return false;
   }
-
-  hasRunningProcessDebugSession = true;
-
   const workspaceFolders = workspace.workspaceFolders;
   let workspaceFolder;
   if (workspaceFolders?.length === 1 && workspaceFolders[0]) {
@@ -67,6 +64,7 @@ async function startProcessDebugging() {
       return false;
     }
   }
+  hasRunningProcessDebugSession = true;
   const started = await debug.startDebugging(workspaceFolder, {
     type: PROCESS_DEBUG_TYPE,
     request: 'attach',

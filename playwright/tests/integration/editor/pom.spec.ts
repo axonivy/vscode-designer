@@ -5,7 +5,6 @@ import { FileExplorer } from '~/page-objects/explorer-view';
 import { multiProjectWorkspacePath } from '~/workspaces/workspace';
 
 test.use({ workspace: multiProjectWorkspacePath });
-test.setTimeout(120_000_000); // or 180_000, etc.
 
 test('Add Ivy Project Dependency', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
