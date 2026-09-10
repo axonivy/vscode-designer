@@ -7,20 +7,17 @@ import {
   FileType,
   Range,
   TreeItem,
+  TreeItemCollapsibleState,
   Uri,
   workspace,
   type IconPath,
-  type TreeDataProvider,
-  type Command as VSCodeCommand
+  type TreeDataProvider
 } from 'vscode';
-import { executeCommand, type KnownCommand } from '../base/commands';
+import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
 import { IvyDiagnostics } from '../engine/diagnostics';
 
 const __dirname = import.meta.dirname;
-interface IvyCommand extends VSCodeCommand {
-  command: KnownCommand;
-}
 
 export interface Entry {
   uri: Uri;
@@ -28,7 +25,7 @@ export interface Entry {
   iconPath?: string | IconPath;
   contextValue?: string;
   parent?: Entry;
-  command?: IvyCommand;
+  collapsibleState?: TreeItemCollapsibleState;
 }
 
 export const IVY_PROJECT_FILE_PATTERN = '**/{.ivyproject,.project}';
@@ -121,12 +118,9 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
       .map(projectFile => path.dirname(projectFile))
       .includes(element.uri.fsPath);
 
-    const treeItem = new TreeItem(element.uri);
+    const treeItem = new TreeItem(element.uri, TreeItemCollapsibleState.None);
     if (projectNeedsConversion) {
-      treeItem.description = '(needs conversion)';
-    }
-    if (element.command) {
-      treeItem.command = element.command;
+      treeItem.collapsibleState = this.collapsibleStateOf(element);
     }
     if (element.iconPath) {
       treeItem.iconPath = element.iconPath;
@@ -139,6 +133,16 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
     return treeItem;
   }
 
+  private collapsibleStateOf(element: Entry): TreeItemCollapsibleState {
+    if (element.collapsibleState !== undefined) {
+      return element.collapsibleState;
+    }
+    if (element.type !== FileType.Directory) {
+      return TreeItemCollapsibleState.None;
+    }
+    return TreeItemCollapsibleState.Collapsed;
+  }
+
   async getParent(element: Entry): Promise<Entry | undefined> {
     return element.parent;
   }
@@ -146,9 +150,21 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   async getChildren(element?: Entry): Promise<Entry[]> {
     await this.activateEnginePromise;
     if (element) {
-      return [];
+      return [this.ivyProjectEntry(element)];
     }
     return (await this.ivyProjects).projects.map(dir => this.createAndCacheRoot(dir));
+  }
+
+  private ivyProjectEntry(element: Entry) {
+    const uri = Uri.joinPath(element.uri, '.ivyproject');
+    const entry: Entry = {
+      uri,
+      type: FileType.File,
+      parent: element,
+      collapsibleState: TreeItemCollapsibleState.None
+    };
+    this.cacheEntry(entry);
+    return entry;
   }
 
   private createAndCacheRoot(ivyProjectDir: string): Entry {
