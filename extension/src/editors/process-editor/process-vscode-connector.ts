@@ -14,18 +14,13 @@ import {
   type SetMarkersAction
 } from '@eclipse-glsp/vscode-integration';
 import type { StatusBarItem } from 'vscode';
-import { Diagnostic, DiagnosticSeverity, EventEmitter, Range, Uri, commands, window } from 'vscode';
+import { EventEmitter, Uri, commands, window } from 'vscode';
 import { logErrorMessage, logInformationMessage, logWarningMessage } from '../../base/logging-util';
 import type { SelectedElement } from '../../base/process-editor-connector';
 import { ProcessBreakpointHandler } from './process-breakpoint-handler';
 import ProcessEditorProvider from './process-editor-provider';
 
 type IvyGlspClient = GlspVscodeClient & { app: string; project: string };
-const severityMap = new Map([
-  ['info', DiagnosticSeverity.Information],
-  ['warning', DiagnosticSeverity.Warning],
-  ['error', DiagnosticSeverity.Error]
-]);
 
 export class ProcessVscodeConnector extends GlspVscodeConnector {
   private readonly emitter = new EventEmitter<SelectedElement>();
@@ -170,18 +165,11 @@ export class ProcessVscodeConnector extends GlspVscodeConnector {
 
   protected override handleSetMarkersAction(
     message: ActionMessage<SetMarkersAction>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     client: GlspVscodeClient | undefined,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _origin: MessageOrigin
   ): MessageProcessingResult {
-    if (client) {
-      const updatedDiagnostics = message.action.markers.map(marker => {
-        const diagnostic = new Diagnostic(new Range(0, 0, 0, 0), marker.description, severityMap.get(marker.kind));
-        diagnostic.source = marker.elementId;
-        return diagnostic;
-      });
-      this.diagnostics.set(client.document.uri, updatedDiagnostics);
-    }
     return { processedMessage: message, messageChanged: false };
   }
 }

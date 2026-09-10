@@ -19,22 +19,11 @@ export class ProblemsView {
     return problemsView;
   }
 
-  private async hasMaker(message: string, type: 'error' | 'warning', pid?: string) {
-    let marker = this.view.locator(`div.monaco-tl-row:has-text("${message}")`);
-
-    if (pid) {
-      marker = marker.filter({ hasText: pid });
-    } else {
-      marker = marker.first();
-    }
-
+  private async hasMaker(message: string, type: 'error' | 'warning') {
+    const marker = this.view.locator(`div.monaco-tl-row:has-text("${message}")`).first();
     await expect(marker).toHaveCount(1);
     await expect(marker).toBeVisible();
     await expect(marker.locator(`div.marker-icon.${type}`)).toBeVisible();
-
-    if (pid) {
-      await expect(marker).toContainText(pid);
-    }
   }
 
   async show() {
@@ -42,12 +31,12 @@ export class ProblemsView {
     await expect(this.tab).toHaveClass(/checked/);
   }
 
-  async hasWarning(message: string, pid: string) {
-    await this.hasMaker(message, 'warning', pid);
+  async hasWarning(message: string) {
+    await this.hasMaker(message, 'warning');
   }
 
-  async hasError(message: string, pid?: string) {
-    await this.hasMaker(message, 'error', pid);
+  async hasError(message: string) {
+    await this.hasMaker(message, 'error');
   }
 
   async hasNoMarker() {
