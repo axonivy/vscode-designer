@@ -115,25 +115,26 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   }
 
   getTreeItem(element: Entry): TreeItem {
-    const treeItem = new TreeItem(element.uri);
-    let treeItemContextValue = element.contextValue ?? '';
-    const projectPathsToBeConverted = IvyDiagnostics.instance
+    const projectNeedsConversion = IvyDiagnostics.instance
       .projectFileUrisToBeConverted()
       .map(uri => uri.fsPath)
-      .map(projectFile => path.dirname(projectFile));
+      .map(projectFile => path.dirname(projectFile))
+      .includes(element.uri.fsPath);
 
-    if (projectPathsToBeConverted.includes(element.uri.fsPath)) {
-      treeItemContextValue += `${IVY_PROJECT_REQUIRES_CONVERSION_CONTEXT_VALUE}`;
+    const treeItem = new TreeItem(element.uri);
+    if (projectNeedsConversion) {
+      treeItem.description = '(needs conversion)';
     }
-
     if (element.command) {
       treeItem.command = element.command;
     }
     if (element.iconPath) {
       treeItem.iconPath = element.iconPath;
     }
-    if (treeItemContextValue) {
-      treeItem.contextValue = treeItemContextValue;
+    if (element.contextValue) {
+      let itemContextValue = element.contextValue;
+      itemContextValue += projectNeedsConversion ? `+${IVY_PROJECT_REQUIRES_CONVERSION_CONTEXT_VALUE}` : '';
+      treeItem.contextValue = itemContextValue;
     }
     return treeItem;
   }
