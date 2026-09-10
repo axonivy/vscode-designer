@@ -20,12 +20,9 @@ export const askToRunJavaCleanWorkspace = async (reason: string) => {
     }
   );
   if (selection?.label === 'Reload Java workspace and window') {
-    await runJavaCleanWorkspace();
+    // Force clean the Java workspace
+    return await runJavaCommand('java.clean.workspace', true);
   }
-};
-
-const runJavaCleanWorkspace = async (force = true) => {
-  return await runJavaCommand('java.clean.workspace', force);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
