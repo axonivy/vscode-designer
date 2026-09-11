@@ -16,6 +16,7 @@ import { IvyEngineManager } from './engine/engine-manager';
 import { showEngineLog } from './engine/engine-output-channel';
 import { registerAddDependencyHandler } from './maven/add-dependency';
 import { IvyProjectExplorer } from './project-explorer/ivy-project-explorer';
+import { ProjectFileWatcherManager } from './project-explorer/project-file-watcher';
 import { resolveExtensionVersion } from './version/extension-version';
 import { showRuntimeLog } from './views/runtimelog-view';
 
@@ -57,6 +58,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     conditionalWelcomePage(context);
 
     IvyProjectExplorer.init(context);
+    ProjectFileWatcherManager.init(context);
     registerAddDependencyHandler(context);
     StatusBar.refreshStatusBar();
     return messenger.diagnosticApi();
