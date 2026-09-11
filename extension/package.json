@@ -910,6 +910,11 @@
         "icon": "$(add)"
       },
       {
+        "id": "view.item",
+        "label": "More",
+        "icon": "$(ellipsis)"
+      },
+      {
         "id": "explorer.ivy",
         "label": "Axon Ivy"
       },
@@ -1025,36 +1030,6 @@
         {
           "command": "ivyProjects.convertProject",
           "when": "view == ivyProjects && viewItem =~ /ivyProject/ && viewItem =~ /requiresConversion/",
-          "group": "1@1"
-        },
-        {
-          "command": "ivyProjects.deployProject",
-          "when": "view == ivyProjects && viewItem =~ /ivyProject/",
-          "group": "2@1"
-        },
-        {
-          "command": "ivyProjects.revealInFileSystem",
-          "when": "view == ivyProjects && viewItem =~ /ivyProject/",
-          "group": "2@2"
-        },
-        {
-          "command": "ivyProjects.exportIvyProject",
-          "when": "view == ivyProjects && viewItem =~ /ivyProject/",
-          "group": "2@3"
-        },
-        {
-          "command": "ivy.debug.attachProcess",
-          "when": "view == ivyProjects && viewItem =~ /ivyProject/",
-          "group": "2@4"
-        },
-        {
-          "command": "ivyProjects.stopBpmEngine",
-          "when": "view == ivyProjects && viewItem =~ /ivyProject/",
-          "group": "2@5"
-        },
-        {
-          "command": "ivyProjects.convertProject",
-          "when": "view == ivyProjects && viewItem =~ /ivyProject/ && viewItem =~ /requiresConversion/",
           "group": "inline@1"
         },
         {
@@ -1063,24 +1038,30 @@
           "group": "inline@2"
         },
         {
+          "submenu": "view.item",
+          "group": "inline@3"
+        }
+      ],
+      "view.item": [
+        {
           "command": "ivyProjects.revealInFileSystem",
           "when": "view == ivyProjects && viewItem =~ /ivyProject/",
-          "group": "inline@3"
+          "group": "1@1"
         },
         {
           "command": "ivyProjects.exportIvyProject",
           "when": "view == ivyProjects && viewItem =~ /ivyProject/",
-          "group": "inline@4"
+          "group": "1@2"
         },
         {
           "command": "ivy.debug.attachProcess",
           "when": "view == ivyProjects && viewItem =~ /ivyProject/",
-          "group": "inline@5"
+          "group": "1@3"
         },
         {
           "command": "ivyProjects.stopBpmEngine",
           "when": "view == ivyProjects && viewItem =~ /ivyProject/",
-          "group": "inline@6"
+          "group": "1@4"
         }
       ],
       "explorer/context": [
