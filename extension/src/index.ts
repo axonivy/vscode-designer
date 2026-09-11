@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { commands, extensions, type ExtensionContext } from 'vscode';
+import { commands, extensions, window, workspace, type ExtensionContext } from 'vscode';
 import { Messenger, type MessengerDiagnostic } from 'vscode-messenger';
 import { LocalMcpServer } from './ai/tools/local-mcp';
 import { registerTools } from './ai/tools/tools';
@@ -16,6 +16,7 @@ import { IvyEngineManager } from './engine/engine-manager';
 import { showEngineLog } from './engine/engine-output-channel';
 import { registerAddDependencyHandler } from './maven/add-dependency';
 import { IvyProjectExplorer } from './project-explorer/ivy-project-explorer';
+import { MarkerFolderDecorationProvider } from './project-explorer/ivy-project-folder-decoration-provider';
 import { resolveExtensionVersion } from './version/extension-version';
 import { showRuntimeLog } from './views/runtimelog-view';
 
@@ -48,6 +49,29 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
     registerCommand('ivy.showStatusBarQuickPick', context, (visibleOptions?: QuickPickOptionId[]) =>
       StatusBar.showStatusBarQuickPick(visibleOptions)
+    );
+
+    const provider = new MarkerFolderDecorationProvider();
+
+    context.subscriptions.push(window.registerFileDecorationProvider(provider));
+
+    // Re-check decorations when files are created, deleted, or renamed.
+    context.subscriptions.push(
+      workspace.onDidCreateFiles(event => {
+        provider.invalidateAncestors(event.files);
+      })
+    );
+
+    context.subscriptions.push(
+      workspace.onDidDeleteFiles(event => {
+        provider.invalidateAncestors(event.files);
+      })
+    );
+
+    context.subscriptions.push(
+      workspace.onDidRenameFiles(event => {
+        provider.invalidateAncestors([...event.files.map(file => file.oldUri), ...event.files.map(file => file.newUri)]);
+      })
     );
 
     registerTools(context);
