@@ -268,6 +268,11 @@
         "category": "Axon Ivy"
       },
       {
+        "command": "ivyEditor.openPersistenceEditor",
+        "title": "Open Persistence Editor",
+        "category": "Axon Ivy"
+      },
+      {
         "command": "ivyBrowserView.openDevWfUi",
         "title": "Open Developer Workflow UI",
         "category": "Axon Ivy"
@@ -1183,6 +1188,9 @@
         },
         {
           "command": "ivyEditor.openCustomFieldEditor"
+        },
+        {
+          "command": "ivyEditor.openPersistenceEditor"
         }
       ],
       "explorer.ivy.runDebug": [
