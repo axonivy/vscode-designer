@@ -126,8 +126,8 @@ export class IvyEngineManager {
     let devContextPath = this.ivyEngineApi.devContextPath;
     IvyBrowserViewProvider.register(this.context, this.resolvedEngineUrl, devContextPath);
     devContextPath += devContextPath.endsWith('/') ? '' : '/';
-    await this.initExistingProjects();
     decreaseWorkspaceLock(); // enable file watchers etc.
+    await this.initExistingProjects();
     const websocketUrl = new URL(devContextPath, toWebSocketUrl(this.resolvedEngineUrl));
     ProcessEditorProvider.register(this.context, websocketUrl);
     FormEditorProvider.register(this.context, websocketUrl);
