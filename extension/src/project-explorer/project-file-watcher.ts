@@ -8,14 +8,14 @@ import { isIvyProject, IVY_PROJECT_FILE_PATTERN } from './ivy-project-tree-data-
 import { treeUriToProjectPath } from './tree-selection';
 
 export class ProjectFileWatcherManager {
-  private lockCount = 1;
+  private lockCount = 1; // make sure the file watchers are initially locked, will be unlocked if engine is available
   private static _instance: ProjectFileWatcherManager;
 
   private constructor(context: ExtensionContext) {
     this.createFileWatchers(context);
   }
 
-  static async init(context: ExtensionContext) {
+  static init(context: ExtensionContext) {
     if (ProjectFileWatcherManager._instance) {
       throw new Error('ProjectFileWatcherManager has already been initialized');
     }
@@ -35,12 +35,12 @@ export class ProjectFileWatcherManager {
   }
 
   public unlock() {
-    if (this.lockCount > 0) {
-      this.lockCount--;
-      extensionLogOutputChannel.appendLine(`Project File Watcher Lock decremented, current count: ${this.lockCount}`);
-    } else {
-      extensionLogOutputChannel.appendLine('Project File Watcher Lock is already at 0');
+    if (this.lockCount <= 0) {
+      extensionLogOutputChannel.appendLine('Project File Watcher Lock underflow');
+      return;
     }
+    this.lockCount--;
+    extensionLogOutputChannel.appendLine(`Project File Watcher Lock decremented, current count: ${this.lockCount}`);
   }
 
   private isLocked() {
