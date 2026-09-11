@@ -1,14 +1,13 @@
 import { Uri, workspace, type ExtensionContext } from 'vscode';
 import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base/debounce';
-import { extensionLogOutputChannel } from '../base/extension-output-channel';
 import { askToRunJavaCleanWorkspace } from '../base/java-extension-api';
+import { isWorkspaceLocked } from '../base/workspace-lock';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { IvyProjectExplorer } from './ivy-project-explorer';
 import { isIvyProject, IVY_PROJECT_FILE_PATTERN } from './ivy-project-tree-data-provider';
 import { treeUriToProjectPath } from './tree-selection';
 
 export class ProjectFileWatcherManager {
-  private lockCount = 1; // make sure the file watchers are initially locked, will be unlocked if engine is available
   private static _instance: ProjectFileWatcherManager;
 
   private constructor(context: ExtensionContext) {
@@ -29,46 +28,23 @@ export class ProjectFileWatcherManager {
     throw new Error('ProjectFileWatcherManager has not been initialized');
   }
 
-  public lock() {
-    if (this.lockCount < 0) {
-      extensionLogOutputChannel.appendLine('Project File Watcher Lock underflow');
-      this.lockCount = 0;
-    }
-    this.lockCount++;
-    extensionLogOutputChannel.appendLine(`Project File Watcher Lock incremented, current count: ${this.lockCount}`);
-  }
-
-  public unlock() {
-    if (this.lockCount <= 0) {
-      extensionLogOutputChannel.appendLine('Project File Watcher Lock underflow');
-      this.lockCount = 0;
-      return;
-    }
-    this.lockCount--;
-    extensionLogOutputChannel.appendLine(`Project File Watcher Lock decremented, current count: ${this.lockCount}`);
-  }
-
-  private isLocked() {
-    return this.lockCount > 0;
-  }
-
   private createFileWatchers(context: ExtensionContext) {
     const ivyProjectFileWatcher = workspace.createFileSystemWatcher(IVY_PROJECT_FILE_PATTERN, false, true, true);
     ivyProjectFileWatcher.onDidCreate(async projectFile => {
-      if (this.isLocked() || !isIvyProject(projectFile)) {
+      if (isWorkspaceLocked() || !isIvyProject(projectFile)) {
         return;
       }
       await IvyProjectExplorer.instance.refresh();
     });
     const deleteProjectWatcher = workspace.createFileSystemWatcher('**/*', true, true, false);
     deleteProjectWatcher.onDidDelete(async e => {
-      if (this.isLocked() || e.path.includes('/target/')) {
+      if (isWorkspaceLocked() || e.path.includes('/target/')) {
         return;
       }
       await this.deleteProjectOnEngine(e.fsPath);
     });
     const deployProject = (uri: Uri) => {
-      if (this.isLocked()) {
+      if (isWorkspaceLocked()) {
         return;
       }
       this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.deployProjects(d), 'deploy', uri);
@@ -83,7 +59,7 @@ export class ProjectFileWatcherManager {
     mvnDepsWatcher.onDidDelete(deployProject);
     const targetWatcher = workspace.createFileSystemWatcher('**/target/classes/**/*.*');
     const invalidateClassLoader = (uri: Uri) => {
-      if (this.isLocked() || hasDeployActionInQueue()) {
+      if (isWorkspaceLocked() || hasDeployActionInQueue()) {
         return;
       }
       this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.invalidateClassLoader(d), 'invalidate', uri);

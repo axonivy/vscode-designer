@@ -8,6 +8,7 @@ import { logErrorMessage, logWarningMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { StatusBar } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
+import { decreaseWorkspaceLock, increaseWorkspaceLock } from '../base/workspace-lock';
 import { registerProcessDebugging } from '../debug/process-debug';
 import { CaseMapEditorProvider } from '../editors/casemap-editor/casemap-editor-provider';
 import { CmsEditorProvider } from '../editors/cms-editor/cms-editor-provider';
@@ -25,7 +26,6 @@ import { VariableEditorProvider } from '../editors/variable-editor/variable-edit
 import { WebServiceEditorProvider } from '../editors/webservice-editor/webservice-editor-provider';
 import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language-client';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
-import { ProjectFileWatcherManager } from '../project-explorer/project-file-watcher';
 import { resolveDefaultNamespace } from '../project-explorer/utils/util';
 import { extensionVersion } from '../version/extension-version';
 import { IvyBrowserViewProvider } from '../views/browser/ivy-browser-view-provider';
@@ -127,7 +127,7 @@ export class IvyEngineManager {
     IvyBrowserViewProvider.register(this.context, this.resolvedEngineUrl, devContextPath);
     devContextPath += devContextPath.endsWith('/') ? '' : '/';
     await this.initExistingProjects();
-    ProjectFileWatcherManager.instance.unlock();
+    decreaseWorkspaceLock(); // enable file watchers etc.
     const websocketUrl = new URL(devContextPath, toWebSocketUrl(this.resolvedEngineUrl));
     ProcessEditorProvider.register(this.context, websocketUrl);
     FormEditorProvider.register(this.context, websocketUrl);
@@ -218,10 +218,10 @@ export class IvyEngineManager {
 
   public async importIvyProject(input: ImportProjectsBody) {
     try {
-      ProjectFileWatcherManager.instance.lock();
+      increaseWorkspaceLock();
       await this.ivyEngineApi?.importIvyProject(input);
     } finally {
-      ProjectFileWatcherManager.instance.unlock();
+      decreaseWorkspaceLock();
     }
     await this.importJavaProjects();
     await IvyProjectExplorer.instance.refresh();
@@ -230,10 +230,10 @@ export class IvyEngineManager {
   public async installMarketProduct(input: ProductInstallParams) {
     await StatusBar.withStatusBarProgress({ text: 'Importing market product' }, async () => {
       try {
-        ProjectFileWatcherManager.instance.lock();
+        increaseWorkspaceLock();
         await this.ivyEngineApi?.installMarketProduct(input);
       } finally {
-        ProjectFileWatcherManager.instance.unlock();
+        decreaseWorkspaceLock();
       }
     });
     await this.importJavaProjects();
@@ -254,10 +254,10 @@ export class IvyEngineManager {
   public async createProject(newProjectParams: CreateProjectParams) {
     await StatusBar.withStatusBarProgress({ text: 'Creating and deploying new project' }, async () => {
       try {
-        ProjectFileWatcherManager.instance.lock();
+        increaseWorkspaceLock();
         await this.ivyEngineApi?.createProject(newProjectParams);
       } finally {
-        ProjectFileWatcherManager.instance.unlock();
+        decreaseWorkspaceLock();
       }
       await this.importJavaProjects();
       await this.createAndOpenProcess({

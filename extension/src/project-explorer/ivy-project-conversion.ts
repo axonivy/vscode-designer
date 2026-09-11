@@ -3,8 +3,8 @@ import { ProgressLocation, Uri, window, type CancellationToken, type Progress } 
 import { showExtensionLog } from '../base/extension-output-channel';
 import { askToRunJavaCleanWorkspace, runJavaProjectConfigurationUpdate } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage, logInformationMessageWithActions } from '../base/logging-util';
+import { decreaseWorkspaceLock, increaseWorkspaceLock } from '../base/workspace-lock';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { ProjectFileWatcherManager } from './project-file-watcher';
 
 export const runProjectConversion = async (projectsToConvert: string[]) => {
   if (projectsToConvert.length === 0) {
@@ -12,7 +12,7 @@ export const runProjectConversion = async (projectsToConvert: string[]) => {
     return;
   }
   try {
-    ProjectFileWatcherManager.instance.lock();
+    increaseWorkspaceLock();
     await window.withProgress(
       {
         location: ProgressLocation.Notification,
@@ -23,7 +23,7 @@ export const runProjectConversion = async (projectsToConvert: string[]) => {
     );
   } finally {
     await askToRunJavaCleanWorkspace('Project conversion finished');
-    ProjectFileWatcherManager.instance.unlock();
+    decreaseWorkspaceLock();
   }
 };
 
