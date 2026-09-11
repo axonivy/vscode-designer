@@ -23,7 +23,7 @@ export const runProjectConversion = async (projectsToConvert: string[]) => {
     );
   } finally {
     await askToRunJavaCleanWorkspace('Project conversion finished');
-    ProjectFileWatcherManager.instance.lock();
+    ProjectFileWatcherManager.instance.unlock();
   }
 };
 
