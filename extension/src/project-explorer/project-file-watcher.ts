@@ -21,13 +21,6 @@ export class ProjectFileWatcherManager {
     ProjectFileWatcherManager._instance = new ProjectFileWatcherManager(context);
   }
 
-  static get instance() {
-    if (ProjectFileWatcherManager._instance) {
-      return ProjectFileWatcherManager._instance;
-    }
-    throw new Error('ProjectFileWatcherManager has not been initialized');
-  }
-
   private createFileWatchers(context: ExtensionContext) {
     const ivyProjectFileWatcher = workspace.createFileSystemWatcher(IVY_PROJECT_FILE_PATTERN, false, true, true);
     ivyProjectFileWatcher.onDidCreate(async projectFile => {
