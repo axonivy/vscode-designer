@@ -30,6 +30,10 @@ export class ProjectFileWatcherManager {
   }
 
   public lock() {
+    if (this.lockCount < 0) {
+      extensionLogOutputChannel.appendLine('Project File Watcher Lock underflow');
+      this.lockCount = 0;
+    }
     this.lockCount++;
     extensionLogOutputChannel.appendLine(`Project File Watcher Lock incremented, current count: ${this.lockCount}`);
   }
@@ -37,6 +41,7 @@ export class ProjectFileWatcherManager {
   public unlock() {
     if (this.lockCount <= 0) {
       extensionLogOutputChannel.appendLine('Project File Watcher Lock underflow');
+      this.lockCount = 0;
       return;
     }
     this.lockCount--;
