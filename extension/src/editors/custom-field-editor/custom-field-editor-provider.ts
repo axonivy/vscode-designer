@@ -8,6 +8,6 @@ export class CustomFieldEditorProvider {
   private constructor() {}
 
   static register(context: ExtensionContext) {
-    registerOpenConfigEditorCmd('ivyEditor.openCustomFieldEditor', context, 'customfields.yaml');
+    registerOpenConfigEditorCmd('ivyEditor.openCustomFieldEditor', context, 'custom-fields.yaml');
   }
 }
