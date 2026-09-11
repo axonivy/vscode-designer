@@ -269,6 +269,7 @@ export class IvyEngineManager {
         path: newProjectParams.path,
         namespace: await resolveDefaultNamespace(newProjectParams.path, 'process')
       });
+      await IvyProjectExplorer.instance.refresh();
     });
   }
 
