@@ -65,7 +65,7 @@ export const IVY_ICON_DEFINITIONS: IvyIconDefinitions = {
     darkColor: '#a074c4'
   },
   _ivy_webservices: {
-    icon: IvyIcons.WebService,
+    icon: IvyIcons.WsStart,
     lightColor: '#b8383d',
     darkColor: '#cc3e44'
   }
