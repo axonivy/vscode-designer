@@ -8,7 +8,7 @@ import { logErrorMessage, logWarningMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { StatusBar } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
-import { decreaseWorkspaceLock, increaseWorkspaceLock } from '../base/workspace-lock';
+import { decreaseWorkspaceLock, increaseWorkspaceLock, isWorkspaceLocked } from '../base/workspace-lock';
 import { registerProcessDebugging } from '../debug/process-debug';
 import { CaseMapEditorProvider } from '../editors/casemap-editor/casemap-editor-provider';
 import { CmsEditorProvider } from '../editors/cms-editor/cms-editor-provider';
@@ -185,6 +185,9 @@ export class IvyEngineManager {
   }
 
   public async deployProjects(ivyProjectDirectory?: string) {
+    if (isWorkspaceLocked()) {
+      return;
+    }
     const ivyProjectDirectories = ivyProjectDirectory ? [ivyProjectDirectory] : await this.ivyProjectDirectories();
     let statusMessage = 'Deploying projects';
     if (ivyProjectDirectories.length === 1 && ivyProjectDirectories[0]) {
@@ -337,6 +340,9 @@ export class IvyEngineManager {
   }
 
   public async invalidateClassLoader(ivyProjectDirectory: string) {
+    if (isWorkspaceLocked()) {
+      return;
+    }
     return await StatusBar.withStatusBarProgress(
       { text: 'Invalidating class loader' },
       async () => await this.ivyEngineApi?.invalidateClassLoader({ projectDir: ivyProjectDirectory })

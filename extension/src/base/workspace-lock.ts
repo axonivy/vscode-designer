@@ -22,5 +22,7 @@ export const decreaseWorkspaceLock = () => {
 };
 
 export const isWorkspaceLocked = () => {
-  return lockCount > 0;
+  const isLocked = lockCount > 0;
+  extensionLogOutputChannel.appendLine(`Workspace lock status checked, current count: ${lockCount}, is locked: ${isLocked}`);
+  return isLocked;
 };
