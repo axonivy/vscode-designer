@@ -42,10 +42,6 @@ export class ProjectFileWatcherManager {
       }
       this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.deployProjects(d), 'deploy', uri);
     };
-    const webContentWatcher = workspace.createFileSystemWatcher('**/webContent/**/*');
-    webContentWatcher.onDidChange(deployProject);
-    webContentWatcher.onDidDelete(deployProject);
-    webContentWatcher.onDidCreate(deployProject);
     const mvnDepsWatcher = workspace.createFileSystemWatcher('**/target/lib/mvn-deps/*.jar');
     mvnDepsWatcher.onDidCreate(deployProject);
     mvnDepsWatcher.onDidChange(deployProject);
@@ -60,7 +56,7 @@ export class ProjectFileWatcherManager {
     targetWatcher.onDidChange(invalidateClassLoader);
     targetWatcher.onDidCreate(invalidateClassLoader);
     targetWatcher.onDidDelete(invalidateClassLoader);
-    context.subscriptions.push(ivyProjectFileWatcher, deleteProjectWatcher, webContentWatcher, mvnDepsWatcher, targetWatcher);
+    context.subscriptions.push(ivyProjectFileWatcher, deleteProjectWatcher, mvnDepsWatcher, targetWatcher);
   }
 
   private async deleteProjectOnEngine(projectToBeDeleted: string) {
