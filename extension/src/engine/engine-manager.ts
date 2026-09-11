@@ -24,8 +24,8 @@ import { UserEditorProvider } from '../editors/user-editor/user-editor-provider'
 import { VariableEditorProvider } from '../editors/variable-editor/variable-editor-provider';
 import { WebServiceEditorProvider } from '../editors/webservice-editor/webservice-editor-provider';
 import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language-client';
-import { isProjectConversionRunning } from '../project-explorer/ivy-project-conversion';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
+import { ProjectFileWatcherManager } from '../project-explorer/project-file-watcher';
 import { resolveDefaultNamespace } from '../project-explorer/utils/util';
 import { extensionVersion } from '../version/extension-version';
 import { IvyBrowserViewProvider } from '../views/browser/ivy-browser-view-provider';
@@ -127,6 +127,7 @@ export class IvyEngineManager {
     IvyBrowserViewProvider.register(this.context, this.resolvedEngineUrl, devContextPath);
     devContextPath += devContextPath.endsWith('/') ? '' : '/';
     await this.initExistingProjects();
+    ProjectFileWatcherManager.instance.unlock();
     const websocketUrl = new URL(devContextPath, toWebSocketUrl(this.resolvedEngineUrl));
     ProcessEditorProvider.register(this.context, websocketUrl);
     FormEditorProvider.register(this.context, websocketUrl);
@@ -184,9 +185,6 @@ export class IvyEngineManager {
   }
 
   public async deployProjects(ivyProjectDirectory?: string) {
-    if (isProjectConversionRunning) {
-      return;
-    }
     const ivyProjectDirectories = ivyProjectDirectory ? [ivyProjectDirectory] : await this.ivyProjectDirectories();
     let statusMessage = 'Deploying projects';
     if (ivyProjectDirectories.length === 1 && ivyProjectDirectories[0]) {
@@ -219,16 +217,25 @@ export class IvyEngineManager {
   }
 
   public async importIvyProject(input: ImportProjectsBody) {
-    await this.ivyEngineApi?.importIvyProject(input);
+    try {
+      ProjectFileWatcherManager.instance.lock();
+      await this.ivyEngineApi?.importIvyProject(input);
+    } finally {
+      ProjectFileWatcherManager.instance.unlock();
+    }
     await this.importJavaProjects();
     await IvyProjectExplorer.instance.refresh();
   }
 
   public async installMarketProduct(input: ProductInstallParams) {
-    await StatusBar.withStatusBarProgress(
-      { text: 'Importing market product' },
-      async () => await this.ivyEngineApi?.installMarketProduct(input)
-    );
+    await StatusBar.withStatusBarProgress({ text: 'Importing market product' }, async () => {
+      try {
+        ProjectFileWatcherManager.instance.lock();
+        await this.ivyEngineApi?.installMarketProduct(input);
+      } finally {
+        ProjectFileWatcherManager.instance.unlock();
+      }
+    });
     await this.importJavaProjects();
     await IvyProjectExplorer.instance.refresh();
   }
@@ -245,8 +252,13 @@ export class IvyEngineManager {
   }
 
   public async createProject(newProjectParams: CreateProjectParams) {
-    return await StatusBar.withStatusBarProgress({ text: 'Creating and deploying new project' }, async () => {
-      const projectBean = await this.ivyEngineApi?.createProject(newProjectParams);
+    await StatusBar.withStatusBarProgress({ text: 'Creating and deploying new project' }, async () => {
+      try {
+        ProjectFileWatcherManager.instance.lock();
+        await this.ivyEngineApi?.createProject(newProjectParams);
+      } finally {
+        ProjectFileWatcherManager.instance.unlock();
+      }
       await this.importJavaProjects();
       await this.createAndOpenProcess({
         name: 'BusinessProcess',
@@ -254,7 +266,6 @@ export class IvyEngineManager {
         path: newProjectParams.path,
         namespace: await resolveDefaultNamespace(newProjectParams.path, 'process')
       });
-      return projectBean;
     });
   }
 
@@ -326,9 +337,6 @@ export class IvyEngineManager {
   }
 
   public async invalidateClassLoader(ivyProjectDirectory: string) {
-    if (isProjectConversionRunning) {
-      return;
-    }
     return await StatusBar.withStatusBarProgress(
       { text: 'Invalidating class loader' },
       async () => await this.ivyEngineApi?.invalidateClassLoader({ projectDir: ivyProjectDirectory })

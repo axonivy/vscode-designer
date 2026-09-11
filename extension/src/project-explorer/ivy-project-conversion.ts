@@ -4,8 +4,7 @@ import { showExtensionLog } from '../base/extension-output-channel';
 import { askToRunJavaCleanWorkspace, runJavaProjectConfigurationUpdate } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage, logInformationMessageWithActions } from '../base/logging-util';
 import { IvyEngineManager } from '../engine/engine-manager';
-
-export let isProjectConversionRunning = false;
+import { ProjectFileWatcherManager } from './project-file-watcher';
 
 export const runProjectConversion = async (projectsToConvert: string[]) => {
   if (projectsToConvert.length === 0) {
@@ -13,7 +12,7 @@ export const runProjectConversion = async (projectsToConvert: string[]) => {
     return;
   }
   try {
-    isProjectConversionRunning = true;
+    ProjectFileWatcherManager.instance.lock();
     await window.withProgress(
       {
         location: ProgressLocation.Notification,
@@ -24,7 +23,7 @@ export const runProjectConversion = async (projectsToConvert: string[]) => {
     );
   } finally {
     await askToRunJavaCleanWorkspace('Project conversion finished');
-    isProjectConversionRunning = false;
+    ProjectFileWatcherManager.instance.lock();
   }
 };
 
@@ -56,7 +55,6 @@ const conversionTask = async (
     });
   }
   const projectsToReload = projectsToConvert.filter(p => !failedProjects.includes(p)).map(p => Uri.file(p));
-  isProjectConversionRunning = false;
   if (projectsToReload.length > 0) {
     await runJavaProjectConfigurationUpdate(projectsToReload);
   }

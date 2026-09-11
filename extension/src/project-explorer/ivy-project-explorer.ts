@@ -2,8 +2,7 @@ import path from 'path';
 import type { ExtensionContext, TreeView, TreeViewSelectionChangeEvent } from 'vscode';
 import { commands, Uri, window, workspace } from 'vscode';
 import { registerCommand, type KnownCommand } from '../base/commands';
-import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base/debounce';
-import { askToRunJavaCleanWorkspace, runJavaProjectImport } from '../base/java-extension-api';
+import { runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -11,8 +10,8 @@ import { installLocalMarketProduct, installMarketProduct } from '../market/impor
 import { exportIvyProject } from './export-ivy-project';
 import { importIvyProject } from './import-ivy-project';
 import { importNewProcess } from './import-process';
-import { isProjectConversionRunning, runProjectConversion } from './ivy-project-conversion';
-import { isIvyProject, IVY_PROJECT_FILE_PATTERN, IvyProjectTreeDataProvider, type Entry } from './ivy-project-tree-data-provider';
+import { runProjectConversion } from './ivy-project-conversion';
+import { IvyProjectTreeDataProvider, type Entry } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
 import { addNewDataClass } from './new-data-class';
 import { addNewProcess, type ProcessKind } from './new-process';
@@ -40,7 +39,6 @@ export class IvyProjectExplorer {
     });
     context.subscriptions.push(this.treeView);
     this.registerCommands(context);
-    this.defineFileWatchers(context);
     context.subscriptions.push(
       workspace.onDidChangeWorkspaceFolders(async () => {
         await this.refresh();
@@ -92,58 +90,6 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.convertAllProjects`, (s: TreeSelection) => this.convertProject(s, true));
   }
 
-  private defineFileWatchers(context: ExtensionContext) {
-    const ivyProjectFileWatcher = workspace.createFileSystemWatcher(IVY_PROJECT_FILE_PATTERN, false, true, true);
-    ivyProjectFileWatcher.onDidCreate(async projectFile => {
-      if (!isProjectConversionRunning && isIvyProject(projectFile)) {
-        await this.refresh();
-      }
-    });
-    const deleteProjectWatcher = workspace.createFileSystemWatcher('**/*', true, true, false);
-    deleteProjectWatcher.onDidDelete(async e => {
-      if (isProjectConversionRunning || e.path.includes('/target/')) {
-        return;
-      }
-      await this.deleteProjectOnEngine(e.fsPath);
-    });
-    const deployProject = (uri: Uri) => {
-      if (!isProjectConversionRunning) {
-        this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.deployProjects(d), 'deploy', uri);
-      }
-    };
-    const webContentWatcher = workspace.createFileSystemWatcher('**/webContent/**/*');
-    webContentWatcher.onDidChange(deployProject);
-    webContentWatcher.onDidDelete(deployProject);
-    webContentWatcher.onDidCreate(deployProject);
-    const mvnDepsWatcher = workspace.createFileSystemWatcher('**/target/lib/mvn-deps/*.jar');
-    mvnDepsWatcher.onDidCreate(deployProject);
-    mvnDepsWatcher.onDidChange(deployProject);
-    mvnDepsWatcher.onDidDelete(deployProject);
-    const targetWatcher = workspace.createFileSystemWatcher('**/target/classes/**/*.*');
-    const invalidateClassLoader = (uri: Uri) => {
-      if (isProjectConversionRunning || hasDeployActionInQueue()) {
-        return;
-      }
-      this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.invalidateClassLoader(d), 'invalidate', uri);
-    };
-    targetWatcher.onDidChange(invalidateClassLoader);
-    targetWatcher.onDidCreate(invalidateClassLoader);
-    targetWatcher.onDidDelete(invalidateClassLoader);
-    context.subscriptions.push(ivyProjectFileWatcher, deleteProjectWatcher, webContentWatcher, mvnDepsWatcher, targetWatcher);
-  }
-
-  private async deleteProjectOnEngine(projectToBeDeleted: string) {
-    const ivyProjects = await this.getIvyProjects();
-    for (const project of ivyProjects) {
-      if (project === projectToBeDeleted) {
-        await IvyEngineManager.instance.deleteProject(projectToBeDeleted);
-        await askToRunJavaCleanWorkspace('Project deleted');
-        await this.refresh();
-        return;
-      }
-    }
-  }
-
   public async refresh() {
     this.treeDataProvider.refresh();
     await this.activateEngineIfNeeded();
@@ -168,15 +114,6 @@ export class IvyProjectExplorer {
     if (uri) {
       await commands.executeCommand('revealFileInOS', uri);
     }
-  }
-
-  private async runEngineActionDebounced(action: (projectDir: string) => Promise<void>, actionKey: ActionKey, uri?: Uri) {
-    const project = await treeUriToProjectPath(uri, this.getIvyProjects());
-    if (!project) {
-      return;
-    }
-    const keyPrefix = actionKey === 'invalidate' ? undefined : project;
-    return debouncedAction(() => action(project), actionKey, keyPrefix)();
   }
 
   private async deployProjects(selection: TreeSelection) {
