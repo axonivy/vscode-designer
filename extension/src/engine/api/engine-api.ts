@@ -172,9 +172,12 @@ export class IvyEngineApi {
     )
       .catch(handleAxiosError)
       .then(res => res.data);
+
+    let result = { hasErrorLogEntry: false };
     if (data instanceof IncomingMessage) {
-      await handleProjectConversionLog(data);
+      result = await handleProjectConversionLog(data);
     }
+    return result;
   }
 
   public async refreshProjectStatuses() {
