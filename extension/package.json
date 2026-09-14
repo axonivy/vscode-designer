@@ -1278,7 +1278,7 @@
       },
       {
         "view": "ivyProjects",
-        "contents": "There are no Axon Ivy projects. Create one by clicking the button below.\n[Create Axon Ivy Project](command:ivyProjects.addNewProject)",
+        "contents": "There are no Axon Ivy projects. Create one by clicking the button below.\n[New Axon Ivy Project](command:ivyProjects.addNewProject)",
         "when": "workbenchState != empty && !ivy:hasIvyProjects && ivy:isStarted"
       }
     ]

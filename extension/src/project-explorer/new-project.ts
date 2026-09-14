@@ -88,7 +88,7 @@ export const addNewProject = async (selectedUri: Uri) => {
 
   const steps: InputStep<NewProjectState>[] = [stepProjectName, stepGroupId, stepProjectId];
   const newProjectData: NewProjectState = {
-    dialogTitle: 'Create New Project',
+    dialogTitle: 'New Axon Ivy Project',
     currentStep: 1,
     totalSteps: steps.length
   };
