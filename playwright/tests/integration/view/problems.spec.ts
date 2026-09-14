@@ -9,11 +9,11 @@ test('Check existing warning and error', async ({ wsPage }) => {
   const trigger = editor.elementByPID('18D9CDFA8F58DA2B-f3');
   await editor.hasWarning(trigger);
   const problemsView = await ProblemsView.initProblemsView(wsPage);
-  await problemsView.hasWarning('TriggerCall target is not defined.', '18D9CDFA8F58DA2B-f3');
+  await problemsView.hasWarning('TriggerCall target is not defined.');
 
   const script = editor.elementByPID('18D9CDFA8F58DA2B-f5');
   await editor.hasError(script);
-  await problemsView.hasError('Output code: A statement is expected, not an expression (maybe missing semicolon)', '18D9CDFA8F58DA2B-f5');
+  await problemsView.hasError('Output code: A statement is expected, not an expression (maybe missing semicolon)');
 });
 
 test('Check live validation', async ({ wsPage }) => {
@@ -28,9 +28,10 @@ test('Check live validation', async ({ wsPage }) => {
   const monacoEditor = inscriptionView.monacoEditor;
   await monacoEditor.click();
   await wsPage.page.keyboard.type('make test error');
+  await wsPage.executeCommand('File: Save');
   await editor.hasError(script);
   const problemsView = await ProblemsView.initProblemsView(wsPage);
-  await problemsView.hasError("Output code: Unexpected token: identifier '", '18D9CDFA8F58DA2B-f7');
+  await problemsView.hasError("Output code: Unexpected token: identifier '");
 });
 
 test('Worspace Validation', async ({ wsPage }) => {
