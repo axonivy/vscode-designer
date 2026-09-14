@@ -327,7 +327,7 @@ export class IvyEngineManager {
   }
 
   public async convertProject(ivyProjectDirectory: string) {
-    await StatusBar.withStatusBarProgress(
+    return await StatusBar.withStatusBarProgress(
       { text: 'Converting project' },
       async () => await this.ivyEngineApi?.convertProject({ projectDir: ivyProjectDirectory })
     );

@@ -44,8 +44,12 @@ const conversionTask = async (
       message: `Converting ${path.basename(project)} - ${convertedCount} of ${numOfProjects} project(s) converted.${failedProjects.length > 0 ? ` ${failedProjects.length} project(s) failed to convert.` : ''}`
     });
     try {
-      await IvyEngineManager.instance.convertProject(project);
-      convertedCount++;
+      const result = await IvyEngineManager.instance.convertProject(project);
+      if (result?.hasErrorLogEntry) {
+        failedProjects.push(project);
+      } else {
+        convertedCount++;
+      }
     } catch (error) {
       logErrorMessage(`Failed to convert project ${project}: ${error}`);
       failedProjects.push(project);

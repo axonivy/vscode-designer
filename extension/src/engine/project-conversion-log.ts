@@ -7,11 +7,13 @@ type LogEntry = { severity: string; message: string };
 export const handleProjectConversionLog = (message: IncomingMessage) => {
   const output = window.createOutputChannel('Axon Ivy Project Conversion', { log: true });
   output.show();
-  return new Promise<void>(resolve => {
+  let hasErrorLogEntry = false;
+  return new Promise<{ hasErrorLogEntry: boolean }>(resolve => {
     message.on('data', chunk => {
       try {
         const logEntry = JSON.parse(chunk);
         if (isLogEntry(logEntry)) {
+          hasErrorLogEntry = hasErrorLogEntry || logEntry.severity.toUpperCase() === 'ERROR';
           append(logEntry, output);
         }
       } catch {
@@ -19,7 +21,7 @@ export const handleProjectConversionLog = (message: IncomingMessage) => {
       }
     });
     message.on('end', () => {
-      resolve();
+      resolve({ hasErrorLogEntry });
     });
   });
 };
