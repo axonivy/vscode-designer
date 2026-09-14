@@ -5,6 +5,7 @@ import { askToRunJavaCleanWorkspace, runJavaProjectConfigurationUpdate } from '.
 import { logErrorMessage, logInformationMessage, logInformationMessageWithActions } from '../base/logging-util';
 import { decreaseWorkspaceLock, increaseWorkspaceLock } from '../base/workspace-lock';
 import { IvyEngineManager } from '../engine/engine-manager';
+import { showProjectConversionLog } from '../engine/project-conversion-log';
 
 export const runProjectConversion = async (projectsToConvert: string[]) => {
   if (projectsToConvert.length === 0) {
@@ -64,6 +65,6 @@ const conversionTask = async (
   }
   logInformationMessageWithActions(
     `Converted ${convertedCount} of ${numOfProjects} Axon Ivy project(s).${failedProjects.length > 0 ? ` ${failedProjects.length} project(s) failed to convert.` : ''}`,
-    { 'Show Extension Log': () => showExtensionLog() }
+    { 'Show Project Conversion Log': () => showProjectConversionLog(), 'Show Extension Log': () => showExtensionLog() }
   );
 };

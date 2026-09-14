@@ -3,10 +3,14 @@ import type { LogOutputChannel } from 'vscode';
 import { window } from 'vscode';
 
 type LogEntry = { severity: string; message: string };
+const projectConversionOutputChannel: LogOutputChannel = window.createOutputChannel('Axon Ivy Project Conversion', { log: true });
+
+export const showProjectConversionLog = () => {
+  projectConversionOutputChannel.show();
+};
 
 export const handleProjectConversionLog = (message: IncomingMessage) => {
-  const output = window.createOutputChannel('Axon Ivy Project Conversion', { log: true });
-  output.show();
+  projectConversionOutputChannel.show();
   let hasErrorLogEntry = false;
   return new Promise<{ hasErrorLogEntry: boolean }>(resolve => {
     message.on('data', chunk => {
@@ -14,10 +18,10 @@ export const handleProjectConversionLog = (message: IncomingMessage) => {
         const logEntry = JSON.parse(chunk);
         if (isLogEntry(logEntry)) {
           hasErrorLogEntry = hasErrorLogEntry || logEntry.severity.toUpperCase() === 'ERROR';
-          append(logEntry, output);
+          append(logEntry, projectConversionOutputChannel);
         }
       } catch {
-        output.info(chunk.toString());
+        projectConversionOutputChannel.info(chunk.toString());
       }
     });
     message.on('end', () => {
