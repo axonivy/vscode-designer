@@ -594,43 +594,43 @@
             "properties": {
               "database": {
                 "type": "boolean",
-                "description": "databases.yaml"
+                "description": "Databases: databases.yaml"
               },
               "dataclass": {
                 "type": "boolean",
-                "description": "Dataclass files (*.d.json)"
+                "description": "Dataclasses: *.d.json"
               },
               "form": {
                 "type": "boolean",
-                "description": "Dialog forms (*.f.json)"
+                "description": "Dialogs: *.f.json"
               },
               "process": {
                 "type": "boolean",
-                "description": "Process files (*.p.json)"
+                "description": "Processes: *.p.json"
               },
               "restclient": {
                 "type": "boolean",
-                "description": "rest-clients.yaml"
+                "description": "Rest Clients: rest-clients.yaml"
               },
               "role": {
                 "type": "boolean",
-                "description": "roles.yaml"
+                "description": "Roles: roles.yaml"
               },
               "user": {
                 "type": "boolean",
-                "description": "users.yaml"
+                "description": "Users: users.yaml"
               },
               "variable": {
                 "type": "boolean",
-                "description": "variables.yaml"
+                "description": "Variables: variables.yaml"
               },
               "webserviceclient": {
                 "type": "boolean",
-                "description": "webservice-clients.yaml"
+                "description": "Web Services: webservice-clients.yaml"
               },
               "xhtml": {
                 "type": "boolean",
-                "description": "XHTML files (*.xhtml)"
+                "description": "XHTML: *.xhtml"
               }
             },
             "markdownDescription": "Configure which validators are enabled workspace-wide. Individual validators can be disabled in the respective editor settings.",
