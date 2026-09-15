@@ -23,11 +23,11 @@ pipeline {
       steps {
         script {
           docker.build("node-webtest:${new Date().format('yyyyMMdd')}", '-f build/Dockerfile.playwright --build-arg INSTALL_CODE_SERVER=true .').inside {
+            maven cmd: '-ntp com.axonivy.ivy.ci:project-build-plugin:installEngine -Dengine.page.url=${params.engineListUrl}'
             sh """
             pnpm install && pnpm run update:axonivy:next
             pnpm run build:production
             pnpm run package
-            maven cmd: '-ntp com.axonivy.ivy.ci:project-build-plugin:installEngine -Dengine.page.url=${params.engineListUrl}'
             nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
             code-server --install-extension vscjava.vscode-java-pack
             code-server --install-extension extension/vscode-designer*.vsix

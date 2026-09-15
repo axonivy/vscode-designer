@@ -19,10 +19,10 @@ pipeline {
       steps {
         script {
           docker.build('node-webtest', '-f build/Dockerfile.playwright .').inside {
+            maven cmd: '-ntp com.axonivy.ivy.ci:project-build-plugin:installEngine -Dengine.page.url=${params.engineListUrl}'
             sh """
             pnpm install && pnpm run update:axonivy:next
             pnpm run build:production
-            maven cmd: '-ntp com.axonivy.ivy.ci:project-build-plugin:installEngine -Dengine.page.url=${params.engineListUrl}'
             nohup bash -c 'AxonIvyEngine/bin/AxonIvyEngine &'> ivy-engine-console.out
             """
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
