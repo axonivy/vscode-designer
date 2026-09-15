@@ -6,15 +6,7 @@ import { screenshot, screenshotLocator } from './screenshot-util';
 
 test.use({ workspace: screenshotProject });
 
-test.beforeEach(({ electronApp }) => {
-  test.skip(!electronApp, 'Electron app is required for this test');
-});
-
 test('xhtml editor preview', async ({ wsPage, electronApp }) => {
-  test.skip(!electronApp, 'Electron app is required for this test');
-  if (!electronApp) {
-    return;
-  }
   const editor = new XhtmlEditor(wsPage, 'DemoDialog.xhtml');
   await editor.open();
 
@@ -25,10 +17,8 @@ test('xhtml editor preview', async ({ wsPage, electronApp }) => {
   await expect(vscodeBrowser.browserPage.locator('#iFrameForm\\:frameTaskName')).toHaveText('Preview', timeout);
 
   await expect(async () => {
-    await expect(async () => {
-      await vscodeBrowser.reload();
-      await expect(vscodeBrowser.browserPage.frameLocator('iframe').getByRole('textbox')).toBeVisible(timeout);
-    }).toPass();
+    await vscodeBrowser.reload();
+    await expect(vscodeBrowser.browserPage.frameLocator('iframe').getByRole('textbox')).toBeVisible(timeout);
   }).toPass();
 
   await new Promise(resolve => setTimeout(resolve, 1000)); // wait for the preview to be fully rendered
