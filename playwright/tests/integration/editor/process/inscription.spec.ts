@@ -168,12 +168,25 @@ test('Create new Sub Process', async ({ wsPage }) => {
   await expect(processStartField).toBeEmpty();
   await inscriptionView.clickButton('Create new Sub Process');
   const processName = 'subProcess';
+  await expect(wsPage.quickInputTitle).toContainText('Callable Sub Process');
   await wsPage.provideUserInput(processName);
   await wsPage.provideUserInput(namespace);
   await editor.expectTabDirty();
   await editor.expectTabInactive();
   await editor.tab.click();
   await expect(processStartField).toHaveValue(`${namespace}/${processName}:call(prebuiltProject.Data)`);
+});
+
+test('Create new Buisness Process from Trigger Call', async ({ wsPage }) => {
+  const editor = new ProcessEditor(wsPage, 'Validation.p.json');
+  await editor.open();
+  const inscriptionView = await editor.openInscriptionView('18D9CDFA8F58DA2B-f3');
+  await inscriptionView.openInscriptionTab('Process');
+  await inscriptionView.openCollapsible('Process start');
+  const processStartField = inscriptionView.parent.getByRole('combobox');
+  await expect(processStartField).toBeEmpty();
+  await inscriptionView.clickButton('Create new Trigger Process');
+  await expect(wsPage.quickInputTitle).toContainText('Business Process');
 });
 
 test('Create Html Dialog', async ({ wsPage }) => {

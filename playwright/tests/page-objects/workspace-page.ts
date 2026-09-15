@@ -46,6 +46,10 @@ export class WorkspacePage {
     return this.page.locator('div.quick-input-box');
   }
 
+  get quickInputTitle() {
+    return this.page.locator('div.quick-input-title');
+  }
+
   get toasts() {
     return this.page.locator('div.notification-toast-container');
   }
