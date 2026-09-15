@@ -234,7 +234,9 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
     await new MultiStepInput<NewUserDialogState>().stepThrough(steps, newUserDialogData);
   } catch (err) {
     if (err instanceof MultiStepCancelledError) {
-      logErrorMessage(err.message);
+      if (err.message.trim()) {
+        logErrorMessage(err.message);
+      }
       return;
     } else {
       throw err;
