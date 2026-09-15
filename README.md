@@ -8,7 +8,6 @@ The available VS Code extension can be found under `/extension`.
 
 - `pnpm install`: install all packages
 - `pnpm run build`: build the extension and webviews
-- `pnpm run engine:download`: download and unpack the latest master engine
 - `pnpm run package`: package the extension as .vsix file
 
 ### Generate REST Client from Axon Ivy OpenAPI
