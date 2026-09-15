@@ -23,7 +23,7 @@ pipeline {
       steps {
         script {
           docker.build("node-webtest:${new Date().format('yyyyMMdd')}", '-f build/Dockerfile.playwright --build-arg INSTALL_CODE_SERVER=true .').inside {
-            maven cmd: '-ntp com.axonivy.ivy.ci:project-build-plugin:installEngine -Dengine.page.url=${params.engineListUrl}'
+            maven cmd: "-ntp com.axonivy.ivy.ci:project-build-plugin:installEngine -Dengine.page.url=${params.engineListUrl}"
             sh """
             pnpm install && pnpm run update:axonivy:next
             pnpm run build:production

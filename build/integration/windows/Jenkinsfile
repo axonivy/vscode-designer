@@ -34,7 +34,7 @@ pipeline {
           bat 'pnpm install'
           bat 'pnpm run update:axonivy:next'
           bat 'pnpm run build:production'
-          maven cmd: '-ntp com.axonivy.ivy.ci:project-build-plugin:installEngine -Dengine.page.url=${params.engineListUrl}'
+          maven cmd: "-ntp com.axonivy.ivy.ci:project-build-plugin:installEngine -Dengine.page.url=${params.engineListUrl}"
         }
       }
     }
