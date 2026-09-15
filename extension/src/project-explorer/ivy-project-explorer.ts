@@ -4,7 +4,7 @@ import { commands, Uri, window, workspace } from 'vscode';
 import { registerCommand, type KnownCommand } from '../base/commands';
 import { runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
-import { IvyDiagnostics } from '../engine/diagnostics';
+import { IVY_PROJECT_FILE, IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { installLocalMarketProduct, installMarketProduct } from '../market/import-market';
 import { exportIvyProject } from './export-ivy-project';
@@ -65,7 +65,7 @@ export class IvyProjectExplorer {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const registerCmd = (command: KnownCommand, callback: (...args: any[]) => any) => registerCommand(command, context, callback);
     registerCmd(`${VIEW_ID}.refreshEntry`, () => this.refresh());
-    registerCmd(`${VIEW_ID}.revealInFileSystem`, async (s: TreeSelection) => this.revealInFileExplorer(s));
+    registerCmd(`${VIEW_ID}.revealProjectInFileSystem`, async (s: TreeSelection) => this.revealInFileExplorer(s));
     registerCmd(`${VIEW_ID}.deployProject`, (s: TreeSelection) => this.deployProjects(s));
     registerCmd(`${VIEW_ID}.stopBpmEngine`, (s: TreeSelection) => this.stopBpmEngine(s));
     registerCmd(`${VIEW_ID}.addBusinessProcess`, (s: TreeSelection) => this.addProcess(s, 'Business Process'));
@@ -110,9 +110,12 @@ export class IvyProjectExplorer {
   }
 
   private async revealInFileExplorer(selection: TreeSelection) {
-    const uri = await treeSelectionToUri(selection);
-    if (uri) {
-      await commands.executeCommand('revealFileInOS', uri);
+    const projectUri = await treeSelectionToProjectUri(selection, this.getIvyProjects());
+    if (projectUri) {
+      const projectFileUri = Uri.joinPath(projectUri, IVY_PROJECT_FILE);
+      if (projectFileUri) {
+        await commands.executeCommand('revealFileInOS', projectFileUri);
+      }
     }
   }
 

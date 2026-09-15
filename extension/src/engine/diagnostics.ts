@@ -7,7 +7,7 @@ import { IvyEngineManager } from './engine-manager';
 const DIAGNOSTIC_SOURCE = 'Axon Ivy';
 const CONVERSION_TOO_OLD_MESSAGE_PREFIX = 'Project is too old and needs to be converted in VS Code.';
 const CONVERSION_OUTDATED_MESSAGE_PREFIX = 'Project is outdated and needs to be converted.';
-const IVY_PROJECT_FILE = '.ivyproject';
+export const IVY_PROJECT_FILE = '.ivyproject';
 const POM_FILE = 'pom.xml';
 export class IvyDiagnostics {
   private static _instance: IvyDiagnostics;
