@@ -98,9 +98,7 @@ export const addNewCaseMap = async (selectionContext: AddCommandSelectionContext
     await new MultiStepInput<NewCaseMapState>().stepThrough(steps, newCaseMapData);
   } catch (err) {
     if (err instanceof MultiStepCancelledError) {
-      if (err.message.trim()) {
-        logErrorMessage(err.message);
-      }
+      logErrorMessage(err.message);
       return;
     } else {
       throw err;

@@ -101,9 +101,7 @@ export const addNewDataClass = async (type: DataClassType, selectionContext: Add
     await new MultiStepInput<NewDataClassState>().stepThrough(steps, newDataClassDialogData);
   } catch (err) {
     if (err instanceof MultiStepCancelledError) {
-      if (err.message.trim()) {
-        logErrorMessage(err.message);
-      }
+      logErrorMessage(err.message);
       return;
     } else {
       throw err;

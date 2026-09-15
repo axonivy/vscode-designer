@@ -64,7 +64,7 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
       openLabel: 'Import product.json'
     });
     if (!productInstaller || productInstaller.length === 0 || !productInstaller[0]) {
-      throw new MultiStepCancelledError();
+      throw new MultiStepCancelledError('No product.json file selected. Dialog cancelled.');
     }
     const fileData = await workspace.fs.readFile(productInstaller[0]);
     const productJson = new TextDecoder('utf-8').decode(fileData);
@@ -205,17 +205,7 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     });
   };
 
-  let productJsonSelection: string = '';
-  try {
-    productJsonSelection = await stepSelectJson();
-  } catch (err) {
-    if (err instanceof MultiStepCancelledError) {
-      return;
-    } else {
-      throw err;
-    }
-  }
-
+  const productJsonSelection = await stepSelectJson();
   const steps: InputStep<InstallMarketProductState>[] = [stepProjects, stepRequiredDependencies, stepDependentProject];
   if (productJsonSelection.includes('${version}')) {
     steps.unshift(stepVersion);
@@ -231,9 +221,7 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     await new MultiStepInput<InstallMarketProductState>().stepThrough(steps, installLocalMarketProductData);
   } catch (err) {
     if (err instanceof MultiStepCancelledError) {
-      if (err.message.trim()) {
-        logErrorMessage(err.message);
-      }
+      logErrorMessage(err.message);
       return;
     } else {
       throw err;
@@ -480,9 +468,7 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
     await new MultiStepInput<InstallMarketProductState>().stepThrough(steps, installMarketProductData);
   } catch (err) {
     if (err instanceof MultiStepCancelledError) {
-      if (err.message.trim()) {
-        logErrorMessage(err.message);
-      }
+      logErrorMessage(err.message);
       return;
     } else {
       throw err;

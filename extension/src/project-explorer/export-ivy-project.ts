@@ -46,7 +46,7 @@ export const exportIvyProject = async (addCommandSelectionContext: AddCommandSel
       openLabel: 'Select folder'
     });
     if (!selectedUri || !selectedUri[0] || selectedUri.length === 0) {
-      throw new MultiStepCancelledError();
+      throw new MultiStepCancelledError('Dialog cancelled by the user');
     }
     try {
       const st = fs.statSync(selectedUri[0].fsPath);
@@ -100,9 +100,7 @@ export const exportIvyProject = async (addCommandSelectionContext: AddCommandSel
     await new MultiStepInput<ExportProjectsState>().stepThrough(steps, exportProjectData);
   } catch (err) {
     if (err instanceof MultiStepCancelledError) {
-      if (err.message.trim()) {
-        logErrorMessage(err.message);
-      }
+      logErrorMessage(err.message);
       return;
     } else {
       throw err;

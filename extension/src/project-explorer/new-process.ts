@@ -102,9 +102,7 @@ export const addNewProcess = async (selectionContext: AddCommandSelectionContext
     await new MultiStepInput<NewProcessState>().stepThrough(steps, newProcessData);
   } catch (err) {
     if (err instanceof MultiStepCancelledError) {
-      if (err.message.trim()) {
-        logErrorMessage(err.message);
-      }
+      logErrorMessage(err.message);
       return;
     } else {
       throw err;

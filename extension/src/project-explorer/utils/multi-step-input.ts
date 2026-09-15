@@ -6,7 +6,7 @@ import { type AddCommandSelectionContext } from '../ivy-project-explorer';
 import { resolveNamespaceFromPath, type ResourceDirectoryTarget } from './util';
 
 export class MultiStepCancelledError extends Error {
-  constructor(message?: string) {
+  constructor(message: string) {
     super(message);
     this.name = 'MultiStepCancelledError';
   }
@@ -164,7 +164,7 @@ export class MultiStepInput<T extends MSStateBase> {
           state.currentStep = stepIndex + 1;
           this.currentStep = steps[stepIndex];
         } else if (err == InputFlowAction.cancel) {
-          throw new MultiStepCancelledError();
+          throw new MultiStepCancelledError('Dialog cancelled by the user');
         } else if (err instanceof MultiStepForceBack) {
           stepIndex = Math.max(0, stepIndex - 1);
           state.currentStep = stepIndex + 1;
