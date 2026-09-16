@@ -2,7 +2,6 @@
 import { Flex } from '@axonivy/ui-components';
 import { useVscode } from '../util/useVscode';
 import { SocialMediaLink } from './SocialMediaLink';
-import facebookLogo from './socialMediaIcons/facebook.svg';
 import gitHubLogo from './socialMediaIcons/github.svg';
 import ivyLogo from './socialMediaIcons/ivy.svg';
 import linkedInLogo from './socialMediaIcons/linkedin.svg';
@@ -23,7 +22,6 @@ export const SocialMediaLinkSection = () => {
           url={'https://www.youtube.com/channel/UCkoNcDoeDAVM7FB-txy3jnQ'}
           onClick={openUrl}
         />
-        <SocialMediaLink name='Facebook' icon={facebookLogo} url={'https://www.facebook.com/axonivy/'} onClick={openUrl} />
         <SocialMediaLink name='Axon Ivy' icon={ivyLogo} url={'https://www.axonivy.com/'} onClick={openUrl} />
       </Flex>
     </Flex>

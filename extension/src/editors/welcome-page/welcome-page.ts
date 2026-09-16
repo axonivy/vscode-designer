@@ -1,11 +1,11 @@
 import Parser from 'rss-parser';
-import type { ExtensionContext, WebviewPanel } from 'vscode';
-import { ViewColumn, commands, window } from 'vscode';
+import { ViewColumn, commands, window, type ExtensionContext, type WebviewPanel } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { NotificationType, RequestType } from 'vscode-messenger-common';
 import { extensionVersion } from '../../version/extension-version';
 import { openUrlExternally } from '../notification-helper';
 import { createWebViewContent } from '../webview-helper';
+import { getSystemInfo, type SystemInfo } from './system-info';
 
 let messenger: Messenger | undefined;
 let currentPanel: WebviewPanel | undefined;
@@ -15,6 +15,7 @@ const commandType: NotificationType<string> = { method: 'executeCommand' };
 const versionType: NotificationType<string> = { method: 'versionDelivered' };
 const showWelcomePageType: NotificationType<boolean> = { method: 'showWelcomePage' };
 const toggleShowWelcomePageType: RequestType<boolean, boolean> = { method: 'toggleShowWelcomePage' };
+const getSystemInfoType: RequestType<void, SystemInfo> = { method: 'getSystemInfo' };
 const newsFeedType: NotificationType<NewsFeed> = { method: 'newsFeed' };
 
 export const showWelcomePageKey = 'showWelcomePage';
@@ -46,6 +47,7 @@ export const showWelcomePage = async (context: ExtensionContext) => {
   messenger.sendNotification(versionType, { type: 'webview', webviewType: 'ivy.welcomePage' }, version);
   messenger.sendNotification(showWelcomePageType, { type: 'webview', webviewType: 'ivy.welcomePage' }, showWelcomePageState(context));
   parseFeed().then(feed => messenger.sendNotification(newsFeedType, { type: 'webview', webviewType: 'ivy.welcomePage' }, feed));
+  messenger.onRequest(getSystemInfoType, getSystemInfo);
 
   panel.onDidDispose(() => {
     panel.dispose();
