@@ -66,8 +66,6 @@ export class ProjectFileWatcherManager {
 
   private async deleteProjectOnEngine(project: string) {
     const allProjects = await IvyProjectExplorer.instance.getIvyProjects();
-    console.log('Project to be deleted:', project);
-    console.log('Ivy projects:', allProjects);
     if (!allProjects.includes(project)) {
       return;
     }
