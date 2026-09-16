@@ -18,4 +18,5 @@ test('toggle show welcome page', async ({ wsPage }) => {
   await wsPage.closeAllTabs();
   await welcomePage.open();
   await expect(welcomePage.showPageCheckbox).toBeChecked();
+  await expect(welcomePage.feedbackButton).toBeVisible();
 });
