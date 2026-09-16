@@ -1,3 +1,4 @@
+import path from 'path';
 import { Uri, workspace, type ExtensionContext } from 'vscode';
 import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base/debounce';
 import { askToRunJavaCleanWorkspace } from '../base/java-extension-api';
@@ -31,7 +32,7 @@ export class ProjectFileWatcherManager {
     });
     const deleteProjectWatcher = workspace.createFileSystemWatcher('**/*', true, true, false);
     deleteProjectWatcher.onDidDelete(async e => {
-      if (isWorkspaceLocked() || e.path.includes('/target/')) {
+      if (isWorkspaceLocked() || e.path.includes('/target/') || path.basename(e.fsPath).includes('.')) {
         return;
       }
       await this.deleteProjectOnEngine(e.fsPath);
@@ -63,16 +64,16 @@ export class ProjectFileWatcherManager {
     context.subscriptions.push(ivyProjectFileWatcher, deleteProjectWatcher, webContentWatcher, mvnDepsWatcher, targetWatcher);
   }
 
-  private async deleteProjectOnEngine(projectToBeDeleted: string) {
-    const ivyProjects = await IvyProjectExplorer.instance.getIvyProjects();
-    for (const project of ivyProjects) {
-      if (project === projectToBeDeleted) {
-        await IvyEngineManager.instance.deleteProject(projectToBeDeleted);
-        await askToRunJavaCleanWorkspace('Project deleted');
-        await IvyProjectExplorer.instance.refresh();
-        return;
-      }
+  private async deleteProjectOnEngine(project: string) {
+    const allProjects = await IvyProjectExplorer.instance.getIvyProjects();
+    console.log('Project to be deleted:', project);
+    console.log('Ivy projects:', allProjects);
+    if (!allProjects.includes(project)) {
+      return;
     }
+    await IvyEngineManager.instance.deleteProject(project);
+    await askToRunJavaCleanWorkspace('Project deleted');
+    await IvyProjectExplorer.instance.refresh();
   }
 
   private async runEngineActionDebounced(action: (projectDir: string) => Promise<void>, actionKey: ActionKey, uri?: Uri) {
