@@ -1,5 +1,4 @@
 import { type ElectronApplication, type Page } from '@playwright/test';
-import type { WorkspacePage } from './workspace-page';
 
 type OpenBrowserOptions = { electronApp?: ElectronApplication; page?: Page };
 
@@ -16,10 +15,6 @@ export class VsCodeBrowser {
       return new VsCodeBrowser(browserPage);
     }
     throw new Error('Either electronApp or page must be provided');
-  }
-
-  static async openDevWfUi(wsPage: WorkspacePage, environment: OpenBrowserOptions) {
-    return this.openBrowser(() => wsPage.executeCommand('Open Developer Workflow UI'), environment);
   }
 
   reload() {

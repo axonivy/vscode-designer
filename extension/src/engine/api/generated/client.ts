@@ -137,13 +137,19 @@ export interface ProjectParams {
 
 export interface WorkspaceInit {
   name: string;
-  path?: string;
+  path: string;
 }
 
 export interface WorkspaceBean {
   id: string;
   baseUrl: string;
   running: boolean;
+}
+
+export interface PortalDeploymentResult {
+  reason?: string;
+  deployed?: boolean;
+  appName?: string;
 }
 
 export interface ProductInstallParams {
@@ -165,7 +171,7 @@ export type ComponentFormParams = {
 export type ImportProcessBody = {
   workspaceId?: string;
   projectDir?: string;
-  file?: Blob;
+  file?: Blob | File;
 };
 
 export type ProjectsParams = {
@@ -194,24 +200,68 @@ export type StopBpmEngineParams = {
 };
 
 export type ImportProjectsBody = {
-  file?: Blob;
+  file?: Blob | File;
   targetPath?: string;
 };
 
 export const processDebugger = (options?: AxiosRequestConfig): Promise<AxiosResponse<number>> => {
   return axios.get(`/web-ide/process/debugger`, options);
 };
+export const getProcessDebuggerUrl = () => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/process/debugger`,
+      baseURL: ''
+    });
+};
 
 export const createCaseMap = (caseMapInit?: CaseMapInit, options?: AxiosRequestConfig): Promise<AxiosResponse<CaseMapBean>> => {
   return axios.post(`/web-ide/casemap`, caseMapInit, options);
+};
+export const getCreateCaseMapUrl = () => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/casemap`,
+      baseURL: ''
+    });
 };
 
 export const createDataClass = (dataClassInit?: DataClassInit, options?: AxiosRequestConfig): Promise<AxiosResponse<DataClassBean>> => {
   return axios.post(`/web-ide/dataclass`, dataClassInit, options);
 };
+export const getCreateDataClassUrl = () => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/dataclass`,
+      baseURL: ''
+    });
+};
 
 export const createEntityClass = (dataClassInit?: DataClassInit, options?: AxiosRequestConfig): Promise<AxiosResponse<DataClassBean>> => {
   return axios.post(`/web-ide/dataclass/entity`, dataClassInit, options);
+};
+export const getCreateEntityClassUrl = () => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/dataclass/entity`,
+      baseURL: ''
+    });
 };
 
 /**
@@ -220,6 +270,17 @@ export const createEntityClass = (dataClassInit?: DataClassInit, options?: Axios
 export const getVersion = (options?: AxiosRequestConfig): Promise<AxiosResponse<EngineVersion>> => {
   return axios.get(`/web-ide/engine/version`, options);
 };
+export const getGetVersionUrl = () => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/engine/version`,
+      baseURL: ''
+    });
+};
 
 export const componentForm = (params?: ComponentFormParams, options?: AxiosRequestConfig): Promise<AxiosResponse<HdBean>> => {
   return axios.get(`/web-ide/form`, {
@@ -227,9 +288,32 @@ export const componentForm = (params?: ComponentFormParams, options?: AxiosReque
     params: { ...params, ...options?.params }
   });
 };
+export const getComponentFormUrl = (params?: ComponentFormParams) => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/form`,
+      baseURL: '',
+      params
+    });
+};
 
 export const createHd = (hdInit?: HdInit, options?: AxiosRequestConfig): Promise<AxiosResponse<HdBean>> => {
   return axios.post(`/web-ide/hd`, hdInit, options);
+};
+export const getCreateHdUrl = () => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/hd`,
+      baseURL: ''
+    });
 };
 
 export const importProcess = (importProcessBody?: ImportProcessBody, options?: AxiosRequestConfig): Promise<AxiosResponse<unknown>> => {
@@ -246,9 +330,31 @@ export const importProcess = (importProcessBody?: ImportProcessBody, options?: A
 
   return axios.post(`/web-ide/process/import/xml`, formData, options);
 };
+export const getImportProcessUrl = () => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/process/import/xml`,
+      baseURL: ''
+    });
+};
 
 export const createProcess = (processInit?: ProcessInit, options?: AxiosRequestConfig): Promise<AxiosResponse<ProcessBean>> => {
   return axios.post(`/web-ide/process`, processInit, options);
+};
+export const getCreateProcessUrl = () => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/process`,
+      baseURL: ''
+    });
 };
 
 export const deployProjects = (
@@ -257,12 +363,35 @@ export const deployProjects = (
 ): Promise<AxiosResponse<unknown>> => {
   return axios.post(`/web-ide/projects/deployProjects`, deployProjectsRequest, options);
 };
+export const getDeployProjectsUrl = () => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/projects/deployProjects`,
+      baseURL: ''
+    });
+};
 
 export const projects = (params?: ProjectsParams, options?: AxiosRequestConfig): Promise<AxiosResponse<ProjectBean[]>> => {
   return axios.get(`/web-ide/projects`, {
     ...options,
     params: { ...params, ...options?.params }
   });
+};
+export const getProjectsUrl = (params?: ProjectsParams) => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/projects`,
+      baseURL: '',
+      params
+    });
 };
 
 export const refreshProjectStatuses = (
@@ -271,12 +400,35 @@ export const refreshProjectStatuses = (
 ): Promise<AxiosResponse<ProjectBean[]>> => {
   return axios.post(`/web-ide/projects/refreshProjectStatuses`, refreshProjectStatusesRequest, options);
 };
+export const getRefreshProjectStatusesUrl = () => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/projects/refreshProjectStatuses`,
+      baseURL: ''
+    });
+};
 
 export const convertProject = (params?: ConvertProjectParams, options?: AxiosRequestConfig): Promise<AxiosResponse<unknown>> => {
   return axios.post(`/web-ide/project/convert`, undefined, {
     ...options,
     params: { ...params, ...options?.params }
   });
+};
+export const getConvertProjectUrl = (params?: ConvertProjectParams) => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/project/convert`,
+      baseURL: '',
+      params
+    });
 };
 
 export const createProjectAndProjectFiles = (
@@ -285,9 +437,31 @@ export const createProjectAndProjectFiles = (
 ): Promise<AxiosResponse<ProjectBean>> => {
   return axios.post(`/web-ide/project/new`, newProjectParams, options);
 };
+export const getCreateProjectAndProjectFilesUrl = () => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/project/new`,
+      baseURL: ''
+    });
+};
 
 export const findOrCreateProject = (projectParams?: ProjectParams, options?: AxiosRequestConfig): Promise<AxiosResponse<unknown>> => {
   return axios.post(`/web-ide/project`, projectParams, options);
+};
+export const getFindOrCreateProjectUrl = () => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/project`,
+      baseURL: ''
+    });
 };
 
 export const deleteProject = (params?: DeleteProjectParams, options?: AxiosRequestConfig): Promise<AxiosResponse<unknown>> => {
@@ -295,6 +469,18 @@ export const deleteProject = (params?: DeleteProjectParams, options?: AxiosReque
     ...options,
     params: { ...params, ...options?.params }
   });
+};
+export const getDeleteProjectUrl = (params?: DeleteProjectParams) => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/project`,
+      baseURL: '',
+      params
+    });
 };
 
 export const invalidateClassLoader = (
@@ -306,6 +492,18 @@ export const invalidateClassLoader = (
     params: { ...params, ...options?.params }
   });
 };
+export const getInvalidateClassLoaderUrl = (params?: InvalidateClassLoaderParams) => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/project/invalidate-class-loader`,
+      baseURL: '',
+      params
+    });
+};
 
 export const stopBpmEngine = (params?: StopBpmEngineParams, options?: AxiosRequestConfig): Promise<AxiosResponse<unknown>> => {
   return axios.post(`/web-ide/project/stop-bpm-engine`, undefined, {
@@ -313,9 +511,47 @@ export const stopBpmEngine = (params?: StopBpmEngineParams, options?: AxiosReque
     params: { ...params, ...options?.params }
   });
 };
+export const getStopBpmEngineUrl = (params?: StopBpmEngineParams) => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/project/stop-bpm-engine`,
+      baseURL: '',
+      params
+    });
+};
 
 export const createWorkspace = (workspaceInit?: WorkspaceInit, options?: AxiosRequestConfig): Promise<AxiosResponse<WorkspaceBean>> => {
   return axios.post(`/web-ide/workspace`, workspaceInit, options);
+};
+export const getCreateWorkspaceUrl = () => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/workspace`,
+      baseURL: ''
+    });
+};
+
+export const deployPortal = (id: string, options?: AxiosRequestConfig): Promise<AxiosResponse<PortalDeploymentResult>> => {
+  return axios.post(`/web-ide/workspace/deployPortal/${id}`, undefined, options);
+};
+export const getDeployPortalUrl = (id: string) => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/workspace/deployPortal/${id}`,
+      baseURL: ''
+    });
 };
 
 export const importProjects = (
@@ -333,6 +569,17 @@ export const importProjects = (
 
   return axios.post(`/web-ide/workspace/${id}`, formData, options);
 };
+export const getImportProjectsUrl = (id: string) => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/workspace/${id}`,
+      baseURL: ''
+    });
+};
 
 export const installMarketProduct = (
   id: string,
@@ -340,6 +587,17 @@ export const installMarketProduct = (
   options?: AxiosRequestConfig
 ): Promise<AxiosResponse<MarketInstallResult>> => {
   return axios.post(`/web-ide/workspace/install/${id}`, productInstallParams, options);
+};
+export const getInstallMarketProductUrl = (id: string) => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/workspace/install/${id}`,
+      baseURL: ''
+    });
 };
 
 export type ProcessDebuggerResult = AxiosResponse<number>;
@@ -361,5 +619,6 @@ export type DeleteProjectResult = AxiosResponse<unknown>;
 export type InvalidateClassLoaderResult = AxiosResponse<unknown>;
 export type StopBpmEngineResult = AxiosResponse<unknown>;
 export type CreateWorkspaceResult = AxiosResponse<WorkspaceBean>;
+export type DeployPortalResult = AxiosResponse<PortalDeploymentResult>;
 export type ImportProjectsResult = AxiosResponse<unknown>;
 export type InstallMarketProductResult = AxiosResponse<MarketInstallResult>;
