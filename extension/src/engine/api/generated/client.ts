@@ -149,6 +149,7 @@ export interface WorkspaceBean {
 export interface PortalDeploymentResult {
   reason?: string;
   deployed?: boolean;
+  appName?: string;
 }
 
 export interface ProductInstallParams {

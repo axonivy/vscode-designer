@@ -77,7 +77,7 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
   private async openPortal() {
     const result = await IvyEngineManager.instance.deployPortal();
     if (result?.deployed) {
-      this.openEngineRelativeUrl('system');
+      this.openEngineRelativeUrl(this.devContextPath + '/' + result.appName);
     } else {
       logErrorMessage(`Portal not available: ${result?.reason}`);
     }

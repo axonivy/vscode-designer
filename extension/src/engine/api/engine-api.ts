@@ -234,6 +234,7 @@ export class IvyEngineApi {
       const response = await deployPortal(this.workspace.id, { baseURL: this.designerUrl, ...options }).catch(handleAxiosError);
       this.portalDeploymentResponse = response?.data;
     });
-    return this.portalDeploymentResponse ?? { reason: 'failed to deploy portal', deployed: false };
+    this.portalDeploymentResponse ??= { reason: 'failed to deploy portal', deployed: false };
+    return this.portalDeploymentResponse;
   }
 }
