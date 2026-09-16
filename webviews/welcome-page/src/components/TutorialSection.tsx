@@ -16,7 +16,7 @@ export const TutorialSection = () => {
         <SectionButton onClick={() => openUrl('https://www.axonivy.com/tutorials')}>{t('welcomePage.showAll')}</SectionButton>
       </Flex>
       <img
-        onClick={() => openUrl('https://app.supademo.com/demo/cmj6v0sta00y20b0ifs1jg53x')}
+        onClick={() => openUrl('https://app.supademo.com/demo/cmtik2kgn00d1tq0jvsxv9iri')}
         className='cursor-pointer rounded-lg border border-n200'
         src={IMG_URL}
         alt='Tutorial Image'
