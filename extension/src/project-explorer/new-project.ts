@@ -97,7 +97,7 @@ export const addNewProject = async (selectedUri: Uri) => {
     await new MultiStepInput<NewProjectState>().stepThrough(steps, newProjectData);
   } catch (err) {
     if (err instanceof MultiStepCancelledError) {
-      if (err.message) {
+      if (err.message.trim()) {
         logErrorMessage(err.message);
       }
       return;
