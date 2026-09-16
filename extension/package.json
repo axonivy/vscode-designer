@@ -481,8 +481,8 @@
         "category": "Axon Ivy"
       },
       {
-        "command": "ivyProjects.revealInFileSystem",
-        "title": "Reveal in File System",
+        "command": "ivyProjects.revealProjectInFileSystem",
+        "title": "Reveal Project in File System",
         "category": "Axon Ivy",
         "icon": "$(file-directory)"
       }
@@ -1049,7 +1049,7 @@
       ],
       "view.item": [
         {
-          "command": "ivyProjects.revealInFileSystem",
+          "command": "ivyProjects.revealProjectInFileSystem",
           "when": "view == ivyProjects && viewItem =~ /ivyProject/",
           "group": "1@1"
         },
