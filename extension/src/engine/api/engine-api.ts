@@ -16,6 +16,7 @@ import {
   type ImportProjectsBody,
   type InvalidateClassLoaderParams,
   type NewProjectParams,
+  type PortalDeploymentResult,
   type ProcessInit,
   type ProductInstallParams,
   type ProjectsParams,
@@ -31,6 +32,7 @@ import {
   createProjectAndProjectFiles,
   createWorkspace,
   deleteProject,
+  deployPortal,
   deployProjects,
   findOrCreateProject,
   getVersion,
@@ -56,6 +58,8 @@ export type CreateUserDialogParams = Omit<HdInit, 'workspaceId'>;
 export type CreateCaseMapParams = Omit<CaseMapInit, 'workspaceId'>;
 
 export class IvyEngineApi {
+  private portalDeploymentResponse: PortalDeploymentResult | undefined;
+
   constructor(
     private readonly workspace: WorkspaceBean,
     private readonly designerUrl: string
@@ -220,5 +224,16 @@ export class IvyEngineApi {
 
   public get devContextPath(): string {
     return this.workspace.baseUrl;
+  }
+
+  public async deployPortal() {
+    if (this.portalDeploymentResponse) {
+      return this.portalDeploymentResponse;
+    }
+    await StatusBar.withStatusBarProgress({ text: 'Deploying portal' }, async () => {
+      const response = await deployPortal(this.workspace.id, { baseURL: this.designerUrl, ...options }).catch(handleAxiosError);
+      this.portalDeploymentResponse = response?.data;
+    });
+    return this.portalDeploymentResponse ?? { reason: 'failed to deploy portal', deployed: false };
   }
 }

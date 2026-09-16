@@ -369,6 +369,10 @@ export class IvyEngineManager {
     return this.ivyEngineApi?.projects({ withDependencies });
   }
 
+  public async deployPortal() {
+    return this.ivyEngineApi?.deployPortal();
+  }
+
   async ivyProjectDirectories() {
     return IvyProjectExplorer.instance.getIvyProjects();
   }

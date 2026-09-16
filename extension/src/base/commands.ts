@@ -61,6 +61,7 @@ type ProjectViewCommand =
 type ViewCommand =
   | 'ivyBrowserView.focus'
   | 'ivyBrowserView.openDevWfUi'
+  | 'ivyBrowserView.openPortal'
   | 'ivyBrowserView.openEngineCockpit'
   | 'ivyBrowserView.openPreview'
   | 'ivyPanelView.openRuntimeLog'

@@ -4,6 +4,7 @@ import { executeCommand, registerCommand } from '../../base/commands';
 import { config } from '../../base/configurations';
 import { logErrorMessage } from '../../base/logging-util';
 import { findRootEntry, parseBuildManifest } from '../../editors/build-manifest';
+import { IvyEngineManager } from '../../engine/engine-manager';
 import { dialogPreviewUrl, isDialogPreviewSupported } from './dialog-preview/dialog-preview-url';
 
 export class IvyBrowserViewProvider implements WebviewViewProvider {
@@ -34,6 +35,7 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
       })
     );
     registerCommand('ivyBrowserView.openDevWfUi', context, () => provider.openDevWfUi());
+    registerCommand('ivyBrowserView.openPortal', context, () => provider.openPortal());
     registerCommand('ivyBrowserView.openEngineCockpit', context, () => provider.openEngineRelativeUrl('system/engine-cockpit'));
     registerCommand('ivyBrowserView.openPreview', context, () => provider.openPreview());
     context.subscriptions.push(window.tabGroups.onDidChangeTabs(() => provider.updateDialogPreviewContext()));
@@ -70,6 +72,15 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
 
   private async openDevWfUi() {
     this.openEngineRelativeUrl(this.devContextPath);
+  }
+
+  private async openPortal() {
+    const result = await IvyEngineManager.instance.deployPortal();
+    if (result?.deployed) {
+      this.openEngineRelativeUrl('system');
+    } else {
+      logErrorMessage(`Portal not available: ${result?.reason}`);
+    }
   }
 
   private async openPreview() {
