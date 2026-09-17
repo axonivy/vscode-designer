@@ -281,7 +281,6 @@ export class IvyProjectExplorer {
         .map(item => item.description)
         .filter((description): description is string => !!description);
       await runProjectConversion(projectsToConvert);
-      IvyDiagnostics.instance.refresh();
     });
   }
 

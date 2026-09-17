@@ -1,9 +1,10 @@
 import path from 'path';
 import { ProgressLocation, Uri, window, type CancellationToken, type Progress } from 'vscode';
 import { showExtensionLog } from '../base/extension-output-channel';
-import { askToRunJavaCleanWorkspace, runJavaProjectConfigurationUpdate } from '../base/java-extension-api';
+import { runJavaProjectConfigurationUpdate } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage, logInformationMessageWithActions } from '../base/logging-util';
 import { decreaseWorkspaceLock, increaseWorkspaceLock } from '../base/workspace-lock';
+import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { showProjectConversionLog } from '../engine/project-conversion-log';
 
@@ -23,8 +24,8 @@ export const runProjectConversion = async (projectsToConvert: string[]) => {
       async (progress, token) => await conversionTask(projectsToConvert, progress, token)
     );
   } finally {
-    await askToRunJavaCleanWorkspace('Project conversion finished');
     decreaseWorkspaceLock();
+    await IvyDiagnostics.instance.refresh();
   }
 };
 

@@ -1,5 +1,5 @@
 import type { Uri } from 'vscode';
-import { window } from 'vscode';
+import { window, workspace } from 'vscode';
 import { executeCommand, type JavaCommand } from './commands';
 import { logWarningMessage } from './logging-util';
 
@@ -9,6 +9,16 @@ export const runJavaProjectImport = async () => {
 
 export const runJavaProjectConfigurationUpdate = async (uris: Uri | Uri[]) => {
   return await runJavaCommand('java.projectConfiguration.update', uris);
+};
+
+export const runJavaServerModeSwitch = async () => {
+  if (workspace.getConfiguration().inspect('java.server.launchMode')?.workspaceValue) {
+    return; // user has specified a workspace value for the launch mode
+  }
+  if (workspace.getConfiguration().get<string>('java.server.launchMode') == 'Standard') {
+    return; // already in Standard mode
+  }
+  return await runJavaCommand('java.server.mode.switch', 'Standard', true);
 };
 
 export const askToRunJavaCleanWorkspace = async (reason: string) => {
