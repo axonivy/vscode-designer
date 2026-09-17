@@ -56,10 +56,6 @@ export class ProcessEditor extends WebViewEditor {
     return this.webViewFrame.locator('.quick-actions-bar');
   }
 
-  async assertNotExecuted(element: Locator) {
-    await expect(element).not.toHaveClass(/executed/);
-  }
-
   async assertStopped(element: Locator) {
     await expect(element).toHaveClass(/stopped/);
   }
