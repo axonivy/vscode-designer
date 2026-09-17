@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { commands, ConfigurationTarget, workspace } from 'vscode';
-import { logErrorMessage, logInformationMessage } from './logging-util';
+import { logInformationMessage } from './logging-util';
 
 const EXPECTED_JAVA_VERSION = '25';
 
@@ -14,7 +14,6 @@ export const validateAndSyncJavaVersion = async () => {
     const message = `No valid Java found under JAVA_HOME=${javaHome} or java.jdt.ls.java.home=${jdtJavaHome}.
     Either set env variable JAVA_HOME to valid Java ${EXPECTED_JAVA_VERSION} installation path,
     or configure VS Code setting 'java.jdt.ls.java.home'.`;
-    logErrorMessage(message);
     throw new Error(message);
   }
   if (!isValidJavaHome) {

@@ -1,41 +1,54 @@
+import { execFileSync } from 'child_process';
+import fs from 'fs';
 import { workspace } from 'vscode';
 import { logInformationMessage } from './logging-util';
 
 const MAVEN_SETTING_GROUP = 'maven';
 const MAVEN_SETTING_EXECUTABLE_PATH = 'executable.path';
+const MAVEN_SETTING_KEY = `${MAVEN_SETTING_GROUP}.${MAVEN_SETTING_EXECUTABLE_PATH}`;
 const EXPECTED_MAVEN_VERSION = '3.9';
 
 export const validateAndSyncMavenVersion = async () => {
-  const mvnExectuables = getMvnExecutables();
+  const mvnExecOverrides = getMvnExecutables();
+  const mvnExecOverrideWorkspace = mvnExecOverrides.ws;
+  const mvnExecOverrideUser = mvnExecOverrides.user;
 
-  const isValidMvnOverrideWorkspace = isValidMvnVersion(mvnExectuables.ws);
-
-  if (isValidMvnOverrideWorkspace) {
-    const msg = `Found valid Maven path override in Workspace settings.
-    Set by "${MAVEN_SETTING_GROUP}.${MAVEN_SETTING_EXECUTABLE_PATH}" = ${mvnExectuables.ws}. 
-    This Maven installation will be used.
-    `;
-    logInformationMessage(msg);
+  if (mvnExecOverrideWorkspace) {
+    if (checkMvnExecutable(mvnExecOverrideWorkspace)) {
+      const msg = `Found valid Workspace Maven executable setting "${MAVEN_SETTING_KEY}" = ${mvnExecOverrideWorkspace}.
+      This Maven executable will be used.`;
+      logInformationMessage(msg);
+      return;
+    } else {
+      const msg = `Invalid Workspace Maven executable setting "${MAVEN_SETTING_KEY}". 
+      ${mvnExecOverrideWorkspace} is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}. 
+      Remove the setting from your Workspace configuration.`;
+      throw new Error(msg);
+    }
   }
 
-  const isValidMvnOverrideUser = isValidMvnVersion(mvnExectuables.user);
-
-  if (isValidMvnOverrideUser) {
-    const msg = `Found valid Maven path override in User settings.
-    Set by "${MAVEN_SETTING_GROUP}.${MAVEN_SETTING_EXECUTABLE_PATH}" = ${mvnExectuables.user}. 
-    This Maven installation will be used.
-    `;
-    logInformationMessage(msg);
+  if (mvnExecOverrideUser) {
+    if (checkMvnExecutable(mvnExecOverrideUser)) {
+      const msg = `Found valid User Maven executable setting "${MAVEN_SETTING_KEY}" = ${mvnExecOverrideUser}.
+      This Maven executable will be used.`;
+      logInformationMessage(msg);
+      return;
+    } else {
+      const msg = `Invalid User Maven executable setting "${MAVEN_SETTING_KEY}". 
+      ${mvnExecOverrideUser} is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}. 
+      Remove the setting from your User configuration.`;
+      throw new Error(msg);
+    }
   }
 
-  const isValidMvnPath = isValidMvnVersion(mvnExectuables.ws);
-
+  const isValidMvnPath = checkMvnExecutable();
   if (isValidMvnPath) {
-    const msg = `No Maven path overrides found in settings.
-    Found valid Maven path in system PATH.
-    `;
-    logInformationMessage(msg);
+    return; // silently return, default is to use the system Maven executable found on PATH
   }
+  const msg = `No valid Maven executable found.
+  Please ensure Maven ${EXPECTED_MAVEN_VERSION} is installed and accessible in your PATH
+  or the path to the executable is configured in your VS Code settings via ${MAVEN_SETTING_KEY}.`;
+  throw new Error(msg);
 };
 
 const getMvnExecutables = () => {
@@ -54,25 +67,26 @@ const getMvnExecutables = () => {
   };
 };
 
-const checkPathToExecutable = (path: string) => {
-  // TODO
-  // 1 - Check if path is executable file
-  // 2 - Check if '${path} --version' return maven version EXPECTED_MAVEN_VERSION
-
-  return false;
-};
-
-const checkMvnFromPath = () => {
-  // TODO
-  // 1 - Run 'mvn --version' and check maven version EXPECTED_MAVEN_VERSION
-
-  return false;
-};
-
-const isValidMvnVersion = (pathToExecutable: string | undefined): boolean => {
+const checkMvnExecutable = (pathToExecutable?: string) => {
   if (pathToExecutable) {
-    return checkPathToExecutable(pathToExecutable);
-  } else {
-    return checkMvnFromPath();
+    if (!isExecutableFile(pathToExecutable)) {
+      return false;
+    }
+    const version = execFileSync(pathToExecutable, ['--version'], { encoding: 'utf8', windowsHide: true });
+    return isExpectedMavenVersion(version);
   }
+  const version = execFileSync('mvn', ['--version'], { encoding: 'utf8', windowsHide: true });
+  return isExpectedMavenVersion(version);
+};
+
+const isExecutableFile = (path: string): boolean => {
+  try {
+    return fs.statSync(path).isFile() && fs.accessSync(path, fs.constants.X_OK) === undefined;
+  } catch {
+    return false;
+  }
+};
+
+const isExpectedMavenVersion = (versionOutput: string) => {
+  return new RegExp(`Apache Maven ${EXPECTED_MAVEN_VERSION.replace('.', '\\.')}\\.\\d+(?:\\s|$)`).test(versionOutput);
 };
