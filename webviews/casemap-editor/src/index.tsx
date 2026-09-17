@@ -20,8 +20,12 @@ export async function start({ file }: InitializeConnection) {
     throw new Error('Root element not found');
   }
   initTranslation();
-  const context = { app: '', project: '', file };
-  await client.initialize(context)
+  const normalized = file.replace(/\\/g, '/');
+  const processPathIndex = normalized.indexOf('/process/');
+  const projectPath = processPathIndex >= 0 ? normalized.slice(0, processPathIndex) : normalized;
+  const projectName = projectPath.substring(projectPath.lastIndexOf('/') + 1);
+  const context = { app: '', project: projectName, file };
+  await client.initialize(context);
   createRoot(rootElement).render(
     <React.StrictMode>
       <ThemeProvider disabled={true}>
