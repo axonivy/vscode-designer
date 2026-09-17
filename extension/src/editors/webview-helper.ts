@@ -34,11 +34,11 @@ export const createWebViewContent = (context: ExtensionContext, webview: Webview
     'http-equiv': 'Content-Security-Policy',
     content: `
       default-src 'none';
-      style-src 'unsafe-inline' ${webview.cspSource};
+      style-src 'unsafe-inline' ${webview.cspSource} http://localhost:* http://127.0.0.1:*;
       img-src ${webview.cspSource} https: http://localhost:* http://127.0.0.1:* data:;
       script-src 'nonce-${nonce}' *;
       worker-src ${webview.cspSource} blob: data:;
-      font-src ${webview.cspSource};
+      font-src ${webview.cspSource} http://localhost:* http://127.0.0.1:* data:;
       connect-src ${webview.cspSource}`
   });
   DomUtils.appendChild(head, csp);
