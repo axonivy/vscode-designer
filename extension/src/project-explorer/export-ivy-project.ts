@@ -152,6 +152,9 @@ const exportIar = async (
     return;
   }
 
+  // TODO: How to test if the export was actually successful?
+  // If path to mvn executable is faulty, the command fails but here we do not catch that
+
   logInformationMessageWithActions(`Exported project ${projectToExport.label} to ${targetFilePath}`, {
     'Show Log': () => {
       showExtensionLog();
