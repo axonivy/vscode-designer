@@ -47,11 +47,11 @@ export class IvyDiagnostics {
           if (!fs.existsSync(uri.fsPath)) {
             uri = Uri.joinPath(projectUri, POM_FILE);
           }
+          hasProjectWithError = true;
         }
         const diagnostic = new Diagnostic(new Range(1, 0, 1, 0), project.errorMessage, DiagnosticSeverity.Error);
         diagnostic.source = DIAGNOSTIC_SOURCE;
         this.diagnostics.set(uri, [diagnostic]);
-        hasProjectWithError = true;
       });
     const projectExplorerDiagnostics = await IvyProjectExplorer.instance.getDiagnostics();
     projectExplorerDiagnostics.forEach((d, uri) => {

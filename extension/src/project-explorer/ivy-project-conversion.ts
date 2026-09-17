@@ -1,7 +1,6 @@
 import path from 'path';
-import { ProgressLocation, Uri, window, type CancellationToken, type Progress } from 'vscode';
+import { ProgressLocation, window, type CancellationToken, type Progress } from 'vscode';
 import { showExtensionLog } from '../base/extension-output-channel';
-import { runJavaProjectConfigurationUpdate } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage, logInformationMessageWithActions } from '../base/logging-util';
 import { decreaseWorkspaceLock, increaseWorkspaceLock } from '../base/workspace-lock';
 import { IvyDiagnostics } from '../engine/diagnostics';
@@ -25,8 +24,9 @@ export const runProjectConversion = async (projectsToConvert: string[]) => {
     );
   } finally {
     decreaseWorkspaceLock();
-    await IvyDiagnostics.instance.refresh();
   }
+  await IvyEngineManager.instance.deployProjects();
+  await IvyDiagnostics.instance.refresh();
 };
 
 const conversionTask = async (
@@ -59,10 +59,6 @@ const conversionTask = async (
     progress.report({
       increment: (1 / numOfProjects) * 100
     });
-  }
-  const projectsToReload = projectsToConvert.filter(p => !failedProjects.includes(p)).map(p => Uri.file(p));
-  if (projectsToReload.length > 0) {
-    await runJavaProjectConfigurationUpdate(projectsToReload);
   }
   logInformationMessageWithActions(
     `Converted ${convertedCount} of ${numOfProjects} Axon Ivy project(s).${failedProjects.length > 0 ? ` ${failedProjects.length} project(s) failed to convert.` : ''}`,
