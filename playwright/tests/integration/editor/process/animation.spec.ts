@@ -13,9 +13,10 @@ test('with activated animation and reset afterwards', { tag: '@serial' }, async 
   await wsPage.page.waitForTimeout(2_000); // ensure config is respected
   const taskInCallSub = callableEditor.elementByPID('190EEC3ABECE2C88-f5');
   await processEditor.startProcessAndAssertExecuted(start, taskInCallSub);
-  await wsPage.page.waitForTimeout(500); //ensure animation finished
-  await wsPage.executeCommand('Axon Ivy: Stop BPM Engine of Project');
-  await processEditor.assertNotExecuted(taskInCallSub);
+  await expect(async () => {
+    await wsPage.executeCommand('Axon Ivy: Stop BPM Engine of Project');
+    await expect(taskInCallSub).not.toHaveClass(/executed/, { timeout: 1_000 });
+  }).toPass();
 });
 
 test('with deactivated animation', { tag: '@serial' }, async ({ wsPage }) => {
