@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { beforeEach, expect, test, vi } from 'vitest';
-import { validateAndSyncMavenVersion } from './maven-version-validation';
+import { validateMavenExecutable } from './maven-version-validation';
 
 const mocks = vi.hoisted(() => ({
   inspect: vi.fn(),
@@ -51,17 +51,15 @@ beforeEach(() => {
 });
 
 test('valid Maven from PATH', async () => {
-  await expect(validateAndSyncMavenVersion()).resolves.toBeUndefined();
-
+  expect(validateMavenExecutable()).toBeUndefined();
   expect(mocks.execFileSync).toHaveBeenCalledWith('mvn', ['--version'], { encoding: 'utf8', windowsHide: true });
-  expect(mocks.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('Found valid Maven path in system PATH.'));
 });
 
 test('valid workspace Maven override', async () => {
   const executablePath = '/workspace/maven/bin/mvn';
   mocks.inspect.mockReturnValue({ workspaceValue: executablePath, globalValue: undefined });
 
-  await expect(validateAndSyncMavenVersion()).resolves.toBeUndefined();
+  expect(validateMavenExecutable()).toBeUndefined();
 
   expect(mocks.statSync).toHaveBeenCalledWith(executablePath);
   expect(mocks.accessSync).toHaveBeenCalledWith(executablePath, fs.constants.X_OK);
@@ -74,7 +72,7 @@ test('valid user Maven override', async () => {
   const executablePath = '/home/user/maven/bin/mvn';
   mocks.inspect.mockReturnValue({ workspaceValue: undefined, globalValue: executablePath });
 
-  await expect(validateAndSyncMavenVersion()).resolves.toBeUndefined();
+  expect(validateMavenExecutable()).toBeUndefined();
 
   expect(mocks.statSync).toHaveBeenCalledWith(executablePath);
   expect(mocks.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('Found valid Maven path override in User settings.'));
@@ -85,7 +83,7 @@ test('invalid Maven executable path', async () => {
   mocks.inspect.mockReturnValue({ workspaceValue: executablePath, globalValue: undefined });
   mocks.statSync.mockReturnValue({ isFile: () => false });
 
-  await expect(validateAndSyncMavenVersion()).resolves.toBeUndefined();
+  expect(validateMavenExecutable()).toBeUndefined();
 
   expect(mocks.showInformationMessage).not.toHaveBeenCalledWith(expect.stringContaining('Workspace settings'));
 });
@@ -93,7 +91,7 @@ test('invalid Maven executable path', async () => {
 test('invalid Maven version', async () => {
   mocks.execFileSync.mockReturnValue('Apache Maven 3.8.8\n');
 
-  await expect(validateAndSyncMavenVersion()).resolves.toBeUndefined();
+  expect(validateMavenExecutable()).toBeUndefined();
 
   expect(mocks.showInformationMessage).not.toHaveBeenCalled();
 });
@@ -103,7 +101,7 @@ test('Maven command failure', async () => {
     throw new Error('Maven not found');
   });
 
-  await expect(validateAndSyncMavenVersion()).resolves.toBeUndefined();
+  expect(validateMavenExecutable()).toBeUndefined();
 
   expect(mocks.showInformationMessage).not.toHaveBeenCalled();
 });

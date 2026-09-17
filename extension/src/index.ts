@@ -8,7 +8,7 @@ import { config } from './base/configurations';
 import { showExtensionLog } from './base/extension-output-channel';
 import { validateAndSyncJavaVersion } from './base/java-version-validation';
 import { logInformationMessage, logWarningMessage } from './base/logging-util';
-import { validateAndSyncMavenVersion } from './base/maven-version-validation';
+import { validateMavenExecutable } from './base/maven-version-validation';
 import { newMarkdownString, StatusBar, type QuickPickOptionId } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
@@ -36,7 +36,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
   });
   try {
     await validateAndSyncJavaVersion();
-    await validateAndSyncMavenVersion();
+    validateMavenExecutable();
     ensureJavaExtensionInstalled();
     resolveExtensionVersion(context);
     ivyEngineManager = IvyEngineManager.init(context);

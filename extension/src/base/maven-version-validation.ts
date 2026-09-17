@@ -8,7 +8,7 @@ const MAVEN_SETTING_EXECUTABLE_PATH = 'executable.path';
 const MAVEN_SETTING_KEY = `${MAVEN_SETTING_GROUP}.${MAVEN_SETTING_EXECUTABLE_PATH}`;
 const EXPECTED_MAVEN_VERSION = '3.9';
 
-export const validateAndSyncMavenVersion = async () => {
+export const validateMavenExecutable = () => {
   const mvnExecOverrides = getMvnExecutables();
   const mvnExecOverrideWorkspace = mvnExecOverrides.ws;
   const mvnExecOverrideUser = mvnExecOverrides.user;
