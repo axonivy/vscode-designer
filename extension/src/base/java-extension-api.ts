@@ -39,9 +39,9 @@ export const askToRunJavaCleanWorkspace = async (reason: string) => {
 const runJavaCommand = async (command: JavaCommand, ...args: any[]) => {
   try {
     return await executeCommand(command, ...args);
-  } catch (error) {
+  } catch {
     logWarningMessage(
-      `Could not execute Java command. Java extension might not be installed or activated. Java support will not be fully available. ${error}`
+      `Could not execute Java command ${command}. Java extension might not be installed or activated. Java support will not be fully available.`
     );
   }
 };
