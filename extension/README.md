@@ -32,7 +32,7 @@ In addition to our extension, make sure the [Dev Container extension](https://ma
 - Add an **Axon Ivy Project**
 - Create a **Business Process** and add a **User Dialog** activity
 - Create a **Form Dialog** with an input field
-- Start a **Process Preview**
+- Start **Process Preview**
 
 See how it works:
 ![Add Project](extension/assets/readme/add-project.gif)
