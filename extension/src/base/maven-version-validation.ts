@@ -48,23 +48,15 @@ export const validateMavenExecutable = () => {
 };
 
 const getMvnExecutables = () => {
-  const mvnConfig = workspace.getConfiguration(MAVEN_SETTING_GROUP);
-  if (!mvnConfig) {
-    return {
-      ws: undefined,
-      user: undefined
-    };
-  }
-  const mvnOverrideWorkspace = mvnConfig.inspect<string>(MAVEN_SETTING_EXECUTABLE_PATH)?.workspaceValue;
-  const mvnOverrideUser = mvnConfig.inspect<string>(MAVEN_SETTING_EXECUTABLE_PATH)?.globalValue;
+  const mvnConfig = workspace.getConfiguration(MAVEN_SETTING_GROUP).inspect<string>(MAVEN_SETTING_EXECUTABLE_PATH);
   return {
-    ws: mvnOverrideWorkspace,
-    user: mvnOverrideUser
+    ws: mvnConfig?.workspaceFolderValue ?? mvnConfig?.workspaceValue, // workspaceFolderValue covers multi-root workspace scenarios
+    user: mvnConfig?.globalValue
   };
 };
 
 const checkMvnExecutable = (pathToExecutable: string) => {
-  if (pathToExecutable && pathToExecutable != DEFAULT_MAVEN_EXECUTABLE) {
+  if (pathToExecutable && pathToExecutable !== DEFAULT_MAVEN_EXECUTABLE) {
     if (!isExecutableFile(pathToExecutable)) {
       return false;
     }
@@ -80,8 +72,7 @@ const checkMvnExecutable = (pathToExecutable: string) => {
 const isExecutableFile = (path: string): boolean => {
   try {
     return statSync(path).isFile() && accessSync(path, constants.X_OK) === undefined;
-  } catch (e) {
-    console.error(e);
+  } catch {
     return false;
   }
 };

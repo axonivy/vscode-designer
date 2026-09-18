@@ -152,8 +152,8 @@ const exportIar = async (
     return;
   }
 
-  // TODO: How to test if the export was actually successful?
-  // If path to mvn executable is faulty, the command fails but here we do not catch that
+  // TODO: Safetynet: Check if file actually exists, making sure the maven cmd succeeded 100%
+  // executeCommand() is not properly awaited, so a simple fileExists check does not work
 
   logInformationMessageWithActions(`Exported project ${projectToExport.label} to ${targetFilePath}`, {
     'Show Log': () => {
