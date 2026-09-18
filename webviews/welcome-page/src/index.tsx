@@ -3,6 +3,7 @@ import '@axonivy/vscode-webview-common/css/colors.css';
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
 import type { NotificationType } from 'vscode-messenger-common';
+import { UsersnapProvider } from './components/feedback/UsersnapProvider';
 import { WelcomePage } from './components/WelcomePage';
 import { initTranslation } from './i18n';
 import './index.css';
@@ -27,8 +28,10 @@ export async function start() {
     <React.StrictMode>
       <ThemeProvider disabled={true}>
         <VscodeMessengerProvider messenger={messenger}>
-          <WelcomePage />
-          <Toaster closeButton={true} />
+          <UsersnapProvider>
+            <WelcomePage />
+            <Toaster closeButton={true} />
+          </UsersnapProvider>
         </VscodeMessengerProvider>
       </ThemeProvider>
     </React.StrictMode>

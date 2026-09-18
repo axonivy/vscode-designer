@@ -22,6 +22,13 @@ export const createWebViewContent = (context: ExtensionContext, webview: Webview
     throw new Error('Invalid HTML template, missing head or body element');
   }
 
+  const nonceMeta = new Element('meta', {
+    name: 'csp-nonce',
+    content: nonce
+  });
+
+  DomUtils.appendChild(head, nonceMeta);
+
   const templateScripts = Array.from(DomUtils.getElementsByTagName('script', htmlDoc));
   const templateStyleLinks = Array.from(DomUtils.getElementsByTagName('link', htmlDoc)).filter(link => link.attribs.rel === 'stylesheet');
 
@@ -39,7 +46,7 @@ export const createWebViewContent = (context: ExtensionContext, webview: Webview
       script-src 'nonce-${nonce}' *;
       worker-src ${webview.cspSource} blob: data:;
       font-src ${webview.cspSource} http://localhost:* http://127.0.0.1:* data:;
-      connect-src ${webview.cspSource}`
+      connect-src ${webview.cspSource} https://*.usersnap.com`
   });
   DomUtils.appendChild(head, csp);
 
