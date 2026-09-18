@@ -32,19 +32,19 @@ export const validateMavenExecutable = () => {
   }
 
   if (mvnExecOverrideWorkspace) {
-    throw new Error(`Invalid Workspace Maven executable setting "${MAVEN_SETTING_KEY}". 
-    ${mvnExecOverrideWorkspace} is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}. 
+    throw new Error(`Invalid Workspace Maven executable setting "${MAVEN_SETTING_KEY}": ${mvnExecOverrideWorkspace}.
+    This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}. 
     Remove the setting from your Workspace configuration.`);
   }
   if (mvnExecOverrideUser) {
-    throw new Error(`Invalid User Maven executable setting "${MAVEN_SETTING_KEY}". 
-    ${mvnExecOverrideUser} is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}. 
+    throw new Error(`Invalid User Maven executable setting "${MAVEN_SETTING_KEY}": ${mvnExecOverrideUser}.
+    This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}. 
     Remove the setting from your User configuration.`);
   }
 
   throw new Error(`No valid Maven executable found.
   Please ensure Maven ${EXPECTED_MAVEN_VERSION} is installed and accessible in your PATH
-  or the path to the executable is configured in your VS Code settings via ${MAVEN_SETTING_KEY}.`);
+  or the path to the executable is configured in your VS Code settings via "${MAVEN_SETTING_KEY}."`);
 };
 
 const getMvnExecutables = () => {
