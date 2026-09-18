@@ -1,5 +1,5 @@
 import { execFileSync } from 'child_process';
-import fs from 'fs';
+import { accessSync, constants, statSync } from 'fs';
 import { workspace } from 'vscode';
 import { logInformationMessage } from './logging-util';
 
@@ -79,8 +79,9 @@ const checkMvnExecutable = (pathToExecutable: string) => {
 
 const isExecutableFile = (path: string): boolean => {
   try {
-    return fs.statSync(path).isFile() && fs.accessSync(path, fs.constants.X_OK) === undefined;
-  } catch {
+    return statSync(path).isFile() && accessSync(path, constants.X_OK) === undefined;
+  } catch (e) {
+    console.error(e);
     return false;
   }
 };
