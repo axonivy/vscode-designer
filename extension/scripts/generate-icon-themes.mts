@@ -3,7 +3,7 @@ import { createFont, woff2 } from 'fonteditor-core';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
-import { IVY_FILE_EXTENSIONS, IVY_FILE_NAMES, IVY_FOLDER, IVY_FONT_ID, IVY_ICON_DEFINITIONS } from './generate-icon-themes-definitions.mts';
+import { IVY_FILE_EXTENSIONS, IVY_FILE_NAMES, IVY_FOLDER, IVY_FOLDER_EXPANDED, IVY_FONT_ID, IVY_ICON_DEFINITIONS } from './generate-icon-themes-definitions.mts';
 import type { IconTheme } from './generate-icon-themes-types.mts';
 
 const ICON_THEMES_OUTPUT_DIRECTORY = '../dist/icon-themes' as const;
@@ -108,11 +108,13 @@ async function themeColored(): Promise<IconTheme> {
     ],
     iconDefinitions: { ...setiIconTheme.iconDefinitions, ...ivyIconDefinitions },
     folder: IVY_FOLDER,
+    folderExpanded: IVY_FOLDER_EXPANDED,
     fileExtensions: { ...setiIconTheme.fileExtensions, ...IVY_FILE_EXTENSIONS },
     fileNames: { ...setiIconTheme.fileNames, ...IVY_FILE_NAMES },
     light: {
       ...setiIconTheme.light,
       folder: `${IVY_FOLDER}_light`,
+      folderExpanded: `${IVY_FOLDER_EXPANDED}_light`,
       fileExtensions: { ...setiIconTheme.light?.fileExtensions, ...toLight(IVY_FILE_EXTENSIONS) },
       fileNames: { ...setiIconTheme.light?.fileNames, ...toLight(IVY_FILE_NAMES) }
     }
