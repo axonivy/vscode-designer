@@ -9,54 +9,73 @@ const MAVEN_SETTING_EXECUTABLE_PATH = 'executable.path';
 const MAVEN_SETTING_KEY = `${MAVEN_SETTING_GROUP}.${MAVEN_SETTING_EXECUTABLE_PATH}`;
 const EXPECTED_MAVEN_VERSION = '3.9';
 
+export type MvnSettingExecutable = {
+  scope: 'workspace' | 'user';
+  value: string;
+};
+
 export const validateMavenExecutable = () => {
-  const { ws: mvnExecOverrideWorkspace, user: mvnExecOverrideUser } = getMvnExecutables();
+  const mvnExecutables = getMvnExecutables();
+  const mvnExectuablesWs = mvnExecutables.filter(mvnExecutable => mvnExecutable.scope === 'workspace');
+  const mvnExectuablesUser = mvnExecutables.filter(mvnExecutable => mvnExecutable.scope === 'user')[0];
 
-  const candidateExec = mvnExecOverrideWorkspace ?? mvnExecOverrideUser ?? DEFAULT_MAVEN_EXECUTABLE;
-
-  const isValid = checkMvnExecutable(candidateExec);
-
-  if (isValid) {
-    if (mvnExecOverrideWorkspace) {
-      logInformationMessage(
-        `Found valid Workspace Maven executable setting "${MAVEN_SETTING_KEY}" = ${mvnExecOverrideWorkspace}.
-        This Maven executable will be used.`
-      );
-    } else if (mvnExecOverrideUser) {
-      logInformationMessage(
-        `Found valid User Maven executable setting "${MAVEN_SETTING_KEY}" = ${mvnExecOverrideUser}.
-        This Maven executable will be used.`
-      );
+  mvnExectuablesWs.forEach(mvnExecutable => {
+    if (!checkMvnExecutable(mvnExecutable.value)) {
+      throw new Error(`Invalid ${mvnExecutable.scope} Maven setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}". 
+        This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}.
+        Remove the setting and reload the window`);
     }
-    return;
+  });
+  if (mvnExectuablesWs.length > 0) {
+    logInformationMessage(`Found valid Workspace/Folder Maven executable setting(s) "${MAVEN_SETTING_KEY}".
+    This executable will be used for Maven operations in the respective Workspace/Folder.`);
   }
 
-  if (mvnExecOverrideWorkspace) {
-    throw new Error(`Invalid Workspace Maven executable setting "${MAVEN_SETTING_KEY}": ${mvnExecOverrideWorkspace}.
-    This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}. 
-    Remove the setting from your Workspace configuration.`);
-  }
-  if (mvnExecOverrideUser) {
-    throw new Error(`Invalid User Maven executable setting "${MAVEN_SETTING_KEY}": ${mvnExecOverrideUser}.
-    This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}. 
-    Remove the setting from your User configuration.`);
+  if (mvnExectuablesUser) {
+    if (!checkMvnExecutable(mvnExectuablesUser.value)) {
+      throw new Error(`Invalid ${mvnExectuablesUser.scope} Maven setting "${MAVEN_SETTING_KEY}": "${mvnExectuablesUser.value}".
+        This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}.
+        Remove the setting and reload the window`);
+    }
   }
 
-  throw new Error(`No valid Maven executable found.
-  Please ensure Maven ${EXPECTED_MAVEN_VERSION} is installed and accessible in your PATH
-  or the path to the executable is configured in your VS Code settings via "${MAVEN_SETTING_KEY}."`);
+  if (mvnExectuablesUser) {
+    logInformationMessage(`Found valid User Maven executable setting(s) "${MAVEN_SETTING_KEY}": "${mvnExectuablesUser.value}".
+    This executable will be used for Maven operations in folders where no Workspace/Folder Maven executable is configured.`);
+  }
+
+  const isValidPath = checkMvnExecutable(DEFAULT_MAVEN_EXECUTABLE);
+  if (!isValidPath) {
+    throw new Error(`No valid Maven executable found.
+    Please ensure Maven ${EXPECTED_MAVEN_VERSION} is installed and accessible in your PATH
+    or the path to the executable is configured in your VS Code settings via "${MAVEN_SETTING_KEY}"`);
+  }
 };
 
 const getMvnExecutables = () => {
-  const mvnConfig = workspace.getConfiguration(MAVEN_SETTING_GROUP).inspect<string>(MAVEN_SETTING_EXECUTABLE_PATH);
-  return {
-    ws: mvnConfig?.workspaceFolderValue ?? mvnConfig?.workspaceValue, // workspaceFolderValue covers multi-root workspace scenarios
-    user: mvnConfig?.globalValue
-  };
+  const mvnExecutables: MvnSettingExecutable[] = [];
+  const wsFolders = workspace.workspaceFolders ?? [];
+
+  // Retrieve Maven executable settings from each workspace folder, covers single and multi-root workspaces
+  wsFolders.forEach(folder => {
+    const mvnConfig = workspace.getConfiguration(MAVEN_SETTING_GROUP, folder.uri).inspect<string>(MAVEN_SETTING_EXECUTABLE_PATH);
+    if (mvnConfig?.workspaceFolderValue) {
+      mvnExecutables.push({ scope: 'workspace', value: mvnConfig.workspaceFolderValue });
+    } else if (mvnConfig?.workspaceValue) {
+      mvnExecutables.push({ scope: 'workspace', value: mvnConfig.workspaceValue });
+    }
+  });
+
+  // Also retrieve the user config if present
+  const userMvnConfig = workspace.getConfiguration(MAVEN_SETTING_GROUP).inspect<string>(MAVEN_SETTING_EXECUTABLE_PATH)?.globalValue;
+  if (userMvnConfig) {
+    mvnExecutables.push({ scope: 'user', value: userMvnConfig });
+  }
+  return mvnExecutables;
 };
 
 const checkMvnExecutable = (pathToExecutable: string) => {
-  if (pathToExecutable && pathToExecutable !== DEFAULT_MAVEN_EXECUTABLE) {
+  if (pathToExecutable !== DEFAULT_MAVEN_EXECUTABLE) {
     if (!isExecutableFile(pathToExecutable)) {
       return false;
     }
