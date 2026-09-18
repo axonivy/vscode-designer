@@ -152,9 +152,6 @@ const exportIar = async (
     return;
   }
 
-  // TODO: Safetynet: Check if file actually exists, making sure the maven cmd succeeded 100%
-  // executeCommand() is not properly awaited, so a simple fileExists check does not work
-
   logInformationMessageWithActions(`Exported project ${projectToExport.label} to ${targetFilePath}`, {
     'Show Log': () => {
       showExtensionLog();
