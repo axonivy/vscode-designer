@@ -78,4 +78,8 @@ export type ConfigEditorCommand =
   | 'ivyEditor.openRestClientEditor'
   | 'ivyEditor.openCustomFieldEditor';
 export type EditorCommand = 'ivyEditor.openCmsEditor';
-export type JavaCommand = 'java.project.import.command' | 'java.clean.workspace' | 'java.projectConfiguration.update';
+export type JavaCommand =
+  | 'java.project.import.command'
+  | 'java.clean.workspace'
+  | 'java.projectConfiguration.update'
+  | 'java.server.mode.switch';

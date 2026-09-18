@@ -1,7 +1,9 @@
 import type { Uri } from 'vscode';
-import { window } from 'vscode';
+import { commands, extensions, window, workspace } from 'vscode';
 import { executeCommand, type JavaCommand } from './commands';
-import { logWarningMessage } from './logging-util';
+import { logInformationMessage, logWarningMessage } from './logging-util';
+
+export const JAVA_EXTENSION_ID = 'redhat.java';
 
 export const runJavaProjectImport = async () => {
   return await runJavaCommand('java.project.import.command');
@@ -9,6 +11,16 @@ export const runJavaProjectImport = async () => {
 
 export const runJavaProjectConfigurationUpdate = async (uris: Uri | Uri[]) => {
   return await runJavaCommand('java.projectConfiguration.update', uris);
+};
+
+export const runJavaServerModeSwitch = async () => {
+  if (workspace.getConfiguration().inspect('java.server.launchMode')?.workspaceValue) {
+    return; // user has specified a workspace value for the launch mode
+  }
+  if (workspace.getConfiguration().get<string>('java.server.launchMode') == 'Standard') {
+    return; // already in Standard mode
+  }
+  return await runJavaCommand('java.server.mode.switch', 'Standard', true);
 };
 
 export const askToRunJavaCleanWorkspace = async (reason: string) => {
@@ -29,9 +41,48 @@ export const askToRunJavaCleanWorkspace = async (reason: string) => {
 const runJavaCommand = async (command: JavaCommand, ...args: any[]) => {
   try {
     return await executeCommand(command, ...args);
-  } catch (error) {
+  } catch {
     logWarningMessage(
-      `Could not execute Java command. Java extension might not be installed or activated. Java support will not be fully available. ${error}`
+      `Could not execute Java command ${command}. Java extension might not be installed or activated. Java support will not be fully available.`
     );
   }
+};
+
+export const ensureJavaLightWeightMode = async (task: string) => {
+  const javaExtension = extensions.getExtension(JAVA_EXTENSION_ID);
+  if (!javaExtension || !javaExtension.isActive) {
+    return;
+  }
+  if (javaExtension.exports.serverMode !== 'Standard') {
+    return;
+  }
+  const launchMode = workspace.getConfiguration().get<string>('java.server.launchMode');
+  if (launchMode !== 'LightWeight') {
+    return;
+  }
+  const selection = await window.showQuickPick(
+    [{ label: 'Reload Window', detail: 'Unsaved changes will be lost' }, { label: 'Continue without reloading' }],
+    {
+      ignoreFocusOut: true,
+      title: `It's recommended to reload the window for ${task} in order to switch back to Java LightWeight mode.`
+    }
+  );
+  if (!selection?.label) {
+    throw new Error('Cancelled dialog');
+  }
+  if (selection?.label === 'Reload Window') {
+    await executeCommand('workbench.action.reloadWindow');
+  }
+};
+
+export const ensureJavaExtensionInstalled = () => {
+  if (extensions.getExtension(JAVA_EXTENSION_ID)) {
+    return;
+  }
+  logWarningMessage('Language Support for Java by Red Hat extension is not installed.', 'Install').then(selection => {
+    if (selection === 'Install') {
+      logInformationMessage('Installing Language Support for Java by Red Hat extension...');
+      commands.executeCommand('workbench.extensions.installExtension', JAVA_EXTENSION_ID);
+    }
+  });
 };

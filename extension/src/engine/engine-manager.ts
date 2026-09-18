@@ -1,10 +1,10 @@
 import path from 'path';
 import type { ExtensionContext } from 'vscode';
-import { Uri, extensions } from 'vscode';
+import { Uri } from 'vscode';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
 import { runJavaProjectImport } from '../base/java-extension-api';
-import { logErrorMessage, logWarningMessage } from '../base/logging-util';
+import { logErrorMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { StatusBar } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
@@ -226,7 +226,7 @@ export class IvyEngineManager {
     } finally {
       decreaseWorkspaceLock();
     }
-    await this.importJavaProjects();
+    await runJavaProjectImport();
     await IvyProjectExplorer.instance.refresh();
   }
 
@@ -239,7 +239,7 @@ export class IvyEngineManager {
         decreaseWorkspaceLock();
       }
     });
-    await this.importJavaProjects();
+    await runJavaProjectImport();
     await IvyProjectExplorer.instance.refresh();
   }
 
@@ -262,7 +262,7 @@ export class IvyEngineManager {
       } finally {
         decreaseWorkspaceLock();
       }
-      await this.importJavaProjects();
+      await runJavaProjectImport();
       await this.createAndOpenProcess({
         name: 'BusinessProcess',
         kind: 'Business Process',
@@ -379,21 +379,6 @@ export class IvyEngineManager {
 
   async stop() {
     await this.engineRunner.stop();
-  }
-
-  private async importJavaProjects() {
-    const javaExt = extensions.getExtension('redhat.java');
-    if (javaExt !== undefined && javaExt.isActive) {
-      await runJavaProjectImport();
-    } else {
-      try {
-        await javaExt?.activate();
-      } catch {
-        logWarningMessage(
-          'Java extension could not be activated. Java support will not be available. Please clean Java workspace and import Java projects manually.'
-        );
-      }
-    }
   }
 
   get engineApi() {

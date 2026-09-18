@@ -1,14 +1,14 @@
 import 'reflect-metadata';
-import { commands, extensions, type ExtensionContext } from 'vscode';
+import { type ExtensionContext } from 'vscode';
 import { Messenger, type MessengerDiagnostic } from 'vscode-messenger';
 import { LocalMcpServer } from './ai/tools/local-mcp';
 import { registerTools } from './ai/tools/tools';
 import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
 import { showExtensionLog } from './base/extension-output-channel';
+import { ensureJavaExtensionInstalled } from './base/java-extension-api';
 import { validateAndSyncJavaVersion } from './base/java-version-validation';
-import { logInformationMessage, logWarningMessage } from './base/logging-util';
-import { validateMavenExecutable } from './base/maven-version-validation';
+import { logWarningMessage } from './base/logging-util';
 import { newMarkdownString, StatusBar, type QuickPickOptionId } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
@@ -81,19 +81,6 @@ export async function deactivate() {
   await localMcpServer?.stop();
   await ivyEngineManager?.stop();
 }
-
-const ensureJavaExtensionInstalled = () => {
-  const JAVA_EXTENSION_ID = 'redhat.java';
-  if (extensions.getExtension(JAVA_EXTENSION_ID)) {
-    return;
-  }
-  logWarningMessage('Language Support for Java by Red Hat extension is not installed.', 'Install').then(selection => {
-    if (selection === 'Install') {
-      logInformationMessage('Installing Language Support for Java by Red Hat extension...');
-      commands.executeCommand('workbench.extensions.installExtension', JAVA_EXTENSION_ID);
-    }
-  });
-};
 
 const startLocalMcpServer = () => {
   localMcpServer = new LocalMcpServer();
