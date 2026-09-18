@@ -1,9 +1,10 @@
 import path from 'path';
-import { ProgressLocation, Uri, window, type CancellationToken, type Progress } from 'vscode';
+import { ProgressLocation, window, type CancellationToken, type Progress } from 'vscode';
 import { showExtensionLog } from '../base/extension-output-channel';
-import { askToRunJavaCleanWorkspace, runJavaProjectConfigurationUpdate } from '../base/java-extension-api';
+import { ensureJavaLightWeightMode } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage, logInformationMessageWithActions } from '../base/logging-util';
 import { decreaseWorkspaceLock, increaseWorkspaceLock } from '../base/workspace-lock';
+import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { showProjectConversionLog } from '../engine/project-conversion-log';
 
@@ -12,6 +13,7 @@ export const runProjectConversion = async (projectsToConvert: string[]) => {
     logInformationMessage('No Axon Ivy project(s) selected for conversion. Conversion aborted.');
     return;
   }
+  await ensureJavaLightWeightMode('Project conversion');
   try {
     increaseWorkspaceLock();
     await window.withProgress(
@@ -23,9 +25,10 @@ export const runProjectConversion = async (projectsToConvert: string[]) => {
       async (progress, token) => await conversionTask(projectsToConvert, progress, token)
     );
   } finally {
-    await askToRunJavaCleanWorkspace('Project conversion finished');
     decreaseWorkspaceLock();
   }
+  await IvyEngineManager.instance.deployProjects();
+  await IvyDiagnostics.instance.refresh();
 };
 
 const conversionTask = async (
@@ -58,10 +61,6 @@ const conversionTask = async (
     progress.report({
       increment: (1 / numOfProjects) * 100
     });
-  }
-  const projectsToReload = projectsToConvert.filter(p => !failedProjects.includes(p)).map(p => Uri.file(p));
-  if (projectsToReload.length > 0) {
-    await runJavaProjectConfigurationUpdate(projectsToReload);
   }
   logInformationMessageWithActions(
     `Converted ${convertedCount} of ${numOfProjects} Axon Ivy project(s).${failedProjects.length > 0 ? ` ${failedProjects.length} project(s) failed to convert.` : ''}`,

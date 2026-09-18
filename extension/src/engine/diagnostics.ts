@@ -1,6 +1,7 @@
 import fs from 'fs';
 import type { CodeActionContext, CodeActionProvider, DiagnosticCollection, ExtensionContext, Selection, TextDocument } from 'vscode';
 import { CodeAction, CodeActionKind, Diagnostic, DiagnosticSeverity, Range, Uri, languages } from 'vscode';
+import { runJavaServerModeSwitch } from '../base/java-extension-api';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { IvyEngineManager } from './engine-manager';
 
@@ -32,6 +33,7 @@ export class IvyDiagnostics {
 
   public async refresh(refreshProjectStatuses = false) {
     this.diagnostics.clear();
+    let hasProjectWithError = false;
     const projects = refreshProjectStatuses
       ? await IvyEngineManager.instance.refreshProjectStatuses()
       : await IvyEngineManager.instance.projects();
@@ -45,6 +47,7 @@ export class IvyDiagnostics {
           if (!fs.existsSync(uri.fsPath)) {
             uri = Uri.joinPath(projectUri, POM_FILE);
           }
+          hasProjectWithError = true;
         }
         const diagnostic = new Diagnostic(new Range(1, 0, 1, 0), project.errorMessage, DiagnosticSeverity.Error);
         diagnostic.source = DIAGNOSTIC_SOURCE;
@@ -54,7 +57,11 @@ export class IvyDiagnostics {
     projectExplorerDiagnostics.forEach((d, uri) => {
       d.source = DIAGNOSTIC_SOURCE;
       this.diagnostics.set(uri, [...(this.diagnostics.get(uri) ?? []), d]);
+      hasProjectWithError = true;
     });
+    if (!hasProjectWithError) {
+      await runJavaServerModeSwitch();
+    }
   }
 
   public projectFileUrisToBeConverted() {
