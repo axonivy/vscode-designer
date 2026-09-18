@@ -40,13 +40,6 @@ export const CommandSection = () => {
           icon={IvyIcons.Download}
           onClick={executeCommand}
         />
-        <Command
-          title={t('commands.downloadDevEngine')}
-          value={'engine.downloadDevEngine'}
-          description={t('commands.downloadDevEngineDescr')}
-          icon={IvyIcons.Ivy}
-          onClick={executeCommand}
-        />
       </div>
     </Flex>
   );
