@@ -9,6 +9,7 @@ import { showExtensionLog } from './base/extension-output-channel';
 import { ensureJavaExtensionInstalled } from './base/java-extension-api';
 import { validateAndSyncJavaVersion } from './base/java-version-validation';
 import { logWarningMessage } from './base/logging-util';
+import { validateMavenExecutable } from './base/maven-version-validation';
 import { newMarkdownString, StatusBar, type QuickPickOptionId } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
