@@ -69,4 +69,26 @@ public class CopilotIntegrationTest {
     assertThat(tokenUsage.input()).isLessThan(150_000);
     assertThat(tokenUsage.output()).isLessThan(10_000);
   }
+
+  @Test
+  void initEditRolesYaml(TestInfo testInfo) throws Exception {
+    var resourceName = testInfo.getTestMethod().orElseThrow().getName();
+    rt.copilot().prompt("create the roles: manager and employee in purchase/config/roles.yaml", resourceName);
+    var spans = rt.aspire().spansOfResource(resourceName);
+    var tokenUsage = spans.tokenUsage();
+    System.out.println(tokenUsage);
+    var tools = spans.usedTools().stream().map(UsedTool::name).toList();
+    System.out.println("tools: "+tools);
+    
+    var roles = rt.ivyWorkspace().path().resolve("purchase/config/roles.yaml");
+    assertThat(roles).content()
+      .contains("Id: manager", "Id: employee");
+    assertThat(roles).content()
+      .as("no tabs in roles.yaml: happens in vscode copilot quite often")
+      .doesNotContain("\t");
+
+    assertThat(tokenUsage.input()).isLessThan(150_000);
+    assertThat(tokenUsage.output()).isLessThan(10_000);
+  }
+
 }
