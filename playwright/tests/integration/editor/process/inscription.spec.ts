@@ -41,6 +41,30 @@ test('Change User Dialog display name', async ({ wsPage }) => {
   await expect(element).toHaveText(newDisplayName);
 });
 
+test('Select all in inscription input without selecting process elements', async ({ wsPage }) => {
+  const editor = new ProcessEditor(wsPage);
+  await editor.open();
+  const inscriptionView = await editor.openInscriptionView(userDialogPID1);
+  await inscriptionView.openInscriptionTab('General');
+
+  const inputField = inscriptionView.inputFieldFor('Display name');
+  const inputText = 'select all in inscription input';
+  const unrelatedElement = editor.elementByPID('15254DCE818AD7A2-f0');
+  await inputField.fill(inputText);
+  await inputField.focus();
+  await wsPage.page.keyboard.press('ControlOrMeta+KeyA');
+
+  await expect
+    .poll(async () =>
+      inputField.evaluate(input => {
+        const field = input as HTMLInputElement;
+        return [field.selectionStart, field.selectionEnd];
+      })
+    )
+    .toEqual([0, inputText.length]);
+  await expect(unrelatedElement).not.toHaveClass(/selected/);
+});
+
 test('OpenPage-Action - valid file - Means/Document Table', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage);
   await editor.open();
