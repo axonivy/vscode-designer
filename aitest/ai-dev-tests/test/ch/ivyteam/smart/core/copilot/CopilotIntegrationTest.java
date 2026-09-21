@@ -53,7 +53,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
-  @Order(1)
+  @Order(2)
   void mcpON() throws Exception {
     assertThat(rt.copilot().listMcp())
       .as("MCP is configured for Copilot user")
@@ -77,7 +77,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
-  @Order(2) // before: createProject (let's fetch the schemas here for the first time)
+  @Order(1) // before: createProject (let's fetch the schemas here for the first time)
   void initEditRolesYaml(TestInfo testInfo) throws Exception {
     var resourceName = testInfo.getTestMethod().orElseThrow().getName();
     rt.copilot().prompt("create the roles: manager and employee in purchase/config/roles.yaml", resourceName);
