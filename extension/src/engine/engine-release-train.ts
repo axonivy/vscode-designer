@@ -12,7 +12,7 @@ export const engineReleaseTrain = () => {
   if (train) {
     return train;
   }
-  return extensionVersion.isPreview ? (extensionVersion.isMilestone ? 'milestone' : 'nightly') : extensionVersion.major;
+  return extensionVersion.isPreview ? (extensionVersion.isMilestone ? 'milestone' : 'nightly') : `${extensionVersion.major}`;
 };
 
 export const engineDirFromGlobalState = (context: ExtensionContext, releaseTrain: string) => {
