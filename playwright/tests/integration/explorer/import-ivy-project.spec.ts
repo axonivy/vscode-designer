@@ -9,8 +9,7 @@ const iarFileName = 'ivy-project.iar';
 const iarFileNameDuplicateAfterSanitization = 'ivy.project.iar';
 const iarProjectName = 'ivy-project';
 
-// eslint-disable-next-line playwright/no-focused-test
-test.describe.only('Single root workspace', () => {
+test.describe('Single root workspace', () => {
   test.use({ workspace: emptyWithFolder });
 
   test.beforeEach(async ({ wsPage, tmpWorkspace }) => {
