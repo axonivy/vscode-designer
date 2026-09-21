@@ -77,11 +77,15 @@ test('preview train', async () => {
 
 test('non-milestone preview train', async () => {
   const validatorNotMilestone = new ReleaseTrainValidator({ ...extensionVersion, isMilestone: false, milestone: 0 });
+  expect((await validatorNotMilestone.validate('nightly-14')).valid).toBeTruthy();
   expect(await validatorNotMilestone.validate('dev')).toEqual({
     valid: false,
     reason: "Invalid release train tag or engine directory 'dev'"
   });
-  expect((await validatorNotMilestone.validate('nightly-14')).valid).toBeTruthy();
+  expect(await validatorNotMilestone.validate('nightly')).toEqual({
+    valid: false,
+    reason: "Invalid release train tag or engine directory 'nightly'"
+  });
   expect(await validatorNotMilestone.validate('milestone')).toEqual({
     valid: false,
     reason:
