@@ -17,7 +17,7 @@ export const downloadIar = async (
 
   url =
     url ??
-    'https://jenkins.ivyteam.io/job/demo-projects/job/master/lastSuccessfulBuild/artifact/connectivity/connectivity-demos/target/connectivity-demos-14.0.0-SNAPSHOT.iar';
+    'https://jenkins.ivyteam.io/job/demo-projects/job/release%252F14.0/lastSuccessfulBuild/artifact/connectivity/connectivity-demos/target/connectivity-demos-14.0.0-SNAPSHOT.iar';
 
   const response = await fetch(url);
   if (!response.ok || !response.body) {
