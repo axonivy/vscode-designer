@@ -6,7 +6,7 @@ import { logInformationMessage, logWarningMessage } from './logging-util';
 const DEFAULT_MAVEN_EXECUTABLE = 'mvn';
 const MAVEN_SETTING_GROUP = 'maven';
 const MAVEN_SETTING_EXECUTABLE_PATH = 'executable.path';
-const MAVEN_SETTING_KEY = `${MAVEN_SETTING_GROUP}.${MAVEN_SETTING_EXECUTABLE_PATH}`;
+export const MAVEN_SETTING_KEY = `${MAVEN_SETTING_GROUP}.${MAVEN_SETTING_EXECUTABLE_PATH}`;
 const EXPECTED_MAVEN_VERSION = '3.9';
 
 export type MvnSettingExecutable = {
@@ -22,27 +22,26 @@ export const validateMavenExecutable = () => {
 
   mvnExectuablesWs.forEach(mvnExecutable => {
     if (!checkMvnExecutable(mvnExecutable.value)) {
-      logWarningMessage(`Invalid ${mvnExecutable.scope} Maven setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}". 
+      logWarningMessage(`Invalid ${mvnExecutable.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}"
+        in workspace folder "${mvnExecutable.workspaceFolder?.name}".
         This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}.
         Keeping this setting might lead to unexpected behavior.`);
+    } else {
+      logInformationMessage(`Found valid ${mvnExecutable.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}"
+      in workspace folder "${mvnExecutable.workspaceFolder?.uri.fsPath}".
+      This executable will be used for Maven operations in that workspace.`);
     }
   });
-  if (mvnExectuablesWs.length > 0) {
-    logInformationMessage(`Found valid Workspace/Folder Maven executable setting(s) "${MAVEN_SETTING_KEY}".
-    This executable will be used for Maven operations in the respective Workspace/Folder.`);
-  }
 
   if (mvnExectuablesUser) {
     if (!checkMvnExecutable(mvnExectuablesUser.value)) {
-      logWarningMessage(`Invalid ${mvnExectuablesUser.scope} Maven setting "${MAVEN_SETTING_KEY}": "${mvnExectuablesUser.value}".
+      logWarningMessage(`Invalid ${mvnExectuablesUser.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExectuablesUser.value}".
         This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}.
         Keeping this setting might lead to unexpected behavior.`);
+    } else {
+      logInformationMessage(`Found valid global ${mvnExectuablesUser.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExectuablesUser.value}".
+      This executable will be used for Maven operations in folders where no Workspace/Folder Maven executable is configured.`);
     }
-  }
-
-  if (mvnExectuablesUser) {
-    logInformationMessage(`Found valid User Maven executable setting(s) "${MAVEN_SETTING_KEY}": "${mvnExectuablesUser.value}".
-    This executable will be used for Maven operations in folders where no Workspace/Folder Maven executable is configured.`);
   }
 
   const isValidPath = checkMvnExecutable(DEFAULT_MAVEN_EXECUTABLE);
