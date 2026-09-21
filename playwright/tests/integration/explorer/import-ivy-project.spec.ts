@@ -2,18 +2,22 @@ import { expect } from '@playwright/test';
 import path from 'path';
 import { test } from '~/fixtures/baseTest';
 import { FileExplorer } from '~/page-objects/explorer-view';
-import { downloadIar } from '~/utils/download-iar';
+import { buildTestIar, copyTestIar } from '~/utils/test-iar';
 import { emptyWithFolder, minimalProjectWorkspacePath, multiRootWorkspacePath } from '../../workspaces/workspace';
 
 const iarFileName = 'ivy-project.iar';
 const iarFileNameDuplicateAfterSanitization = 'ivy.project.iar';
 const iarProjectName = 'ivy-project';
 
+test.beforeAll(async () => {
+  await buildTestIar();
+});
+
 test.describe('Single root workspace', () => {
   test.use({ workspace: emptyWithFolder });
 
   test.beforeEach(async ({ wsPage, tmpWorkspace }) => {
-    await downloadIar(tmpWorkspace.tmpWorkspacePath, iarFileName);
+    await copyTestIar(tmpWorkspace.tmpWorkspacePath, iarFileName);
     const explorer = new FileExplorer(wsPage);
     await explorer.hasNodeExact(iarFileName);
   });
@@ -57,7 +61,7 @@ test.describe('Single root workspace', () => {
     await expect(successToast).toHaveCount(1);
     await expect(successToast).toContainText('Successfully imported Ivy project(s) from');
 
-    await downloadIar(tmpWorkspace.tmpWorkspacePath, iarFileNameDuplicateAfterSanitization);
+    await copyTestIar(tmpWorkspace.tmpWorkspacePath, iarFileNameDuplicateAfterSanitization);
     await explorer.hasNodeExact(iarFileNameDuplicateAfterSanitization);
     await wsPage.executeCommand('Import Project Archive (.iar or .zip)');
     await wsPage.selectItemFromQuickPick(iarFileNameDuplicateAfterSanitization);
@@ -91,8 +95,8 @@ test.describe('Multi root workspace', () => {
   test('Import existing project by name into multi-root workspace error', async ({ wsPage, tmpWorkspace }) => {
     const iarFileName = 'connector.iar';
     const iarProjectName = 'connector';
-    const downloadIarFolder = 'connector';
-    await downloadIar(path.join(tmpWorkspace.tmpWorkspacePath, downloadIarFolder), iarFileName);
+    const iarFolder = 'connector';
+    await copyTestIar(path.join(tmpWorkspace.tmpWorkspacePath, iarFolder), iarFileName);
 
     const explorer = new FileExplorer(wsPage);
     await explorer.hasNodeExact(iarFileName);
@@ -108,10 +112,10 @@ test.describe('Multi root workspace', () => {
 
   test('Import existing folder into multi-root workspace error', async ({ wsPage, tmpWorkspace }) => {
     const iarFileName = 'already-present.iar';
-    const downloadIarFolder = 'connector';
+    const iarFolder = 'connector';
 
     const explorer = new FileExplorer(wsPage);
-    await downloadIar(path.join(tmpWorkspace.tmpWorkspacePath, downloadIarFolder), iarFileName);
+    await copyTestIar(path.join(tmpWorkspace.tmpWorkspacePath, iarFolder), iarFileName);
 
     await explorer.selectInContextMenuOfNode('non-ivy-folder', 'Axon Ivy', 'Import / Export', 'Import Project Archive (.iar or .zip)');
     await wsPage.selectItemFromQuickPick(iarFileName);
