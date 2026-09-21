@@ -97,6 +97,12 @@
         "https://json-schema.org/": true,
         "https://json-schema.axonivy.com/": true
       },
+      "chat.tools.urls.autoApprove": {
+        "https://json-schema.axonivy.com": {
+          "approveRequest": true,
+          "approveResponse": true
+        }
+      },
       "html.suggest.html5": false,
       "java.server.launchMode": "LightWeight",
       "java.configuration.updateBuildConfiguration": "automatic",
