@@ -176,7 +176,7 @@ const exportIar = async (
       'Reveal in Explorer': async () => {
         await env.openExternal(Uri.file(targetFolder));
       },
-      'Focus on Terminal': () => {
+      'Show Terminal': () => {
         commands.executeCommand('terminal.focus');
       },
       'Show Extension Log': () => {
