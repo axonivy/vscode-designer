@@ -54,15 +54,10 @@ test('invalid when util lib is missing', async () => {
 });
 
 test('preview train', async () => {
-  expect(await validator.validate('dev')).toEqual({
+  expect(await validator.validate('nightly-14')).toEqual({
     valid: false,
     reason:
-      'Release train setting mismatch. Extension Version is a milestone release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "dev". Switch the releaseTrain to \'milestone\' or install a non-milestone version of the extension.'
-  });
-  expect(await validator.validate('nightly')).toEqual({
-    valid: false,
-    reason:
-      'Release train setting mismatch. Extension Version is a milestone release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "nightly". Switch the releaseTrain to \'milestone\' or install a non-milestone version of the extension.'
+      'Release train setting mismatch. Extension Version is a milestone release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "nightly-14". Switch the releaseTrain to \'milestone\' or install a non-milestone version of the extension.'
   });
   expect((await validator.validate('milestone')).valid).toBeTruthy();
 
