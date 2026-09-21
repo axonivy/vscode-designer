@@ -4,12 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import ch.ivyteam.smart.core.AgentRuntime;
 import ch.ivyteam.smart.core.aspire.AspireSpans.UsedTool;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CopilotIntegrationTest {
 
   private static AgentRuntime rt = new AgentRuntime();
@@ -26,6 +30,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+@Order(3)
   void createProject(TestInfo testInfo) throws Exception {
     var resourceName = testInfo.getTestMethod().orElseThrow().getName();
     rt.copilot().prompt("create an axon ivy project for a flight-simulator", resourceName);
@@ -48,6 +53,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+@Order(1)
   void mcpON() throws Exception {
     assertThat(rt.copilot().listMcp())
       .as("MCP is configured for Copilot user")
@@ -71,6 +77,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+@Order(2) // before: createProject (let's fetch the schemas here for the first time)
   void initEditRolesYaml(TestInfo testInfo) throws Exception {
     var resourceName = testInfo.getTestMethod().orElseThrow().getName();
     rt.copilot().prompt("create the roles: manager and employee in purchase/config/roles.yaml", resourceName);
