@@ -4,7 +4,7 @@ import { config } from '../base/configurations';
 import { extensionVersion } from '../version/extension-version';
 import { ReleaseTrainValidator } from './release-train-validator';
 
-export const PREVIEW_TRAINS = ['nightly', 'dev', 'milestone'];
+export const PREVIEW_TRAINS = ['nightly-14', 'milestone'];
 export const stableTrains = (major: number) => [`${major}`, `nightly-${major}`];
 
 export const engineReleaseTrain = () => {
@@ -12,11 +12,7 @@ export const engineReleaseTrain = () => {
   if (train) {
     return train;
   }
-  return extensionVersion.isPreview
-    ? extensionVersion.isMilestone
-      ? 'milestone'
-      : 'nightly'
-    : `${extensionVersion.major}.${extensionVersion.minor}`;
+  return extensionVersion.isPreview ? (extensionVersion.isMilestone ? 'milestone' : 'nightly-14') : `${extensionVersion.major}`;
 };
 
 export const engineDirFromGlobalState = (context: ExtensionContext, releaseTrain: string) => {
