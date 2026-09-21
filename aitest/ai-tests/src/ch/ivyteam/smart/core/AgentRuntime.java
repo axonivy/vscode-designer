@@ -62,7 +62,8 @@ public class AgentRuntime {
     aspireApi = AspireAPI.create("http://" + aspireContainer.getHost() + ":" + aspireContainer.getMappedPort(18888));
     System.out.println("Aspire dashboard bound: " + aspireApi);
     
-    var copilotContainer = new CopilotContainer(ivyWorkspace, userData);
+    var copilotSkills = extensionDir.resolve("src/ai/skills");
+    var copilotContainer = new CopilotContainer(ivyWorkspace, userData, copilotSkills);
     copilot = new Copilot(copilotContainer);
     copilot.otlpEndpoint(aspireContainer.getAspireEndpoint());
     startContainer(copilotContainer);
