@@ -19,6 +19,7 @@ import ch.ivyteam.smart.core.copilot.CopilotContainer;
 import ch.ivyteam.smart.core.mcp.DesignerMcpContainer;
 import ch.ivyteam.smart.core.mcp.IvyEngine;
 import ch.ivyteam.smart.core.mcp.IvyWorkspace;
+import ch.ivyteam.smart.core.mcp.IvyWorkspaceSetup;
 
 public class AgentRuntime {
   private static final String NETWORK_NAME = "smart-test-network";
@@ -43,7 +44,7 @@ public class AgentRuntime {
     
     Path workspaceRoot = findWorkspaceRoot();
     Path extensionDir = workspaceRoot.resolve("extension");
-    ivyWorkspace = workspaceRoot.resolve("aitest/ai-dev-tests/ivy");
+    ivyWorkspace = new IvyWorkspaceSetup(workspaceRoot).initialize();
     Path mcp = workspaceRoot.resolve("aitest/mcp.sh");
     userData = workspaceRoot.resolve("ci-user-data");
     try {
