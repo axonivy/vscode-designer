@@ -1,6 +1,6 @@
 ---
 name: yaml-files
-description: 'Use when creating or editing any YAML file in this repository: including **/*.yaml. Especially enforce this for roles.yaml, users.yaml, rest-clients.yaml, webservice-clients.yaml, persistence.yaml, database.yaml, custom-fields.yaml'
+description: 'Use when creating or editing any YAML file in this repository: including **/*.yaml. Especially enforce this for roles.yaml, users.yaml, rest-clients.yaml, webservice-clients.yaml, persistence.yaml, databases.yaml, custom-fields.yaml'
 user-invocable: false
 ---
 
