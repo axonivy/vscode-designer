@@ -1,5 +1,5 @@
-import { LogClientJsonRpc } from '@axonivy/log-view-core';
-import type { RuntimeLogEntry } from '@axonivy/log-view-protocol';
+import { LogClientJsonRpc } from './protocol-types/log-client-jsonrpc';
+import type { RuntimeLogEntry } from './protocol-types/log';
 import type { LogOutputChannel } from 'vscode';
 import { window } from 'vscode';
 import { createWebSocket, toSocketConnection } from '../engine/ws-client';
