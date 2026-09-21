@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'path';
-import { commands, env, ProgressLocation, Uri, window, workspace, type Progress } from 'vscode';
+import { commands, env, ProgressLocation, Uri, window, workspace, type CancellationToken, type Progress } from 'vscode';
 import { showExtensionLog } from '../base/extension-output-channel';
 import { logErrorMessage, logInformationMessageWithActions } from '../base/logging-util';
 import type { AddCommandSelectionContext } from './ivy-project-explorer';
@@ -123,10 +123,18 @@ export const exportIvyProject = async (addCommandSelectionContext: AddCommandSel
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
-      cancellable: false,
-      title: 'Axon Ivy Export .iar'
+      cancellable: true,
+      title: 'Axon Ivy Export'
     },
-    async progress => await exportIar(exportProjectData.project as ProjectSelection, targetFilePath, targetFolder, targetFileName, progress)
+    async (progress, token) => {
+      if (token.isCancellationRequested) {
+        return;
+      }
+      await exportIar(exportProjectData.project as ProjectSelection, targetFilePath, targetFolder, targetFileName, progress, token);
+      if (token.isCancellationRequested) {
+        return;
+      }
+    }
   );
 };
 
@@ -135,8 +143,13 @@ const exportIar = async (
   targetFilePath: string,
   targetFolder: string,
   fileName: string,
-  progress: Progress<{ message?: string; increment?: number }>
+  progress: Progress<{ message?: string; increment?: number }>,
+  token: CancellationToken
 ) => {
+  if (token.isCancellationRequested) {
+    return;
+  }
+
   progress.report({
     message: `${projectToExport.label}`
   });
@@ -148,16 +161,27 @@ const exportIar = async (
       `com.axonivy.ivy.ci:project-build-plugin:pack-iar "-Divy.output.directory=${targetFolder}" "-Divy.final.name=${fileName}"`
     );
   } catch (error) {
-    logErrorMessage(`Failed to run Maven command for project ${projectToExport.label}: ${(error as Error).message}`);
+    logErrorMessage(`Failed to execute Maven command for project ${projectToExport.label}: ${(error as Error).message}`);
     return;
   }
 
-  logInformationMessageWithActions(`Exported project ${projectToExport.label} to ${targetFilePath}`, {
-    'Show Log': () => {
-      showExtensionLog();
-    },
-    'Reveal in Explorer': async () => {
-      await env.openExternal(Uri.file(targetFolder));
+  if (token.isCancellationRequested) {
+    return;
+  }
+
+  logInformationMessageWithActions(
+    `Export concluded. Check if project ${projectToExport.label} has been exported to ${targetFilePath}.
+    If not, check the Terminal view for Maven build errors.`,
+    {
+      'Reveal in Explorer': async () => {
+        await env.openExternal(Uri.file(targetFolder));
+      },
+      'Focus on Terminal': () => {
+        commands.executeCommand('terminal.focus');
+      },
+      'Show Extension Log': () => {
+        showExtensionLog();
+      }
     }
-  });
+  );
 };
