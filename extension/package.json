@@ -16,6 +16,9 @@
   "engines": {
     "vscode": "^1.136.1"
   },
+  "enabledApiProposals": [
+    "chatContextProvider"
+  ],
   "scripts": {
     "build": "node esbuild.mts",
     "build:production": "node esbuild.mts --production",

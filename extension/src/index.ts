@@ -11,6 +11,7 @@ import { validateAndSyncJavaVersion } from './base/java-version-validation';
 import { logWarningMessage } from './base/logging-util';
 import { newMarkdownString, StatusBar, type QuickPickOptionId } from './base/status-bar';
 import { addDevContainer } from './dev-container/command';
+import { registerRestClientChatContextProvider } from './editors/restclient-editor/chat-context-provider';
 import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/welcome-page';
 import { IvyDiagnostics } from './engine/diagnostics';
 import { IvyEngineManager } from './engine/engine-manager';
@@ -27,6 +28,7 @@ let localMcpStartup: Promise<void> | undefined;
 export const messenger = new Messenger({ ignoreHiddenViews: false });
 
 export async function activate(context: ExtensionContext): Promise<MessengerDiagnostic> {
+  registerRestClientChatContextProvider(context);
   StatusBar.init(context);
   StatusBar.overrideStatusBar({
     text: 'Activating...',
