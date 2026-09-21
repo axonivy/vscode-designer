@@ -18,7 +18,7 @@ export type MvnSettingExecutable = {
 export const validateMavenExecutable = () => {
   const mvnExecutables = getMvnExecutables();
   const mvnExectuablesWs = mvnExecutables.filter(mvnExecutable => mvnExecutable.scope === 'workspace');
-  const mvnExectuablesUser = mvnExecutables.filter(mvnExecutable => mvnExecutable.scope === 'user')[0];
+  const mvnExectuablesUser = mvnExecutables.find(mvnExecutable => mvnExecutable.scope === 'user');
 
   mvnExectuablesWs.forEach(mvnExecutable => {
     if (!checkMvnExecutable(mvnExecutable.value)) {
