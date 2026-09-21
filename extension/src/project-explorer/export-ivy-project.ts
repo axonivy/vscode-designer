@@ -124,9 +124,11 @@ export const exportIvyProject = async (addCommandSelectionContext: AddCommandSel
     {
       location: ProgressLocation.Notification,
       cancellable: false,
-      title: 'Axon Ivy Export .iar'
+      title: 'Axon Ivy Export'
     },
-    async progress => await exportIar(exportProjectData.project as ProjectSelection, targetFilePath, targetFolder, targetFileName, progress)
+    async progress => {
+      await exportIar(exportProjectData.project as ProjectSelection, targetFilePath, targetFolder, targetFileName, progress);
+    }
   );
 };
 
@@ -148,16 +150,23 @@ const exportIar = async (
       `com.axonivy.ivy.ci:project-build-plugin:pack-iar "-Divy.output.directory=${targetFolder}" "-Divy.final.name=${fileName}"`
     );
   } catch (error) {
-    logErrorMessage(`Failed to run Maven command for project ${projectToExport.label}: ${(error as Error).message}`);
+    logErrorMessage(`Failed to execute Maven command for project ${projectToExport.label}: ${(error as Error).message}`);
     return;
   }
 
-  logInformationMessageWithActions(`Exported project ${projectToExport.label} to ${targetFilePath}`, {
-    'Show Log': () => {
-      showExtensionLog();
-    },
-    'Reveal in Explorer': async () => {
-      await env.openExternal(Uri.file(targetFolder));
+  logInformationMessageWithActions(
+    `Export concluded. Check if project ${projectToExport.label} has been exported to ${targetFilePath}.
+    If not, check the Terminal view for Maven build errors.`,
+    {
+      'Reveal in Explorer': async () => {
+        await env.openExternal(Uri.file(targetFolder));
+      },
+      'Show Terminal': () => {
+        commands.executeCommand('terminal.focus');
+      },
+      'Show Extension Log': () => {
+        showExtensionLog();
+      }
     }
-  });
+  );
 };
