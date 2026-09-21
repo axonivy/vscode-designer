@@ -725,7 +725,7 @@
             },
             "path": {
               "type": "string",
-              "description": "Absolute path to the parent directory where the new project folder should be created."
+              "description": "Absolute filesystem path to the parent directory where the new project folder should be created. Do not use a dot-separated namespace directories."
             },
             "groupId": {
               "type": "string",
