@@ -1,7 +1,7 @@
 import { execFileSync } from 'child_process';
 import { accessSync, constants, statSync } from 'fs';
-import { workspace } from 'vscode';
-import { logInformationMessage } from './logging-util';
+import { workspace, type WorkspaceFolder } from 'vscode';
+import { logInformationMessage, logWarningMessage } from './logging-util';
 
 const DEFAULT_MAVEN_EXECUTABLE = 'mvn';
 const MAVEN_SETTING_GROUP = 'maven';
@@ -12,6 +12,7 @@ const EXPECTED_MAVEN_VERSION = '3.9';
 export type MvnSettingExecutable = {
   scope: 'workspace' | 'user';
   value: string;
+  workspaceFolder?: WorkspaceFolder;
 };
 
 export const validateMavenExecutable = () => {
@@ -21,9 +22,9 @@ export const validateMavenExecutable = () => {
 
   mvnExectuablesWs.forEach(mvnExecutable => {
     if (!checkMvnExecutable(mvnExecutable.value)) {
-      throw new Error(`Invalid ${mvnExecutable.scope} Maven setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}". 
+      logWarningMessage(`Invalid ${mvnExecutable.scope} Maven setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}". 
         This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}.
-        Remove the setting and reload the window`);
+        Keeping this setting might lead to unexpected behavior.`);
     }
   });
   if (mvnExectuablesWs.length > 0) {
@@ -33,9 +34,9 @@ export const validateMavenExecutable = () => {
 
   if (mvnExectuablesUser) {
     if (!checkMvnExecutable(mvnExectuablesUser.value)) {
-      throw new Error(`Invalid ${mvnExectuablesUser.scope} Maven setting "${MAVEN_SETTING_KEY}": "${mvnExectuablesUser.value}".
+      logWarningMessage(`Invalid ${mvnExectuablesUser.scope} Maven setting "${MAVEN_SETTING_KEY}": "${mvnExectuablesUser.value}".
         This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}.
-        Remove the setting and reload the window`);
+        Keeping this setting might lead to unexpected behavior.`);
     }
   }
 
@@ -46,9 +47,10 @@ export const validateMavenExecutable = () => {
 
   const isValidPath = checkMvnExecutable(DEFAULT_MAVEN_EXECUTABLE);
   if (!isValidPath) {
-    throw new Error(`No valid Maven executable found.
+    logWarningMessage(`No valid Maven executable found.
     Please ensure Maven ${EXPECTED_MAVEN_VERSION} is installed and accessible in your PATH
-    or the path to the executable is configured in your VS Code settings via "${MAVEN_SETTING_KEY}"`);
+    or the path to the executable is configured in your VS Code settings via "${MAVEN_SETTING_KEY}".
+    Ignoring this might lead to unexpected behavior.`);
   }
 };
 
@@ -59,14 +61,22 @@ const getMvnExecutables = () => {
   // Retrieve Maven executable settings from each workspace folder, covers single and multi-root workspaces
   wsFolders.forEach(folder => {
     const mvnConfig = workspace.getConfiguration(MAVEN_SETTING_GROUP, folder.uri).inspect<string>(MAVEN_SETTING_EXECUTABLE_PATH);
-    if (mvnConfig?.workspaceFolderValue) {
-      mvnExecutables.push({ scope: 'workspace', value: mvnConfig.workspaceFolderValue });
-    } else if (mvnConfig?.workspaceValue) {
-      mvnExecutables.push({ scope: 'workspace', value: mvnConfig.workspaceValue });
+    if (!mvnConfig) {
+      return;
     }
+    // Skip if neither workspace folder nor workspace value is set
+    const val = mvnConfig.workspaceFolderValue ?? mvnConfig.workspaceValue;
+    if (!val) {
+      return;
+    }
+    mvnExecutables.push({
+      scope: 'workspace',
+      value: val,
+      workspaceFolder: folder
+    });
   });
 
-  // Also retrieve the user config if present
+  // Also retrieve the global user config value if present
   const userMvnConfig = workspace.getConfiguration(MAVEN_SETTING_GROUP).inspect<string>(MAVEN_SETTING_EXECUTABLE_PATH)?.globalValue;
   if (userMvnConfig) {
     mvnExecutables.push({ scope: 'user', value: userMvnConfig });
