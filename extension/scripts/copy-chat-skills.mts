@@ -1,8 +1,7 @@
-import { copyFile, mkdir } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { cp } from 'node:fs/promises';
+import { resolve } from 'node:path';
 
-const source = resolve('src/ai/skills/yaml-files/SKILL.md');
-const target = resolve('skills/yaml-files/SKILL.md');
+const source = resolve('src/ai/skills');
+const target = resolve('skills');
 
-await mkdir(dirname(target), { recursive: true });
-await copyFile(source, target);
+await cp(source, target, { recursive: true });
