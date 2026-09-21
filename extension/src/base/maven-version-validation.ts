@@ -1,5 +1,4 @@
 import { execFileSync } from 'child_process';
-import { accessSync, constants, statSync } from 'fs';
 import { workspace, type WorkspaceFolder } from 'vscode';
 import { logInformationMessage, logWarningMessage } from './logging-util';
 
@@ -17,33 +16,38 @@ export type MvnSettingExecutable = {
 
 export const validateMavenExecutable = () => {
   const mvnExecutables = getMvnExecutables();
-  const mvnExectuablesWs = mvnExecutables.filter(mvnExecutable => mvnExecutable.scope === 'workspace');
-  const mvnExectuablesUser = mvnExecutables.find(mvnExecutable => mvnExecutable.scope === 'user');
+  const mvnExectuableUser = mvnExecutables.find(mvnExecutable => mvnExecutable.scope === 'user');
 
-  mvnExectuablesWs.forEach(mvnExecutable => {
-    if (!checkMvnExecutable(mvnExecutable.value)) {
-      logWarningMessage(`Invalid ${mvnExecutable.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}"
-        in workspace folder "${mvnExecutable.workspaceFolder?.name}".
+  // First check all workspace-specific Maven executable settings
+  mvnExecutables
+    .filter(mvnExecutable => mvnExecutable.scope === 'workspace')
+    .forEach(mvnExecutable => {
+      if (!checkMvnExecutable(mvnExecutable.value)) {
+        logWarningMessage(`Invalid ${mvnExecutable.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}"
+        in workspace folder "${mvnExecutable.workspaceFolder?.uri.fsPath}".
+        This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}.
+        Keeping this setting might lead to unexpected behavior.`);
+      } else {
+        logInformationMessage(`Found valid ${mvnExecutable.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}"
+        in workspace folder "${mvnExecutable.workspaceFolder?.uri.fsPath}".
+        This executable will be used for Maven operations in that workspace.`);
+      }
+    });
+
+  // Next, check the user-specific Maven executable setting if present
+  if (mvnExectuableUser) {
+    if (!checkMvnExecutable(mvnExectuableUser.value)) {
+      logWarningMessage(`Invalid ${mvnExectuableUser.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExectuableUser.value}".
         This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}.
         Keeping this setting might lead to unexpected behavior.`);
     } else {
-      logInformationMessage(`Found valid ${mvnExecutable.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}"
-      in workspace folder "${mvnExecutable.workspaceFolder?.uri.fsPath}".
-      This executable will be used for Maven operations in that workspace.`);
-    }
-  });
-
-  if (mvnExectuablesUser) {
-    if (!checkMvnExecutable(mvnExectuablesUser.value)) {
-      logWarningMessage(`Invalid ${mvnExectuablesUser.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExectuablesUser.value}".
-        This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}.
-        Keeping this setting might lead to unexpected behavior.`);
-    } else {
-      logInformationMessage(`Found valid global ${mvnExectuablesUser.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExectuablesUser.value}".
+      logInformationMessage(`Found valid global ${mvnExectuableUser.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExectuableUser.value}".
       This executable will be used for Maven operations in folders where no Workspace/Folder Maven executable is configured.`);
     }
+    return; // Stop further validation if a user-specific Maven executable is found and checked, no matter the validation outcome
   }
 
+  // If there is no user-specific Maven executable, fall back to the default Maven executable on PATH
   const isValidPath = checkMvnExecutable(DEFAULT_MAVEN_EXECUTABLE);
   if (!isValidPath) {
     logWarningMessage(`No valid Maven executable found.
@@ -83,23 +87,10 @@ const getMvnExecutables = () => {
   return mvnExecutables;
 };
 
-const checkMvnExecutable = (pathToExecutable: string) => {
-  if (pathToExecutable !== DEFAULT_MAVEN_EXECUTABLE) {
-    if (!isExecutableFile(pathToExecutable)) {
-      return false;
-    }
-  }
+const checkMvnExecutable = (executable: string) => {
   try {
-    const version = execFileSync(pathToExecutable, ['--version'], { encoding: 'utf8', windowsHide: true });
+    const version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
     return isExpectedMavenVersion(version);
-  } catch {
-    return false;
-  }
-};
-
-const isExecutableFile = (path: string): boolean => {
-  try {
-    return statSync(path).isFile() && accessSync(path, constants.X_OK) === undefined;
   } catch {
     return false;
   }

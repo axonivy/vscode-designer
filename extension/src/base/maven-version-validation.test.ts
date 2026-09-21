@@ -4,8 +4,6 @@ import { MAVEN_SETTING_KEY, validateMavenExecutable } from './maven-version-vali
 const mocks = vi.hoisted(() => ({
   inspect: vi.fn(),
   execFileSync: vi.fn(),
-  accessSync: vi.fn(),
-  statSync: vi.fn(),
   showInformationMessage: vi.fn(),
   showWarningMessage: vi.fn(),
   workspaceFolders: [] as Array<{ uri: { fsPath: string } }>
@@ -35,14 +33,6 @@ vi.mock('vscode', () => ({
   }
 }));
 
-vi.mock('fs', () => ({
-  statSync: mocks.statSync,
-  accessSync: mocks.accessSync,
-  constants: {
-    X_OK: 1
-  }
-}));
-
 vi.mock('child_process', () => ({
   execFileSync: mocks.execFileSync
 }));
@@ -58,8 +48,6 @@ beforeEach(() => {
     return { workspaceFolderValue: undefined, workspaceValue: undefined, globalValue: undefined };
   });
   mocks.execFileSync.mockReturnValue(VALID_MAVEN_VERSION_OUTPUT); // by default, assume the Maven executable returns a valid version
-  mocks.statSync.mockImplementation(() => ({ isFile: () => true })); // by default, assume the file exists
-  mocks.accessSync.mockReturnValue(undefined); // by default, assume the file is accessible
 });
 
 test('valid Workspace only override', async () => {
@@ -87,7 +75,7 @@ test('valid Workspace override and valid User override', async () => {
   );
 });
 
-test('valid workspace override list', async () => {
+test('valid workspace override multi-root', async () => {
   setWorkspaceFolders('workspace-folder-a', 'workspace-folder-b');
   mocks.inspect.mockImplementation((setting: string, scope?: { fsPath: string }) => {
     expect(setting).toBe('executable.path');
@@ -159,10 +147,10 @@ test('valid no override', async () => {
   expect(mocks.showWarningMessage).toHaveBeenCalledTimes(0);
 });
 
-test('invalid Workspace override and valid User override', async () => {
+test('invalid Workspace wrong version override and valid User override', async () => {
   setWorkspaceFolders('workspace-folder');
   mocks.inspect.mockReturnValue({ workspaceValue: 'invalidPath', globalValue: 'some/User/path' });
-  mocks.statSync.mockImplementationOnce(() => ({ isFile: () => false }));
+  mocks.execFileSync.mockReturnValueOnce(INVALID_MAVEN_VERSION_OUTPUT);
   expect(validateMavenExecutable()).toBeUndefined();
   expect(mocks.showWarningMessage).toHaveBeenCalledTimes(1);
   expect(mocks.showWarningMessage).toHaveBeenCalledWith(
@@ -174,25 +162,16 @@ test('invalid Workspace override and valid User override', async () => {
   );
 });
 
-test('invalid Workspace override not executable', async () => {
+test('invalid Workspace throws error override', async () => {
   setWorkspaceFolders('workspace-folder');
   mocks.inspect.mockReturnValue({ workspaceValue: 'invalidPath', globalValue: undefined });
-  mocks.accessSync.mockImplementation(() => 'notAccessible');
+  mocks.execFileSync.mockImplementationOnce(() => {
+    throw new Error('Maven executable failed');
+  });
   expect(validateMavenExecutable()).toBeUndefined();
   expect(mocks.showWarningMessage).toHaveBeenCalledTimes(1);
   expect(mocks.showWarningMessage).toHaveBeenCalledWith(
     expect.stringContaining(`Invalid workspace Maven executable setting "${MAVEN_SETTING_KEY}": "invalidPath"`)
-  );
-});
-
-test('invalid Workspace override wrong version', async () => {
-  setWorkspaceFolders('workspace-folder');
-  mocks.inspect.mockReturnValue({ workspaceValue: 'valid/executable/wrong/version', globalValue: undefined });
-  mocks.execFileSync.mockReturnValueOnce(INVALID_MAVEN_VERSION_OUTPUT);
-  expect(validateMavenExecutable()).toBeUndefined();
-  expect(mocks.showWarningMessage).toHaveBeenCalledTimes(1);
-  expect(mocks.showWarningMessage).toHaveBeenCalledWith(
-    expect.stringContaining(`Invalid workspace Maven executable setting "${MAVEN_SETTING_KEY}": "valid/executable/wrong/version"`)
   );
 });
 
