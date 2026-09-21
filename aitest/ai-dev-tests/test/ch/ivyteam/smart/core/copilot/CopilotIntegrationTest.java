@@ -30,7 +30,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
-@Order(3)
+  @Order(3)
   void createProject(TestInfo testInfo) throws Exception {
     var resourceName = testInfo.getTestMethod().orElseThrow().getName();
     rt.copilot().prompt("create an axon ivy project for a flight-simulator", resourceName);
@@ -53,7 +53,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
-@Order(1)
+  @Order(1)
   void mcpON() throws Exception {
     assertThat(rt.copilot().listMcp())
       .as("MCP is configured for Copilot user")
@@ -77,7 +77,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
-@Order(2) // before: createProject (let's fetch the schemas here for the first time)
+  @Order(2) // before: createProject (let's fetch the schemas here for the first time)
   void initEditRolesYaml(TestInfo testInfo) throws Exception {
     var resourceName = testInfo.getTestMethod().orElseThrow().getName();
     rt.copilot().prompt("create the roles: manager and employee in purchase/config/roles.yaml", resourceName);
@@ -89,6 +89,7 @@ public class CopilotIntegrationTest {
     
     var roles = rt.ivyWorkspace().path().resolve("purchase/config/roles.yaml");
     assertThat(roles).content()
+      .as("Id: field name is known by reading roles.yaml schema")
       .contains("Id: manager", "Id: employee");
     assertThat(roles).content()
       .as("no tabs in roles.yaml: happens in vscode copilot quite often")
@@ -97,6 +98,15 @@ public class CopilotIntegrationTest {
     assertThat(spans.usedTools())
       .extracting(UsedTool::name)
       .contains("skill", "web_fetch");
+
+
+    var skillTool = spans.usedTools().stream().filter(t -> t.name().equals("skill")).findFirst().orElseThrow();
+    assertThat(skillTool.arguments()).contains("yaml-files");
+
+    var webFetch = spans.usedTools().stream().filter(t -> t.name().equals("web_fetch")).findFirst().orElseThrow();
+    assertThat(webFetch.arguments())
+      .contains("https://json-schema.axonivy.com")
+      .contains("config/roles.json");
 
     assertThat(tokenUsage.input()).isLessThan(200_000); // around: 170_000 in local tests
     assertThat(tokenUsage.output()).isLessThan(10_000);
