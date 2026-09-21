@@ -36,6 +36,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     isClickable: false
   });
   try {
+    registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));
     await validateAndSyncJavaVersion();
     validateMavenExecutable();
     ensureJavaExtensionInstalled();
@@ -45,7 +46,6 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     registerCommand('engine.switchEngineReleaseTrain', context, () => ivyEngineManager.switchEngineReleaseTrain());
     registerCommand('engine.activateAnimation', context, async () => await config.setProcessAnimationAnimate(true));
     registerCommand('engine.deactivateAnimation', context, async () => await config.setProcessAnimationAnimate(false));
-    registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));
     registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
     registerCommand('ivyPanelView.openExtensionLog', context, () => showExtensionLog());
     registerCommand('ivyPanelView.openEngineLog', context, () => showEngineLog());

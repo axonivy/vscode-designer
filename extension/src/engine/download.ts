@@ -52,19 +52,8 @@ const formatBytes = (bytes: number) => {
 
 const unzipEngine = (zipPath: string, targetDir: string, logger: (message: string) => void) => {
   logger(`Extract '${zipPath}' to '${targetDir}'`);
-  let zip = new AdmZip(zipPath);
+  const zip = new AdmZip(zipPath);
   zip.extractAllTo(targetDir, true, true);
   fs.rmSync(zipPath);
-
-  const files = fs.readdirSync(targetDir);
-  files.forEach(file => {
-    const nestedZipName = path.join(targetDir, file);
-    if (nestedZipName.endsWith('.zip') && fs.existsSync(nestedZipName)) {
-      zip = new AdmZip(nestedZipName);
-      zip.extractAllTo(targetDir, true, true);
-      fs.rmSync(nestedZipName);
-      return;
-    }
-  });
   logger('--> Extract finished');
 };

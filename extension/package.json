@@ -66,11 +66,11 @@
     "@axonivy/ui-icons": "next-14.0.0",
     "@types/vscode": "1.98.0",
     "@types/vscode-webview": "1.57.5",
-    "@vscode/vsce": "3.9.2",
+    "@vscode/vsce": "4.0.0",
     "esbuild": "0.28.2",
     "fonteditor-core": "2.6.3",
     "json-schema-to-typescript": "^16.0.0",
-    "vitest": "5.0.0"
+    "vitest": "5.0.1"
   },
   "activationEvents": [
     "workspaceContains:**/pom.xml",
@@ -96,6 +96,12 @@
         "https://json.schemastore.org/": true,
         "https://json-schema.org/": true,
         "https://json-schema.axonivy.com/": true
+      },
+      "chat.tools.urls.autoApprove": {
+        "https://json-schema.axonivy.com": {
+          "approveRequest": true,
+          "approveResponse": true
+        }
       },
       "html.suggest.html5": false,
       "java.server.launchMode": "LightWeight",

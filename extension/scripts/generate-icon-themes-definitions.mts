@@ -20,7 +20,7 @@ export const IVY_ICON_DEFINITIONS: IvyIconDefinitions = {
     darkColor: '#519aba'
   },
   _ivy_dataclass: {
-    icon: IvyIcons.DataClass,
+    icon: IvyIcons.DataClassFile,
     lightColor: '#7fae42',
     darkColor: '#8dc149'
   },
