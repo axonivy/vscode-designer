@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'path';
-import { commands, env, ProgressLocation, Uri, window, workspace, type CancellationToken, type Progress } from 'vscode';
+import { commands, env, ProgressLocation, Uri, window, workspace, type Progress } from 'vscode';
 import { showExtensionLog } from '../base/extension-output-channel';
 import { logErrorMessage, logInformationMessageWithActions } from '../base/logging-util';
 import type { AddCommandSelectionContext } from './ivy-project-explorer';
@@ -123,17 +123,11 @@ export const exportIvyProject = async (addCommandSelectionContext: AddCommandSel
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
-      cancellable: true,
+      cancellable: false,
       title: 'Axon Ivy Export'
     },
-    async (progress, token) => {
-      if (token.isCancellationRequested) {
-        return;
-      }
-      await exportIar(exportProjectData.project as ProjectSelection, targetFilePath, targetFolder, targetFileName, progress, token);
-      if (token.isCancellationRequested) {
-        return;
-      }
+    async progress => {
+      await exportIar(exportProjectData.project as ProjectSelection, targetFilePath, targetFolder, targetFileName, progress);
     }
   );
 };
@@ -143,13 +137,8 @@ const exportIar = async (
   targetFilePath: string,
   targetFolder: string,
   fileName: string,
-  progress: Progress<{ message?: string; increment?: number }>,
-  token: CancellationToken
+  progress: Progress<{ message?: string; increment?: number }>
 ) => {
-  if (token.isCancellationRequested) {
-    return;
-  }
-
   progress.report({
     message: `${projectToExport.label}`
   });
@@ -162,10 +151,6 @@ const exportIar = async (
     );
   } catch (error) {
     logErrorMessage(`Failed to execute Maven command for project ${projectToExport.label}: ${(error as Error).message}`);
-    return;
-  }
-
-  if (token.isCancellationRequested) {
     return;
   }
 
