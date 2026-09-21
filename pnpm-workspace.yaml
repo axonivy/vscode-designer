@@ -11,8 +11,8 @@ minimumReleaseAgeExclude:
   - esbuild@0.28.1
   # Renovate security update: dompurify@3.4.13
   - dompurify@3.4.11 || 3.4.13
-  # Renovate security update: adm-zip@0.6.0
-  - adm-zip@0.6.0
+  # Renovate security update: adm-zip@0.6.0 || 0.6.1
+  - adm-zip@0.6.0 || 0.6.1
 overrides:
   dompurify: '>=3.4.11'
 patchedDependencies:
