@@ -15,6 +15,7 @@ import { HOST_EXTENSION, type NotificationType, type RequestType } from 'vscode-
 import { Messenger } from 'vscode-messenger-webview';
 import './index.css';
 import { setupCutShortcutHandler, setupPasteShortcutHandler, setupSaveShortcutHandler } from './monaco-fix';
+import { setupSelectAllShortcutHandler } from './select-all-shortcut';
 
 const WebviewConnectionReadyNotification: NotificationType<void> = { method: 'connectionReady' };
 const InitializeConnectionRequest: RequestType<void, void> = { method: 'initializeConnection' };
@@ -41,6 +42,7 @@ export class StandaloneDiagramStartup implements IDiagramStartup {
     // Setup clipboard handler for Monaco editors in webview
     setupPasteShortcutHandler();
     setupCutShortcutHandler();
+    setupSelectAllShortcutHandler(this.actionDispatcher);
 
     // Setup save shortcut handler for Monaco editors
     setupSaveShortcutHandler(() => this.messenger.sendNotification(SaveDocumentNotification, HOST_EXTENSION));

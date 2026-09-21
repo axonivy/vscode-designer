@@ -44,6 +44,41 @@ test('Change display name of Request Start', async ({ wsPage }) => {
   await editor.expectTabDirty();
 });
 
+test('Select all process elements with canvas focus', async ({ wsPage }) => {
+  const editor = new ProcessEditor(wsPage);
+  await editor.open();
+  const start = editor.elementByPID('15254DCE818AD7A2-f0');
+  const userDialog = editor.elementByPID(userDialogPID);
+
+  await start.click();
+  await wsPage.page.keyboard.press('ControlOrMeta+KeyA');
+
+  await editor.assertSelected(start);
+  await editor.assertSelected(userDialog);
+});
+
+test('Select all text in Search without selecting process elements', async ({ wsPage }) => {
+  const editor = new ProcessEditor(wsPage);
+  await editor.open();
+  const searchText = 'process editor search';
+  const searchInput = wsPage.page.getByRole('textbox', { name: 'Search' });
+
+  await wsPage.page.keyboard.press('ControlOrMeta+Shift+KeyF');
+  await expect(searchInput).toBeVisible();
+  await searchInput.fill(searchText);
+  await searchInput.press('ControlOrMeta+KeyA');
+
+  await expect
+    .poll(async () =>
+      searchInput.evaluate(input => {
+        const field = input as HTMLInputElement;
+        return [field.selectionStart, field.selectionEnd];
+      })
+    )
+    .toEqual([0, searchText.length]);
+  await expect(editor.graph.locator('.selected')).toHaveCount(0);
+});
+
 test('Jump into Call Sub', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage);
   await editor.open();
