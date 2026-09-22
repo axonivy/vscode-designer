@@ -93,7 +93,7 @@ const checkMvnExecutable = (executable: string) => {
     return isExpectedMavenVersion(version);
   } catch (error) {
     logErrorMessage(`Failed to check Maven executable "${executable}": ${error}`);
-    console.error(`Failed to check Maven executable "${executable}":`, error);
+    console.log(`Failed to check Maven executable "${executable}":`, error);
     return false;
   }
 };
