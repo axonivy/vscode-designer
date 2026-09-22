@@ -1,4 +1,3 @@
-import Parser from 'rss-parser';
 import type { ExtensionContext, WebviewPanel } from 'vscode';
 import { ViewColumn, commands, window } from 'vscode';
 import { Messenger } from 'vscode-messenger';
@@ -15,7 +14,6 @@ const commandType: NotificationType<string> = { method: 'executeCommand' };
 const versionType: NotificationType<string> = { method: 'versionDelivered' };
 const showWelcomePageType: NotificationType<boolean> = { method: 'showWelcomePage' };
 const toggleShowWelcomePageType: RequestType<boolean, boolean> = { method: 'toggleShowWelcomePage' };
-const newsFeedType: NotificationType<NewsFeed> = { method: 'newsFeed' };
 
 export const showWelcomePageKey = 'showWelcomePage';
 
@@ -45,29 +43,11 @@ export const showWelcomePage = async (context: ExtensionContext) => {
   const version = `${extensionVersion.major}.${extensionVersion.minor}.${extensionVersion.patch}`;
   messenger.sendNotification(versionType, { type: 'webview', webviewType: 'ivy.welcomePage' }, version);
   messenger.sendNotification(showWelcomePageType, { type: 'webview', webviewType: 'ivy.welcomePage' }, showWelcomePageState(context));
-  parseFeed().then(feed => messenger.sendNotification(newsFeedType, { type: 'webview', webviewType: 'ivy.welcomePage' }, feed));
 
   panel.onDidDispose(() => {
     panel.dispose();
     currentPanel = undefined;
   });
-};
-
-type NewsFeed = {
-  description: string;
-  items: Array<NewsItem>;
-};
-
-type NewsItem = {
-  title: string;
-  pubDate: string;
-  contentSnippet: string;
-  link: string;
-};
-
-const parseFeed = async () => {
-  const parser: Parser<NewsFeed, NewsItem> = new Parser();
-  return (await parser.parseURL('https://www.axonivy.com/blog/rss.xml')) as NewsFeed;
 };
 
 const showWelcomePageState = (context: ExtensionContext) => {
