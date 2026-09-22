@@ -78,7 +78,7 @@ public class CopilotIntegrationTest {
         .contains("skill", "web_fetch");
 
     var skillTool = spans.usedTools().stream().filter(t -> t.name().equals("skill")).findFirst().orElseThrow();
-    assertThat(skillTool.arguments()).contains("yaml-files");
+    assertThat(skillTool.arguments()).contains("ivy-yaml-files");
 
     var webFetch = spans.usedTools().stream().filter(t -> t.name().equals("web_fetch")).findFirst().orElseThrow();
     assertThat(webFetch.arguments())
