@@ -1,6 +1,7 @@
 import fs from 'fs';
 import type { CodeActionContext, CodeActionProvider, DiagnosticCollection, ExtensionContext, Selection, TextDocument } from 'vscode';
 import { CodeAction, CodeActionKind, Diagnostic, DiagnosticSeverity, Range, Uri, languages } from 'vscode';
+import { executeCommand } from '../base/commands';
 import { runJavaServerModeSwitch } from '../base/java-extension-api';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { IvyEngineManager } from './engine-manager';
@@ -62,6 +63,7 @@ export class IvyDiagnostics {
     if (!hasProjectWithError) {
       await runJavaServerModeSwitch();
     }
+    await executeCommand('setContext', 'ivy:hasProjectsToConvert', this.projectFileUrisToBeConverted().length > 0);
   }
 
   public projectFileUrisToBeConverted() {
