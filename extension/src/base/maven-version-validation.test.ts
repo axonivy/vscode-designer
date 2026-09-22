@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   exec: vi.fn(),
   showInformationMessage: vi.fn(),
   showWarningMessage: vi.fn(),
+  showErrorMessage: vi.fn(),
   workspaceFolders: [] as Array<{ uri: { fsPath: string } }>
 }));
 
@@ -21,7 +22,8 @@ vi.mock('vscode', () => ({
       info: vi.fn()
     }),
     showInformationMessage: mocks.showInformationMessage,
-    showWarningMessage: mocks.showWarningMessage
+    showWarningMessage: mocks.showWarningMessage,
+    showErrorMessage: mocks.showErrorMessage
   },
   workspace: {
     getConfiguration: (_section: string, scope?: { fsPath: string }) => ({
