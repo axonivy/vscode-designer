@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 import { workspace, type WorkspaceFolder } from 'vscode';
-import { logErrorMessage, logInformationMessage, logWarningMessage } from './logging-util';
+import { logInformationMessage, logWarningMessage } from './logging-util';
 
 const DEFAULT_MAVEN_EXECUTABLE = 'mvn';
 const MAVEN_SETTING_GROUP = 'maven';
@@ -90,7 +90,6 @@ const checkMvnExecutable = (executable: string): Promise<boolean> => {
     exec(`${executable} --version`, { encoding: 'utf8', windowsHide: true }, (error, stdout, stderr) => {
       const version = `${stdout}${stderr}`;
       if (error) {
-        logErrorMessage(`"${executable}": ${error}`);
         console.log(`"${executable}":`, error);
         resolve(false);
         return;
