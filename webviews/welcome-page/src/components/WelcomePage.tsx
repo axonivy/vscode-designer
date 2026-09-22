@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import logo from '../axonivy-logo.svg';
 import { VersionStore } from '../util/VersionStore';
 import { CommandSection } from './CommandSection';
-import { NewsSection } from './NewsSection';
 import { ShortcutSection } from './shortcut/ShortcutSection';
 import { ShowOnActivationToggle } from './ShowOnActivation';
 import { SocialMediaLinkSection } from './SocialMediaLinkSection';
@@ -30,10 +29,7 @@ export const WelcomePage = () => {
             <ShortcutSection />
           </div>
           <Separator className='m-0!' />
-          <div className='grid grid-cols-1 gap-3 lg:grid-cols-2'>
-            <CommandSection />
-            <NewsSection />
-          </div>
+          <CommandSection />
         </Flex>
         <SocialMediaLinkSection />
         <ShowOnActivationToggle />
