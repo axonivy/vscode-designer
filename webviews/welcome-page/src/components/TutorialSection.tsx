@@ -1,9 +1,8 @@
 import { Flex } from '@axonivy/ui-components';
 import { useTranslation } from 'react-i18next';
+import SPLASH from '../img/splash.png';
 import { useVscode } from '../util/useVscode';
 import { SectionButton } from './SectionButton';
-
-const IMG_URL = 'https://raw.githubusercontent.com/axonivy/vscode-designer/refs/heads/master/doc/image/tutorial_thumbnail.png';
 
 export const TutorialSection = () => {
   const { t } = useTranslation();
@@ -18,7 +17,7 @@ export const TutorialSection = () => {
       <img
         onClick={() => openUrl('https://app.supademo.com/demo/cmtik2kgn00d1tq0jvsxv9iri')}
         className='cursor-pointer rounded-lg border border-n200'
-        src={IMG_URL}
+        src={SPLASH}
         alt='Tutorial Image'
       />
     </Flex>
