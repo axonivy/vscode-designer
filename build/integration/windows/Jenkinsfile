@@ -53,6 +53,7 @@ pipeline {
           archiveArtifacts artifacts: 'playwright/playwright-videos/**', allowEmptyArchive: true
           archiveArtifacts artifacts: 'AxonIvyEngine/logs/ivy.log', allowEmptyArchive: true
           archiveArtifacts artifacts: 'ivy-engine-console.out', allowEmptyArchive: true
+          archiveArtifacts artifacts: 'playwright/test-user-data-dir/User/globalStorage/axonivy.vscode-designer*/engines/*_All_*/logs/**', allowEmptyArchive: true
           withChecks('WebTests') {
             junit testDataPublishers: [[$class: 'StabilityTestDataPublisher']], testResults: '**/node_modules/**/report.xml'
           }

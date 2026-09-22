@@ -1,6 +1,6 @@
 import { execFileSync } from 'child_process';
 import { workspace, type WorkspaceFolder } from 'vscode';
-import { logErrorMessage, logInformationMessage, logWarningMessage } from './logging-util';
+import { logInformationMessage, logWarningMessage } from './logging-util';
 
 const DEFAULT_MAVEN_EXECUTABLE = 'mvn';
 const MAVEN_SETTING_GROUP = 'maven';
@@ -89,10 +89,27 @@ const getMvnExecutables = () => {
 
 const checkMvnExecutable = (executable: string) => {
   try {
-    const version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
+    console.log(`Checking Maven executable: "${executable}"`);
+
+    const isWindows = process.platform === 'win32';
+    console.log('process.platform:', process.platform);
+    console.log('isWindows:', isWindows);
+
+    const execFunction = (isWindows: boolean) => {
+      if (isWindows) {
+        console.log('Executing Maven command on Windows');
+        return execFileSync('cmd.exe', ['/d', '/s', '/c', `"${executable}" --version`], { encoding: 'utf8', windowsHide: true });
+      } else {
+        console.log('Executing Maven command on non-Windows platform');
+        return execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
+      }
+    };
+
+    const version = execFunction(isWindows);
+
+    // const version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
     return isExpectedMavenVersion(version);
   } catch (error) {
-    logErrorMessage(`Failed to check Maven executable "${executable}": ${error}`);
     console.log(`Failed to check Maven executable "${executable}":`, error);
     return false;
   }
