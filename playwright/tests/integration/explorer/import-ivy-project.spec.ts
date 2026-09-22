@@ -88,8 +88,7 @@ test.describe('Single root workspace', () => {
   });
 });
 
-// eslint-disable-next-line playwright/no-focused-test
-test.describe.only('Multi root workspace', () => {
+test.describe('Multi root workspace', () => {
   test.use({ workspace: multiRootWorkspacePath });
   test.skip(process.env.RUN_IN_BROWSER === 'true');
 
