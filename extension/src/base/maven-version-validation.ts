@@ -1,4 +1,4 @@
-import { ChildProcess, exec } from 'child_process';
+import { exec } from 'child_process';
 import { workspace, type WorkspaceFolder } from 'vscode';
 import { logErrorMessage, logInformationMessage, logWarningMessage } from './logging-util';
 
@@ -14,29 +14,27 @@ export type MvnSettingExecutable = {
   workspaceFolder?: WorkspaceFolder;
 };
 
-export const validateMavenExecutable = () => {
+export const validateMavenExecutable = async () => {
   const mvnExecutables = getMvnExecutables();
   const mvnExectuableUser = mvnExecutables.find(mvnExecutable => mvnExecutable.scope === 'user');
 
   // First check all workspace-specific Maven executable settings
-  mvnExecutables
-    .filter(mvnExecutable => mvnExecutable.scope === 'workspace')
-    .forEach(mvnExecutable => {
-      if (!checkMvnExecutable(mvnExecutable.value)) {
-        logWarningMessage(`Invalid ${mvnExecutable.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}"
+  for (const mvnExecutable of mvnExecutables.filter(mvnExecutable => mvnExecutable.scope === 'workspace')) {
+    if (!(await checkMvnExecutable(mvnExecutable.value))) {
+      logWarningMessage(`Invalid ${mvnExecutable.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}"
         in workspace folder "${mvnExecutable.workspaceFolder?.uri.fsPath}".
         This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}.
         Keeping this setting might lead to unexpected behavior.`);
-      } else {
-        logInformationMessage(`Found valid ${mvnExecutable.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}"
+    } else {
+      logInformationMessage(`Found valid ${mvnExecutable.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}"
         in workspace folder "${mvnExecutable.workspaceFolder?.uri.fsPath}".
         This executable will be used for Maven operations in that workspace.`);
-      }
-    });
+    }
+  }
 
   // Next, check the user-specific Maven executable setting if present
   if (mvnExectuableUser) {
-    if (!checkMvnExecutable(mvnExectuableUser.value)) {
+    if (!(await checkMvnExecutable(mvnExectuableUser.value))) {
       logWarningMessage(`Invalid ${mvnExectuableUser.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExectuableUser.value}".
         This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}.
         Keeping this setting might lead to unexpected behavior.`);
@@ -48,7 +46,7 @@ export const validateMavenExecutable = () => {
   }
 
   // If there is no user-specific Maven executable, fall back to the default Maven executable on PATH
-  const isValidPath = checkMvnExecutable(DEFAULT_MAVEN_EXECUTABLE);
+  const isValidPath = await checkMvnExecutable(DEFAULT_MAVEN_EXECUTABLE);
   if (!isValidPath) {
     logWarningMessage(`No valid Maven executable found.
     Please ensure Maven ${EXPECTED_MAVEN_VERSION} is installed and accessible in your PATH
@@ -87,60 +85,24 @@ const getMvnExecutables = () => {
   return mvnExecutables;
 };
 
-const checkMvnExecutable = (executable: string) => {
+const checkMvnExecutable = (executable: string): Promise<boolean> => {
+  logInformationMessage(`Checking Maven executable: "${executable}"`);
   console.log(`Checking Maven executable: "${executable}"`);
 
-  const isWindows = process.platform === 'win32';
-  console.log('process.platform:', process.platform);
-  console.log('isWindows:', isWindows);
-
-  try {
-    let versionOutput: ChildProcess;
-    let version: string = '';
-    if (isWindows) {
-      console.log('Detected Windows platform');
-
-      // version = execFileSync(process.env.ComSpec ?? 'cmd.exe', ['/d', '/s', '/c', `"${executable}" --version`]);
-
-      // version = execFileSync(process.env.ComSpec ?? 'cmd.exe', ['/d', '/s', '/c', `"${executable}" --version`], {
-      //   encoding: 'utf8',
-      //   windowsHide: true
-      //   // env: { ...process.env }
-      // });
-
-      versionOutput = exec(['mvn', '--version'].join(' '), { cwd: process.cwd() });
-    } else {
-      console.log('Detected non-Windows platform');
-      // version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true, env: { ...process.env } });
-      // version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
-
-      versionOutput = exec(['mvn', '--version'].join(' '), { cwd: process.cwd() });
-    }
-
-    // const version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
-
-    if (versionOutput.stdout) {
-      versionOutput.stdout.setEncoding('utf-8');
-
-      versionOutput.stdout.on('data', (data: string) => {
-        version += data;
-      });
-    }
-
-    if (versionOutput.stderr) {
-      versionOutput.stderr.setEncoding('utf-8');
-
-      versionOutput.stderr.on('data', (data: string) => {
-        version += data;
-      });
-    }
-
-    return isExpectedMavenVersion(version);
-  } catch (error) {
-    logErrorMessage(`"${executable}": ${error}`);
-    console.log(`"${executable}":`, error);
-    return false;
-  }
+  return new Promise(resolve => {
+    exec(`"${executable}" --version`, { encoding: 'utf8', windowsHide: true }, (error, stdout, stderr) => {
+      const version = `${stdout}${stderr}`;
+      if (error) {
+        logErrorMessage(`"${executable}": ${error}`);
+        console.log(`"${executable}":`, error);
+        resolve(false);
+        return;
+      }
+      logInformationMessage(`"${executable}" version output: ${version}`);
+      console.log(`"${executable}" version output:`, version);
+      resolve(isExpectedMavenVersion(version));
+    });
+  });
 };
 
 const isExpectedMavenVersion = (versionOutput: string) => {
