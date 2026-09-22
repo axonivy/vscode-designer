@@ -2,7 +2,7 @@ import { exec } from 'child_process';
 import { workspace, type WorkspaceFolder } from 'vscode';
 import { logErrorMessage, logInformationMessage, logWarningMessage } from './logging-util';
 
-const DEFAULT_MAVEN_EXECUTABLE = process.platform === 'win32' ? 'mvn' : 'mvn';
+const DEFAULT_MAVEN_EXECUTABLE = 'mvn';
 const MAVEN_SETTING_GROUP = 'maven';
 const MAVEN_SETTING_EXECUTABLE_PATH = 'executable.path';
 export const MAVEN_SETTING_KEY = `${MAVEN_SETTING_GROUP}.${MAVEN_SETTING_EXECUTABLE_PATH}`;
