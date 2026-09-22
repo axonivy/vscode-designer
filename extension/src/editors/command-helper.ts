@@ -1,5 +1,6 @@
+import fs from 'fs';
 import type { ExtensionContext } from 'vscode';
-import { Uri, commands } from 'vscode';
+import { Uri, commands, workspace } from 'vscode';
 import { registerCommand, type ConfigEditorCommand, type EditorCommand } from '../base/commands';
 import { logErrorMessage } from '../base/logging-util';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
@@ -11,7 +12,12 @@ export const registerOpenConfigEditorCmd = (command: ConfigEditorCommand, contex
     if (!projectPath) {
       return;
     }
-    const fileUri = Uri.joinPath(Uri.file(projectPath), 'config', file);
+    const configDir = Uri.joinPath(Uri.file(projectPath), 'config');
+    const fileUri = Uri.joinPath(configDir, file);
+    if (!fs.existsSync(fileUri.fsPath)) {
+      await workspace.fs.createDirectory(configDir);
+      await workspace.fs.writeFile(fileUri, new Uint8Array());
+    }
     commands.executeCommand('vscode.open', fileUri);
   });
 

@@ -20,8 +20,8 @@ these environment variables need to be set:
 
 ```bash
 # linux example
-JAVA_HOME=/usr/lib/jvm/temurin-25-jdk-amd64/
-HOST_UID=$(id -u)
-HOST_GID=$(id -g)
-COPILOT_TOKEN=github_pat_xyz...
+export JAVA_HOME=/usr/lib/jvm/temurin-25-jdk-amd64/
+export HOST_UID=$(id -u)
+export HOST_GID=$(id -g)
+export COPILOT_TOKEN=github_pat_xyz...
 ```
