@@ -20,16 +20,11 @@ export const screenshotLocator = async (page: Page, locator: Locator, name: stri
   expect(buffer.byteLength).toBeGreaterThan(3000);
 };
 
-export const withViewportHeightRatio = async (page: Page, heightRatio: number, action: () => Promise<void>) => {
+export const withViewportSize = async (page: Page, width: number, height: number, action: () => Promise<void>) => {
   const previousViewport = page.viewportSize();
 
   try {
-    if (previousViewport) {
-      await page.setViewportSize({
-        width: previousViewport.width,
-        height: Math.floor(previousViewport.height * heightRatio)
-      });
-    }
+    await page.setViewportSize({ width, height });
     await action();
   } finally {
     if (previousViewport) {

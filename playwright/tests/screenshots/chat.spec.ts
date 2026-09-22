@@ -1,7 +1,7 @@
 import { expect, test } from '~/fixtures/baseTest';
 import { ChatPage } from '~/page-objects/chat';
 import { screenshotProject } from '~/workspaces/workspace';
-import { screenshotLocator, withViewportHeightRatio } from './screenshot-util';
+import { screenshotLocator, withViewportSize } from './screenshot-util';
 
 test.use({ workspace: screenshotProject });
 
@@ -9,7 +9,7 @@ test('chat: window', async ({ wsPage }) => {
   await wsPage.openEditorFile('pom.xml');
   const chatPage = new ChatPage(wsPage);
   await chatPage.open();
-  await withViewportHeightRatio(wsPage.page, 0.4, () => screenshotLocator(wsPage.page, chatPage.chatArea, 'chat-window'));
+  await withViewportSize(wsPage.page, 1920, 432, () => screenshotLocator(wsPage.page, chatPage.chatArea, 'chat-window'));
 });
 
 test('chat: tools', async ({ wsPage }) => {
