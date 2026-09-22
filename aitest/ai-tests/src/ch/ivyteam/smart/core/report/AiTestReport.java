@@ -9,8 +9,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.TestInfo;
-
 import ch.ivyteam.smart.core.aspire.AspireSpans;
 import ch.ivyteam.smart.core.aspire.AspireSpans.TokenUsage;
 import ch.ivyteam.smart.core.aspire.AspireSpans.UsedTool;
@@ -24,8 +22,8 @@ public class AiTestReport {
     this.writer.init();
   }
 
-  public void report(TestInfo testInfo, AspireSpans spans) {
-    this.writer.append(testInfo.getTestMethod().orElseThrow().getName(), spans.tokenUsage(), spans.usedTools());
+  public void report(String testName, AspireSpans spans) {
+    this.writer.append(testName, spans.tokenUsage(), spans.usedTools());
   }
 
   private static class ReportFileWriter {

@@ -27,6 +27,7 @@ public class AgentRuntimeExtension implements BeforeAllCallback, AfterAllCallbac
 
   @Override
   public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+    runtime.currentTest(extensionContext.getTestMethod().orElseThrow().getName());
     return runtime;
   }
 }

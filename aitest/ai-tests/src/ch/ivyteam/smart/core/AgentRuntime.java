@@ -14,6 +14,7 @@ import com.github.dockerjava.api.exception.NotFoundException;
 
 import ch.ivyteam.smart.core.aspire.AspireAPI;
 import ch.ivyteam.smart.core.aspire.AspireContainer;
+import ch.ivyteam.smart.core.aspire.AspireSpans;
 import ch.ivyteam.smart.core.copilot.Copilot;
 import ch.ivyteam.smart.core.copilot.CopilotContainer;
 import ch.ivyteam.smart.core.mcp.DesignerMcpContainer;
@@ -40,6 +41,8 @@ public class AgentRuntime {
   static Path userData;
 
   static AiTestReport reporter = new AiTestReport();
+
+  private String currentTest;
 
   public void start() {
     System.out.println("Container reuse: " + reuseContainers);
@@ -94,6 +97,25 @@ public class AgentRuntime {
 
   public Copilot copilot() {
     return copilot;
+  }
+
+  void currentTest(String testName) {
+    currentTest = testName;
+  }
+
+  public AspireSpans prompt(String prompt) {
+    var resourceName = currentTest;
+    if (resourceName == null) {
+      throw new IllegalStateException("AgentRuntime is not attached to a test");
+    }
+    try {
+      copilot.prompt(prompt, resourceName);
+    } catch (InterruptedException | IOException e) {
+      throw new RuntimeException("Failed to prompt Copilot", e);
+    }
+    var spans = aspire().spansOfResource(resourceName);
+    reporter().report(resourceName, spans);
+    return spans;
   }
 
   public AspireAPI aspire() {

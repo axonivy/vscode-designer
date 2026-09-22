@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import ch.ivyteam.smart.core.AgentRuntime;
@@ -19,11 +18,8 @@ public class CopilotIntegrationTest {
 
   @Test
   @Order(3)
-  void createProject(AgentRuntime rt, TestInfo testInfo) throws Exception {
-    var resourceName = testInfo.getTestMethod().orElseThrow().getName();
-    rt.copilot().prompt("create an axon ivy project for a flight-simulator", resourceName);
-    var spans = rt.aspire().spansOfResource(resourceName);
-    rt.reporter().report(testInfo, spans);
+  void createProject(AgentRuntime rt) throws Exception {
+    var spans = rt.prompt("create an axon ivy project for a flight-simulator");
     var tokenUsage = spans.tokenUsage();
     assertThat(tokenUsage.input()).isLessThan(150_000);
     assertThat(tokenUsage.output()).isLessThan(10_000);
@@ -43,7 +39,7 @@ public class CopilotIntegrationTest {
 
   @Test
   @Order(2)
-  void mcpON(AgentRuntime rt, TestInfo testInfo) throws Exception {
+  void mcpON(AgentRuntime rt) throws Exception {
     assertThat(rt.copilot().listMcp())
         .as("MCP is configured for Copilot user")
         .contains(
@@ -53,9 +49,7 @@ public class CopilotIntegrationTest {
         .as("MCP answers health with 200 OK")
         .isEqualTo(200);
 
-    rt.copilot().prompt("name all available tools from current MCP setup", "mcp-tools");
-    var spans = rt.aspire().spansOfResource("mcp-tools");
-    rt.reporter().report(testInfo, spans);
+    var spans = rt.prompt("name all available tools from current MCP setup");
 
     assertThat(spans.tools().names())
         .as("tools from vscode-designer MCP are propagated to harness")
@@ -68,11 +62,8 @@ public class CopilotIntegrationTest {
 
   @Test
   @Order(1) // before: createProject (let's fetch the schemas here for the first time)
-  void initEditRolesYaml(AgentRuntime rt, TestInfo testInfo) throws Exception {
-    var resourceName = testInfo.getTestMethod().orElseThrow().getName();
-    rt.copilot().prompt("create the roles: manager and employee in purchase/config/roles.yaml", resourceName);
-    var spans = rt.aspire().spansOfResource(resourceName);
-    rt.reporter().report(testInfo, spans);
+  void initEditRolesYaml(AgentRuntime rt) throws Exception {
+    var spans = rt.prompt("create the roles: manager and employee in purchase/config/roles.yaml");
 
     var roles = rt.ivyWorkspace().path().resolve("purchase/config/roles.yaml");
     assertThat(roles).content()
