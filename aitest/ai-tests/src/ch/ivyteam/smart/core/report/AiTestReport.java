@@ -23,7 +23,14 @@ public class AiTestReport {
   }
 
   public void report(String testName, AspireSpans spans) {
-    this.writer.append(testName, spans.tokenUsage(), spans.usedTools());
+    var usage = spans.tokenUsage();
+    
+    System.out.println("Executed "+testName +
+    ": inputTokens="+usage.input()+
+    ", outputTokens="+usage.output()+
+    ", tools="+spans.usedTools().stream().map(UsedTool::name).toList());
+
+    this.writer.append(testName, usage, spans.usedTools());
   }
 
   private static class ReportFileWriter {
