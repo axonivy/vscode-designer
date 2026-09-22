@@ -88,26 +88,24 @@ const getMvnExecutables = () => {
 };
 
 const checkMvnExecutable = (executable: string) => {
+  console.log(`Checking Maven executable: "${executable}"`);
+
+  const isWindows = process.platform === 'win32';
+  console.log('process.platform:', process.platform);
+  console.log('isWindows:', isWindows);
+
   try {
-    console.log(`Checking Maven executable: "${executable}"`);
-
-    const isWindows = process.platform === 'win32';
-    console.log('process.platform:', process.platform);
-    console.log('isWindows:', isWindows);
-
-    const execFunction = (isWindows: boolean) => {
-      if (isWindows) {
-        console.log('Executing Maven command on Windows');
-        return execFileSync('cmd.exe', ['/d', '/s', '/c', `"${executable}" --version`], { encoding: 'utf8', windowsHide: true });
-      } else {
-        console.log('Executing Maven command on non-Windows platform');
-        return execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
-      }
-    };
-
-    const version = execFunction(isWindows);
+    let version;
+    if (isWindows) {
+      console.log('Detected Windows platform');
+      version = execFileSync('cmd.exe', ['/d', '/s', '/c', `"${executable}" --version`], { encoding: 'utf8', windowsHide: true });
+    } else {
+      console.log('Detected non-Windows platform');
+      version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
+    }
 
     // const version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
+
     return isExpectedMavenVersion(version);
   } catch (error) {
     console.log(`Failed to check Maven executable "${executable}":`, error);
