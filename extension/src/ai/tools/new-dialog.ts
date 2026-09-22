@@ -21,7 +21,7 @@ type NewDialogToolArgs = {
   layout?: DialogLayout;
   template?: DialogTemplate;
 };
-type DialogType = 'Form' | 'JSF' | 'JSFOffline';
+type DialogType = 'Form' | 'Faces' | 'FacesOffline';
 type DialogLayout =
   | 'Page Responsive Grid 2 Columns'
   | 'Page Responsive Grid 4 Columns'
@@ -39,7 +39,7 @@ export class NewDialogTool implements LanguageModelTool<NewDialogToolArgs> {
   prepareInvocation?(options: LanguageModelToolInvocationPrepareOptions<NewDialogToolArgs>): ProviderResult<PreparedToolInvocation> {
     const newDialogParams = resolvedParams(options.input);
     let confirmationMessage = `Create an Axon Ivy ${newDialogParams.type} Dialog with the following details?\n- Name: ${newDialogParams.name}\n- Namespace: ${newDialogParams.namespace}\n- Project: ${path.basename(newDialogParams.projectDir ?? '')}`;
-    if (newDialogParams.type === 'JSF') {
+    if (newDialogParams.type === 'Faces') {
       confirmationMessage += `\n- Layout: ${newDialogParams.layout}`;
       if (newDialogParams.layout !== 'Component') {
         confirmationMessage += `\n- Template: ${newDialogParams.template}`;
@@ -69,13 +69,13 @@ const resolvedParams = (args: NewDialogToolArgs) => {
     projectDir: args.projectPath,
     type: args.type ?? 'Form'
   };
-  if (params.type === 'JSF') {
+  if (params.type === 'Faces') {
     params.layout = args.layout ?? 'Page Responsive Grid 2 Columns';
     if (params.layout !== 'Component') {
       params.template = args.template ?? 'basic-10';
     }
   }
-  if (params.type === 'JSFOffline') {
+  if (params.type === 'FacesOffline') {
     params.layout = 'Page';
   }
   return params;

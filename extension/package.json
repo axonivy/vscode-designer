@@ -440,7 +440,7 @@
       },
       {
         "command": "ivyProjects.addNewHtmlDialog",
-        "title": "New Html Dialog (JSF)",
+        "title": "New Faces Dialog",
         "category": "Axon Ivy"
       },
       {
@@ -450,7 +450,7 @@
       },
       {
         "command": "ivyProjects.addNewOfflineDialog",
-        "title": "New Offline Dialog (JSF)",
+        "title": "New Offline Faces Dialog",
         "category": "Axon Ivy"
       },
       {
@@ -851,8 +851,8 @@
               "type": "string",
               "enum": [
                 "Form",
-                "JSF",
-                "JSFOffline"
+                "Faces",
+                "FacesOffline"
               ],
               "default": "Form",
               "description": "Type of the Dialog to create"
@@ -867,7 +867,7 @@
                 "Component"
               ],
               "default": "Page Responsive Grid 2 Columns",
-              "description": "Layout to use for the new Dialog. Only applicable if type is 'JSF'."
+              "description": "Layout to use for the new Dialog. Only applicable if type is 'Faces'."
             },
             "template": {
               "type": "string",
@@ -878,7 +878,7 @@
                 "frame-10-full-width"
               ],
               "default": "basic-10",
-              "description": "Template to use for the new Dialog. Only applicable if type is 'JSF' and layout is not 'Component'."
+              "description": "Template to use for the new Dialog. Only applicable if type is 'Faces' and layout is not 'Component'."
             }
           },
           "required": [

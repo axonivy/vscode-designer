@@ -130,7 +130,7 @@ export class FileExplorer extends ExplorerView {
   async addUserDialog(
     dialogName: string,
     namespace: string,
-    kind: 'Html Dialog (JSF)' | 'Offline Dialog (JSF)' | 'Dialog Form',
+    kind: 'Faces Dialog' | 'Offline Faces Dialog' | 'Dialog Form',
     defaultNamespaceExpected: string = 'prebuiltProject'
   ) {
     await this.selectNode('config');
@@ -139,7 +139,7 @@ export class FileExplorer extends ExplorerView {
     await this.wsPage.provideUserInput(dialogName);
     await expect(this.wsPage.quickInputBox.getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
     await this.wsPage.provideUserInput(namespace);
-    if (kind === 'Html Dialog (JSF)') {
+    if (kind === 'Faces Dialog') {
       await this.wsPage.provideUserInput();
       await this.wsPage.provideUserInput();
     }

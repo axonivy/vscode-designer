@@ -50,7 +50,7 @@ test('finds an XHTML element selection by id', () => {
   expect(selection?.active).toEqual({ line: 2, character: 4 });
 });
 
-test('finds an XHTML element selection by JSF qualified id', () => {
+test('finds an XHTML element selection by Faces qualified id', () => {
   const selection = findXhtmlElementSelection(createTextDocument(xhtml), 'form:proceed');
   expect(selection).toBeDefined();
   expect(selection?.anchor).toEqual({ line: 3, character: 6 });
@@ -68,7 +68,7 @@ const repeatedButtonXhtml = `<html>
   </h:body>
 </html>`;
 
-test('prefers the most plausible child match when intermediate JSF segments are missing in source', () => {
+test('prefers the most plausible child match when intermediate Faces segments are missing in source', () => {
   const selection = findXhtmlElementSelection(createTextDocument(repeatedButtonXhtml), 'form:j_idt42:proceed');
   expect(selection).toBeDefined();
   expect(selection?.anchor).toEqual({ line: 6, character: 6 });
@@ -92,7 +92,7 @@ const nestedButtonXhtml = `<html>
   </h:body>
 </html>`;
 
-test('matches nested JSF ids with more than two segments', () => {
+test('matches nested Faces ids with more than two segments', () => {
   const selection = findXhtmlElementSelection(createTextDocument(nestedButtonXhtml), 'otherForm:grid:proceed');
   expect(selection).toBeDefined();
   expect(selection?.anchor).toEqual({ line: 4, character: 8 });
@@ -114,7 +114,7 @@ const buttonWithoutIdXhtml = `<html>
   </h:body>
 </html>`;
 
-test('falls back to the form when a button has no id and JSF generates a random child id', () => {
+test('falls back to the form when a button has no id and Faces generates a random child id', () => {
   const selection = findXhtmlElementSelection(createTextDocument(buttonWithoutIdXhtml), 'form:j_idt42');
   expect(selection).toBeDefined();
   expect(selection?.anchor).toEqual({ line: 2, character: 4 });

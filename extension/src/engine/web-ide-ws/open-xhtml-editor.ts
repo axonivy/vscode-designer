@@ -41,18 +41,18 @@ export const findXhtmlElementSelection = (document: TextDocument, elementId?: st
 };
 
 const findBestMatchingXhtmlElement = (xhtmlDocument: ReturnType<typeof parseDocument>, selectedId: string) => {
-  const requestedIdParts = toJsfIdParts(selectedId);
+  const requestedIdParts = toFacesIdParts(selectedId);
   if (requestedIdParts.length === 0) {
     return undefined;
   }
 
   const elements = DomUtils.findAll(
-    node => node instanceof Element && typeof node.attribs.id === 'string' && normalizeJsfIdSegment(node.attribs.id).length > 0,
+    node => node instanceof Element && typeof node.attribs.id === 'string' && normalizeFacesIdSegment(node.attribs.id).length > 0,
     xhtmlDocument.children
   ).filter((node): node is Element => node instanceof Element);
 
   const exactElement = elements.find(element => {
-    const localId = normalizeJsfIdSegment(element.attribs.id);
+    const localId = normalizeFacesIdSegment(element.attribs.id);
     return localId === selectedId || buildElementIdPath(element).join(':') === selectedId;
   });
   if (exactElement) {
@@ -62,7 +62,7 @@ const findBestMatchingXhtmlElement = (xhtmlDocument: ReturnType<typeof parseDocu
   for (let requestIndex = requestedIdParts.length - 1; requestIndex >= 0; requestIndex--) {
     const requestPart = requestedIdParts[requestIndex];
     const bestCandidate = elements
-      .filter(element => normalizeJsfIdSegment(element.attribs.id) === requestPart)
+      .filter(element => normalizeFacesIdSegment(element.attribs.id) === requestPart)
       .map(element => {
         const path = buildElementIdPath(element);
         return {
@@ -86,7 +86,7 @@ const buildElementIdPath = (element: Element) => {
   const idSegments: string[] = [];
   let currentElement: Element | null = element;
   while (currentElement) {
-    const currentId = normalizeJsfIdSegment(currentElement.attribs.id);
+    const currentId = normalizeFacesIdSegment(currentElement.attribs.id);
     if (currentId) {
       idSegments.unshift(currentId);
     }
@@ -114,10 +114,10 @@ const countMatchingIdSegments = (elementPath: string[], requestedIdParts: string
   return matchedSegments;
 };
 
-const toJsfIdParts = (selectedId: string) =>
+const toFacesIdParts = (selectedId: string) =>
   selectedId
     .split(':')
-    .map(part => normalizeJsfIdSegment(part))
+    .map(part => normalizeFacesIdSegment(part))
     .filter(part => part.length > 0);
 
-const normalizeJsfIdSegment = (id: string | undefined) => id?.trim() ?? '';
+const normalizeFacesIdSegment = (id: string | undefined) => id?.trim() ?? '';

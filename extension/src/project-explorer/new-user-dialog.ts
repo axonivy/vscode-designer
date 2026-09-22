@@ -16,7 +16,7 @@ import {
 } from './utils/multi-step-input';
 import { validateDotSeparatedName, validateProjectArtifactName, type ResourceDirectoryTarget } from './utils/util';
 
-export const dialogTypes = ['JSF', 'Form', 'JSFOffline'] as const;
+export const dialogTypes = ['Faces', 'Form', 'FacesOffline'] as const;
 export type DialogType = (typeof dialogTypes)[number];
 
 const layouts = [
@@ -70,15 +70,15 @@ const prepareAndValidateFinalState: (
   }
 
   switch (type) {
-    case 'JSF':
+    case 'Faces':
       if (state.layout === undefined) {
-        throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Layout is required for JSF dialogs.');
+        throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Layout is required for Faces dialogs.');
       }
       if (state.layout.label === 'Page') {
         throw new MultiStepInvalidStateError(ERROR_PREFIX + '"Page" layout is only valid in Offline Dialog.');
       }
       if (state.template === undefined && state.layout.label !== 'Component') {
-        throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Template is required for JSF dialogs with non-Component layouts.');
+        throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Template is required for Faces dialogs with non-Component layouts.');
       }
       break;
     case 'Form':
@@ -89,10 +89,10 @@ const prepareAndValidateFinalState: (
         throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Template should not be set for Form dialogs.');
       }
       break;
-    case 'JSFOffline':
+    case 'FacesOffline':
       state.layout = { label: 'Page' };
       if (state.template !== undefined) {
-        throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Template should not be set for JSF Offline dialogs.');
+        throw new MultiStepInvalidStateError(ERROR_PREFIX + 'Template should not be set for Faces Offline dialogs.');
       }
       break;
     default:
@@ -212,10 +212,10 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
     case 'Form':
       steps = [stepProject, stepName, stepNamespace];
       break;
-    case 'JSFOffline':
+    case 'FacesOffline':
       steps = [stepProject, stepName, stepNamespace];
       break;
-    case 'JSF':
+    case 'Faces':
       steps = [stepProject, stepName, stepNamespace, stepLayout, stepTemplate];
       break;
     default:

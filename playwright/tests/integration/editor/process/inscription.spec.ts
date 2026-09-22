@@ -223,7 +223,7 @@ test('Create Html Dialog', async ({ wsPage }) => {
   await expect(dialogField).toBeEmpty();
   await inscriptionView.clickButton('Create new Html Dialog');
   const userDialogName = 'htmlDialog';
-  await wsPage.provideUserInput('JSF');
+  await wsPage.provideUserInput('Faces');
   await wsPage.provideUserInput(userDialogName);
   await wsPage.provideUserInput();
   await wsPage.provideUserInput();
@@ -265,7 +265,7 @@ test('Create Offline Dialog', async ({ wsPage }) => {
   await expect(dialogField).toBeEmpty();
   await inscriptionView.clickButton('Create new Html Dialog');
   const userDialogName = 'offlineDialog';
-  await wsPage.provideUserInput('JSFOffline');
+  await wsPage.provideUserInput('FacesOffline');
   await wsPage.provideUserInput(userDialogName);
   await wsPage.provideUserInput();
   await editor.expectTabDirty();
