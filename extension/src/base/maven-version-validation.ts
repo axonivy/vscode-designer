@@ -1,6 +1,6 @@
 import { execFileSync } from 'child_process';
 import { workspace, type WorkspaceFolder } from 'vscode';
-import { logInformationMessage, logWarningMessage } from './logging-util';
+import { logErrorMessage, logInformationMessage, logWarningMessage } from './logging-util';
 
 const DEFAULT_MAVEN_EXECUTABLE = process.platform === 'win32' ? 'mvn.cmd' : 'mvn';
 const MAVEN_SETTING_GROUP = 'maven';
@@ -113,7 +113,8 @@ const checkMvnExecutable = (executable: string) => {
 
     return isExpectedMavenVersion(version);
   } catch (error) {
-    console.log(`Failed to check Maven executable "${executable}":`, error);
+    logErrorMessage(`"${executable}": ${error}`);
+    console.log(`"${executable}":`, error);
     return false;
   }
 };
