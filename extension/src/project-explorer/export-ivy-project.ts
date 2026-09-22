@@ -1,8 +1,7 @@
 import fs from 'node:fs';
 import path from 'path';
-import { commands, env, ProgressLocation, Uri, window, workspace, type Progress } from 'vscode';
-import { showExtensionLog } from '../base/extension-output-channel';
-import { logErrorMessage, logInformationMessageWithActions } from '../base/logging-util';
+import { commands, Disposable, env, ProgressLocation, Uri, window, workspace, type Progress } from 'vscode';
+import { logErrorMessage, logErrorMessageWithActions, logInformationMessageWithActions } from '../base/logging-util';
 import type { AddCommandSelectionContext } from './ivy-project-explorer';
 import { MultiStepCancelledError, MultiStepInput, type InputStep, type MSStateBase, type ProjectSelection } from './utils/multi-step-input';
 import { validateExportPath } from './utils/util';
@@ -143,30 +142,54 @@ const exportIar = async (
     message: `${projectToExport.label}`
   });
 
-  try {
-    await commands.executeCommand(
-      'maven.goal.custom',
-      path.join(projectToExport.path, 'pom.xml'),
-      `com.axonivy.ivy.ci:project-build-plugin:pack-iar "-Divy.output.directory=${targetFolder}" "-Divy.final.name=${fileName}"`
-    );
-  } catch (error) {
-    logErrorMessage(`Failed to execute Maven command for project ${projectToExport.label}: ${(error as Error).message}`);
+  createEndTerminalExecutionListener();
+
+  await commands.executeCommand(
+    'maven.goal.custom',
+    path.join(projectToExport.path, 'pom.xml'),
+    `com.axonivy.ivy.ci:project-build-plugin:pack-iar "-Divy.output.directory=${targetFolder}" "-Divy.final.name=${fileName}"`
+  );
+};
+
+let endTerminalExecutionListener: Disposable | undefined;
+
+const createEndTerminalExecutionListener = () => {
+  if (endTerminalExecutionListener) {
     return;
   }
-
-  logInformationMessageWithActions(
-    `Export concluded. Check if project ${projectToExport.label} has been exported to ${targetFilePath}.
-    If not, check the Terminal view for Maven build errors.`,
-    {
+  endTerminalExecutionListener = window.onDidEndTerminalShellExecution(e => {
+    const commandLineValue = e.execution.commandLine.value;
+    if (!commandLineValue.includes('com.axonivy.ivy.ci:project-build-plugin:pack-iar "-Divy.output.directory=')) {
+      return;
+    }
+    if (!commandLineValue.includes('"-Divy.final.name=')) {
+      return;
+    }
+    if (e.exitCode !== 0) {
+      logErrorMessageWithActions(`Maven command failed with exit code ${e.exitCode} for command: ${commandLineValue}`, {
+        'Show Terminal': () => {
+          commands.executeCommand('terminal.focus');
+        }
+      });
+      return;
+    }
+    const targetFolder = commandLineValue.match(/"-Divy\.output\.directory=([^"]+)"/)?.[1];
+    const fileName = commandLineValue.match(/"-Divy\.final\.name=([^"]+)"/)?.[1];
+    if (!targetFolder) {
+      logErrorMessageWithActions(`Could not determine target folder from command: ${commandLineValue}`, {
+        'Show Terminal': () => {
+          commands.executeCommand('terminal.focus');
+        }
+      });
+      return;
+    }
+    logInformationMessageWithActions(`Project archive ${fileName} has been exported to "${targetFolder}".`, {
       'Reveal in Explorer': async () => {
         await env.openExternal(Uri.file(targetFolder));
       },
       'Show Terminal': () => {
         commands.executeCommand('terminal.focus');
-      },
-      'Show Extension Log': () => {
-        showExtensionLog();
       }
-    }
-  );
+    });
+  });
 };
