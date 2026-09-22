@@ -15,10 +15,11 @@ public class CopilotContainer extends GenericContainer<CopilotContainer> {
 
   private static final String IMAGE_NAME = "ivy-copilot:local";
 
-  public CopilotContainer(Path workspace, Path userData) {
+  public CopilotContainer(Path workspace, Path userData, Path skills) {
     super(copilotImage());
     withFileSystemBind(workspace.toString(), "/workspace", BindMode.READ_WRITE);
     withFileSystemBind(userData.toString(), "/user-data", BindMode.READ_WRITE);
+    withFileSystemBind(skills.toString(), "/root/.copilot/skills", BindMode.READ_ONLY);
     withEnv("COPILOT_AUTO_UPDATE", "false");
     withEnv("COPILOT_MODEL", "gpt-5-mini");
     withEnv("GITHUB_COPILOT_PROMPT_MODE_WORKSPACE_MCP", "true");

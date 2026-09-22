@@ -98,6 +98,10 @@ public class AspireSpans {
     public String name() {
       return findSpanAttributeValue(span, AttributeKey.stringKey("gen_ai.tool.name")).get();
     }
+
+    public String arguments() {
+      return findSpanAttributeValue(span, AttributeKey.stringKey("gen_ai.tool.call.arguments")).orElse(null);
+    }
   }
 
   private static ObjectNode rootSpan(JsonNode spans) {

@@ -4,12 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import ch.ivyteam.smart.core.AgentRuntime;
 import ch.ivyteam.smart.core.aspire.AspireSpans.UsedTool;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CopilotIntegrationTest {
 
   private static AgentRuntime rt = new AgentRuntime();
@@ -26,6 +30,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Order(3)
   void createProject(TestInfo testInfo) throws Exception {
     var resourceName = testInfo.getTestMethod().orElseThrow().getName();
     rt.copilot().prompt("create an axon ivy project for a flight-simulator", resourceName);
@@ -48,6 +53,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Order(2)
   void mcpON() throws Exception {
     assertThat(rt.copilot().listMcp())
       .as("MCP is configured for Copilot user")
@@ -69,4 +75,41 @@ public class CopilotIntegrationTest {
     assertThat(tokenUsage.input()).isLessThan(150_000);
     assertThat(tokenUsage.output()).isLessThan(10_000);
   }
+
+  @Test
+  @Order(1) // before: createProject (let's fetch the schemas here for the first time)
+  void initEditRolesYaml(TestInfo testInfo) throws Exception {
+    var resourceName = testInfo.getTestMethod().orElseThrow().getName();
+    rt.copilot().prompt("create the roles: manager and employee in purchase/config/roles.yaml", resourceName);
+    var spans = rt.aspire().spansOfResource(resourceName);
+    var tokenUsage = spans.tokenUsage();
+    System.out.println(tokenUsage);
+    var tools = spans.usedTools().stream().map(UsedTool::name).toList();
+    System.out.println("tools: "+tools);
+    
+    var roles = rt.ivyWorkspace().path().resolve("purchase/config/roles.yaml");
+    assertThat(roles).content()
+      .as("Id: field name is known by reading roles.yaml schema")
+      .contains("Id: manager", "Id: employee");
+    assertThat(roles).content()
+      .as("no tabs in roles.yaml: happens in vscode copilot quite often")
+      .doesNotContain("\t");
+
+    assertThat(spans.usedTools())
+      .extracting(UsedTool::name)
+      .contains("skill", "web_fetch");
+
+
+    var skillTool = spans.usedTools().stream().filter(t -> t.name().equals("skill")).findFirst().orElseThrow();
+    assertThat(skillTool.arguments()).contains("yaml-files");
+
+    var webFetch = spans.usedTools().stream().filter(t -> t.name().equals("web_fetch")).findFirst().orElseThrow();
+    assertThat(webFetch.arguments())
+      .contains("https://json-schema.axonivy.com")
+      .contains("config/roles.json");
+
+    assertThat(tokenUsage.input()).isLessThan(200_000); // around: 170_000 in local tests
+    assertThat(tokenUsage.output()).isLessThan(10_000);
+  }
+
 }

@@ -54,6 +54,7 @@ jobs:
             ci-user-data/xvfb-errors.log
             ci-user-data/process*.log
             **/*.log
+            aitest/ai-dev-tests/target/surefire-reports/*.xml
       # - name: Publish Test Results
       #   uses: EnricoMi/publish-unit-test-result-action@v2
       #   if: always()
