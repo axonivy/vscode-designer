@@ -27,6 +27,8 @@ type IconThemeDefinition = {
   file: string;
   folder?: string;
   folderExpanded?: string;
+  folderNames?: Record<string, string>;
+  folderNamesExpanded?: Record<string, string>;
   fileExtensions: Record<string, string>;
   fileNames: Record<string, string>;
   languageIds: Record<string, string>;

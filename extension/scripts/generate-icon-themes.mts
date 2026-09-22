@@ -3,7 +3,15 @@ import { createFont, woff2 } from 'fonteditor-core';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
-import { IVY_FILE_EXTENSIONS, IVY_FILE_NAMES, IVY_FOLDER, IVY_FOLDER_EXPANDED, IVY_FONT_ID, IVY_ICON_DEFINITIONS } from './generate-icon-themes-definitions.mts';
+import {
+  IVY_FILE_EXTENSIONS,
+  IVY_FILE_NAMES,
+  IVY_FOLDER,
+  IVY_FOLDER_EXPANDED,
+  IVY_FOLDER_NAMES,
+  IVY_FONT_ID,
+  IVY_ICON_DEFINITIONS
+} from './generate-icon-themes-definitions.mts';
 import type { IconTheme } from './generate-icon-themes-types.mts';
 
 const ICON_THEMES_OUTPUT_DIRECTORY = '../dist/icon-themes' as const;
@@ -67,8 +75,16 @@ function toFontCharacter(icon: IvyIconsId) {
   return `\\${Number(IVY_ICONS_CODEPOINTS[icon]).toString(16)}`;
 }
 
+function postfixIconDefinition(iconDefinitionMapping: Record<string, string>, postfix: string) {
+  return Object.fromEntries(Object.entries(iconDefinitionMapping).map(([key, value]) => [key, `${value}_${postfix}`]));
+}
+
+function toExpanded(iconDefinitionMapping: Record<string, string>) {
+  return postfixIconDefinition(iconDefinitionMapping, 'expanded');
+}
+
 function toLight(iconDefinitionMapping: Record<string, string>) {
-  return Object.fromEntries(Object.entries(iconDefinitionMapping).map(([key, value]) => [key, `${value}_light`]));
+  return postfixIconDefinition(iconDefinitionMapping, 'light');
 }
 
 async function themeColored(): Promise<IconTheme> {
@@ -109,12 +125,16 @@ async function themeColored(): Promise<IconTheme> {
     iconDefinitions: { ...setiIconTheme.iconDefinitions, ...ivyIconDefinitions },
     folder: IVY_FOLDER,
     folderExpanded: IVY_FOLDER_EXPANDED,
+    folderNames: { ...setiIconTheme.folderNames, ...IVY_FOLDER_NAMES },
+    folderNamesExpanded: { ...setiIconTheme.folderNamesExpanded, ...toExpanded(IVY_FOLDER_NAMES) },
     fileExtensions: { ...setiIconTheme.fileExtensions, ...IVY_FILE_EXTENSIONS },
     fileNames: { ...setiIconTheme.fileNames, ...IVY_FILE_NAMES },
     light: {
       ...setiIconTheme.light,
       folder: `${IVY_FOLDER}_light`,
       folderExpanded: `${IVY_FOLDER_EXPANDED}_light`,
+      folderNames: { ...setiIconTheme.light?.folderNames, ...toLight(IVY_FOLDER_NAMES) },
+      folderNamesExpanded: { ...setiIconTheme.light?.folderNamesExpanded, ...toLight(toExpanded(IVY_FOLDER_NAMES)) },
       fileExtensions: { ...setiIconTheme.light?.fileExtensions, ...toLight(IVY_FILE_EXTENSIONS) },
       fileNames: { ...setiIconTheme.light?.fileNames, ...toLight(IVY_FILE_NAMES) }
     }
