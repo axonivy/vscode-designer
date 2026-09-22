@@ -2,8 +2,7 @@ package ch.ivyteam.smart.core.copilot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -11,26 +10,16 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import ch.ivyteam.smart.core.AgentRuntime;
+import ch.ivyteam.smart.core.AgentRuntimeExtension;
 import ch.ivyteam.smart.core.aspire.AspireSpans.UsedTool;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@ExtendWith(AgentRuntimeExtension.class)
 public class CopilotIntegrationTest {
-
-  private static AgentRuntime rt = new AgentRuntime();
-
-  @BeforeAll
-  public static void beforeAll() {
-    rt.start();
-  }
-
-  @AfterAll
-  public static void afterAll() {
-    rt.stop();
-  }
 
   @Test
   @Order(3)
-  void createProject(TestInfo testInfo) throws Exception {
+  void createProject(AgentRuntime rt, TestInfo testInfo) throws Exception {
     var resourceName = testInfo.getTestMethod().orElseThrow().getName();
     rt.copilot().prompt("create an axon ivy project for a flight-simulator", resourceName);
     var spans = rt.aspire().spansOfResource(resourceName);
@@ -54,7 +43,7 @@ public class CopilotIntegrationTest {
 
   @Test
   @Order(2)
-  void mcpON(TestInfo testInfo) throws Exception {
+  void mcpON(AgentRuntime rt, TestInfo testInfo) throws Exception {
     assertThat(rt.copilot().listMcp())
         .as("MCP is configured for Copilot user")
         .contains(
@@ -79,7 +68,7 @@ public class CopilotIntegrationTest {
 
   @Test
   @Order(1) // before: createProject (let's fetch the schemas here for the first time)
-  void initEditRolesYaml(TestInfo testInfo) throws Exception {
+  void initEditRolesYaml(AgentRuntime rt, TestInfo testInfo) throws Exception {
     var resourceName = testInfo.getTestMethod().orElseThrow().getName();
     rt.copilot().prompt("create the roles: manager and employee in purchase/config/roles.yaml", resourceName);
     var spans = rt.aspire().spansOfResource(resourceName);
