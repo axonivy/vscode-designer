@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { type ExtensionContext } from 'vscode';
+import { window, type ExtensionContext } from 'vscode';
 import { Messenger, type MessengerDiagnostic } from 'vscode-messenger';
 import { LocalMcpServer } from './ai/tools/local-mcp';
 import { registerTools } from './ai/tools/tools';
@@ -28,6 +28,10 @@ let localMcpStartup: Promise<void> | undefined;
 export const messenger = new Messenger({ ignoreHiddenViews: false });
 
 export async function activate(context: ExtensionContext): Promise<MessengerDiagnostic> {
+  window.onDidEndTerminalShellExecution(e => {
+    console.log('wopa', e);
+  });
+
   StatusBar.init(context);
   StatusBar.overrideStatusBar({
     text: 'Activating...',
