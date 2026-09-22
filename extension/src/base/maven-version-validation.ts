@@ -98,7 +98,10 @@ const checkMvnExecutable = (executable: string) => {
     let version;
     if (isWindows) {
       console.log('Detected Windows platform');
-      version = execFileSync('cmd.exe', ['/d', '/s', '/c', `"${executable}" --version`], { encoding: 'utf8', windowsHide: true });
+      version = execFileSync(process.env.ComSpec ?? 'cmd.exe', ['/d', '/s', '/c', `"${executable}" --version`], {
+        encoding: 'utf8',
+        windowsHide: true
+      });
     } else {
       console.log('Detected non-Windows platform');
       version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
