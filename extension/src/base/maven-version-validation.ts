@@ -2,7 +2,7 @@ import { exec } from 'child_process';
 import { workspace, type WorkspaceFolder } from 'vscode';
 import { logErrorMessage, logInformationMessage, logWarningMessage } from './logging-util';
 
-const DEFAULT_MAVEN_EXECUTABLE = process.platform === 'win32' ? 'mvn.cmd' : 'mvn';
+const DEFAULT_MAVEN_EXECUTABLE = process.platform === 'win32' ? 'mvn' : 'mvn';
 const MAVEN_SETTING_GROUP = 'maven';
 const MAVEN_SETTING_EXECUTABLE_PATH = 'executable.path';
 export const MAVEN_SETTING_KEY = `${MAVEN_SETTING_GROUP}.${MAVEN_SETTING_EXECUTABLE_PATH}`;
@@ -86,11 +86,11 @@ const getMvnExecutables = () => {
 };
 
 const checkMvnExecutable = (executable: string): Promise<boolean> => {
-  logInformationMessage(`Checking Maven executable: "${executable}"`);
+  logErrorMessage(`Checking Maven executable: "${executable}"`);
   console.log(`Checking Maven executable: "${executable}"`);
 
   return new Promise(resolve => {
-    exec(`"${executable}" --version`, { encoding: 'utf8', windowsHide: true }, (error, stdout, stderr) => {
+    exec(`${executable} --version`, { encoding: 'utf8', windowsHide: true }, (error, stdout, stderr) => {
       const version = `${stdout}${stderr}`;
       if (error) {
         logErrorMessage(`"${executable}": ${error}`);
@@ -98,7 +98,7 @@ const checkMvnExecutable = (executable: string): Promise<boolean> => {
         resolve(false);
         return;
       }
-      logInformationMessage(`"${executable}" version output: ${version}`);
+      logErrorMessage(`"${executable}" version output: ${version}`);
       console.log(`"${executable}" version output:`, version);
       resolve(isExpectedMavenVersion(version));
     });
