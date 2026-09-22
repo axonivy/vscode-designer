@@ -9,7 +9,7 @@ const userDialogName = 'testCreateUserDialog';
 
 test('Add Html Dialog', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
-  await explorer.addUserDialog(userDialogName, 'ch.ivyteam.test', 'Html Dialog (JSF)');
+  await explorer.addUserDialog(userDialogName, 'ch.ivyteam.test', 'Faces Dialog');
   await explorer.hasNodeExact(`${userDialogName}.xhtml`);
   await explorer.hasNodeExact(`${userDialogName}Data.d.json`);
   await explorer.hasNodeExact(`${userDialogName}Process.p.json`);
@@ -23,7 +23,7 @@ test('Add Html Dialog', async ({ wsPage }) => {
 
 test('Add Offline Dialog', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
-  await explorer.addUserDialog(userDialogName, 'ch.ivyteam.test.offline', 'Offline Dialog (JSF)');
+  await explorer.addUserDialog(userDialogName, 'ch.ivyteam.test.offline', 'Offline Faces Dialog');
   await explorer.hasNodeExact(`${userDialogName}.xhtml`);
   await explorer.hasNodeExact(`${userDialogName}Data.d.json`);
   await explorer.hasNodeExact(`${userDialogName}Process.p.json`);
