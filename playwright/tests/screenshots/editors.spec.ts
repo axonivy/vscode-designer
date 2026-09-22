@@ -1,4 +1,5 @@
 import { expect, test } from '~/fixtures/baseTest';
+import { ProcessEditor } from '~/page-objects/process-editor';
 import { VsCodeBrowser } from '~/page-objects/vscode-browser';
 import { screenshotProject } from '~/workspaces/workspace';
 import { FormEditor } from '../page-objects/form-editor';
@@ -6,11 +7,14 @@ import { screenshot } from './screenshot-util';
 
 test.use({ workspace: screenshotProject });
 
+test('process editor', async ({ wsPage }) => {
+  const editor = new ProcessEditor(wsPage, 'quickstart.p.json');
+  await editor.open();
+  await expect(editor.graph).toBeVisible();
+  await screenshot(wsPage.page, 'editor-process');
+});
+
 test('form editor preview', async ({ wsPage, electronApp }) => {
-  test.skip(!electronApp, 'Electron app is required for this test');
-  if (!electronApp) {
-    return;
-  }
   const editor = new FormEditor(wsPage);
   await editor.open();
 
