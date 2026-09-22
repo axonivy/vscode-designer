@@ -1,4 +1,4 @@
-import { execFileSync } from 'child_process';
+import { exec } from 'child_process';
 import { workspace, type WorkspaceFolder } from 'vscode';
 import { logErrorMessage, logInformationMessage, logWarningMessage } from './logging-util';
 
@@ -98,15 +98,22 @@ const checkMvnExecutable = (executable: string) => {
     let version;
     if (isWindows) {
       console.log('Detected Windows platform');
-      version = execFileSync(process.env.ComSpec ?? 'cmd.exe', ['/d', '/s', '/c', `"${executable}" --version`], {
-        encoding: 'utf8',
-        windowsHide: true
-        // env: { ...process.env }
-      });
+
+      // version = execFileSync(process.env.ComSpec ?? 'cmd.exe', ['/d', '/s', '/c', `"${executable}" --version`]);
+
+      // version = execFileSync(process.env.ComSpec ?? 'cmd.exe', ['/d', '/s', '/c', `"${executable}" --version`], {
+      //   encoding: 'utf8',
+      //   windowsHide: true
+      //   // env: { ...process.env }
+      // });
+
+      version = exec('mvn --version');
     } else {
       console.log('Detected non-Windows platform');
       // version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true, env: { ...process.env } });
-      version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
+      // version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
+
+      version = exec('mvn --version');
     }
 
     // const version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
