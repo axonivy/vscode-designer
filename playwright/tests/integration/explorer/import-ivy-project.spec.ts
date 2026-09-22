@@ -22,10 +22,10 @@ test.describe.only('Import Ivy Project Tests', () => {
 
     test('Import up-to-date Ivy Project', async ({ wsPage }) => {
       const explorer = new FileExplorer(wsPage);
+      await explorer.hasNodeExact('non-ivy-folder');
 
       throw new Error('Abort test');
 
-      await explorer.hasNodeExact('non-ivy-folder');
       await wsPage.executeCommand('Import Project Archive (.iar or .zip)');
       await wsPage.selectItemFromQuickPick(iarFileName);
       await wsPage.executeCommand('Refresh Explorer');
