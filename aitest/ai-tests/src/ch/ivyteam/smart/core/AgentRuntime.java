@@ -20,6 +20,7 @@ import ch.ivyteam.smart.core.mcp.DesignerMcpContainer;
 import ch.ivyteam.smart.core.mcp.IvyEngine;
 import ch.ivyteam.smart.core.mcp.IvyWorkspace;
 import ch.ivyteam.smart.core.mcp.IvyWorkspaceSetup;
+import ch.ivyteam.smart.core.report.AiTestReport;
 
 public class AgentRuntime {
   private static final String NETWORK_NAME = "smart-test-network";
@@ -37,6 +38,8 @@ public class AgentRuntime {
   static AspireAPI aspireApi;
   static Path ivyWorkspace;
   static Path userData;
+
+  static AiTestReport reporter = new AiTestReport();
 
   public void start() {
     System.out.println("Container reuse: " + reuseContainers);
@@ -68,6 +71,8 @@ public class AgentRuntime {
     copilot.otlpEndpoint(aspireContainer.getAspireEndpoint());
     startContainer(copilotContainer);
     copilot.addMcp(designerMcpContainer.getMcpUri());
+
+    reporter.resetReport();
   }
 
   private void startContainer(GenericContainer<?> container) {
@@ -93,6 +98,10 @@ public class AgentRuntime {
 
   public AspireAPI aspire() {
     return aspireApi;
+  }
+
+  public AiTestReport reporter() {
+    return reporter;
   }
 
   public IvyWorkspace ivyWorkspace() {
