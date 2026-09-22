@@ -2,7 +2,7 @@ import { execFileSync } from 'child_process';
 import { workspace, type WorkspaceFolder } from 'vscode';
 import { logInformationMessage, logWarningMessage } from './logging-util';
 
-const DEFAULT_MAVEN_EXECUTABLE = 'mvn';
+const DEFAULT_MAVEN_EXECUTABLE = process.platform === 'win32' ? 'mvn.cmd' : 'mvn';
 const MAVEN_SETTING_GROUP = 'maven';
 const MAVEN_SETTING_EXECUTABLE_PATH = 'executable.path';
 export const MAVEN_SETTING_KEY = `${MAVEN_SETTING_GROUP}.${MAVEN_SETTING_EXECUTABLE_PATH}`;
@@ -101,9 +101,11 @@ const checkMvnExecutable = (executable: string) => {
       version = execFileSync(process.env.ComSpec ?? 'cmd.exe', ['/d', '/s', '/c', `"${executable}" --version`], {
         encoding: 'utf8',
         windowsHide: true
+        // env: { ...process.env }
       });
     } else {
       console.log('Detected non-Windows platform');
+      // version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true, env: { ...process.env } });
       version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
     }
 
