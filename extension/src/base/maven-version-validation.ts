@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { ChildProcess, exec } from 'child_process';
 import { workspace, type WorkspaceFolder } from 'vscode';
 import { logErrorMessage, logInformationMessage, logWarningMessage } from './logging-util';
 
@@ -95,7 +95,8 @@ const checkMvnExecutable = (executable: string) => {
   console.log('isWindows:', isWindows);
 
   try {
-    let version;
+    let versionOutput: ChildProcess;
+    let version: string = '';
     if (isWindows) {
       console.log('Detected Windows platform');
 
@@ -107,16 +108,32 @@ const checkMvnExecutable = (executable: string) => {
       //   // env: { ...process.env }
       // });
 
-      version = exec('mvn --version');
+      versionOutput = exec(['mvn', '--version'].join(' '), { cwd: process.cwd() });
     } else {
       console.log('Detected non-Windows platform');
       // version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true, env: { ...process.env } });
       // version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
 
-      version = exec('mvn --version');
+      versionOutput = exec(['mvn', '--version'].join(' '), { cwd: process.cwd() });
     }
 
     // const version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
+
+    if (versionOutput.stdout) {
+      versionOutput.stdout.setEncoding('utf-8');
+
+      versionOutput.stdout.on('data', (data: string) => {
+        version += data;
+      });
+    }
+
+    if (versionOutput.stderr) {
+      versionOutput.stderr.setEncoding('utf-8');
+
+      versionOutput.stderr.on('data', (data: string) => {
+        version += data;
+      });
+    }
 
     return isExpectedMavenVersion(version);
   } catch (error) {
