@@ -1,4 +1,5 @@
 import { exec } from 'child_process';
+import { promisify } from 'node:util';
 import { workspace, type WorkspaceFolder } from 'vscode';
 import { logInformationMessage, logWarningMessage } from './logging-util';
 
@@ -7,6 +8,8 @@ const MAVEN_SETTING_GROUP = 'maven';
 const MAVEN_SETTING_EXECUTABLE_PATH = 'executable.path';
 export const MAVEN_SETTING_KEY = `${MAVEN_SETTING_GROUP}.${MAVEN_SETTING_EXECUTABLE_PATH}`;
 const EXPECTED_MAVEN_VERSION = '3.9';
+
+const execAsync = promisify(exec);
 
 export type MvnSettingExecutable = {
   scope: 'workspace' | 'user';
@@ -85,18 +88,16 @@ const getMvnExecutables = () => {
   return mvnExecutables;
 };
 
-const checkMvnExecutable = (executable: string): Promise<boolean> => {
-  return new Promise(resolve => {
-    exec(`${executable} --version`, { encoding: 'utf8', windowsHide: true }, (error, stdout, stderr) => {
-      const version = `${stdout}${stderr}`;
-      if (error) {
-        console.log(`"${executable}":`, error);
-        resolve(false);
-        return;
-      }
-      resolve(isExpectedMavenVersion(version));
-    });
-  });
+const checkMvnExecutable = async (executable: string): Promise<boolean> => {
+  try {
+    const command = [`"${executable}"`, '--version'].join(' ');
+    const { stdout, stderr } = await execAsync(command, { encoding: 'utf8', windowsHide: true });
+    const version = `${stdout}${stderr}`;
+    return isExpectedMavenVersion(version);
+  } catch (error) {
+    console.log(`"${executable}":`, error);
+    return false;
+  }
 };
 
 const isExpectedMavenVersion = (versionOutput: string) => {

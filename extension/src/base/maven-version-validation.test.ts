@@ -35,9 +35,24 @@ vi.mock('vscode', () => ({
   }
 }));
 
-vi.mock('child_process', () => ({
-  exec: mocks.exec
-}));
+vi.mock('child_process', () => {
+  const customPromisify = Symbol.for('nodejs.util.promisify.custom');
+  const exec = mocks.exec as typeof mocks.exec & {
+    [customPromisify]: (command: string, options: unknown) => Promise<{ stdout: string; stderr: string }>;
+  };
+  exec[customPromisify] = (command: string, options: unknown) => {
+    return new Promise((resolve, reject) => {
+      exec(command, options, (error: Error | null, stdout: string, stderr: string) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve({ stdout, stderr });
+        }
+      });
+    });
+  };
+  return { exec };
+});
 
 const VALID_MAVEN_VERSION_OUTPUT = 'Apache Maven 3.9.11';
 const INVALID_MAVEN_VERSION_OUTPUT = 'Apache Maven 3.8.5';
@@ -93,8 +108,8 @@ test('valid workspace override multi-root', async () => {
   });
   await expect(validateMavenExecutable()).resolves.toBeUndefined();
   expect(mocks.showWarningMessage).toHaveBeenCalledTimes(0);
-  expect(mocks.exec).toHaveBeenCalledWith('some/workspace-a/path --version', { encoding: 'utf8', windowsHide: true }, expect.anything());
-  expect(mocks.exec).toHaveBeenCalledWith('some/workspace-b/path --version', { encoding: 'utf8', windowsHide: true }, expect.anything());
+  expect(mocks.exec).toHaveBeenCalledWith('"some/workspace-a/path" --version', { encoding: 'utf8', windowsHide: true }, expect.anything());
+  expect(mocks.exec).toHaveBeenCalledWith('"some/workspace-b/path" --version', { encoding: 'utf8', windowsHide: true }, expect.anything());
   expect(mocks.showInformationMessage).toHaveBeenCalledTimes(2);
   expect(mocks.showInformationMessage).toHaveBeenCalledWith(
     expect.stringContaining(`Found valid workspace Maven executable setting "${MAVEN_SETTING_KEY}": "some/workspace-a/path"`)
@@ -118,9 +133,9 @@ test('valid workspace override list and valid User override', async () => {
   });
   await expect(validateMavenExecutable()).resolves.toBeUndefined();
   expect(mocks.showWarningMessage).toHaveBeenCalledTimes(0);
-  expect(mocks.exec).toHaveBeenCalledWith('some/workspace-a/path --version', { encoding: 'utf8', windowsHide: true }, expect.anything());
-  expect(mocks.exec).toHaveBeenCalledWith('some/workspace-b/path --version', { encoding: 'utf8', windowsHide: true }, expect.anything());
-  expect(mocks.exec).toHaveBeenCalledWith('some/User/path --version', { encoding: 'utf8', windowsHide: true }, expect.anything());
+  expect(mocks.exec).toHaveBeenCalledWith('"some/workspace-a/path" --version', { encoding: 'utf8', windowsHide: true }, expect.anything());
+  expect(mocks.exec).toHaveBeenCalledWith('"some/workspace-b/path" --version', { encoding: 'utf8', windowsHide: true }, expect.anything());
+  expect(mocks.exec).toHaveBeenCalledWith('"some/User/path" --version', { encoding: 'utf8', windowsHide: true }, expect.anything());
   expect(mocks.showInformationMessage).toHaveBeenCalledTimes(3);
   expect(mocks.showInformationMessage).toHaveBeenCalledWith(
     expect.stringContaining(`Found valid workspace Maven executable setting "${MAVEN_SETTING_KEY}": "some/workspace-a/path"`)
@@ -146,7 +161,7 @@ test('valid User only override ', async () => {
 test('valid no override', async () => {
   mocks.inspect.mockReturnValue(undefined);
   await expect(validateMavenExecutable()).resolves.toBeUndefined();
-  expect(mocks.exec).toHaveBeenCalledWith('mvn --version', { encoding: 'utf8', windowsHide: true }, expect.anything());
+  expect(mocks.exec).toHaveBeenCalledWith('"mvn" --version', { encoding: 'utf8', windowsHide: true }, expect.anything());
   expect(mocks.showInformationMessage).toHaveBeenCalledTimes(0);
   expect(mocks.showWarningMessage).toHaveBeenCalledTimes(0);
 });
