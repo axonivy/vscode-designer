@@ -2,15 +2,22 @@ package ch.ivyteam.smart.core.copilot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.extension.ExtendWith;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.Objects;
+
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import ch.ivyteam.smart.core.AgentRuntime;
 import ch.ivyteam.smart.core.AgentRuntimeExtension;
 import ch.ivyteam.smart.core.aspire.AspireSpans.UsedTool;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.StringNode;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ExtendWith(AgentRuntimeExtension.class)
@@ -88,6 +95,38 @@ public class CopilotIntegrationTest {
     var tokenUsage = spans.tokenUsage();
     assertThat(tokenUsage.input()).isLessThan(200_000); // around: 170_000 in local tests
     assertThat(tokenUsage.output()).isLessThan(10_000);
+  }
+
+  @Test
+  @Order(1)
+  void process(AgentRuntime rt) throws Exception {
+    var spans = rt.prompt("""
+        create a new process for 'treePlanting' (purchase/process/treePlanting.p.json).
+        The start must accept a 'name' parameter.
+        After the start, a Script activity should print a 'Hello Ivy in.name!' log.
+        """);
+
+    var plantProcess = rt.ivyWorkspace().path().resolve("purchase/process/treePlanting.p.json");
+    try (var in = Files.newInputStream(plantProcess, StandardOpenOption.READ)) {
+      var procJson = JsonMapper.shared().readTree(in);
+
+      assertThat(procJson.get("$schema").asString())
+          .as("valid $schema was set by new_process_tool")
+          .startsWith("https://json-schema.axonivy.com/");
+
+      var elements = (ArrayNode) procJson.get("elements");
+      var script = elements.valueStream()
+          .filter(e -> e.get("type") instanceof StringNode type && Objects.equals(type.asString(), "Script"))
+          .findFirst().orElseThrow(() -> new IllegalStateException("Script activity not found in " + procJson.toPrettyString()));
+      assertThat(script.get("config").get("output").get("code").toPrettyString())
+          .as("Script Activity is configured schema-aware")
+          .contains("Hello Ivy");
+    }
+
+    assertThat(spans.usedTools())
+        .extracting(UsedTool::name)
+        .as("Must use create-tool for initial correct creation; then web_fetch to get aware of the schema")
+        .contains("skill", "axonivy-designer-new_axon_ivy_process", "web_fetch");
   }
 
 }
