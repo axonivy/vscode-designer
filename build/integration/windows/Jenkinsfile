@@ -116,7 +116,7 @@ pipeline {
         script {
           nodejs(nodeJSInstallationName: '24.18.0') {
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-              def branchName = env.BRANCH_NAME.replace("/", "%252F")
+              def branchName = env.BRANCH_NAME.replace("/", "%%252F")
               bat 'pnpm install'
               bat 'pnpm run runtimelog:generate clean'
               bat '''
