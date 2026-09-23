@@ -1,7 +1,7 @@
 import { BaseRpcClient, createMessageConnection, Emitter, urlBuilder, type Connection, type MessageConnection } from '@axonivy/jsonrpc';
-import type { Event, LogClient } from './log-client';
-import type {LogOnNotificationTypes, LogRequestTypes} from './log-protocol';
-import type { RuntimeLogEntry } from './log';
+import type { RuntimeLogEntry } from '../generated/runtime-log';
+import type { Event, LogClient } from './runtimelog-client';
+import type { LogOnNotificationTypes, LogRequestTypes } from './runtimelog-protocol';
 
 export class LogClientJsonRpc extends BaseRpcClient implements LogClient {
   protected onNewEntryEmitter = new Emitter<RuntimeLogEntry>();

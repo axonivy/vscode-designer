@@ -1,4 +1,4 @@
-import type { RuntimeLogEntry } from './log';
+import type { RuntimeLogEntry } from '../generated/runtime-log';
 
 export interface Event<T> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

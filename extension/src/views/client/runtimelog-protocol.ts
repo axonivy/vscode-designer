@@ -1,4 +1,4 @@
-import type { RuntimeLogEntry } from './log';
+import type { RuntimeLogEntry } from '../generated/runtime-log';
 
 export interface LogRequestTypes {
   data: [RuntimeLogEntry[], RuntimeLogEntry[]];

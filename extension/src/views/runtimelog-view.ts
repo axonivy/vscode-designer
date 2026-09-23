@@ -1,8 +1,8 @@
-import { LogClientJsonRpc } from './protocol-types/log-client-jsonrpc';
-import type { RuntimeLogEntry } from './protocol-types/log';
 import type { LogOutputChannel } from 'vscode';
 import { window } from 'vscode';
 import { createWebSocket, toSocketConnection } from '../engine/ws-client';
+import { LogClientJsonRpc } from './client/log-client-jsonrpc';
+import type { RuntimeLogEntry } from './generated/runtime-log';
 
 const outputChannel: LogOutputChannel = window.createOutputChannel('Axon Ivy Runtime Log', { log: true });
 
