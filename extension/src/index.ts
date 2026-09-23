@@ -38,7 +38,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
   try {
     registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));
     await validateAndSyncJavaVersion();
-    validateMavenExecutable();
+    await validateMavenExecutable();
     ensureJavaExtensionInstalled();
     resolveExtensionVersion(context);
     ivyEngineManager = IvyEngineManager.init(context);

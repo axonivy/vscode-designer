@@ -1,4 +1,5 @@
-import { execFileSync } from 'child_process';
+import { exec } from 'child_process';
+import { promisify } from 'node:util';
 import { workspace, type WorkspaceFolder } from 'vscode';
 import { logInformationMessage, logWarningMessage } from './logging-util';
 
@@ -8,35 +9,35 @@ const MAVEN_SETTING_EXECUTABLE_PATH = 'executable.path';
 export const MAVEN_SETTING_KEY = `${MAVEN_SETTING_GROUP}.${MAVEN_SETTING_EXECUTABLE_PATH}`;
 const EXPECTED_MAVEN_VERSION = '3.9';
 
+const execAsync = promisify(exec);
+
 export type MvnSettingExecutable = {
   scope: 'workspace' | 'user';
   value: string;
   workspaceFolder?: WorkspaceFolder;
 };
 
-export const validateMavenExecutable = () => {
+export const validateMavenExecutable = async () => {
   const mvnExecutables = getMvnExecutables();
   const mvnExectuableUser = mvnExecutables.find(mvnExecutable => mvnExecutable.scope === 'user');
 
   // First check all workspace-specific Maven executable settings
-  mvnExecutables
-    .filter(mvnExecutable => mvnExecutable.scope === 'workspace')
-    .forEach(mvnExecutable => {
-      if (!checkMvnExecutable(mvnExecutable.value)) {
-        logWarningMessage(`Invalid ${mvnExecutable.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}"
+  for (const mvnExecutable of mvnExecutables.filter(mvnExecutable => mvnExecutable.scope === 'workspace')) {
+    if (!(await checkMvnExecutable(mvnExecutable.value))) {
+      logWarningMessage(`Invalid ${mvnExecutable.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}"
         in workspace folder "${mvnExecutable.workspaceFolder?.uri.fsPath}".
         This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}.
         Keeping this setting might lead to unexpected behavior.`);
-      } else {
-        logInformationMessage(`Found valid ${mvnExecutable.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}"
+    } else {
+      logInformationMessage(`Found valid ${mvnExecutable.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}"
         in workspace folder "${mvnExecutable.workspaceFolder?.uri.fsPath}".
         This executable will be used for Maven operations in that workspace.`);
-      }
-    });
+    }
+  }
 
   // Next, check the user-specific Maven executable setting if present
   if (mvnExectuableUser) {
-    if (!checkMvnExecutable(mvnExectuableUser.value)) {
+    if (!(await checkMvnExecutable(mvnExectuableUser.value))) {
       logWarningMessage(`Invalid ${mvnExectuableUser.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExectuableUser.value}".
         This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}.
         Keeping this setting might lead to unexpected behavior.`);
@@ -48,7 +49,7 @@ export const validateMavenExecutable = () => {
   }
 
   // If there is no user-specific Maven executable, fall back to the default Maven executable on PATH
-  const isValidPath = checkMvnExecutable(DEFAULT_MAVEN_EXECUTABLE);
+  const isValidPath = await checkMvnExecutable(DEFAULT_MAVEN_EXECUTABLE);
   if (!isValidPath) {
     logWarningMessage(`No valid Maven executable found.
     Please ensure Maven ${EXPECTED_MAVEN_VERSION} is installed and accessible in your PATH
@@ -87,11 +88,16 @@ const getMvnExecutables = () => {
   return mvnExecutables;
 };
 
-const checkMvnExecutable = (executable: string) => {
+const checkMvnExecutable = async (executableRaw: string): Promise<boolean> => {
   try {
-    const version = execFileSync(executable, ['--version'], { encoding: 'utf8', windowsHide: true });
+    const executable = executableRaw.trim();
+    const executableQuoted = /\s/.test(executable) ? `"${executable}"` : executable;
+    const command = [executableQuoted, '--version'].join(' ');
+    const { stdout, stderr } = await execAsync(command, { encoding: 'utf8', windowsHide: true });
+    const version = `${stdout}${stderr}`;
     return isExpectedMavenVersion(version);
-  } catch {
+  } catch (error) {
+    console.log(`"${executableRaw}":`, error);
     return false;
   }
 };
