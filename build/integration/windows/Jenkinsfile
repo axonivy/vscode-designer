@@ -87,13 +87,13 @@ pipeline {
         script {
           nodejs(nodeJSInstallationName: '24.18.0') {
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-              def branchName = env.BRANCH_NAME.replace("/", "%252F")
+              def branchName = env.BRANCH_NAME.replace("/", "%%252F")
               bat 'pnpm install'
               bat 'pnpm run market:generate clean'
               bat '''
                 set artifacts=https://jenkins.ivyteam.io/job/core_json-schema/job/'''+branchName+'''/lastSuccessfulBuild/artifact
                 set devSchema=%artifacts%/workspace/ch.ivyteam.ivy.market.schema/target/schema/market/*/product.json/*zip*/schema.zip
-                curl -o schema.zip %devSchema%'
+                curl -o schema.zip %devSchema%
               '''
               bat 'powershell -Command "Expand-Archive -Path schema.zip -DestinationPath . -Force"'
               bat 'move 14.0.0\\product.json marketProduct.json'
