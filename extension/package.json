@@ -382,13 +382,15 @@
         "command": "ivyProjects.convertProject",
         "title": "Convert Project",
         "category": "Axon Ivy",
-        "icon": "$(wrench)"
+        "icon": "$(wrench)",
+        "enablement": "ivy:hasProjectsToConvert"
       },
       {
         "command": "ivyProjects.convertAllProjects",
         "title": "Convert All Projects",
         "category": "Axon Ivy",
-        "icon": "$(wrench)"
+        "icon": "$(wrench)",
+        "enablement": "ivy:hasProjectsToConvert"
       },
       {
         "command": "ivyProjects.addBusinessProcess",
@@ -1032,7 +1034,7 @@
         {
           "command": "ivyProjects.convertAllProjects",
           "group": "navigation@4",
-          "when": "view == ivyProjects && ivy:hasIvyProjects"
+          "when": "view == ivyProjects && ivy:hasProjectsToConvert"
         }
       ],
       "view.title.new": [
@@ -1228,7 +1230,8 @@
         },
         {
           "command": "ivyProjects.convertProject",
-          "group": "1@2"
+          "group": "1@2",
+          "when": "ivy:hasProjectsToConvert"
         }
       ],
       "explorer.ivy.importExport": [
