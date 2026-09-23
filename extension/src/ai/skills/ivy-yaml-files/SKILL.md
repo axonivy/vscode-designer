@@ -1,6 +1,6 @@
 ---
-name: yaml-files
-description: 'Use when creating or editing any YAML file in this repository: including **/*.yaml. Especially enforce this for roles.yaml, users.yaml, rest-clients.yaml, webservice-clients.yaml, persistence.yaml, databases.yaml, custom-fields.yaml'
+name: ivy-yaml-files
+description: 'MUST use for every YAML task: create, edit, update, or validate **/*.yaml. Always apply to roles.yaml, users.yaml, rest-clients.yaml, webservice-clients.yaml, persistence.yaml, databases.yaml, and custom-fields.yaml.'
 user-invocable: false
 ---
 
