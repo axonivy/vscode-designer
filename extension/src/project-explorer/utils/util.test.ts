@@ -250,13 +250,13 @@ test.describe('validateProjectArtifactName', () => {
 });
 
 test.describe('validateProjectArtifactId', () => {
-  test('valid single character', () => {
+  test('valid single character segment', () => {
     expect(validateProjectArtifactId('a')).toBeUndefined();
     expect(validateProjectArtifactId('_')).toBeUndefined();
     expect(validateProjectArtifactId('1')).toBeUndefined();
   });
 
-  test('valid multi character', () => {
+  test('valid multi character segment', () => {
     expect(validateProjectArtifactId('aA')).toBeUndefined();
     expect(validateProjectArtifactId('a1')).toBeUndefined();
     expect(validateProjectArtifactId('1a')).toBeUndefined();
@@ -265,7 +265,7 @@ test.describe('validateProjectArtifactId', () => {
     expect(validateProjectArtifactId('_a1_')).toBeUndefined();
   });
 
-  test('valid words with allowed separators', () => {
+  test('valid segments with allowed separators', () => {
     expect(validateProjectArtifactId('ab-1')).toBeUndefined();
     expect(validateProjectArtifactId('ab.1')).toBeUndefined();
     expect(validateProjectArtifactId('a_b.c-d')).toBeUndefined();

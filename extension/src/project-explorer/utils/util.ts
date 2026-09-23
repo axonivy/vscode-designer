@@ -110,7 +110,7 @@ export const validateNamespace = (value: string) => {
 };
 
 export const validateProjectArtifactId = (value: string) => {
-  const pattern = /^\w+([._-]\w+)*$/;
+  const pattern = /^\w+([.-]\w+)*$/;
   if (pattern.test(value)) {
     return;
   }
