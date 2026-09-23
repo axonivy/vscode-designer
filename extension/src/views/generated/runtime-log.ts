@@ -8,7 +8,7 @@
 export type RuntimeLogCategory = ("DB" | "PERSISTENCE" | "REQUEST" | "WEB_SERVICE" | "MACRO" | "MAIL" | "PROCESS" | "WEB_SERVICE_PROCESS" | "CONTENT_MANAGEMENT" | "HTML" | "EVENT" | "USER" | "HTML_DIALOG" | "BUSINESS_DATA" | "REST_CLIENT" | "CASE_MAP")
 export type Level = "OFF" | "FATAL" | "ERROR" | "WARN" | "INFO" | "DEBUG" | "TRACE" | "ALL";
 
-export interface Logs {
+export interface RuntimeLog {
   runtimeLogEntryLsp: RuntimeLogEntry[];
   void: Void;
   [k: string]: unknown;
