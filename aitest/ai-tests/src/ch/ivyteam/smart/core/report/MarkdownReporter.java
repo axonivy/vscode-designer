@@ -29,16 +29,35 @@ public class MarkdownReporter implements Reporter {
 
   @Override
   public void append(String name, TokenUsage tokenUsage, List<UsedTool> usedTools) {
-    var tools = usedTools.stream()
+    var toolNames = usedTools.stream()
         .map(UsedTool::name)
-        .distinct()
-        .sorted()
         .collect(Collectors.joining(", "));
+    var tools = usedTools.stream()
+        .map(MarkdownReporter::toolDetails)
+        .collect(Collectors.joining("<br>"));
     if (tools.isEmpty()) {
       tools = "None";
+    } else {
+      tools = "<details><summary>" + escapeHtml(toolNames) + "</summary><br>" + tools + "</details>";
     }
     lines.add(String.format("| `%s` | %d | %d | %s |", name,
         tokenUsage.input(), tokenUsage.output(), tools));
+  }
+
+  private static String toolDetails(UsedTool tool) {
+    var arguments = tool.arguments() == null ? "" : escapeHtml(tool.arguments())
+        .replace("\r\n", "&#13;&#10;")
+        .replace("\r", "&#13;")
+        .replace("\n", "&#10;")
+        .replace("\t", "&#9;");
+    return "<strong>" + escapeHtml(tool.name()) + "</strong><pre><code>" + arguments + "</code></pre>";
+  }
+
+  private static String escapeHtml(String value) {
+    return value.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("|", "&#124;");
   }
 
   public String toMarkdownContent() {
