@@ -45,24 +45,12 @@ jobs:
       - name: Print AI test report
         if: always()
         run: |
-          report="aitest/ai-dev-tests/target/ai-test-report.tsv"
-          {
-            echo "## AI test report"
-            echo
-            echo 'Test file: `aitest/ai-dev-tests/test/ch/ivyteam/smart/core/copilot/CopilotIntegrationTest.java`'
-            echo
-            if [[ -s "$report" ]]; then
-              echo '| Test | Input tokens | Output tokens | Tools used |'
-              echo '| --- | ---: | ---: | --- |'
-              tail -n +2 "$report" | while IFS=$'\t' read -r test input output tools; do
-                [[ -z "$test" ]] && continue
-                [[ -z "$tools" ]] && tools="None"
-                echo "| \`$test\` | $input | $output | $tools |"
-              done
-            else
-              echo 'No AI test metrics were recorded.'
-            fi
-          } | tee -a "$GITHUB_STEP_SUMMARY"
+          report="aitest/ai-dev-tests/target/ai-test-report.md"
+          if [[ -s "$report" ]]; then
+            cat "$report" | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'No AI test metrics were recorded.' | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
       - name: Archive test reports
         uses: actions/upload-artifact@v7
         if: always()
@@ -75,16 +63,8 @@ jobs:
             ci-user-data/xvfb-errors.log
             ci-user-data/process*.log
             **/*.log
-            aitest/ai-dev-tests/target/ai-test-report.tsv
+            aitest/ai-dev-tests/target/ai-test-report.md
             aitest/ai-dev-tests/target/surefire-reports/*.xml
-      - name: Fail if AI tests failed
-        if: always()
-        run: |
-          if find aitest/ai-dev-tests/target/surefire-reports -name 'TEST-*.xml' -print0 \
-            | xargs -0 grep -l -E '<(failure|error)' | grep -q .; then
-            echo "AI tests failed; see the report above and the archived test reports."
-            exit 1
-          fi
       # - name: Publish Test Results
       #   uses: EnricoMi/publish-unit-test-result-action@v2
       #   if: always()

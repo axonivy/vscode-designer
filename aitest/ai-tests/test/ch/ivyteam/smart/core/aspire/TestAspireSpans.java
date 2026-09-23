@@ -33,7 +33,7 @@ public class TestAspireSpans {
       .isEqualTo("axonivy-designer-new_axon_ivy_project");
   }
 
-  private AspireSpans read(String resource) {
+  public static AspireSpans read(String resource) {
     var in = TestAspireSpans.class.getResourceAsStream(resource);
     if (in == null) {
       throw new IllegalArgumentException("Resource not found: " + resource);
