@@ -88,15 +88,16 @@ const getMvnExecutables = () => {
   return mvnExecutables;
 };
 
-const checkMvnExecutable = async (executable: string): Promise<boolean> => {
+const checkMvnExecutable = async (executableRaw: string): Promise<boolean> => {
   try {
-    // const command = [`"${executable}"`, '--version'].join(' ');
-    const command = [executable, '--version'].join(' ');
+    const executable = executableRaw.trim();
+    const executableQuoted = /\s/.test(executable) ? `"${executable}"` : executable;
+    const command = [executableQuoted, '--version'].join(' ');
     const { stdout, stderr } = await execAsync(command, { encoding: 'utf8', windowsHide: true });
     const version = `${stdout}${stderr}`;
     return isExpectedMavenVersion(version);
   } catch (error) {
-    console.log(`"${executable}":`, error);
+    console.log(`"${executableRaw}":`, error);
     return false;
   }
 };
