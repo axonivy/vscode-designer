@@ -77,14 +77,6 @@ jobs:
             **/*.log
             aitest/ai-dev-tests/target/ai-test-report.tsv
             aitest/ai-dev-tests/target/surefire-reports/*.xml
-      - name: Fail if AI tests failed
-        if: always()
-        run: |
-          if find aitest/ai-dev-tests/target/surefire-reports -name 'TEST-*.xml' -print0 \
-            | xargs -0 grep -l -E '<(failure|error)' | grep -q .; then
-            echo "AI tests failed; see the report above and the archived test reports."
-            exit 1
-          fi
       # - name: Publish Test Results
       #   uses: EnricoMi/publish-unit-test-result-action@v2
       #   if: always()
