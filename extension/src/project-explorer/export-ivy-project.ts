@@ -165,31 +165,27 @@ const createEndTerminalExecutionListener = () => {
     if (!commandLineValue.includes('"-Divy.final.name=')) {
       return;
     }
+    const showTerminal = {
+      'Show Terminal': () => {
+        e.terminal.show();
+      }
+    };
+
     if (e.exitCode !== 0) {
-      logErrorMessageWithActions(`Maven command failed with exit code ${e.exitCode} for command: ${commandLineValue}`, {
-        'Show Terminal': () => {
-          commands.executeCommand('terminal.focus');
-        }
-      });
+      logErrorMessageWithActions(`Maven command failed with exit code ${e.exitCode} for command: ${commandLineValue}`, showTerminal);
       return;
     }
     const targetFolder = commandLineValue.match(/"-Divy\.output\.directory=([^"]+)"/)?.[1];
     const fileName = commandLineValue.match(/"-Divy\.final\.name=([^"]+)"/)?.[1];
     if (!targetFolder) {
-      logErrorMessageWithActions(`Could not determine target folder from command: ${commandLineValue}`, {
-        'Show Terminal': () => {
-          commands.executeCommand('terminal.focus');
-        }
-      });
+      logErrorMessageWithActions(`Could not determine target folder from command: ${commandLineValue}`, showTerminal);
       return;
     }
     logInformationMessageWithActions(`Project archive ${fileName} has been exported to "${targetFolder}".`, {
       'Reveal in Explorer': async () => {
         await env.openExternal(Uri.file(targetFolder));
       },
-      'Show Terminal': () => {
-        commands.executeCommand('terminal.focus');
-      }
+      ...showTerminal
     });
   });
 };
