@@ -1,4 +1,4 @@
-package ch.ivyteam.smart.core;
+package ch.ivyteam.smart.core.docker;
 
 import java.util.function.Consumer;
 

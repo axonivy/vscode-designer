@@ -8,7 +8,8 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
-import ch.ivyteam.smart.core.SysoutLogger;
+import ch.ivyteam.smart.core.docker.HostUser;
+import ch.ivyteam.smart.core.docker.SysoutLogger;
 
 public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer> {
 
@@ -24,7 +25,7 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
 
     withWorkingDirectory("/workspace");
     
-    configureContainerUser();
+    HostUser.configure(this, "designer-mcp");
     System.out.println("Starting designer-mcp container with workspace root: " + ivyWorkspace);
     withFileSystemBind(ivyWorkspace.toString(), 
       "/workspace", BindMode.READ_WRITE);
@@ -50,20 +51,6 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
             + "/mcp.sh\n"
             + "exec tail -f /dev/null");
   }
-
-
-  private void configureContainerUser() {
-    String uid = System.getenv().getOrDefault("HOST_UID", "1000");
-    String gid = System.getenv().getOrDefault("HOST_GID", "1000");
-    String user = uid + ":" + gid;
-    System.out.println("Configuring designer-mcp container to run as user: " + user);
-    if (uid != null && !uid.isBlank() && gid != null && !gid.isBlank()) {
-      withCreateContainerCmdModifier(cmd -> {
-        cmd.withUser(user);
-      });
-    }
-  }
-
   public String getMcpUri() {
     return "http://" + NETWORK_ALIAS + ":" + MCP_PORT + "/mcp";
   }
