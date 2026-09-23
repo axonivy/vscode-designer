@@ -5,3 +5,7 @@ to_next_version() {
 to_next_tag() {
   echo "next-${1%-SNAPSHOT}"
 }
+
+to_next_major() {
+  echo "${1%%.*}"
+}
