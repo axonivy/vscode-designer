@@ -22,8 +22,8 @@ import ch.ivyteam.smart.core.mcp.IvyEngine;
 import ch.ivyteam.smart.core.mcp.IvyWorkspace;
 import ch.ivyteam.smart.core.mcp.IvyWorkspaceSetup;
 import ch.ivyteam.smart.core.report.AiTestReport;
+import ch.ivyteam.smart.core.report.MarkdownReporter;
 import ch.ivyteam.smart.core.report.SysoutReporter;
-import ch.ivyteam.smart.core.report.TabReportWriter;
 
 public class AgentRuntime {
   private static final String NETWORK_NAME = "smart-test-network";
@@ -43,7 +43,7 @@ public class AgentRuntime {
   static Path userData;
 
   static AiTestReport reporter = new AiTestReport();
-  static TabReportWriter tab;
+  static MarkdownReporter markdown;
 
   private String currentTest;
 
@@ -79,10 +79,10 @@ public class AgentRuntime {
     startContainer(copilotContainer);
     copilot.addMcp(designerMcpContainer.getMcpUri());
 
-    tab = new TabReportWriter();
-    reporter.resetReport();
-    reporter.register(tab);
+    markdown = new MarkdownReporter();
+    reporter.register(markdown);
     reporter.register(new SysoutReporter());
+    reporter.resetReport();
   }
 
   private void startContainer(GenericContainer<?> container) {
@@ -100,8 +100,8 @@ public class AgentRuntime {
     for (var container : containers) {
       container.stop();
     }
-    Path reportFile = Path.of(System.getProperty("ai.report.file", "target/ai-test-report.tsv"));
-    tab.toTabFile(reportFile);
+    Path reportFile = Path.of(System.getProperty("ai.report.file", "target/ai-test-report.md"));
+    markdown.toMarkdownFile(reportFile);
   }
 
   public Copilot copilot() {
