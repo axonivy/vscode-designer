@@ -23,9 +23,9 @@ export const toVersion = (rawVersion: string) => {
     throw new Error(`Invalid version ${rawVersion}`);
   }
   return {
-    major: versionNumberToInt(rawVersion, splittedVersion[0]),
-    minor: versionNumberToInt(rawVersion, splittedVersion[1]),
-    patch: versionNumberToInt(rawVersion, splittedVersion[2])
+    major: versionNumberToInt(rawVersion, splittedVersion[0]?.slice(0, 2)),
+    minor: versionNumberToInt(rawVersion, splittedVersion[0]?.slice(2)),
+    patch: versionNumberToInt(rawVersion, splittedVersion[1])
   };
 };
 

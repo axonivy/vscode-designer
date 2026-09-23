@@ -75,9 +75,7 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.importIvyProject`, (s: TreeSelection) => this.importIvyProject(s));
     registerCmd(`${VIEW_ID}.exportIvyProject`, (s: TreeSelection) => this.exportIvyProject(s));
     registerCmd(`${VIEW_ID}.installLocalMarketProduct`, (s: TreeSelection) => this.installLocalMarketProduct(s));
-    registerCmd(`${VIEW_ID}.installMarketProduct`, (s: TreeSelection) =>
-      this.installMarketProduct(s, context.extension.packageJSON.version)
-    );
+    registerCmd(`${VIEW_ID}.installMarketProduct`, (s: TreeSelection) => this.installMarketProduct(s));
 
     registerCmd(`${VIEW_ID}.addNewProject`, (s: TreeSelection) => this.addProject(s));
     registerCmd(`${VIEW_ID}.addNewHtmlDialog`, (s: TreeSelection, pid?: string) => this.addUserDialog(s, 'JSF', pid));
@@ -221,12 +219,12 @@ export class IvyProjectExplorer {
     await installLocalMarketProduct(addCommandContext);
   }
 
-  private async installMarketProduct(selection: TreeSelection, extensionVersion?: string) {
+  private async installMarketProduct(selection: TreeSelection) {
     const addCommandContext = await this.getAddCommandSelectionContext(selection, false);
     if (!addCommandContext) {
       return;
     }
-    const engineVersion = (await IvyEngineManager.instance.getEngineVersion()) ?? extensionVersion ?? '';
+    const engineVersion = (await IvyEngineManager.instance.getEngineVersion()) ?? '';
     await installMarketProduct(addCommandContext, engineVersion);
   }
 
