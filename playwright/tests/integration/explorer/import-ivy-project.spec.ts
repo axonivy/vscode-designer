@@ -88,8 +88,7 @@ test.describe('Single root workspace', () => {
   });
 });
 
-// eslint-disable-next-line playwright/no-focused-test
-test.describe.only('Multi root workspace', () => {
+test.describe('Multi root workspace', () => {
   test.use({ workspace: multiRootWorkspacePath });
   test.skip(process.env.RUN_IN_BROWSER === 'true');
 
@@ -111,8 +110,7 @@ test.describe.only('Multi root workspace', () => {
     await expect(wsPage.toasts).toContainText(`Please either rename the import file ${iarFileName} or delete/rename the existing project.`);
   });
 
-  // eslint-disable-next-line playwright/no-skipped-test
-  test.skip('Import existing folder into multi-root workspace error', async ({ wsPage, tmpWorkspace }) => {
+  test('Import existing folder into multi-root workspace error', async ({ wsPage, tmpWorkspace }) => {
     const iarFileName = 'already-present.iar';
     const iarFolder = 'connector';
 
