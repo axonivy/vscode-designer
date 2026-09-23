@@ -78,9 +78,9 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.installMarketProduct`, (s: TreeSelection) => this.installMarketProduct(s));
 
     registerCmd(`${VIEW_ID}.addNewProject`, (s: TreeSelection) => this.addProject(s));
-    registerCmd(`${VIEW_ID}.addNewHtmlDialog`, (s: TreeSelection, pid?: string) => this.addUserDialog(s, 'JSF', pid));
-    registerCmd(`${VIEW_ID}.addNewFormDialog`, (s: TreeSelection, pid?: string) => this.addUserDialog(s, 'Form', pid));
-    registerCmd(`${VIEW_ID}.addNewOfflineDialog`, (s: TreeSelection, pid?: string) => this.addUserDialog(s, 'JSFOffline', pid));
+    registerCmd(`${VIEW_ID}.addNewHtmlDialog`, (s: TreeSelection) => this.addUserDialog(s, 'JSF'));
+    registerCmd(`${VIEW_ID}.addNewFormDialog`, (s: TreeSelection) => this.addUserDialog(s, 'Form'));
+    registerCmd(`${VIEW_ID}.addNewOfflineDialog`, (s: TreeSelection) => this.addUserDialog(s, 'JSFOffline'));
     registerCmd(`${VIEW_ID}.addNewDataClass`, (s: TreeSelection) => this.addDataClass(s));
     registerCmd(`${VIEW_ID}.addNewEntityClass`, (s: TreeSelection) => this.addEntityClass(s));
     registerCmd(`${VIEW_ID}.addNewCaseMap`, (s: TreeSelection) => this.addCaseMap(s));
