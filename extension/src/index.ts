@@ -3,6 +3,7 @@ import { type ExtensionContext } from 'vscode';
 import { Messenger, type MessengerDiagnostic } from 'vscode-messenger';
 import { LocalMcpServer } from './ai/tools/local-mcp';
 import { registerTools } from './ai/tools/tools';
+import { checkSettings } from './base/check-settings';
 import { registerCommand } from './base/commands';
 import { config } from './base/configurations';
 import { showExtensionLog } from './base/extension-output-channel';
@@ -39,6 +40,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     registerCommand('ivy.addDevContainer', context, () => addDevContainer(context.extensionUri));
     await validateAndSyncJavaVersion();
     await validateMavenExecutable();
+    checkSettings();
     ensureJavaExtensionInstalled();
     resolveExtensionVersion(context);
     ivyEngineManager = IvyEngineManager.init(context);
