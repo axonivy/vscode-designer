@@ -23,7 +23,7 @@ vi.mock('vscode', () => ({
   }
 }));
 
-import { NewProjectTool } from './new-project';
+import { createNewProject, NewProjectTool } from './new-project';
 
 test('invoke creates a new project with resolved path', async () => {
   const tool = new NewProjectTool();
@@ -43,4 +43,19 @@ test('invoke creates a new project with resolved path', async () => {
   expect((result as { content: Array<{ value: string }> }).content[0]?.value).toBe(
     `Project created successfully at '${path.join(input.path, input.name)}'`
   );
+});
+
+test('defaults an omitted project id to the project name', async () => {
+  await createNewProject({
+    name: 'DemoProject',
+    path: '/tmp/ivy',
+    groupId: 'com.acme'
+  });
+
+  expect(createProject).toHaveBeenCalledWith({
+    name: 'DemoProject',
+    path: path.join('/tmp/ivy', 'DemoProject'),
+    groupId: 'com.acme',
+    projectId: 'DemoProject'
+  });
 });

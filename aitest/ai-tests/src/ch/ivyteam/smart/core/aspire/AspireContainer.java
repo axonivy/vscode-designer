@@ -4,7 +4,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
-import ch.ivyteam.smart.core.SysoutLogger;
+import ch.ivyteam.smart.core.docker.SysoutLogger;
 
 public class AspireContainer extends GenericContainer<AspireContainer> {
 
