@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { type ExtensionContext } from 'vscode';
+import { window, type ExtensionContext } from 'vscode';
 import { Messenger, type MessengerDiagnostic } from 'vscode-messenger';
 import { LocalMcpServer } from './ai/tools/local-mcp';
 import { registerTools } from './ai/tools/tools';
@@ -66,6 +66,14 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     StatusBar.refreshStatusBar();
     return messenger.diagnosticApi();
   } catch (error) {
+    await window.showQuickPick(
+      [{ label: 'Reload Window', detail: 'Unsaved changes will be lost' }, { label: 'Continue without reloading' }],
+      {
+        ignoreFocusOut: true,
+        title: `activation failed. ${error}`
+      }
+    );
+    window.showErrorMessage('activation failed - ', {});
     StatusBar.overrideStatusBar({
       text: 'Activation failed',
       tooltip: newMarkdownString('Activation of Axon Ivy Extension failed.\nCheck the error logs for more details.'),
