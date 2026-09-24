@@ -804,7 +804,7 @@
             "namespace": {
               "type": "string",
               "default": "",
-              "description": "Slash-separated namespace. Keep empty for processes in 'process' root directory. NEVER duplicate projectPath or parts of it!"
+              "description": "Slash-separated namespace or empty. NEVER duplicate projectPath or parts of it!"
             },
             "projectPath": {
               "type": "string",
