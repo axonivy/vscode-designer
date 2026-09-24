@@ -117,7 +117,6 @@ export const exportIvyProject = async (addCommandSelectionContext: AddCommandSel
 
   const targetFolder = exportProjectData.targetFolderUri.fsPath;
   const targetFileName = exportProjectData.targetFilename;
-  const targetFilePath = path.join(targetFolder, targetFileName + '.iar');
 
   await window.withProgress(
     {
@@ -126,14 +125,13 @@ export const exportIvyProject = async (addCommandSelectionContext: AddCommandSel
       title: 'Axon Ivy Export'
     },
     async progress => {
-      await exportIar(exportProjectData.project as ProjectSelection, targetFilePath, targetFolder, targetFileName, progress);
+      await exportIar(exportProjectData.project as ProjectSelection, targetFolder, targetFileName, progress);
     }
   );
 };
 
 const exportIar = async (
   projectToExport: ProjectSelection,
-  targetFilePath: string,
   targetFolder: string,
   fileName: string,
   progress: Progress<{ message?: string; increment?: number }>
@@ -171,7 +169,10 @@ const createEndTerminalExecutionListener = () => {
       }
     };
     if (e.exitCode !== 0) {
-      logErrorMessageWithActions(`Maven pack-iar command failed with exit code ${e.exitCode} for command: ${commandLineValue}`, showTerminal);
+      logErrorMessageWithActions(
+        `Maven pack-iar command failed with exit code ${e.exitCode} for command: ${commandLineValue}`,
+        showTerminal
+      );
       return;
     }
     const targetFolder = commandLineValue.match(/"-Divy\.output\.directory=([^"]+)"/)?.[1];
