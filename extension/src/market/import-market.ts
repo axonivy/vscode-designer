@@ -278,7 +278,7 @@ const replaceDynamicVersion = (productJson: string, version: string): string => 
 
 export const installMarketProduct = async (selectionContext: AddCommandSelectionContext, engineVersion: string) => {
   const existingProjects = selectionContext.existingIvyProjects.map(project => ({
-    label: project.substring(project.lastIndexOf(path.sep) + 1),
+    label: path.basename(project),
     description: project,
     path: project
   }));
