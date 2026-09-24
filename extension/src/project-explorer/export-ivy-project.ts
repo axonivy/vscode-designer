@@ -170,9 +170,8 @@ const createEndTerminalExecutionListener = () => {
         e.terminal.show();
       }
     };
-
     if (e.exitCode !== 0) {
-      logErrorMessageWithActions(`Maven command failed with exit code ${e.exitCode} for command: ${commandLineValue}`, showTerminal);
+      logErrorMessageWithActions(`Maven pack-iar command failed with exit code ${e.exitCode} for command: ${commandLineValue}`, showTerminal);
       return;
     }
     const targetFolder = commandLineValue.match(/"-Divy\.output\.directory=([^"]+)"/)?.[1];
