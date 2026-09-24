@@ -14,7 +14,7 @@ export const checkSettings = () => {
     ) {
       logWarningMessage(`Dangerous setting override found for setting "${setting.key}".
         Expected ${JSON.stringify(setting.expectedValue)} (${setting.expectedType}) but found ${JSON.stringify(settingEffective)} (${typeof settingEffective}).
-        Remove the setting to ensure the extension works correctly.`);
+        Remove the setting and reload the window to ensure the extension works correctly.`);
     }
   });
 };
