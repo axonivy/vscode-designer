@@ -4,7 +4,6 @@ import { ProcessEditor } from '~/page-objects/process-editor';
 
 test('Install product without maven-dependency from Market website', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
-  await explorer.selectNode('resources');
   await explorer.installProduct('connectivity-demo');
   await wsPage.provideUserInput('14.0.0');
   const header = wsPage.page.locator('div.quick-input-header');
@@ -19,7 +18,6 @@ test('Install product without maven-dependency from Market website', async ({ ws
 
 test('Install product with maven-dependency from Market website', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
-  await explorer.selectNode('resources');
   await explorer.installProduct('excel-connector');
   await wsPage.provideUserInput('13.1.2');
   const header = wsPage.page.locator('div.quick-input-header');
@@ -32,9 +30,23 @@ test('Install product with maven-dependency from Market website', async ({ wsPag
   await explorer.selectNodeExact('excel-connector-demo');
 });
 
+test('Validate that no project folder with the same name as the artifact id of a project to install already exists', async ({ wsPage }) => {
+  const explorer = new FileExplorer(wsPage);
+  await explorer.installProduct('connectivity-demo');
+  await wsPage.provideUserInput('14.0.0');
+  const header = wsPage.page.locator('div.quick-input-header');
+  const checkbox = header.getByRole('checkbox', { name: 'Toggle all checkboxes' });
+  await checkbox.check();
+  await wsPage.provideUserInput();
+  await explorer.hasNodeExact('connectivity-demos');
+  await explorer.installProduct('connectivity-demo');
+  await wsPage.provideUserInput('14.0.0');
+  const title = wsPage.page.locator('div.quick-input-title');
+  await expect(title).toHaveText(/The following projects cannot be installed because a project with the same name already exists/);
+});
+
 test('Install local product.json', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
-  await explorer.selectNode('resources');
   await explorer.selectNode('product.json');
   await explorer.installLocalProduct('product.json');
   await wsPage.provideUserInput(); // confirm projects
@@ -46,7 +58,6 @@ test('Install local product.json', async ({ wsPage }) => {
 
 test('Install local product.json with dynamic version', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
-  await explorer.selectNode('resources');
   await explorer.selectNode('product-dynamic.json');
   await explorer.installLocalProduct('product-dynamic.json');
   await wsPage.provideUserInput('14.0.0-SNAPSHOT');
