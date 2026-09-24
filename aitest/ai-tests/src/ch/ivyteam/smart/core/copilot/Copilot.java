@@ -7,6 +7,8 @@ import org.testcontainers.images.builder.Transferable;
 
 public class Copilot {
 
+  private static final String COPILOT_CONFIG_DIR = "/home/copilot/.copilot/";
+
   private final CopilotContainer container;
   private String configuredMcpUrl;
 
@@ -33,13 +35,13 @@ public class Copilot {
     String mcp = smartCoreMcpServerConfig(designerMcp);
     System.out.println("Adding MCP config to Copilot container: " + mcp);
     try {
-      container.execInContainer("mkdir", "-p", "/root/.copilot/");
+      container.execInContainer("mkdir", "-p", COPILOT_CONFIG_DIR);
     } catch (Exception e) {
       throw new RuntimeException("Failed to create Copilot MCP config directory", e);
     }
     container.copyFileToContainer(
         Transferable.of(mcp),
-        "/root/.copilot/mcp-config.json");
+        COPILOT_CONFIG_DIR + "mcp-config.json");
     System.out.println("copilot container: "+ container.getContainerId());
   }
 
