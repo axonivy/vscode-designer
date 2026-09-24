@@ -277,7 +277,11 @@ const replaceDynamicVersion = (productJson: string, version: string): string => 
 };
 
 export const installMarketProduct = async (selectionContext: AddCommandSelectionContext, engineVersion: string) => {
-  const existingProjects = selectionContext.existingIvyProjects;
+  const existingProjects = selectionContext.existingIvyProjects.map(project => ({
+    label: project.substring(project.lastIndexOf(path.sep) + 1),
+    description: project,
+    path: project
+  }));
   let projectFromSelection = selectionContext.projectPathSelection;
   const allProducts = await searchMarketProduct();
 
@@ -360,6 +364,14 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
       initialProjectSelection = projectItems.filter(project => project.isPicked);
       state.changedProjectSelection = true;
     }
+    const validateProjectSelection = (selectedProjects: Array<ProductProjectSelection>): string | undefined => {
+      const conflictingProjects = selectedProjects.filter(
+        project => project.artifactId && existingProjects.some(existing => existing.label === project.artifactId)
+      );
+      if (conflictingProjects.length > 0) {
+        return `The following projects cannot be installed because a project with the same name already exists: ${conflictingProjects.map(p => p.artifactId).join(', ')}`;
+      }
+    };
     const selectedProjects = await input.showQuickPick<ProductProjectSelection, true>({
       title: state.dialogTitle,
       titleSuffix: ' - Choose Projects and Dependencies to Import',
@@ -368,6 +380,7 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
       totalSteps: state.totalSteps,
       canSelectMany: true,
       value: state.projectsSearchString,
+      validationFunction: validateProjectSelection,
       items: projectItems,
       selectedItems: initialProjectSelection ?? state.projects?.filter(p => !p.requireOneOfGroup) ?? [],
       onBack: (typedValue: string, selectedItems: ProductProjectSelection[]) => {
@@ -446,13 +459,7 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: dependentProjectFilterText ?? state.dependentProjectFilterText,
-      items: existingProjects.map(project => {
-        return {
-          label: project.substring(project.lastIndexOf(path.sep) + 1),
-          description: project,
-          path: project
-        };
-      }),
+      items: existingProjects,
       onBack: (typedValue: string) => {
         state.dependentProjectFilterText = typedValue;
         state.forceBackRequiredStep = true;
