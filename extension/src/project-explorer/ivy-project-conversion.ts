@@ -1,7 +1,6 @@
 import path from 'path';
 import { ProgressLocation, window, type CancellationToken, type Progress } from 'vscode';
 import { showExtensionLog } from '../base/extension-output-channel';
-import { ensureJavaLightWeightMode } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage, logInformationMessageWithActions } from '../base/logging-util';
 import { decreaseWorkspaceLock, increaseWorkspaceLock } from '../base/workspace-lock';
 import { IvyDiagnostics } from '../engine/diagnostics';
@@ -13,7 +12,6 @@ export const runProjectConversion = async (projectsToConvert: string[]) => {
     logInformationMessage('No Axon Ivy project(s) selected for conversion. Conversion aborted.');
     return;
   }
-  await ensureJavaLightWeightMode('Project conversion');
   try {
     increaseWorkspaceLock();
     await window.withProgress(
