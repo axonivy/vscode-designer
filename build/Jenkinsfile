@@ -45,9 +45,11 @@ pipeline {
         expression { params.publishToMarket }
       }
       steps {
-        withCredentials([string(credentialsId: 'marketplace.visualstudio.com', variable: 'VSCE_PAT')]) {
+        script {
           def extVersion = sh(script: "node -p \"require('./extension/package.json').version\"", returnStdout: true).trim()
           input "Would you like to publish version ${extVersion} from branch ${env.BRANCH_NAME}?"
+        }
+        withCredentials([string(credentialsId: 'marketplace.visualstudio.com', variable: 'VSCE_PAT')]) {
           sh "MILESTONE='${params.milestone}' pnpm run publish:next"
         }
       }
