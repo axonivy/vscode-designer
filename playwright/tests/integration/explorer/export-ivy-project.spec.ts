@@ -1,4 +1,4 @@
-import { test } from '~/fixtures/baseTest';
+import { expect, test } from '~/fixtures/baseTest';
 import { FileExplorer } from '~/page-objects/explorer-view';
 
 test('Export Ivy Project .iar', async ({ wsPage }) => {
@@ -6,5 +6,6 @@ test('Export Ivy Project .iar', async ({ wsPage }) => {
   await wsPage.executeCommand('Axon Ivy: Export Project Archive (.iar)', 'playwrightTestWorkspace');
   await wsPage.page.getByRole('button', { name: 'Select folder' }).click();
   await wsPage.provideUserInput('testExportIar');
+  await expect(wsPage.toasts.filter({ hasText: new RegExp('Project archive testExportIar has been exported to') })).toHaveCount(1);
   await explorer.hasNodeExact('testExportIar.iar');
 });

@@ -1,8 +1,7 @@
 import fs from 'node:fs';
 import path from 'path';
-import { commands, env, ProgressLocation, Uri, window, workspace, type Progress } from 'vscode';
-import { showExtensionLog } from '../base/extension-output-channel';
-import { logErrorMessage, logInformationMessageWithActions } from '../base/logging-util';
+import { commands, Disposable, env, ProgressLocation, Uri, window, workspace, type Progress } from 'vscode';
+import { logErrorMessage, logErrorMessageWithActions, logInformationMessageWithActions } from '../base/logging-util';
 import type { AddCommandSelectionContext } from './ivy-project-explorer';
 import { MultiStepCancelledError, MultiStepInput, type InputStep, type MSStateBase, type ProjectSelection } from './utils/multi-step-input';
 import { validateExportPath } from './utils/util';
@@ -118,7 +117,6 @@ export const exportIvyProject = async (addCommandSelectionContext: AddCommandSel
 
   const targetFolder = exportProjectData.targetFolderUri.fsPath;
   const targetFileName = exportProjectData.targetFilename;
-  const targetFilePath = path.join(targetFolder, targetFileName + '.iar');
 
   await window.withProgress(
     {
@@ -127,14 +125,13 @@ export const exportIvyProject = async (addCommandSelectionContext: AddCommandSel
       title: 'Axon Ivy Export'
     },
     async progress => {
-      await exportIar(exportProjectData.project as ProjectSelection, targetFilePath, targetFolder, targetFileName, progress);
+      await exportIar(exportProjectData.project as ProjectSelection, targetFolder, targetFileName, progress);
     }
   );
 };
 
 const exportIar = async (
   projectToExport: ProjectSelection,
-  targetFilePath: string,
   targetFolder: string,
   fileName: string,
   progress: Progress<{ message?: string; increment?: number }>
@@ -143,30 +140,52 @@ const exportIar = async (
     message: `${projectToExport.label}`
   });
 
-  try {
-    await commands.executeCommand(
-      'maven.goal.custom',
-      path.join(projectToExport.path, 'pom.xml'),
-      `com.axonivy.ivy.ci:project-build-plugin:pack-iar "-Divy.output.directory=${targetFolder}" "-Divy.final.name=${fileName}"`
-    );
-  } catch (error) {
-    logErrorMessage(`Failed to execute Maven command for project ${projectToExport.label}: ${(error as Error).message}`);
+  createEndTerminalExecutionListener();
+
+  await commands.executeCommand(
+    'maven.goal.custom',
+    path.join(projectToExport.path, 'pom.xml'),
+    `com.axonivy.ivy.ci:project-build-plugin:pack-iar "-Divy.output.directory=${targetFolder}" "-Divy.final.name=${fileName}"`
+  );
+};
+
+let endTerminalExecutionListener: Disposable | undefined;
+
+const createEndTerminalExecutionListener = () => {
+  if (endTerminalExecutionListener) {
     return;
   }
-
-  logInformationMessageWithActions(
-    `Export concluded. Check if project ${projectToExport.label} has been exported to ${targetFilePath}.
-    If not, check the Terminal view for Maven build errors.`,
-    {
+  endTerminalExecutionListener = window.onDidEndTerminalShellExecution(e => {
+    const commandLineValue = e.execution.commandLine.value;
+    if (!commandLineValue.includes('com.axonivy.ivy.ci:project-build-plugin:pack-iar "-Divy.output.directory=')) {
+      return;
+    }
+    if (!commandLineValue.includes('"-Divy.final.name=')) {
+      return;
+    }
+    const showTerminal = {
+      'Show Terminal': () => {
+        e.terminal.show();
+      }
+    };
+    if (e.exitCode !== 0) {
+      logErrorMessageWithActions(
+        `Maven pack-iar command failed with exit code ${e.exitCode} for command: ${commandLineValue}`,
+        showTerminal
+      );
+      return;
+    }
+    const targetFolder = commandLineValue.match(/"-Divy\.output\.directory=([^"]+)"/)?.[1];
+    const fileName = commandLineValue.match(/"-Divy\.final\.name=([^"]+)"/)?.[1];
+    if (!targetFolder) {
+      logErrorMessageWithActions(`Could not determine target folder from command: ${commandLineValue}`, showTerminal);
+      return;
+    }
+    logInformationMessageWithActions(`Project archive ${fileName} has been exported to "${targetFolder}".`, {
       'Reveal in Explorer': async () => {
         await env.openExternal(Uri.file(targetFolder));
       },
-      'Show Terminal': () => {
-        commands.executeCommand('terminal.focus');
-      },
-      'Show Extension Log': () => {
-        showExtensionLog();
-      }
-    }
-  );
+      ...showTerminal
+    });
+  });
 };
