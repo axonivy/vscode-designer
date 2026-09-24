@@ -33,4 +33,5 @@ export const IvyLanguageServerClientProvider = async (webSocketUrl: URL) => {
   languageClient.start();
 
   languageClient.onRequest(ExecuteClientCommandRequest, params => onExecuteClientCommand(languageClient, params));
+  return languageClient;
 };

@@ -1,6 +1,7 @@
 import path from 'path';
 import type { ExtensionContext } from 'vscode';
-import { Uri } from 'vscode';
+import { commands, Uri } from 'vscode';
+import { DidChangeWatchedFilesNotification } from 'vscode-languageserver-protocol';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
 import { runJavaProjectImport } from '../base/java-extension-api';
@@ -145,10 +146,8 @@ export class IvyEngineManager {
 
     RuntimeLogViewProvider(websocketUrl);
     WebIdeWebSocketProvider(websocketUrl);
-    XhtmlLanguageClientProvider(websocketUrl);
     registerProcessDebugging(this.context, this.ivyEngineApi);
-
-    IvyLanguageServerClientProvider(websocketUrl);
+    this.registerLanguageClients(websocketUrl);
 
     await IvyDiagnostics.instance.refresh();
   }
@@ -182,6 +181,20 @@ export class IvyEngineManager {
         await this.ivyEngineApi?.deployProjects({ projectDirs: ivyProjectDirectories });
       }
     );
+  }
+
+  private async registerLanguageClients(websocketUrl: URL) {
+    const ivyLanguageClient = await IvyLanguageServerClientProvider(websocketUrl);
+    const xhtmlLanguageClient = await XhtmlLanguageClientProvider(websocketUrl);
+
+    commands.registerCommand('ivyProjects.runWorkspaceValidation', async () => {
+      await ivyLanguageClient.sendNotification(DidChangeWatchedFilesNotification.type, {
+        changes: []
+      });
+      await xhtmlLanguageClient.sendNotification(DidChangeWatchedFilesNotification.type, {
+        changes: []
+      });
+    });
   }
 
   public async deployProjects(ivyProjectDirectory?: string) {
