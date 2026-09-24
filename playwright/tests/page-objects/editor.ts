@@ -20,8 +20,10 @@ abstract class Editor {
     await expect(this.tab).toBeHidden();
   }
 
-  async save() {
-    await this.expectTabDirty();
+  async save(options?: { force?: boolean }) {
+    if (!options?.force) {
+      await this.expectTabDirty();
+    }
     await this.tab.click();
     await this.wsPage.executeCommand('File: Save');
     await this.expectTabNotDirty();
