@@ -29,9 +29,6 @@ pipeline {
             sh 'pnpm install && pnpm run update:axonivy:next'
             sh 'pnpm run build:production'
             sh 'pnpm run check'
-            input "Would you like to deploy the release? \n" +
-                  "Please check the artifacts next to the build pipeline or here: \n" +
-                  "${env.BUILD_URL}artifact"
           }
           withChecks('ESLint') {
             recordIssues enabledForFailure: true, publishAllIssues: true, aggregatingResults: true, tools: [esLint(pattern: 'eslint.xml', skipSymbolicLinks: true)], qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
@@ -49,6 +46,8 @@ pipeline {
       }
       steps {
         withCredentials([string(credentialsId: 'marketplace.visualstudio.com', variable: 'VSCE_PAT')]) {
+          def extVersion = sh(script: "node -p \"require('./extension/package.json').version\"", returnStdout: true).trim()
+          input "Would you like to publish version ${extVersion} from branch ${env.BRANCH_NAME}?"
           sh "MILESTONE='${params.milestone}' pnpm run publish:next"
         }
       }
