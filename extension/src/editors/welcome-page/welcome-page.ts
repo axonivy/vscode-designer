@@ -5,6 +5,7 @@ import type { NotificationType, RequestType } from 'vscode-messenger-common';
 import { extensionVersion } from '../../version/extension-version';
 import { openUrlExternally } from '../notification-helper';
 import { createWebViewContent } from '../webview-helper';
+import { getSystemInfo, type SystemInfo } from './system-info';
 
 let messenger: Messenger | undefined;
 let currentPanel: WebviewPanel | undefined;
@@ -14,6 +15,7 @@ const commandType: NotificationType<string> = { method: 'executeCommand' };
 const versionType: NotificationType<string> = { method: 'versionDelivered' };
 const showWelcomePageType: NotificationType<boolean> = { method: 'showWelcomePage' };
 const toggleShowWelcomePageType: RequestType<boolean, boolean> = { method: 'toggleShowWelcomePage' };
+const getSystemInfoType: RequestType<void, SystemInfo> = { method: 'getSystemInfo' };
 
 export const showWelcomePageKey = 'showWelcomePage';
 
@@ -43,6 +45,7 @@ export const showWelcomePage = async (context: ExtensionContext) => {
   const version = `${extensionVersion.major}.${extensionVersion.minor}.${extensionVersion.patch}`;
   messenger.sendNotification(versionType, { type: 'webview', webviewType: 'ivy.welcomePage' }, version);
   messenger.sendNotification(showWelcomePageType, { type: 'webview', webviewType: 'ivy.welcomePage' }, showWelcomePageState(context));
+  messenger.onRequest(getSystemInfoType, getSystemInfo);
 
   panel.onDidDispose(() => {
     panel.dispose();
