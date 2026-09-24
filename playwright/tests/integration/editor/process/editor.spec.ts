@@ -27,8 +27,7 @@ test('Change User Dialog position', async ({ wsPage }) => {
   await editor.expectTabDirty();
 });
 
-// eslint-disable-next-line playwright/no-focused-test
-test.only('Change display name of Request Start', async ({ wsPage }) => {
+test('Change display name of Request Start', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage);
   await editor.open();
   const start = editor.elementByPID('15254DCE818AD7A2-f0');
