@@ -122,11 +122,11 @@ pipeline {
               bat '''
                 set artifacts=https://jenkins.ivyteam.io/job/core_json-schema/job/'''+branchName+'''/lastSuccessfulBuild/artifact
                 set devSchema=%artifacts%/build/schema/target/editor-ts/*/runtime-log-tsgen.json/*zip*/schema.zip
-                curl -o schema.zip %devSchema%'
+                curl -o schema.zip %devSchema%
               '''
               bat 'powershell -Command "Expand-Archive -Path schema.zip -DestinationPath . -Force"'
               bat 'move 14.0.0\\runtime-log-tsgen.json runtime-log.json'
-              bat 'pnpm run market:generate %cd%\\runtime-log.json'
+              bat 'pnpm run runtimelog:generate %cd%\\runtime-log.json'
               bat 'pnpm run type && pnpm run lint:ci'
             }
             withChecks('Integration Protocol ESLint') {
