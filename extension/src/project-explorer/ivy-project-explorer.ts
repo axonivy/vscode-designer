@@ -2,7 +2,7 @@ import path from 'path';
 import type { ExtensionContext, TreeView, TreeViewSelectionChangeEvent } from 'vscode';
 import { commands, Uri, window, workspace } from 'vscode';
 import { registerCommand, type KnownCommand } from '../base/commands';
-import { runJavaProjectImport } from '../base/java-extension-api';
+import { ensureJavaLightWeightMode, runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { IVY_PROJECT_FILE, IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -260,6 +260,7 @@ export class IvyProjectExplorer {
   }
 
   private async convertProject(selection: TreeSelection, convertAll: boolean = false) {
+    await ensureJavaLightWeightMode('Project conversion');
     const uri = await treeSelectionToUri(selection);
     const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
     const quickPick = window.createQuickPick();

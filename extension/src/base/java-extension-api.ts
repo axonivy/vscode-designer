@@ -64,11 +64,11 @@ export const ensureJavaLightWeightMode = async (task: string) => {
     [{ label: 'Reload Window', detail: 'Unsaved changes will be lost' }, { label: 'Continue without reloading' }],
     {
       ignoreFocusOut: true,
-      title: `It's recommended to reload the window for ${task} in order to switch back to Java LightWeight mode.`
+      title: `For better performance, it's recommended to reload the window to switch back to Java LightWeight mode. After reloading, you'll need to trigger ${task} again.`
     }
   );
   if (!selection?.label) {
-    throw new Error('Cancelled dialog');
+    return;
   }
   if (selection?.label === 'Reload Window') {
     await executeCommand('workbench.action.reloadWindow');
