@@ -740,14 +740,13 @@
             },
             "projectId": {
               "type": "string",
-              "description": "Dot-separated namespace"
+              "description": "Only letters, numbers, underscores, and hyphens are allowed. No spaces."
             }
           },
           "required": [
             "name",
             "path",
-            "groupId",
-            "projectId"
+            "groupId"
           ]
         },
         "canBeReferencedInPrompt": true,
@@ -794,7 +793,7 @@
       {
         "name": "new_axon_ivy_process",
         "displayName": "New Axon Ivy Process",
-        "modelDescription": "Creates a new Axon Ivy Process. MUST be called for every request to create, add, scaffold, initialize, or generate an Axon Ivy Process. Do NOT attempt to create the Process by writing files, or inspecting and copying existing Processes — only this tool produces a valid, registered Process.",
+        "modelDescription": "Creates a new Axon Ivy Process. MUST be called for every request to create, scaffold, initialize, or generate an Axon Ivy Process. Do NOT attempt to create the Process by writing files, or inspecting and copying existing Processes — only this tool produces a valid, registered Process.",
         "inputSchema": {
           "type": "object",
           "properties": {
@@ -804,11 +803,12 @@
             },
             "namespace": {
               "type": "string",
-              "description": "Slash-separated namespace"
+              "default": "",
+              "description": "Slash-separated namespace. Keep empty for processes in 'process' root directory. NEVER duplicate projectPath or parts of it!"
             },
             "projectPath": {
               "type": "string",
-              "description": "Absolute path to the project directory where the new Process should be created."
+              "description": "Absolute path to the project directory, in which the new Process should be created. It must be a child of the workspace directory and contain a '.ivyproject' file."
             },
             "type": {
               "type": "string",
@@ -823,7 +823,6 @@
           },
           "required": [
             "name",
-            "namespace",
             "projectPath"
           ]
         },

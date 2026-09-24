@@ -14,7 +14,7 @@ import { IvyEngineManager } from '../../engine/engine-manager';
 
 type NewProcessToolArgs = {
   name: string;
-  namespace: string;
+  namespace?: string;
   projectPath: string;
   type?: ProcessType;
 };
@@ -44,7 +44,7 @@ export const createNewProcess = async (input: NewProcessToolArgs): Promise<strin
   const type = resolvedType(input.type);
   const newProcessParams = {
     name: input.name,
-    namespace: input.namespace,
+    namespace: input.namespace ?? '',
     path: input.projectPath,
     kind: type
   };

@@ -15,12 +15,13 @@ type NewProjectToolArgs = {
   name: string;
   path: string;
   groupId: string;
-  projectId: string;
+  projectId?: string;
 };
 
 export const createNewProject = async (input: NewProjectToolArgs): Promise<string> => {
   const newProjectParams = {
     ...input,
+    projectId: input.projectId ?? input.name,
     path: path.join(input.path, input.name)
   };
   await IvyEngineManager.instance.createProject(newProjectParams);
