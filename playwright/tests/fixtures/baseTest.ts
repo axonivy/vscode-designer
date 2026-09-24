@@ -1,6 +1,5 @@
 import { _electron, test as base, chromium, type ElectronApplication, type Page } from '@playwright/test';
-import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath } from '@vscode/test-electron';
-import { execSync } from 'child_process';
+import { downloadAndUnzipVSCode } from '@vscode/test-electron';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -81,10 +80,8 @@ const runBrowserTest = async (tmpWorkspace: TmpWorkspace, take: (r: Page) => Pro
 
 const runElectronAppTest = async (tmpWorkspace: TmpWorkspace, take: (r: ElectronApplication) => Promise<void>) => {
   const vscodePath = await downloadAndUnzipVSCode(downloadVersion);
-  const [cliPath] = resolveCliArgsFromVSCodeExecutablePath(vscodePath);
   const extensionDir = path.resolve(process.cwd(), 'test-extension-dir');
   const userDataDir = path.resolve(process.cwd(), 'test-user-data-dir');
-  execSync(`"${cliPath}" --install-extension vscjava.vscode-java-pack --extensions-dir ${extensionDir}`);
   const electronApp = await _electron.launch({
     executablePath: vscodePath,
     args: [
