@@ -10,7 +10,7 @@ import {
   MultiStepInput,
   MultiStepInvalidStateError
 } from './utils/multi-step-input';
-import { validateDotSeparatedName, validateProjectName } from './utils/util';
+import { validateDotSeparatedName, validateProjectArtifactId, validateProjectName } from './utils/util';
 
 interface NewProjectState extends MSStateBase {
   projectName?: string | undefined;
@@ -24,7 +24,7 @@ export const addNewProject = async (selectedUri: Uri) => {
     state.projectName = await input.showTextInput({
       title: state.dialogTitle,
       titleSuffix: ' - Choose project name',
-      placeholder: 'Enter a name. Allowed characters: a-z, A-Z, 0-9, _, -',
+      placeholder: 'Enter a project name. Allowed characters: a-z, A-Z, 0-9, _, -',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.projectName,
@@ -40,7 +40,7 @@ export const addNewProject = async (selectedUri: Uri) => {
     if (state.groupId === undefined) {
       if (state.projectName !== undefined) {
         const sanitizedProjectName = state.projectName?.replace(/-/g, '.');
-        if (validateDotSeparatedName(sanitizedProjectName) === undefined) {
+        if (validateDotSeparatedName(sanitizedProjectName, 'Group ID') === undefined) {
           state.groupId = sanitizedProjectName;
         }
       } else {
@@ -49,12 +49,12 @@ export const addNewProject = async (selectedUri: Uri) => {
     }
     state.groupId = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose a group ID',
-      placeholder: 'Enter a group ID. Allowed characters: a-z, A-Z, 0-9, _. Separate namespaces with dots, e.g. com.mycompany',
+      titleSuffix: ' - Choose a Group ID',
+      placeholder: 'Enter a Group ID (e.g. com.domain.one). Allowed characters: a-z, A-Z, 0-9, _',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.groupId,
-      validationFunction: validateDotSeparatedName,
+      validationFunction: (value: string) => validateDotSeparatedName(value, 'Group ID'),
       onBack: (typedValue: string) => {
         state.groupId = typedValue;
       }
@@ -65,7 +65,7 @@ export const addNewProject = async (selectedUri: Uri) => {
     if (state.projectId === undefined) {
       if (state.projectName !== undefined) {
         const sanitizedProjectName = state.projectName?.replace(/-/g, '.');
-        if (validateDotSeparatedName(sanitizedProjectName) === undefined) {
+        if (validateProjectArtifactId(sanitizedProjectName) === undefined) {
           state.projectId = sanitizedProjectName;
         }
       } else {
@@ -74,12 +74,12 @@ export const addNewProject = async (selectedUri: Uri) => {
     }
     state.projectId = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose a project artifact ID',
-      placeholder: 'Enter a project ID. Allowed characters: a-z, A-Z, 0-9, _. Separate namespaces with dots, e.g. my.project',
+      titleSuffix: ' - Choose an Artifact ID',
+      placeholder: 'Enter an Artifact ID (e.g. another-project-id). Allowed characters: a-z, A-Z, 0-9, _',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.projectId,
-      validationFunction: validateDotSeparatedName,
+      validationFunction: (value: string) => validateProjectArtifactId(value),
       onBack: (typedValue: string) => {
         state.projectId = typedValue;
       }

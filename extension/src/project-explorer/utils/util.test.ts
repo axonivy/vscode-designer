@@ -1,5 +1,12 @@
 import { expect, test, vi } from 'vitest';
-import { sanitizeProjectName, validateDotSeparatedName, validateNamespace, validateProjectArtifactName, validateProjectName } from './util';
+import {
+  sanitizeProjectName,
+  validateDotSeparatedName,
+  validateNamespace,
+  validateProjectArtifactId,
+  validateProjectArtifactName,
+  validateProjectName
+} from './util';
 
 vi.mock('vscode', () => ({
   FileType: { File: 1, Directory: 2 },
@@ -8,13 +15,16 @@ vi.mock('vscode', () => ({
 }));
 
 test.describe('validateDotSeparatedName', () => {
-  test('valid single character', () => {
+  test('valid single character not underscore', () => {
     expect(validateDotSeparatedName('a')).toBeUndefined();
-    expect(validateDotSeparatedName('_')).toBeUndefined();
+    expect(validateDotSeparatedName('A')).toBeUndefined();
   });
 
   test('valid single word', () => {
     expect(validateDotSeparatedName('ab')).toBeUndefined();
+    expect(validateDotSeparatedName('a1')).toBeUndefined();
+    expect(validateDotSeparatedName('a1a')).toBeUndefined();
+    expect(validateDotSeparatedName('__')).toBeUndefined();
   });
 
   test('valid dotseparated words single character', () => {
@@ -37,8 +47,7 @@ test.describe('validateDotSeparatedName', () => {
     expect(validateDotSeparatedName('_a.b')).toBeUndefined();
     expect(validateDotSeparatedName('_a._b')).toBeUndefined();
     expect(validateDotSeparatedName('_a_._b_')).toBeUndefined();
-
-    expect(validateDotSeparatedName('_._')).toBeUndefined();
+    expect(validateDotSeparatedName('__.__')).toBeUndefined();
   });
 
   test('error invalid characters', () => {
@@ -52,7 +61,16 @@ test.describe('validateDotSeparatedName', () => {
     expect(validateDotSeparatedName('a/b')).toBeTruthy();
   });
 
+  test('error invalid underscore only in group', () => {
+    expect(validateDotSeparatedName('_')).toBeTruthy();
+    expect(validateDotSeparatedName('_._')).toBeTruthy();
+    expect(validateDotSeparatedName('_.__')).toBeTruthy();
+    expect(validateDotSeparatedName('__._')).toBeTruthy();
+  });
+
   test('error malformed dots', () => {
+    expect(validateDotSeparatedName('.')).toBeTruthy();
+    expect(validateDotSeparatedName('...')).toBeTruthy();
     expect(validateDotSeparatedName('a.b.')).toBeTruthy();
     expect(validateDotSeparatedName('.a.b')).toBeTruthy();
     expect(validateDotSeparatedName('a..b')).toBeTruthy();
@@ -228,6 +246,72 @@ test.describe('validateProjectArtifactName', () => {
     expect(validateProjectArtifactName(' ab')).toBeTruthy();
     expect(validateProjectArtifactName('ab ')).toBeTruthy();
     expect(validateProjectArtifactName('a b')).toBeTruthy();
+  });
+});
+
+test.describe('validateProjectArtifactId', () => {
+  test('valid single character segment', () => {
+    expect(validateProjectArtifactId('a')).toBeUndefined();
+    expect(validateProjectArtifactId('_')).toBeUndefined();
+    expect(validateProjectArtifactId('1')).toBeUndefined();
+  });
+
+  test('valid multi character segment', () => {
+    expect(validateProjectArtifactId('aA')).toBeUndefined();
+    expect(validateProjectArtifactId('a1')).toBeUndefined();
+    expect(validateProjectArtifactId('1a')).toBeUndefined();
+    expect(validateProjectArtifactId('__')).toBeUndefined();
+    expect(validateProjectArtifactId('1_a')).toBeUndefined();
+    expect(validateProjectArtifactId('_a1_')).toBeUndefined();
+  });
+
+  test('valid segments with allowed separators', () => {
+    expect(validateProjectArtifactId('ab-1')).toBeUndefined();
+    expect(validateProjectArtifactId('ab.1')).toBeUndefined();
+    expect(validateProjectArtifactId('a_b.c-d')).toBeUndefined();
+    expect(validateProjectArtifactId('_a.b_c-d1')).toBeUndefined();
+    expect(validateProjectArtifactId('_._')).toBeUndefined();
+    expect(validateProjectArtifactId('__-1_')).toBeUndefined();
+  });
+
+  test('error invalid characters', () => {
+    expect(validateProjectArtifactId('')).toBeTruthy();
+    expect(validateProjectArtifactId(' ')).toBeTruthy();
+    expect(validateProjectArtifactId('a ')).toBeTruthy();
+    expect(validateProjectArtifactId(' a')).toBeTruthy();
+    expect(validateProjectArtifactId('a a')).toBeTruthy();
+    expect(validateProjectArtifactId('/')).toBeTruthy();
+    expect(validateProjectArtifactId('a/b')).toBeTruthy();
+    expect(validateProjectArtifactId('a:b')).toBeTruthy();
+    expect(validateProjectArtifactId('a@b')).toBeTruthy();
+  });
+
+  test('error malformed separators', () => {
+    expect(validateProjectArtifactId('-')).toBeTruthy();
+    expect(validateProjectArtifactId('a-')).toBeTruthy();
+    expect(validateProjectArtifactId('a.')).toBeTruthy();
+    expect(validateProjectArtifactId('-a')).toBeTruthy();
+    expect(validateProjectArtifactId('.a')).toBeTruthy();
+    expect(validateProjectArtifactId('a--b')).toBeTruthy();
+    expect(validateProjectArtifactId('a..b')).toBeTruthy();
+    expect(validateProjectArtifactId('a...b')).toBeTruthy();
+    expect(validateProjectArtifactId('a.-b')).toBeTruthy();
+    expect(validateProjectArtifactId('a.-')).toBeTruthy();
+    expect(validateProjectArtifactId('.-a')).toBeTruthy();
+    expect(validateProjectArtifactId('a.b.')).toBeTruthy();
+  });
+
+  test('valid leading digits are allowed', () => {
+    expect(validateProjectArtifactId('1')).toBeUndefined();
+    expect(validateProjectArtifactId('1a')).toBeUndefined();
+    expect(validateProjectArtifactId('1a.b')).toBeUndefined();
+  });
+
+  test('error whitespace in separator sequences', () => {
+    expect(validateProjectArtifactId('a b')).toBeTruthy();
+    expect(validateProjectArtifactId('a .b')).toBeTruthy();
+    expect(validateProjectArtifactId('a. b')).toBeTruthy();
+    expect(validateProjectArtifactId('a _b')).toBeTruthy();
   });
 });
 
