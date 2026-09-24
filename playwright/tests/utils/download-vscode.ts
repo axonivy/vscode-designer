@@ -3,5 +3,5 @@ import { downloadAndUnzipVSCode, type DownloadOptions } from '@vscode/test-elect
 const downloadVersion: DownloadOptions['version'] = process.env.RUN_STABLE_VERSION === 'true' ? 'stable' : 'insiders';
 
 export const runDownloadAndUnzipVSCode = async () => {
-  await downloadAndUnzipVSCode({ version: downloadVersion });
+  return await downloadAndUnzipVSCode({ version: downloadVersion });
 };
