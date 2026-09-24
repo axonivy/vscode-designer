@@ -82,7 +82,7 @@ export const validateProjectArtifactName = (value: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return 'Only letters, numbers and underscores are allowed -- Each segment must start with a letter or underscore -- No spaces -- Cannot be empty';
+  return 'Only letters, digits, and underscores are allowed -- Each segment must start with a letter or underscore -- No spaces -- Cannot be empty';
 };
 
 export const validateProjectName = (value: string) => {
@@ -90,7 +90,7 @@ export const validateProjectName = (value: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return 'Only letters, numbers, underscores and hyphens are allowed -- No spaces -- Cannot be empty';
+  return 'Only letters, digits, underscores, and hyphens are allowed -- No spaces -- Cannot be empty';
 };
 
 export const validateDotSeparatedName = (value: string, label?: string) => {
@@ -98,7 +98,7 @@ export const validateDotSeparatedName = (value: string, label?: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return `Enter ${label ?? 'Namespace'} as segments separated by "." -- Only letters, numbers and underscores are allowed -- Each segment must start with a letter or underscore -- A segment cannot consist of a single underscore -- No spaces -- Cannot be empty`;
+  return `Enter ${label ?? 'Namespace'} as segments separated by "." -- Only letters, digits, and underscores are allowed -- Each segment must start with a letter or underscore -- A segment cannot consist of a single underscore -- No spaces -- Cannot be empty`;
 };
 
 export const validateNamespace = (value: string) => {
@@ -106,7 +106,7 @@ export const validateNamespace = (value: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return 'Enter Namespace as segments separated by "/" -- Only letters, numbers and underscores are allowed -- Spaces allowed within segments -- Empty allowed.';
+  return 'Enter Namespace as segments separated by "/" -- Only letters, digits, and underscores are allowed -- Spaces allowed within segments -- Empty allowed.';
 };
 
 export const validateProjectArtifactId = (value: string) => {
@@ -114,7 +114,7 @@ export const validateProjectArtifactId = (value: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return 'Enter Artifact ID as segments separated by "." or "-" -- Only letters, numbers and underscores are allowed -- No spaces -- Cannot be empty';
+  return 'Only letters, digits, and underscores are allowed -- Separate by single "." or "-" -- No spaces -- Cannot be empty';
 };
 
 export const validateExportPath = (fileName: string, folderPath: Uri) => {
