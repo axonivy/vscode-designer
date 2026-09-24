@@ -24,6 +24,6 @@ export default defineConfig({
       dependencies: ['setup-test'],
       retries: 0
     },
-    { name: 'screenshots', testDir: './tests/screenshots', retries: 0 }
+    { name: 'screenshots', testDir: './tests/screenshots', retries: 0, dependencies: ['setup-test'] }
   ]
 });
