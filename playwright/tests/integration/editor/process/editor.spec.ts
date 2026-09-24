@@ -36,7 +36,8 @@ test.only('Change display name of Request Start', async ({ wsPage }) => {
   await expect(start).toHaveText(initialName);
 
   await start.click();
-  await wsPage.page.keyboard.press('KeyL');
+  await editor.assertSelected(start);
+  await editor.quickActionBar.getByRole('button', { name: /Edit Label/ }).click();
   await editor.webViewFrame.locator('div.label-edit').locator('textarea').fill('a new test label');
   await start.click();
   await expect(start).not.toHaveText(initialName);
