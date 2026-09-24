@@ -125,7 +125,7 @@ pipeline {
                 curl -o schema.zip %devSchema%
               '''
               bat 'powershell -Command "Expand-Archive -Path schema.zip -DestinationPath . -Force"'
-              bat 'move 14.0.0\\runtime-log-tsgen.json runtime-log.json'
+              bat 'move 14.0\\runtime-log-tsgen.json runtime-log.json'
               bat 'pnpm run runtimelog:generate %cd%\\runtime-log.json'
               bat 'pnpm run type && pnpm run lint:ci'
             }
