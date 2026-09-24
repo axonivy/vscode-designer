@@ -1,6 +1,8 @@
 package ch.ivyteam.smart.core.copilot;
 
 import java.nio.file.Path;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -10,22 +12,36 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import com.github.dockerjava.api.exception.NotFoundException;
+import ch.ivyteam.smart.core.docker.HostUser;
 
 public class CopilotContainer extends GenericContainer<CopilotContainer> {
 
-  private static final String IMAGE_NAME = "ivy-copilot:local";
+  private static final String IMAGE_NAME = "ivy-copilot:uid-compatible";
 
   public CopilotContainer(Path workspace, Path userData, Path skills) {
     super(copilotImage());
+    HostUser.configure(this, "copilot");
     withFileSystemBind(workspace.toString(), "/workspace", BindMode.READ_WRITE);
     withFileSystemBind(userData.toString(), "/user-data", BindMode.READ_WRITE);
-    withFileSystemBind(skills.toString(), "/root/.copilot/skills", BindMode.READ_ONLY);
+    withFileSystemBind(getCopilotCache(userData).toString(), "/home/copilot/.cache", BindMode.READ_WRITE);
+    withFileSystemBind(skills.toString(), "/home/copilot/.copilot/skills", BindMode.READ_ONLY);
+    withEnv("HOME", "/home/copilot");
     withEnv("COPILOT_AUTO_UPDATE", "false");
     withEnv("COPILOT_MODEL", "gpt-5-mini");
     withEnv("GITHUB_COPILOT_PROMPT_MODE_WORKSPACE_MCP", "true");
     withEnv("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "true");
     authorize(this);
     withCommand("sleep", "infinity");
+  }
+
+  private static Path getCopilotCache(Path userData) {
+    Path copilotCache = userData.resolve("copilot-cache");
+    try {
+      java.nio.file.Files.createDirectories(copilotCache);
+    } catch (IOException exception) {
+      throw new UncheckedIOException("Failed to create Copilot cache directory", exception);
+    }
+    return copilotCache;
   }
 
   private static Future<String> copilotImage() {
@@ -38,7 +54,8 @@ public class CopilotContainer extends GenericContainer<CopilotContainer> {
         .withDockerfileFromBuilder(builder -> builder
           .from("node:24.18-slim")
           .run("apt-get update && apt-get install -y --no-install-recommends ca-certificates curl && rm -rf /var/lib/apt/lists/*")
-              .run("COPILOT_AUTO_UPDATE=false npm install -g @github/copilot@1.0.80")
+            .run("COPILOT_AUTO_UPDATE=false npm install -g @github/copilot@1.0.80")
+            .run("mkdir -p /home/copilot/.copilot && chmod -R 0777 /home/copilot")
           .build());
     }
   }
