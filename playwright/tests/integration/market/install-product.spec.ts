@@ -6,7 +6,7 @@ test('Install product without maven-dependency from Market website', async ({ ws
   const explorer = new FileExplorer(wsPage);
   await explorer.selectNode('resources');
   await explorer.installProduct('connectivity-demo');
-  await wsPage.provideUserInput('14.0.0-SNAPSHOT');
+  await wsPage.provideUserInput('14.0.0');
   const header = wsPage.page.locator('div.quick-input-header');
   const checkbox = header.getByRole('checkbox', { name: 'Toggle all checkboxes' });
   await checkbox.check();
