@@ -65,6 +65,8 @@ test.describe('empty', () => {
     await wsPage.executeCommand('View: Show Explorer');
     const welcomePage = new WelcomePage(wsPage);
     await welcomePage.open();
+    const explorer = new ProjectExplorerView(wsPage);
+    await explorer.openView();
     await screenshot(wsPage.page, 'empty-workspace');
   });
 });
