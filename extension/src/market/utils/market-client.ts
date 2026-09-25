@@ -6,7 +6,7 @@ import {
   type BestMatchVersion,
   type MavenArtifactVersionModel,
   type ProductModel
-} from './generated/market-client';
+} from '../generated/market-client';
 
 export type Product = {
   id: string;

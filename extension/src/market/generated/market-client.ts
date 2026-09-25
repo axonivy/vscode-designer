@@ -5,7 +5,7 @@
  * The stable public api
  * OpenAPI spec version: 1.0.0
  */
-import { marketFetch } from '../market-fetch';
+import { marketFetch } from '../utils/market-fetch';
 /**
  * Product name by locale
  */
