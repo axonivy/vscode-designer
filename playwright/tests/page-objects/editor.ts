@@ -24,7 +24,7 @@ abstract class Editor {
     if (!options?.force) {
       await this.expectTabDirty();
     }
-    await this.tab.click();
+    await this.tab.focus();
     await this.wsPage.executeCommand('File: Save');
     await this.expectTabNotDirty();
   }

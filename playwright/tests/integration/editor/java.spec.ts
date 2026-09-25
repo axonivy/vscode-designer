@@ -20,13 +20,11 @@ test('Compile java and invalidate class loader', { tag: '@serial' }, async ({ ws
   await javaEditor.goToLineColumn(5, 1);
   await wsPage.page.keyboard.type(runMethod, { delay: 50 });
   await expect(javaEditor.content).toContainText(runMethod);
-  await wsPage.page.waitForTimeout(500);
   await javaEditor.save({ force: true });
   await wsPage.hasReadyStatusMessage();
 
   await processEditor.open();
   const start = processEditor.elementByPID('19BE060A6564078E-f0');
   const end = processEditor.elementByPID('19BE060A6564078E-f1');
-  await wsPage.page.waitForTimeout(4_000);
   await processEditor.startProcessAndAssertExecuted(start, end);
 });
