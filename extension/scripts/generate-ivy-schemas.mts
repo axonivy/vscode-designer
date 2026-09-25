@@ -4,7 +4,12 @@ import { fileURLToPath } from 'node:url';
 
 const schemaIndexes = ['https://json-schema.axonivy.com/14.0/config/', 'https://json-schema.axonivy.com/14.0/project/'];
 
-const cacheRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../src/ai/skills/schemas/14.0');
+const skillsRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../src/ai/skills');
+const cacheRoots: Record<string, string> = {
+  config: path.join(skillsRoot, 'ivy-yaml-files/schemas/14.0/config'),
+  project: path.join(skillsRoot, 'ivy-json-files/schemas/14.0/project')
+};
+const legacyCacheRoot = path.join(skillsRoot, 'schemas/14.0');
 
 async function fetchText(url: string): Promise<string> {
   const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
@@ -59,10 +64,15 @@ async function generateIvySchemas(): Promise<void> {
     throw new Error('No JSON schemas found in the Axon Ivy schema indexes.');
   }
 
-  await rm(cacheRoot, { recursive: true, force: true });
+  await Promise.all([...Object.values(cacheRoots), legacyCacheRoot].map(cacheRoot => rm(cacheRoot, { recursive: true, force: true })));
   await Promise.all(
     files.map(async ({ relativePath, content }) => {
-      const destination = path.join(cacheRoot, relativePath);
+      const [directory, file] = relativePath.split(path.sep);
+      const cacheRoot = directory ? cacheRoots[directory] : undefined;
+      if (!cacheRoot || !file) {
+        throw new Error(`Unexpected schema path: ${relativePath}`);
+      }
+      const destination = path.join(cacheRoot, file);
       await mkdir(path.dirname(destination), { recursive: true });
       await writeFile(destination, content);
     })
