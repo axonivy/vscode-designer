@@ -9,5 +9,5 @@ public interface Reporter {
 
   default void init(String testUnit){}
 
-  void append(String testName, TokenUsage tokenUsage, List<UsedTool> usedTools);
+  void append(String testName, String userMessage, TokenUsage tokenUsage, List<UsedTool> usedTools);
 }

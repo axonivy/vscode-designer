@@ -23,6 +23,8 @@ public class TestAiTestReport {
 
     assertThat(memory.testName)
       .isEqualTo("myTest");
+    assertThat(memory.userMessage)
+      .contains("create an axon ivy project for a flight-simulator");
     assertThat(memory.tokenUsage.input())
       .isEqualTo(38517);
     assertThat(memory.tokenUsage.output())
@@ -34,12 +36,14 @@ public class TestAiTestReport {
   private static class MemoryReporter implements Reporter {
 
     private String testName;
+    private String userMessage;
     private TokenUsage tokenUsage;
     private List<UsedTool> usedTools;
 
     @Override
-    public void append(String testName, TokenUsage tokenUsage, List<UsedTool> usedTools) {
+    public void append(String testName, String userMessage, TokenUsage tokenUsage, List<UsedTool> usedTools) {
       this.testName = testName;
+      this.userMessage = userMessage;
       this.tokenUsage = tokenUsage;
       this.usedTools = usedTools;
     }

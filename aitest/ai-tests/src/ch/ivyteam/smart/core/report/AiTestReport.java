@@ -14,10 +14,11 @@ public class AiTestReport {
   }
 
   public void report(String testName, AspireSpans spans) {
+    var userMessage = spans.userMessage();
     var usage = spans.tokenUsage();
     var tools = spans.usedTools();
 
-    reporters.stream().forEach(r -> r.append(testName, usage, tools));
+    reporters.stream().forEach(r -> r.append(testName, userMessage, usage, tools));
   }
 
   public void register(Reporter reporter) {

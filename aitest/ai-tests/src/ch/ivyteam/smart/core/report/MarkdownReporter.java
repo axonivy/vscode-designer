@@ -28,7 +28,7 @@ public class MarkdownReporter implements Reporter {
   }
 
   @Override
-  public void append(String name, TokenUsage tokenUsage, List<UsedTool> usedTools) {
+  public void append(String name, String userMessage, TokenUsage tokenUsage, List<UsedTool> usedTools) {
     var toolNames = usedTools.stream()
         .map(UsedTool::name)
         .collect(Collectors.joining(", "));
@@ -40,7 +40,10 @@ public class MarkdownReporter implements Reporter {
     } else {
       tools = "<details><summary>" + escapeHtml(toolNames) + "</summary><br>" + tools + "</details>";
     }
-    lines.add(String.format("| `%s` | %d | %d | %s |", name,
+    var test = "<details><summary>`" + escapeHtml(name) + "`</summary><strong>Prompt</strong><pre><code>"
+      + escapeHtml(userMessage).replace("\r\n", "&#13;&#10;").replace("\r", "&#13;").replace("\n", "&#10;")
+        + "</code></pre></details>";
+    lines.add(String.format("| %s | %d | %d | %s |", test,
         tokenUsage.input(), tokenUsage.output(), tools));
   }
 

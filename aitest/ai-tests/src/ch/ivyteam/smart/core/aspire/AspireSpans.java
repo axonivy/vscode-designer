@@ -44,6 +44,26 @@ public class AspireSpans {
       .orElseThrow(() -> new IllegalStateException("Missing attribute "+ GEN_AI_USAGE_OUTPUT_TOKENS.getKey() +" in root span"));
     return new TokenUsage(inputTokens, outputTokens);
   }
+
+  public String userMessage() {
+    var messages = findSpanAttributeValue(rootSpan(spans), AttributeKey.stringKey("gen_ai.input.messages"))
+        .map(value -> {
+          try {
+            return MAPPER.readTree(value);
+          } catch (Exception ex) {
+            throw new RuntimeException("Failed to parse input messages", ex);
+          }
+        })
+        .orElseThrow(() -> new IllegalStateException("No gen_ai.input.messages attribute found in root span"));
+    return messages.valueStream()
+        .filter(message -> "user".equals(message.path("role").asString()))
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException("No user message found in gen_ai.input.messages"))
+        .path("parts").valueStream()
+        .filter(part -> "text".equals(part.path("type").asString()))
+        .map(part -> part.path("content").asString())
+        .collect(java.util.stream.Collectors.joining("\n"));
+  }
   
   public static record TokenUsage(int input, int output) {}
   

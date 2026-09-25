@@ -27,6 +27,11 @@ public class TestAspireSpans {
   }
 
   @Test
+  void userMessage() {
+    assertThat(spans.userMessage()).contains("create an axon ivy project for a flight-simulator");
+  }
+
+  @Test
   void usedTools() {
     assertThat(spans.usedTools()).hasSize(1);
     assertThat(spans.usedTools().get(0).name())
