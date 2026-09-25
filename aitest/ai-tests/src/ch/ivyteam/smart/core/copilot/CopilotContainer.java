@@ -27,7 +27,7 @@ public class CopilotContainer extends GenericContainer<CopilotContainer> {
     withFileSystemBind(skills.toString(), "/home/copilot/.copilot/skills", BindMode.READ_ONLY);
     withEnv("HOME", "/home/copilot");
     withEnv("COPILOT_AUTO_UPDATE", "false");
-    withEnv("COPILOT_MODEL", "gpt-5-mini");
+    withEnv("COPILOT_MODEL", "gpt-6-luna");
     withEnv("GITHUB_COPILOT_PROMPT_MODE_WORKSPACE_MCP", "true");
     withEnv("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "true");
     authorize(this);
@@ -66,6 +66,7 @@ public class CopilotContainer extends GenericContainer<CopilotContainer> {
       System.out.println("Copilot in BYOM mode: using OpenAI API key from environment variable OPENAI_API_KEY");
       copilot
           .withEnv("COPILOT_PROVIDER_BASE_URL", "https://api.openai.com/v1")
+          .withEnv("COPILOT_PROVIDER_WIRE_API", "responses")
           .withEnv("COPILOT_PROVIDER_API_KEY", openAiKey);
       return;
     }
