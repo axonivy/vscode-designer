@@ -13,9 +13,9 @@ export const runInBrowser = process.env.RUN_IN_BROWSER ? true : false;
 type TmpWorkspace = { tmpWorkspacePath: string; tmpWsConfig?: string };
 
 type TestFixtures = {
-  workspace: string;
+  workspace: string | null;
   closeWelcomePage: boolean;
-  tmpWorkspace: TmpWorkspace;
+  tmpWorkspace?: TmpWorkspace;
   electronApp?: ElectronApplication;
   page: Page;
   wsPage: WorkspacePage;
@@ -30,12 +30,12 @@ export const test = base.extend<TestFixtures>({
     const tmpWs = await createTmpWorkspace(workspace);
     await take(tmpWs);
     if (!process.env.CI) {
-      await removeTmpWorkspace(tmpWs.tmpWorkspacePath);
+      await removeTmpWorkspace(tmpWs?.tmpWorkspacePath);
     }
   },
   electronApp: async ({ tmpWorkspace }, take) => {
     if (!runInBrowser) {
-      await runElectronAppTest(tmpWorkspace, take);
+      await runElectronAppTest(take, tmpWorkspace);
     } else {
       await take(undefined);
     }
@@ -44,15 +44,17 @@ export const test = base.extend<TestFixtures>({
     if (electronApp) {
       await pageOfElectronAppTest(electronApp, take);
     } else {
-      await runBrowserTest(tmpWorkspace, take);
+      await runBrowserTest(take, tmpWorkspace);
     }
   },
   wsPage: async ({ page }, take) => {
     await take(new WorkspacePage(page));
   },
   isReady: [
-    async ({ page, wsPage, closeWelcomePage }, take) => {
-      await wsPage.hasReadyStatusMessage();
+    async ({ tmpWorkspace, page, wsPage, closeWelcomePage }, take) => {
+      if (tmpWorkspace) {
+        await wsPage.hasReadyStatusMessage();
+      }
       if (closeWelcomePage) {
         await page
           .getByRole('tab', { name: 'Axon Ivy PRO Designer' })
@@ -65,11 +67,15 @@ export const test = base.extend<TestFixtures>({
   ]
 });
 
-const runBrowserTest = async (tmpWorkspace: TmpWorkspace, take: (r: Page) => Promise<void>) => {
+const runBrowserTest = async (take: (r: Page) => Promise<void>, tmpWorkspace?: TmpWorkspace) => {
   const browser = await chromium.launch({ args: ['--disable-web-security'] }); // disable-web-security because of https://chromestatus.com/feature/5152728072060928
   const page = await browser.newPage();
   await page.setViewportSize({ width: 1920, height: 1080 });
-  const queryParam = tmpWorkspace.tmpWsConfig ? `workspace=${tmpWorkspace.tmpWsConfig}` : `folder=${tmpWorkspace.tmpWorkspacePath}`;
+  const queryParam = tmpWorkspace
+    ? tmpWorkspace.tmpWsConfig
+      ? `workspace=${tmpWorkspace.tmpWsConfig}`
+      : `folder=${tmpWorkspace.tmpWorkspacePath}`
+    : '';
   await page.goto(`http://localhost:3000/?${queryParam}`);
   await page.getByRole('tab', { name: 'Welcome' }).getByRole('button', { name: 'Close' }).click({ delay: 100 });
   await take(page);
@@ -78,7 +84,7 @@ const runBrowserTest = async (tmpWorkspace: TmpWorkspace, take: (r: Page) => Pro
   await browser.close();
 };
 
-const runElectronAppTest = async (tmpWorkspace: TmpWorkspace, take: (r: ElectronApplication) => Promise<void>) => {
+const runElectronAppTest = async (take: (r: ElectronApplication) => Promise<void>, tmpWorkspace?: TmpWorkspace) => {
   const vscodePath = await downloadAndUnzipVSCode(downloadVersion);
   const extensionDir = path.resolve(process.cwd(), 'test-extension-dir');
   const userDataDir = path.resolve(process.cwd(), 'test-user-data-dir');
@@ -96,7 +102,7 @@ const runElectronAppTest = async (tmpWorkspace: TmpWorkspace, take: (r: Electron
       `--extensionDevelopmentPath=${path.resolve(import.meta.dirname, '../../../extension/')}`,
       `--extensions-dir=${extensionDir}`,
       `--user-data-dir=${userDataDir}`,
-      tmpWorkspace.tmpWsConfig ?? tmpWorkspace.tmpWorkspacePath
+      tmpWorkspace ? (tmpWorkspace.tmpWsConfig ?? tmpWorkspace.tmpWorkspacePath) : ''
     ]
   });
   await take(electronApp);
@@ -112,8 +118,11 @@ const pageOfElectronAppTest = async (electronApp: ElectronApplication, take: (r:
   await take(page);
 };
 
-const createTmpWorkspace = async (workspace: string) => {
+const createTmpWorkspace = async (workspace: string | null) => {
   let wsConfig: string | undefined;
+  if (!workspace) {
+    return undefined;
+  }
   if (fs.statSync(workspace).isFile()) {
     wsConfig = path.basename(workspace);
     workspace = path.dirname(workspace);
@@ -124,6 +133,8 @@ const createTmpWorkspace = async (workspace: string) => {
   return { tmpWorkspacePath: tmpWorkspace, tmpWsConfig: tmpWsConfig };
 };
 
-const removeTmpWorkspace = async (workspacePath: string) => {
-  await fs.promises.rm(workspacePath, { recursive: true, force: true, maxRetries: 3, retryDelay: 1000 });
+const removeTmpWorkspace = async (workspacePath?: string) => {
+  if (workspacePath) {
+    await fs.promises.rm(workspacePath, { recursive: true, force: true, maxRetries: 3, retryDelay: 1000 });
+  }
 };

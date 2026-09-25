@@ -23,33 +23,33 @@ abstract class ExplorerView {
     if (!(await this.expandedTab.isVisible())) {
       await this.tab.click();
     }
-    await expect(this.view).toBeVisible();
+    await expect(this.expandedTab).toBeVisible();
   }
 
   async closeView() {
     if (await this.expandedTab.isVisible()) {
       await this.tab.click();
     }
-    await expect(this.view).toBeHidden();
+    await expect(this.expandedTab).toBeHidden();
   }
 
   async hasNodeExact(name: string) {
-    const node = this.view.getByText(name, { exact: true });
+    const node = this.view.getByRole('treeitem', { name, exact: true }).first();
     await expect(node).toBeVisible();
   }
 
   async hasNoNode(name: string) {
-    const node = this.view.getByText(name);
+    const node = this.view.getByRole('treeitem', { name });
     await expect(node).not.toBeAttached();
   }
 
   async selectNode(name: string) {
-    await this.view.getByText(name).click();
+    await this.view.getByRole('treeitem', { name }).click();
     await this.isSelected(name);
   }
 
   async selectNodeExact(name: string) {
-    await this.view.getByText(name, { exact: true }).click();
+    await this.view.getByRole('treeitem', { name, exact: true }).click();
     await this.isSelected(name);
   }
 
@@ -59,11 +59,11 @@ abstract class ExplorerView {
   }
 
   async doubleClickNode(name: string) {
-    await this.view.getByText(name).dblclick();
+    await this.view.getByRole('treeitem', { name }).dblclick();
   }
 
   async selectInContextMenuOfNode(name: string, ...menuPath: Array<string>) {
-    await this.view.getByText(name).click({ button: 'right' });
+    await this.view.getByRole('treeitem', { name }).click({ button: 'right' });
     for (const menuEntry of menuPath.slice(0, -1)) {
       await this.wsPage.page.getByRole('menuitem', { name: menuEntry }).hover();
     }

@@ -11,9 +11,11 @@ export const screenshotLocator = async (
   page: Page,
   locator: Locator,
   name: string,
-  options?: { margin?: number; marginBottom?: number; marginTop?: number }
+  options?: { margin?: number; marginLeft?: number; marginRight?: number; marginBottom?: number; marginTop?: number }
 ) => {
   const margin = options?.margin ?? 16;
+  const marginLeft = options?.marginLeft ?? margin;
+  const marginRight = options?.marginRight ?? margin;
   const marginBottom = options?.marginBottom ?? margin;
   const marginTop = options?.marginTop ?? margin;
   const box = await locator.boundingBox();
@@ -23,7 +25,12 @@ export const screenshotLocator = async (
   const buffer = await page.screenshot({
     path: `${dir}/${name}.png`,
     animations: 'disabled',
-    clip: { x: box.x - margin, y: box.y - marginTop, width: box.width + margin * 2, height: box.height + marginTop + marginBottom }
+    clip: {
+      x: box.x - marginLeft,
+      y: box.y - marginTop,
+      width: box.width + marginLeft + marginRight,
+      height: box.height + marginTop + marginBottom
+    }
   });
   expect(buffer.byteLength).toBeGreaterThan(3000);
 };
