@@ -1,7 +1,10 @@
 import { expect, test } from '~/fixtures/baseTest';
-import { ProjectExplorerView } from '~/page-objects/explorer-view';
+import { FileExplorer, ProjectExplorerView } from '~/page-objects/explorer-view';
+import { OutputView } from '~/page-objects/output-view';
+import { ProblemsView } from '~/page-objects/problems-view';
+import { ProcessEditor } from '~/page-objects/process-editor';
 import { WelcomePage } from '~/page-objects/welcome-page';
-import { screenshotProject } from '~/workspaces/workspace';
+import { embeddedEngineWorkspace, screenshotProject } from '~/workspaces/workspace';
 import { screenshot, screenshotLocator } from './screenshot-util';
 
 test.use({ workspace: screenshotProject });
@@ -57,16 +60,43 @@ test('extensions', async ({ wsPage }) => {
   await screenshotLocator(wsPage.page, extensionsView, 'extensions', { marginLeft: 80, marginTop: 80, marginBottom: -200 });
 });
 
-test.describe('empty', () => {
+test.describe('empty workspace', () => {
   test.use({ workspace: null });
 
   test('empty workspace', async ({ wsPage }) => {
     await wsPage.executeCommand('Preferences: Toggle between Light/Dark Themes');
     await wsPage.executeCommand('View: Show Explorer');
-    const welcomePage = new WelcomePage(wsPage);
-    await welcomePage.open();
-    const explorer = new ProjectExplorerView(wsPage);
-    await explorer.openView();
+    await new WelcomePage(wsPage).open();
+    await new ProjectExplorerView(wsPage).openView();
     await screenshot(wsPage.page, 'empty-workspace');
+  });
+});
+
+test.describe('new project', () => {
+  test.use({ workspace: embeddedEngineWorkspace });
+
+  test('new project', async ({ wsPage }) => {
+    await new WelcomePage(wsPage).open();
+    const outputview = new OutputView(wsPage);
+    await outputview.openLog('Axon Ivy Engine');
+    await outputview.checkIfEngineStarted();
+    await screenshot(wsPage.page, 'empty-project');
+
+    await wsPage.executeCommand('Axon Ivy: New Project');
+    await wsPage.provideUserInput('myNewProject');
+    await wsPage.provideUserInput();
+    await wsPage.provideUserInput();
+
+    const explorer = new FileExplorer(wsPage);
+    await wsPage.hasReadyStatusMessage();
+    await explorer.hasNodeExact('myNewProject');
+
+    const problemsView = await ProblemsView.initProblemsView(wsPage);
+    await problemsView.hasNoMarker();
+
+    const processEditor = new ProcessEditor(wsPage, 'BusinessProcess.p.json');
+    await processEditor.expectWebViewVisible();
+
+    await screenshot(wsPage.page, 'new-project');
   });
 });
