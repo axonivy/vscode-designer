@@ -1,7 +1,8 @@
 import { expect, test } from '~/fixtures/baseTest';
 import { ProjectExplorerView } from '~/page-objects/explorer-view';
+import { WelcomePage } from '~/page-objects/welcome-page';
 import { screenshotProject } from '~/workspaces/workspace';
-import { screenshotLocator } from './screenshot-util';
+import { screenshot, screenshotLocator } from './screenshot-util';
 
 test.use({ workspace: screenshotProject });
 
@@ -50,9 +51,20 @@ test('axonivy tree view', async ({ wsPage }) => {
 });
 
 test('extensions', async ({ wsPage }) => {
-  // await wsPage.executeCommand('Extensions: Show Installed Extensions');
   await wsPage.executeCommand('View: Show Extensions');
   const extensionsView = wsPage.page.locator('.extensions');
   await expect(extensionsView).toBeVisible();
   await screenshotLocator(wsPage.page, extensionsView, 'extensions', { marginLeft: 80, marginTop: 80, marginBottom: -200 });
+});
+
+test.describe('empty', () => {
+  test.use({ workspace: null });
+
+  test('empty workspace', async ({ wsPage }) => {
+    await wsPage.executeCommand('Preferences: Toggle between Light/Dark Themes');
+    await wsPage.executeCommand('View: Show Explorer');
+    const welcomePage = new WelcomePage(wsPage);
+    await welcomePage.open();
+    await screenshot(wsPage.page, 'empty-workspace');
+  });
 });
