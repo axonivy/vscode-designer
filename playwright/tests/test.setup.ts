@@ -10,7 +10,9 @@ setup('Setup', async ({}) => {
     const vscodePath = await runDownloadAndUnzipVSCode();
     const [cliPath] = resolveCliArgsFromVSCodeExecutablePath(vscodePath);
     const extensionDir = path.resolve(process.cwd(), 'test-extension-dir');
-    execSync(`"${cliPath}" --install-extension vscjava.vscode-java-pack --extensions-dir ${extensionDir}`);
+    execSync(
+      `"${cliPath}" --install-extension vscjava.vscode-java-pack --install-extension axonivy.vscode-designer-14 --extensions-dir ${extensionDir}`
+    );
   } else {
     console.log('Skipping VSCode download as RUN_IN_BROWSER is set to true');
   }

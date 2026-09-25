@@ -48,3 +48,11 @@ test('axonivy tree view', async ({ wsPage }) => {
   await expect(explorer.view.getByText('playwrightTestWorkspace')).toBeVisible();
   await screenshotLocator(wsPage.page, explorer.view, 'axonivy-tree-view', { marginTop: 40 });
 });
+
+test('extensions', async ({ wsPage }) => {
+  // await wsPage.executeCommand('Extensions: Show Installed Extensions');
+  await wsPage.executeCommand('View: Show Extensions');
+  const extensionsView = wsPage.page.locator('.extensions');
+  await expect(extensionsView).toBeVisible();
+  await screenshotLocator(wsPage.page, extensionsView, 'extensions', { marginLeft: 80, marginTop: 80, marginBottom: -200 });
+});
