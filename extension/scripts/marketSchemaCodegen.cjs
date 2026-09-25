@@ -4,7 +4,7 @@ const { generateSchema, writeSrc } = require('./schemaCodegen.cjs');
 const tsGen = require('json-schema-to-typescript');
 const path = require('path');
 
-tsGen.DEFAULT_OPTIONS.bannerComment = "/* eslint-disable */" + tsGen.DEFAULT_OPTIONS.bannerComment;
+tsGen.DEFAULT_OPTIONS.bannerComment = '/* eslint-disable */' + tsGen.DEFAULT_OPTIONS.bannerComment;
 tsGen.DEFAULT_OPTIONS.unreachableDefinitions = true;
 
 var schemaUri =
