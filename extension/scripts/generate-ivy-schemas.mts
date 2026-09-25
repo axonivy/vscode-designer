@@ -39,7 +39,7 @@ function validateSchema(content: string, url: string): string {
   if (schema === null || typeof schema !== 'object' || Array.isArray(schema)) {
     throw new Error(`Invalid JSON schema response from ${url}`);
   }
-  return `${content.trimEnd()}\n`;
+  return JSON.stringify(schema);
 }
 
 async function fetchIndexSchemas(indexUrl: string): Promise<{ relativePath: string; content: string }[]> {
