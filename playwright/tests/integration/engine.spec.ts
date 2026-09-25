@@ -7,7 +7,7 @@ import { embeddedEngineWorkspace, noEngineWorkspacePath, noProjectWorkspacePath 
 test.describe('Engine run by extension', () => {
   test.use({ workspace: embeddedEngineWorkspace });
 
-  test('check if extension can download and start engine', async ({ wsPage }) => {
+  test('check if extension can download and start engine', { tag: '@serial' }, async ({ wsPage }) => {
     const outputview = new OutputView(wsPage);
     await outputview.checkIfEngineStarted();
   });
@@ -28,7 +28,7 @@ test.describe('Engine run by extension', () => {
 test.describe('Engine noProjectWorkspacePath', () => {
   test.use({ workspace: noProjectWorkspacePath });
 
-  test('check default engine settings and ensure engine is started even if no projects in workspace', async ({ wsPage }) => {
+  test('check default engine settings and ensure engine is started even if no projects in workspace', { tag: '@serial' }, async ({ wsPage }) => {
     const settingsView = new SettingsView(wsPage);
     await settingsView.openDefaultSettings();
     await settingsView.containsSetting('"axonivy.engine.runByExtension": true');
