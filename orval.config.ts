@@ -2,7 +2,7 @@ import { defineConfig } from 'orval';
 
 const marketFetch = {
   mutator: {
-    path: 'extension/src/market/market-fetch.ts',
+    path: 'extension/src/market/utils/market-fetch.ts',
     name: 'marketFetch'
   }
 };

@@ -20,7 +20,7 @@ import type {
   MavenProjectInstaller,
   ProjectDependency
 } from './generated/market-product';
-import { fetchInstaller, getAvailableVersions, getBestVersion, searchMarketProduct } from './market-client';
+import { fetchInstaller, getAvailableVersions, getBestVersion, searchMarketProduct } from './utils/market-client';
 import { validateProjectSelection } from './utils/market-install-util';
 
 interface ProductSelection extends QuickPickItem {
