@@ -6,7 +6,7 @@ import { ensureJavaLightWeightMode, runJavaProjectImport } from '../base/java-ex
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { IVY_PROJECT_FILE, IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { installLocalMarketProduct, installMarketProduct } from '../market/import-market';
+import { installLocalMarketProduct, installMarketProduct } from '../market/market-install';
 import { exportIvyProject } from './export-ivy-project';
 import { importIvyProject } from './import-ivy-project';
 import { importNewProcess } from './import-process';
