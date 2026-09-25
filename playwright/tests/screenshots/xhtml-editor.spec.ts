@@ -36,7 +36,7 @@ test('hover', async ({ wsPage }) => {
     await wsPage.page.keyboard.press('Control+I');
     await expect(hover).toBeVisible({ timeout: 2_000 });
   }).toPass();
-  await screenshotLocator(wsPage.page, hover, 'editor-xhtml-hover', 30);
+  await screenshotLocator(wsPage.page, hover, 'editor-xhtml-hover', { margin: 30 });
 });
 
 test('completions', async ({ wsPage }) => {
@@ -46,7 +46,7 @@ test('completions', async ({ wsPage }) => {
   await editor.goToLineColumn(13, 36);
   await wsPage.page.keyboard.press('Control+Space');
   await expect(editor.completions).toBeVisible();
-  await screenshotLocator(wsPage.page, editor.completions, 'editor-xhtml-completions', 30);
+  await screenshotLocator(wsPage.page, editor.completions, 'editor-xhtml-completions', { margin: 30 });
 });
 
 test('code actions', async ({ wsPage }) => {
@@ -57,5 +57,5 @@ test('code actions', async ({ wsPage }) => {
   await wsPage.page.keyboard.press('Control+.');
   const codeActions = wsPage.page.locator('div.context-view.monaco-component').first();
   await expect(codeActions).toBeVisible();
-  await screenshotLocator(wsPage.page, codeActions, 'editor-xhtml-code-actions', 30);
+  await screenshotLocator(wsPage.page, codeActions, 'editor-xhtml-code-actions', { margin: 30 });
 });

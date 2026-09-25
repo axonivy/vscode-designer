@@ -66,6 +66,14 @@ export class WorkspacePage {
     return this.page.locator('div.quick-input-list');
   }
 
+  get quickInputWidget() {
+    return this.page.locator('.quick-input-widget');
+  }
+
+  get notificationsCenter() {
+    return this.page.locator('.notifications-center');
+  }
+
   async activateExpensiveJavaStandardMode() {
     const javaStatusBar = this.page.locator('div.statusbar-item[id*="redhat.java"]');
     await javaStatusBar.filter({ hasText: 'Java: Lightweight Mode' }).click();

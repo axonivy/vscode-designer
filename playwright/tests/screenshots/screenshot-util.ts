@@ -7,7 +7,15 @@ export const screenshot = async (page: Page, name: string) => {
   expect(buffer.byteLength).toBeGreaterThan(3000);
 };
 
-export const screenshotLocator = async (page: Page, locator: Locator, name: string, margin = 16) => {
+export const screenshotLocator = async (
+  page: Page,
+  locator: Locator,
+  name: string,
+  options?: { margin?: number; marginBottom?: number; marginTop?: number }
+) => {
+  const margin = options?.margin ?? 16;
+  const marginBottom = options?.marginBottom ?? margin;
+  const marginTop = options?.marginTop ?? margin;
   const box = await locator.boundingBox();
   if (!box) {
     throw new Error(`Could not get bounding box for screenshot '${name}'`);
@@ -15,7 +23,7 @@ export const screenshotLocator = async (page: Page, locator: Locator, name: stri
   const buffer = await page.screenshot({
     path: `${dir}/${name}.png`,
     animations: 'disabled',
-    clip: { x: box.x - margin, y: box.y - margin, width: box.width + margin * 2, height: box.height + margin * 2 }
+    clip: { x: box.x - margin, y: box.y - marginTop, width: box.width + margin * 2, height: box.height + marginTop + marginBottom }
   });
   expect(buffer.byteLength).toBeGreaterThan(3000);
 };
