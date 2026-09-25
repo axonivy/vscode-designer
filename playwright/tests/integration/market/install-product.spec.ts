@@ -4,7 +4,6 @@ import { ProcessEditor } from '~/page-objects/process-editor';
 
 test('Install product without maven-dependency from Market website', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
-  await explorer.selectNode('resources');
   await explorer.installProduct('connectivity-demo');
   await wsPage.provideUserInput('14.0.0');
   const header = wsPage.page.locator('div.quick-input-header');
@@ -19,7 +18,6 @@ test('Install product without maven-dependency from Market website', async ({ ws
 
 test('Install product with maven-dependency from Market website', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
-  await explorer.selectNode('resources');
   await explorer.installProduct('excel-connector');
   await wsPage.provideUserInput('13.1.2');
   const header = wsPage.page.locator('div.quick-input-header');
@@ -32,12 +30,27 @@ test('Install product with maven-dependency from Market website', async ({ wsPag
   await explorer.selectNodeExact('excel-connector-demo');
 });
 
+test('Install product with conflicting project folder', async ({ wsPage }) => {
+  const explorer = new FileExplorer(wsPage);
+  await explorer.installProduct('connectivity-demo');
+  await wsPage.provideUserInput('14.0.0');
+  const header = wsPage.page.locator('div.quick-input-header');
+  const checkbox = header.getByRole('checkbox', { name: 'Toggle all checkboxes' });
+  await checkbox.check();
+  await wsPage.provideUserInput();
+  await wsPage.hasReadyStatusMessage();
+  await explorer.installProduct('connectivity-demo');
+  await wsPage.provideUserInput('14.0.0');
+  const title = wsPage.page.locator('div.quick-input-title');
+  await expect(title).toHaveText(/The following projects cannot be installed because a project folder with the same name already exists/);
+});
+
 test('Install local product.json', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.selectNode('resources');
   await explorer.selectNode('product.json');
   await explorer.installLocalProduct('product.json');
-  await wsPage.provideUserInput(); // confirm projects
+  await wsPage.provideUserInput();
   await wsPage.executeCommand('Refresh Explorer');
   await explorer.selectNode('connectivity-demos');
   const processEditor = new ProcessEditor(wsPage, 'personService.p.json');
@@ -57,9 +70,22 @@ test('Install local product.json with dynamic version', async ({ wsPage }) => {
   await expect(entry).toHaveCount(1);
   await expect(entry.getByRole('checkbox')).toHaveAttribute('aria-label', '👁️ connectivity-demos (com.axonivy.demo)');
 
-  await wsPage.provideUserInput(); // confirm projects
+  await wsPage.provideUserInput();
   await wsPage.executeCommand('Refresh Explorer');
   await explorer.selectNode('connectivity-demos');
   const processEditor = new ProcessEditor(wsPage, 'personService.p.json');
   await processEditor.open();
+});
+
+test('Install local product.json with conflicting project folder', async ({ wsPage }) => {
+  const explorer = new FileExplorer(wsPage);
+  await explorer.selectNode('resources');
+  await explorer.selectNode('product.json');
+  await explorer.installLocalProduct('product.json');
+  await wsPage.provideUserInput();
+  await wsPage.hasReadyStatusMessage();
+  await explorer.installLocalProduct('product.json');
+  await wsPage.provideUserInput();
+  const title = wsPage.page.locator('div.quick-input-title');
+  await expect(title).toHaveText(/The following projects cannot be installed because a project folder with the same name already exists/);
 });

@@ -21,6 +21,7 @@ import type {
   ProjectDependency
 } from './generated/market-product';
 import { fetchInstaller, getAvailableVersions, getBestVersion, searchMarketProduct } from './market-client';
+import { validateProjectSelection } from './utils/market-install-util';
 
 interface ProductSelection extends QuickPickItem {
   id: string;
@@ -30,7 +31,7 @@ interface ProductSelection extends QuickPickItem {
   iconPath?: Uri;
 }
 
-interface ProductProjectSelection extends QuickPickItem {
+export interface ProductProjectSelection extends QuickPickItem {
   label: string;
   description?: string;
   mavenType: 'maven-import' | 'maven-dependency';
@@ -54,7 +55,11 @@ interface InstallMarketProductState extends MSStateBase {
 }
 
 export const installLocalMarketProduct = async (selectionContext: AddCommandSelectionContext) => {
-  const existingProjects = selectionContext.existingIvyProjects;
+  const existingProjects = selectionContext.existingIvyProjects.map(project => ({
+    label: path.basename(project),
+    description: project,
+    path: project
+  }));
 
   const stepSelectJson: () => Promise<string> = async () => {
     const productInstaller = await window.showOpenDialog({
@@ -120,6 +125,7 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
       totalSteps: state.totalSteps,
       canSelectMany: true,
       value: state.projectsSearchString,
+      validationFunction: (selectedItems: Array<ProductProjectSelection>) => validateProjectSelection(selectedItems, existingProjects),
       items: projectItems,
       selectedItems: initialProjectSelection ?? state.projects?.filter(p => !p.requireOneOfGroup) ?? [],
       onBack: (typedValue: string, selectedItems: ProductProjectSelection[]) => {
@@ -191,13 +197,7 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.dependentProjectFilterText,
-      items: existingProjects.map(project => {
-        return {
-          label: project.substring(project.lastIndexOf(path.sep) + 1),
-          description: project,
-          path: project
-        };
-      }),
+      items: existingProjects,
       onBack: (typedValue: string) => {
         state.dependentProjectFilterText = typedValue;
         state.forceBackRequiredStep = true;
@@ -277,7 +277,11 @@ const replaceDynamicVersion = (productJson: string, version: string): string => 
 };
 
 export const installMarketProduct = async (selectionContext: AddCommandSelectionContext, engineVersion: string) => {
-  const existingProjects = selectionContext.existingIvyProjects;
+  const existingProjects = selectionContext.existingIvyProjects.map(project => ({
+    label: path.basename(project),
+    description: project,
+    path: project
+  }));
   let projectFromSelection = selectionContext.projectPathSelection;
   const allProducts = await searchMarketProduct();
 
@@ -368,6 +372,7 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
       totalSteps: state.totalSteps,
       canSelectMany: true,
       value: state.projectsSearchString,
+      validationFunction: (selectedItems: Array<ProductProjectSelection>) => validateProjectSelection(selectedItems, existingProjects),
       items: projectItems,
       selectedItems: initialProjectSelection ?? state.projects?.filter(p => !p.requireOneOfGroup) ?? [],
       onBack: (typedValue: string, selectedItems: ProductProjectSelection[]) => {
@@ -446,13 +451,7 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: dependentProjectFilterText ?? state.dependentProjectFilterText,
-      items: existingProjects.map(project => {
-        return {
-          label: project.substring(project.lastIndexOf(path.sep) + 1),
-          description: project,
-          path: project
-        };
-      }),
+      items: existingProjects,
       onBack: (typedValue: string) => {
         state.dependentProjectFilterText = typedValue;
         state.forceBackRequiredStep = true;
