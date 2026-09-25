@@ -38,7 +38,7 @@ test('Install product with conflicting project folder', async ({ wsPage }) => {
   const checkbox = header.getByRole('checkbox', { name: 'Toggle all checkboxes' });
   await checkbox.check();
   await wsPage.provideUserInput();
-  await explorer.hasNodeExact('connectivity-demos');
+  await wsPage.hasReadyStatusMessage();
   await explorer.installProduct('connectivity-demo');
   await wsPage.provideUserInput('14.0.0');
   const title = wsPage.page.locator('div.quick-input-title');
@@ -83,7 +83,7 @@ test('Install local product.json with conflicting project folder', async ({ wsPa
   await explorer.selectNode('product.json');
   await explorer.installLocalProduct('product.json');
   await wsPage.provideUserInput();
-  await explorer.hasNodeExact('connectivity-demos');
+  await wsPage.hasReadyStatusMessage();
   await explorer.installLocalProduct('product.json');
   await wsPage.provideUserInput();
   const title = wsPage.page.locator('div.quick-input-title');
