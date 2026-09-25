@@ -53,7 +53,7 @@ async function fetchIndexSchemas(indexUrl: string): Promise<{ relativePath: stri
   );
 }
 
-export async function generateIvySchemas(): Promise<void> {
+async function generateIvySchemas(): Promise<void> {
   const files = (await Promise.all(schemaIndexes.map(fetchIndexSchemas))).flat();
   if (files.length === 0) {
     throw new Error('No JSON schemas found in the Axon Ivy schema indexes.');
@@ -69,3 +69,5 @@ export async function generateIvySchemas(): Promise<void> {
   );
   console.log(`[ivy-schemas] Generated ${files.length} schema(s).`);
 }
+
+await generateIvySchemas();

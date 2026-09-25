@@ -1,6 +1,5 @@
 import { context, type Plugin } from 'esbuild';
 import { generateIconThemes } from './scripts/generate-icon-themes.mts';
-import { generateIvySchemas } from './scripts/generate-ivy-schemas.mts';
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
@@ -23,7 +22,6 @@ const esbuildProblemMatcherPlugin: Plugin = {
 };
 
 async function main() {
-  await generateIvySchemas();
   await generateIconThemes();
   const ctx = await context({
     entryPoints: ['src/index.ts'],

@@ -18,8 +18,9 @@
   },
   "scripts": {
     "build": "node esbuild.mts",
-    "build:production": "node esbuild.mts --production",
+    "build:production": "pnpm run generate:schemas && node esbuild.mts --production",
     "clean": "rimraf lib dist *.tsbuildinfo",
+    "generate:schemas": "node ./scripts/generate-ivy-schemas.mts",
     "generate:market": "node ./scripts/marketSchemaCodegen.cjs",
     "generate:runtimelog": "node ./scripts/runtimelogSchemaCodegen.cjs",
     "package": "node ../scripts/set-milestone.mts && bash -c 'vsce package --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version/./}.${MILESTONE:-$(date \"+%Y%m%d%H\")}'",
