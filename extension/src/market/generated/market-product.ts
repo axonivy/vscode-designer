@@ -10,14 +10,12 @@
  * This interface was referenced by `MarketProduct`'s JSON-Schema
  * via the `definition` "Installer".
  */
-export type Installer = ({
-[k: string]: unknown
-} & {
+export type Installer = {
 id?: (("maven-import" | "maven-dependency") & string)
 data: any |  {
 [k: string]: unknown
 }
-})
+}
 
 export interface MarketProduct {
   $schema?: string;
