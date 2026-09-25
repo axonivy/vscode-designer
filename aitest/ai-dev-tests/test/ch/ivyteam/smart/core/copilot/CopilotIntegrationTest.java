@@ -82,7 +82,8 @@ public class CopilotIntegrationTest {
 
     assertThat(spans.usedTools())
         .extracting(UsedTool::name)
-        .contains("skill", "web_fetch");
+        .contains("skill")
+        .doesNotContain("web_fetch"); // skill cache!
 
     var skillTool = spans.usedTools().stream().filter(t -> t.name().equals("skill")).findFirst().orElseThrow();
     assertThat(skillTool.arguments()).contains("ivy-yaml-files");
@@ -126,7 +127,8 @@ public class CopilotIntegrationTest {
     assertThat(spans.usedTools())
         .extracting(UsedTool::name)
         .as("Must use create-tool for initial correct creation; then web_fetch to get aware of the schema")
-        .contains("skill", "axonivy-designer-new_axon_ivy_process", "web_fetch");
+        .contains("skill", "axonivy-designer-new_axon_ivy_process")
+        .doesNotContain("web_fetch"); // skill cache!
   }
 
 }

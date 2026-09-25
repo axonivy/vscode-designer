@@ -8,9 +8,11 @@ user-invocable: false
 
 Apply these rules whenever creating or editing a YAML file in this repository:
 
+- Axon Ivy 14 schemas are cached locally in `../schemas/14.0/`, mirroring their paths under `https://json-schema.axonivy.com/14.0/`. Use the local schema file, not a remote request.
+- For an existing file, its YAML schema comment is authoritative; map the path after `/14.0/` to the matching local cache path. For a new YAML file, identify the repository's canonical schema from a template or neighboring file.
 - Schema use is mandatory. Before editing, determine the applicable schema and use its definitions to guide and validate the change.
 - For an existing YAML file, inspect its `$schema` reference or YAML schema comment first. For a new YAML file, identify the repository's canonical schema from a template or neighboring file before writing content.
 - If the schema content is already available in the current context, reuse it and do not download it again.
-- If a schema URI is available but its content is not in the current context, call a `web` tool for that URI before editing. A URI alone does not count as using the schema.
+- If the matching local schema is missing, stop and report the missing cache entry. Do not fetch it from the network during a task.
 - When creating or editing YAML, use literal spaces for indentation in the initial patch. Never emit tab characters.
 - Always indent with 2 spaces, never tabs, and do not rely on a post-edit replacement or cleanup command.
