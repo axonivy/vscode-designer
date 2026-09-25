@@ -18,8 +18,9 @@
   },
   "scripts": {
     "build": "node esbuild.mts",
-    "build:production": "node esbuild.mts --production",
+    "build:production": "pnpm run generate:schemas && node esbuild.mts --production",
     "clean": "rimraf lib dist *.tsbuildinfo",
+    "generate:schemas": "node ./scripts/generate-ivy-schemas.mts",
     "generate:market": "node ./scripts/marketSchemaCodegen.cjs",
     "generate:runtimelog": "node ./scripts/runtimelogSchemaCodegen.cjs",
     "package": "node ../scripts/set-milestone.mts && bash -c 'vsce package --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version/./}.${MILESTONE:-$(date \"+%Y%m%d%H\")}'",
@@ -812,11 +813,11 @@
             "namespace": {
               "type": "string",
               "default": "",
-              "description": "Slash-separated namespace. Keep empty for processes in 'process' root directory. NEVER duplicate projectPath or parts of it!"
+              "description": "Usually omit: default path is `{projectPath}/process/{name}.p.json`. Only set when explicitly requested, use a namespace that fits into {namespace} of `{projectPath}/process/{namespace}/{name}.p.json`."
             },
             "projectPath": {
               "type": "string",
-              "description": "Absolute path to the project directory, in which the new Process should be created. It must be a child of the workspace directory and contain a '.ivyproject' file."
+              "description": "Absolute path to the project directory, in which the new Process should be created. MUST contain an '.ivyproject' file."
             },
             "type": {
               "type": "string",

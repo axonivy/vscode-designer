@@ -8,9 +8,9 @@ user-invocable: false
 
 Apply these rules whenever creating or editing a JSON file in this repository:
 
-- Schema use is mandatory. Before editing, determine the applicable schema and use its definitions to guide and validate the change.
-- For an existing JSON file, inspect its `$schema` reference or JSON schema comment first.
-- If a schema's content is already available in the current context, reuse it and do not fetch it again. A `$schema` URI alone is only a pointer; it is not the schema content.
-- If a schema URI is available but its content is not in the current context, call a `web` tool with that exact URI and read the returned schema before editing. Do not use an edit tool until this fetch has completed.
-- After `new_axon_ivy_...` creates an initial JSON file, inspect that file and apply the same rule before any follow-up edits: fetch the schema named by its `$schema` property unless the schema content is already present in context.
-- If the file does not yet exists: use `new_axon_ivy_...` tool to create a valid JSON file with the best matching schema header.
+- Use the bundled Axon Ivy 14 schemas at `schemas/14.0/project/`, relative to this skill: `*.p.json` → `process.json`, `*.d.json` → `data-class.json`, `*.f.json` → `form.json`.
+- Select the schema from the file's `$schema` or schema comment; map the URI path after `/14.0/project/` to the bundled file. Never search the workspace or fetch remotely. If the local schema is missing, stop and report it.
+- Before editing, read the complete target JSON and matching schema once. Retain their full contents; reread or search only if a tool reports truncation or a schema reference requires another schema.
+- Treat the schema as authoritative: follow all required fields, types, and constraints; do not omit schema requirements or invent structure.
+- No routine post-edit validation is required. Check only when the user asks or a concrete tool-reported problem needs diagnosis.
+- For a new file, use `new_axon_ivy_...`; inspect its `$schema` and apply the same local-schema rule before follow-up edits.

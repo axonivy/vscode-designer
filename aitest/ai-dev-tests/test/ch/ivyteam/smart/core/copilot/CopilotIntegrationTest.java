@@ -82,14 +82,18 @@ public class CopilotIntegrationTest {
 
     assertThat(spans.usedTools())
         .extracting(UsedTool::name)
-        .contains("skill", "web_fetch");
+        .contains("skill")
+        .doesNotContain("web_fetch"); // skill cache!
 
     var skillTool = spans.usedTools().stream().filter(t -> t.name().equals("skill")).findFirst().orElseThrow();
     assertThat(skillTool.arguments()).contains("ivy-yaml-files");
 
-    var webFetch = spans.usedTools().stream().filter(t -> t.name().equals("web_fetch")).findFirst().orElseThrow();
-    assertThat(webFetch.arguments())
-        .contains("https://json-schema.axonivy.com")
+    var viewSchema = spans.usedTools().stream()
+        .filter(t -> t.name().equals("view"))
+        .filter(t -> t.arguments().contains("skills/ivy-yaml-files/schemas/"))
+        .findFirst().orElseThrow();
+    assertThat(viewSchema.arguments())
+        .as("schema read was enforced by skill")
         .contains("config/roles.json");
 
     var tokenUsage = spans.tokenUsage();
@@ -126,7 +130,16 @@ public class CopilotIntegrationTest {
     assertThat(spans.usedTools())
         .extracting(UsedTool::name)
         .as("Must use create-tool for initial correct creation; then web_fetch to get aware of the schema")
-        .contains("skill", "axonivy-designer-new_axon_ivy_process", "web_fetch");
+        .contains("skill", "axonivy-designer-new_axon_ivy_process")
+        .doesNotContain("web_fetch"); // skill cache!
+
+    var viewSchema = spans.usedTools().stream()
+        .filter(t -> t.name().equals("view"))
+        .filter(t -> t.arguments().contains("skills/ivy-json-files/schemas/"))
+        .findFirst().orElseThrow();
+    assertThat(viewSchema.arguments())
+        .as("schema read was enforced by skill")
+        .contains("project/process.json");
   }
 
 }
