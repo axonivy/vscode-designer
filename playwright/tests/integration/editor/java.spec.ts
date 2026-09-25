@@ -18,8 +18,9 @@ test('Compile java and invalidate class loader', { tag: '@serial' }, async ({ ws
   const runMethod = 'public static void run(){}';
 
   await javaEditor.goToLineColumn(5, 1);
-  await wsPage.page.keyboard.type(runMethod);
+  await wsPage.page.keyboard.type(runMethod, { delay: 50 });
   await expect(javaEditor.content).toContainText(runMethod);
+  await wsPage.page.waitForTimeout(500);
   await javaEditor.save({ force: true });
   await wsPage.hasReadyStatusMessage();
 
