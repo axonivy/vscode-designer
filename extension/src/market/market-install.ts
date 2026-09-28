@@ -1,21 +1,11 @@
-import path from 'path';
 import { Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
-import type { AddCommandSelectionContext } from '../project-explorer/ivy-project-explorer';
 import { MultiStepCancelledError, MultiStepInput, type InputStep } from '../project-explorer/utils/multi-step-input';
 import { fetchInstaller, getAvailableVersions, getBestVersion, searchMarketProduct } from './utils/market-client';
 import { createMarketProductSelectionSteps, finishMarketProductInstallation } from './utils/market-install-flow';
 import type { InstallMarketProductState, ProductSelection } from './utils/market-install-types';
 
-export const installMarketProduct = async (selectionContext: AddCommandSelectionContext, engineVersion: string) => {
-  const existingProjects = selectionContext.existingIvyProjects.map(project => ({
-    label: path.basename(project),
-    description: project,
-    path: project
-  }));
-  const initialDependentProjectFilterText = selectionContext.projectPathSelection?.substring(
-    selectionContext.projectPathSelection.lastIndexOf(path.sep) + 1
-  );
+export const installMarketProduct = async (existingIvyProjects: string[], engineVersion: string) => {
   const allProducts = await searchMarketProduct();
 
   const stepProduct: InputStep<InstallMarketProductState> = async (
@@ -85,8 +75,7 @@ export const installMarketProduct = async (selectionContext: AddCommandSelection
     stepProduct,
     stepVersion,
     ...createMarketProductSelectionSteps({
-      existingProjects,
-      initialDependentProjectFilterText,
+      existingIvyProjects,
       getSourceProductJson: state => fetchInstaller(state.product?.id ?? '', state.version ?? '')
     })
   ];

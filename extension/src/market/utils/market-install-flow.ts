@@ -15,14 +15,14 @@ import {
   markProjectsForImport,
   parseAvailableProjectItems,
   parseProduct,
+  projectPathToProjectItem,
   validateDependencySelection,
   validateProjectSelection
 } from './market-install-util';
 
 export interface MarketProductInstallFlowOptions {
-  existingProjects: ProjectSelection[];
+  existingIvyProjects: string[];
   getSourceProductJson: (state: InstallMarketProductState) => Promise<string>;
-  initialDependentProjectFilterText?: string;
 }
 
 const getProductJson = async (state: InstallMarketProductState, options: MarketProductInstallFlowOptions): Promise<string> => {
@@ -32,6 +32,8 @@ const getProductJson = async (state: InstallMarketProductState, options: MarketP
 };
 
 export const createMarketProductSelectionSteps = (options: MarketProductInstallFlowOptions): InputStep<InstallMarketProductState>[] => {
+  const existingProjects = projectPathToProjectItem(options.existingIvyProjects);
+
   const stepProjects: InputStep<InstallMarketProductState> = async (input, state) => {
     state.forceBackRequiredStep = false;
 
@@ -51,7 +53,7 @@ export const createMarketProductSelectionSteps = (options: MarketProductInstallF
       totalSteps: state.totalSteps,
       canSelectMany: true,
       value: state.projectsSearchString,
-      validationFunction: selectedItems => validateProjectSelection(selectedItems, options.existingProjects),
+      validationFunction: selectedItems => validateProjectSelection(selectedItems, existingProjects),
       items: projectItems,
       selectedItems: initialProjectSelection ?? state.projects?.filter(project => !project.requireOneOfGroup) ?? [],
       onBack: (typedValue, selectedItems) => {
@@ -100,7 +102,7 @@ export const createMarketProductSelectionSteps = (options: MarketProductInstallF
     if (!isIvyProjectSelectionRequired(state.projects ?? [])) {
       return;
     }
-    if (options.existingProjects.length === 0) {
+    if (existingProjects.length === 0) {
       throw new MultiStepCancelledError(
         'At least one existing Ivy project is required for installing this Market Product. No Axon Ivy projects in the workspace. Create an Axon Ivy project first.'
       );
@@ -112,8 +114,8 @@ export const createMarketProductSelectionSteps = (options: MarketProductInstallF
       placeholder: 'Select one of the available projects',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
-      value: state.dependentProjectFilterText ?? options.initialDependentProjectFilterText,
-      items: options.existingProjects,
+      value: state.dependentProjectFilterText,
+      items: existingProjects,
       onBack: typedValue => {
         state.dependentProjectFilterText = typedValue;
         state.forceBackRequiredStep = true;

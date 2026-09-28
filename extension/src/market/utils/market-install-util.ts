@@ -1,3 +1,4 @@
+import path from 'path';
 import { QuickPickItemKind } from 'vscode';
 import type { ProjectSelection } from '../../project-explorer/utils/multi-step-input';
 import type {
@@ -8,6 +9,13 @@ import type {
   ProjectDependency
 } from '../generated/market-product';
 import type { ProductProjectSelection } from './market-install-types';
+
+export const projectPathToProjectItem = (ivyProjects: string[]): ProjectSelection[] =>
+  ivyProjects.map(project => ({
+    label: path.basename(project),
+    description: project,
+    path: project
+  }));
 
 export const parseProduct = (productJson: string) => {
   let product: MarketProduct | undefined;

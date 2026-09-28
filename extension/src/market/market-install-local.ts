@@ -1,7 +1,5 @@
-import path from 'path';
 import { window, workspace } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
-import type { AddCommandSelectionContext } from '../project-explorer/ivy-project-explorer';
 import {
   MultiStepCancelledError,
   MultiStepInput,
@@ -12,13 +10,7 @@ import { createMarketProductSelectionSteps, finishMarketProductInstallation } fr
 import type { InstallMarketProductState } from './utils/market-install-types';
 import { parseProduct } from './utils/market-install-util';
 
-export const installLocalMarketProduct = async (selectionContext: AddCommandSelectionContext) => {
-  const existingProjects = selectionContext.existingIvyProjects.map(project => ({
-    label: path.basename(project),
-    description: project,
-    path: project
-  }));
-
+export const installLocalMarketProduct = async (existingIvyProjects: string[]) => {
   const stepSelectJson: () => Promise<string> = async () => {
     const productInstaller = await window.showOpenDialog({
       title: 'Select product.json file',
@@ -73,7 +65,7 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
 
   const steps: InputStep<InstallMarketProductState>[] = [
     ...createMarketProductSelectionSteps({
-      existingProjects,
+      existingIvyProjects,
       getSourceProductJson: async () => productJsonSelection
     })
   ];
