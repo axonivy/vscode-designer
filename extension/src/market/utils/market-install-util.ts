@@ -1,3 +1,4 @@
+import path from 'path';
 import { QuickPickItemKind } from 'vscode';
 import type { ProjectSelection } from '../../project-explorer/utils/multi-step-input';
 import type {
@@ -8,6 +9,13 @@ import type {
   ProjectDependency
 } from '../generated/market-product';
 import type { ProductProjectSelection } from './market-install-types';
+
+export const projectPathToProjectItem = (ivyProjects: string[]): ProjectSelection[] =>
+  ivyProjects.map(project => ({
+    label: path.basename(project),
+    description: project,
+    path: project
+  }));
 
 export const parseProduct = (productJson: string) => {
   let product: MarketProduct | undefined;
@@ -22,7 +30,7 @@ export const parseProduct = (productJson: string) => {
   return product;
 };
 
-export const markProjectsForImport = (productJson: string, selectedProjects: ProductProjectSelection[]): string => {
+export const markProjectsForInstall = (productJson: string, selectedProjects: ProductProjectSelection[]): string => {
   const product = parseProduct(productJson);
   if (!product.installers || product.installers.length === 0) {
     throw new Error('No installers found in product.json');
@@ -84,16 +92,6 @@ export const isIvyProjectSelectionRequired = (products: ProductProjectSelection[
   return false;
 };
 
-export const sortAvailableProjects = (projects: ProductProjectSelection[]) => {
-  projects.sort((p1, p2) => {
-    if (p1.mavenType === p2.mavenType) {
-      return p1.label.localeCompare(p2.label);
-    }
-    return p1.mavenType === 'maven-dependency' ? -1 : 1;
-  });
-  return projects;
-};
-
 export const parseAvailableProjectItems = (product: MarketProduct): ProductProjectSelection[] => {
   if (!product.installers || product.installers.length === 0) {
     throw new Error('No installers found in product.json');
@@ -147,6 +145,16 @@ export const buildGroupedItems = (requiredItems: ProductProjectSelection[]): Pro
   ]);
 };
 
+export const replaceDynamicVersion = (productJson: string, version: string): string => {
+  if (!productJson.includes('${version}')) {
+    return productJson;
+  }
+  if (!version) {
+    return productJson;
+  }
+  return productJson.replace(/\$\{version\}/g, version);
+};
+
 export const validateProjectSelection = (
   selectedProjects: Array<ProductProjectSelection>,
   existingProjects: Array<ProjectSelection>
@@ -171,4 +179,14 @@ export const validateDependencySelection = (
     return `Select at least one dependency from each required group: ${missingGroups.join(', ')}.`;
   }
   return undefined;
+};
+
+const sortAvailableProjects = (projects: ProductProjectSelection[]) => {
+  projects.sort((p1, p2) => {
+    if (p1.mavenType === p2.mavenType) {
+      return p1.label.localeCompare(p2.label);
+    }
+    return p1.mavenType === 'maven-dependency' ? -1 : 1;
+  });
+  return projects;
 };

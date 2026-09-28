@@ -75,8 +75,8 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.importBpmnProcess`, (s: TreeSelection) => this.importBpmnProcess(s));
     registerCmd(`${VIEW_ID}.importIvyProject`, (s: TreeSelection) => this.importIvyProject(s));
     registerCmd(`${VIEW_ID}.exportIvyProject`, (s: TreeSelection) => this.exportIvyProject(s));
-    registerCmd(`${VIEW_ID}.installLocalMarketProduct`, (s: TreeSelection) => this.installLocalMarketProduct(s));
-    registerCmd(`${VIEW_ID}.installMarketProduct`, (s: TreeSelection) => this.installMarketProduct(s));
+    registerCmd(`${VIEW_ID}.installLocalMarketProduct`, () => this.installLocalMarketProduct());
+    registerCmd(`${VIEW_ID}.installMarketProduct`, () => this.installMarketProduct());
 
     registerCmd(`${VIEW_ID}.addNewProject`, (s: TreeSelection) => this.addProject(s));
     registerCmd(`${VIEW_ID}.addNewHtmlDialog`, (s: TreeSelection) => this.addUserDialog(s, 'JSF'));
@@ -212,21 +212,13 @@ export class IvyProjectExplorer {
     await exportIvyProject(addCommandSelectionContext);
   }
 
-  private async installLocalMarketProduct(selection: TreeSelection) {
-    const addCommandContext = await this.getAddCommandSelectionContext(selection, false);
-    if (!addCommandContext) {
-      return;
-    }
-    await installLocalMarketProduct(addCommandContext);
+  private async installLocalMarketProduct() {
+    await installLocalMarketProduct(await this.getIvyProjects());
   }
 
-  private async installMarketProduct(selection: TreeSelection) {
-    const addCommandContext = await this.getAddCommandSelectionContext(selection, false);
-    if (!addCommandContext) {
-      return;
-    }
+  private async installMarketProduct() {
     const engineVersion = (await IvyEngineManager.instance.getEngineVersion()) ?? '';
-    await installMarketProduct(addCommandContext, engineVersion);
+    await installMarketProduct(await this.getIvyProjects(), engineVersion);
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {

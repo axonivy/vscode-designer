@@ -21,13 +21,46 @@ export interface ProductProjectSelection extends QuickPickItem {
 
 export interface InstallMarketProductState extends MSStateBase {
   product?: ProductSelection;
-  productJson?: string;
+  installProductJson?: string;
   sourceProductJson?: string;
   version?: string;
   projects?: ProductProjectSelection[];
   projectsSearchString?: string;
   forceBackRequiredStep: boolean;
-  changedProjectSelection?: boolean;
+  changedProjectSelection: boolean;
   dependentProject?: ProjectSelection;
   dependentProjectFilterText?: string;
 }
+
+export const initState = ({
+  dialogTitle,
+  totalSteps,
+  sourceProductJson
+}: {
+  dialogTitle: string;
+  totalSteps: number;
+  sourceProductJson?: string;
+}): InstallMarketProductState => ({
+  dialogTitle: dialogTitle,
+  currentStep: 1,
+  totalSteps: totalSteps,
+  sourceProductJson: sourceProductJson,
+  changedProjectSelection: false,
+  forceBackRequiredStep: false
+});
+
+export const resetState = (state: InstallMarketProductState, keep: (keyof InstallMarketProductState)[] = []) => {
+  const previousState = { ...state };
+
+  Object.assign(state, {
+    version: undefined,
+    projects: undefined,
+    projectsSearchString: undefined,
+    changedProjectSelection: false,
+    dependentProject: undefined,
+    dependentProjectFilterText: undefined,
+    forceBackRequiredStep: false
+  });
+
+  Object.assign(state, Object.fromEntries(keep.map(key => [key, previousState[key]])));
+};
