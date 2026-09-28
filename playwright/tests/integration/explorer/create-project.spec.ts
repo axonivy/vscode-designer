@@ -15,7 +15,8 @@ test('Add Project and execute init Process', { tag: '@serial' }, async ({ wsPage
   await explorer.hasNodeExact(`parent${path.sep}${projectName}`);
 
   const problemsView = await ProblemsView.initProblemsView(wsPage);
-  await problemsView.hasNoMarker();
+  await problemsView.hasNumOfMarkers(1);
+  await problemsView.hasWarning('Jandex index file of \\"testProject\\" is missing');
 
   const processEditor = new ProcessEditor(wsPage, 'BusinessProcess.p.json');
   await processEditor.expectWebViewVisible();

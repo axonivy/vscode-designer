@@ -39,9 +39,11 @@ export class ProblemsView {
     await this.hasMaker(message, 'error');
   }
 
-  async hasNoMarker() {
-    const marker = this.view.locator('div.monaco-tl-row');
-    await expect(marker).not.toBeAttached();
-    await expect(this.view).toContainText('No problems have been detected in the workspace.');
+  async hasNumOfMarkers(count: number) {
+    const marker = this.view.locator('div.marker-icon');
+    await expect(marker).toHaveCount(count);
+    if (count === 0) {
+      await expect(this.view).toContainText('No problems have been detected in the workspace.');
+    }
   }
 }
