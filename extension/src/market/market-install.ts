@@ -93,5 +93,5 @@ export const installMarketProduct = async (existingProjects: string[], engineVer
 
   const finalProductJson = installMarketProductData.installProductJson ?? '';
 
-  executeInstall(finalProductJson, installMarketProductData.dependentProject?.path ?? '');
+  await executeInstall(finalProductJson, installMarketProductData.dependentProject?.path ?? '');
 };

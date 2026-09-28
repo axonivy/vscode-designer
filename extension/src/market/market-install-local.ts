@@ -81,9 +81,9 @@ export const installLocalMarketProduct = async (existingProjects: string[]) => {
   }
 
   const finalProductJson = replaceDynamicVersion(
-    installLocalMarketProductData.sourceProductJson ?? '',
+    installLocalMarketProductData.installProductJson ?? '',
     installLocalMarketProductData.version ?? ''
   );
 
-  executeInstall(finalProductJson, installLocalMarketProductData.dependentProject?.path ?? '');
+  await executeInstall(finalProductJson, installLocalMarketProductData.dependentProject?.path ?? '');
 };

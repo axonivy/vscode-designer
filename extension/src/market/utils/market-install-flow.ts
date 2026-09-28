@@ -95,6 +95,9 @@ export const createSteps = (
       );
     }
 
+    const hasRequiredItems =
+      parseAvailableProjectItems(parseProduct(await getProductFromSource(state))).filter(item => item.requireOneOfGroup).length > 0;
+
     state.dependentProject = await input.showQuickPick<ProjectSelection>({
       title: state.dialogTitle,
       titleSuffix: ' - Choose Ivy Project to install Product into',
@@ -103,14 +106,9 @@ export const createSteps = (
       totalSteps: state.totalSteps,
       value: state.dependentProjectFilterText,
       items: existingProjectItems,
-      onBack: async typedValue => {
+      onBack: typedValue => {
         state.dependentProjectFilterText = typedValue;
-
-        // state.forceBackRequiredStep = true;
-
-        const sourceProductJson = await getProductFromSource(state);
-        const requiredItems = parseAvailableProjectItems(parseProduct(sourceProductJson)).filter(item => item.requireOneOfGroup);
-        state.forceBackRequiredStep = requiredItems.length === 0; // if no required items exist, force back to prevent being stuck on this step
+        state.forceBackRequiredStep = !hasRequiredItems;
       }
     });
   };
