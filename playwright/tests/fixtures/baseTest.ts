@@ -71,7 +71,6 @@ const runBrowserTest = async (tmpWorkspace: TmpWorkspace, take: (r: Page) => Pro
   await page.setViewportSize({ width: 1920, height: 1080 });
   const queryParam = tmpWorkspace.tmpWsConfig ? `workspace=${tmpWorkspace.tmpWsConfig}` : `folder=${tmpWorkspace.tmpWorkspacePath}`;
   await page.goto(`http://localhost:3000/?${queryParam}`);
-  await page.getByRole('tab', { name: 'Welcome' }).getByRole('button', { name: 'Close' }).click({ delay: 100 });
   await take(page);
   // this goto closes WebSocket connections
   await page.goto('about:blank');

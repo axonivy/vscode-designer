@@ -255,7 +255,7 @@ test('Create Form Dialog', async ({ wsPage }) => {
   await expect(dialogField).toHaveValue(`prebuiltProject.${userDialogName}:start(prebuiltProject.Data)`);
 });
 
-test.only('Create Offline Dialog', async ({ wsPage }) => {
+test('Create Offline Dialog', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage);
   await editor.open();
   const inscriptionView = await editor.openInscriptionView(userTaskPID);
