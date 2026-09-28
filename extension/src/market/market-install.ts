@@ -2,10 +2,11 @@ import { Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { MultiStepCancelledError, MultiStepInput, type InputStep } from '../project-explorer/utils/multi-step-input';
 import { fetchInstaller, getAvailableVersions, getBestVersion, searchMarketProduct } from './utils/market-client';
-import { createMarketProductSelectionSteps, finishMarketProductInstallation } from './utils/market-install-flow';
+import { createInstallSteps, executeInstall } from './utils/market-install-flow';
 import type { InstallMarketProductState, ProductSelection } from './utils/market-install-types';
+import { initState, resetState } from './utils/market-install-types';
 
-export const installMarketProduct = async (existingIvyProjects: string[], engineVersion: string) => {
+export const installMarketProduct = async (existingProjects: string[], engineVersion: string) => {
   const allProducts = await searchMarketProduct();
 
   const stepProduct: InputStep<InstallMarketProductState> = async (
@@ -31,10 +32,7 @@ export const installMarketProduct = async (existingIvyProjects: string[], engine
       }))
     });
     if (previousProduct?.id !== state.product?.id) {
-      state.projects = undefined;
-      state.version = undefined;
-      state.productJson = undefined;
-      state.sourceProductJson = undefined;
+      resetState(state);
     }
   };
 
@@ -65,28 +63,20 @@ export const installMarketProduct = async (existingIvyProjects: string[], engine
     });
     state.version = version.label;
     if (previousVersion !== state.version) {
-      state.projects = undefined;
-      state.productJson = undefined;
-      state.sourceProductJson = undefined;
+      resetState(state, ['version']);
     }
   };
 
   const steps: InputStep<InstallMarketProductState>[] = [
     stepProduct,
     stepVersion,
-    ...createMarketProductSelectionSteps({
-      existingIvyProjects,
-      getSourceProductJson: state => fetchInstaller(state.product?.id ?? '', state.version ?? '')
-    })
+    ...createInstallSteps(existingProjects, state => fetchInstaller(state.product?.id ?? '', state.version ?? ''))
   ];
 
-  const installMarketProductData: InstallMarketProductState = {
+  const installMarketProductData: InstallMarketProductState = initState({
     dialogTitle: 'Install Market Product',
-    currentStep: 1,
-    totalSteps: steps.length,
-    changedProjectSelection: false,
-    forceBackRequiredStep: false
-  };
+    totalSteps: steps.length
+  });
 
   try {
     await new MultiStepInput<InstallMarketProductState>().stepThrough(steps, installMarketProductData);
@@ -101,5 +91,7 @@ export const installMarketProduct = async (existingIvyProjects: string[], engine
     }
   }
 
-  await finishMarketProductInstallation(installMarketProductData);
+  const finalProductJson = installMarketProductData.installProductJson ?? '';
+
+  executeInstall(finalProductJson, installMarketProductData.dependentProject?.path ?? '');
 };

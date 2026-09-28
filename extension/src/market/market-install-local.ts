@@ -1,17 +1,13 @@
 import { window, workspace } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
-import {
-  MultiStepCancelledError,
-  MultiStepInput,
-  MultiStepInvalidStateError,
-  type InputStep
-} from '../project-explorer/utils/multi-step-input';
-import { createMarketProductSelectionSteps, finishMarketProductInstallation } from './utils/market-install-flow';
+import { MultiStepCancelledError, MultiStepInput, type InputStep } from '../project-explorer/utils/multi-step-input';
+import { createInstallSteps, executeInstall } from './utils/market-install-flow';
 import type { InstallMarketProductState } from './utils/market-install-types';
-import { parseProduct } from './utils/market-install-util';
+import { initState } from './utils/market-install-types';
+import { parseProduct, replaceDynamicVersion } from './utils/market-install-util';
 
-export const installLocalMarketProduct = async (existingIvyProjects: string[]) => {
-  const stepSelectJson: () => Promise<string> = async () => {
+export const installLocalMarketProduct = async (existingProjects: string[]) => {
+  const stepSelectJsonFile: () => Promise<string> = async () => {
     const productInstaller = await window.showOpenDialog({
       title: 'Select product.json file',
       filters: { 'JSON files': ['json'] },
@@ -23,7 +19,7 @@ export const installLocalMarketProduct = async (existingIvyProjects: string[]) =
     }
     const fileData = await workspace.fs.readFile(productInstaller[0]);
     const productJson = new TextDecoder('utf-8').decode(fileData);
-    parseProduct(productJson);
+    parseProduct(productJson); // this validates the parsed json
     return productJson;
   };
 
@@ -44,17 +40,14 @@ export const installLocalMarketProduct = async (existingIvyProjects: string[]) =
           if (!value.trim()) {
             return 'Version is required for product.json files with ${version} placeholder. Please enter a version.';
           }
-        },
-        onBack: (typedValue: string) => {
-          state.version = typedValue;
         }
       });
     }
   };
 
-  let productJsonSelection: string = '';
+  let productJsonFromFile: string = '';
   try {
-    productJsonSelection = await stepSelectJson();
+    productJsonFromFile = await stepSelectJsonFile();
   } catch (err) {
     if (err instanceof MultiStepCancelledError) {
       return;
@@ -63,23 +56,17 @@ export const installLocalMarketProduct = async (existingIvyProjects: string[]) =
     }
   }
 
-  const steps: InputStep<InstallMarketProductState>[] = [
-    ...createMarketProductSelectionSteps({
-      existingIvyProjects,
-      getSourceProductJson: async () => productJsonSelection
-    })
-  ];
-  if (productJsonSelection.includes('${version}')) {
+  // In the local case, productJsonFromFile is already determined and fixed, no need to use the state to fetch it.
+  const steps: InputStep<InstallMarketProductState>[] = [...createInstallSteps(existingProjects, async () => productJsonFromFile)];
+  if (productJsonFromFile.includes('${version}')) {
     steps.unshift(stepVersion);
   }
-  const installLocalMarketProductData: InstallMarketProductState = {
+  const installLocalMarketProductData = initState({
     dialogTitle: 'Install Local Market Product',
-    currentStep: 1,
     totalSteps: steps.length,
-    sourceProductJson: productJsonSelection,
-    changedProjectSelection: false,
-    forceBackRequiredStep: false
-  };
+    sourceProductJson: productJsonFromFile // At this point, the ground truth JSON is already determined and fixed
+  });
+
   try {
     await new MultiStepInput<InstallMarketProductState>().stepThrough(steps, installLocalMarketProductData);
   } catch (err) {
@@ -93,28 +80,10 @@ export const installLocalMarketProduct = async (existingIvyProjects: string[]) =
     }
   }
 
-  if (!installLocalMarketProductData.productJson) {
-    throw new MultiStepInvalidStateError(
-      'Market Product installation failed due to corrupted input state. ProductJson is not set. Current input state: ' +
-        JSON.stringify(installLocalMarketProductData)
-    );
-  } else if (installLocalMarketProductData.productJson.includes('${version}') && !installLocalMarketProductData.version) {
-    throw new MultiStepInvalidStateError(
-      'Market Product installation failed due to corrupted input state. ProductJson contains ${version} placeholder but version is not set. Current input state: ' +
-        JSON.stringify(installLocalMarketProductData)
-    );
-  }
-  await finishMarketProductInstallation(installLocalMarketProductData, productJson =>
-    replaceDynamicVersion(productJson, installLocalMarketProductData.version ?? '')
+  const finalProductJson = replaceDynamicVersion(
+    installLocalMarketProductData.sourceProductJson ?? '',
+    installLocalMarketProductData.version ?? ''
   );
-};
 
-const replaceDynamicVersion = (productJson: string, version: string): string => {
-  if (!productJson.includes('${version}')) {
-    return productJson;
-  }
-  if (!version) {
-    return productJson;
-  }
-  return productJson.replace(/\$\{version\}/g, version);
+  executeInstall(finalProductJson, installLocalMarketProductData.dependentProject?.path ?? '');
 };
