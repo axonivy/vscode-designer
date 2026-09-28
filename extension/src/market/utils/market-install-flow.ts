@@ -1,10 +1,8 @@
 import { logErrorMessage } from '../../base/logging-util';
-import type { ProductInstallParams } from '../../engine/api/generated/client';
 import { IvyEngineManager } from '../../engine/engine-manager';
 import {
   MultiStepCancelledError,
   MultiStepForceBack,
-  MultiStepInvalidStateError,
   type InputStep,
   type ProjectSelection
 } from '../../project-explorer/utils/multi-step-input';
@@ -118,28 +116,6 @@ export const createSteps = (
   };
 
   return [stepProjects, stepRequiredDependencies, stepDependentProject];
-};
-
-export const finishMarketProductInstallation = async (
-  state: InstallMarketProductState,
-  transformProductJson: (productJson: string) => string = productJson => productJson
-): Promise<void> => {
-  if (!state.installProductJson) {
-    throw new MultiStepInvalidStateError(
-      'Market Product installation failed due to corrupted input state. InstallProductJson is not set. Current input state: ' +
-        JSON.stringify(state)
-    );
-  }
-
-  try {
-    const installMarketProductInput: ProductInstallParams = {
-      productJson: transformProductJson(state.installProductJson),
-      dependentProjectPath: state.dependentProject?.path ?? ''
-    };
-    await IvyEngineManager.instance.installMarketProduct(installMarketProductInput);
-  } catch (err) {
-    logErrorMessage('Market installation failed: ' + (err instanceof Error ? err.message : err));
-  }
 };
 
 export const executeInstall = async (productJson: string, dependentProjectPath: string): Promise<void> => {

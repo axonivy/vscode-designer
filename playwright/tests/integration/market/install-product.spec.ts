@@ -2,8 +2,7 @@ import { expect, test } from '~/fixtures/baseTest';
 import { FileExplorer } from '~/page-objects/explorer-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
 
-// eslint-disable-next-line playwright/no-focused-test
-test.describe.only('Market Product Installation', () => {
+test.describe('Market Product Installation', () => {
   test('Install product without maven-dependency from Market website', async ({ wsPage }) => {
     const explorer = new FileExplorer(wsPage);
     await explorer.installProduct('connectivity-demo');
