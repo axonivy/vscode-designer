@@ -12,7 +12,7 @@ import type { InstallMarketProductState, ProductProjectSelection } from './marke
 import {
   buildGroupedItems,
   isIvyProjectSelectionRequired,
-  markProjectsForImport,
+  markProjectsForInstall,
   parseAvailableProjectItems,
   parseProduct,
   projectPathToProjectItem,
@@ -39,8 +39,8 @@ export const createInstallSteps = (
 
     const selectedProjects = await input.showQuickPick<ProductProjectSelection, true>({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose Projects and Dependencies to Import',
-      placeholder: 'Select projects to import',
+      titleSuffix: ' - Choose Projects and Dependencies to install',
+      placeholder: 'Select projects to install',
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       canSelectMany: true,
@@ -84,7 +84,7 @@ export const createInstallSteps = (
       });
       state.projects = [...(state.projects?.filter(project => !project.requireOneOfGroup) ?? []), ...selectedRequired];
     }
-    state.installProductJson = markProjectsForImport(sourceProductJson, state.projects ?? []);
+    state.installProductJson = markProjectsForInstall(sourceProductJson, state.projects ?? []);
   };
 
   const stepDependentProject: InputStep<InstallMarketProductState> = async (input, state) => {
