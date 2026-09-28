@@ -37,5 +37,5 @@ test('Convert project', async ({ wsPage }) => {
   await ivyProjectEditor.open();
   await expect(ivyProjectEditor.content).toContainText('version=');
   await problemsView.show();
-  await problemsView.hasNoMarker();
+  await problemsView.hasNumOfMarkers(0);
 });
