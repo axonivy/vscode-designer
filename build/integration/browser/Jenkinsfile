@@ -32,7 +32,7 @@ pipeline {
             code-server --install-extension vscjava.vscode-java-pack
             code-server --install-extension extension/vscode-designer*.vsix
             export VSCODE_PROXY_URI=
-            nohup code-server --bind-addr 0.0.0.0:3000 --auth none --disable-telemetry --disable-update-check --disable-workspace-trust &
+            nohup code-server --bind-addr 0.0.0.0:3000 --auth none --disable-telemetry --disable-update-check --disable-workspace-trust --skip-welcome &
             """
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
               sh 'pnpm run test:playwright:browser --project=integration-parallel'
