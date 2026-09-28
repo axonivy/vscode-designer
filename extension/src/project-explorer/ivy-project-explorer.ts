@@ -6,7 +6,7 @@ import { ensureJavaLightWeightMode, runJavaProjectImport } from '../base/java-ex
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { IVY_PROJECT_FILE, IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { executeInstall } from '../market/market-install';
+import { installMarketProduct } from '../market/market-install';
 import { installLocalMarketProduct } from '../market/market-install-local';
 import { exportIvyProject } from './export-ivy-project';
 import { importIvyProject } from './import-ivy-project';
@@ -218,7 +218,7 @@ export class IvyProjectExplorer {
 
   private async installMarketProduct() {
     const engineVersion = (await IvyEngineManager.instance.getEngineVersion()) ?? '';
-    await executeInstall(await this.getIvyProjects(), engineVersion);
+    await installMarketProduct(await this.getIvyProjects(), engineVersion);
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {

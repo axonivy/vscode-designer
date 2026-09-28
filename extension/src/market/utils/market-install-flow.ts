@@ -20,7 +20,7 @@ import {
   validateProjectSelection
 } from './market-install-util';
 
-export const createInstallSteps = (
+export const createSteps = (
   existingProjects: string[],
   getProductFromSource: (state: InstallMarketProductState) => Promise<string>
 ): InputStep<InstallMarketProductState>[] => {
@@ -105,9 +105,14 @@ export const createInstallSteps = (
       totalSteps: state.totalSteps,
       value: state.dependentProjectFilterText,
       items: existingProjectItems,
-      onBack: typedValue => {
+      onBack: async typedValue => {
         state.dependentProjectFilterText = typedValue;
-        state.forceBackRequiredStep = true;
+
+        // state.forceBackRequiredStep = true;
+
+        const sourceProductJson = await getProductFromSource(state);
+        const requiredItems = parseAvailableProjectItems(parseProduct(sourceProductJson)).filter(item => item.requireOneOfGroup);
+        state.forceBackRequiredStep = requiredItems.length === 0; // if no required items exist, force back to prevent being stuck on this step
       }
     });
   };

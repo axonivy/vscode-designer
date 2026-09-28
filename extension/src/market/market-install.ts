@@ -2,7 +2,7 @@ import { Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { MultiStepCancelledError, MultiStepInput, type InputStep } from '../project-explorer/utils/multi-step-input';
 import { fetchInstaller, getAvailableVersions, getBestVersion, searchMarketProduct } from './utils/market-client';
-import { createInstallSteps, executeInstall } from './utils/market-install-flow';
+import { createSteps, executeInstall } from './utils/market-install-flow';
 import type { InstallMarketProductState, ProductSelection } from './utils/market-install-types';
 import { initState, resetState } from './utils/market-install-types';
 
@@ -70,7 +70,7 @@ export const installMarketProduct = async (existingProjects: string[], engineVer
   const steps: InputStep<InstallMarketProductState>[] = [
     stepProduct,
     stepVersion,
-    ...createInstallSteps(existingProjects, state => fetchInstaller(state.product?.id ?? '', state.version ?? ''))
+    ...createSteps(existingProjects, state => fetchInstaller(state.product?.id ?? '', state.version ?? ''))
   ];
 
   const installMarketProductData: InstallMarketProductState = initState({

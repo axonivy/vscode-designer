@@ -1,7 +1,7 @@
 import { window, workspace } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { MultiStepCancelledError, MultiStepInput, type InputStep } from '../project-explorer/utils/multi-step-input';
-import { createInstallSteps, executeInstall } from './utils/market-install-flow';
+import { createSteps, executeInstall } from './utils/market-install-flow';
 import type { InstallMarketProductState } from './utils/market-install-types';
 import { initState } from './utils/market-install-types';
 import { parseProduct, replaceDynamicVersion } from './utils/market-install-util';
@@ -57,7 +57,7 @@ export const installLocalMarketProduct = async (existingProjects: string[]) => {
   }
 
   // In the local case, productJsonFromFile is already determined and fixed, no need to use the state to fetch it.
-  const steps: InputStep<InstallMarketProductState>[] = [...createInstallSteps(existingProjects, async () => productJsonFromFile)];
+  const steps: InputStep<InstallMarketProductState>[] = [...createSteps(existingProjects, async () => productJsonFromFile)];
   if (productJsonFromFile.includes('${version}')) {
     steps.unshift(stepVersion);
   }
