@@ -1,27 +1,16 @@
 import path from 'path';
 import { window, workspace } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
-import type { ProductInstallParams } from '../engine/api/generated/client';
-import { IvyEngineManager } from '../engine/engine-manager';
 import type { AddCommandSelectionContext } from '../project-explorer/ivy-project-explorer';
 import {
   MultiStepCancelledError,
-  MultiStepForceBack,
   MultiStepInput,
   MultiStepInvalidStateError,
-  type InputStep,
-  type ProjectSelection
+  type InputStep
 } from '../project-explorer/utils/multi-step-input';
-import type { InstallMarketProductState, ProductProjectSelection } from './utils/market-install-types';
-import {
-  buildGroupedItems,
-  isIvyProjectSelectionRequired,
-  markProjectsForImport,
-  parseAvailableProjectItems,
-  parseProduct,
-  validateDependencySelection,
-  validateProjectSelection
-} from './utils/market-install-util';
+import { createMarketProductSelectionSteps, finishMarketProductInstallation } from './utils/market-install-flow';
+import type { InstallMarketProductState } from './utils/market-install-types';
+import { parseProduct } from './utils/market-install-util';
 
 export const installLocalMarketProduct = async (selectionContext: AddCommandSelectionContext) => {
   const existingProjects = selectionContext.existingIvyProjects.map(project => ({
@@ -50,7 +39,7 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     input: MultiStepInput<InstallMarketProductState>,
     state: InstallMarketProductState
   ) => {
-    if (state.productJson?.includes('${version}')) {
+    if (state.sourceProductJson?.includes('${version}')) {
       state.version = await input.showTextInput({
         title: state.dialogTitle,
         titleSuffix: ' - Resolve dynamic ${version} in product.json',
@@ -71,109 +60,6 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     }
   };
 
-  const stepProjects: InputStep<InstallMarketProductState> = async (
-    input: MultiStepInput<InstallMarketProductState>,
-    state: InstallMarketProductState
-  ) => {
-    state.forceBackRequiredStep = false;
-
-    const product = parseProduct(productJsonSelection);
-    const allItems = parseAvailableProjectItems(product);
-    const projectItems = allItems.filter(item => !item.requireOneOfGroup);
-    let initialProjectSelection: ProductProjectSelection[] | undefined = undefined;
-    if (!state.changedProjectSelection) {
-      initialProjectSelection = projectItems.filter(project => project.isPicked);
-      state.changedProjectSelection = true;
-    }
-
-    const selectedProjects = await input.showQuickPick<ProductProjectSelection, true>({
-      title: state.dialogTitle,
-      titleSuffix: ' - Choose Projects and Dependencies to Import',
-      placeholder: 'Select projects to import',
-      currentStep: state.currentStep,
-      totalSteps: state.totalSteps,
-      canSelectMany: true,
-      value: state.projectsSearchString,
-      validationFunction: (selectedItems: Array<ProductProjectSelection>) => validateProjectSelection(selectedItems, existingProjects),
-      items: projectItems,
-      selectedItems: initialProjectSelection ?? state.projects?.filter(p => !p.requireOneOfGroup) ?? [],
-      onBack: (typedValue: string, selectedItems: ProductProjectSelection[]) => {
-        state.projectsSearchString = typedValue;
-        state.projects = [...selectedItems, ...(state.projects?.filter(p => p.requireOneOfGroup) ?? [])];
-      }
-    });
-    state.projects = [...selectedProjects, ...(state.projects?.filter(p => p.requireOneOfGroup) ?? [])];
-  };
-
-  const stepRequiredDependencies: InputStep<InstallMarketProductState> = async (
-    input: MultiStepInput<InstallMarketProductState>,
-    state: InstallMarketProductState
-  ) => {
-    if (state.forceBackRequiredStep) {
-      throw new MultiStepForceBack();
-    }
-    const product = parseProduct(productJsonSelection);
-    const allItems = parseAvailableProjectItems(product);
-    const requiredItems = allItems.filter(item => item.requireOneOfGroup);
-    if (requiredItems.length === 0) {
-      state.productJson = markProjectsForImport(productJsonSelection, state.projects ?? []);
-      return;
-    }
-
-    const groupedItems = buildGroupedItems(requiredItems);
-    const selectedRequired = await input.showQuickPick<ProductProjectSelection, true>({
-      title: state.dialogTitle,
-      titleSuffix: ' - Choose Required Dependencies',
-      placeholder: 'Select required dependencies',
-      currentStep: state.currentStep,
-      totalSteps: state.totalSteps,
-      canSelectMany: true,
-      value: state.projectsSearchString,
-      items: groupedItems,
-      selectedItems: state.projects?.some(p => p.requireOneOfGroup)
-        ? state.projects.filter(p => p.requireOneOfGroup)
-        : requiredItems.filter(item => item.isPicked),
-      validationFunction: (selectedItems: ProductProjectSelection[]) => {
-        return validateDependencySelection(requiredItems, selectedItems);
-      },
-      onBack: (typedValue: string, selectedItems: ProductProjectSelection[]) => {
-        state.projectsSearchString = typedValue;
-        state.projects = [...(state.projects?.filter(p => !p.requireOneOfGroup) ?? []), ...selectedItems];
-      }
-    });
-    state.projects = [...(state.projects?.filter(p => !p.requireOneOfGroup) ?? []), ...selectedRequired];
-    state.productJson = markProjectsForImport(productJsonSelection, state.projects);
-  };
-
-  const stepDependentProject: InputStep<InstallMarketProductState> = async (
-    input: MultiStepInput<InstallMarketProductState>,
-    state: InstallMarketProductState
-  ) => {
-    if (!isIvyProjectSelectionRequired(state.projects ?? [])) {
-      return;
-    } else {
-      if (existingProjects.length === 0) {
-        throw new MultiStepCancelledError(
-          'At least one existing Ivy project is required for installing this Market Product. No Axon Ivy projects in the workspace. Create an Axon Ivy project first.'
-        );
-      }
-    }
-
-    state.dependentProject = await input.showQuickPick<ProjectSelection>({
-      title: state.dialogTitle,
-      titleSuffix: ' - Choose Ivy Project to install Product into',
-      placeholder: 'Select one of the available projects',
-      currentStep: state.currentStep,
-      totalSteps: state.totalSteps,
-      value: state.dependentProjectFilterText,
-      items: existingProjects,
-      onBack: (typedValue: string) => {
-        state.dependentProjectFilterText = typedValue;
-        state.forceBackRequiredStep = true;
-      }
-    });
-  };
-
   let productJsonSelection: string = '';
   try {
     productJsonSelection = await stepSelectJson();
@@ -185,7 +71,12 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     }
   }
 
-  const steps: InputStep<InstallMarketProductState>[] = [stepProjects, stepRequiredDependencies, stepDependentProject];
+  const steps: InputStep<InstallMarketProductState>[] = [
+    ...createMarketProductSelectionSteps({
+      existingProjects,
+      getSourceProductJson: async () => productJsonSelection
+    })
+  ];
   if (productJsonSelection.includes('${version}')) {
     steps.unshift(stepVersion);
   }
@@ -193,7 +84,8 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
     dialogTitle: 'Install Local Market Product',
     currentStep: 1,
     totalSteps: steps.length,
-    productJson: productJsonSelection,
+    sourceProductJson: productJsonSelection,
+    changedProjectSelection: false,
     forceBackRequiredStep: false
   };
   try {
@@ -220,19 +112,9 @@ export const installLocalMarketProduct = async (selectionContext: AddCommandSele
         JSON.stringify(installLocalMarketProductData)
     );
   }
-  try {
-    installLocalMarketProductData.productJson = replaceDynamicVersion(
-      installLocalMarketProductData.productJson ?? '',
-      installLocalMarketProductData.version ?? ''
-    );
-    const installMarketProductInput: ProductInstallParams = {
-      productJson: installLocalMarketProductData.productJson,
-      dependentProjectPath: installLocalMarketProductData.dependentProject?.path ?? ''
-    };
-    await IvyEngineManager.instance.installMarketProduct(installMarketProductInput);
-  } catch (err) {
-    logErrorMessage('Market installation failed: ' + (err instanceof Error ? err.message : err));
-  }
+  await finishMarketProductInstallation(installLocalMarketProductData, productJson =>
+    replaceDynamicVersion(productJson, installLocalMarketProductData.version ?? '')
+  );
 };
 
 const replaceDynamicVersion = (productJson: string, version: string): string => {
