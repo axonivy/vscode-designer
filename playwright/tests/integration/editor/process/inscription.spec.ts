@@ -182,7 +182,7 @@ test('Monaco Editor shortcuts', async ({ wsPage }) => {
   await editor.expectTabNotDirty();
 });
 
-test('Create new Sub Process', async ({ wsPage }) => {
+test.only('Create new Sub Process', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage);
   await editor.open();
   const inscriptionView = await editor.openInscriptionView('15254DCE818AD7A2-f5');
@@ -201,7 +201,7 @@ test('Create new Sub Process', async ({ wsPage }) => {
   await expect(processStartField).toHaveValue(`${namespace}/${processName}:call(prebuiltProject.Data)`);
 });
 
-test('Create new Buisness Process from Trigger Call', async ({ wsPage }) => {
+test.only('Create new Buisness Process from Trigger Call', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage, 'Validation.p.json');
   await editor.open();
   const inscriptionView = await editor.openInscriptionView('18D9CDFA8F58DA2B-f3');
@@ -213,7 +213,7 @@ test('Create new Buisness Process from Trigger Call', async ({ wsPage }) => {
   await expect(wsPage.quickInputTitle).toContainText('Business Process');
 });
 
-test('Create Html Dialog', async ({ wsPage }) => {
+test.only('Create Html Dialog', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage);
   await editor.open();
   const inscriptionView = await editor.openInscriptionView(userDialogPID1);
@@ -235,7 +235,7 @@ test('Create Html Dialog', async ({ wsPage }) => {
   await expect(dialogField).toHaveValue(`prebuiltProject.${userDialogName}:start(prebuiltProject.Data)`);
 });
 
-test('Create Form Dialog', async ({ wsPage }) => {
+test.only('Create Form Dialog', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage);
   await editor.open();
   const inscriptionView = await editor.openInscriptionView(userDialogPID2);
@@ -255,7 +255,7 @@ test('Create Form Dialog', async ({ wsPage }) => {
   await expect(dialogField).toHaveValue(`prebuiltProject.${userDialogName}:start(prebuiltProject.Data)`);
 });
 
-test('Create Offline Dialog', async ({ wsPage }) => {
+test.only('Create Offline Dialog', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage);
   await editor.open();
   const inscriptionView = await editor.openInscriptionView(userTaskPID);

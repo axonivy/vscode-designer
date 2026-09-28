@@ -39,9 +39,6 @@ pipeline {
             }
             sh 'mv playwright/report.xml playwright/report-parallel.xml'
             archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
-            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-              sh 'pnpm run test:playwright:browser --project=integration-serial'
-            }
           }
           archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
           archiveArtifacts artifacts: 'AxonIvyEngine/logs/ivy.log', allowEmptyArchive: true

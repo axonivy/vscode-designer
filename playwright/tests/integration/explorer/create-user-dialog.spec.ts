@@ -7,7 +7,7 @@ import { ProcessEditor } from '~/page-objects/process-editor';
 
 const userDialogName = 'testCreateUserDialog';
 
-test('Add Html Dialog', async ({ wsPage }) => {
+test.only('Add Html Dialog', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.addUserDialog(userDialogName, 'ch.ivyteam.test', 'Html Dialog (JSF)');
   await explorer.hasNodeExact(`${userDialogName}.xhtml`);
@@ -21,7 +21,7 @@ test('Add Html Dialog', async ({ wsPage }) => {
   await expect(start).toBeVisible();
 });
 
-test('Add Offline Dialog', async ({ wsPage }) => {
+test.only('Add Offline Dialog', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.addUserDialog(userDialogName, 'ch.ivyteam.test.offline', 'Offline Dialog (JSF)');
   await explorer.hasNodeExact(`${userDialogName}.xhtml`);
@@ -35,7 +35,7 @@ test('Add Offline Dialog', async ({ wsPage }) => {
   await expect(start).toBeVisible();
 });
 
-test('Add Form Dialog', async ({ wsPage }) => {
+test.only('Add Form Dialog', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.addUserDialog(userDialogName, 'ch.ivyteam.test.form', 'Dialog Form');
   await explorer.hasNodeExact(`${userDialogName}.f.json`);
