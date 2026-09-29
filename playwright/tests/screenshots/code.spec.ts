@@ -76,7 +76,6 @@ test.describe('new project', () => {
   test.use({ workspace: embeddedEngineWorkspace });
 
   test('new project', async ({ wsPage }) => {
-    await wsPage.activateExpensiveJavaStandardMode();
     await new WelcomePage(wsPage).open();
     const outputview = new OutputView(wsPage);
     await outputview.openLog('Axon Ivy Engine');
@@ -87,6 +86,8 @@ test.describe('new project', () => {
     await wsPage.provideUserInput('myNewProject');
     await wsPage.provideUserInput();
     await wsPage.provideUserInput();
+
+    await wsPage.activateExpensiveJavaStandardMode();
 
     const explorer = new FileExplorer(wsPage);
     await wsPage.hasReadyStatusMessage();
