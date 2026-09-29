@@ -13,14 +13,18 @@ setup('Setup', async ({}) => {
       throw new Error('Unable to resolve VS Code CLI path');
     }
     const extensionDir = path.resolve(process.cwd(), 'test-extension-dir');
-    execFileSync(cliPath, [
+    const args = [
       '--install-extension',
       'vscjava.vscode-java-pack',
       '--install-extension',
       'axonivy.vscode-designer-14',
       '--extensions-dir',
       extensionDir
-    ]);
+    ];
+    const isWindows = process.platform === 'win32';
+    execFileSync(cliPath, isWindows ? args.map(arg => `"${arg}"`) : args, {
+      shell: isWindows
+    });
   } else {
     console.log('Skipping VSCode download as RUN_IN_BROWSER is set to true');
   }
