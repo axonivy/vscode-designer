@@ -36,7 +36,7 @@ test('xhtml preview', async ({ wsPage, electronApp }) => {
   });
   const frame = vscodeBrowser.browserPage.frameLocator('iframe');
   const button = frame.getByRole('button', { name: 'Proceed' });
-  await expect(vscodeBrowser.browserPage.locator('#iFrameForm\\:frameTaskName')).toHaveText('Preview', timeout);
+  await expect(vscodeBrowser.browserPage.locator('#iFrameForm\\:frameTaskName')).toHaveText('Preview');
   await expect(async () => {
     await vscodeBrowser.reload();
     await expect(button).toBeVisible(timeout);
