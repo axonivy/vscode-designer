@@ -1,5 +1,5 @@
 import { expect, test } from '~/fixtures/baseTest';
-import { FileExplorer, ProjectExplorerView } from '~/page-objects/explorer-view';
+import { ExplorerView, FileExplorer, ProjectExplorerView } from '~/page-objects/explorer-view';
 import { OutputView } from '~/page-objects/output-view';
 import { ProblemsView } from '~/page-objects/problems-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
@@ -57,7 +57,9 @@ test('extensions', async ({ wsPage }) => {
   await wsPage.executeCommand('View: Show Extensions');
   const extensionsView = wsPage.page.locator('.extensions');
   await expect(extensionsView).toBeVisible();
-  await screenshotLocator(wsPage.page, extensionsView, 'extensions', { marginLeft: 80, marginTop: 80, marginBottom: -200 });
+  await new ExplorerView(wsPage, 'Recommended').closeView();
+  await new ExplorerView(wsPage, 'MCP Servers').closeView();
+  await screenshotLocator(wsPage.page, extensionsView, 'extensions', { marginLeft: 80, marginTop: 80, marginBottom: -300 });
 });
 
 test.describe('empty workspace', () => {

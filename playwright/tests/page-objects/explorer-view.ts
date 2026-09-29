@@ -1,7 +1,7 @@
 import { expect, type Locator } from '@playwright/test';
 import type { WorkspacePage } from './workspace-page';
 
-abstract class ExplorerView {
+export class ExplorerView {
   readonly tab: Locator;
   private readonly expandedTab: Locator;
   readonly view: Locator;
