@@ -15,6 +15,7 @@ export class WorkspacePage {
   async executeCommand(command: string, ...userInputs: Array<string>) {
     await expect(async () => {
       await this.page.keyboard.press('ControlOrMeta+KeyP');
+      await expect(this.page.locator('div.quick-input-box')).toBeVisible({ timeout: 1_000 });
       await this.quickInputBox.locator('input.input').fill('>' + command, { timeout: 300 });
       await this.quickInputList.getByRole('option', { name: command }).first().click({ timeout: 1_000, delay: 100 });
     }).toPass();
