@@ -28,18 +28,29 @@ import {
 import { runMavenCommand } from './maven-runner';
 
 const RestClientWebSocketMessage: NotificationType<unknown> = { method: 'restClientWebSocketMessage' };
+export const SelectRestClientNotification: NotificationType<{ clientId: string }> = { method: 'selectRestClient' };
 
-export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webviewPanel: WebviewPanel, document: TextDocument) => {
+export const setupCommunication = (
+  websocketUrl: URL,
+  messenger: Messenger,
+  webviewPanel: WebviewPanel,
+  document: TextDocument,
+  onReady: () => void
+) => {
   const messageParticipant = messenger.registerWebviewPanel(webviewPanel);
   const toDispose = new DisposableCollection(
     new RestClientWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
     messenger.onNotification(
       WebviewReadyNotification,
-      () => messenger.sendNotification(InitializeConnectionRequest, messageParticipant, { file: document.fileName }),
+      async () => {
+        await messenger.sendNotification(InitializeConnectionRequest, messageParticipant, { file: document.fileName });
+        onReady();
+      },
       { sender: messageParticipant }
     ),
     webviewPanel.onDidDispose(() => toDispose.dispose())
   );
+  return messageParticipant;
 };
 
 class RestClientWebSocketForwarder extends EditorWebSocketForwarder {

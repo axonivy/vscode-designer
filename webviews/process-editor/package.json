@@ -16,10 +16,10 @@
     "url": "https://github.com/axonivy/process-editor"
   },
   "dependencies": {
-    "@axonivy/process-editor": "next-14.0.1",
-    "@axonivy/process-editor-inscription": "next-14.0.1",
-    "@axonivy/process-editor-inscription-view": "next-14.0.1",
-    "@axonivy/process-editor-protocol": "next-14.0.1",
+    "@axonivy/process-editor": "link:../../../process-editor/packages/editor",
+    "@axonivy/process-editor-inscription": "link:../../../process-editor/packages/inscription",
+    "@axonivy/process-editor-inscription-view": "link:../../../process-editor/packages/inscription-view",
+    "@axonivy/process-editor-protocol": "link:../../../process-editor/packages/protocol",
     "@axonivy/vscode-webview-common": "workspace:~",
     "@eclipse-glsp/client": "2.7.0",
     "@eclipse-glsp/vscode-integration": "2.7.0",

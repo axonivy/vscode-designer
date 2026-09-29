@@ -18,6 +18,9 @@ export default defineConfig(() => ({
     outDir: '../../extension/dist/webviews/process-editor',
     chunkSizeWarningLimit: 5000
   },
+  resolve: {
+    dedupe: ['react', 'react-dom', 'inversify', '@eclipse-glsp/client', '@eclipse-glsp/protocol']
+  },
   css: {
     lightningcss: {
       errorRecovery: true

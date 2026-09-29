@@ -20,7 +20,11 @@ export const handleActionLocal = (msg: unknown, sendInscriptionNotification: Sen
       case 'newHtmlDialog':
         handleNewHtmlDialog(msg.params, sendInscriptionNotification);
         break;
-      case 'openRestConfig':
+      case 'openRestConfig': {
+        const selectedClientKey = typeof msg.params.payload === 'string' ? msg.params.payload : undefined;
+        executeCommand('ivyEditor.openRestClientEditor', undefined, { selectedClientKey });
+        break;
+      }
       case 'newRestClient':
         executeCommand('ivyEditor.openRestClientEditor');
         break;

@@ -6,8 +6,12 @@ import { logErrorMessage } from '../base/logging-util';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
 import { treeSelectionToProjectUri, treeUriToProjectPath, type TreeSelection } from '../project-explorer/tree-selection';
 
-export const registerOpenConfigEditorCmd = (command: ConfigEditorCommand, context: ExtensionContext, file: string) =>
-  registerCommand(command, context, async (selection: TreeSelection) => {
+export const registerOpenConfigEditorCmd = (
+  command: ConfigEditorCommand,
+  context: ExtensionContext,
+  file: string,
+  options?: ConfigEditorOpenOptions
+) => registerCommand(command, context, async (selection: TreeSelection, request?: ConfigEditorOpenRequest) => {
     const projectPath = await getEditorCmdProjectPath(command, selection);
     if (!projectPath) {
       return;
@@ -18,8 +22,12 @@ export const registerOpenConfigEditorCmd = (command: ConfigEditorCommand, contex
       await workspace.fs.createDirectory(configDir);
       await workspace.fs.writeFile(fileUri, new Uint8Array());
     }
+    options?.onOpen(fileUri, request?.selectedClientKey);
     commands.executeCommand('vscode.open', fileUri);
   });
+
+export type ConfigEditorOpenOptions = { onOpen: (fileUri: Uri, selectedClientKey?: string) => void };
+type ConfigEditorOpenRequest = { selectedClientKey?: string };
 
 export const getEditorCmdProjectPath = async (command: ConfigEditorCommand | EditorCommand, selection: TreeSelection) => {
   const ivyProjects = IvyProjectExplorer.instance.getIvyProjects();
