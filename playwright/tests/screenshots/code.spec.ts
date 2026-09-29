@@ -89,6 +89,8 @@ test.describe('new project', () => {
     await wsPage.provideUserInput();
     await wsPage.provideUserInput();
 
+    await wsPage.activateExpensiveJavaStandardMode();
+
     const explorer = new FileExplorer(wsPage);
     await wsPage.hasReadyStatusMessage();
     await explorer.hasNodeExact('myNewProject');
