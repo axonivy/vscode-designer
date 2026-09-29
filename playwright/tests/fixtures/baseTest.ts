@@ -1,10 +1,9 @@
 import { _electron, test as base, chromium, type ElectronApplication, type Page } from '@playwright/test';
-import { downloadAndUnzipVSCode } from '@vscode/test-electron';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { runDownloadAndUnzipVSCode } from '~/utils/download-vscode';
 import { WorkspacePage } from '../page-objects/workspace-page';
-import { downloadVersion } from '../utils/download-version';
 import { prebuiltWorkspacePath } from '../workspaces/workspace';
 export { expect } from '@playwright/test';
 
@@ -84,7 +83,7 @@ const runBrowserTest = async (take: (r: Page) => Promise<void>, tmpWorkspace?: T
 };
 
 const runElectronAppTest = async (take: (r: ElectronApplication) => Promise<void>, tmpWorkspace?: TmpWorkspace) => {
-  const vscodePath = await downloadAndUnzipVSCode(downloadVersion);
+  const vscodePath = await runDownloadAndUnzipVSCode();
   const extensionDir = path.resolve(process.cwd(), 'test-extension-dir');
   const userDataDir = path.resolve(process.cwd(), 'test-user-data-dir');
   const electronApp = await _electron.launch({
