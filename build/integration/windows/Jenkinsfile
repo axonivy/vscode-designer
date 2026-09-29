@@ -24,7 +24,6 @@ pipeline {
   environment {
     JAVA_OPTS_IVY_SYSTEM = '-Ddev.mode=true -Divy.engine.testheadless=true'
     CI = 'true'
-    RUN_STABLE_VERSION = 'true'
   }
 
   stages {

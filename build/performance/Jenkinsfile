@@ -19,7 +19,6 @@ pipeline {
 
   environment {
     CI = 'true'
-    RUN_STABLE_VERSION = 'true'
   }
 
   stages {
