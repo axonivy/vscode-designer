@@ -7,7 +7,7 @@ export const Command = ({ title, value, icon, description, onClick }: Shortcut) 
       <Tooltip>
         <TooltipTrigger asChild>
           <button
-            className='flex h-15 cursor-pointer items-center justify-start gap-1 rounded-lg border border-n200 bg-n50 p-2 text-sm hover:bg-n100'
+            className='flex h-15 cursor-pointer items-center justify-start gap-2 rounded-lg border border-n200 bg-n50 p-2 text-left text-sm hover:bg-n100'
             onClick={() => onClick(value)}
           >
             <IvyIcon icon={icon} className='text-2xl text-p75' />
