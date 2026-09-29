@@ -4,6 +4,7 @@ import { logWarningMessage } from '../../../base/logging-util';
 import { isAction, noUnknownAction } from '../../notification-helper';
 import { handleNewProcess } from './new-process';
 import { handleNewHtmlDialog } from './new-user-dialog';
+import { handleOpenConfig } from './open-config';
 import { handleOpenPage } from './open-page';
 
 export type SendInscriptionNotification = (type: keyof InscriptionNotificationTypes) => void;
@@ -22,7 +23,7 @@ export const handleActionLocal = (msg: unknown, sendInscriptionNotification: Sen
         break;
       case 'openRestConfig':
       case 'newRestClient':
-        executeCommand('ivyEditor.openRestClientEditor');
+        handleOpenConfig('ivyEditor.openRestClientEditor', msg.params);
         break;
       case 'openWsConfig':
       case 'newWebServiceClient':
