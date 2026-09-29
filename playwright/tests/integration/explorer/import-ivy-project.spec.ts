@@ -17,7 +17,7 @@ test.describe('Single root workspace', () => {
   test.use({ workspace: emptyWithFolder });
 
   test.beforeEach(async ({ wsPage, tmpWorkspace }) => {
-    await copyTestIar(tmpWorkspace.tmpWorkspacePath, iarFileName);
+    await copyTestIar(tmpWorkspace!.tmpWorkspacePath, iarFileName);
     const explorer = new FileExplorer(wsPage);
     await explorer.hasNodeExact(iarFileName);
   });
@@ -61,7 +61,7 @@ test.describe('Single root workspace', () => {
     await expect(successToast).toHaveCount(1);
     await expect(successToast).toContainText('Successfully imported Ivy project(s) from');
 
-    await copyTestIar(tmpWorkspace.tmpWorkspacePath, iarFileNameDuplicateAfterSanitization);
+    await copyTestIar(tmpWorkspace!.tmpWorkspacePath, iarFileNameDuplicateAfterSanitization);
     await explorer.hasNodeExact(iarFileNameDuplicateAfterSanitization);
     await wsPage.executeCommand('Import Project Archive (.iar or .zip)');
     await wsPage.selectItemFromQuickPick(iarFileNameDuplicateAfterSanitization);
@@ -96,7 +96,7 @@ test.describe('Multi root workspace', () => {
     const iarFileName = 'connector.iar';
     const iarProjectName = 'connector';
     const iarFolder = 'connector';
-    await copyTestIar(path.join(tmpWorkspace.tmpWorkspacePath, iarFolder), iarFileName);
+    await copyTestIar(path.join(tmpWorkspace!.tmpWorkspacePath, iarFolder), iarFileName);
 
     const explorer = new FileExplorer(wsPage);
     await explorer.hasNodeExact(iarFileName);
@@ -115,7 +115,7 @@ test.describe('Multi root workspace', () => {
     const iarFolder = 'connector';
 
     const explorer = new FileExplorer(wsPage);
-    await copyTestIar(path.join(tmpWorkspace.tmpWorkspacePath, iarFolder), iarFileName);
+    await copyTestIar(path.join(tmpWorkspace!.tmpWorkspacePath, iarFolder), iarFileName);
 
     await explorer.selectInContextMenuOfNode('non-ivy-folder', 'Axon Ivy', 'Import / Export', 'Import Project Archive (.iar or .zip)');
     await wsPage.selectItemFromQuickPick(iarFileName);

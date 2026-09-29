@@ -1,6 +1,6 @@
 import { test as setup } from '@playwright/test';
 import { resolveCliArgsFromVSCodeExecutablePath } from '@vscode/test-electron';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import path from 'path';
 import { runDownloadAndUnzipVSCode } from './utils/download-vscode';
 
@@ -9,8 +9,22 @@ setup('Setup', async ({}) => {
   if (!skipVSCodeDownload) {
     const vscodePath = await runDownloadAndUnzipVSCode();
     const [cliPath] = resolveCliArgsFromVSCodeExecutablePath(vscodePath);
+    if (!cliPath) {
+      throw new Error('Unable to resolve VS Code CLI path');
+    }
     const extensionDir = path.resolve(process.cwd(), 'test-extension-dir');
-    execSync(`"${cliPath}" --install-extension vscjava.vscode-java-pack --extensions-dir ${extensionDir}`);
+    const args = [
+      '--install-extension',
+      'vscjava.vscode-java-pack',
+      '--install-extension',
+      'axonivy.vscode-designer-14',
+      '--extensions-dir',
+      extensionDir
+    ];
+    const isWindows = process.platform === 'win32';
+    execFileSync(cliPath, isWindows ? args.map(arg => `"${arg}"`) : args, {
+      shell: isWindows
+    });
   } else {
     console.log('Skipping VSCode download as RUN_IN_BROWSER is set to true');
   }

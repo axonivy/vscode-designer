@@ -23,18 +23,18 @@ abstract class ExplorerView {
     if (!(await this.expandedTab.isVisible())) {
       await this.tab.click();
     }
-    await expect(this.view).toBeVisible();
+    await expect(this.expandedTab).toBeVisible();
   }
 
   async closeView() {
     if (await this.expandedTab.isVisible()) {
       await this.tab.click();
     }
-    await expect(this.view).toBeHidden();
+    await expect(this.expandedTab).toBeHidden();
   }
 
   async hasNodeExact(name: string) {
-    const node = this.view.getByText(name, { exact: true });
+    const node = this.view.getByText(name, { exact: true }).first();
     await expect(node).toBeVisible();
   }
 
