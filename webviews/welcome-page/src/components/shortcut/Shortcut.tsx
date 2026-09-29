@@ -1,4 +1,4 @@
-import { cn, Flex, IvyIcon } from '@axonivy/ui-components';
+import { Flex, IvyIcon } from '@axonivy/ui-components';
 import { IvyIcons } from '@axonivy/ui-icons';
 
 export type Shortcut = {
@@ -12,9 +12,9 @@ export type Shortcut = {
 export const ShortcutCard = ({ title, icon, value, description, onClick }: Shortcut) => {
   return (
     <button
-      className={cn(
-        'flex size-full cursor-pointer items-center justify-center gap-1 rounded-lg border border-n200 bg-n50 p-2 text-sm hover:bg-n100'
-      )}
+      className={
+        'flex size-full cursor-pointer items-center justify-center gap-1 rounded-lg border border-n200 bg-n50 p-2 px-6 text-sm hover:bg-n100'
+      }
       onClick={() => onClick(value)}
     >
       <Flex direction='column' gap={2} justifyContent='center' alignItems='center'>
