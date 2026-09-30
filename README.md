@@ -49,8 +49,7 @@ For MCP setup instructions, see [mcp.md](doc/mcp/mcp.md).
 
 ## Integration Tests
 
-Playwright tests can be executed against VSCode Insiders.
+Playwright tests run against VS Code Stable, which is downloaded automatically during test setup.
 Make sure that an Engine is running on localhost:8080. It will be used as the backend for testing.
 
-- `pnpm run test:playwright:download:vscode`: download latest VSCode Insiders
 - `pnpm run test:playwright`: run all tests against electron app
