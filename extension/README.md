@@ -16,6 +16,7 @@ Make sure that **Java Development Kit (JDK) 25** and **Maven 3.9** are installed
 You may want to use JDK 25 provided by your operating system or install [Eclipse Temurin](https://adoptium.net/).
 
 After installing the extension and launching it for the first time, an Axon Ivy Engine is automatically downloaded in the background. The download progress is displayed in the lower-right corner.
+Downloads use temporary storage that is removed after success or failure. Download and extraction errors are reported rather than leaving the download pending.
 Advanced users may wish to specify the Axon Ivy Engine release train. To do so, execute the command **Axon Ivy: Switch Engine release train**.
 
 ### Dev Container
