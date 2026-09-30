@@ -1,4 +1,3 @@
-import { IncomingMessage } from 'http';
 import type { LogOutputChannel } from 'vscode';
 import { window } from 'vscode';
 
@@ -9,25 +8,84 @@ export const showProjectConversionLog = () => {
   projectConversionOutputChannel.show();
 };
 
-export const handleProjectConversionLog = (message: IncomingMessage) => {
+export const handleProjectConversionLog = async (message: ReadableStream<Uint8Array>) => {
   projectConversionOutputChannel.show();
   let hasErrorLogEntry = false;
-  return new Promise<{ hasErrorLogEntry: boolean }>(resolve => {
-    message.on('data', chunk => {
-      try {
-        const logEntry = JSON.parse(chunk);
-        if (isLogEntry(logEntry)) {
-          hasErrorLogEntry = hasErrorLogEntry || logEntry.severity.toUpperCase() === 'ERROR';
-          append(logEntry, projectConversionOutputChannel);
-        }
-      } catch {
-        projectConversionOutputChannel.info(chunk.toString());
+  const log = (text: string) => {
+    let entry: unknown;
+    try {
+      entry = JSON.parse(text);
+    } catch (error) {
+      if (!(error instanceof SyntaxError)) {
+        throw error;
       }
-    });
-    message.on('end', () => {
-      resolve({ hasErrorLogEntry });
-    });
-  });
+      projectConversionOutputChannel.info(text);
+      return;
+    }
+    if (isLogEntry(entry)) {
+      hasErrorLogEntry ||= entry.severity.toUpperCase() === 'ERROR';
+      append(entry, projectConversionOutputChannel);
+    } else {
+      projectConversionOutputChannel.info(text);
+    }
+  };
+
+  // HTTP chunks can split a JSON record or contain several concatenated records.
+  let pending = '';
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  const consume = (text: string) => {
+    for (const character of text) {
+      if (!pending && /\s/.test(character)) {
+        continue;
+      }
+      pending += character;
+      if (pending.startsWith('{')) {
+        if (inString) {
+          if (escaped) {
+            escaped = false;
+          } else if (character === '\\') {
+            escaped = true;
+          } else if (character === '"') {
+            inString = false;
+          }
+        } else if (character === '"') {
+          inString = true;
+        } else if (character === '{') {
+          depth++;
+        } else if (character === '}') {
+          depth--;
+        }
+        if (depth !== 0) {
+          continue;
+        }
+      } else if (character !== '\n') {
+        continue;
+      }
+      log(pending.trimEnd());
+      pending = '';
+    }
+  };
+
+  const reader = message.getReader();
+  const decoder = new TextDecoder();
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) {
+        break;
+      }
+      consume(decoder.decode(value, { stream: true }));
+    }
+    consume(decoder.decode());
+    if (pending) {
+      log(pending);
+    }
+    return { hasErrorLogEntry };
+  } finally {
+    reader.releaseLock();
+  }
 };
 
 const append = (entry: LogEntry, output: LogOutputChannel) => {
