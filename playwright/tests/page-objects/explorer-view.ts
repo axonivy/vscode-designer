@@ -119,7 +119,7 @@ export class FileExplorer extends ExplorerView {
 
   async installLocalProduct(productJson: string) {
     await this.wsPage.executeCommand('Axon Ivy: Install Local Market Product');
-    await this.wsPage.selectItemFromQuickPick(productJson);
+    await this.wsPage.selectFileFromQuickPick(productJson);
   }
 
   async installProduct(productId: string) {

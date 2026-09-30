@@ -27,8 +27,10 @@ export class IvyProjectExplorer {
   private static _instance: IvyProjectExplorer;
   private readonly treeDataProvider: IvyProjectTreeDataProvider;
   private readonly treeView: TreeView<Entry>;
+  private readonly context: ExtensionContext;
 
   private constructor(context: ExtensionContext) {
+    this.context = context;
     const activateEnginePromise = this.activateEngineIfNeeded();
     this.treeDataProvider = new IvyProjectTreeDataProvider(activateEnginePromise);
     this.treeView = window.createTreeView(VIEW_ID, { treeDataProvider: this.treeDataProvider });
@@ -39,7 +41,7 @@ export class IvyProjectExplorer {
       }
     });
     context.subscriptions.push(this.treeView);
-    this.registerCommands(context);
+    this.registerCommands();
     context.subscriptions.push(
       workspace.onDidChangeWorkspaceFolders(async () => {
         await this.refresh();
@@ -62,9 +64,9 @@ export class IvyProjectExplorer {
     await IvyEngineManager.instance.start();
   }
 
-  private registerCommands(context: ExtensionContext) {
+  private registerCommands() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const registerCmd = (command: KnownCommand, callback: (...args: any[]) => any) => registerCommand(command, context, callback);
+    const registerCmd = (command: KnownCommand, callback: (...args: any[]) => any) => registerCommand(command, this.context, callback);
     registerCmd(`${VIEW_ID}.refreshEntry`, () => this.refresh());
     registerCmd(`${VIEW_ID}.revealProjectInFileSystem`, async (s: TreeSelection) => this.revealInFileExplorer(s));
     registerCmd(`${VIEW_ID}.deployProject`, (s: TreeSelection) => this.deployProjects(s));
@@ -183,7 +185,7 @@ export class IvyProjectExplorer {
     if (!project) {
       return;
     }
-    await importNewProcess(project);
+    await importNewProcess(project, this.context);
   }
 
   private async importIvyProject(selection: TreeSelection) {
@@ -201,7 +203,7 @@ export class IvyProjectExplorer {
         return;
       }
     }
-    await importIvyProject(selectedUri);
+    await importIvyProject(selectedUri, this.context);
   }
 
   private async exportIvyProject(selection: TreeSelection) {
@@ -209,11 +211,11 @@ export class IvyProjectExplorer {
     if (!addCommandSelectionContext) {
       return;
     }
-    await exportIvyProject(addCommandSelectionContext);
+    await exportIvyProject(addCommandSelectionContext, this.context);
   }
 
   private async installLocalMarketProduct() {
-    await installLocalMarketProduct(await this.getIvyProjects());
+    await installLocalMarketProduct(await this.getIvyProjects(), this.context);
   }
 
   private async installMarketProduct() {

@@ -1,3 +1,4 @@
+import path from 'path';
 import { expect, test } from '~/fixtures/baseTest';
 import { FileExplorer } from '~/page-objects/explorer-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
@@ -45,11 +46,11 @@ test('Install product with conflicting project folder', async ({ wsPage }) => {
   await expect(title).toHaveText(/The following projects cannot be installed because a project folder with the same name already exists/);
 });
 
-test('Install local product.json', async ({ wsPage }) => {
+test('Install local product.json', async ({ wsPage, tmpWorkspace }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.selectNode('resources');
   await explorer.selectNode('product.json');
-  await explorer.installLocalProduct('product.json');
+  await explorer.installLocalProduct(path.join(tmpWorkspace!.tmpWorkspacePath, 'resources', 'product.json'));
   await wsPage.provideUserInput();
   await wsPage.executeCommand('Refresh Explorer');
   await explorer.selectNode('connectivity-demos');
@@ -57,11 +58,11 @@ test('Install local product.json', async ({ wsPage }) => {
   await processEditor.open();
 });
 
-test('Install local product.json with dynamic version', async ({ wsPage }) => {
+test('Install local product.json with dynamic version', async ({ wsPage, tmpWorkspace }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.selectNode('resources');
   await explorer.selectNode('product-dynamic.json');
-  await explorer.installLocalProduct('product-dynamic.json');
+  await explorer.installLocalProduct(path.join(tmpWorkspace!.tmpWorkspacePath, 'resources', 'product-dynamic.json'));
   await wsPage.provideUserInput('14.0.0-SNAPSHOT');
 
   const projects = wsPage.quickInputList;
@@ -77,14 +78,14 @@ test('Install local product.json with dynamic version', async ({ wsPage }) => {
   await processEditor.open();
 });
 
-test('Install local product.json with conflicting project folder', async ({ wsPage }) => {
+test('Install local product.json with conflicting project folder', async ({ wsPage, tmpWorkspace }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.selectNode('resources');
   await explorer.selectNode('product.json');
-  await explorer.installLocalProduct('product.json');
+  await explorer.installLocalProduct(path.join(tmpWorkspace!.tmpWorkspacePath, 'resources', 'product.json'));
   await wsPage.provideUserInput();
   await wsPage.hasReadyStatusMessage();
-  await explorer.installLocalProduct('product.json');
+  await explorer.installLocalProduct(path.join(tmpWorkspace!.tmpWorkspacePath, 'resources', 'product.json'));
   await wsPage.provideUserInput();
   const title = wsPage.page.locator('div.quick-input-title');
   await expect(title).toHaveText(/The following projects cannot be installed because a project folder with the same name already exists/);

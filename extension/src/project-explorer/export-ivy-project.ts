@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'path';
-import { commands, Disposable, env, ProgressLocation, Uri, window, workspace, type Progress } from 'vscode';
+import { commands, Disposable, env, ProgressLocation, Uri, window, workspace, type ExtensionContext, type Progress } from 'vscode';
 import { logErrorMessage, logErrorMessageWithActions, logInformationMessageWithActions } from '../base/logging-util';
 import type { AddCommandSelectionContext } from './ivy-project-explorer';
 import { MultiStepCancelledError, MultiStepInput, type InputStep, type MSStateBase, type ProjectSelection } from './utils/multi-step-input';
@@ -12,9 +12,12 @@ interface ExportProjectsState extends MSStateBase {
   targetFilename?: string;
 }
 
-let lastTargetFolderUri: Uri | undefined;
+const LAST_TARGET_FOLDER_KEY = 'axonivy.exportIvyProject.lastTargetFolderUri';
 
-export const exportIvyProject = async (addCommandSelectionContext: AddCommandSelectionContext) => {
+export const exportIvyProject = async (
+  addCommandSelectionContext: AddCommandSelectionContext,
+  context: Pick<ExtensionContext, 'globalState'>
+) => {
   const stepProjects: InputStep<ExportProjectsState> = async (input: MultiStepInput<ExportProjectsState>, state: ExportProjectsState) => {
     const selectedProject = await input.showQuickPick<ProjectSelection>({
       title: state.dialogTitle,
@@ -53,10 +56,10 @@ export const exportIvyProject = async (addCommandSelectionContext: AddCommandSel
         throw new MultiStepCancelledError('Selected target is not a directory. Export cancelled.');
       }
       state.targetFolderUri = selectedUri[0];
-      lastTargetFolderUri = state.targetFolderUri;
     } catch (error) {
       throw new MultiStepCancelledError(`Error accessing target folder. Export cancelled. ${error}`);
     }
+    await context.globalState.update(LAST_TARGET_FOLDER_KEY, state.targetFolderUri.toString());
   };
 
   const stepFileName: InputStep<ExportProjectsState> = async (input: MultiStepInput<ExportProjectsState>, state: ExportProjectsState) => {
@@ -86,13 +89,14 @@ export const exportIvyProject = async (addCommandSelectionContext: AddCommandSel
   };
 
   const steps: InputStep<ExportProjectsState>[] = [stepProjects, stepFolder, stepFileName];
+  const lastTargetFolderUri = context.globalState.get<string>(LAST_TARGET_FOLDER_KEY);
 
   const exportProjectData: ExportProjectsState = {
     dialogTitle: `Export Axon Ivy Project`,
     currentStep: 1,
     totalSteps: steps.length,
     project: undefined,
-    targetFolderUri: lastTargetFolderUri ?? workspace.workspaceFolders?.[0]?.uri
+    targetFolderUri: lastTargetFolderUri ? Uri.parse(lastTargetFolderUri) : workspace.workspaceFolders?.[0]?.uri
   };
 
   try {
