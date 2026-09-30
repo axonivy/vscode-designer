@@ -12,19 +12,23 @@ The available VS Code extension can be found under `/extension`.
 
 ### Generate REST Client from Axon Ivy OpenAPI
 
-To access the REST API of the engine and the market, we generate the Axios client from OpenAPI. To retreive the current OpenAPI specifications, you can run the following command (Maven needed):
+To access the REST API of the engine and the market, we generate native `fetch` clients from OpenAPI with Orval. To retrieve the current OpenAPI specifications, you can run the following command (Maven needed):
 
 ```shellscript
 pnpm run openapi
 ```
 
-This will run `"openapi:download"` and `"openapi:codegen"`, which will download the most recent OpenAPI specification with and generate the Axios client under `extension/src/engine/api/generated` and `extension/src/market/api/generated`.
+This will run `"openapi:download"` and `"openapi:codegen"`, which will download the most recent OpenAPI specifications and generate the clients under `extension/src/engine/api/generated` and `extension/src/market/generated`.
 The OpenAPI specifications generated are from the last successful build of a releasing branch. You can also load the file from https://jenkins.ivyteam.io/job/core_openapi/.
+
+The clients use custom fetch mutators configured in `orval.config.ts`. The engine mutator preserves the runtime engine base URL, rejects unsuccessful HTTP responses, and supports unbuffered project-conversion streams. Change the configuration or mutators rather than editing generated clients manually.
 
 If you're working on a feature branch and want to generate the clients from a manually generated OpenAPI specification, you can
 
 - download the OpenAPI specification from the engine and place it under `target/engine/openapi.json` and then run:
 - `pnpm run openapi:codegen`
+
+To regenerate only the engine client, run `pnpm run openapi:codegen --project ivyOpenApi`.
 
 ## Debugging the extension
 

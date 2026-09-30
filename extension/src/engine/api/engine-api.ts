@@ -1,9 +1,8 @@
-import { IncomingMessage } from 'http';
 import path from 'path';
 import { workspace } from 'vscode';
 import { StatusBar } from '../../base/status-bar';
 import { handleProjectConversionLog } from '../project-conversion-log';
-import { handleAxiosError } from './axios-error-handler';
+import { handleEngineError } from './engine-error-handler';
 import {
   type CaseMapInit,
   type ComponentFormParams,
@@ -48,7 +47,7 @@ import {
 import { pollWithProgress } from './poll';
 
 const headers = { 'X-Requested-By': 'web-ide' };
-const options = { headers, paramsSerializer: { indexes: null } };
+const options = { headers };
 
 export type CreateDataClassParams = Omit<DataClassInit, 'workspaceId'>;
 export type CreateProjectParams = Omit<NewProjectParams, 'workspaceId'> & { path: string };
@@ -68,7 +67,7 @@ export class IvyEngineApi {
   static async init(rawEngineUrl: string) {
     const designerUrl = new URL(path.join('designer/api'), rawEngineUrl).toString();
     await pollWithProgress(rawEngineUrl, 'Waiting for Axon Ivy Engine to be ready.');
-    const workspace = await IvyEngineApi.createWorkspace(designerUrl).catch(handleAxiosError);
+    const workspace = await IvyEngineApi.createWorkspace(designerUrl).catch(handleEngineError);
     if (!workspace) {
       throw new Error('Failed to create workspace');
     }
@@ -93,43 +92,43 @@ export class IvyEngineApi {
   public async findOrCreateProject(projectDir: string) {
     const name = path.basename(projectDir);
     await findOrCreateProject({ workspaceId: this.workspace.id, name, path: projectDir }, { baseURL: this.designerUrl, ...options }).catch(
-      handleAxiosError
+      handleEngineError
     );
   }
 
   public async deployProjects(params: Omit<DeployProjectsRequest, 'workspaceId'>) {
-    await deployProjects({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options }).catch(handleAxiosError);
+    await deployProjects({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options }).catch(handleEngineError);
   }
 
   public async stopBpmEngine(params: Omit<StopBpmEngineParams, 'workspaceId'>) {
     await stopBpmEngine(
       { workspaceId: this.workspace.id, ...params },
       { baseURL: this.designerUrl, ...options, headers: { ...headers, 'Content-Type': 'application/json' } }
-    ).catch(handleAxiosError);
+    ).catch(handleEngineError);
   }
 
   public async createProcess(newProcessParams: CreateProcessParams) {
     return createProcess({ workspaceId: this.workspace.id, ...newProcessParams }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
-      .catch(handleAxiosError);
+      .catch(handleEngineError);
   }
 
   public async createProcessFromBpmn(params: CreateProcessFromBpmnParams) {
     return importProcess({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
-      .catch(handleAxiosError);
+      .catch(handleEngineError);
   }
 
   public async importIvyProject(params: ImportProjectsBody) {
     return importProjects(this.workspace.id, params, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
-      .catch(error => handleAxiosError(error, false));
+      .catch(error => handleEngineError(error, false));
   }
 
   public async installMarketProduct(params: Omit<ProductInstallParams, 'workspaceId'>) {
     return installMarketProduct(this.workspace.id, params, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
-      .catch(handleAxiosError);
+      .catch(handleEngineError);
   }
 
   public async createProject(newProjectParams: CreateProjectParams) {
@@ -138,35 +137,35 @@ export class IvyEngineApi {
       { baseURL: this.designerUrl, ...options }
     )
       .then(res => res.data)
-      .catch(handleAxiosError);
+      .catch(handleEngineError);
   }
 
   public async createUserDialog(newUserDialogParams: CreateUserDialogParams) {
     return createHd({ workspaceId: this.workspace.id, ...newUserDialogParams }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
-      .catch(handleAxiosError);
+      .catch(handleEngineError);
   }
 
   public async createDataClass(params: CreateDataClassParams) {
     return createDataClass({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
-      .catch(handleAxiosError);
+      .catch(handleEngineError);
   }
 
   public async createEntityClass(params: CreateDataClassParams) {
     return createEntityClass({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
-      .catch(handleAxiosError);
+      .catch(handleEngineError);
   }
 
   public async createCaseMap(params: CreateCaseMapParams) {
     return createCaseMap({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
-      .catch(handleAxiosError);
+      .catch(handleEngineError);
   }
 
   public async deleteProject(params: Omit<DeleteProjectParams, 'workspaceId'>) {
-    await deleteProject({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options }).catch(handleAxiosError);
+    await deleteProject({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options }).catch(handleEngineError);
   }
 
   public async convertProject(params: Omit<ConvertProjectParams, 'workspaceId'>) {
@@ -174,32 +173,31 @@ export class IvyEngineApi {
       { workspaceId: this.workspace.id, ...params },
       { baseURL: this.designerUrl, ...options, responseType: 'stream' }
     )
-      .catch(handleAxiosError)
+      .catch(handleEngineError)
       .then(res => res.data);
 
-    let result = { hasErrorLogEntry: false };
-    if (data instanceof IncomingMessage) {
-      result = await handleProjectConversionLog(data);
+    if (!(data instanceof ReadableStream)) {
+      throw new Error('Missing project conversion response stream');
     }
-    return result;
+    return handleProjectConversionLog(data);
   }
 
   public async refreshProjectStatuses() {
     return refreshProjectStatuses({ workspaceId: this.workspace.id }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
-      .catch(handleAxiosError);
+      .catch(handleEngineError);
   }
 
   public async invalidateClassLoader(params: Omit<InvalidateClassLoaderParams, 'workspaceId'>) {
     await invalidateClassLoader({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options }).catch(
-      handleAxiosError
+      handleEngineError
     );
   }
 
   public async getComponentForm(params: Omit<ComponentFormParams, 'workspaceId'>) {
     return componentForm({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
-      .catch(handleAxiosError);
+      .catch(handleEngineError);
   }
 
   public async projects(params: Omit<ProjectsParams, 'workspaceId'> = { withDependencies: false }) {
@@ -209,7 +207,7 @@ export class IvyEngineApi {
   public async getEngineVersion() {
     return getVersion({ baseURL: this.designerUrl })
       .then(res => res.data)
-      .catch(handleAxiosError);
+      .catch(handleEngineError);
   }
 
   public async getWorkspaceId() {
@@ -219,7 +217,7 @@ export class IvyEngineApi {
   public async processDebugServerPort() {
     return processDebugger({ baseURL: this.designerUrl })
       .then(res => res.data)
-      .catch(handleAxiosError);
+      .catch(handleEngineError);
   }
 
   public get devContextPath(): string {
@@ -231,7 +229,7 @@ export class IvyEngineApi {
       return this.portalDeploymentResponse;
     }
     await StatusBar.withStatusBarProgress({ text: 'Deploying portal' }, async () => {
-      const response = await deployPortal(this.workspace.id, { baseURL: this.designerUrl, ...options }).catch(handleAxiosError);
+      const response = await deployPortal(this.workspace.id, { baseURL: this.designerUrl, ...options }).catch(handleEngineError);
       this.portalDeploymentResponse = response?.data;
     });
     this.portalDeploymentResponse ??= { reason: 'failed to deploy portal', deployed: false };

@@ -15,7 +15,14 @@ export default defineConfig({
     },
     output: {
       target: 'extension/src/engine/api/generated/client.ts',
-      formatter: 'prettier'
+      formatter: 'prettier',
+      client: 'fetch',
+      override: {
+        mutator: {
+          path: 'extension/src/engine/api/engine-fetch.ts',
+          name: 'engineFetch'
+        }
+      }
     }
   },
   openapiMarket: {

@@ -1,5 +1,6 @@
-import axios from 'axios';
+import { setTimeout as wait } from 'node:timers/promises';
 import { ProgressLocation, window } from 'vscode';
+import { extensionLogOutputChannel } from '../../base/extension-output-channel';
 
 export async function pollWithProgress(url: string, title: string) {
   const options = {
@@ -9,22 +10,33 @@ export async function pollWithProgress(url: string, title: string) {
   };
   await window.withProgress(options, async (progress, token) => {
     progress.report({ message: url });
-    while (!token.isCancellationRequested) {
-      const status = await axios
-        .get(url)
-        .then(async response => response.status)
-        .catch(() => undefined);
-      if (status === 200) {
-        return;
+    const controller = new AbortController();
+    const cancellation = token.onCancellationRequested(() => controller.abort());
+    try {
+      while (!token.isCancellationRequested) {
+        let ready = false;
+        try {
+          const response = await fetch(url, { signal: controller.signal });
+          ready = response.status === 200;
+          await response.body?.cancel();
+        } catch (error) {
+          if (controller.signal.aborted) {
+            throw error;
+          }
+          extensionLogOutputChannel.debug(`Engine readiness probe failed: ${url}`, error);
+        }
+        if (ready) {
+          return;
+        }
+        await wait(2000, undefined, { signal: controller.signal });
       }
-      await wait(2000);
+    } catch (error) {
+      if (!token.isCancellationRequested) {
+        throw error;
+      }
+    } finally {
+      cancellation.dispose();
     }
-    await Promise.reject(`Polling of "${title}" was cancelled.`);
+    throw `Polling of "${title}" was cancelled.`;
   });
 }
-
-const wait = function (ms: number) {
-  return new Promise(resolve => {
-    setTimeout(resolve, ms);
-  });
-};
