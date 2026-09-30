@@ -1,9 +1,10 @@
 import fs from 'fs';
 import type { CodeActionContext, CodeActionProvider, DiagnosticCollection, ExtensionContext, Selection, TextDocument } from 'vscode';
-import { CodeAction, CodeActionKind, Diagnostic, DiagnosticSeverity, Range, Uri, languages } from 'vscode';
+import { CodeAction, CodeActionKind, Diagnostic, DiagnosticSeverity, Position, Range, Uri, languages, workspace } from 'vscode';
 import { executeCommand } from '../base/commands';
 import { runJavaServerModeSwitch } from '../base/java-extension-api';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
+import type { ProjectBean } from './api/generated/client';
 import { IvyEngineManager } from './engine-manager';
 
 const DIAGNOSTIC_SOURCE = 'Axon Ivy';
@@ -35,24 +36,20 @@ export class IvyDiagnostics {
   public async refresh(refreshProjectStatuses = false) {
     this.diagnostics.clear();
     let hasProjectWithError = false;
-    const projects = refreshProjectStatuses
-      ? await IvyEngineManager.instance.refreshProjectStatuses()
-      : await IvyEngineManager.instance.projects();
+    if (refreshProjectStatuses) {
+      await IvyEngineManager.instance.refreshProjectStatuses();
+    }
+    const projects = await IvyEngineManager.instance.projects(true);
+    projects?.filter(p => p.id.isIar);
     projects
       ?.filter(p => p && p.errorMessage)
       .forEach(project => {
-        const projectUri = Uri.file(project.projectDirectory);
-        let uri = projectUri;
-        if (fs.statSync(uri.fsPath).isDirectory()) {
-          uri = Uri.joinPath(projectUri, IVY_PROJECT_FILE);
-          if (!fs.existsSync(uri.fsPath)) {
-            uri = Uri.joinPath(projectUri, POM_FILE);
-          }
-          hasProjectWithError = true;
+        hasProjectWithError = true;
+        if (project.id.isIar) {
+          this.handleIarDiagnostic(project, projects);
+        } else {
+          this.handleProjectDiagnostic(project);
         }
-        const diagnostic = new Diagnostic(new Range(1, 0, 1, 0), project.errorMessage, DiagnosticSeverity.Error);
-        diagnostic.source = DIAGNOSTIC_SOURCE;
-        this.diagnostics.set(uri, [diagnostic]);
       });
     const projectExplorerDiagnostics = await IvyProjectExplorer.instance.getDiagnostics();
     projectExplorerDiagnostics.forEach((d, uri) => {
@@ -64,6 +61,48 @@ export class IvyDiagnostics {
       await runJavaServerModeSwitch();
     }
     await executeCommand('setContext', 'ivy:hasProjectsToConvert', this.projectFileUrisToBeConverted().length > 0);
+  }
+
+  private async handleIarDiagnostic(iar: ProjectBean, projects: ProjectBean[]) {
+    projects
+      .filter(p => p.id.isIar === false)
+      .filter(p => p.dependencies.find(d => d.id === iar.id.id))
+      .forEach(async p => {
+        const projectUri = Uri.file(p.projectDirectory);
+        const uri = Uri.joinPath(projectUri, POM_FILE);
+        const message = `Referenced dependency ${iar.artifactId} has error: ${iar.errorMessage}`;
+        const range = await this.dependencyRange(uri, iar);
+        const diagnostic = new Diagnostic(range, message, DiagnosticSeverity.Error);
+        diagnostic.source = DIAGNOSTIC_SOURCE;
+        this.diagnostics.set(uri, [...(this.diagnostics.get(uri) ?? []), diagnostic]);
+      });
+  }
+
+  private async dependencyRange(uri: Uri, iar: ProjectBean) {
+    const defaultRange = new Range(1, 0, 1, 0);
+    try {
+      const doc = await workspace.openTextDocument(uri);
+      const searchString = '>' + iar.artifactId + '<';
+      const offset = doc.getText().indexOf(searchString);
+      if (offset === -1) {
+        return defaultRange;
+      }
+      const start = doc.positionAt(offset);
+      return new Range(start, new Position(start.line, start.character + searchString.length));
+    } catch {
+      return new Range(1, 0, 1, 0);
+    }
+  }
+
+  private async handleProjectDiagnostic(project: ProjectBean) {
+    const projectUri = Uri.file(project.projectDirectory);
+    let uri = Uri.joinPath(projectUri, IVY_PROJECT_FILE);
+    if (!fs.existsSync(uri.fsPath)) {
+      uri = Uri.joinPath(projectUri, POM_FILE);
+    }
+    const diagnostic = new Diagnostic(new Range(1, 0, 1, 0), project.errorMessage, DiagnosticSeverity.Error);
+    diagnostic.source = DIAGNOSTIC_SOURCE;
+    this.diagnostics.set(uri, [diagnostic]);
   }
 
   public projectFileUrisToBeConverted() {
