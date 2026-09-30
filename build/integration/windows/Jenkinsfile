@@ -50,7 +50,7 @@ pipeline {
           }
           archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
           archiveArtifacts artifacts: 'playwright/playwright-videos/**', allowEmptyArchive: true
-          withChecks('WebTests') {
+          withChecks('Windows Integration Tests') {
             junit testDataPublishers: [[$class: 'StabilityTestDataPublisher']], testResults: '**/node_modules/**/report.xml'
           }
         }
