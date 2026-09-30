@@ -2,17 +2,8 @@ packages:
   - webviews/*
   - playwright
   - extension
-allowUnusedPatches: true
-blockExoticSubdeps: true
-minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   - '@axonivy/*'
-  # Renovate security update: esbuild@0.28.1
-  - esbuild@0.28.1
-  # Renovate security update: dompurify@3.4.13
-  - dompurify@3.4.11 || 3.4.13
-  # Renovate security update: adm-zip@0.6.0 || 0.6.1
-  - adm-zip@0.6.0 || 0.6.1
 overrides:
   dompurify: '>=3.4.11'
 patchedDependencies:
@@ -22,7 +13,6 @@ publicHoistPattern:
   - eslint
 registries:
   '@axonivy': 'https://npmjs-registry.ivyteam.ch/'
-sideEffectsCache: false
 trustPolicy: no-downgrade
 trustPolicyIgnoreAfter: 43200 # minutes (30 days)
 allowBuilds:
@@ -31,3 +21,4 @@ allowBuilds:
   esbuild: false
   keytar: false
 verifyDepsBeforeRun: warn
+autoDedupe: true
