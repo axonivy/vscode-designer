@@ -46,7 +46,7 @@ pipeline {
           archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
           archiveArtifacts artifacts: 'AxonIvyEngine/logs/ivy.log', allowEmptyArchive: true
           archiveArtifacts artifacts: 'ivy-engine-console.out', allowEmptyArchive: true
-          withChecks('WebTests') {
+          withChecks('Browser Integration Tests') {
             junit testDataPublishers: [[$class: 'StabilityTestDataPublisher']], testResults: 'playwright/report*.xml'
           }
         }
