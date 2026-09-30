@@ -41,7 +41,7 @@ export class StandaloneDiagramStartup implements IDiagramStartup {
 
     // Setup clipboard handler for Monaco editors in webview
     setupPasteShortcutHandler();
-    setupCutShortcutHandler();
+    setupCutShortcutHandler().catch(error => console.error('Failed to set up Monaco clipboard cut handler:', error));
     setupSelectAllShortcutHandler(this.actionDispatcher);
 
     // Setup save shortcut handler for Monaco editors

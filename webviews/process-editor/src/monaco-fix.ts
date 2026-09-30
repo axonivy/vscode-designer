@@ -1,3 +1,5 @@
+import { MonacoUtil } from '@axonivy/process-editor-inscription-view';
+
 /**
  * Sets up a paste shortcut handler for Monaco editors.
  */
@@ -47,14 +49,15 @@ export const setupPasteShortcutHandler = () => {
 /**
  * Sets up a cut shortcut handler for Monaco editors.
  * Since copy works but cut doesn't properly write to clipboard,
- * we first trigger a copy event (same way as paste), then delete the selection.
+ * capture and write the copy first, then cut only if the editor is unchanged.
  */
-export const setupCutShortcutHandler = () => {
+export const setupCutShortcutHandler = async () => {
   if (window.location.protocol !== 'vscode-webview:') {
     // Cut handling is only needed in VS Code webview, where Monaco doesn't properly write to clipboard on cut.
     // In a regular browser environment, the native cut event works fine, so we can skip this workaround.
     return;
   }
+  const monaco = await MonacoUtil.monaco();
   document.addEventListener(
     'keydown',
     async (event: KeyboardEvent) => {
@@ -73,35 +76,54 @@ export const setupCutShortcutHandler = () => {
       event.preventDefault();
       event.stopPropagation();
 
-      // Create a synthetic copy event (same pattern as paste event)
-      const clipboardData = new DataTransfer();
-      const copyEvent = new ClipboardEvent('copy', {
-        bubbles: true,
-        cancelable: true,
-        clipboardData: clipboardData
-      });
-
-      // Dispatch the copy event - Monaco will populate clipboardData with the selection
-      target.dispatchEvent(copyEvent);
-
-      // Get the copied text from the event's clipboardData and write to system clipboard
-      const copiedText = clipboardData.getData('text/plain');
-      if (copiedText) {
-        try {
-          await navigator.clipboard.writeText(copiedText);
-        } catch (error) {
-          console.error('Failed to write to clipboard:', error);
-        }
+      const editor = monaco.editor.getEditors().find(editor => editor.getDomNode()?.contains(target));
+      const model = editor?.getModel();
+      if (!editor || !model || !editor.hasTextFocus()) {
+        console.error('Clipboard cut failed: no focused Monaco editor with a model was found.');
+        return;
       }
 
-      // Now delete the selection by dispatching a cut event
-      // (Monaco will handle the deletion part)
-      const cutEvent = new ClipboardEvent('cut', {
-        bubbles: true,
-        cancelable: true,
-        clipboardData: new DataTransfer()
-      });
-      target.dispatchEvent(cutEvent);
+      const version = model.getVersionId();
+      let changed = false;
+      const cancelCut = () => {
+        changed = true;
+      };
+      const listeners = [
+        editor.onDidChangeCursorSelection(cancelCut),
+        editor.onDidChangeModelContent(cancelCut),
+        editor.onDidChangeModel(cancelCut),
+        editor.onDidBlurEditorText(cancelCut),
+        editor.onDidDispose(cancelCut)
+      ];
+      try {
+        const clipboardData = new DataTransfer();
+        const copyEvent = new ClipboardEvent('copy', {
+          bubbles: true,
+          cancelable: true,
+          clipboardData
+        });
+        target.dispatchEvent(copyEvent);
+
+        const copiedText = clipboardData.getData('text/plain');
+        if (!copiedText) {
+          console.error('Clipboard cut failed: no text was captured; the selection was not deleted.');
+          return;
+        }
+        await navigator.clipboard.writeText(copiedText);
+
+        if (changed || !target.isConnected || !editor.hasTextFocus() || editor.getModel() !== model || model.getVersionId() !== version) {
+          console.warn('Clipboard cut cancelled: the editor changed; captured text remains on the clipboard.');
+          return;
+        }
+
+        // A synthetic cut event schedules deletion later, reopening the selection race.
+        // Monaco's cut handler deletes synchronously and preserves line cuts, multi-cursor cuts and undo.
+        editor.trigger('keyboard', 'cut', undefined);
+      } catch (error) {
+        console.error('Clipboard cut failed:', error);
+      } finally {
+        listeners.forEach(listener => listener.dispose());
+      }
     },
     true
   );
