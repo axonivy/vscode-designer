@@ -1,17 +1,21 @@
 import path from 'path';
-import { window, workspace } from 'vscode';
+import { workspace, type ExtensionContext } from 'vscode';
+import { showRememberedFileDialog } from '../base/remembered-file-dialog';
 import type { ImportProcessBody } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 
-export const importNewProcess = async (projectDir: string) => {
-  const input = await collectImportBpmnProcessParams(projectDir);
+export const importNewProcess = async (projectDir: string, context: Pick<ExtensionContext, 'globalState'>) => {
+  const input = await collectImportBpmnProcessParams(projectDir, context);
   if (input) {
     await IvyEngineManager.instance.createProcessFromBpmn(input);
   }
 };
 
-const collectImportBpmnProcessParams = async (projectDir: string): Promise<ImportProcessBody | undefined> => {
-  const bpmnXmlFile = await window.showOpenDialog({
+const collectImportBpmnProcessParams = async (
+  projectDir: string,
+  context: Pick<ExtensionContext, 'globalState'>
+): Promise<ImportProcessBody | undefined> => {
+  const bpmnXmlFile = await showRememberedFileDialog(context, 'importBpmnProcess', {
     canSelectMany: false,
     title: 'Select BPMN .bpmn or .xml file to import',
     openLabel: 'Import BPMN Process',

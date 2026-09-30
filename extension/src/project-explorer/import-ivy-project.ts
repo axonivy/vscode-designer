@@ -1,17 +1,18 @@
 import AdmZip from 'adm-zip';
 import fs from 'fs';
 import path from 'path';
-import { Uri, window, workspace } from 'vscode';
+import { Uri, workspace, type ExtensionContext } from 'vscode';
 import { showExtensionLog } from '../base/extension-output-channel';
 import { logErrorMessageWithActions, logInformationMessageWithActions } from '../base/logging-util';
+import { showRememberedFileDialog } from '../base/remembered-file-dialog';
 import { StatusBar } from '../base/status-bar';
 import type { ImportProjectsBody } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { sanitizeProjectName } from './utils/util';
 
-export const importIvyProject = async (selectedWorkspaceUri: Uri) => {
+export const importIvyProject = async (selectedWorkspaceUri: Uri, context: Pick<ExtensionContext, 'globalState'>) => {
   const selectedTargetPath = selectedWorkspaceUri.fsPath;
-  const selectedFile = await collectImportIvyArchiveFile();
+  const selectedFile = await collectImportIvyArchiveFile(context);
   if (!selectedFile) {
     return;
   }
@@ -69,8 +70,8 @@ Please either rename the import file ${fileName} or delete/rename the existing f
   });
 };
 
-const collectImportIvyArchiveFile = async () => {
-  const ivyProjectFile = await window.showOpenDialog({
+const collectImportIvyArchiveFile = async (context: Pick<ExtensionContext, 'globalState'>) => {
+  const ivyProjectFile = await showRememberedFileDialog(context, 'importIvyProject', {
     canSelectMany: false,
     title: 'Select Ivy Project Archive .iar or .zip to import',
     openLabel: 'Import Ivy Project Archive',

@@ -1,14 +1,15 @@
-import { window, workspace } from 'vscode';
+import { workspace, type ExtensionContext } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
+import { showRememberedFileDialog } from '../base/remembered-file-dialog';
 import { MultiStepCancelledError, MultiStepInput, type InputStep } from '../project-explorer/utils/multi-step-input';
 import { createSteps, executeInstall } from './utils/market-install-flow';
 import type { InstallMarketProductState } from './utils/market-install-types';
 import { initState } from './utils/market-install-types';
 import { parseProduct, replaceDynamicVersion } from './utils/market-install-util';
 
-export const installLocalMarketProduct = async (existingProjects: string[]) => {
+export const installLocalMarketProduct = async (existingProjects: string[], context: Pick<ExtensionContext, 'globalState'>) => {
   const stepSelectJsonFile: () => Promise<string> = async () => {
-    const productInstaller = await window.showOpenDialog({
+    const productInstaller = await showRememberedFileDialog(context, 'installLocalMarketProduct', {
       title: 'Select product.json file',
       filters: { 'JSON files': ['json'] },
       canSelectMany: false,

@@ -103,8 +103,11 @@ const runElectronAppTest = async (take: (r: ElectronApplication) => Promise<void
       tmpWorkspace ? (tmpWorkspace.tmpWsConfig ?? tmpWorkspace.tmpWorkspacePath) : ''
     ]
   });
-  await take(electronApp);
-  await electronApp.close();
+  try {
+    await take(electronApp);
+  } finally {
+    await electronApp.close();
+  }
 };
 
 const pageOfElectronAppTest = async (electronApp: ElectronApplication, take: (r: Page) => Promise<void>) => {

@@ -1,4 +1,5 @@
 import { type Page, expect } from '@playwright/test';
+import path from 'path';
 
 export class WorkspacePage {
   constructor(readonly page: Page) {}
@@ -40,6 +41,19 @@ export class WorkspacePage {
     const item = this.page.locator('div.quick-input-list').locator('div.monaco-icon-label-container', { hasText: label });
     await item.click({ delay: 100 });
     await expect(item).toBeHidden();
+  }
+
+  async selectFileFromQuickPick(filePath: string) {
+    expect(path.isAbsolute(filePath), 'File picker selection requires an absolute path').toBe(true);
+    const textBox = this.quickInputBox.getByRole('textbox');
+    await expect(textBox).toBeFocused();
+    // The file picker can rewrite the input while initializing or updating its directory.
+    await expect(async () => {
+      await textBox.fill(filePath, { timeout: 1_000 });
+      await expect(this.quickInputList.getByText(path.basename(filePath), { exact: true })).toBeVisible({ timeout: 1_000 });
+      await expect(textBox).toHaveValue(filePath, { timeout: 1_000 });
+    }).toPass({ timeout: 10_000 });
+    await textBox.press('Enter', { delay: 100 });
   }
 
   get quickInputBox() {
