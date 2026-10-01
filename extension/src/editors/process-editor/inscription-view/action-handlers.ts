@@ -27,7 +27,7 @@ export const handleActionLocal = (msg: unknown, sendInscriptionNotification: Sen
         break;
       case 'openWsConfig':
       case 'newWebServiceClient':
-        executeCommand('ivyEditor.openWebServiceClientEditor');
+        handleOpenConfig('ivyEditor.openWebServiceClientEditor', msg.params);
         break;
       case 'openDatabaseConfig':
       case 'newDatabaseConfig':

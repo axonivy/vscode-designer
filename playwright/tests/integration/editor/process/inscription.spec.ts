@@ -4,11 +4,14 @@ import { TextEditor } from '~/page-objects/editor';
 import { OutputView } from '~/page-objects/output-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
 import { RestClientEditor } from '~/page-objects/restclient-editor';
+import { WebServiceClientEditor } from '~/page-objects/webservice-client-editor';
 
 const userDialogPID1 = '15254DCE818AD7A2-f3';
 const userDialogPID2 = '15254DCE818AD7A2-f14';
 const userTaskPID = '15254DCE818AD7A2-f17';
 const namespace = 'testNamespace';
+
+const actionsProcessPID = '1A0F1ED6FCC52C9A';
 
 test('Check Process Editor Connector', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage);
@@ -277,7 +280,7 @@ test('Create Offline Dialog', async ({ wsPage }) => {
 });
 
 test('Open Rest config', async ({ wsPage }) => {
-  const restClientPid = '1A0F1ED6FCC52C9A-f3';
+  const restClientPid = `${actionsProcessPID}-f3`;
 
   const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
   const restClientEditor = new RestClientEditor(wsPage);
@@ -303,4 +306,29 @@ test('Open Rest config', async ({ wsPage }) => {
   await inscriptionView.openInscriptionTab('Request');
   await inscriptionView.clickButton('Create new Rest Client');
   await restClientEditor.expectTabActive();
+});
+
+test('Open WebService config', async ({ wsPage }) => {
+  const webServicePid = `${actionsProcessPID}-f5`;
+
+  const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
+  const webServiceClientEditor = new WebServiceClientEditor(wsPage);
+
+  await processEditor.open();
+  const inscriptionView = await processEditor.openInscriptionView(webServicePid);
+  await inscriptionView.openInscriptionTab('Request');
+  await inscriptionView.clickButton('Open WebService config');
+  await webServiceClientEditor.expectTabActive();
+
+  await processEditor.open();
+  await webServiceClientEditor.expectTabInactive();
+  await inscriptionView.parent.getByRole('combobox', { name: 'Client' }).click();
+  await processEditor.webViewFrame.getByRole('option', { name: 'technicalBackend' }).click();
+  await inscriptionView.clickButton('Open WebService config');
+  await webServiceClientEditor.expectTabActive();
+
+  await processEditor.open();
+  await webServiceClientEditor.expectTabInactive();
+  await inscriptionView.clickButton('Create new WebService Client');
+  await webServiceClientEditor.expectTabActive();
 });
