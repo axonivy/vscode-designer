@@ -3,6 +3,7 @@ import { test } from '~/fixtures/baseTest';
 import { TextEditor } from '~/page-objects/editor';
 import { OutputView } from '~/page-objects/output-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
+import { RestClientEditor } from '~/page-objects/restclient-editor';
 
 const userDialogPID1 = '15254DCE818AD7A2-f3';
 const userDialogPID2 = '15254DCE818AD7A2-f14';
@@ -273,4 +274,33 @@ test('Create Offline Dialog', async ({ wsPage }) => {
   await wsPage.isTabWithNameVisible(`${userDialogName}.xhtml`);
   await editor.tab.click();
   await expect(dialogField).toHaveValue(`prebuiltProject.${userDialogName}:start(prebuiltProject.Data)`);
+});
+
+test('Open Rest config', async ({ wsPage }) => {
+  const restClientPid = '1A0F1ED6FCC52C9A-f3';
+
+  const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
+  const restClientEditor = new RestClientEditor(wsPage);
+
+  await processEditor.open();
+  let inscriptionView = await processEditor.openInscriptionView(restClientPid);
+  await inscriptionView.openInscriptionTab('Request');
+  await inscriptionView.clickButton('Open Rest config');
+  await restClientEditor.expectTabActive();
+
+  await processEditor.open();
+  await restClientEditor.expectTabInactive();
+  inscriptionView = await processEditor.openInscriptionView(restClientPid);
+  await inscriptionView.openInscriptionTab('Request');
+  await inscriptionView.parent.getByRole('combobox', { name: 'Client' }).click();
+  await processEditor.webViewFrame.getByRole('option', { name: 'personService' }).click();
+  await inscriptionView.clickButton('Open Rest config');
+  await restClientEditor.expectTabActive();
+
+  await processEditor.open();
+  await restClientEditor.expectTabInactive();
+  inscriptionView = await processEditor.openInscriptionView(restClientPid);
+  await inscriptionView.openInscriptionTab('Request');
+  await inscriptionView.clickButton('Create new Rest Client');
+  await restClientEditor.expectTabActive();
 });
