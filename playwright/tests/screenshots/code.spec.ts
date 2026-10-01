@@ -49,7 +49,7 @@ test('profiles', async ({ wsPage }) => {
 test('axonivy tree view', async ({ wsPage }) => {
   const explorer = new ProjectExplorerView(wsPage);
   await explorer.openView();
-  await expect(explorer.view.getByText('playwrightTestWorkspace')).toBeVisible();
+  await expect(explorer.view.getByText('screenshotProject')).toBeVisible();
   await screenshotLocator(wsPage.page, explorer.view, 'axonivy-tree-view', { marginTop: 40 });
 });
 

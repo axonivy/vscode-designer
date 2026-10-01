@@ -3,7 +3,7 @@ import { FileExplorer } from '~/page-objects/explorer-view';
 
 test('Export Ivy Project .iar', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
-  await wsPage.executeCommand('Axon Ivy: Export Project Archive (.iar)', 'playwrightTestWorkspace');
+  await wsPage.executeCommand('Axon Ivy: Export Project Archive (.iar)', 'prebuiltProject');
   await wsPage.page.getByRole('button', { name: 'Select folder' }).click();
   await wsPage.provideUserInput('testExportIar');
   await expect(wsPage.toasts.filter({ hasText: new RegExp('Project archive testExportIar has been exported to') })).toHaveCount(1);

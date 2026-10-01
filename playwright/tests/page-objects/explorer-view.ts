@@ -111,7 +111,7 @@ export class FileExplorer extends ExplorerView {
     }
     await this.selectNode('config');
     await this.wsPage.executeCommand('Axon Ivy: New ' + kind);
-    await this.wsPage.provideUserInput('playwrightTestWorkspace');
+    await this.wsPage.provideUserInput('prebuiltProject');
     await this.wsPage.provideUserInput(processName);
     await expect(this.wsPage.quickInputBox.getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
     await this.wsPage.provideUserInput(namespace);
@@ -135,7 +135,7 @@ export class FileExplorer extends ExplorerView {
   ) {
     await this.selectNode('config');
     await this.wsPage.executeCommand('Axon Ivy: New ' + kind);
-    await this.wsPage.provideUserInput('playwrightTestWorkspace');
+    await this.wsPage.provideUserInput('prebuiltProject');
     await this.wsPage.provideUserInput(dialogName);
     await expect(this.wsPage.quickInputBox.getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
     await this.wsPage.provideUserInput(namespace);
@@ -148,7 +148,7 @@ export class FileExplorer extends ExplorerView {
   async addDataClass(dataClass: string, namespace: string, defaultNamespaceExpected: string = 'prebuiltProject') {
     await this.selectNode('config');
     await this.wsPage.executeCommand('Axon Ivy: New Data Class');
-    await this.wsPage.provideUserInput('playwrightTestWorkspace');
+    await this.wsPage.provideUserInput('prebuiltProject');
     await this.wsPage.provideUserInput(dataClass);
     await expect(this.wsPage.quickInputBox.getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
     await this.wsPage.provideUserInput(namespace);
@@ -157,7 +157,7 @@ export class FileExplorer extends ExplorerView {
   async addEntityClass(entityClass: string, namespace: string, defaultNamespaceExpected: string = 'prebuiltProject') {
     await this.selectNode('config');
     await this.wsPage.executeCommand('Axon Ivy: New Entity Class');
-    await this.wsPage.provideUserInput('playwrightTestWorkspace');
+    await this.wsPage.provideUserInput('prebuiltProject');
     await this.wsPage.provideUserInput(entityClass);
     await expect(this.wsPage.quickInputBox.getByRole('textbox')).toHaveValue(defaultNamespaceExpected);
     await this.wsPage.provideUserInput(namespace);
