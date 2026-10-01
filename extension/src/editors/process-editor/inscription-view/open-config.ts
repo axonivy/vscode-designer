@@ -19,8 +19,7 @@ const parsePayload = (command: KnownCommand, args: InscriptionActionArgs) => {
     return JSON.parse(args.payload);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    logErrorMessage(`Failed to parse payload '${args.payload}' for command '${command}': ${message}`);
-    return;
+    logErrorMessage(`Failed to open config. Could not parse payload '${args.payload}' for command '${command}': ${message}`);
   }
 };
 
