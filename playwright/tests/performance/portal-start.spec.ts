@@ -16,6 +16,9 @@ test.describe('Portal performance', () => {
   test.use({ workspace: portalPerformanceWorkspacePath });
 
   test('Portal home', async ({ wsPage, electronApp }) => {
+    const openingJavaProjects = wsPage.toasts.getByText('Opening Java Projects');
+    await expect(openingJavaProjects).toBeVisible();
+    await expect(openingJavaProjects).toBeHidden();
     await expect(async () => {
       const javaReady = async () => await expect(wsPage.page.locator('div.statusbar-item[id*="redhat.java"]').filter({ hasText: 'Java: Ready' })).toBeVisible({ timeout: 1_000 });
       for (let i = 0; i < 2; i++) {
@@ -26,8 +29,8 @@ test.describe('Portal performance', () => {
     const editor = new ProcessEditor(wsPage, 'PortalStart.p.json');
     await wsPage.executeCommand('View: Hide Panel');
     await editor.open();
-    const start = editor.elementByPID('1549F58C18A6C562-f28');
     await wsPage.executeCommand('Notifications: Clear All Notifications');
+    const start = editor.elementByPID('1549F58C18A6C562-f28');
     const vscodeBrowser = await VsCodeBrowser.openBrowser(() => editor.startProcessAndAssertExecuted(start, start), { electronApp });
     await expect(vscodeBrowser.browserPage.locator('span.default-welcome-image')).toBeVisible();
   });
