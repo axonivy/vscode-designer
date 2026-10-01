@@ -579,6 +579,20 @@
           "axonivy.process.animation.speed": {
             "type": "integer",
             "default": 50,
+            "enum": [
+              0,
+              25,
+              50,
+              75,
+              100
+            ],
+            "enumItemLabels": [
+              "Fastest",
+              "Fast",
+              "Normal",
+              "Slow",
+              "Slowest"
+            ],
             "minimum": 0,
             "maximum": 100,
             "markdownDescription": "Specify process animation speed."
@@ -593,7 +607,14 @@
               "noDialogProcesses",
               "noEmbeddedProcesses"
             ],
-            "markdownDescription": "Specify process animation mode."
+            "enumItemLabels": [
+              "Show and open all touched processes (default)",
+              "Follow only in the current editor on top",
+              "Follow only in open editors",
+              "Do not enter dialog logic",
+              "Follow only top-level business processes"
+            ],
+            "markdownDescription": "Choose which processes to follow during animation. Turn off **Animate processes during preview** to stop following entirely."
           },
           "axonivy.workspaceValidation": {
             "type": "object",
