@@ -43,7 +43,8 @@ export class ProjectFileWatcherManager {
       }
       this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.deployProjects(d), 'deploy', uri);
     };
-    const mvnDepsWatcher = workspace.createFileSystemWatcher('**/target/lib/mvn-deps/*.jar');
+    // a newly created folder may be reported as a single event without its content (e.g. Maven creating mvn-deps with its jars)
+    const mvnDepsWatcher = workspace.createFileSystemWatcher('**/target/{lib,lib/mvn-deps,lib/mvn-deps/*.jar}');
     mvnDepsWatcher.onDidCreate(deployProject);
     mvnDepsWatcher.onDidChange(deployProject);
     mvnDepsWatcher.onDidDelete(deployProject);
