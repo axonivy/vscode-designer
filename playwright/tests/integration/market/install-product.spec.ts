@@ -26,7 +26,7 @@ test('Install product with maven-dependency from Market website', async ({ wsPag
   await checkbox.check();
   await wsPage.provideUserInput();
   await expect(wsPage.quickInputBox).toBeVisible();
-  await wsPage.provideUserInput('playwrightTestWorkspace');
+  await wsPage.provideUserInput('prebuiltProject');
   await wsPage.executeCommand('Refresh Explorer');
   await explorer.selectNodeExact('excel-connector-demo');
 });

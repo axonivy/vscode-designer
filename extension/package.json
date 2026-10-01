@@ -385,7 +385,7 @@
         "title": "Convert Project",
         "category": "Axon Ivy",
         "icon": "$(wrench)",
-        "enablement": "ivy:hasProjectsToConvert"
+        "enablement": "ivy:hasProjectsToConvert && (view != ivyProjects || viewItem =~ /requiresConversion/)"
       },
       {
         "command": "ivyProjects.convertAllProjects",
@@ -1059,7 +1059,7 @@
       "view/item/context": [
         {
           "command": "ivyProjects.convertProject",
-          "when": "view == ivyProjects && viewItem =~ /ivyProject/ && viewItem =~ /requiresConversion/",
+          "when": "view == ivyProjects && viewItem =~ /ivyProject/",
           "group": "inline@1"
         },
         {
@@ -1070,6 +1070,36 @@
         {
           "submenu": "view.item",
           "group": "inline@3"
+        },
+        {
+          "command": "ivyProjects.convertProject",
+          "when": "view == ivyProjects && viewItem =~ /ivyProject/",
+          "group": "1@1"
+        },
+        {
+          "command": "ivyProjects.deployProject",
+          "when": "view == ivyProjects && viewItem =~ /ivyProject/",
+          "group": "1@2"
+        },
+        {
+          "command": "ivyProjects.revealProjectInFileSystem",
+          "when": "view == ivyProjects && viewItem =~ /ivyProject/",
+          "group": "1@3"
+        },
+        {
+          "command": "ivyProjects.exportIvyProject",
+          "when": "view == ivyProjects && viewItem =~ /ivyProject/",
+          "group": "1@4"
+        },
+        {
+          "command": "ivy.debug.attachProcess",
+          "when": "view == ivyProjects && viewItem =~ /ivyProject/",
+          "group": "1@5"
+        },
+        {
+          "command": "ivyProjects.stopBpmEngine",
+          "when": "view == ivyProjects && viewItem =~ /ivyProject/",
+          "group": "1@6"
         }
       ],
       "view.item": [
