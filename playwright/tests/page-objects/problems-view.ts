@@ -19,11 +19,15 @@ export class ProblemsView {
     return problemsView;
   }
 
-  private async hasMaker(message: string, type: 'error' | 'warning') {
-    const marker = this.view.locator(`div.monaco-tl-row:has-text("${message}")`).first();
+  get marker() {
+    return this.view.getByRole('treeitem');
+  }
+
+  private async hasMarker(message: string, type: 'error' | 'warning') {
+    const marker = this.marker.locator(`.monaco-tl-row:has-text("${message}")`).first();
     await expect(marker).toHaveCount(1);
     await expect(marker).toBeVisible();
-    await expect(marker.locator(`div.marker-icon.${type}`)).toBeVisible();
+    await expect(marker.locator(`.marker-icon.${type}`)).toBeVisible();
   }
 
   async show() {
@@ -32,11 +36,11 @@ export class ProblemsView {
   }
 
   async hasWarning(message: string) {
-    await this.hasMaker(message, 'warning');
+    await this.hasMarker(message, 'warning');
   }
 
   async hasError(message: string) {
-    await this.hasMaker(message, 'error');
+    await this.hasMarker(message, 'error');
   }
 
   async hasNumOfMarkers(count: number) {
