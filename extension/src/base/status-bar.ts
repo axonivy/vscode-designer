@@ -34,6 +34,21 @@ const DEFAULT_TRUSTED_COMMANDS_MARKDOWN = [
   'workbench.action.openSettings'
 ] as const satisfies Array<KnownCommand>;
 
+const ANIMATION_SPEED_LABELS: Record<number, string> = {
+  0: 'Fastest',
+  25: 'Fast',
+  50: 'Normal',
+  75: 'Slow',
+  100: 'Slowest'
+};
+const ANIMATION_MODE_LABELS: Record<string, string> = {
+  all: 'Show and open all touched processes',
+  currentProcess: 'Follow only in the current editor on top',
+  openProcesses: 'Follow only in open editors',
+  noDialogProcesses: 'Do not enter dialog logic',
+  noEmbeddedProcesses: 'Follow only top-level business processes'
+};
+
 type StatusQuickPickItem = QuickPickItem & { id?: string; command?: KnownCommand; commandArgs?: unknown[]; hidden?: boolean };
 
 const QUICK_PICK_OPTIONS = [
@@ -261,7 +276,7 @@ export class StatusBar {
     }
 
     const markdown = newMarkdownString(`### ${DEFAULT_PREFIX} Engine Status - ${statusLabel}`);
-    markdown.appendMarkdown('\n\n Animation ' + this.buildAnimationStatusString());
+    markdown.appendMarkdown('\n\n' + this.buildAnimationStatusString());
     markdown.appendMarkdown('\n\n Projects in Workspace - ' + (await this.buildProjectCountString()));
     markdown.appendMarkdown('\n\n Engine URL - ' + this.buildEngineUrlString());
     markdown.appendMarkdown('\n\n Engine Dir - ' + (await this.buildEngineDirString()));
@@ -298,10 +313,14 @@ export class StatusBar {
   }
 
   private buildAnimationStatusString() {
-    const animationToggleCommandLink = animationSettings().animate
+    const settings = animationSettings();
+    const animationToggleCommandLink = settings.animate
       ? '[Turn OFF](command:engine.deactivateAnimation)'
       : '[Turn ON](command:engine.activateAnimation)';
-    return `${animationSettings().animate ? `ON (${animationToggleCommandLink})` : `OFF (${animationToggleCommandLink})`} (Speed: ${animationSettings().speed}, Mode: ${animationSettings().mode})`;
+    const speed = ANIMATION_SPEED_LABELS[settings.speed] ?? String(settings.speed);
+    const mode = ANIMATION_MODE_LABELS[settings.mode] ?? settings.mode;
+    const state = settings.animate ? `ON (${animationToggleCommandLink})` : `OFF (${animationToggleCommandLink})`;
+    return `**Animation:** ${state}  \n**Animation Speed:** ${speed}  \n**Animation Mode:** ${mode}`;
   }
 
   private async buildEngineVersionString() {
