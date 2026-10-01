@@ -622,6 +622,7 @@
               "database": true,
               "dataclass": true,
               "form": true,
+              "javaIndex": true,
               "process": true,
               "restclient": true,
               "role": true,
@@ -642,6 +643,10 @@
               "form": {
                 "type": "boolean",
                 "description": "Dialogs: *.f.json"
+              },
+              "javaIndex": {
+                "type": "boolean",
+                "description": "Beans/FacesConverter/FacesValidator: *.java"
               },
               "process": {
                 "type": "boolean",
