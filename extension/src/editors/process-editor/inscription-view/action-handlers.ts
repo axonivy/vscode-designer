@@ -31,7 +31,7 @@ export const handleActionLocal = (msg: unknown, sendInscriptionNotification: Sen
         break;
       case 'openDatabaseConfig':
       case 'newDatabaseConfig':
-        executeCommand('ivyEditor.openDatabaseEditor');
+        handleOpenConfig('ivyEditor.openDatabaseEditor', msg.params);
         break;
       case 'openCustomField':
         executeCommand('ivyEditor.openCustomFieldEditor');
