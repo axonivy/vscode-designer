@@ -27,14 +27,14 @@ export const handleActionLocal = (msg: unknown, sendInscriptionNotification: Sen
         break;
       case 'openWsConfig':
       case 'newWebServiceClient':
-        executeCommand('ivyEditor.openWebServiceClientEditor');
+        handleOpenConfig('ivyEditor.openWebServiceClientEditor', msg.params);
         break;
       case 'openDatabaseConfig':
       case 'newDatabaseConfig':
-        executeCommand('ivyEditor.openDatabaseEditor');
+        handleOpenConfig('ivyEditor.openDatabaseEditor', msg.params);
         break;
       case 'openCustomField':
-        executeCommand('ivyEditor.openCustomFieldEditor');
+        handleOpenConfig('ivyEditor.openCustomFieldEditor', msg.params);
         break;
       case 'openOrCreateCmsCategory':
         executeCommand('ivyEditor.openCmsEditor');

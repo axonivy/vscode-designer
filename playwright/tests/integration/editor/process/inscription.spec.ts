@@ -1,14 +1,18 @@
 import { expect } from '@playwright/test';
 import { test } from '~/fixtures/baseTest';
+import { DatabaseEditor } from '~/page-objects/database-editor';
 import { TextEditor } from '~/page-objects/editor';
 import { OutputView } from '~/page-objects/output-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
 import { RestClientEditor } from '~/page-objects/restclient-editor';
+import { WebServiceClientEditor } from '~/page-objects/webservice-client-editor';
 
 const userDialogPID1 = '15254DCE818AD7A2-f3';
 const userDialogPID2 = '15254DCE818AD7A2-f14';
 const userTaskPID = '15254DCE818AD7A2-f17';
 const namespace = 'testNamespace';
+
+const actionsProcessPID = '1A0F1ED6FCC52C9A';
 
 test('Check Process Editor Connector', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage);
@@ -276,31 +280,99 @@ test('Create Offline Dialog', async ({ wsPage }) => {
   await expect(dialogField).toHaveValue(`prebuiltProject.${userDialogName}:start(prebuiltProject.Data)`);
 });
 
-test('Open Rest config', async ({ wsPage }) => {
-  const restClientPid = '1A0F1ED6FCC52C9A-f3';
+test.describe('Open config actions', () => {
+  test('Open Rest config', async ({ wsPage }) => {
+    const restClientPid = `${actionsProcessPID}-f3`;
 
-  const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
-  const restClientEditor = new RestClientEditor(wsPage);
+    const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
+    const restClientEditor = new RestClientEditor(wsPage);
 
-  await processEditor.open();
-  let inscriptionView = await processEditor.openInscriptionView(restClientPid);
-  await inscriptionView.openInscriptionTab('Request');
-  await inscriptionView.clickButton('Open Rest config');
-  await restClientEditor.expectTabActive();
+    await processEditor.open();
+    const inscriptionView = await processEditor.openInscriptionView(restClientPid);
+    await inscriptionView.openInscriptionTab('Request');
+    await inscriptionView.clickButton('Open Rest config');
+    await restClientEditor.expectTabActive();
 
-  await processEditor.open();
-  await restClientEditor.expectTabInactive();
-  inscriptionView = await processEditor.openInscriptionView(restClientPid);
-  await inscriptionView.openInscriptionTab('Request');
-  await inscriptionView.parent.getByRole('combobox', { name: 'Client' }).click();
-  await processEditor.webViewFrame.getByRole('option', { name: 'personService' }).click();
-  await inscriptionView.clickButton('Open Rest config');
-  await restClientEditor.expectTabActive();
+    await processEditor.open();
+    await restClientEditor.expectTabInactive();
+    await inscriptionView.parent.getByRole('combobox', { name: 'Client' }).click();
+    await processEditor.webViewFrame.getByRole('option', { name: 'personService' }).click();
+    await inscriptionView.clickButton('Open Rest config');
+    await restClientEditor.expectTabActive();
 
-  await processEditor.open();
-  await restClientEditor.expectTabInactive();
-  inscriptionView = await processEditor.openInscriptionView(restClientPid);
-  await inscriptionView.openInscriptionTab('Request');
-  await inscriptionView.clickButton('Create new Rest Client');
-  await restClientEditor.expectTabActive();
+    await processEditor.open();
+    await restClientEditor.expectTabInactive();
+    await inscriptionView.clickButton('Create new Rest Client');
+    await restClientEditor.expectTabActive();
+  });
+
+  test('Open WebService config', async ({ wsPage }) => {
+    const webServicePid = `${actionsProcessPID}-f5`;
+
+    const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
+    const webServiceClientEditor = new WebServiceClientEditor(wsPage);
+
+    await processEditor.open();
+    const inscriptionView = await processEditor.openInscriptionView(webServicePid);
+    await inscriptionView.openInscriptionTab('Request');
+    await inscriptionView.clickButton('Open WebService config');
+    await webServiceClientEditor.expectTabActive();
+
+    await processEditor.open();
+    await webServiceClientEditor.expectTabInactive();
+    await inscriptionView.parent.getByRole('combobox', { name: 'Client' }).click();
+    await processEditor.webViewFrame.getByRole('option', { name: 'technicalBackend' }).click();
+    await inscriptionView.clickButton('Open WebService config');
+    await webServiceClientEditor.expectTabActive();
+
+    await processEditor.open();
+    await webServiceClientEditor.expectTabInactive();
+    await inscriptionView.clickButton('Create new WebService Client');
+    await webServiceClientEditor.expectTabActive();
+  });
+
+  test('Open Database client', async ({ wsPage }) => {
+    const databasePid = `${actionsProcessPID}-f7`;
+
+    const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
+    const databaseEditor = new DatabaseEditor(wsPage);
+
+    await processEditor.open();
+    const inscriptionView = await processEditor.openInscriptionView(databasePid);
+    await inscriptionView.openInscriptionTab('Query');
+    await inscriptionView.clickButton('Open Database Client');
+    await databaseEditor.expectTabActive();
+
+    await processEditor.open();
+    await databaseEditor.expectTabInactive();
+    await inscriptionView.parent.getByRole('combobox', { name: 'Database' }).click();
+    await processEditor.webViewFrame.getByRole('option', { name: 'demo_db' }).click();
+    await inscriptionView.clickButton('Open Database Client');
+    await databaseEditor.expectTabActive();
+
+    await processEditor.open();
+    await databaseEditor.expectTabInactive();
+    await inscriptionView.clickButton('Create new Database Client');
+    await databaseEditor.expectTabActive();
+  });
+
+  test('Open custom field configuration', async ({ wsPage }) => {
+    const startPid = `${actionsProcessPID}-f0`;
+
+    const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
+    const customFieldsEditor = new TextEditor(wsPage, 'custom-fields.yaml');
+
+    await processEditor.open();
+    const inscriptionView = await processEditor.openInscriptionView(startPid);
+    await inscriptionView.openInscriptionTab('Request');
+    await inscriptionView.openCollapsible('Custom Fields');
+    await inscriptionView.clickButton('Open custom field configuration');
+    await customFieldsEditor.expectTabActive();
+
+    await processEditor.open();
+    await customFieldsEditor.expectTabInactive();
+    await inscriptionView.parent.getByRole('cell').first().click();
+    await inscriptionView.clickButton('Open custom field configuration');
+    await customFieldsEditor.expectTabActive();
+  });
 });
