@@ -24,10 +24,10 @@ export class ProblemsView {
   }
 
   private async hasMarker(message: string, type: 'error' | 'warning') {
-    const marker = this.marker.locator(`.monaco-tl-row:has-text("${message}")`).first();
+    const marker = this.view.locator(`div.monaco-tl-row:has-text("${message}")`).first();
     await expect(marker).toHaveCount(1);
     await expect(marker).toBeVisible();
-    await expect(marker.locator(`.marker-icon.${type}`)).toBeVisible();
+    await expect(marker.locator(`div.marker-icon.${type}`)).toBeVisible();
   }
 
   async show() {
