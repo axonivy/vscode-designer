@@ -48,7 +48,7 @@ test.describe('screenshot project', () => {
     await expect(start).toBeVisible();
     const dialog = processEditor.elementByPID('148655DDB7BB6588-f3');
     await processEditor.addBreakpoint(dialog);
-    await debugView.assertBreakpoint('quickstart.p.json', '28');
+    await debugView.assertBreakpoint('quickstart.p.json', '31');
 
     await wsPage.page.waitForTimeout(2_000); // ensure session is started
     await processEditor.startProcessAndAssertExecuted(start, dialog);
