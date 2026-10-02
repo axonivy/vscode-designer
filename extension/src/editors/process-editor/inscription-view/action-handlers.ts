@@ -34,7 +34,7 @@ export const handleActionLocal = (msg: unknown, sendInscriptionNotification: Sen
         handleOpenConfig('ivyEditor.openDatabaseEditor', msg.params);
         break;
       case 'openCustomField':
-        executeCommand('ivyEditor.openCustomFieldEditor');
+        handleOpenConfig('ivyEditor.openCustomFieldEditor', msg.params);
         break;
       case 'openOrCreateCmsCategory':
         executeCommand('ivyEditor.openCmsEditor');

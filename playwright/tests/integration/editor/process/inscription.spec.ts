@@ -359,4 +359,24 @@ test.describe('Open config actions', () => {
     await inscriptionView.clickButton('Create new Database Client');
     await databaseEditor.expectTabActive();
   });
+
+  test('Open custom field configuration', async ({ wsPage }) => {
+    const startPid = `${actionsProcessPID}-f0`;
+
+    const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
+    const customFieldsEditor = new TextEditor(wsPage, 'custom-fields.yaml');
+
+    await processEditor.open();
+    const inscriptionView = await processEditor.openInscriptionView(startPid);
+    await inscriptionView.openInscriptionTab('Request');
+    await inscriptionView.openCollapsible('Custom Fields');
+    await inscriptionView.clickButton('Open custom field configuration');
+    await customFieldsEditor.expectTabActive();
+
+    await processEditor.open();
+    await customFieldsEditor.expectTabInactive();
+    await inscriptionView.parent.getByRole('cell').first().click();
+    await inscriptionView.clickButton('Open custom field configuration');
+    await customFieldsEditor.expectTabActive();
+  });
 });
