@@ -288,15 +288,13 @@ test.describe('Open config actions', () => {
     const restClientEditor = new RestClientEditor(wsPage);
 
     await processEditor.open();
-    let inscriptionView = await processEditor.openInscriptionView(restClientPid);
+    const inscriptionView = await processEditor.openInscriptionView(restClientPid);
     await inscriptionView.openInscriptionTab('Request');
     await inscriptionView.clickButton('Open Rest config');
     await restClientEditor.expectTabActive();
 
     await processEditor.open();
     await restClientEditor.expectTabInactive();
-    inscriptionView = await processEditor.openInscriptionView(restClientPid);
-    await inscriptionView.openInscriptionTab('Request');
     await inscriptionView.parent.getByRole('combobox', { name: 'Client' }).click();
     await processEditor.webViewFrame.getByRole('option', { name: 'personService' }).click();
     await inscriptionView.clickButton('Open Rest config');
@@ -304,8 +302,6 @@ test.describe('Open config actions', () => {
 
     await processEditor.open();
     await restClientEditor.expectTabInactive();
-    inscriptionView = await processEditor.openInscriptionView(restClientPid);
-    await inscriptionView.openInscriptionTab('Request');
     await inscriptionView.clickButton('Create new Rest Client');
     await restClientEditor.expectTabActive();
   });
