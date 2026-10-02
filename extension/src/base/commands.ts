@@ -2,8 +2,8 @@ import type { ExtensionContext } from 'vscode';
 import { commands } from 'vscode';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function executeCommand(command: KnownCommand, ...rest: any[]) {
-  return commands.executeCommand(command, ...rest);
+export async function executeCommand<T = unknown>(command: KnownCommand, ...rest: any[]) {
+  return commands.executeCommand<T>(command, ...rest);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,6 +24,7 @@ export type KnownCommand =
 type VSCodeCommand =
   | 'setContext'
   | 'vscode.open'
+  | 'vscode.executeWorkspaceSymbolProvider'
   | 'copyFilePath'
   | 'workbench.action.openSettings'
   | 'workbench.action.reloadWindow'

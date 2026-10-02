@@ -5,6 +5,7 @@ import { handleNewProcess } from './new-process';
 import { handleNewHtmlDialog } from './new-user-dialog';
 import { handleOpenAction } from './open-action';
 import { handleOpenPage } from './open-page';
+import { handleOpenProgram } from './open-program';
 
 export type SendInscriptionNotification = (type: keyof InscriptionNotificationTypes) => void;
 
@@ -38,9 +39,11 @@ export const handleActionLocal = (msg: unknown, sendInscriptionNotification: Sen
       case 'openCms':
         handleOpenAction('ivyEditor.openCmsEditor', msg.params);
         break;
-      case 'openEndPage':
-      case 'newProgram':
       case 'openProgram':
+        handleOpenProgram(msg.params);
+        break;
+      case 'newProgram':
+      case 'openEndPage':
         logWarningMessage(`Action '${msg.params.actionId}' is not yet implemented.`);
         break;
       default:
