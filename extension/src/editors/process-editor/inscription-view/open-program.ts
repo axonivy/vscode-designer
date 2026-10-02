@@ -1,5 +1,4 @@
 import type { InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
-import path from 'path';
 import { type SymbolInformation, type Uri } from 'vscode';
 import { executeCommand } from '../../../base/commands';
 import { logWarningMessage } from '../../../base/logging-util';
@@ -13,26 +12,25 @@ export const handleOpenProgram = async (args: InscriptionActionArgs) => {
     logWarningMessage(`Failed to open Java file. No symbols found for fully qualified name: ${fullyQualifiedName}`);
     return;
   }
-  const matches = await findMatches(symbols, fullyQualifiedName, args.context.project);
-  if (matches.length !== 1) {
-    logWarningMessage(
-      `Failed to open Java file. Could not uniquely resolve fully qualified name '${fullyQualifiedName}'. Found matches: ${matches.map(match => match.toString()).join(', ')}`
-    );
+  const match = await findMatch(symbols, fullyQualifiedName, args.context.project);
+  if (!match) {
+    logWarningMessage(`Failed to open Java file. No match found for fully qualified name: ${fullyQualifiedName}`);
     return;
   }
-  await executeCommand('vscode.open', matches[0]);
+  await executeCommand('vscode.open', match);
 };
 
-const findMatches = async (symbols: Array<SymbolInformation>, fullyQualifiedName: string, projectName: string) => {
-  const project = await IvyEngineManager.instance.projects().then(projects => projects?.find(project => project.id.name === projectName));
-  if (!project) {
-    return [];
-  }
+const findMatch = async (symbols: Array<SymbolInformation>, fullyQualifiedName: string, projectName: string) => {
   const javaMatches = symbols.filter(symbol => isJavaMatch(symbol, fullyQualifiedName));
   if (!javaMatches) {
-    return [];
+    return;
   }
-  return javaMatches.filter(symbol => belongsToProject(symbol.location.uri, project)).map(symbol => symbol.location.uri);
+  const allProjectsWithDependencies = await IvyEngineManager.instance.projects(true);
+  const project = allProjectsWithDependencies?.find(project => project.id.name === projectName);
+  if (!project || !allProjectsWithDependencies) {
+    return;
+  }
+  return javaMatches.find(symbol => belongsToProject(symbol.location.uri, project, allProjectsWithDependencies))?.location.uri;
 };
 
 const isJavaMatch = (symbol: SymbolInformation, fullyQualifiedName: string) =>
@@ -40,24 +38,36 @@ const isJavaMatch = (symbol: SymbolInformation, fullyQualifiedName: string) =>
 
 const isJavaUri = (uri: Uri) => uri.scheme === 'jdt' || (uri.scheme === 'file' && uri.path.endsWith('.java'));
 
-const belongsToProject = (uri: Uri, project: ProjectBean) => {
+const belongsToProject = (uri: Uri, project: ProjectBean, allProjectsWithDependencies: Array<ProjectBean>) => {
+  let uriMatcher;
   if (uri.scheme === 'file') {
-    const relativePath = path.relative(project.projectDirectory, uri.fsPath);
-    return relativePath === '' || (!path.isAbsolute(relativePath) && relativePath !== '..' && !relativePath.startsWith(`..${path.sep}`));
+    uriMatcher = () => uri.path.startsWith(project.projectDirectory);
+  } else {
+    uriMatcher = () => uri.query.startsWith(`=${project.id.name}/`);
   }
-
-  if (uri.scheme === 'jdt') {
-    const query = decodeUriQuery(uri.query);
-    return query.match(/^=([^/]+)\//)?.[1] === project.id.name;
-  }
-
-  return false;
+  return uriBelongsToProject(uri, project, allProjectsWithDependencies, uriMatcher);
 };
 
-const decodeUriQuery = (query: string) => {
-  try {
-    return decodeURIComponent(query).replace(/\\\//g, '/');
-  } catch {
-    return query;
-  }
+const uriBelongsToProject = (
+  uri: Uri,
+  project: ProjectBean,
+  allProjectsWithDependencies: Array<ProjectBean>,
+  uriMatcher: (uri: Uri, project: ProjectBean) => boolean
+): boolean => {
+  return uriMatcher(uri, project) || uriBelongsToRequiredProject(uri, project, allProjectsWithDependencies, uriMatcher);
+};
+
+const uriBelongsToRequiredProject = (
+  uri: Uri,
+  project: ProjectBean,
+  allProjectsWithDependencies: Array<ProjectBean>,
+  uriMatcher: (uri: Uri, project: ProjectBean) => boolean
+): boolean => {
+  return project.dependencies.some(dependency => {
+    const requiredProject = allProjectsWithDependencies.find(p => p.id.name === dependency.name);
+    if (!requiredProject) {
+      return false;
+    }
+    return uriBelongsToProject(uri, requiredProject, allProjectsWithDependencies, uriMatcher);
+  });
 };
