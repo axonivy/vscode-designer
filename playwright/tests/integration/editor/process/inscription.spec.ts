@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 import { test } from '~/fixtures/baseTest';
+import { CmsEditor } from '~/page-objects/cms-editor';
 import { DatabaseEditor } from '~/page-objects/database-editor';
 import { TextEditor } from '~/page-objects/editor';
 import { OutputView } from '~/page-objects/output-view';
@@ -374,5 +375,18 @@ test.describe('Open config actions', () => {
     await inscriptionView.parent.getByRole('cell').first().click();
     await inscriptionView.clickButton('Open custom field configuration');
     await customFieldsEditor.expectTabActive();
+  });
+
+  test('Open CMS Editor', async ({ wsPage }) => {
+    const startPid = `${actionsProcessPID}-f0`;
+
+    const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
+    const cmsEditor = new CmsEditor(wsPage);
+
+    await processEditor.open();
+    const inscriptionView = await processEditor.openInscriptionView(startPid);
+    await inscriptionView.openInscriptionTab('Request');
+    await inscriptionView.clickButton('Open CMS Editor');
+    await cmsEditor.expectTabActive();
   });
 });
