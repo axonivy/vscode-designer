@@ -3,7 +3,7 @@ import { OutputView } from '~/page-objects/output-view';
 import { ProblemsView } from '~/page-objects/problems-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
 import { VsDebugView } from '~/page-objects/vs-debug-view';
-import { embeddedEngineWorkspace, outdatedProjectWorkspacePath, screenshotProject } from '~/workspaces/workspace';
+import { outdatedProjectWorkspacePath, screenshotProject } from '~/workspaces/workspace';
 import { screenshot, screenshotLocator } from './screenshot-util';
 
 test.describe('outdated project', () => {
@@ -21,20 +21,22 @@ test.describe('outdated project', () => {
   });
 });
 
-test.describe('embedded engine workspace', () => {
-  test.use({ workspace: embeddedEngineWorkspace });
+test.describe('screenshot project', () => {
+  test.use({ workspace: screenshotProject });
 
   test('engine output', async ({ wsPage }) => {
     const output = new OutputView(wsPage);
-    await output.openLog('Axon Ivy Engine');
-    await output.scrollToTop();
-    await output.sourceSelection.click();
-    await screenshotLocator(wsPage.page, output.view, 'engine-output', { marginTop: 50 });
-  });
-});
+    await output.openLog('Axon Ivy Runtime Log');
 
-test.describe('screenshot project', () => {
-  test.use({ workspace: screenshotProject });
+    const processEditor = new ProcessEditor(wsPage, 'quickstart.p.json');
+    await processEditor.open();
+    const start = processEditor.elementByPID('148655DDB7BB6588-f0');
+    await expect(start).toBeVisible();
+    await processEditor.startProcessAndAssertExecuted(start, start);
+
+    await output.sourceSelection.click();
+    await screenshotLocator(wsPage.page, output.view, 'output-view', { marginTop: 50 });
+  });
 
   test('debug view', async ({ wsPage }) => {
     const processEditor = new ProcessEditor(wsPage, 'quickstart.p.json');
