@@ -1,10 +1,9 @@
 import type { InscriptionActionArgs, InscriptionNotificationTypes } from '@axonivy/process-editor-inscription-protocol';
-import { executeCommand } from '../../../base/commands';
 import { logWarningMessage } from '../../../base/logging-util';
 import { isAction, noUnknownAction } from '../../notification-helper';
 import { handleNewProcess } from './new-process';
 import { handleNewHtmlDialog } from './new-user-dialog';
-import { handleOpenConfig } from './open-config';
+import { handleOpenAction } from './open-action';
 import { handleOpenPage } from './open-page';
 
 export type SendInscriptionNotification = (type: keyof InscriptionNotificationTypes) => void;
@@ -23,21 +22,21 @@ export const handleActionLocal = (msg: unknown, sendInscriptionNotification: Sen
         break;
       case 'openRestConfig':
       case 'newRestClient':
-        handleOpenConfig('ivyEditor.openRestClientEditor', msg.params);
+        handleOpenAction('ivyEditor.openRestClientEditor', msg.params);
         break;
       case 'openWsConfig':
       case 'newWebServiceClient':
-        handleOpenConfig('ivyEditor.openWebServiceClientEditor', msg.params);
+        handleOpenAction('ivyEditor.openWebServiceClientEditor', msg.params);
         break;
       case 'openDatabaseConfig':
       case 'newDatabaseConfig':
-        handleOpenConfig('ivyEditor.openDatabaseEditor', msg.params);
+        handleOpenAction('ivyEditor.openDatabaseEditor', msg.params);
         break;
       case 'openCustomField':
-        handleOpenConfig('ivyEditor.openCustomFieldEditor', msg.params);
+        handleOpenAction('ivyEditor.openCustomFieldEditor', msg.params);
         break;
-      case 'openOrCreateCmsCategory':
-        executeCommand('ivyEditor.openCmsEditor');
+      case 'openCms':
+        handleOpenAction('ivyEditor.openCmsEditor', msg.params);
         break;
       case 'openEndPage':
       case 'newProgram':

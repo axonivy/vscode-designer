@@ -1,12 +1,12 @@
-import { isOpenConfigEditorPayload, type InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
+import { isOpenActionPayload, type InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
 import { Uri } from 'vscode';
 import { executeCommand, type KnownCommand } from '../../../base/commands';
 import { logErrorMessage } from '../../../base/logging-util';
 import { IvyEngineManager } from '../../../engine/engine-manager';
 
-export const handleOpenConfig = async (command: KnownCommand, args: InscriptionActionArgs) => {
+export const handleOpenAction = async (command: KnownCommand, args: InscriptionActionArgs) => {
   const payload = parsePayload(command, args);
-  const project = isOpenConfigEditorPayload(payload) ? payload.project : args.context.project;
+  const project = isOpenActionPayload(payload) ? payload.project : args.context.project;
   const projectUri = await resolveProjectUri(project);
   executeCommand(command, projectUri);
 };
