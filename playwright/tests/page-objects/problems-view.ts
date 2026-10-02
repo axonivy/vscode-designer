@@ -6,8 +6,8 @@ export class ProblemsView {
   readonly view: Locator;
 
   constructor(readonly wsPage: WorkspacePage) {
-    this.tab = wsPage.page.locator('li.action-item:has-text("Problems")');
-    this.view = wsPage.page.locator('div.markers-panel-container');
+    this.tab = wsPage.page.locator('.action-item:has-text("Problems")');
+    this.view = wsPage.page.locator('.markers-panel-container');
   }
 
   static async initProblemsView(wsPage: WorkspacePage) {
@@ -24,10 +24,10 @@ export class ProblemsView {
   }
 
   private async hasMarker(message: string, type: 'error' | 'warning') {
-    const marker = this.view.locator(`div.monaco-tl-row:has-text("${message}")`).first();
+    const marker = this.marker.locator(`.monaco-tl-row:has-text("${message}")`).first();
     await expect(marker).toHaveCount(1);
     await expect(marker).toBeVisible();
-    await expect(marker.locator(`div.marker-icon.${type}`)).toBeVisible();
+    await expect(marker.locator(`.marker-icon.${type}`)).toBeVisible();
   }
 
   async show() {
@@ -44,7 +44,7 @@ export class ProblemsView {
   }
 
   async hasNumOfMarkers(count: number) {
-    const marker = this.view.locator('div.marker-icon');
+    const marker = this.view.locator('.marker-icon');
     await expect(marker).toHaveCount(count);
     if (count === 0) {
       await expect(this.view).toContainText('No problems have been detected in the workspace.');

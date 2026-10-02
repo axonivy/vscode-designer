@@ -39,9 +39,4 @@ export class OutputView {
   async expectLogEntry(entry: string | RegExp, timeout?: number) {
     await expect(this.logEntries).toContainText(entry, { timeout });
   }
-
-  async scrollToTop() {
-    await this.view.click();
-    await this.view.press(process.platform === 'darwin' ? 'Meta+ArrowUp' : 'Control+Home');
-  }
 }
