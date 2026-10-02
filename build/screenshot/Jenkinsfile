@@ -19,6 +19,7 @@ pipeline {
       steps {
         script {
           docker.build('node-webtest', '-f build/Dockerfile.playwright .').inside {
+            maven cmd: "-ntp -f playwright/tests/workspaces/screenshotProject/pom.xml clean package"
             maven cmd: "-ntp com.axonivy.ivy.ci:project-build-plugin:installEngine -Divy.engine.list.url=${params.engineListUrl}"
             sh """
             pnpm install && pnpm run update:axonivy:next
