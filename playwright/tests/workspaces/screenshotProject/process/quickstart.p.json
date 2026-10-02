@@ -9,7 +9,10 @@
       "type" : "RequestStart",
       "name" : "start.ivp",
       "config" : {
-        "signature" : "start"
+        "signature" : "start",
+        "task" : {
+          "code" : "ivy.log.info(\"Start process\");"
+        }
       },
       "visual" : {
         "at" : { "x" : 96, "y" : 64 },
