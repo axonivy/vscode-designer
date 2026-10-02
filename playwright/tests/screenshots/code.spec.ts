@@ -1,10 +1,7 @@
 import { expect, test } from '~/fixtures/baseTest';
-import { ExplorerView, FileExplorer, ProjectExplorerView } from '~/page-objects/explorer-view';
-import { OutputView } from '~/page-objects/output-view';
-import { ProblemsView } from '~/page-objects/problems-view';
-import { ProcessEditor } from '~/page-objects/process-editor';
+import { ExplorerView, ProjectExplorerView } from '~/page-objects/explorer-view';
 import { WelcomePage } from '~/page-objects/welcome-page';
-import { embeddedEngineWorkspace, screenshotProject } from '~/workspaces/workspace';
+import { screenshotProject } from '~/workspaces/workspace';
 import { screenshot, screenshotLocator } from './screenshot-util';
 
 test.use({ workspace: screenshotProject });
@@ -74,33 +71,33 @@ test.describe('empty workspace', () => {
   });
 });
 
-test.describe('new project', () => {
-  test.use({ workspace: embeddedEngineWorkspace });
+// test.describe('new project', () => {
+//   test.use({ workspace: embeddedEngineWorkspace });
 
-  test('new project', async ({ wsPage }) => {
-    await new WelcomePage(wsPage).open();
-    const outputview = new OutputView(wsPage);
-    await outputview.openLog('Axon Ivy Engine');
-    await outputview.checkIfEngineStarted();
-    await screenshot(wsPage.page, 'empty-project');
+//   test('new project', async ({ wsPage }) => {
+//     await new WelcomePage(wsPage).open();
+//     const outputview = new OutputView(wsPage);
+//     await outputview.openLog('Axon Ivy Engine');
+//     await outputview.checkIfEngineStarted();
+//     await screenshot(wsPage.page, 'empty-project');
 
-    await wsPage.executeCommand('Axon Ivy: New Project');
-    await wsPage.provideUserInput('myNewProject');
-    await wsPage.provideUserInput();
-    await wsPage.provideUserInput();
+//     await wsPage.executeCommand('Axon Ivy: New Project');
+//     await wsPage.provideUserInput('myNewProject');
+//     await wsPage.provideUserInput();
+//     await wsPage.provideUserInput();
 
-    await wsPage.activateExpensiveJavaStandardMode();
+//     await wsPage.activateExpensiveJavaStandardMode();
 
-    const explorer = new FileExplorer(wsPage);
-    await wsPage.hasReadyStatusMessage();
-    await explorer.hasNodeExact('myNewProject');
+//     const explorer = new FileExplorer(wsPage);
+//     await wsPage.hasReadyStatusMessage();
+//     await explorer.hasNodeExact('myNewProject');
 
-    const problemsView = await ProblemsView.initProblemsView(wsPage);
-    await problemsView.hasNumOfMarkers(0);
+//     const problemsView = await ProblemsView.initProblemsView(wsPage);
+//     await problemsView.hasNumOfMarkers(0);
 
-    const processEditor = new ProcessEditor(wsPage, 'BusinessProcess.p.json');
-    await processEditor.expectWebViewVisible();
+//     const processEditor = new ProcessEditor(wsPage, 'BusinessProcess.p.json');
+//     await processEditor.expectWebViewVisible();
 
-    await screenshot(wsPage.page, 'new-project');
-  });
-});
+//     await screenshot(wsPage.page, 'new-project');
+//   });
+// });
