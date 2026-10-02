@@ -389,4 +389,24 @@ test.describe('Open config actions', () => {
     await inscriptionView.clickButton('Open CMS Editor');
     await cmsEditor.expectTabActive();
   });
+
+  test('Open Java Class config', async ({ wsPage }) => {
+    await wsPage.activateExpensiveJavaStandardMode();
+
+    const programPid = `${actionsProcessPID}-f12`;
+
+    const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
+
+    await processEditor.open();
+    const inscriptionView = await processEditor.openInscriptionView(programPid);
+    await inscriptionView.openInscriptionTab('Java Bean');
+    await inscriptionView.clickButton('Open Java Class config');
+    await new TextEditor(wsPage, 'TestProgramExecutor.java').expectTabActive();
+
+    await processEditor.open();
+    await inscriptionView.parent.getByRole('combobox').click();
+    await processEditor.webViewFrame.getByRole('option', { name: 'Wait' }).click();
+    await inscriptionView.clickButton('Open Java Class config');
+    await new TextEditor(wsPage, 'Wait.java').expectTabActive();
+  });
 });
