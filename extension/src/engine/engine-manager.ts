@@ -194,6 +194,7 @@ export class IvyEngineManager {
       await xhtmlLanguageClient.sendNotification(DidChangeWatchedFilesNotification.type, {
         changes: []
       });
+      await IvyDiagnostics.instance.refresh();
     });
   }
 
