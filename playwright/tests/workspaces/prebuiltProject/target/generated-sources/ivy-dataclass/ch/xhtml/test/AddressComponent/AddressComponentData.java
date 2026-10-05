@@ -9,7 +9,7 @@ public class AddressComponentData extends ch.ivyteam.ivy.scripting.objects.Compo
   /** SerialVersionUID */
   private static final long serialVersionUID = -5809870861664543756L;
 
-  private prebuiltProject.Address address;
+  private transient prebuiltProject.Address address;
 
   /**
    * Gets the field address.

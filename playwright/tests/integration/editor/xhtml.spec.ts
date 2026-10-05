@@ -26,8 +26,6 @@ test('xhtml preview', async ({ wsPage, electronApp }) => {
   await editor.open();
   await wsPage.hasReadyStatusMessage();
 
-  const timeout = { timeout: 3_000 };
-  await wsPage.hasReadyStatusMessage();
   await wsPage.executeCommand('Axon Ivy: Deploy All Projects');
   await wsPage.statusMessageContains('Axon Ivy: Success: Deploying project');
   const vscodeBrowser = await VsCodeBrowser.openBrowser(() => wsPage.page.getByRole('button', { name: 'Open Dialog Preview' }).click(), {
@@ -36,10 +34,10 @@ test('xhtml preview', async ({ wsPage, electronApp }) => {
   });
   const frame = vscodeBrowser.browserPage.frameLocator('iframe');
   const button = frame.getByRole('button', { name: 'Proceed' });
-  await expect(vscodeBrowser.browserPage.locator('#iFrameForm\\:frameTaskName')).toHaveText('Preview', timeout);
+  await expect(vscodeBrowser.browserPage.locator('#iFrameForm\\:frameTaskName')).toHaveText('Preview');
   await expect(async () => {
     await vscodeBrowser.reload();
-    await expect(button).toBeVisible(timeout);
+    await expect(button).toBeVisible({ timeout: 3_000 });
   }).toPass();
 
   await editor.close();
