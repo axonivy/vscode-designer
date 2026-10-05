@@ -28,6 +28,18 @@ test('Edit input label', async ({ wsPage }) => {
   await expect(xhtmlEditor.content).toContainText(`value="${newLabel}" />`);
 });
 
+test('Convert dialog form to JSF', async ({ wsPage }) => {
+  const editor = new FormEditor(wsPage);
+  await editor.open();
+
+  await wsPage.executeCommand('Axon Ivy: Convert Dialog Form to JSF');
+
+  const xhtmlEditor = new TextEditor(wsPage, 'testForm.xhtml');
+  await xhtmlEditor.expectTabVisible();
+  await xhtmlEditor.expectTabActive();
+  await expect(xhtmlEditor.content).toContainText('<h:body>');
+});
+
 test('Extract component and jump', async ({ wsPage }) => {
   const editor = new FormEditor(wsPage);
   await editor.open();

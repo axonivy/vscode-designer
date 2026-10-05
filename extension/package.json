@@ -452,6 +452,11 @@
         "category": "Axon Ivy"
       },
       {
+        "command": "ivyProjects.convertDialogFormToJsf",
+        "title": "Convert Dialog Form to JSF",
+        "category": "Axon Ivy"
+      },
+      {
         "command": "ivyProjects.addNewOfflineDialog",
         "title": "New Offline Dialog (JSF)",
         "category": "Axon Ivy"
@@ -1150,7 +1155,18 @@
           "group": "1@4"
         }
       ],
+      "commandPalette": [
+        {
+          "command": "ivyProjects.convertDialogFormToJsf",
+          "when": "resourceFilename =~ /\\.f\\.json$/"
+        }
+      ],
       "explorer/context": [
+        {
+          "command": "ivyProjects.convertDialogFormToJsf",
+          "when": "resourceFilename =~ /\\.f\\.json$/",
+          "group": "1@0"
+        },
         {
           "submenu": "explorer.ivy",
           "group": "1@1"

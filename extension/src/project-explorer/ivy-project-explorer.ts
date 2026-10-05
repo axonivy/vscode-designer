@@ -1,9 +1,10 @@
 import path from 'path';
 import type { ExtensionContext, TreeView, TreeViewSelectionChangeEvent } from 'vscode';
-import { commands, Uri, window, workspace } from 'vscode';
+import { commands, TabInputCustom, TabInputText, Uri, window, workspace } from 'vscode';
 import { registerCommand, type KnownCommand } from '../base/commands';
 import { ensureJavaLightWeightMode, runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
+import { convertDialogFormToJsf } from '../editors/form-editor/convert-dialog-form';
 import { IVY_PROJECT_FILE, IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { installMarketProduct } from '../market/market-install';
@@ -89,6 +90,7 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.addNewCaseMap`, (s: TreeSelection) => this.addCaseMap(s));
     registerCmd(`${VIEW_ID}.convertProject`, (s: TreeSelection) => this.convertProject(s));
     registerCmd(`${VIEW_ID}.convertAllProjects`, (s: TreeSelection) => this.convertProject(s, true));
+    registerCmd(`${VIEW_ID}.convertDialogFormToJsf`, (s: TreeSelection) => this.convertSelectedDialogFormToJsf(s));
   }
 
   public async refresh() {
@@ -276,6 +278,33 @@ export class IvyProjectExplorer {
         .filter((description): description is string => !!description);
       await runProjectConversion(projectsToConvert);
     });
+  }
+
+  private async convertSelectedDialogFormToJsf(selection: TreeSelection) {
+    const activeTabInput = window.tabGroups.activeTabGroup.activeTab?.input;
+    const uri =
+      (await treeSelectionToUri(selection)) ??
+      (activeTabInput instanceof TabInputText || activeTabInput instanceof TabInputCustom
+        ? activeTabInput.uri
+        : window.activeTextEditor?.document.uri);
+    if (!uri) {
+      logErrorMessage('Select a dialog form to convert to JSF.');
+      return;
+    }
+    const projectDirectory = await treeUriToProjectPath(uri, this.getIvyProjects());
+    if (!projectDirectory) {
+      logErrorMessage(`The selected dialog form does not belong to an Axon Ivy project: ${uri.fsPath}`);
+      return;
+    }
+    try {
+      const convertedViewUri = await convertDialogFormToJsf(projectDirectory, uri);
+      await commands.executeCommand('vscode.open', convertedViewUri);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logErrorMessage(`Failed to convert dialog form to JSF: ${errorMessage}`);
+      return;
+    }
+    logInformationMessage(`Converted dialog form to JSF: ${uri.fsPath}`);
   }
 
   public async getIvyProjects() {
