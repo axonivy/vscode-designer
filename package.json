@@ -6,7 +6,7 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "check": "pnpm run type && pnpm run lint:ci && pnpm run test:ci",
+    "check": "pnpm run type && pnpm run lint:ci && pnpm run test:ci && pnpm run i18n:ci",
     "build": "pnpm run -r build",
     "build:production": "pnpm run -r build:production",
     "openapi": "pnpm run openapi:download && pnpm run openapi:codegen",
@@ -19,6 +19,8 @@
     "lint:ci": "eslint -o eslint.xml -f checkstyle",
     "lint:fix": "eslint --fix",
     "lint:inspect": "eslint --inspect-config",
+    "i18n": "pnpm run -r i18n",
+    "i18n:ci": "pnpm run -r i18n:ci",
     "package": "pnpm run -r package",
     "publish:next": "pnpm run -r publish:next",
     "sbom": "pnpm sbom --sbom-format cyclonedx --prod > bom.json",

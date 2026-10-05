@@ -7,6 +7,14 @@ export type InitializeConnection = { file: string };
 const WebviewReadyNotification: NotificationType<void> = { method: 'ready' };
 const InitializeConnectionNotification: NotificationType<InitializeConnection> = { method: 'initializeConnection' };
 
+export const getVscodeLanguage = () => {
+  const language = document.documentElement.lang.toLowerCase().split(/[-_]/)[0];
+  if (language === 'de' || language === 'ja') {
+    return language;
+  }
+  return 'en';
+};
+
 export const initMessenger = (messenger: Messenger, start: (init: InitializeConnection) => Promise<void>) => {
   messenger.onNotification(InitializeConnectionNotification, start);
   messenger.start();
