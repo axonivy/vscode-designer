@@ -69,7 +69,10 @@ export class IvyDiagnostics {
       .forEach(async p => {
         const projectUri = Uri.file(p.projectDirectory);
         const uri = Uri.joinPath(projectUri, POM_FILE);
-        const message = `Referenced dependency ${iar.artifactId} has error: ${iar.errorMessage}`;
+        const error = isConversionMessage(iar.errorMessage)
+          ? `${CONVERSION_OUTDATED_MESSAGE_PREFIX} Update to a newer compatible version or import the project to VS Code to convert the project.`
+          : iar.errorMessage;
+        const message = `Referenced dependency ${iar.artifactId} has error: ${error}`;
         const range = await this.dependencyRange(uri, iar);
         const diagnostic = new Diagnostic(range, message, DiagnosticSeverity.Error);
         diagnostic.source = DIAGNOSTIC_SOURCE;
@@ -144,5 +147,7 @@ export class ConvertProjectQuickFix implements CodeActionProvider {
 }
 
 const isConversionDiagnostic = (diagnostic: Diagnostic) =>
-  diagnostic.source === DIAGNOSTIC_SOURCE &&
-  (diagnostic.message.startsWith(CONVERSION_TOO_OLD_MESSAGE_PREFIX) || diagnostic.message.startsWith(CONVERSION_OUTDATED_MESSAGE_PREFIX));
+  diagnostic.source === DIAGNOSTIC_SOURCE && isConversionMessage(diagnostic.message);
+
+const isConversionMessage = (message: string) =>
+  message.startsWith(CONVERSION_TOO_OLD_MESSAGE_PREFIX) || message.startsWith(CONVERSION_OUTDATED_MESSAGE_PREFIX);

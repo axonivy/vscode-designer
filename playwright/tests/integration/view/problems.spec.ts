@@ -65,6 +65,9 @@ test('Outdated iar dependency error', async ({ wsPage, tmpWorkspace }) => {
   const problemsView = await ProblemsView.initProblemsView(wsPage);
   await expect(async () => {
     await wsPage.executeCommand('Axon Ivy: Refresh Project Explorer');
-    await problemsView.hasError('Referenced dependency excel-connector has error: Project is too old and needs to be converted in VS Code.', 2_000);
+    await problemsView.hasError(
+      'Referenced dependency excel-connector has error: Project is outdated and needs to be converted. Update to a newer compatible version or import the project to VS Code to convert the project.',
+      2_000
+    );
   }).toPass();
 });

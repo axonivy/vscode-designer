@@ -19,7 +19,7 @@ export class ProblemsView {
     return problemsView;
   }
 
-  private async hasMaker(message: string, type: 'error' | 'warning', timeout?: number) {
+  private async hasMarker(message: string, type: 'error' | 'warning', timeout?: number) {
     const marker = this.view.locator(`div.monaco-tl-row:has-text("${message}")`).first();
     await expect(marker).toHaveCount(1, { timeout });
     await expect(marker).toBeVisible({ timeout });
@@ -32,11 +32,11 @@ export class ProblemsView {
   }
 
   async hasWarning(message: string) {
-    await this.hasMaker(message, 'warning');
+    await this.hasMarker(message, 'warning');
   }
 
   async hasError(message: string, timeout?: number) {
-    await this.hasMaker(message, 'error', timeout);
+    await this.hasMarker(message, 'error', timeout);
   }
 
   async hasNumOfMarkers(count: number) {
