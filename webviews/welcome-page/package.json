@@ -27,6 +27,7 @@
     "type": "tsc --noEmit",
     "watch": "vite build --mode development --watch --emptyOutDir",
     "i18n": "i18next-cli extract",
+    "i18n:ci": "i18next-cli extract --ci --dry-run",
     "dev": "vite"
   }
 }

@@ -3,7 +3,7 @@ import { Element, Text } from 'domhandler';
 import fs from 'fs';
 import { DomUtils, parseDocument } from 'htmlparser2';
 import type { ExtensionContext, Webview } from 'vscode';
-import { Uri } from 'vscode';
+import { env, Uri } from 'vscode';
 import { findEditorWorker, findRootEntry, findRootHtml, parseBuildManifest } from './build-manifest';
 
 export const createWebViewContent = (context: ExtensionContext, webview: Webview, webviewPath: string) => {
@@ -18,9 +18,11 @@ export const createWebViewContent = (context: ExtensionContext, webview: Webview
   const htmlDoc = parseDocument(htmlContent, { xmlMode: true, decodeEntities: false });
   const head = DomUtils.getElementsByTagName('head', [htmlDoc])[0];
   const body = DomUtils.getElementsByTagName('body', [htmlDoc])[0];
-  if (!head || !body) {
-    throw new Error('Invalid HTML template, missing head or body element');
+  const html = DomUtils.getElementsByTagName('html', [htmlDoc])[0];
+  if (!head || !body || !html) {
+    throw new Error('Invalid HTML template, missing html, head or body element');
   }
+  html.attribs.lang = env.language;
 
   const nonceMeta = new Element('meta', {
     name: 'csp-nonce',
