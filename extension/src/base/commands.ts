@@ -57,6 +57,7 @@ type ProjectViewCommand =
   | 'ivyProjects.stopBpmEngine'
   | 'ivyProjects.convertProject'
   | 'ivyProjects.convertAllProjects'
+  | 'ivyProjects.convertDialogFormToJsf'
   | 'ivyProjects.addDependency';
 type ViewCommand =
   | 'ivyBrowserView.focus'
