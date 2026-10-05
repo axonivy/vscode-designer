@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { test } from '~/fixtures/baseTest';
 import { FormEditor } from '~/page-objects/form-editor';
 import { ProblemsView } from '~/page-objects/problems-view';
@@ -45,4 +47,23 @@ test('Worspace Validation', async ({ wsPage }) => {
   await editor.save();
   const problemsView = await ProblemsView.initProblemsView(wsPage);
   await problemsView.hasError('Button action cannot be empty');
+});
+
+test('Outdated iar dependency error', async ({ wsPage, tmpWorkspace }) => {
+  const pomPath = path.join(tmpWorkspace!.tmpWorkspacePath, 'pom.xml');
+  const newPomContent = (await fs.promises.readFile(pomPath, 'utf-8')).replace(
+    '</dependencies>',
+    `<dependency>
+      <groupId>com.axonivy.connector.excel</groupId>
+      <artifactId>excel-connector</artifactId>
+      <version>13.2.0</version>
+      <type>iar</type>
+    </dependency>
+    </dependencies>`
+  );
+  await fs.promises.writeFile(pomPath, newPomContent, 'utf-8');
+  await wsPage.page.waitForTimeout(3_000); // wait for engine file watcher
+  await wsPage.executeCommand('Axon Ivy: Refresh Project Explorer');
+  const problemsView = await ProblemsView.initProblemsView(wsPage);
+  await problemsView.hasError('Referenced dependency excel-connector has error: Project is too old and needs to be converted in VS Code.');
 });
