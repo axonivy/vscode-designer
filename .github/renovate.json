@@ -9,6 +9,17 @@
     "enabled": true
   },
   "postUpdateOptions": ["pnpmDedupe"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^build\\/Dockerfile\\.playwright$/"],
+      "matchStrings": ["ARG CODE_SERVER_VERSION=(?<currentValue>\\S+)"],
+      "depNameTemplate": "coder/code-server",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$",
+      "versioningTemplate": "semver"
+    }
+  ],
   "packageRules": [
     {
       "matchPackageNames": ["@axonivy/*", "@types/vscode", "vscode-messenger*", "@codingame/*"],
