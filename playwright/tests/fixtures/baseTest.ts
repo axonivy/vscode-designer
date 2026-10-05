@@ -128,8 +128,7 @@ const createTmpWorkspace = async (workspace: string | null) => {
     wsConfig = path.basename(workspace);
     workspace = path.dirname(workspace);
   }
-  const tmpWorkspaceDir = await fs.promises.realpath(await fs.promises.mkdtemp(path.join(os.tmpdir(), 'ptw')));
-  const tmpWorkspace = path.join(tmpWorkspaceDir, path.basename(workspace));
+  const tmpWorkspace = await fs.promises.realpath(await fs.promises.mkdtemp(path.join(os.tmpdir(), path.basename(workspace))));
   await fs.promises.cp(workspace, tmpWorkspace, { recursive: true });
   const tmpWsConfig = wsConfig ? path.join(tmpWorkspace, wsConfig) : undefined;
   return { tmpWorkspacePath: tmpWorkspace, tmpWsConfig: tmpWsConfig };
