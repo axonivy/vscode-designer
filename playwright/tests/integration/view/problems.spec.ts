@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { test } from '~/fixtures/baseTest';
+import { expect, test } from '~/fixtures/baseTest';
 import { FormEditor } from '~/page-objects/form-editor';
 import { ProblemsView } from '~/page-objects/problems-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
@@ -62,8 +62,9 @@ test('Outdated iar dependency error', async ({ wsPage, tmpWorkspace }) => {
     </dependencies>`
   );
   await fs.promises.writeFile(pomPath, newPomContent, 'utf-8');
-  await wsPage.page.waitForTimeout(3_000); // wait for engine file watcher
-  await wsPage.executeCommand('Axon Ivy: Refresh Project Explorer');
   const problemsView = await ProblemsView.initProblemsView(wsPage);
-  await problemsView.hasError('Referenced dependency excel-connector has error: Project is too old and needs to be converted in VS Code.');
+  await expect(async () => {
+    await wsPage.executeCommand('Axon Ivy: Refresh Project Explorer');
+    await problemsView.hasError('Referenced dependency excel-connector has error: Project is too old and needs to be converted in VS Code.', 2_000);
+  }).toPass();
 });
