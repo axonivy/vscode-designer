@@ -2,6 +2,8 @@
 
 # VS Code extension
 
+[![translation-status](https://hosted.weblate.org/widget/axonivy/vscode-designer-welcome/svg-badge.svg)](https://hosted.weblate.org/engage/axonivy/)
+
 The available VS Code extension can be found under `/extension`.
 
 ## Build & Package
