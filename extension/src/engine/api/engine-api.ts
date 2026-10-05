@@ -1,6 +1,6 @@
 import { IncomingMessage } from 'http';
 import path from 'path';
-import { workspace } from 'vscode';
+import { l10n, workspace } from 'vscode';
 import { StatusBar } from '../../base/status-bar';
 import { handleProjectConversionLog } from '../project-conversion-log';
 import { handleAxiosError } from './axios-error-handler';
@@ -67,7 +67,7 @@ export class IvyEngineApi {
 
   static async init(rawEngineUrl: string) {
     const designerUrl = new URL(path.join('designer/api'), rawEngineUrl).toString();
-    await pollWithProgress(rawEngineUrl, 'Waiting for Axon Ivy Engine to be ready.');
+    await pollWithProgress(rawEngineUrl, l10n.t('Waiting for Axon Ivy Engine to be ready.'));
     const workspace = await IvyEngineApi.createWorkspace(designerUrl).catch(handleAxiosError);
     if (!workspace) {
       throw new Error('Failed to create workspace');
@@ -81,7 +81,7 @@ export class IvyEngineApi {
     if (!workspaces || !workspaceFolder) {
       throw new Error('No workspace available');
     }
-    return StatusBar.withStatusBarProgress({ text: 'Creating workspace' }, async () => {
+    return StatusBar.withStatusBarProgress({ text: l10n.t('Creating workspace') }, async () => {
       const response = await createWorkspace(
         { name: workspaceFolder.name, path: workspaceFolder.uri.fsPath },
         { baseURL: designerUrl, ...options }
@@ -230,7 +230,7 @@ export class IvyEngineApi {
     if (this.portalDeploymentResponse) {
       return this.portalDeploymentResponse;
     }
-    await StatusBar.withStatusBarProgress({ text: 'Deploying portal' }, async () => {
+    await StatusBar.withStatusBarProgress({ text: l10n.t('Deploying portal') }, async () => {
       const response = await deployPortal(this.workspace.id, { baseURL: this.designerUrl, ...options }).catch(handleAxiosError);
       this.portalDeploymentResponse = response?.data;
     });

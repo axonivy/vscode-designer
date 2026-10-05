@@ -1,5 +1,6 @@
 import path from 'path';
 import {
+  l10n,
   LanguageModelTextPart,
   type LanguageModelTool,
   type LanguageModelToolInvocationOptions,
@@ -10,6 +11,7 @@ import {
   type ProviderResult,
   Uri
 } from 'vscode';
+import { localizeDialogLayout, localizeDialogType } from '../../base/localized-labels';
 import type { CreateUserDialogParams } from '../../engine/api/engine-api';
 import { IvyEngineManager } from '../../engine/engine-manager';
 
@@ -38,17 +40,24 @@ export class NewDialogTool implements LanguageModelTool<NewDialogToolArgs> {
 
   prepareInvocation?(options: LanguageModelToolInvocationPrepareOptions<NewDialogToolArgs>): ProviderResult<PreparedToolInvocation> {
     const newDialogParams = resolvedParams(options.input);
-    let confirmationMessage = `Create an Axon Ivy ${newDialogParams.type} Dialog with the following details?\n- Name: ${newDialogParams.name}\n- Namespace: ${newDialogParams.namespace}\n- Project: ${path.basename(newDialogParams.projectDir ?? '')}`;
-    if (newDialogParams.type === 'JSF') {
-      confirmationMessage += `\n- Layout: ${newDialogParams.layout}`;
+    const dialogType = newDialogParams.type ?? 'Form';
+    const confirmationLines = [
+      l10n.t('Create an Axon Ivy {0} with the following details?', localizeDialogType(dialogType)),
+      `- ${l10n.t('Name')}: ${newDialogParams.name}`,
+      `- ${l10n.t('Namespace')}: ${newDialogParams.namespace}`,
+      `- ${l10n.t('Project')}: ${path.basename(newDialogParams.projectDir ?? '')}`
+    ];
+    if (dialogType === 'JSF') {
+      confirmationLines.push(`- ${l10n.t('Layout')}: ${localizeDialogLayout(newDialogParams.layout ?? '')}`);
       if (newDialogParams.layout !== 'Component') {
-        confirmationMessage += `\n- Template: ${newDialogParams.template}`;
+        confirmationLines.push(`- ${l10n.t('Template')}: ${newDialogParams.template ?? ''}`);
       }
     }
+    const confirmationMessage = confirmationLines.join('\n');
     return {
-      invocationMessage: `Creating new Axon Ivy ${newDialogParams.type} Dialog "${newDialogParams.name}"`,
+      invocationMessage: l10n.t('Creating new Axon Ivy {0} "{1}"', localizeDialogType(dialogType), newDialogParams.name),
       confirmationMessages: {
-        title: `New Axon Ivy ${newDialogParams.type} Dialog`,
+        title: l10n.t('New Axon Ivy {0}', localizeDialogType(dialogType)),
         message: new MarkdownString(confirmationMessage)
       }
     };
@@ -57,9 +66,10 @@ export class NewDialogTool implements LanguageModelTool<NewDialogToolArgs> {
 
 export const createNewDialog = async (input: NewDialogToolArgs): Promise<string> => {
   const newDialogParams = resolvedParams(input);
+  const dialogType = newDialogParams.type ?? 'Form';
   const hdBean = await IvyEngineManager.instance.createUserDialog(newDialogParams);
   const dialogPath = hdBean?.uri ? Uri.parse(hdBean.uri).fsPath : '<unknown location>';
-  return `${newDialogParams.type} Dialog created successfully at '${dialogPath}'`;
+  return l10n.t("{0} created successfully at '{1}'", localizeDialogType(dialogType), dialogPath);
 };
 
 const resolvedParams = (args: NewDialogToolArgs) => {

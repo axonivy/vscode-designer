@@ -2,7 +2,12 @@ import path from 'path';
 import { expect, test, vi } from 'vitest';
 import { ReleaseTrainValidator } from './release-train-validator';
 
-vi.mock('vscode', () => ({}));
+vi.mock('vscode', () => ({
+  l10n: {
+    t: (message: string, ...args: unknown[]) =>
+      args.reduce<string>((result, arg, index) => result.replace(`{${index}}`, String(arg)), message)
+  }
+}));
 
 const extensionVersion = { major: 13, minor: 2, patch: 999, rawVersion: '13.2.999', isPreview: true, isMilestone: true, milestone: 999 };
 const validator = new ReleaseTrainValidator(extensionVersion);

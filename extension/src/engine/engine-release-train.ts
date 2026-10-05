@@ -1,5 +1,5 @@
 import type { ExtensionContext } from 'vscode';
-import { ThemeIcon, window } from 'vscode';
+import { l10n, ThemeIcon, window } from 'vscode';
 import { config } from '../base/configurations';
 import { extensionVersion } from '../version/extension-version';
 import { ReleaseTrainValidator } from './release-train-validator';
@@ -28,22 +28,23 @@ export const switchEngineReleaseTrain = async (reason?: string) => {
   const items = extensionVersion.isPreview
     ? PREVIEW_TRAINS.map(train => toItem(train, currentTrain))
     : stableTrains(extensionVersion.major).map(train => toItem(train, currentTrain));
+  const customValueLabel = l10n.t('Enter custom value');
   let selectedTrain = (
-    await window.showQuickPick([...items, { label: 'Enter custom value' }], {
+    await window.showQuickPick([...items, { label: customValueLabel }], {
       ignoreFocusOut: true,
       title: reason
     })
   )?.label;
-  if (selectedTrain === 'Enter custom value') {
+  if (selectedTrain === customValueLabel) {
     const releaseTrainValidator = new ReleaseTrainValidator(extensionVersion);
     selectedTrain = await window.showInputBox({
-      placeHolder: "Enter custom release train, e.g. '14.0.1' or a path of an existing engine directory)",
+      placeHolder: l10n.t("Enter custom release train, e.g. '14.0.1' or a path of an existing engine directory"),
       validateInput: async (value: string) => {
         const result = await releaseTrainValidator.validate(value);
         if (result.valid) {
           return;
         }
-        return result.reason ?? 'Invalid release train tag';
+        return result.reason ?? l10n.t('Invalid release train tag');
       },
       ignoreFocusOut: true
     });

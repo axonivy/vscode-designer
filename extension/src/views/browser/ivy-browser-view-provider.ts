@@ -54,7 +54,7 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
             const url = Uri.parse(e.url);
             env.openExternal(url);
           } catch {
-            logErrorMessage(`Couldn't open uri '${e.url}' in external browser.`);
+            logErrorMessage(l10n.t("Couldn't open uri '{0}' in external browser.", e.url));
           }
           break;
         case 'openHome':
@@ -79,7 +79,7 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
     if (result?.deployed) {
       this.openEngineRelativeUrl(this.devContextPath + '/' + result.appName);
     } else {
-      logErrorMessage(`Portal not available: ${result?.reason}`);
+      logErrorMessage(l10n.t('Portal not available: {0}', result?.reason ?? ''));
     }
   }
 

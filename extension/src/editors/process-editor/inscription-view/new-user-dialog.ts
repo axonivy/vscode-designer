@@ -1,5 +1,6 @@
 import type { InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
-import { TabInputCustom, window } from 'vscode';
+import { l10n, TabInputCustom, window } from 'vscode';
+import { localizeDialogType } from '../../../base/localized-labels';
 import { IvyProjectExplorer } from '../../../project-explorer/ivy-project-explorer';
 import { dialogTypes, type DialogType } from '../../../project-explorer/new-user-dialog';
 import type { SendInscriptionNotification } from './action-handlers';
@@ -18,8 +19,11 @@ export const handleNewHtmlDialog = async (actionArgs: InscriptionActionArgs, sen
   sendInscriptionNotification('validation');
 };
 
-const collectDialogType = () =>
-  window.showQuickPick(dialogTypes, {
-    title: 'Select Dialog Type',
+const collectDialogType = async (): Promise<DialogType | undefined> => {
+  const items = dialogTypes.map(value => ({ label: localizeDialogType(value), value }));
+  const selected = await window.showQuickPick(items, {
+    title: l10n.t('Select Dialog Type'),
     ignoreFocusOut: true
-  }) as Promise<DialogType | undefined>;
+  });
+  return selected?.value;
+};

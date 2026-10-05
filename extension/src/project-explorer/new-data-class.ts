@@ -1,4 +1,6 @@
 import path from 'path';
+import { l10n } from 'vscode';
+import { localizeDataClassType } from '../base/localized-labels';
 import { logErrorMessage } from '../base/logging-util';
 import type { CreateDataClassParams } from '../engine/api/engine-api';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -15,7 +17,7 @@ import {
 } from './utils/multi-step-input';
 import { validateDotSeparatedName, validateProjectArtifactName, type ResourceDirectoryTarget } from './utils/util';
 
-type DataClassType = 'Data Class' | 'Entity Class';
+export type DataClassType = 'Data Class' | 'Entity Class';
 
 interface NewDataClassState extends MSStateBase {
   project?: ProjectSelection | undefined;
@@ -40,8 +42,8 @@ export const addNewDataClass = async (type: DataClassType, selectionContext: Add
       const previousProject = state.project;
       state.project = await input.showQuickPick<ProjectSelection>({
         title: state.dialogTitle,
-        titleSuffix: ' - Choose project',
-        placeholder: 'Select one of the available projects',
+        titleSuffix: l10n.t('Choose project'),
+        placeholder: l10n.t('Select one of the available projects'),
         currentStep: state.currentStep,
         totalSteps: state.totalSteps,
         value: state.project ? state.project.label : '',
@@ -60,8 +62,8 @@ export const addNewDataClass = async (type: DataClassType, selectionContext: Add
   const stepName: InputStep<NewDataClassState> = async (input: MultiStepInput<NewDataClassState>, state: NewDataClassState) => {
     state.name = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose name',
-      placeholder: 'Enter a name. Must start with a letter or underscore. Allowed characters: a-z, A-Z, 0-9, _',
+      titleSuffix: l10n.t('Choose name'),
+      placeholder: l10n.t('Enter a name. Must start with a letter or underscore. Allowed characters: a-z, A-Z, 0-9, _'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.name,
@@ -75,8 +77,8 @@ export const addNewDataClass = async (type: DataClassType, selectionContext: Add
   const stepNamespace: InputStep<NewDataClassState> = async (input: MultiStepInput<NewDataClassState>, state: NewDataClassState) => {
     state.namespace = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose namespace',
-      placeholder: 'Enter Namespace separated by ".". Allowed characters: a-z, A-Z, 0-9, _, .',
+      titleSuffix: l10n.t('Choose namespace'),
+      placeholder: l10n.t('Enter Namespace separated by ".". Allowed characters: a-z, A-Z, 0-9, _, .'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.namespace,
@@ -90,7 +92,7 @@ export const addNewDataClass = async (type: DataClassType, selectionContext: Add
   const steps: InputStep<NewDataClassState>[] = [stepProject, stepName, stepNamespace];
 
   const newDataClassDialogData: NewDataClassState = {
-    dialogTitle: `Add New ${type}`,
+    dialogTitle: l10n.t('Add New {0}', localizeDataClassType(type)),
     currentStep: 1,
     totalSteps: steps.length,
     namespace: namespaceFromSelection,

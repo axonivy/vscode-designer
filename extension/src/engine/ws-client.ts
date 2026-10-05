@@ -1,3 +1,4 @@
+import { l10n } from 'vscode';
 import { WebSocketMessageReader, WebSocketMessageWriter, type IWebSocket } from 'vscode-ws-jsonrpc';
 import { logErrorMessage } from '../base/logging-util';
 
@@ -12,7 +13,9 @@ export const createWebSocket = (url: URL) => {
   const webSocket = new WebSocket(url);
   webSocket.onclose = event => {
     if (event.code !== 1000) {
-      logErrorMessage(`WebSocket connection to ${url} closed abnormally (code: ${event.code}, reason: ${event.reason})`);
+      logErrorMessage(
+        l10n.t('WebSocket connection to {0} closed abnormally (code: {1}, reason: {2})', url.toString(), event.code, event.reason)
+      );
     }
   };
   return webSocket;

@@ -1,5 +1,5 @@
 import path from 'path';
-import { QuickPickItemKind } from 'vscode';
+import { l10n, QuickPickItemKind } from 'vscode';
 import type { ProjectSelection } from '../../project-explorer/utils/multi-step-input';
 import type {
   Installer,
@@ -163,7 +163,10 @@ export const validateProjectSelection = (
     project => project.artifactId && existingProjects.some(existing => existing.label === project.artifactId)
   );
   if (conflictingProjects.length > 0) {
-    return `The following projects cannot be installed because a project folder with the same name already exists: ${conflictingProjects.map(p => p.artifactId).join(', ')}`;
+    return l10n.t(
+      'The following projects cannot be installed because a project folder with the same name already exists: {0}',
+      conflictingProjects.map(p => p.artifactId).join(', ')
+    );
   }
 };
 
@@ -176,7 +179,7 @@ export const validateDependencySelection = (
 
   const missingGroups = [...requiredGroups].filter(group => !selectedRequiredGroups.has(group));
   if (missingGroups.length > 0) {
-    return `Select at least one dependency from each required group: ${missingGroups.join(', ')}.`;
+    return l10n.t('Select at least one dependency from each required group: {0}.', missingGroups.join(', '));
   }
   return undefined;
 };

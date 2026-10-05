@@ -3,6 +3,10 @@ import { expect, test, vi } from 'vitest';
 import { validateAndSyncJavaVersion } from './java-version-validation';
 
 vi.mock('vscode', () => ({
+  l10n: {
+    t: (message: string, ...args: unknown[]) =>
+      args.reduce<string>((result, arg, index) => result.replace(`{${index}}`, String(arg)), message)
+  },
   window: {
     createOutputChannel: () => ({
       error: vi.fn(),
@@ -34,8 +38,8 @@ test('Undefined JAVA_HOME and IVY_JAVA_HOME', async () => {
   vi.stubEnv('IVY_JAVA_HOME', undefined);
   await expect(validateAndSyncJavaVersion()).rejects.toThrow(
     `No valid Java found under JAVA_HOME=undefined or java.jdt.ls.java.home=undefined.
-    Either set env variable JAVA_HOME to valid Java 25 installation path,
-    or configure VS Code setting 'java.jdt.ls.java.home'.`
+Either set env variable JAVA_HOME to valid Java 25 installation path,
+or configure VS Code setting 'java.jdt.ls.java.home'.`
   );
 });
 
@@ -63,8 +67,8 @@ test('Invalid IVY_JAVA_HOME', async () => {
   vi.stubEnv('IVY_JAVA_HOME', java21Dir);
   await expect(validateAndSyncJavaVersion()).rejects
     .toThrow(`No valid Java found under JAVA_HOME=${java21Dir} or java.jdt.ls.java.home=undefined.
-    Either set env variable JAVA_HOME to valid Java 25 installation path,
-    or configure VS Code setting 'java.jdt.ls.java.home'.`);
+Either set env variable JAVA_HOME to valid Java 25 installation path,
+or configure VS Code setting 'java.jdt.ls.java.home'.`);
 });
 
 test('Invalid IVY_JAVA_HOME', async () => {
@@ -73,6 +77,6 @@ test('Invalid IVY_JAVA_HOME', async () => {
   vi.stubEnv('IVY_JAVA_HOME', undefined);
   await expect(validateAndSyncJavaVersion()).rejects
     .toThrow(`No valid Java found under JAVA_HOME=${java21Dir} or java.jdt.ls.java.home=undefined.
-    Either set env variable JAVA_HOME to valid Java 25 installation path,
-    or configure VS Code setting 'java.jdt.ls.java.home'.`);
+Either set env variable JAVA_HOME to valid Java 25 installation path,
+or configure VS Code setting 'java.jdt.ls.java.home'.`);
 });

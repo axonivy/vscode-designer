@@ -4,6 +4,10 @@ import { checkSettings } from './check-settings';
 import { logWarningMessage } from './logging-util';
 
 vi.mock('vscode', () => ({
+  l10n: {
+    t: (message: string, ...args: unknown[]) =>
+      args.reduce<string>((result, arg, index) => result.replace(`{${index}}`, String(arg)), message)
+  },
   workspace: {
     getConfiguration: vi.fn()
   }

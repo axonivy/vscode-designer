@@ -1,5 +1,5 @@
 import type { CustomTextEditorProvider, ExtensionContext, TextDocument, WebviewPanel } from 'vscode';
-import { window } from 'vscode';
+import { l10n, window } from 'vscode';
 import { logErrorMessage } from '../../base/logging-util';
 import { IvyProjectExplorer } from '../../project-explorer/ivy-project-explorer';
 import { treeUriToProjectPath } from '../../project-explorer/tree-selection';
@@ -22,7 +22,7 @@ export class CmsEditorProvider implements CustomTextEditorProvider {
   async resolveCustomTextEditor(document: TextDocument, webviewPanel: WebviewPanel) {
     const projectPath = await treeUriToProjectPath(document.uri, IvyProjectExplorer.instance.getIvyProjects());
     if (!projectPath) {
-      logErrorMessage('Failed to find project associated with the document.');
+      logErrorMessage(l10n.t('Failed to find project associated with the document.'));
       return;
     }
     if (revealExistingPanel(projectPath)) {

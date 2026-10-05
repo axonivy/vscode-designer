@@ -3,7 +3,7 @@
   "private": true,
   "preview": true,
   "version": "14.0.1",
-  "description": "This extension gives you all the tools you need to design, automate and optimize workflows from simple tasks to complex enterprise processes.",
+  "description": "%extension.description%",
   "publisher": "axonivy",
   "author": "Axon Ivy AG",
   "type": "module",
@@ -12,7 +12,7 @@
     "url": "https://github.com/axonivy/vscode-designer"
   },
   "icon": "assets/ivy-logo.png",
-  "displayName": "Axon Ivy PRO Designer 14",
+  "displayName": "%extension.displayName%",
   "engines": {
     "vscode": "^1.136.1"
   },
@@ -27,10 +27,13 @@
     "publish:next": "node ../scripts/set-milestone.mts && bash -c 'vsce publish --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version/./}.${MILESTONE:-$(date \"+%Y%m%d%H\")}'",
     "test": "vitest",
     "test:ci": "vitest run",
+    "i18n": "vscode-l10n-dev export -o ./l10n ./src",
+    "i18n:ci": "pnpm run i18n && node ./scripts/check-i18n-catalogs.mjs",
     "type": "tsc --noEmit",
     "watch": "node esbuild.mts --watch"
   },
   "main": "./dist/extension.js",
+  "l10n": "./l10n",
   "dependencies": {
     "@axonivy/case-map-editor-protocol": "next-14.0.1",
     "@axonivy/cms-editor-protocol": "next-14.0.1",
@@ -65,6 +68,7 @@
     "@axonivy/ui-icons": "next-14.0.1",
     "@types/vscode": "1.98.0",
     "@types/vscode-webview": "1.57.5",
+    "@vscode/l10n-dev": "0.0.35",
     "@vscode/vsce": "4.0.0",
     "esbuild": "0.28.2",
     "fonteditor-core": "2.6.3",
@@ -125,7 +129,7 @@
     "customEditors": [
       {
         "viewType": "ivy.variableEditor",
-        "displayName": "Axon Ivy Variables Editor",
+        "displayName": "%editor.variables%",
         "selector": [
           {
             "filenamePattern": "variables.yaml"
@@ -134,7 +138,7 @@
       },
       {
         "viewType": "ivy.roleEditor",
-        "displayName": "Axon Ivy Role Editor",
+        "displayName": "%editor.roles%",
         "selector": [
           {
             "filenamePattern": "roles.yaml"
@@ -143,7 +147,7 @@
       },
       {
         "viewType": "ivy.persistenceEditor",
-        "displayName": "Axon Ivy Persistence Editor",
+        "displayName": "%editor.persistence%",
         "selector": [
           {
             "filenamePattern": "persistence.yaml"
@@ -152,7 +156,7 @@
       },
       {
         "viewType": "ivy.userEditor",
-        "displayName": "Axon Ivy User Editor",
+        "displayName": "%editor.users%",
         "selector": [
           {
             "filenamePattern": "users.yaml"
@@ -161,7 +165,7 @@
       },
       {
         "viewType": "ivy.restClientEditor",
-        "displayName": "Axon Ivy Rest Client Editor",
+        "displayName": "%editor.restClients%",
         "selector": [
           {
             "filenamePattern": "rest-clients.yaml"
@@ -170,7 +174,7 @@
       },
       {
         "viewType": "ivy.webServiceClientEditor",
-        "displayName": "Axon Ivy Web Service Client Editor",
+        "displayName": "%editor.webServiceClients%",
         "selector": [
           {
             "filenamePattern": "webservice-clients.yaml"
@@ -179,7 +183,7 @@
       },
       {
         "viewType": "ivy.databaseEditor",
-        "displayName": "Axon Ivy Database Editor",
+        "displayName": "%editor.databases%",
         "selector": [
           {
             "filenamePattern": "databases.yaml"
@@ -188,7 +192,7 @@
       },
       {
         "viewType": "ivy.cmsEditor",
-        "displayName": "Axon Ivy CMS Editor",
+        "displayName": "%editor.cms%",
         "selector": [
           {
             "filenamePattern": "cms_*.yaml"
@@ -197,7 +201,7 @@
       },
       {
         "viewType": "ivy.glspDiagram",
-        "displayName": "Axon Ivy Process Editor",
+        "displayName": "%editor.processes%",
         "selector": [
           {
             "filenamePattern": "*.p.json"
@@ -206,7 +210,7 @@
       },
       {
         "viewType": "ivy.casemapEditor",
-        "displayName": "Axon Ivy Case Map Editor",
+        "displayName": "%editor.caseMaps%",
         "selector": [
           {
             "filenamePattern": "*.m.json"
@@ -215,7 +219,7 @@
       },
       {
         "viewType": "ivy.formEditor",
-        "displayName": "Axon Ivy Form Editor",
+        "displayName": "%editor.forms%",
         "selector": [
           {
             "filenamePattern": "*.f.json"
@@ -224,7 +228,7 @@
       },
       {
         "viewType": "ivy.dataClassEditor",
-        "displayName": "Axon Ivy Data Class Editor",
+        "displayName": "%editor.dataClasses%",
         "selector": [
           {
             "filenamePattern": "*.d.json"
@@ -235,324 +239,324 @@
     "commands": [
       {
         "command": "ivyEditor.openVariableEditor",
-        "title": "Open Variable Editor",
-        "category": "Axon Ivy"
+        "title": "%command.openVariableEditor%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyEditor.openCmsEditor",
-        "title": "Open CMS Editor",
-        "category": "Axon Ivy"
+        "title": "%command.openCmsEditor%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyEditor.openDatabaseEditor",
-        "title": "Open Database Editor",
-        "category": "Axon Ivy"
+        "title": "%command.openDatabaseEditor%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyEditor.openRoleEditor",
-        "title": "Open Role Editor",
-        "category": "Axon Ivy"
+        "title": "%command.openRoleEditor%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyEditor.openUserEditor",
-        "title": "Open User Editor",
-        "category": "Axon Ivy"
+        "title": "%command.openUserEditor%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyEditor.openRestClientEditor",
-        "title": "Open Rest Client Editor",
-        "category": "Axon Ivy"
+        "title": "%command.openRestClientEditor%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyEditor.openWebServiceClientEditor",
-        "title": "Open Web Service Client Editor",
-        "category": "Axon Ivy"
+        "title": "%command.openWebServiceClientEditor%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyEditor.openCustomFieldEditor",
-        "title": "Open Custom Field Editor",
-        "category": "Axon Ivy"
+        "title": "%command.openCustomFieldEditor%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyEditor.openPersistenceEditor",
-        "title": "Open Persistence Editor",
-        "category": "Axon Ivy"
+        "title": "%command.openPersistenceEditor%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyBrowserView.openDevWfUi",
-        "title": "Open Developer Workflow UI",
-        "category": "Axon Ivy"
+        "title": "%command.openDeveloperWorkflowUi%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyBrowserView.openPortal",
-        "title": "Open Portal",
-        "category": "Axon Ivy"
+        "title": "%command.openPortal%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyBrowserView.openEngineCockpit",
-        "title": "Open Engine Cockpit",
-        "category": "Axon Ivy"
+        "title": "%command.openEngineCockpit%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyBrowserView.openPreview",
-        "title": "Open Dialog Preview",
-        "category": "Axon Ivy",
+        "title": "%command.openDialogPreview%",
+        "category": "%category.axonIvy%",
         "icon": "$(play)",
         "enablement": "ivy:hasIvyProjects && ivy:dialogPreviewSupported"
       },
       {
         "command": "ivyPanelView.openRuntimeLog",
-        "title": "Open Axon Ivy Runtime Log",
-        "category": "Axon Ivy"
+        "title": "%command.openRuntimeLog%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyPanelView.openExtensionLog",
-        "title": "Open Axon Ivy Extension Log",
-        "category": "Axon Ivy"
+        "title": "%command.openExtensionLog%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyPanelView.openEngineLog",
-        "title": "Open Axon Ivy Engine Log",
-        "category": "Axon Ivy"
+        "title": "%command.openEngineLog%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyPanelView.openWelcomePage",
-        "title": "Open Welcome Page",
-        "category": "Axon Ivy"
+        "title": "%command.openWelcomePage%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "workflow.fit",
-        "title": "Fit to Screen",
-        "category": "Axon Ivy",
+        "title": "%command.fitToScreen%",
+        "category": "%category.axonIvy%",
         "enablement": "activeCustomEditorId == 'ivy.glspDiagram'"
       },
       {
         "command": "workflow.center",
-        "title": "Center selection",
-        "category": "Axon Ivy",
+        "title": "%command.centerSelection%",
+        "category": "%category.axonIvy%",
         "enablement": "activeCustomEditorId == 'ivy.glspDiagram'"
       },
       {
         "command": "workflow.layout",
-        "title": "Layout diagram",
-        "category": "Axon Ivy",
+        "title": "%command.layoutDiagram%",
+        "category": "%category.axonIvy%",
         "enablement": "activeCustomEditorId == 'ivy.glspDiagram'"
       },
       {
         "command": "workflow.exportAsSVG",
-        "title": "Export as SVG",
-        "category": "Axon Ivy",
+        "title": "%command.exportAsSvg%",
+        "category": "%category.axonIvy%",
         "enablement": "activeCustomEditorId == 'ivy.glspDiagram'"
       },
       {
         "command": "ivyProjects.refreshEntry",
-        "title": "Refresh Project Explorer",
-        "category": "Axon Ivy",
+        "title": "%command.refreshProjectExplorer%",
+        "category": "%category.axonIvy%",
         "icon": "$(refresh)"
       },
       {
         "command": "ivyProjects.deployProject",
-        "title": "Deploy Project",
-        "category": "Axon Ivy",
+        "title": "%command.deployProject%",
+        "category": "%category.axonIvy%",
         "icon": "$(cloud-upload)"
       },
       {
         "command": "engine.deployProjects",
-        "title": "Deploy all Projects",
-        "category": "Axon Ivy",
+        "title": "%command.deployAllProjects%",
+        "category": "%category.axonIvy%",
         "icon": "$(cloud-upload)"
       },
       {
         "command": "engine.switchEngineReleaseTrain",
-        "title": "Switch Engine release train",
-        "category": "Axon Ivy"
+        "title": "%command.switchEngineReleaseTrain%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivy.debug.attachProcess",
-        "title": "Attach Process Debugger",
-        "category": "Axon Ivy",
+        "title": "%command.attachProcessDebugger%",
+        "category": "%category.axonIvy%",
         "icon": "$(debug-alt-small)",
         "enablement": "ivy:hasIvyProjects"
       },
       {
         "command": "ivyProjects.stopBpmEngine",
-        "title": "Stop BPM Engine of Project",
-        "category": "Axon Ivy",
+        "title": "%command.stopBpmEngine%",
+        "category": "%category.axonIvy%",
         "icon": "$(stop-circle)"
       },
       {
         "command": "ivyProjects.convertProject",
-        "title": "Convert Project",
-        "category": "Axon Ivy",
+        "title": "%command.convertProject%",
+        "category": "%category.axonIvy%",
         "icon": "$(wrench)",
         "enablement": "ivy:hasProjectsToConvert && (view != ivyProjects || viewItem =~ /requiresConversion/)"
       },
       {
         "command": "ivyProjects.convertAllProjects",
-        "title": "Convert All Projects",
-        "category": "Axon Ivy",
+        "title": "%command.convertAllProjects%",
+        "category": "%category.axonIvy%",
         "icon": "$(wrench)",
         "enablement": "ivy:hasProjectsToConvert"
       },
       {
         "command": "ivyProjects.addBusinessProcess",
-        "title": "New Business Process",
-        "category": "Axon Ivy"
+        "title": "%command.newBusinessProcess%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyProjects.addCallableSubProcess",
-        "title": "New Callable Sub Process",
-        "category": "Axon Ivy"
+        "title": "%command.newCallableSubProcess%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyProjects.addWebServiceProcess",
-        "title": "New Web Service Process",
-        "category": "Axon Ivy"
+        "title": "%command.newWebServiceProcess%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyProjects.importBpmnProcess",
-        "title": "Import BPMN Process",
-        "category": "Axon Ivy"
+        "title": "%command.importBpmnProcess%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyProjects.importIvyProject",
-        "title": "Import Project Archive (.iar or .zip)",
-        "category": "Axon Ivy"
+        "title": "%command.importProjectArchive%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyProjects.exportIvyProject",
-        "title": "Export Project Archive (.iar)",
-        "category": "Axon Ivy",
+        "title": "%command.exportProjectArchive%",
+        "category": "%category.axonIvy%",
         "icon": "$(file-symlink-directory)"
       },
       {
         "command": "ivyProjects.installLocalMarketProduct",
-        "title": "Install Local Market Product",
-        "category": "Axon Ivy"
+        "title": "%command.installLocalMarketProduct%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyProjects.installMarketProduct",
-        "title": "Install Market Product",
-        "category": "Axon Ivy"
+        "title": "%command.installMarketProduct%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyProjects.addNewProject",
-        "title": "New Project",
-        "category": "Axon Ivy",
+        "title": "%command.newProject%",
+        "category": "%category.axonIvy%",
         "icon": "$(add)"
       },
       {
         "command": "ivyProjects.addNewHtmlDialog",
-        "title": "New Html Dialog (JSF)",
-        "category": "Axon Ivy"
+        "title": "%command.newHtmlDialog%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyProjects.addNewFormDialog",
-        "title": "New Dialog Form",
-        "category": "Axon Ivy"
+        "title": "%command.newDialogForm%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyProjects.convertDialogFormToJsf",
-        "title": "Convert Dialog Form to JSF",
-        "category": "Axon Ivy"
+        "title": "%command.convertDialogFormToJsf%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyProjects.addNewOfflineDialog",
-        "title": "New Offline Dialog (JSF)",
-        "category": "Axon Ivy"
+        "title": "%command.newOfflineDialog%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyProjects.addNewDataClass",
-        "title": "New Data Class",
-        "category": "Axon Ivy"
+        "title": "%command.newDataClass%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyProjects.addNewEntityClass",
-        "title": "New Entity Class",
-        "category": "Axon Ivy"
+        "title": "%command.newEntityClass%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyProjects.addNewCaseMap",
-        "title": "New Case Map",
-        "category": "Axon Ivy"
+        "title": "%command.newCaseMap%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyProjects.addDependency",
-        "title": "Add Project Dependency",
-        "category": "Axon Ivy",
+        "title": "%command.addProjectDependency%",
+        "category": "%category.axonIvy%",
         "icon": "$(add)",
         "enablement": "ivy:hasIvyProjects"
       },
       {
         "command": "ivy.addDevContainer",
-        "title": "Add Dev Container",
-        "category": "Axon Ivy"
+        "title": "%command.addDevContainer%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "engine.activateAnimation",
-        "title": "Activate Process Animation",
-        "category": "Axon Ivy"
+        "title": "%command.activateProcessAnimation%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "engine.deactivateAnimation",
-        "title": "Deactivate Process Animation",
-        "category": "Axon Ivy"
+        "title": "%command.deactivateProcessAnimation%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivyProjects.revealProjectInFileSystem",
-        "title": "Reveal Project in File System",
-        "category": "Axon Ivy",
+        "title": "%command.revealProjectInFileSystem%",
+        "category": "%category.axonIvy%",
         "icon": "$(file-directory)"
       },
       {
         "command": "ivyProjects.runWorkspaceValidation",
-        "title": "Run Workspace Validation",
-        "category": "Axon Ivy"
+        "title": "%command.runWorkspaceValidation%",
+        "category": "%category.axonIvy%"
       },
       {
         "command": "ivy.openSettings",
-        "title": "Open Settings",
-        "category": "Axon Ivy"
+        "title": "%command.openSettings%",
+        "category": "%category.axonIvy%"
       }
     ],
     "configuration": [
       {
-        "title": "Axon Ivy",
+        "title": "%setting.title%",
         "properties": {
           "axonivy.engine.runByExtension": {
             "type": "boolean",
             "default": true,
-            "markdownDescription": "Configure whether a local Axon Ivy Engine will be run by this extension. If set true, you can specify `#axonivy.engine.releaseTrain#`. If set false, you have to define `#axonivy.engine.url#`.",
+            "markdownDescription": "%setting.engine.runByExtension%",
             "order": 1000
           },
           "axonivy.engine.releaseTrain": {
             "type": "string",
             "default": "",
-            "markdownDescription": "Release train of Axon Ivy Engine to be used as Developer Engine. Expected to be a release tag like '14.0' or an absolute path to an existing Axon Ivy Engine.",
+            "markdownDescription": "%setting.engine.releaseTrain%",
             "order": 1100
           },
           "axonivy.engine.url": {
             "type": "string",
             "default": "http://localhost:8080/",
-            "markdownDescription": "Url of the Axon Ivy Engine that will be used as backend. Only relevant if `#axonivy.engine.runByExtension#` is set to false.",
+            "markdownDescription": "%setting.engine.url%",
             "order": 1200
           },
           "axonivy.engine.vmArgs": {
             "type": "string",
             "default": "",
-            "markdownDescription": "Specifies extra VM arguments used to launch the Axon Ivy Engine. Eg. use `-agentlib:jdwp=transport=dt_socket,server=y,address=*:8000,suspend=n` to enable remote debugging.",
+            "markdownDescription": "%setting.engine.vmArgs%",
             "order": 1300
           },
           "axonivy.localMcp.enabled": {
             "type": "boolean",
             "default": false,
-            "markdownDescription": "Enable local loopback MCP endpoints for third-party harness automation clients. Use only on trusted machines.",
+            "markdownDescription": "%setting.localMcp.enabled%",
             "order": 1400
           },
           "axonivy.localMcp.host": {
             "type": "string",
             "default": "127.0.0.1",
-            "markdownDescription": "Host interface for the local MCP server. Keep this on loopback for security.",
+            "markdownDescription": "%setting.localMcp.host%",
             "order": 1410
           },
           "axonivy.localMcp.port": {
@@ -560,31 +564,31 @@
             "default": 32140,
             "minimum": 1,
             "maximum": 65535,
-            "markdownDescription": "TCP port for the local MCP server.",
+            "markdownDescription": "%setting.localMcp.port%",
             "order": 1420
           },
           "axonivy.localMcp.exposeAllTools": {
             "type": "boolean",
             "default": false,
-            "markdownDescription": "Expose all IDE language model tools via the local MCP endpoint. If false, only tools contributed by this extension are exposed.",
+            "markdownDescription": "%setting.localMcp.exposeAllTools%",
             "order": 1430
           },
           "axonivy.project.excludePattern": {
             "type": "string",
             "default": "**/{target,bin}/**",
-            "markdownDescription": "A Glob Pattern that is used to exclude Axon Ivy projects during detection. [Learn more about Glob Pattern](https://code.visualstudio.com/docs/editor/glob-patterns)",
+            "markdownDescription": "%setting.project.excludePattern%",
             "order": 2000
           },
           "axonivy.project.maximumNumber": {
             "type": "integer",
             "default": 50,
-            "markdownDescription": "Maximum number of Axon Ivy projects that will be detected.",
+            "markdownDescription": "%setting.project.maximumNumber%",
             "order": 2100
           },
           "axonivy.process.animation.animate": {
             "type": "boolean",
             "default": true,
-            "markdownDescription": "Specify whether processes should be animated during preview."
+            "markdownDescription": "%setting.process.animation.animate%"
           },
           "axonivy.process.animation.speed": {
             "type": "integer",
@@ -597,15 +601,15 @@
               100
             ],
             "enumItemLabels": [
-              "Fastest",
-              "Fast",
-              "Normal",
-              "Slow",
-              "Slowest"
+              "%setting.process.animation.fastest%",
+              "%setting.process.animation.fast%",
+              "%setting.process.animation.normal%",
+              "%setting.process.animation.slow%",
+              "%setting.process.animation.slowest%"
             ],
             "minimum": 0,
             "maximum": 100,
-            "markdownDescription": "Specify process animation speed."
+            "markdownDescription": "%setting.process.animation.speed%"
           },
           "axonivy.process.animation.mode": {
             "type": "string",
@@ -618,13 +622,13 @@
               "noEmbeddedProcesses"
             ],
             "enumItemLabels": [
-              "Show and open all touched processes (default)",
-              "Follow only in the current editor on top",
-              "Follow only in open editors",
-              "Do not enter dialog logic",
-              "Follow only top-level business processes"
+              "%setting.process.animation.showAll%",
+              "%setting.process.animation.currentEditor%",
+              "%setting.process.animation.openEditors%",
+              "%setting.process.animation.noDialogLogic%",
+              "%setting.process.animation.topLevelProcesses%"
             ],
-            "markdownDescription": "Choose which processes to follow during animation. Turn off **Animate processes during preview** to stop following entirely."
+            "markdownDescription": "%setting.process.animation.mode%"
           },
           "axonivy.workspaceValidation": {
             "type": "object",
@@ -644,50 +648,50 @@
             "properties": {
               "database": {
                 "type": "boolean",
-                "description": "Databases: databases.yaml"
+                "description": "%setting.validation.databases%"
               },
               "dataclass": {
                 "type": "boolean",
-                "description": "Dataclasses: *.d.json"
+                "description": "%setting.validation.dataClasses%"
               },
               "form": {
                 "type": "boolean",
-                "description": "Dialogs: *.f.json"
+                "description": "%setting.validation.dialogs%"
               },
               "javaIndex": {
                 "type": "boolean",
-                "description": "Beans/FacesConverter/FacesValidator: *.java"
+                "description": "%setting.validation.java%"
               },
               "process": {
                 "type": "boolean",
-                "description": "Processes: *.p.json"
+                "description": "%setting.validation.processes%"
               },
               "restclient": {
                 "type": "boolean",
-                "description": "Rest Clients: rest-clients.yaml"
+                "description": "%setting.validation.restClients%"
               },
               "role": {
                 "type": "boolean",
-                "description": "Roles: roles.yaml"
+                "description": "%setting.validation.roles%"
               },
               "user": {
                 "type": "boolean",
-                "description": "Users: users.yaml"
+                "description": "%setting.validation.users%"
               },
               "variable": {
                 "type": "boolean",
-                "description": "Variables: variables.yaml"
+                "description": "%setting.validation.variables%"
               },
               "webserviceclient": {
                 "type": "boolean",
-                "description": "Web Services: webservice-clients.yaml"
+                "description": "%setting.validation.webServices%"
               },
               "xhtml": {
                 "type": "boolean",
-                "description": "XHTML: *.xhtml"
+                "description": "%setting.validation.xhtml%"
               }
             },
-            "markdownDescription": "Configure which validators are enabled workspace-wide. Individual validators can be disabled in the respective editor settings.",
+            "markdownDescription": "%setting.workspaceValidation%",
             "additionalProperties": false
           },
           "axonivy.browser": {
@@ -698,7 +702,7 @@
               "ivyBrowser",
               "externalBrowser"
             ],
-            "markdownDescription": "Specify which browser to use for opening Axon Ivy content."
+            "markdownDescription": "%setting.browser%"
           }
         }
       }
@@ -706,7 +710,7 @@
     "debuggers": [
       {
         "type": "ivy-process",
-        "label": "Axon Ivy Process Debugger",
+        "label": "%debugger.label%",
         "languages": [
           "ivy-process"
         ],
@@ -720,17 +724,17 @@
             "properties": {
               "host": {
                 "type": "string",
-                "description": "Host name of the Axon Ivy Engine DAP server. Defaults to the configured engine host."
+                "description": "%debugger.host%"
               },
               "port": {
                 "type": "number",
-                "description": "Port of the Axon Ivy Engine DAP server. Defaults to the configured debug port.",
+                "description": "%debugger.port%",
                 "minimum": 1,
                 "maximum": 65535
               },
               "workspaceFolder": {
                 "type": "string",
-                "description": "Absolute path of the workspace folder to expose to the Axon Ivy debug adapter. Defaults to the selected workspace folder."
+                "description": "%debugger.workspaceFolder%"
               }
             }
           }
@@ -739,13 +743,13 @@
           {
             "type": "ivy-process",
             "request": "attach",
-            "name": "Attach to Axon Ivy Engine"
+            "name": "%debugger.attachName%"
           }
         ],
         "configurationSnippets": [
           {
-            "label": "Axon Ivy: Attach to Engine",
-            "description": "Attach the Axon Ivy process debugger to a running engine DAP server.",
+            "label": "%debugger.snippetLabel%",
+            "description": "%debugger.snippetDescription%",
             "body": {
               "type": "ivy-process",
               "request": "attach",
@@ -766,7 +770,7 @@
     "languageModelTools": [
       {
         "name": "new_axon_ivy_project",
-        "displayName": "New Axon Ivy project",
+        "displayName": "%tool.newProject%",
         "modelDescription": "Scaffolds and registers a new Axon Ivy project. MUST be called for every request to create, add, scaffold, initialize, or generate an Axon Ivy project. Do NOT attempt to create the project by writing files, copying an existing project, or running shell/maven commands — only this tool produces a valid, registered project.",
         "inputSchema": {
           "type": "object",
@@ -799,7 +803,7 @@
       },
       {
         "name": "new_axon_ivy_data_class",
-        "displayName": "New Axon Ivy Data Class",
+        "displayName": "%tool.newDataClass%",
         "modelDescription": "Creates a new Axon Ivy Data Class or Entity Class. MUST be called for every request to create, add, scaffold, initialize, or generate an Axon Ivy Data Class. Do NOT attempt to create the Data Class by writing descriptor or Java files, or inspecting and copying existing Data Classes — only this tool produces a valid, registered Data Class.",
         "inputSchema": {
           "type": "object",
@@ -837,7 +841,7 @@
       },
       {
         "name": "new_axon_ivy_process",
-        "displayName": "New Axon Ivy Process",
+        "displayName": "%tool.newProcess%",
         "modelDescription": "Creates a new Axon Ivy Process. MUST be called for every request to create, scaffold, initialize, or generate an Axon Ivy Process. Do NOT attempt to create the Process by writing files, or inspecting and copying existing Processes — only this tool produces a valid, registered Process.",
         "inputSchema": {
           "type": "object",
@@ -876,7 +880,7 @@
       },
       {
         "name": "new_axon_ivy_dialog",
-        "displayName": "New Axon Ivy Dialog",
+        "displayName": "%tool.newDialog%",
         "modelDescription": "Creates a new Axon Ivy Dialog. MUST be called for every request to create, add, scaffold, initialize, or generate an Axon Ivy Dialog. Do NOT attempt to create the Dialog by writing files, or inspecting and copying existing Dialogs — only this tool produces a valid, registered Dialog.",
         "inputSchema": {
           "type": "object",
@@ -941,7 +945,7 @@
       "panel": [
         {
           "id": "ivy-browser-container",
-          "title": "Browser",
+          "title": "%view.browser%",
           "icon": "$(globe)",
           "when": "ivy:hasIvyProjects"
         }
@@ -952,7 +956,7 @@
         {
           "type": "webview",
           "id": "ivyBrowserView",
-          "name": "Browser",
+          "name": "%view.browser%",
           "when": "ivy:hasIvyProjects",
           "icon": "$(globe)"
         }
@@ -960,7 +964,7 @@
       "explorer": [
         {
           "id": "ivyProjects",
-          "name": "Axon Ivy Projects",
+          "name": "%view.projects%",
           "icon": "./assets/ivy-logo.svg"
         }
       ]
@@ -968,53 +972,53 @@
     "submenus": [
       {
         "id": "workflow.editor.title",
-        "label": "Diagram"
+        "label": "%submenu.diagram%"
       },
       {
         "id": "view.title.new",
-        "label": "New",
+        "label": "%submenu.new%",
         "icon": "$(add)"
       },
       {
         "id": "view.item",
-        "label": "More",
+        "label": "%submenu.more%",
         "icon": "$(ellipsis)"
       },
       {
         "id": "explorer.ivy",
-        "label": "Axon Ivy"
+        "label": "%submenu.axonIvy%"
       },
       {
         "id": "explorer.ivy.new",
-        "label": "New"
+        "label": "%submenu.new%"
       },
       {
         "id": "explorer.ivy.new.process",
-        "label": "Process"
+        "label": "%submenu.process%"
       },
       {
         "id": "explorer.ivy.new.ui",
-        "label": "UI"
+        "label": "%submenu.ui%"
       },
       {
         "id": "explorer.ivy.new.data",
-        "label": "Data"
+        "label": "%submenu.data%"
       },
       {
         "id": "explorer.ivy.open",
-        "label": "Open"
+        "label": "%submenu.open%"
       },
       {
         "id": "explorer.ivy.runDebug",
-        "label": "Run & Debug"
+        "label": "%submenu.runDebug%"
       },
       {
         "id": "explorer.ivy.projectSetup",
-        "label": "Project Setup"
+        "label": "%submenu.projectSetup%"
       },
       {
         "id": "explorer.ivy.importExport",
-        "label": "Import / Export"
+        "label": "%submenu.importExport%"
       }
     ],
     "menus": {
@@ -1358,24 +1362,24 @@
     "iconThemes": [
       {
         "id": "ivy-icon-theme-monochrome",
-        "label": "Axon Ivy Icon Theme Monochrome",
+        "label": "%iconTheme.monochrome%",
         "path": "./dist/icon-themes/ivy-icon-theme-monochrome.json"
       },
       {
         "id": "ivy-icon-theme-colored",
-        "label": "Axon Ivy Icon Theme Colored",
+        "label": "%iconTheme.colored%",
         "path": "./dist/icon-themes/ivy-icon-theme-colored.json"
       }
     ],
     "viewsWelcome": [
       {
         "view": "ivyProjects",
-        "contents": "You have not yet opened a folder.\n[Open Folder](command:vscode.openFolder)",
+        "contents": "%welcome.emptyWorkspace%",
         "when": "workbenchState == empty"
       },
       {
         "view": "ivyProjects",
-        "contents": "There are no Axon Ivy projects. Create one by clicking the button below.\n[New Axon Ivy Project](command:ivyProjects.addNewProject)",
+        "contents": "%welcome.noProjects%",
         "when": "workbenchState != empty && !ivy:hasIvyProjects && ivy:isStarted"
       }
     ]

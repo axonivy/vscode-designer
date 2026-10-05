@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'path';
-import { commands, Disposable, env, ProgressLocation, Uri, window, workspace, type ExtensionContext, type Progress } from 'vscode';
+import { commands, Disposable, env, l10n, ProgressLocation, Uri, window, workspace, type ExtensionContext, type Progress } from 'vscode';
 import { logErrorMessage, logErrorMessageWithActions, logInformationMessageWithActions } from '../base/logging-util';
 import type { AddCommandSelectionContext } from './ivy-project-explorer';
 import { MultiStepCancelledError, MultiStepInput, type InputStep, type MSStateBase, type ProjectSelection } from './utils/multi-step-input';
@@ -21,7 +21,7 @@ export const exportIvyProject = async (
   const stepProjects: InputStep<ExportProjectsState> = async (input: MultiStepInput<ExportProjectsState>, state: ExportProjectsState) => {
     const selectedProject = await input.showQuickPick<ProjectSelection>({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose project to export as Ivy Archive (.iar)',
+      titleSuffix: l10n.t('Choose project to export as Ivy Archive (.iar)'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: addCommandSelectionContext.projectPathSelection,
@@ -44,8 +44,8 @@ export const exportIvyProject = async (
       canSelectFolders: true,
       canSelectMany: false,
       defaultUri: state.targetFolderUri,
-      title: 'Target folder for .iar file',
-      openLabel: 'Select folder'
+      title: l10n.t('Target folder for .iar file'),
+      openLabel: l10n.t('Select folder')
     });
     if (!selectedUri || !selectedUri[0] || selectedUri.length === 0) {
       throw new MultiStepCancelledError();
@@ -53,26 +53,26 @@ export const exportIvyProject = async (
     try {
       const st = fs.statSync(selectedUri[0].fsPath);
       if (!st.isDirectory()) {
-        throw new MultiStepCancelledError('Selected target is not a directory. Export cancelled.');
+        throw new MultiStepCancelledError(l10n.t('Selected target is not a directory. Export cancelled.'));
       }
       state.targetFolderUri = selectedUri[0];
     } catch (error) {
-      throw new MultiStepCancelledError(`Error accessing target folder. Export cancelled. ${error}`);
+      throw new MultiStepCancelledError(l10n.t('Error accessing target folder. Export cancelled. {0}', String(error)));
     }
     await context.globalState.update(LAST_TARGET_FOLDER_KEY, state.targetFolderUri.toString());
   };
 
   const stepFileName: InputStep<ExportProjectsState> = async (input: MultiStepInput<ExportProjectsState>, state: ExportProjectsState) => {
     if (!state.targetFolderUri) {
-      throw new MultiStepCancelledError('Target folder not selected. Export cancelled.');
+      throw new MultiStepCancelledError(l10n.t('Target folder not selected. Export cancelled.'));
     }
     state.targetFilename = state.project?.label;
     const targetFolderPath = state.targetFolderUri.fsPath;
-    const buildTargetPathPrompt = (typedValue: string) => `Target path: ${path.join(targetFolderPath, typedValue + '.iar')}`;
+    const buildTargetPathPrompt = (typedValue: string) => l10n.t('Target path: {0}', path.join(targetFolderPath, typedValue + '.iar'));
 
     state.targetFilename = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose name of export file (without extension .iar)',
+      titleSuffix: l10n.t('Choose name of export file (without extension .iar)'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.targetFilename,
@@ -92,7 +92,7 @@ export const exportIvyProject = async (
   const lastTargetFolderUri = context.globalState.get<string>(LAST_TARGET_FOLDER_KEY);
 
   const exportProjectData: ExportProjectsState = {
-    dialogTitle: `Export Axon Ivy Project`,
+    dialogTitle: l10n.t('Export Axon Ivy Project'),
     currentStep: 1,
     totalSteps: steps.length,
     project: undefined,
@@ -126,7 +126,7 @@ export const exportIvyProject = async (
     {
       location: ProgressLocation.Notification,
       cancellable: false,
-      title: 'Axon Ivy Export'
+      title: l10n.t('Axon Ivy Export')
     },
     async progress => {
       await exportIar(exportProjectData.project as ProjectSelection, targetFolder, targetFileName, progress);
@@ -168,13 +168,13 @@ const createEndTerminalExecutionListener = () => {
       return;
     }
     const showTerminal = {
-      'Show Terminal': () => {
+      [l10n.t('Show Terminal')]: () => {
         e.terminal.show();
       }
     };
     if (e.exitCode !== 0) {
       logErrorMessageWithActions(
-        `Maven pack-iar command failed with exit code ${e.exitCode} for command: ${commandLineValue}`,
+        l10n.t('Maven pack-iar command failed with exit code {0} for command: {1}', e.exitCode ?? 'unknown', commandLineValue),
         showTerminal
       );
       return;
@@ -182,14 +182,17 @@ const createEndTerminalExecutionListener = () => {
     const targetFolder = commandLineValue.match(/"-Divy\.output\.directory=([^"]+)"/)?.[1];
     const fileName = commandLineValue.match(/"-Divy\.final\.name=([^"]+)"/)?.[1];
     if (!targetFolder) {
-      logErrorMessageWithActions(`Could not determine target folder from command: ${commandLineValue}`, showTerminal);
+      logErrorMessageWithActions(l10n.t('Could not determine target folder from command: {0}', commandLineValue), showTerminal);
       return;
     }
-    logInformationMessageWithActions(`Project archive ${fileName} has been exported to "${targetFolder}".`, {
-      'Reveal in Explorer': async () => {
-        await env.openExternal(Uri.file(targetFolder));
-      },
-      ...showTerminal
-    });
+    logInformationMessageWithActions(
+      l10n.t('Project archive {0} has been exported to "{1}".', fileName ?? '<unknown file name>', targetFolder),
+      {
+        [l10n.t('Reveal in Explorer')]: async () => {
+          await env.openExternal(Uri.file(targetFolder));
+        },
+        ...showTerminal
+      }
+    );
   });
 };

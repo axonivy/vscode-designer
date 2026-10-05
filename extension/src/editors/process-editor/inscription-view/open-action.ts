@@ -1,5 +1,5 @@
 import { isOpenActionPayload, type InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
-import { Uri } from 'vscode';
+import { l10n, Uri } from 'vscode';
 import { executeCommand, type KnownCommand } from '../../../base/commands';
 import { logErrorMessage } from '../../../base/logging-util';
 import { IvyEngineManager } from '../../../engine/engine-manager';
@@ -19,7 +19,7 @@ const parsePayload = (command: KnownCommand, args: InscriptionActionArgs) => {
     return JSON.parse(args.payload);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    logErrorMessage(`Failed to open config. Could not parse payload '${args.payload}' for command '${command}': ${message}`);
+    logErrorMessage(l10n.t("Failed to open config. Could not parse payload '{0}' for command '{1}': {2}", args.payload, command, message));
   }
 };
 

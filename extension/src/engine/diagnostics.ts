@@ -1,6 +1,6 @@
 import fs from 'fs';
 import type { CodeActionContext, CodeActionProvider, DiagnosticCollection, ExtensionContext, Selection, TextDocument } from 'vscode';
-import { CodeAction, CodeActionKind, Diagnostic, DiagnosticSeverity, Position, Range, Uri, languages, workspace } from 'vscode';
+import { CodeAction, CodeActionKind, Diagnostic, DiagnosticSeverity, Position, Range, Uri, l10n, languages, workspace } from 'vscode';
 import { executeCommand } from '../base/commands';
 import { runJavaServerModeSwitch } from '../base/java-extension-api';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
@@ -70,9 +70,11 @@ export class IvyDiagnostics {
         const projectUri = Uri.file(p.projectDirectory);
         const uri = Uri.joinPath(projectUri, POM_FILE);
         const error = isConversionMessage(iar.errorMessage)
-          ? `${CONVERSION_OUTDATED_MESSAGE_PREFIX} Update to a newer compatible version or import the project to VS Code to convert the project.`
+          ? l10n.t(
+              'Project is outdated and needs to be converted. Update to a newer compatible version or import the project to VS Code to convert the project.'
+            )
           : iar.errorMessage;
-        const message = `Referenced dependency ${iar.artifactId} has error: ${error}`;
+        const message = l10n.t('Referenced dependency {0} has error: {1}', iar.artifactId, error);
         const range = await this.dependencyRange(uri, iar);
         const diagnostic = new Diagnostic(range, message, DiagnosticSeverity.Error);
         diagnostic.source = DIAGNOSTIC_SOURCE;
@@ -134,7 +136,7 @@ export class ConvertProjectQuickFix implements CodeActionProvider {
     if (!isConversionDiagnostic(firstDiagnostic)) {
       return [];
     }
-    const title = 'Axon Ivy: Convert Project';
+    const title = l10n.t('Axon Ivy: Convert Project');
     const action = new CodeAction(title, CodeActionKind.QuickFix);
     action.isPreferred = true;
     action.command = {

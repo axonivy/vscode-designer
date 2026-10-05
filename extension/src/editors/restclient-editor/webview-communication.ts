@@ -6,7 +6,7 @@ import type {
 } from '@axonivy/restclient-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import * as path from 'path';
-import type { TextDocument, WebviewPanel } from 'vscode';
+import { l10n, type TextDocument, type WebviewPanel } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { runJavaProjectConfigurationUpdate } from '../../base/java-extension-api';
@@ -106,20 +106,22 @@ async function generateClient(openapi: OpenApiGeneratorConfig, document: TextDoc
 
   try {
     await runMavenCommand(projectPath, command);
-    logInformationMessage(`${openapi.clientName} OpenAPI client generated successfully`);
+    const successMessage = l10n.t('{0} OpenAPI client generated successfully', openapi.clientName);
+    logInformationMessage(successMessage);
 
     await runJavaProjectConfigurationUpdate(document.uri);
 
     return {
       success: true,
-      message: `${openapi.clientName} OpenAPI client generated successfully`
+      message: successMessage
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : `${error}`;
-    logErrorMessage(`OpenAPI client generation failed: ${errorMessage}`);
+    const failureMessage = l10n.t('OpenAPI client generation failed: {0}', errorMessage);
+    logErrorMessage(failureMessage);
     return {
       success: false,
-      message: `OpenAPI client generation failed: ${errorMessage}`
+      message: failureMessage
     };
   }
 }

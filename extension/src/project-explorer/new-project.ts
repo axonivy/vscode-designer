@@ -1,5 +1,5 @@
 import path from 'path';
-import { Uri } from 'vscode';
+import { l10n, Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { CreateProjectParams } from '../engine/api/engine-api';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -23,8 +23,8 @@ export const addNewProject = async (selectedUri: Uri) => {
   const stepProjectName: InputStep<NewProjectState> = async (input: MultiStepInput<NewProjectState>, state: NewProjectState) => {
     state.projectName = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose project name',
-      placeholder: 'Enter a project name. Allowed characters: a-z, A-Z, 0-9, _, -',
+      titleSuffix: l10n.t('Choose project name'),
+      placeholder: l10n.t('Enter a project name. Allowed characters: a-z, A-Z, 0-9, _, -'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.projectName,
@@ -49,8 +49,8 @@ export const addNewProject = async (selectedUri: Uri) => {
     }
     state.groupId = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose a Group ID',
-      placeholder: 'Enter a Group ID (e.g. com.domain.one). Allowed characters: a-z, A-Z, 0-9, _',
+      titleSuffix: l10n.t('Choose a Group ID'),
+      placeholder: l10n.t('Enter a Group ID (e.g. com.domain.one). Allowed characters: a-z, A-Z, 0-9, _'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.groupId,
@@ -74,8 +74,8 @@ export const addNewProject = async (selectedUri: Uri) => {
     }
     state.projectId = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose an Artifact ID',
-      placeholder: 'Enter an Artifact ID (e.g. another-project-id). Allowed characters: a-z, A-Z, 0-9, _',
+      titleSuffix: l10n.t('Choose an Artifact ID'),
+      placeholder: l10n.t('Enter an Artifact ID (e.g. another-project-id). Allowed characters: a-z, A-Z, 0-9, _'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.projectId,
@@ -88,7 +88,7 @@ export const addNewProject = async (selectedUri: Uri) => {
 
   const steps: InputStep<NewProjectState>[] = [stepProjectName, stepGroupId, stepProjectId];
   const newProjectData: NewProjectState = {
-    dialogTitle: 'New Axon Ivy Project',
+    dialogTitle: l10n.t('New Axon Ivy Project'),
     currentStep: 1,
     totalSteps: steps.length
   };

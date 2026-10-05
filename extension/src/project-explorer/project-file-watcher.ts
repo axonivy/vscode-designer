@@ -1,5 +1,5 @@
 import path from 'path';
-import { Uri, workspace, type ExtensionContext } from 'vscode';
+import { l10n, Uri, workspace, type ExtensionContext } from 'vscode';
 import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base/debounce';
 import { askToRunJavaCleanWorkspace } from '../base/java-extension-api';
 import { isWorkspaceLocked } from '../base/workspace-lock';
@@ -67,7 +67,7 @@ export class ProjectFileWatcherManager {
       return;
     }
     await IvyEngineManager.instance.deleteProject(project);
-    await askToRunJavaCleanWorkspace('Project deleted');
+    await askToRunJavaCleanWorkspace(l10n.t('Project deleted'));
     await IvyProjectExplorer.instance.refresh();
   }
 

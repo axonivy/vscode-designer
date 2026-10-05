@@ -1,5 +1,6 @@
 import path from 'path';
 import {
+  l10n,
   LanguageModelTextPart,
   type LanguageModelTool,
   type LanguageModelToolInvocationOptions,
@@ -10,6 +11,7 @@ import {
   type ProviderResult,
   Uri
 } from 'vscode';
+import { localizeProcessKind } from '../../base/localized-labels';
 import { IvyEngineManager } from '../../engine/engine-manager';
 
 type NewProcessToolArgs = {
@@ -28,13 +30,17 @@ export class NewProcessTool implements LanguageModelTool<NewProcessToolArgs> {
 
   prepareInvocation?(options: LanguageModelToolInvocationPrepareOptions<NewProcessToolArgs>): ProviderResult<PreparedToolInvocation> {
     const type = resolvedType(options.input.type);
+    const confirmationMessage = [
+      l10n.t('Create an Axon Ivy {0} with the following details?', localizeProcessKind(type)),
+      `- ${l10n.t('Name')}: ${options.input.name}`,
+      `- ${l10n.t('Namespace')}: ${options.input.namespace ?? ''}`,
+      `- ${l10n.t('Project')}: ${path.basename(options.input.projectPath)}`
+    ].join('\n');
     return {
-      invocationMessage: `Creating new Axon Ivy ${type} "${options.input.name}"`,
+      invocationMessage: l10n.t('Creating new Axon Ivy {0} "{1}"', localizeProcessKind(type), options.input.name),
       confirmationMessages: {
-        title: `New Axon Ivy ${type}`,
-        message: new MarkdownString(
-          `Create an Axon Ivy ${type} with the following details?\n- Name: ${options.input.name}\n- Namespace: ${options.input.namespace}\n- Project: ${path.basename(options.input.projectPath)}`
-        )
+        title: l10n.t('New Axon Ivy {0}', localizeProcessKind(type)),
+        message: new MarkdownString(confirmationMessage)
       }
     };
   }
@@ -50,7 +56,7 @@ export const createNewProcess = async (input: NewProcessToolArgs): Promise<strin
   };
   const processBean = await IvyEngineManager.instance.createProcess(newProcessParams);
   const processPath = processBean?.uri ? Uri.parse(processBean.uri).fsPath : '<unknown location>';
-  return `${type} created successfully at '${processPath}'`;
+  return l10n.t("{0} created successfully at '{1}'", localizeProcessKind(type), processPath);
 };
 
 const resolvedType = (type?: ProcessType) => type ?? 'Business Process';

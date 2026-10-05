@@ -1,4 +1,5 @@
 import path from 'path';
+import { l10n } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { type AddCommandSelectionContext } from './ivy-project-explorer';
@@ -37,8 +38,8 @@ export const addNewCaseMap = async (selectionContext: AddCommandSelectionContext
       const previousProject = state.project;
       state.project = await input.showQuickPick<ProjectSelection>({
         title: state.dialogTitle,
-        titleSuffix: ' - Choose project',
-        placeholder: 'Select one of the available projects',
+        titleSuffix: l10n.t('Choose project'),
+        placeholder: l10n.t('Select one of the available projects'),
         currentStep: state.currentStep,
         totalSteps: state.totalSteps,
         value: state.project ? state.project.label : '',
@@ -57,8 +58,8 @@ export const addNewCaseMap = async (selectionContext: AddCommandSelectionContext
   const stepName: InputStep<NewCaseMapState> = async (input: MultiStepInput<NewCaseMapState>, state: NewCaseMapState) => {
     state.name = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose name',
-      placeholder: 'Enter a name. Must start with a letter or underscore. Allowed characters: a-z, A-Z, 0-9, _',
+      titleSuffix: l10n.t('Choose name'),
+      placeholder: l10n.t('Enter a name. Must start with a letter or underscore. Allowed characters: a-z, A-Z, 0-9, _'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.name,
@@ -72,8 +73,8 @@ export const addNewCaseMap = async (selectionContext: AddCommandSelectionContext
   const stepNamespace: InputStep<NewCaseMapState> = async (input: MultiStepInput<NewCaseMapState>, state: NewCaseMapState) => {
     state.namespace = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose namespace',
-      placeholder: 'Enter Namespace separated by "/". Allowed characters: a-z, A-Z, 0-9, _, /',
+      titleSuffix: l10n.t('Choose namespace'),
+      placeholder: l10n.t('Enter Namespace separated by "/". Allowed characters: a-z, A-Z, 0-9, _, /'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.namespace,
@@ -87,7 +88,7 @@ export const addNewCaseMap = async (selectionContext: AddCommandSelectionContext
   const steps: InputStep<NewCaseMapState>[] = [stepProject, stepName, stepNamespace];
 
   const newCaseMapData: NewCaseMapState = {
-    dialogTitle: 'Add New Case Map',
+    dialogTitle: l10n.t('Add New Case Map'),
     currentStep: 1,
     totalSteps: steps.length,
     namespace: namespaceFromSelection,

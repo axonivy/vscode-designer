@@ -1,5 +1,5 @@
 import type { Uri } from 'vscode';
-import { commands, extensions, window, workspace } from 'vscode';
+import { commands, extensions, l10n, window, workspace } from 'vscode';
 import { executeCommand, type JavaCommand } from './commands';
 import { logInformationMessage, logWarningMessage } from './logging-util';
 
@@ -25,13 +25,13 @@ export const runJavaServerModeSwitch = async () => {
 
 export const askToRunJavaCleanWorkspace = async (reason: string) => {
   const selection = await window.showQuickPick(
-    [{ label: 'Reload Java workspace and window', detail: 'Unsaved changes might be lost' }, { label: 'Cancel' }],
+    [{ label: l10n.t('Reload Java workspace and window'), detail: l10n.t('Unsaved changes might be lost') }, { label: l10n.t('Cancel') }],
     {
       ignoreFocusOut: true,
-      title: `${reason} - reload Java workspace and window to apply modifications`
+      title: l10n.t('{0} - reload Java workspace and window to apply modifications', reason)
     }
   );
-  if (selection?.label === 'Reload Java workspace and window') {
+  if (selection?.label === l10n.t('Reload Java workspace and window')) {
     // Force clean the Java workspace
     return await runJavaCommand('java.clean.workspace', true);
   }
@@ -43,7 +43,10 @@ const runJavaCommand = async (command: JavaCommand, ...args: any[]) => {
     return await executeCommand(command, ...args);
   } catch {
     logWarningMessage(
-      `Could not execute Java command ${command}. Java extension might not be installed or activated. Java support will not be fully available.`
+      l10n.t(
+        'Could not execute Java command {0}. Java extension might not be installed or activated. Java support will not be fully available.',
+        command
+      )
     );
   }
 };
@@ -61,16 +64,19 @@ export const ensureJavaLightWeightMode = async (task: string) => {
     return;
   }
   const selection = await window.showQuickPick(
-    [{ label: 'Reload Window', detail: 'Unsaved changes will be lost' }, { label: 'Continue without reloading' }],
+    [{ label: l10n.t('Reload Window'), detail: l10n.t('Unsaved changes will be lost') }, { label: l10n.t('Continue without reloading') }],
     {
       ignoreFocusOut: true,
-      title: `For better performance, it's recommended to reload the window to switch back to Java LightWeight mode. After reloading, you'll need to trigger ${task} again.`
+      title: l10n.t(
+        "For better performance, it's recommended to reload the window to switch back to Java LightWeight mode. After reloading, you'll need to trigger {0} again.",
+        task
+      )
     }
   );
   if (!selection?.label) {
     return;
   }
-  if (selection?.label === 'Reload Window') {
+  if (selection?.label === l10n.t('Reload Window')) {
     await executeCommand('workbench.action.reloadWindow');
   }
 };
@@ -79,9 +85,10 @@ export const ensureJavaExtensionInstalled = () => {
   if (extensions.getExtension(JAVA_EXTENSION_ID)) {
     return;
   }
-  logWarningMessage('Language Support for Java by Red Hat extension is not installed.', 'Install').then(selection => {
-    if (selection === 'Install') {
-      logInformationMessage('Installing Language Support for Java by Red Hat extension...');
+  const installLabel = l10n.t('Install');
+  logWarningMessage(l10n.t('Language Support for Java by Red Hat extension is not installed.'), installLabel).then(selection => {
+    if (selection === installLabel) {
+      logInformationMessage(l10n.t('Installing Language Support for Java by Red Hat extension...'));
       commands.executeCommand('workbench.extensions.installExtension', JAVA_EXTENSION_ID);
     }
   });

@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 import { promisify } from 'node:util';
-import { workspace, type WorkspaceFolder } from 'vscode';
+import { l10n, workspace, type WorkspaceFolder } from 'vscode';
 import { logInformationMessage, logWarningMessage } from './logging-util';
 
 const DEFAULT_MAVEN_EXECUTABLE = 'mvn';
@@ -17,6 +17,8 @@ export type MvnSettingExecutable = {
   workspaceFolder?: WorkspaceFolder;
 };
 
+const localizeScope = (scope: MvnSettingExecutable['scope']) => (scope === 'user' ? l10n.t('user') : l10n.t('workspace'));
+
 export const validateMavenExecutable = async () => {
   const mvnExecutables = getMvnExecutables();
   const mvnExectuableUser = mvnExecutables.find(mvnExecutable => mvnExecutable.scope === 'user');
@@ -24,26 +26,50 @@ export const validateMavenExecutable = async () => {
   // First check all workspace-specific Maven executable settings
   for (const mvnExecutable of mvnExecutables.filter(mvnExecutable => mvnExecutable.scope === 'workspace')) {
     if (!(await checkMvnExecutable(mvnExecutable.value))) {
-      logWarningMessage(`Invalid ${mvnExecutable.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}"
-        in workspace folder "${mvnExecutable.workspaceFolder?.uri.fsPath}".
-        This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}.
-        Keeping this setting might lead to unexpected behavior.`);
+      logWarningMessage(
+        l10n.t(
+          'Invalid {0} Maven executable setting "{1}": "{2}"\nin workspace folder "{3}".\nThis is not a valid Maven executable with version {4}.\nKeeping this setting might lead to unexpected behavior.',
+          localizeScope(mvnExecutable.scope),
+          MAVEN_SETTING_KEY,
+          mvnExecutable.value,
+          mvnExecutable.workspaceFolder?.uri.fsPath ?? '',
+          EXPECTED_MAVEN_VERSION
+        )
+      );
     } else {
-      logInformationMessage(`Found valid ${mvnExecutable.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExecutable.value}"
-        in workspace folder "${mvnExecutable.workspaceFolder?.uri.fsPath}".
-        This executable will be used for Maven operations in that workspace.`);
+      logInformationMessage(
+        l10n.t(
+          'Found valid {0} Maven executable setting "{1}": "{2}"\nin workspace folder "{3}".\nThis executable will be used for Maven operations in that workspace.',
+          localizeScope(mvnExecutable.scope),
+          MAVEN_SETTING_KEY,
+          mvnExecutable.value,
+          mvnExecutable.workspaceFolder?.uri.fsPath ?? ''
+        )
+      );
     }
   }
 
   // Next, check the user-specific Maven executable setting if present
   if (mvnExectuableUser) {
     if (!(await checkMvnExecutable(mvnExectuableUser.value))) {
-      logWarningMessage(`Invalid ${mvnExectuableUser.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExectuableUser.value}".
-        This is not a valid Maven executable with version ${EXPECTED_MAVEN_VERSION}.
-        Keeping this setting might lead to unexpected behavior.`);
+      logWarningMessage(
+        l10n.t(
+          'Invalid {0} Maven executable setting "{1}": "{2}".\nThis is not a valid Maven executable with version {3}.\nKeeping this setting might lead to unexpected behavior.',
+          localizeScope(mvnExectuableUser.scope),
+          MAVEN_SETTING_KEY,
+          mvnExectuableUser.value,
+          EXPECTED_MAVEN_VERSION
+        )
+      );
     } else {
-      logInformationMessage(`Found valid global ${mvnExectuableUser.scope} Maven executable setting "${MAVEN_SETTING_KEY}": "${mvnExectuableUser.value}".
-      This executable will be used for Maven operations in folders where no Workspace/Folder Maven executable is configured.`);
+      logInformationMessage(
+        l10n.t(
+          'Found valid global {0} Maven executable setting "{1}": "{2}".\nThis executable will be used for Maven operations in folders where no Workspace/Folder Maven executable is configured.',
+          localizeScope(mvnExectuableUser.scope),
+          MAVEN_SETTING_KEY,
+          mvnExectuableUser.value
+        )
+      );
     }
     return; // Stop further validation if a user-specific Maven executable is found and checked, no matter the validation outcome
   }
@@ -51,10 +77,13 @@ export const validateMavenExecutable = async () => {
   // If there is no user-specific Maven executable, fall back to the default Maven executable on PATH
   const isValidPath = await checkMvnExecutable(DEFAULT_MAVEN_EXECUTABLE);
   if (!isValidPath) {
-    logWarningMessage(`No valid Maven executable found.
-    Please ensure Maven ${EXPECTED_MAVEN_VERSION} is installed and accessible in your PATH
-    or the path to the executable is configured in your VS Code settings via "${MAVEN_SETTING_KEY}".
-    Ignoring this might lead to unexpected behavior.`);
+    logWarningMessage(
+      l10n.t(
+        'No valid Maven executable found.\nPlease ensure Maven {0} is installed and accessible in your PATH\nor the path to the executable is configured in your VS Code settings via "{1}".\nIgnoring this might lead to unexpected behavior.',
+        EXPECTED_MAVEN_VERSION,
+        MAVEN_SETTING_KEY
+      )
+    );
   }
 };
 

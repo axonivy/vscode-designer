@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { type ExtensionContext } from 'vscode';
+import { l10n, type ExtensionContext } from 'vscode';
 import { Messenger, type MessengerDiagnostic } from 'vscode-messenger';
 import { LocalMcpServer } from './ai/tools/local-mcp';
 import { registerTools } from './ai/tools/tools';
@@ -31,8 +31,8 @@ export const messenger = new Messenger({ ignoreHiddenViews: false });
 export async function activate(context: ExtensionContext): Promise<MessengerDiagnostic> {
   StatusBar.init(context);
   StatusBar.overrideStatusBar({
-    text: 'Activating...',
-    tooltip: newMarkdownString('Activating Axon Ivy Extension ...'),
+    text: l10n.t('Activating...'),
+    tooltip: newMarkdownString(l10n.t('Activating Axon Ivy Extension ...')),
     icon: '$(loading~spin)',
     isClickable: false
   });
@@ -70,8 +70,10 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     return messenger.diagnosticApi();
   } catch (error) {
     StatusBar.overrideStatusBar({
-      text: 'Activation failed',
-      tooltip: newMarkdownString('Activation of Axon Ivy Extension failed.\nCheck the error logs for more details.'),
+      text: l10n.t('Activation failed'),
+      tooltip: newMarkdownString(
+        `${l10n.t('Activation of Axon Ivy Extension failed.')}\n${l10n.t('Check the error logs for more details.')}`
+      ),
       icon: '$(error)',
       isError: true,
       visibleOptions: ['openRuntimeLog', 'openExtensionLog', 'openEngineLog', 'openSettings']
@@ -90,6 +92,6 @@ const startLocalMcpServer = () => {
   localMcpServer = new LocalMcpServer();
   localMcpStartup = localMcpServer.start(config.localMcp()).catch(error => {
     const reason = error instanceof Error ? error.message : String(error);
-    logWarningMessage(`Local MCP server failed to start: ${reason}`);
+    logWarningMessage(l10n.t('Local MCP server failed to start: {0}', reason));
   });
 };

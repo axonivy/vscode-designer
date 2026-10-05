@@ -1,5 +1,5 @@
 import path from 'path';
-import { ProgressLocation, window, type CancellationToken, type Progress } from 'vscode';
+import { l10n, ProgressLocation, window, type CancellationToken, type Progress } from 'vscode';
 import { showExtensionLog } from '../base/extension-output-channel';
 import { logErrorMessage, logInformationMessage, logInformationMessageWithActions } from '../base/logging-util';
 import { decreaseWorkspaceLock, increaseWorkspaceLock } from '../base/workspace-lock';
@@ -9,7 +9,7 @@ import { showProjectConversionLog } from '../engine/project-conversion-log';
 
 export const runProjectConversion = async (projectsToConvert: string[]) => {
   if (projectsToConvert.length === 0) {
-    logInformationMessage('No Axon Ivy project(s) selected for conversion. Conversion aborted.');
+    logInformationMessage(l10n.t('No Axon Ivy project(s) selected for conversion. Conversion aborted.'));
     return;
   }
   try {
@@ -18,7 +18,7 @@ export const runProjectConversion = async (projectsToConvert: string[]) => {
       {
         location: ProgressLocation.Notification,
         cancellable: true,
-        title: 'Axon Ivy Project Conversion'
+        title: l10n.t('Axon Ivy Project Conversion')
       },
       async (progress, token) => await conversionTask(projectsToConvert, progress, token)
     );
@@ -39,11 +39,17 @@ const conversionTask = async (
   const numOfProjects = projectsToConvert.length;
   for (const project of projectsToConvert) {
     if (token.isCancellationRequested) {
-      logInformationMessage(`Project conversion cancelled by user.`);
+      logInformationMessage(l10n.t(`Project conversion cancelled by user.`));
       return;
     }
     progress.report({
-      message: `Converting ${path.basename(project)} - ${convertedCount} of ${numOfProjects} project(s) converted.${failedProjects.length > 0 ? ` ${failedProjects.length} project(s) failed to convert.` : ''}`
+      message: l10n.t(
+        'Converting {0} - {1} of {2} project(s) converted.{3}',
+        path.basename(project),
+        convertedCount,
+        numOfProjects,
+        failedProjects.length > 0 ? ` ${l10n.t('{0} project(s) failed to convert.', failedProjects.length)}` : ''
+      )
     });
     try {
       const result = await IvyEngineManager.instance.convertProject(project);
@@ -53,7 +59,7 @@ const conversionTask = async (
         convertedCount++;
       }
     } catch (error) {
-      logErrorMessage(`Failed to convert project ${project}: ${error}`);
+      logErrorMessage(l10n.t('Failed to convert project {0}: {1}', project, String(error)));
       failedProjects.push(project);
     }
     progress.report({
@@ -61,7 +67,12 @@ const conversionTask = async (
     });
   }
   logInformationMessageWithActions(
-    `Converted ${convertedCount} of ${numOfProjects} Axon Ivy project(s).${failedProjects.length > 0 ? ` ${failedProjects.length} project(s) failed to convert.` : ''}`,
-    { 'Show Project Conversion Log': () => showProjectConversionLog(), 'Show Extension Log': () => showExtensionLog() }
+    l10n.t(
+      'Converted {0} of {1} Axon Ivy project(s).{2}',
+      convertedCount,
+      numOfProjects,
+      failedProjects.length > 0 ? ` ${l10n.t('{0} project(s) failed to convert.', failedProjects.length)}` : ''
+    ),
+    { [l10n.t('Show Project Conversion Log')]: () => showProjectConversionLog(), [l10n.t('Show Extension Log')]: () => showExtensionLog() }
   );
 };

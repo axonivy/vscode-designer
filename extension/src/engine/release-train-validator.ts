@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { l10n } from 'vscode';
 import { type ExtensionVersion } from '../version/extension-version';
 import { PREVIEW_TRAINS, stableTrains } from './engine-release-train';
 
@@ -33,18 +34,26 @@ export class ReleaseTrainValidator {
   public isValidEngineDir = async (engineDir: string) => {
     const pluginsDir = path.join(engineDir, 'system', 'plugins');
     if (!this.isDirectory(pluginsDir)) {
-      return { valid: false, reason: `Invalid release train tag or engine directory '${engineDir}'` };
+      return { valid: false, reason: l10n.t("Invalid release train tag or engine directory '{0}'", engineDir) };
     }
     const isDirectory = true;
     const utilBundleFileName = await fs.promises
       .readdir(pluginsDir, { withFileTypes: true })
       .then(files => files.find(file => file.isFile() && file.name.startsWith('ch.ivyteam.util_') && file.name.endsWith('.jar'))?.name);
     if (!utilBundleFileName) {
-      return { valid: false, isDirectory, reason: `Failed to determine engine version, no util bundle found in '${pluginsDir}'.` };
+      return {
+        valid: false,
+        isDirectory,
+        reason: l10n.t("Failed to determine engine version, no util bundle found in '{0}'.", pluginsDir)
+      };
     }
     const splittedBundleName = utilBundleFileName.split('_');
     if (splittedBundleName.length !== 2 || !splittedBundleName[1]) {
-      return { valid: false, isDirectory, reason: `Failed to check engine version, unexpected util bundle name '${utilBundleFileName}'.` };
+      return {
+        valid: false,
+        isDirectory,
+        reason: l10n.t("Failed to check engine version, unexpected util bundle name '{0}'.", utilBundleFileName)
+      };
     }
     const engineVersion = splittedBundleName[1].replace('.jar', '');
     return { isDirectory, ...this.isValidEngineVersion(engineVersion) };
@@ -53,23 +62,29 @@ export class ReleaseTrainValidator {
   private isValidEngineVersion = (engineVersion: string) => {
     const splittedEngineVersion = engineVersion.split('.');
     if (splittedEngineVersion.length < 3) {
-      return { valid: false, reason: `Engine version validation failed, unexpected engine version '${engineVersion}'.` };
+      return {
+        valid: false,
+        reason: l10n.t("Engine version validation failed, unexpected engine version '{0}'.", engineVersion)
+      };
     }
     const minEngineVersion = `${this.extensionVersion.major}.${this.extensionVersion.minor}.${this.minPatchVersion}`;
     if (this.toInt(splittedEngineVersion[0]) !== this.extensionVersion.major) {
       return {
         valid: false,
-        reason: `Engine major version '${engineVersion}' does not match expected major version '${minEngineVersion}'.`
+        reason: l10n.t("Engine major version '{0}' does not match expected major version '{1}'.", engineVersion, minEngineVersion)
       };
     }
     if (this.toInt(splittedEngineVersion[1]) !== this.extensionVersion.minor) {
       return {
         valid: false,
-        reason: `Engine minor version '${engineVersion}' does not match expected minor version '${minEngineVersion}'.`
+        reason: l10n.t("Engine minor version '{0}' does not match expected minor version '{1}'.", engineVersion, minEngineVersion)
       };
     }
     if (this.toInt(splittedEngineVersion[2]) < this.minPatchVersion) {
-      return { valid: false, reason: `Engine patch version '${engineVersion}' is older than expected version '${minEngineVersion}'.` };
+      return {
+        valid: false,
+        reason: l10n.t("Engine patch version '{0}' is older than expected version '{1}'.", engineVersion, minEngineVersion)
+      };
     }
     return { valid: true };
   };
@@ -82,13 +97,18 @@ export class ReleaseTrainValidator {
       if (this.extensionVersion.isMilestone && releaseTrain != 'milestone') {
         return {
           valid: false,
-          reason: `Release train setting mismatch. Extension Version is a milestone release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "${releaseTrain}". Switch the releaseTrain to 'milestone' or install a non-milestone version of the extension.`
+          reason: l10n.t(
+            `Release train setting mismatch. Extension Version is a milestone release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "{0}". Switch the releaseTrain to 'milestone' or install a non-milestone version of the extension.`,
+            releaseTrain
+          )
         };
       }
       if (!this.extensionVersion.isMilestone && releaseTrain == 'milestone') {
         return {
           valid: false,
-          reason: `Release train setting mismatch. Extension Version is not a milestone release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "milestone". Switch the releaseTrain to 'nightly' or 'dev', or install a milestone version of the extension.`
+          reason: l10n.t(
+            `Release train setting mismatch. Extension Version is not a milestone release, but there is a Workspace or User VS Code setting "axonivy.engine.releaseTrain": "milestone". Switch the releaseTrain to 'nightly' or 'dev', or install a milestone version of the extension.`
+          )
         };
       }
       return { valid: true };

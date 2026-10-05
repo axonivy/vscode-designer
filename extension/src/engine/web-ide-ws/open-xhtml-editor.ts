@@ -1,6 +1,6 @@
 import { Element } from 'domhandler';
 import { DomUtils, parseDocument } from 'htmlparser2';
-import { Selection, Uri, window, workspace, type TextDocument } from 'vscode';
+import { l10n, Selection, Uri, window, workspace, type TextDocument } from 'vscode';
 import { logWarningMessage } from '../../base/logging-util';
 import type { OpenXhtmlEditorArgs } from '../api/jsonrpc';
 
@@ -14,7 +14,7 @@ export const openXhtmlEditor = async (args: OpenXhtmlEditorArgs) => {
   await window.showTextDocument(document, selection ? { selection } : undefined);
 
   if (!selection) {
-    logWarningMessage(`Could not resolve XHTML element '${args.selection}' in '${args.bean.uri}'.`);
+    logWarningMessage(l10n.t("Could not resolve XHTML element '{0}' in '{1}'.", args.selection ?? '', args.bean.uri));
   }
 
   return true;

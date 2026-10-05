@@ -1,4 +1,4 @@
-import { DebugAdapterServer, type DebugAdapterDescriptor, type DebugAdapterDescriptorFactory, type DebugSession } from 'vscode';
+import { DebugAdapterServer, l10n, type DebugAdapterDescriptor, type DebugAdapterDescriptorFactory, type DebugSession } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { PROCESS_DEBUG_HOST, toPort } from './process-debug-configuration-provider';
 
@@ -6,7 +6,7 @@ export class ProcessDebugAdapterDescriptorFactory implements DebugAdapterDescrip
   createDebugAdapterDescriptor(session: DebugSession): DebugAdapterDescriptor | undefined {
     const port = toPort(session.configuration.port);
     if (!port) {
-      void logErrorMessage('No Axon Ivy debug port is configured for this debug session.');
+      void logErrorMessage(l10n.t('No Axon Ivy debug port is configured for this debug session.'));
       return undefined;
     }
 

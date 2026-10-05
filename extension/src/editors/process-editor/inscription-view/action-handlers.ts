@@ -1,4 +1,5 @@
 import type { InscriptionActionArgs, InscriptionNotificationTypes } from '@axonivy/process-editor-inscription-protocol';
+import { l10n } from 'vscode';
 import { logWarningMessage } from '../../../base/logging-util';
 import { isAction, noUnknownAction } from '../../notification-helper';
 import { handleNewProcess } from './new-process';
@@ -41,7 +42,7 @@ export const handleActionLocal = (msg: unknown, sendInscriptionNotification: Sen
       case 'openEndPage':
       case 'newProgram':
       case 'openProgram':
-        logWarningMessage(`Action '${msg.params.actionId}' is not yet implemented.`);
+        logWarningMessage(l10n.t("Action '{0}' is not yet implemented.", msg.params.actionId));
         break;
       default:
         noUnknownAction(msg.params.actionId);

@@ -1,5 +1,5 @@
 import type { EditorFileContent } from '@axonivy/dataclass-editor-protocol';
-import { Uri, env } from 'vscode';
+import { env, l10n, Uri } from 'vscode';
 import type { NotificationType } from 'vscode-messenger-common';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 
@@ -65,7 +65,7 @@ export const hasEditorFileContent = (obj: unknown): obj is { jsonrpc: string; id
   );
 };
 
-export const noUnknownAction = (action: never) => logErrorMessage(`Unknown action: ${action}`);
+export const noUnknownAction = (action: never) => logErrorMessage(l10n.t('Unknown action: {0}', action));
 
 export const isAllTypesSearchRequest = <T>(obj: unknown): obj is { method: string; params: T; id: number } => {
   return (
@@ -97,6 +97,6 @@ export const isSearchResult = <T>(obj: unknown, id?: number): obj is { result: T
 };
 
 export const openUrlExternally = (url: string) => {
-  logInformationMessage(`Opening URL externally: ${url}`);
+  logInformationMessage(l10n.t('Opening URL externally: {0}', url));
   env.openExternal(Uri.parse(url));
 };

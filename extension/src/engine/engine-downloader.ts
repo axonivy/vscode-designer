@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { ExtensionContext } from 'vscode';
-import { ProgressLocation, Uri, window } from 'vscode';
+import { l10n, ProgressLocation, Uri, window } from 'vscode';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { downloadEngine } from './download';
@@ -16,7 +16,7 @@ export class EngineDownloader {
   }
   loadReleaseTrain = async (releaseTrain: string) => {
     return await window.withProgress(
-      { location: ProgressLocation.Notification, title: 'Downloading Axon Ivy Engine', cancellable: false },
+      { location: ProgressLocation.Notification, title: l10n.t('Downloading Axon Ivy Engine'), cancellable: false },
       async progress => {
         const logger = (message: string) => {
           progress.report({ message });
@@ -26,7 +26,7 @@ export class EngineDownloader {
         try {
           return await downloadEngine(url, this.globalEngieStoragePath, logger);
         } catch (error) {
-          await logErrorMessage(`Failed to download engine from ${url}, error: ${error}`);
+          await logErrorMessage(l10n.t('Failed to download engine from {0}, error: {1}', url, String(error)));
           throw error;
         }
       }
@@ -46,16 +46,17 @@ export class EngineDownloader {
         if (globalStateEngineDir !== enginePath) {
           engineOutputChannel.appendLine(`New Dev Axon Ivy Engine Version available locally, updating engine path to ${enginePath}`);
           await updateGlobalStateEngineDir(this.context, releaseTrain, enginePath);
-          await askToReloadWindow('Axon Ivy Engine updated');
+          await askToReloadWindow(l10n.t('Axon Ivy Engine updated'));
         }
         return;
       }
+      const downloadLabel = l10n.t('Download new Version');
       const selection = await logInformationMessage(
-        `There is a new Dev Axon Ivy Engine Version available ${zipName}`,
-        'Download new Version',
-        'Cancel'
+        l10n.t('There is a new Dev Axon Ivy Engine Version available {0}', zipName),
+        downloadLabel,
+        l10n.t('Cancel')
       );
-      if (selection !== 'Download new Version') {
+      if (selection !== downloadLabel) {
         return;
       }
     } catch (error) {
@@ -64,7 +65,7 @@ export class EngineDownloader {
     }
     const newEngineDir = await this.loadReleaseTrain(releaseTrain);
     await updateGlobalStateEngineDir(this.context, releaseTrain, newEngineDir);
-    await askToReloadWindow('Axon Ivy Engine updated');
+    await askToReloadWindow(l10n.t('Axon Ivy Engine updated'));
   };
 
   private downloadUrl = (releaseTrain: string) => {
