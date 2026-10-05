@@ -18,6 +18,14 @@
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>.*)$",
       "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^playwright\\/tests\\/utils\\/download-vscode\\.ts$/"],
+      "matchStrings": ["version: '(?<currentValue>\\d+\\.\\d+\\.\\d+)'"],
+      "depNameTemplate": "microsoft/vscode",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
     }
   ],
   "packageRules": [
