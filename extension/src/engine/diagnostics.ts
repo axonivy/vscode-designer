@@ -40,7 +40,6 @@ export class IvyDiagnostics {
       await IvyEngineManager.instance.refreshProjectStatuses();
     }
     const projects = await IvyEngineManager.instance.projects(true);
-    projects?.filter(p => p.id.isIar);
     projects
       ?.filter(p => p && p.errorMessage)
       .forEach(project => {
