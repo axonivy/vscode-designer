@@ -20,7 +20,8 @@ export type KnownCommand =
   | ConfigEditorCommand
   | EditorCommand
   | 'ivy.addDevContainer'
-  | 'ivy.showStatusBarQuickPick';
+  | 'ivy.showStatusBarQuickPick'
+  | 'ivy.openSettings';
 type VSCodeCommand =
   | 'setContext'
   | 'vscode.open'
