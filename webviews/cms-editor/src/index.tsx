@@ -1,4 +1,5 @@
-import { ClientContextProvider, ClientJsonRpc, CmsEditor, initQueryClient, QueryProvider } from '@axonivy/cms-editor';
+import { ClientContextProvider, ClientJsonRpc, CmsEditor, initQueryClient } from '@axonivy/cms-editor';
+import { QueryClientProvider } from '@tanstack/react-query';
 import '@axonivy/cms-editor/lib/editor.css';
 import { HotkeysProvider, ThemeProvider, Toaster } from '@axonivy/ui-components';
 import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
@@ -26,12 +27,12 @@ export async function start({ file }: InitializeConnection) {
     <React.StrictMode>
       <ThemeProvider disabled={true}>
         <ClientContextProvider client={client}>
-          <QueryProvider client={queryClient}>
+          <QueryClientProvider client={queryClient}>
             <HotkeysProvider initiallyActiveScopes={['global']}>
               <CmsEditor context={context} initializePromise={initializePromise} />
               <Toaster closeButton={true} />
             </HotkeysProvider>
-          </QueryProvider>
+          </QueryClientProvider>
         </ClientContextProvider>
       </ThemeProvider>
     </React.StrictMode>

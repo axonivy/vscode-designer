@@ -1,4 +1,5 @@
-import { App, ClientContextProvider, QueryProvider, initQueryClient } from '@axonivy/form-editor';
+import { App, ClientContextProvider, initQueryClient } from '@axonivy/form-editor';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { FormClientJsonRpc } from '@axonivy/form-editor-core';
 import '@axonivy/form-editor/lib/editor.css';
 import { HotkeysProvider, ThemeProvider, Toaster } from '@axonivy/ui-components';
@@ -29,12 +30,12 @@ export async function start({ file }: InitializeConnection): Promise<void> {
     <React.StrictMode>
       <ThemeProvider disabled={true}>
         <ClientContextProvider client={client}>
-          <QueryProvider client={queryClient}>
+          <QueryClientProvider client={queryClient}>
             <HotkeysProvider initiallyActiveScopes={['global']}>
               <App context={context} />
               <Toaster closeButton={true} />
             </HotkeysProvider>
-          </QueryProvider>
+          </QueryClientProvider>
         </ClientContextProvider>
       </ThemeProvider>
     </React.StrictMode>

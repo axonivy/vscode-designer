@@ -1,4 +1,5 @@
-import { ClientContextProvider, ClientJsonRpc, DatabaseEditor, initQueryClient, QueryProvider } from '@axonivy/database-editor';
+import { ClientContextProvider, ClientJsonRpc, DatabaseEditor, initQueryClient } from '@axonivy/database-editor';
+import { QueryClientProvider } from '@tanstack/react-query';
 import '@axonivy/database-editor/lib/editor.css';
 import { HotkeysProvider, ThemeProvider, Toaster } from '@axonivy/ui-components';
 import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
@@ -29,12 +30,12 @@ export async function start({ file }: InitializeConnection) {
     <React.StrictMode>
       <ThemeProvider disabled={true}>
         <ClientContextProvider client={client}>
-          <QueryProvider client={queryClient}>
+          <QueryClientProvider client={queryClient}>
             <HotkeysProvider initiallyActiveScopes={['global']}>
               <DatabaseEditor context={{ app: '', projects: [projectName], file }} />
               <Toaster closeButton={true} />
             </HotkeysProvider>
-          </QueryProvider>
+          </QueryClientProvider>
         </ClientContextProvider>
       </ThemeProvider>
     </React.StrictMode>

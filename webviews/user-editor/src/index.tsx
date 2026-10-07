@@ -1,5 +1,6 @@
 import { HotkeysProvider, ThemeProvider, Toaster } from '@axonivy/ui-components';
-import { App, ClientContextProvider, QueryProvider, UserClientJsonRpc, initQueryClient } from '@axonivy/user-editor';
+import { App, ClientContextProvider, UserClientJsonRpc, initQueryClient } from '@axonivy/user-editor';
+import { QueryClientProvider } from '@tanstack/react-query';
 import '@axonivy/user-editor/lib/editor.css';
 import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
 import '@axonivy/vscode-webview-common/css/colors.css';
@@ -26,12 +27,12 @@ export async function start({ file }: InitializeConnection) {
     <React.StrictMode>
       <ThemeProvider disabled={true}>
         <ClientContextProvider client={client}>
-          <QueryProvider client={queryClient}>
+          <QueryClientProvider client={queryClient}>
             <HotkeysProvider initiallyActiveScopes={['global']}>
               <App context={context} />
               <Toaster closeButton={true} />
             </HotkeysProvider>
-          </QueryProvider>
+          </QueryClientProvider>
         </ClientContextProvider>
       </ThemeProvider>
     </React.StrictMode>
