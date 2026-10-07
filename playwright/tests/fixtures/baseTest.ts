@@ -11,13 +11,10 @@ export const runInBrowser = process.env.RUN_IN_BROWSER ? true : false;
 
 type TmpWorkspace = { tmpWorkspacePath: string; tmpWsConfig?: string };
 
-type InstalledLocale = '' | 'de';
-
 type TestFixtures = {
   workspace: string | null;
   closeWelcomePage: boolean;
   isolatedUserDataDir: boolean;
-  locale: InstalledLocale;
   userDataDir: string;
   tmpWorkspace?: TmpWorkspace;
   electronApp?: ElectronApplication;
@@ -31,7 +28,6 @@ export const test = base.extend<TestFixtures>({
   workspace: prebuiltWorkspacePath,
   closeWelcomePage: true,
   isolatedUserDataDir: false,
-  locale: '',
   userDataDir: async ({ isolatedUserDataDir }, take) => {
     const userDataDir = isolatedUserDataDir
       ? await fs.promises.mkdtemp(path.join(os.tmpdir(), 'vscode-test-user-data-'))
@@ -48,9 +44,9 @@ export const test = base.extend<TestFixtures>({
       await removeTmpWorkspace(tmpWs?.tmpWorkspacePath);
     }
   },
-  electronApp: async ({ tmpWorkspace, userDataDir, locale }, take) => {
+  electronApp: async ({ tmpWorkspace, userDataDir }, take) => {
     if (!runInBrowser) {
-      await runElectronAppTest(take, tmpWorkspace, userDataDir, locale);
+      await runElectronAppTest(take, tmpWorkspace, userDataDir);
     } else {
       await take(undefined);
     }
@@ -101,14 +97,10 @@ const runBrowserTest = async (take: (r: Page) => Promise<void>, tmpWorkspace?: T
 const runElectronAppTest = async (
   take: (r: ElectronApplication) => Promise<void>,
   tmpWorkspace: TmpWorkspace | undefined,
-  userDataDir: string,
-  locale: InstalledLocale
+  userDataDir: string
 ) => {
   const vscodePath = await runDownloadAndUnzipVSCode();
   const extensionDir = path.resolve(process.cwd(), 'test-extension-dir');
-  if (locale) {
-    await registerLanguagePack(extensionDir, userDataDir, locale);
-  }
   const electronApp = await _electron.launch({
     executablePath: vscodePath,
     args: [
@@ -120,7 +112,6 @@ const runElectronAppTest = async (
       '--skip-welcome',
       '--skip-release-notes',
       '--disable-workspace-trust',
-      ...(locale ? [`--locale=${locale}`, `--lang=${locale}`] : []),
       `--extensionDevelopmentPath=${path.resolve(import.meta.dirname, '../../../extension/')}`,
       `--extensions-dir=${extensionDir}`,
       `--user-data-dir=${userDataDir}`,
@@ -132,35 +123,6 @@ const runElectronAppTest = async (
   } finally {
     await electronApp.close();
   }
-};
-
-const registerLanguagePack = async (extensionDir: string, userDataDir: string, locale: InstalledLocale): Promise<void> => {
-  const languagePackId = `ms-ceintl.vscode-language-pack-${locale}-`;
-  const languagePack = (await fs.promises.readdir(extensionDir)).find(directory => directory.startsWith(languagePackId));
-  if (!languagePack) {
-    throw new Error(`Could not find the ${locale} VS Code language pack in ${extensionDir}`);
-  }
-  const languagePackPath = path.join(extensionDir, languagePack);
-  const languagePackPackage = JSON.parse(await fs.promises.readFile(path.join(languagePackPath, 'package.json'), 'utf8')) as {
-    version: string;
-    contributes: {
-      localizations: Array<{
-        languageId: string;
-        translations: Array<{ id: string; path: string }>;
-      }>;
-    };
-  };
-  const localization = languagePackPackage.contributes.localizations.find(item => item.languageId === locale);
-  if (!localization) {
-    throw new Error(`The ${locale} language pack does not provide a matching localization`);
-  }
-  const translations = Object.fromEntries(
-    localization.translations.map(translation => [translation.id, path.join(languagePackPath, translation.path)])
-  );
-  await fs.promises.writeFile(
-    path.join(userDataDir, 'languagepacks.json'),
-    JSON.stringify({ [locale]: { hash: languagePackPackage.version, translations } })
-  );
 };
 
 const pageOfElectronAppTest = async (electronApp: ElectronApplication, take: (r: Page) => Promise<void>) => {

@@ -17,8 +17,6 @@ setup('Setup', async ({}) => {
       '--install-extension',
       'vscjava.vscode-java-pack',
       '--install-extension',
-      'MS-CEINTL.vscode-language-pack-de',
-      '--install-extension',
       'axonivy.vscode-designer-14',
       '--extensions-dir',
       extensionDir
