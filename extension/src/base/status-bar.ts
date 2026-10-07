@@ -31,7 +31,7 @@ const DEFAULT_TRUSTED_COMMANDS_MARKDOWN = [
   'ivyPanelView.openEngineLog',
   'engine.activateAnimation',
   'engine.deactivateAnimation',
-  'workbench.action.openSettings'
+  'ivy.openSettings'
 ] as const satisfies Array<KnownCommand>;
 
 const ANIMATION_SPEED_LABELS: Record<number, string> = {
@@ -64,8 +64,7 @@ const QUICK_PICK_OPTIONS = [
   {
     label: '$(settings-gear)  Open Axon Ivy Settings',
     id: 'openSettings',
-    command: 'workbench.action.openSettings',
-    commandArgs: ['@ext:axonivy.vscode-designer-14']
+    command: 'ivy.openSettings'
   },
 
   { label: 'Logs', kind: QuickPickItemKind.Separator },
