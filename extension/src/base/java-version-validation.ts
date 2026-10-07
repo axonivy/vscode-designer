@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { commands, ConfigurationTarget, workspace } from 'vscode';
+import { commands, ConfigurationTarget, l10n, workspace } from 'vscode';
 import { logErrorMessage, logInformationMessage } from './logging-util';
 
 const EXPECTED_JAVA_VERSION = '25';
@@ -11,9 +11,12 @@ export const validateAndSyncJavaVersion = async () => {
   const isValidJavaHome = isValidJavaVersion(javaHome);
   const isValidJdtJavaHome = isValidJavaVersion(jdtJavaHome);
   if (!isValidJavaHome && !isValidJdtJavaHome) {
-    const message = `No valid Java found under JAVA_HOME=${javaHome} or java.jdt.ls.java.home=${jdtJavaHome}.
-    Either set env variable JAVA_HOME to valid Java ${EXPECTED_JAVA_VERSION} installation path,
-    or configure VS Code setting 'java.jdt.ls.java.home'.`;
+    const message = l10n.t(
+      "No valid Java found under JAVA_HOME={0} or java.jdt.ls.java.home={1}.\nEither set env variable JAVA_HOME to valid Java {2} installation path,\nor configure VS Code setting 'java.jdt.ls.java.home'.",
+      String(javaHome),
+      String(jdtJavaHome),
+      EXPECTED_JAVA_VERSION
+    );
     logErrorMessage(message);
     throw new Error(message);
   }
@@ -22,7 +25,7 @@ export const validateAndSyncJavaVersion = async () => {
     return;
   }
   if (!isValidJdtJavaHome) {
-    logInformationMessage("Updating 'java.jdt.ls.java.home' to match JAVA_HOME and restarting extension host...");
+    logInformationMessage(l10n.t("Updating 'java.jdt.ls.java.home' to match JAVA_HOME and restarting extension host..."));
     await workspace.getConfiguration().update('java.jdt.ls.java.home', javaHome, ConfigurationTarget.Global);
     await commands.executeCommand('workbench.action.reloadWindow');
   }

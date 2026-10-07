@@ -1,11 +1,12 @@
 import path from 'path';
 import {
   LanguageModelTextPart,
+  LanguageModelToolResult,
+  MarkdownString,
+  l10n,
   type LanguageModelTool,
   type LanguageModelToolInvocationOptions,
   type LanguageModelToolInvocationPrepareOptions,
-  LanguageModelToolResult,
-  MarkdownString,
   type PreparedToolInvocation,
   type ProviderResult
 } from 'vscode';
@@ -25,7 +26,7 @@ export const createNewProject = async (input: NewProjectToolArgs): Promise<strin
     path: path.join(input.path, input.name)
   };
   await IvyEngineManager.instance.createProject(newProjectParams);
-  return `Project created successfully at '${newProjectParams.path}'`;
+  return l10n.t("Project created successfully at '{0}'", newProjectParams.path);
 };
 
 export class NewProjectTool implements LanguageModelTool<NewProjectToolArgs> {
@@ -35,13 +36,18 @@ export class NewProjectTool implements LanguageModelTool<NewProjectToolArgs> {
   }
 
   prepareInvocation?(options: LanguageModelToolInvocationPrepareOptions<NewProjectToolArgs>): ProviderResult<PreparedToolInvocation> {
+    const confirmationMessage = [
+      l10n.t('Create an Axon Ivy project with the following details?'),
+      `- ${l10n.t('Name')}: ${options.input.name}`,
+      `- ${l10n.t('Group ID')}: ${options.input.groupId}`,
+      `- ${l10n.t('Project ID')}: ${options.input.projectId ?? options.input.name}`,
+      `- ${l10n.t('Path')}: ${options.input.path}`
+    ].join('\n');
     return {
-      invocationMessage: `Creating new Axon Ivy project "${options.input.name}"`,
+      invocationMessage: l10n.t('Creating new Axon Ivy project "{0}"', options.input.name),
       confirmationMessages: {
-        title: 'New Axon Ivy Project',
-        message: new MarkdownString(
-          `Create an Axon Ivy project with the following details?\n- Name: ${options.input.name}\n- Group ID: ${options.input.groupId}\n- Project ID: ${options.input.projectId}\n- Path: ${options.input.path}`
-        )
+        title: l10n.t('New Axon Ivy Project'),
+        message: new MarkdownString(confirmationMessage)
       }
     };
   }

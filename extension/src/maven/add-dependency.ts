@@ -1,6 +1,6 @@
 import path from 'path';
 import type { ExtensionContext } from 'vscode';
-import { Uri, commands, window } from 'vscode';
+import { Uri, commands, l10n, window } from 'vscode';
 import { registerCommand } from '../base/commands';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { logErrorMessage } from '../base/logging-util';
@@ -21,10 +21,10 @@ const addDependencyHandler = async (uri: Uri) => {
     targetProject = await treeUriToProjectPath(uri, IvyProjectExplorer.instance.getIvyProjects());
   }
   if (targetProject === undefined) {
-    targetProject = await selectIvyProjectDialog('Select project to add dependency to').then(uri => uri?.fsPath);
+    targetProject = await selectIvyProjectDialog(l10n.t('Select project to add dependency to')).then(uri => uri?.fsPath);
   }
   if (targetProject === undefined) {
-    logErrorMessage('No project selected. Cannot add dependency.');
+    logErrorMessage(l10n.t('No project selected. Cannot add dependency.'));
     return;
   }
   const pomPath = Uri.joinPath(Uri.file(targetProject), 'pom.xml').fsPath;
@@ -33,7 +33,7 @@ const addDependencyHandler = async (uri: Uri) => {
     pomPath.startsWith(p.projectDirectory.endsWith(path.sep) ? p.projectDirectory : p.projectDirectory + path.sep)
   );
   if (!targetProjectBean) {
-    logErrorMessage(`No project bean found for selected project ${targetProject}. Cannot add dependency.`);
+    logErrorMessage(l10n.t('No project bean found for selected project {0}. Cannot add dependency.', targetProject));
     return;
   }
   const possibleDeps = projectBeans
@@ -74,7 +74,7 @@ const showDependencyPick = async (projects: ProjectBean[]) => {
     project: project
   }));
   const selected = await window.showQuickPick(items, {
-    placeHolder: projects.length > 0 ? 'Select an Ivy Project Dependency' : 'No Ivy Project Dependencies left to add'
+    placeHolder: projects.length > 0 ? l10n.t('Select an Ivy Project Dependency') : l10n.t('No Ivy Project Dependencies left to add')
   });
   return selected?.project;
 };

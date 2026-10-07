@@ -9,6 +9,10 @@ import {
 } from './util';
 
 vi.mock('vscode', () => ({
+  l10n: {
+    t: (message: string, ...args: unknown[]) =>
+      args.reduce<string>((result, arg, index) => result.replace(`{${index}}`, String(arg)), message)
+  },
   FileType: { File: 1, Directory: 2 },
   Uri: { joinPath: vi.fn(), file: vi.fn() },
   workspace: { fs: { readFile: vi.fn(), stat: vi.fn() } }

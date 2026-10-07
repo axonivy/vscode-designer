@@ -1,7 +1,7 @@
 import type { InscriptionActionArgs } from '@axonivy/process-editor-inscription-protocol';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Uri, window } from 'vscode';
+import { l10n, Uri, window } from 'vscode';
 import { executeCommand } from '../../../base/commands';
 import { logInformationMessage } from '../../../base/logging-util';
 import { IvyProjectExplorer } from '../../../project-explorer/ivy-project-explorer';
@@ -35,7 +35,7 @@ function openInExplorer(absolutePath: string | null) {
   if (absolutePath) {
     executeCommand('vscode.open', Uri.file(absolutePath));
   } else {
-    logInformationMessage('The entered url is not valid.');
+    logInformationMessage(l10n.t('The entered url is not valid.'));
   }
 }
 

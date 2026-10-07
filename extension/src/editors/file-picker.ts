@@ -1,6 +1,6 @@
 import * as path from 'path';
 import type { TextDocument } from 'vscode';
-import { Uri, window } from 'vscode';
+import { l10n, Uri, window } from 'vscode';
 
 type FilePickRequestLike = {
   fileTypes?: Record<string, string[]>;
@@ -17,8 +17,8 @@ export async function pickFile(request: FilePickRequestLike, document: TextDocum
     canSelectFolders: false,
     canSelectMany: false,
     defaultUri: Uri.file(projectPath),
-    openLabel: 'Select File',
-    filters: request.fileTypes
+    openLabel: l10n.t('Select File'),
+    filters: Object.fromEntries(Object.entries(request.fileTypes).map(([label, extensions]) => [localizeFileTypeLabel(label), extensions]))
   });
 
   const selected = picked?.[0];
@@ -33,3 +33,12 @@ export async function pickFile(request: FilePickRequestLike, document: TextDocum
 
   return selected.toString();
 }
+
+const localizeFileTypeLabel = (label: string) => {
+  switch (label) {
+    case 'Project archive':
+      return l10n.t('Project archive');
+    default:
+      return label;
+  }
+};

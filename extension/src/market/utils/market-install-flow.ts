@@ -1,3 +1,4 @@
+import { l10n } from 'vscode';
 import { logErrorMessage } from '../../base/logging-util';
 import { IvyEngineManager } from '../../engine/engine-manager';
 import {
@@ -37,8 +38,8 @@ export const createSteps = (
 
     const selectedProjects = await input.showQuickPick<ProductProjectSelection, true>({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose Projects and Dependencies to install',
-      placeholder: 'Select projects to install',
+      titleSuffix: l10n.t('Choose Projects and Dependencies to install'),
+      placeholder: l10n.t('Select projects to install'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       canSelectMany: true,
@@ -64,8 +65,8 @@ export const createSteps = (
     if (requiredItems.length > 0) {
       const selectedRequired = await input.showQuickPick<ProductProjectSelection, true>({
         title: state.dialogTitle,
-        titleSuffix: ' - Choose Required Dependencies',
-        placeholder: 'Select required dependencies',
+        titleSuffix: l10n.t('Choose Required Dependencies'),
+        placeholder: l10n.t('Select required dependencies'),
         currentStep: state.currentStep,
         totalSteps: state.totalSteps,
         canSelectMany: true,
@@ -91,7 +92,9 @@ export const createSteps = (
     }
     if (existingProjectItems.length === 0) {
       throw new MultiStepCancelledError(
-        'At least one existing Ivy project is required for installing this Market Product. No Axon Ivy projects in the workspace. Create an Axon Ivy project first.'
+        l10n.t(
+          'At least one existing Ivy project is required for installing this Market Product. No Axon Ivy projects in the workspace. Create an Axon Ivy project first.'
+        )
       );
     }
 
@@ -100,8 +103,8 @@ export const createSteps = (
 
     state.dependentProject = await input.showQuickPick<ProjectSelection>({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose Ivy Project to install Product into',
-      placeholder: 'Select one of the available projects',
+      titleSuffix: l10n.t('Choose Ivy Project to install Product into'),
+      placeholder: l10n.t('Select one of the available projects'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.dependentProjectFilterText,
@@ -123,6 +126,6 @@ export const executeInstall = async (productJson: string, dependentProjectPath: 
       dependentProjectPath
     });
   } catch (err) {
-    logErrorMessage('Market installation failed: ' + (err instanceof Error ? err.message : err));
+    logErrorMessage(l10n.t('Market installation failed: {0}', err instanceof Error ? err.message : String(err)));
   }
 };

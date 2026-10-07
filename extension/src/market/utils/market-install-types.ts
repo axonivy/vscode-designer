@@ -32,19 +32,9 @@ export interface InstallMarketProductState extends MSStateBase {
   dependentProjectFilterText?: string;
 }
 
-export const initState = ({
-  dialogTitle,
-  totalSteps,
-  sourceProductJson
-}: {
-  dialogTitle: string;
-  totalSteps: number;
-  sourceProductJson?: string;
-}): InstallMarketProductState => ({
-  dialogTitle: dialogTitle,
+export const initState = (state: { dialogTitle: string; totalSteps: number; sourceProductJson?: string }): InstallMarketProductState => ({
+  ...state,
   currentStep: 1,
-  totalSteps: totalSteps,
-  sourceProductJson: sourceProductJson,
   changedProjectSelection: false,
   forceBackRequiredStep: false
 });

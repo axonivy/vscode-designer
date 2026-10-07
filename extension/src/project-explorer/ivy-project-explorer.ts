@@ -1,6 +1,6 @@
 import path from 'path';
 import type { ExtensionContext, TreeView, TreeViewSelectionChangeEvent } from 'vscode';
-import { commands, TabInputCustom, TabInputText, Uri, window, workspace } from 'vscode';
+import { commands, l10n, TabInputCustom, TabInputText, Uri, window, workspace } from 'vscode';
 import { registerCommand, type KnownCommand } from '../base/commands';
 import { ensureJavaLightWeightMode, runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
@@ -149,13 +149,13 @@ export class IvyProjectExplorer {
   private async addProject(selection: TreeSelection) {
     const selectedUri = await this.selectWorkspace(selection);
     if (!selectedUri) {
-      logInformationMessage('No valid workspace selected.');
+      logInformationMessage(l10n.t('No valid workspace selected.'));
       return;
     }
     const existingIvyProjects = await this.getIvyProjects();
     for (const existingProject of existingIvyProjects) {
       if (isSubdirectoryOrEqual(existingProject, selectedUri.fsPath)) {
-        logErrorMessage('Cannot create a new project inside an existing Axon Ivy project. Select a valid directory.');
+        logErrorMessage(l10n.t('Cannot create a new project inside an existing Axon Ivy project. Select a valid directory.'));
         return;
       }
     }
@@ -193,14 +193,16 @@ export class IvyProjectExplorer {
   private async importIvyProject(selection: TreeSelection) {
     const selectedUri = await this.selectWorkspace(selection);
     if (!selectedUri) {
-      logInformationMessage('No valid import directory selected.');
+      logInformationMessage(l10n.t('No valid import directory selected.'));
       return;
     }
     const existingIvyProjects = await this.getIvyProjects();
     for (const existingProject of existingIvyProjects) {
       if (isSubdirectoryOrEqual(existingProject, selectedUri.fsPath)) {
         logErrorMessage(
-          'Axon Ivy Import Error - Cannot import an Axon Ivy Project into an existing Axon Ivy Project. Select a valid directory which is not inside an existing Axon Ivy Project.'
+          l10n.t(
+            'Axon Ivy Import Error - Cannot import an Axon Ivy Project into an existing Axon Ivy Project. Select a valid directory which is not inside an existing Axon Ivy Project.'
+          )
         );
         return;
       }
@@ -257,11 +259,11 @@ export class IvyProjectExplorer {
   }
 
   private async convertProject(selection: TreeSelection, convertAll: boolean = false) {
-    await ensureJavaLightWeightMode('Project conversion');
+    await ensureJavaLightWeightMode(l10n.t('Project conversion'));
     const uri = await treeSelectionToUri(selection);
     const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
     const quickPick = window.createQuickPick();
-    quickPick.title = 'Convert Projects - Select Axon Ivy projects to be converted (1/1)';
+    quickPick.title = l10n.t('Convert Projects - Select Axon Ivy projects to be converted (1/1)');
     quickPick.canSelectMany = true;
     quickPick.items = IvyDiagnostics.instance
       .projectFileUrisToBeConverted()
@@ -331,7 +333,7 @@ export class IvyProjectExplorer {
   ): Promise<AddCommandSelectionContext | undefined> {
     const hasIvyProjects = await this.hasIvyProjects();
     if (needsExistingIvyProjects && !hasIvyProjects) {
-      logErrorMessage('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.');
+      logErrorMessage(l10n.t('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.'));
       return;
     }
     const existingProjects = await this.getIvyProjects();

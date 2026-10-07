@@ -2,7 +2,7 @@ import { XMLParser } from 'fast-xml-parser';
 import fs from 'node:fs';
 import path from 'path';
 import type { FileStat } from 'vscode';
-import { FileType, InputBoxValidationSeverity, Uri, window, workspace } from 'vscode';
+import { FileType, InputBoxValidationSeverity, l10n, Uri, window, workspace } from 'vscode';
 
 const defaultNamespaceOf = (projecDir: string) => {
   const designerPrefs = Uri.joinPath(Uri.file(projecDir), 'pom.xml');
@@ -82,7 +82,9 @@ export const validateProjectArtifactName = (value: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return 'Only letters, digits, and underscores are allowed -- Each segment must start with a letter or underscore -- No spaces -- Cannot be empty';
+  return l10n.t(
+    'Only letters, digits, and underscores are allowed -- Each segment must start with a letter or underscore -- No spaces -- Cannot be empty'
+  );
 };
 
 export const validateProjectName = (value: string) => {
@@ -90,7 +92,7 @@ export const validateProjectName = (value: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return 'Only letters, digits, underscores, and hyphens are allowed -- No spaces -- Cannot be empty';
+  return l10n.t('Only letters, digits, underscores, and hyphens are allowed -- No spaces -- Cannot be empty');
 };
 
 export const validateDotSeparatedName = (value: string, label?: string) => {
@@ -98,7 +100,11 @@ export const validateDotSeparatedName = (value: string, label?: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return `Enter ${label ?? 'Namespace'} as segments separated by "." -- Only letters, digits, and underscores are allowed -- Each segment must start with a letter or underscore -- A segment cannot consist of a single underscore -- No spaces -- Cannot be empty`;
+  const localizedLabel = label === 'Group ID' ? l10n.t('Group ID') : label === undefined ? l10n.t('Namespace') : label;
+  return l10n.t(
+    'Enter {0} as segments separated by "." -- Only letters, digits, and underscores are allowed -- Each segment must start with a letter or underscore -- A segment cannot consist of a single underscore -- No spaces -- Cannot be empty',
+    localizedLabel
+  );
 };
 
 export const validateNamespace = (value: string) => {
@@ -106,7 +112,9 @@ export const validateNamespace = (value: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return 'Enter Namespace as segments separated by "/" -- Only letters, digits, and underscores are allowed -- Spaces allowed within segments -- Empty allowed.';
+  return l10n.t(
+    'Enter Namespace as segments separated by "/" -- Only letters, digits, and underscores are allowed -- Spaces allowed within segments -- Empty allowed.'
+  );
 };
 
 export const validateProjectArtifactId = (value: string) => {
@@ -114,14 +122,14 @@ export const validateProjectArtifactId = (value: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return 'Only letters, digits, and underscores are allowed -- Separate by single "." or "-" -- No spaces -- Cannot be empty';
+  return l10n.t('Only letters, digits, and underscores are allowed -- Separate by single "." or "-" -- No spaces -- Cannot be empty');
 };
 
 export const validateExportPath = (fileName: string, folderPath: Uri) => {
   const filePath = path.join(folderPath.fsPath, `${fileName}.iar`);
   if (fs.existsSync(filePath)) {
     return {
-      message: `File already exists: ${filePath}. File will be overwritten if you proceed.`,
+      message: l10n.t('File already exists: {0}. File will be overwritten if you proceed.', filePath),
       severity: InputBoxValidationSeverity.Warning
     };
   }

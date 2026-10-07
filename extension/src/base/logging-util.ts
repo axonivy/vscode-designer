@@ -10,8 +10,8 @@ export const logErrorMessageWithActions = async (message: string, actions: Recor
   extensionLogOutputChannel.error(message);
   const selected = await window.showErrorMessage(message, ...Object.keys(actions));
 
-  if (selected && actions[selected]) {
-    actions[selected]();
+  if (selected) {
+    actions[selected]?.();
   }
 };
 
@@ -29,7 +29,7 @@ export const logInformationMessageWithActions = async (message: string, actions:
   extensionLogOutputChannel.info(message);
   const selected = await window.showInformationMessage(message, ...Object.keys(actions));
 
-  if (selected && actions[selected]) {
-    actions[selected]();
+  if (selected) {
+    actions[selected]?.();
   }
 };

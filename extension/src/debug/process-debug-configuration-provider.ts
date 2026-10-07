@@ -1,4 +1,11 @@
-import { workspace, type DebugConfiguration, type DebugConfigurationProvider, type ProviderResult, type WorkspaceFolder } from 'vscode';
+import {
+  l10n,
+  workspace,
+  type DebugConfiguration,
+  type DebugConfigurationProvider,
+  type ProviderResult,
+  type WorkspaceFolder
+} from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { IvyEngineApi } from '../engine/api/engine-api';
 
@@ -59,7 +66,7 @@ export class ProcessDebugConfigurationProvider implements DebugConfigurationProv
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      void logErrorMessage(`Unable to resolve Axon Ivy debug connection: ${message}`);
+      void logErrorMessage(l10n.t('Unable to resolve Axon Ivy debug connection: {0}', message));
       return undefined;
     }
   }

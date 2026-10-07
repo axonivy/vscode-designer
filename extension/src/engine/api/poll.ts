@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ProgressLocation, window } from 'vscode';
+import { l10n, ProgressLocation, window } from 'vscode';
 
 export async function pollWithProgress(url: string, title: string) {
   const options = {
@@ -19,7 +19,7 @@ export async function pollWithProgress(url: string, title: string) {
       }
       await wait(2000);
     }
-    await Promise.reject(`Polling of "${title}" was cancelled.`);
+    await Promise.reject(l10n.t('Polling of "{0}" was cancelled.', title));
   });
 }
 

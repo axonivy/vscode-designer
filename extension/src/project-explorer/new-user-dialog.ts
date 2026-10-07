@@ -1,5 +1,6 @@
 import path from 'path';
-import { type QuickPickItem } from 'vscode';
+import { l10n, type QuickPickItem } from 'vscode';
+import { localizeDialogLayout, localizeDialogType } from '../base/localized-labels';
 import { logErrorMessage } from '../base/logging-util';
 import type { CreateUserDialogParams } from '../engine/api/engine-api';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -27,15 +28,17 @@ const layouts = [
   'Component',
   'Page'
 ] as const;
-type Layout = (typeof layouts)[number];
+export type Layout = (typeof layouts)[number];
 interface LayoutPick extends QuickPickItem {
   label: Layout;
+  localizedLabel?: string;
 }
 
 const templates = ['frame-10', 'frame-10-right', 'frame-10-full-width', 'basic-10'] as const;
-type Template = (typeof templates)[number];
+export type Template = (typeof templates)[number];
 interface TemplatePick extends QuickPickItem {
   label: Template;
+  localizedLabel?: string;
 }
 
 interface NewUserDialogState extends MSStateBase {
@@ -116,8 +119,8 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
       const previousProject = state.project;
       state.project = await input.showQuickPick<ProjectSelection>({
         title: state.dialogTitle,
-        titleSuffix: ' - Choose project',
-        placeholder: 'Select one of the available projects',
+        titleSuffix: l10n.t('Choose project'),
+        placeholder: l10n.t('Select one of the available projects'),
         currentStep: state.currentStep,
         totalSteps: state.totalSteps,
         value: state.project ? state.project.label : '',
@@ -136,8 +139,8 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
   const stepName: InputStep<NewUserDialogState> = async (input: MultiStepInput<NewUserDialogState>, state: NewUserDialogState) => {
     state.name = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose name',
-      placeholder: 'Enter a name. Must start with a letter or underscore. Allowed characters: a-z, A-Z, 0-9, _',
+      titleSuffix: l10n.t('Choose name'),
+      placeholder: l10n.t('Enter a name. Must start with a letter or underscore. Allowed characters: a-z, A-Z, 0-9, _'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.name,
@@ -151,8 +154,8 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
   const stepNamespace: InputStep<NewUserDialogState> = async (input: MultiStepInput<NewUserDialogState>, state: NewUserDialogState) => {
     state.namespace = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose namespace',
-      placeholder: 'Enter Namespace separated by ".". Allowed characters: a-z, A-Z, 0-9, _, .',
+      titleSuffix: l10n.t('Choose namespace'),
+      placeholder: l10n.t('Enter Namespace separated by ".". Allowed characters: a-z, A-Z, 0-9, _, .'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.namespace,
@@ -166,8 +169,8 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
   const stepLayout: InputStep<NewUserDialogState> = async (input: MultiStepInput<NewUserDialogState>, state: NewUserDialogState) => {
     state.layout = await input.showQuickPick<LayoutPick>({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose layout',
-      placeholder: 'Select one of the available layouts',
+      titleSuffix: l10n.t('Choose layout'),
+      placeholder: l10n.t('Select one of the available layouts'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.layout ? state.layout.label : '',
@@ -175,7 +178,8 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
         .filter(layout => layout !== 'Page')
         .map(layout => {
           return {
-            label: layout
+            label: layout,
+            localizedLabel: localizeDialogLayout(layout)
           };
         }),
       onBack: (typedValue: string) => {
@@ -190,14 +194,15 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
     } else {
       state.template = await input.showQuickPick<TemplatePick>({
         title: state.dialogTitle,
-        titleSuffix: ' - Choose template',
-        placeholder: 'Select one of the available templates',
+        titleSuffix: l10n.t('Choose template'),
+        placeholder: l10n.t('Select one of the available templates'),
         currentStep: state.currentStep,
         totalSteps: state.totalSteps,
         value: state.template ? state.template.label : '',
         items: templates.map(template => {
           return {
-            label: template
+            label: template,
+            localizedLabel: template
           };
         }),
         onBack: (typedValue: string) => {
@@ -223,7 +228,7 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
   }
 
   const newUserDialogData: NewUserDialogState = {
-    dialogTitle: `Add New ${type}`,
+    dialogTitle: l10n.t('Add New {0}', localizeDialogType(type)),
     currentStep: 1,
     totalSteps: steps.length,
     namespace: namespaceFromSelection,

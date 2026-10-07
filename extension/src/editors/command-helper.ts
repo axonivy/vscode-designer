@@ -1,6 +1,6 @@
 import fs from 'fs';
 import type { ExtensionContext } from 'vscode';
-import { Uri, commands, workspace } from 'vscode';
+import { Uri, commands, l10n, workspace } from 'vscode';
 import { registerCommand, type ConfigEditorCommand, type EditorCommand } from '../base/commands';
 import { logErrorMessage } from '../base/logging-util';
 import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
@@ -29,7 +29,7 @@ export const getEditorCmdProjectPath = async (command: ConfigEditorCommand | Edi
   }
   const projectPath = await treeUriToProjectPath(projectUri, ivyProjects);
   if (!projectPath) {
-    logErrorMessage(`${command}: Selected project ${projectUri.fsPath} is not a valid Axon Ivy project path.`);
+    logErrorMessage(l10n.t('{0}: Selected project {1} is not a valid Axon Ivy project path.', command, projectUri.fsPath));
     return;
   }
   return projectPath;

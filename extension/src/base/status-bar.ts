@@ -1,5 +1,6 @@
 import {
   extensions,
+  l10n,
   MarkdownString,
   QuickPickItemKind,
   StatusBarAlignment,
@@ -24,7 +25,7 @@ import { logErrorMessageWithActions } from './logging-util';
 const DEFAULT_PREFIX = 'Axon Ivy';
 const DEFAULT_PRIORITY = 1;
 const DEFAULT_SUCCESS_MESSAGE_DURATION = 3_000;
-const DEFAULT_TOOLTIP_DIVIDER = '\n\n============================================================';
+const DEFAULT_TOOLTIP_DIVIDER = '============================================================';
 const DEFAULT_TRUSTED_COMMANDS_MARKDOWN = [
   'ivyPanelView.openRuntimeLog',
   'ivyPanelView.openExtensionLog',
@@ -35,69 +36,77 @@ const DEFAULT_TRUSTED_COMMANDS_MARKDOWN = [
 ] as const satisfies Array<KnownCommand>;
 
 const ANIMATION_SPEED_LABELS: Record<number, string> = {
-  0: 'Fastest',
-  25: 'Fast',
-  50: 'Normal',
-  75: 'Slow',
-  100: 'Slowest'
+  0: l10n.t('Fastest'),
+  25: l10n.t('Fast'),
+  50: l10n.t('Normal'),
+  75: l10n.t('Slow'),
+  100: l10n.t('Slowest')
 };
 const ANIMATION_MODE_LABELS: Record<string, string> = {
-  all: 'Show and open all touched processes',
-  currentProcess: 'Follow only in the current editor on top',
-  openProcesses: 'Follow only in open editors',
-  noDialogProcesses: 'Do not enter dialog logic',
-  noEmbeddedProcesses: 'Follow only top-level business processes'
+  all: l10n.t('Show and open all touched processes'),
+  currentProcess: l10n.t('Follow only in the current editor on top'),
+  openProcesses: l10n.t('Follow only in open editors'),
+  noDialogProcesses: l10n.t('Do not enter dialog logic'),
+  noEmbeddedProcesses: l10n.t('Follow only top-level business processes')
 };
 
 type StatusQuickPickItem = QuickPickItem & { id?: string; command?: KnownCommand; commandArgs?: unknown[]; hidden?: boolean };
 
 const QUICK_PICK_OPTIONS = [
-  { label: '$(refresh)  Reload Window', id: 'reloadWindow', command: 'workbench.action.reloadWindow', hidden: true },
-  { label: 'Animation', kind: QuickPickItemKind.Separator },
+  { label: `$(refresh)  ${l10n.t('Reload Window')}`, id: 'reloadWindow', command: 'workbench.action.reloadWindow', hidden: true },
+  { label: l10n.t('Animation'), kind: QuickPickItemKind.Separator },
   {
-    label: animationSettings().animate ? '$(eye-closed)  Deactivate Animation' : '$(eye)  Activate Animation',
+    label: animationSettings().animate ? `$(eye-closed)  ${l10n.t('Deactivate Animation')}` : `$(eye)  ${l10n.t('Activate Animation')}`,
     id: 'toggleAnimation',
     command: animationSettings().animate ? 'engine.deactivateAnimation' : 'engine.activateAnimation'
   },
 
-  { label: 'Settings', kind: QuickPickItemKind.Separator },
+  { label: l10n.t('Settings'), kind: QuickPickItemKind.Separator },
   {
-    label: '$(settings-gear)  Open Axon Ivy Settings',
+    label: `$(settings-gear)  ${l10n.t('Open Axon Ivy Settings')}`,
     id: 'openSettings',
     command: 'ivy.openSettings'
   },
 
-  { label: 'Logs', kind: QuickPickItemKind.Separator },
+  { label: l10n.t('Logs'), kind: QuickPickItemKind.Separator },
   {
-    label: '$(list-filter)  Open Axon Ivy Runtime Log',
+    label: `$(list-filter)  ${l10n.t('Open Axon Ivy Runtime Log')}`,
     id: 'openRuntimeLog',
     command: 'ivyPanelView.openRuntimeLog'
   },
   {
-    label: '$(list-filter)  Open Axon Ivy Extension Log',
+    label: `$(list-filter)  ${l10n.t('Open Axon Ivy Extension Log')}`,
     id: 'openExtensionLog',
     command: 'ivyPanelView.openExtensionLog'
   },
   {
-    label: '$(list-filter)  Open Axon Ivy Engine Log',
+    label: `$(list-filter)  ${l10n.t('Open Axon Ivy Engine Log')}`,
     id: 'openEngineLog',
     command: 'ivyPanelView.openEngineLog'
   },
 
-  { label: 'Deployment', kind: QuickPickItemKind.Separator },
-  { label: '$(cloud-upload)  Deploy all Axon Ivy Projects', id: 'deployAllProjects', command: 'engine.deployProjects' },
-  { label: '$(cloud-upload)  Deploy Axon Ivy Project', id: 'deployProject', command: 'ivyProjects.deployProject' },
-
-  { label: 'Market', kind: QuickPickItemKind.Separator },
+  { label: l10n.t('Deployment'), kind: QuickPickItemKind.Separator },
   {
-    label: '$(gift)  Install Market Product',
+    label: `$(cloud-upload)  ${l10n.t('Deploy all Axon Ivy Projects')}`,
+    id: 'deployAllProjects',
+    command: 'engine.deployProjects'
+  },
+  {
+    label: `$(cloud-upload)  ${l10n.t('Deploy Axon Ivy Project')}`,
+    id: 'deployProject',
+    command: 'ivyProjects.deployProject'
+  },
+
+  { label: l10n.t('Market'), kind: QuickPickItemKind.Separator },
+  {
+    label: `$(gift)  ${l10n.t('Install Market Product')}`,
     id: 'installMarketProduct',
     command: 'ivyProjects.installMarketProduct'
   },
-  { label: 'New ...', kind: QuickPickItemKind.Separator },
-  { label: '$(repo-create)  New Project', id: 'newProject', command: 'ivyProjects.addNewProject' },
+  { label: l10n.t('New ...'), kind: QuickPickItemKind.Separator },
+  { label: `$(repo-create)  ${l10n.t('New Project')}`, id: 'newProject', command: 'ivyProjects.addNewProject' },
   {
-    label: '$(repo-create)  Import Axon Ivy Project',
+    label: `$(repo-create)  ${l10n.t('Import Axon Ivy Project')}`,
     id: 'importProject',
     command: 'ivyProjects.importIvyProject'
   }
@@ -203,32 +212,32 @@ export class StatusBar {
     let statusIcon: StatusBarIcon = '';
     let statusBackgroundColor: ThemeColor | undefined;
     let command: 'ivy.showStatusBarQuickPick' | Command = {
-      title: 'Show Axon Ivy actions',
+      title: l10n.t('Show Axon Ivy actions'),
       command: 'ivy.showStatusBarQuickPick',
       arguments: [['reloadWindow', 'openRuntimeLog', 'openExtensionLog', 'openEngineLog', 'openSettings']]
     };
 
     switch (this.readyState) {
       case WebSocket.CONNECTING:
-        statusLabel = 'Connecting ...';
+        statusLabel = l10n.t('Connecting ...');
         statusIcon = '$(loading~spin)';
         this.statusBarItem.tooltip = newMarkdownString(
-          'Connecting to the Axon Ivy Engine...\n\nPlease wait while the connection is being established.'
+          `${l10n.t('Connecting to the Axon Ivy Engine...')}\n\n${l10n.t('Please wait while the connection is being established.')}`
         );
         break;
       case WebSocket.OPEN:
-        statusLabel = 'Connected';
+        statusLabel = l10n.t('Connected');
         statusIcon = '$(plug)';
         command = 'ivy.showStatusBarQuickPick';
         await this.refreshTooltip();
         break;
       case WebSocket.CLOSING:
-        statusLabel = 'Disconnecting ...';
+        statusLabel = l10n.t('Disconnecting ...');
         statusIcon = '$(debug-disconnect)';
-        this.statusBarItem.tooltip = newMarkdownString('Disconnecting from the Axon Ivy Engine...');
+        this.statusBarItem.tooltip = newMarkdownString(l10n.t('Disconnecting from the Axon Ivy Engine...'));
         break;
       case WebSocket.CLOSED:
-        statusLabel = 'Disconnected';
+        statusLabel = l10n.t('Disconnected');
         statusIcon = '$(debug-disconnect)';
         statusBackgroundColor = new ThemeColor('statusBarItem.errorBackground');
         await this.refreshTooltip();
@@ -259,28 +268,30 @@ export class StatusBar {
     let statusLabel: string = '';
     switch (this.readyState) {
       case WebSocket.CONNECTING:
-        statusLabel = 'Connecting ...';
+        statusLabel = l10n.t('Connecting ...');
         break;
       case WebSocket.OPEN:
-        statusLabel = 'Connected';
+        statusLabel = l10n.t('Connected');
         break;
       case WebSocket.CLOSING:
-        statusLabel = 'Disconnecting ...';
+        statusLabel = l10n.t('Disconnecting ...');
         break;
       case WebSocket.CLOSED:
-        statusLabel = 'Disconnected';
+        statusLabel = l10n.t('Disconnected');
         break;
       default:
         break;
     }
 
-    const markdown = newMarkdownString(`### ${DEFAULT_PREFIX} Engine Status - ${statusLabel}`);
+    const markdown = newMarkdownString(`### ${l10n.t('{0} Engine Status - {1}', DEFAULT_PREFIX, statusLabel)}`);
     markdown.appendMarkdown('\n\n' + this.buildAnimationStatusString());
-    markdown.appendMarkdown('\n\n Projects in Workspace - ' + (await this.buildProjectCountString()));
-    markdown.appendMarkdown('\n\n Engine URL - ' + this.buildEngineUrlString());
-    markdown.appendMarkdown('\n\n Engine Dir - ' + (await this.buildEngineDirString()));
-    markdown.appendMarkdown('\n\n Engine Version - ' + (await this.buildEngineVersionString()));
-    markdown.appendMarkdown(`\n\n Extension Version - ${extensions.getExtension('axonivy.vscode-designer-14')?.packageJSON.version}`);
+    markdown.appendMarkdown(`\n\n${l10n.t('Projects in Workspace - {0}', await this.buildProjectCountString())}`);
+    markdown.appendMarkdown(`\n\n${l10n.t('Engine URL - {0}', this.buildEngineUrlString())}`);
+    markdown.appendMarkdown(`\n\n${l10n.t('Engine Dir - {0}', await this.buildEngineDirString())}`);
+    markdown.appendMarkdown(`\n\n${l10n.t('Engine Version - {0}', String(await this.buildEngineVersionString()))}`);
+    markdown.appendMarkdown(
+      `\n\n${l10n.t('Extension Version - {0}', extensions.getExtension('axonivy.vscode-designer-14')?.packageJSON.version ?? '')}`
+    );
     if (refreshVersion === this.refreshVersion) {
       this.statusBarItem.tooltip = markdown;
     }
@@ -291,40 +302,44 @@ export class StatusBar {
     try {
       ivyProjectExplorerInstance = IvyProjectExplorer.instance;
     } catch {
-      return 'Loading projects...';
+      return l10n.t('Loading projects...');
     }
 
     try {
       const projects = await ivyProjectExplorerInstance.getIvyProjects();
       return projects.length.toString();
     } catch {
-      return 'Error loading projects';
+      return l10n.t('Error loading projects');
     }
   }
 
   private buildEngineUrlString() {
     if (this.readyState !== WebSocket.OPEN) {
-      return 'No connection to the engine. URL cannot be resolved.';
+      return l10n.t('No connection to the engine. URL cannot be resolved.');
     }
     const engineUrl = IvyEngineManager.instance.engineUrl;
-    const engineUrlLink = engineUrl ? `[${engineUrl}](${engineUrl})` : 'Engine URL cannot be resolved';
+    const engineUrlLink = engineUrl ? `[${engineUrl}](${engineUrl})` : l10n.t('Engine URL cannot be resolved');
     return engineUrlLink;
   }
 
   private buildAnimationStatusString() {
     const settings = animationSettings();
     const animationToggleCommandLink = settings.animate
-      ? '[Turn OFF](command:engine.deactivateAnimation)'
-      : '[Turn ON](command:engine.activateAnimation)';
+      ? `[${l10n.t('Turn OFF')}](command:engine.deactivateAnimation)`
+      : `[${l10n.t('Turn ON')}](command:engine.activateAnimation)`;
     const speed = ANIMATION_SPEED_LABELS[settings.speed] ?? String(settings.speed);
     const mode = ANIMATION_MODE_LABELS[settings.mode] ?? settings.mode;
-    const state = settings.animate ? `ON (${animationToggleCommandLink})` : `OFF (${animationToggleCommandLink})`;
-    return `**Animation:** ${state}  \n**Animation Speed:** ${speed}  \n**Animation Mode:** ${mode}`;
+    const state = settings.animate ? l10n.t('ON ({0})', animationToggleCommandLink) : l10n.t('OFF ({0})', animationToggleCommandLink);
+    return [
+      `**${l10n.t('Animation:')}** ${state}`,
+      `**${l10n.t('Animation Speed:')}** ${speed}`,
+      `**${l10n.t('Animation Mode:')}** ${mode}`
+    ].join('  \n');
   }
 
   private async buildEngineVersionString() {
     if (this.readyState !== WebSocket.OPEN) {
-      return 'Cannot retrieve engine version without a connection.';
+      return l10n.t('Cannot retrieve engine version without a connection.');
     }
     const engineVersion = await IvyEngineManager.instance.getEngineVersion();
     return engineVersion;
@@ -332,13 +347,13 @@ export class StatusBar {
 
   private async buildEngineDirString() {
     if (!config.engineRunByExtension()) {
-      return 'Engine directory is only available when "Run by Extension" is enabled.';
+      return l10n.t('Engine directory is only available when "Run by Extension" is enabled.');
     }
     if (this.readyState !== WebSocket.OPEN) {
-      return 'Cannot retrieve engine directory without a connection.';
+      return l10n.t('Cannot retrieve engine directory without a connection.');
     }
     const engineDir = IvyEngineManager.instance.engineDir;
-    const engineDirLink = engineDir ? `[${engineDir}](${Uri.file(engineDir).toString()})` : 'Cannot resolve engine directory';
+    const engineDirLink = engineDir ? `[${engineDir}](${Uri.file(engineDir).toString()})` : l10n.t('Cannot resolve engine directory');
     return engineDirLink;
   }
 
@@ -351,7 +366,7 @@ export class StatusBar {
     item.tooltip = opt.tooltip;
     item.backgroundColor = isError ? new ThemeColor('statusBarItem.errorBackground') : undefined;
     item.command = isClickable
-      ? { title: 'Show Axon Ivy actions', command: 'ivy.showStatusBarQuickPick', arguments: [opt.visibleOptions] }
+      ? { title: l10n.t('Show Axon Ivy actions'), command: 'ivy.showStatusBarQuickPick', arguments: [opt.visibleOptions] }
       : undefined;
     item.show();
   }
@@ -373,8 +388,8 @@ export class StatusBar {
   async withStatusBarProgress<R>(options: StatusBarProgressOptions, action: () => Promise<R>): Promise<R | undefined> {
     const textDuring = options.text;
     const tooltip = newMarkdownString(options.tooltip ?? textDuring);
-    const textSuccess = options.textSuccess ?? `Success: ${textDuring}`;
-    const textError = options.textError ?? `Error: ${textDuring}`;
+    const textSuccess = options.textSuccess ?? l10n.t('Success: {0}', textDuring);
+    const textError = options.textError ?? l10n.t('Error: {0}', textDuring);
     const successMsgDuration = options.successMsgDuration ?? DEFAULT_SUCCESS_MESSAGE_DURATION;
 
     if (this.temporaryTimeout) {
@@ -397,7 +412,9 @@ export class StatusBar {
       const result = await action();
       this.overrideStatusBar({
         text: textSuccess,
-        tooltip: previousTooltip.appendMarkdown(`${DEFAULT_TOOLTIP_DIVIDER}\n\n**Success last operation: ${textDuring}**`),
+        tooltip: previousTooltip.appendMarkdown(
+          `\n\n${DEFAULT_TOOLTIP_DIVIDER}\n\n**${l10n.t('Success last operation: {0}', textDuring)}**`
+        ),
         icon: '$(check)'
       });
       this.temporaryTimeout = setTimeout(async () => {
@@ -409,7 +426,7 @@ export class StatusBar {
       const errorString = error instanceof Error ? error.message : String(error);
       const linksString = this.buildLogLinks();
       const previousTooltipError = newMarkdownString(previousTooltip.value);
-      previousTooltipError.appendMarkdown(`${DEFAULT_TOOLTIP_DIVIDER}\n\n**Error last operation: ${textDuring}**`);
+      previousTooltipError.appendMarkdown(`\n\n${DEFAULT_TOOLTIP_DIVIDER}\n\n**${l10n.t('Error last operation: {0}', textDuring)}**`);
       previousTooltipError.appendText(`\n\n${errorString}\n\n`);
       previousTooltipError.appendMarkdown(`\n\n${linksString}`);
       this.overrideStatusBar({
@@ -419,17 +436,17 @@ export class StatusBar {
         isError: true
       });
       logErrorMessageWithActions(`${textError}\n\n${errorString}`, {
-        'Open Runtime Log': () => showRuntimeLog(),
-        'Open Extension Log': () => showExtensionLog(),
-        'Open Engine Log': () => showEngineLog()
+        [l10n.t('Open Runtime Log')]: () => showRuntimeLog(),
+        [l10n.t('Open Extension Log')]: () => showExtensionLog(),
+        [l10n.t('Open Engine Log')]: () => showEngineLog()
       });
     }
   }
 
   private buildLogLinks() {
-    const linkRuntimeLog = '[Open Runtime Log](command:ivyPanelView.openRuntimeLog)';
-    const linkExtensionLog = '[Open Extension Log](command:ivyPanelView.openExtensionLog)';
-    const linkEngineLog = '[Open Engine Log](command:ivyPanelView.openEngineLog)';
+    const linkRuntimeLog = `[${l10n.t('Open Runtime Log')}](command:ivyPanelView.openRuntimeLog)`;
+    const linkExtensionLog = `[${l10n.t('Open Extension Log')}](command:ivyPanelView.openExtensionLog)`;
+    const linkEngineLog = `[${l10n.t('Open Engine Log')}](command:ivyPanelView.openEngineLog)`;
     return `${linkRuntimeLog} | ${linkExtensionLog} | ${linkEngineLog}`;
   }
 }

@@ -1,12 +1,12 @@
 import type { ExtensionContext } from 'vscode';
-import { debug, window, workspace } from 'vscode';
+import { debug, l10n, window, workspace } from 'vscode';
 import { registerCommand } from '../base/commands';
 import { logWarningMessage } from '../base/logging-util';
 import type { IvyEngineApi } from '../engine/api/engine-api';
 import { ProcessDebugAdapterDescriptorFactory } from './process-debug-adapter-descriptor-factory';
 import { PROCESS_DEBUG_NAME, PROCESS_DEBUG_TYPE, ProcessDebugConfigurationProvider } from './process-debug-configuration-provider';
 
-const START_PROCESS_DEBUG = 'Start Process Debug' as const;
+const START_PROCESS_DEBUG = l10n.t('Start Process Debug');
 let hasRunningProcessDebugSession = debug.activeDebugSession?.type === PROCESS_DEBUG_TYPE;
 
 export function registerProcessDebugging(context: ExtensionContext, engineApi: IvyEngineApi) {
@@ -39,7 +39,7 @@ export async function promptToStartProcessDebuggingIfNeeded() {
   }
 
   const selection = await logWarningMessage(
-    'No Axon Ivy process debug session is running. Do you want to start one now?',
+    l10n.t('No Axon Ivy process debug session is running. Do you want to start one now?'),
     START_PROCESS_DEBUG
   );
   if (selection !== START_PROCESS_DEBUG) {
@@ -51,7 +51,7 @@ export async function promptToStartProcessDebuggingIfNeeded() {
 
 async function startProcessDebugging() {
   if (hasRunningProcessDebugSession) {
-    await logWarningMessage('An Axon Ivy process debug session is already running. Stop it before starting another one.');
+    await logWarningMessage(l10n.t('An Axon Ivy process debug session is already running. Stop it before starting another one.'));
     return false;
   }
   const workspaceFolders = workspace.workspaceFolders;

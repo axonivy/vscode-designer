@@ -8,7 +8,7 @@ import type {
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import { promises } from 'fs';
 import * as path from 'path';
-import type { TextDocument, WebviewPanel } from 'vscode';
+import { l10n, type TextDocument, type WebviewPanel } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { runJavaProjectConfigurationUpdate } from '../../base/java-extension-api';
@@ -120,21 +120,23 @@ async function generateClient(codegen: WsGeneratorConfig, document: TextDocument
     const serviceContent = await promises.readFile(serviceJson, 'utf-8');
     const wsInfo = JSON.parse(serviceContent) as WsInfo;
     await promises.unlink(serviceJson).catch(error => {
-      logErrorMessage(`Could not delete generated service info file ${serviceJson}: ${error}`);
+      logErrorMessage(l10n.t('Could not delete generated service info file {0}: {1}', serviceJson, String(error)));
     });
 
-    logInformationMessage(`${codegen.clientName} web service client generated successfully`);
+    const successMessage = l10n.t('{0} web service client generated successfully', codegen.clientName);
+    logInformationMessage(successMessage);
     return {
       success: true,
-      message: `${codegen.clientName} web service client generated successfully`,
+      message: successMessage,
       ...wsInfo
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : `${error}`;
-    logErrorMessage(`Web service client generation failed: ${errorMessage}`);
+    const failureMessage = l10n.t('Web service client generation failed: {0}', errorMessage);
+    logErrorMessage(failureMessage);
     return {
       success: false,
-      message: `Web service client generation failed: ${errorMessage}`
+      message: failureMessage
     } as WsGeneratorResult;
   }
 }

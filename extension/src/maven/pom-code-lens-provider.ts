@@ -1,5 +1,5 @@
 import type { CodeLensProvider, ExtensionContext, TextDocument } from 'vscode';
-import { CodeLens, Range, languages } from 'vscode';
+import { CodeLens, l10n, languages, Range } from 'vscode';
 
 class PomCodeLensProvider implements CodeLensProvider {
   provideCodeLenses(document: TextDocument): CodeLens[] {
@@ -12,7 +12,7 @@ class PomCodeLensProvider implements CodeLensProvider {
     const range = new Range(pos, pos);
     return [
       new CodeLens(range, {
-        title: '$(add) Add Ivy Project Dependency',
+        title: `$(add) ${l10n.t('Add Ivy Project Dependency')}`,
         command: 'ivyProjects.addDependency',
         arguments: [document.uri]
       })

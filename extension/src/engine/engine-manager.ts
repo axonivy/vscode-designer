@@ -1,6 +1,6 @@
 import path from 'path';
 import type { ExtensionContext } from 'vscode';
-import { commands, Uri } from 'vscode';
+import { commands, l10n, Uri } from 'vscode';
 import { DidChangeWatchedFilesNotification } from 'vscode-languageserver-protocol';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
@@ -97,22 +97,22 @@ export class IvyEngineManager {
       this.resolvedEngineDir = newEngineDir;
       return newEngineDir;
     }
-    logErrorMessage(`Downloaded engine is invalid: ${newEngineDir}`);
+    logErrorMessage(l10n.t('Downloaded engine is invalid: {0}', newEngineDir));
   }
 
   private async handleInvalidReleaseTrain(reason?: string) {
-    const errorMessage = `Engine release train validation failed: ${reason}`;
+    const errorMessage = l10n.t('Engine release train validation failed: {0}', reason ?? '');
     engineOutputChannel.appendLine(errorMessage);
     const newTrain = await switchEngineReleaseTrain(errorMessage);
     if (!newTrain) {
-      return logErrorMessage('No engine release train selected.');
+      return logErrorMessage(l10n.t('No engine release train selected.'));
     }
     return await this.resolveEngineDir();
   }
 
   async switchEngineReleaseTrain() {
     if (await switchEngineReleaseTrain()) {
-      await askToReloadWindow('Engine release train switched');
+      await askToReloadWindow(l10n.t('Engine release train switched'));
     }
   }
 
@@ -172,7 +172,7 @@ export class IvyEngineManager {
     }
     await StatusBar.withStatusBarProgress(
       {
-        text: 'Initialize projects'
+        text: l10n.t('Initialize projects')
       },
       async () => {
         for (const projectDir of ivyProjectDirectories) {
@@ -203,11 +203,11 @@ export class IvyEngineManager {
       return;
     }
     const ivyProjectDirectories = ivyProjectDirectory ? [ivyProjectDirectory] : await this.ivyProjectDirectories();
-    let statusMessage = 'Deploying projects';
+    let statusMessage = l10n.t('Deploying projects');
     if (ivyProjectDirectories.length === 1 && ivyProjectDirectories[0]) {
       const projectPath = ivyProjectDirectories[0];
       const projectName = path.basename(projectPath);
-      statusMessage = `Deploying project ${projectName}`;
+      statusMessage = l10n.t('Deploying project {0}', projectName);
     }
     await StatusBar.withStatusBarProgress(
       { text: statusMessage },
@@ -217,7 +217,7 @@ export class IvyEngineManager {
 
   public async stopBpmEngine(ivyProjectDirectory: string) {
     await StatusBar.withStatusBarProgress(
-      { text: `Stopping BPM Engine of ${path.basename(ivyProjectDirectory)}` },
+      { text: l10n.t('Stopping BPM Engine of {0}', path.basename(ivyProjectDirectory)) },
       async () => await this.ivyEngineApi?.stopBpmEngine({ projectDir: ivyProjectDirectory })
     );
   }
@@ -228,7 +228,7 @@ export class IvyEngineManager {
 
   public async createProcessFromBpmn(input: CreateProcessFromBpmnParams) {
     await StatusBar.withStatusBarProgress(
-      { text: 'Importing BPMN process' },
+      { text: l10n.t('Importing BPMN process') },
       async () => await this.ivyEngineApi?.createProcessFromBpmn(input)
     );
   }
@@ -245,7 +245,7 @@ export class IvyEngineManager {
   }
 
   public async installMarketProduct(input: ProductInstallParams) {
-    await StatusBar.withStatusBarProgress({ text: 'Importing market product' }, async () => {
+    await StatusBar.withStatusBarProgress({ text: l10n.t('Importing market product') }, async () => {
       try {
         increaseWorkspaceLock();
         await this.ivyEngineApi?.installMarketProduct(input);
@@ -259,7 +259,7 @@ export class IvyEngineManager {
 
   public async createUserDialog(newUserDialogParams: CreateUserDialogParams) {
     const hdBean = await StatusBar.withStatusBarProgress(
-      { text: 'Creating new User Dialog' },
+      { text: l10n.t('Creating new User Dialog') },
       async () => await this.ivyEngineApi?.createUserDialog(newUserDialogParams)
     );
     if (hdBean?.uri) {
@@ -269,7 +269,7 @@ export class IvyEngineManager {
   }
 
   public async createProject(newProjectParams: CreateProjectParams) {
-    await StatusBar.withStatusBarProgress({ text: 'Creating and deploying new project' }, async () => {
+    await StatusBar.withStatusBarProgress({ text: l10n.t('Creating and deploying new project') }, async () => {
       try {
         increaseWorkspaceLock();
         await this.ivyEngineApi?.createProject(newProjectParams);
@@ -289,7 +289,7 @@ export class IvyEngineManager {
 
   public async createDataClass(params: CreateDataClassParams) {
     const dataClassBean = await StatusBar.withStatusBarProgress(
-      { text: 'Creating new Data Class' },
+      { text: l10n.t('Creating new Data Class') },
       async () => await this.ivyEngineApi?.createDataClass(params)
     );
     if (dataClassBean && params.projectDir) {
@@ -301,7 +301,7 @@ export class IvyEngineManager {
 
   public async createEntityClass(params: CreateDataClassParams) {
     const dataClassBean = await StatusBar.withStatusBarProgress(
-      { text: 'Creating new Entity Class' },
+      { text: l10n.t('Creating new Entity Class') },
       async () => await this.ivyEngineApi?.createEntityClass(params)
     );
     if (dataClassBean && params.projectDir) {
@@ -313,7 +313,7 @@ export class IvyEngineManager {
 
   public async createCaseMap(params: CreateCaseMapParams) {
     const caseMapBean = await StatusBar.withStatusBarProgress(
-      { text: 'Creating new Case Map' },
+      { text: l10n.t('Creating new Case Map') },
       async () => await this.ivyEngineApi?.createCaseMap(params)
     );
     if (caseMapBean && params.projectDir) {
@@ -324,7 +324,7 @@ export class IvyEngineManager {
 
   private async createAndOpenProcess(newProcessParams: CreateProcessParams) {
     const processBean = await StatusBar.withStatusBarProgress(
-      { text: 'Creating new Process' },
+      { text: l10n.t('Creating new Process') },
       async () => await this.ivyEngineApi?.createProcess(newProcessParams)
     );
     if (processBean?.uri) {
@@ -335,21 +335,21 @@ export class IvyEngineManager {
 
   public async deleteProject(ivyProjectDirectory: string) {
     await StatusBar.withStatusBarProgress(
-      { text: 'Deleting project' },
+      { text: l10n.t('Deleting project') },
       async () => await this.ivyEngineApi?.deleteProject({ projectDir: ivyProjectDirectory })
     );
   }
 
   public async convertProject(ivyProjectDirectory: string) {
     return await StatusBar.withStatusBarProgress(
-      { text: 'Converting project' },
+      { text: l10n.t('Converting project') },
       async () => await this.ivyEngineApi?.convertProject({ projectDir: ivyProjectDirectory })
     );
   }
 
   public async refreshProjectStatuses() {
     return await StatusBar.withStatusBarProgress(
-      { text: 'Refreshing project statuses' },
+      { text: l10n.t('Refreshing project statuses') },
       async () => await this.ivyEngineApi?.refreshProjectStatuses()
     );
   }
@@ -359,7 +359,7 @@ export class IvyEngineManager {
       return;
     }
     return await StatusBar.withStatusBarProgress(
-      { text: 'Invalidating class loader' },
+      { text: l10n.t('Invalidating class loader') },
       async () => await this.ivyEngineApi?.invalidateClassLoader({ projectDir: ivyProjectDirectory })
     );
   }

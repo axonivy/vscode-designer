@@ -16,6 +16,10 @@ vi.mock('vscode', () => {
   }
 
   return {
+    l10n: {
+      t: (message: string, ...args: unknown[]) =>
+        args.reduce<string>((result, arg, index) => result.replace(`{${index}}`, String(arg)), message)
+    },
     Selection,
     Uri: {
       parse: vi.fn((value: string) => ({ value, fsPath: value }))

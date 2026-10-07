@@ -1,4 +1,6 @@
 import path from 'path';
+import { l10n } from 'vscode';
+import { localizeProcessKind } from '../base/localized-labels';
 import { logErrorMessage } from '../base/logging-util';
 import type { CreateProcessParams } from '../engine/api/engine-api';
 import { IvyEngineManager } from '../engine/engine-manager';
@@ -40,8 +42,8 @@ export const addNewProcess = async (selectionContext: AddCommandSelectionContext
       const previousProject = state.project;
       state.project = await input.showQuickPick<ProjectSelection>({
         title: state.dialogTitle,
-        titleSuffix: ' - Choose project',
-        placeholder: 'Select one of the available projects',
+        titleSuffix: l10n.t('Choose project'),
+        placeholder: l10n.t('Select one of the available projects'),
         currentStep: state.currentStep,
         totalSteps: state.totalSteps,
         value: state.project ? state.project.label : '',
@@ -60,8 +62,8 @@ export const addNewProcess = async (selectionContext: AddCommandSelectionContext
   const stepName: InputStep<NewProcessState> = async (input: MultiStepInput<NewProcessState>, state: NewProcessState) => {
     state.name = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose name',
-      placeholder: 'Enter a name. Must start with a letter or underscore. Allowed characters: a-z, A-Z, 0-9, _',
+      titleSuffix: l10n.t('Choose name'),
+      placeholder: l10n.t('Enter a name. Must start with a letter or underscore. Allowed characters: a-z, A-Z, 0-9, _'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.name,
@@ -75,8 +77,8 @@ export const addNewProcess = async (selectionContext: AddCommandSelectionContext
   const stepNamespace: InputStep<NewProcessState> = async (input: MultiStepInput<NewProcessState>, state: NewProcessState) => {
     state.namespace = await input.showTextInput({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose namespace',
-      placeholder: 'Enter Namespace separated by "/". Allowed characters: a-z, A-Z, 0-9, _, /',
+      titleSuffix: l10n.t('Choose namespace'),
+      placeholder: l10n.t('Enter Namespace separated by "/". Allowed characters: a-z, A-Z, 0-9, _, /'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.namespace,
@@ -91,7 +93,7 @@ export const addNewProcess = async (selectionContext: AddCommandSelectionContext
   const steps: InputStep<NewProcessState>[] = [stepProject, stepName, stepNamespace];
 
   const newProcessData: NewProcessState = {
-    dialogTitle: `Add New ${kind}`,
+    dialogTitle: l10n.t('Add New {0}', localizeProcessKind(kind)),
     currentStep: 1,
     totalSteps: steps.length,
     namespace: namespaceFromSelection,

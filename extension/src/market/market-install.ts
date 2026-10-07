@@ -1,4 +1,4 @@
-import { Uri } from 'vscode';
+import { l10n, Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { MultiStepCancelledError, MultiStepInput, type InputStep } from '../project-explorer/utils/multi-step-input';
 import { fetchInstaller, getAvailableVersions, getBestVersion, searchMarketProduct } from './utils/market-client';
@@ -16,8 +16,8 @@ export const installMarketProduct = async (existingProjects: string[], engineVer
     const previousProduct = state.product;
     state.product = await input.showQuickPick<ProductSelection>({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose available Market Product',
-      placeholder: 'Select a Market Product to install',
+      titleSuffix: l10n.t('Choose available Market Product'),
+      placeholder: l10n.t('Select a Market Product to install'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.product ? state.product.label : '',
@@ -43,7 +43,10 @@ export const installMarketProduct = async (existingProjects: string[], engineVer
     const availableVersions = state.product ? await getAvailableVersions(state.product.id ?? '', engineVersion) : [];
     if (availableVersions.length === 0) {
       throw new Error(
-        `No available product versions found that satisfy your engine version.Your current Ivy Engine version: ${engineVersion}. Please update your Ivy Engine.`
+        l10n.t(
+          'No available product versions found that satisfy your engine version. Your current Ivy Engine version: {0}. Please update your Ivy Engine.',
+          engineVersion
+        )
       );
     }
     const bestVersion = await getBestVersion(state.product?.id ?? '', engineVersion);
@@ -51,8 +54,8 @@ export const installMarketProduct = async (existingProjects: string[], engineVer
     const previousVersion = state.version;
     const version = await input.showQuickPick({
       title: state.dialogTitle,
-      titleSuffix: ' - Choose Version',
-      placeholder: 'Select a Market Product version to install',
+      titleSuffix: l10n.t('Choose Version'),
+      placeholder: l10n.t('Select a Market Product version to install'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.version ?? (availableVersions.includes(bestVersion) ? bestVersion : ''),
@@ -74,7 +77,7 @@ export const installMarketProduct = async (existingProjects: string[], engineVer
   ];
 
   const installMarketProductData: InstallMarketProductState = initState({
-    dialogTitle: 'Install Market Product',
+    dialogTitle: l10n.t('Install Market Product'),
     totalSteps: steps.length
   });
 

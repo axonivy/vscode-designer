@@ -1,4 +1,4 @@
-import { workspace, type ExtensionContext } from 'vscode';
+import { l10n, workspace, type ExtensionContext } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { showRememberedFileDialog } from '../base/remembered-file-dialog';
 import { MultiStepCancelledError, MultiStepInput, type InputStep } from '../project-explorer/utils/multi-step-input';
@@ -10,10 +10,10 @@ import { parseProduct, replaceDynamicVersion } from './utils/market-install-util
 export const installLocalMarketProduct = async (existingProjects: string[], context: Pick<ExtensionContext, 'globalState'>) => {
   const stepSelectJsonFile: () => Promise<string> = async () => {
     const productInstaller = await showRememberedFileDialog(context, 'installLocalMarketProduct', {
-      title: 'Select product.json file',
-      filters: { 'JSON files': ['json'] },
+      title: l10n.t('Select product.json file'),
+      filters: { [l10n.t('JSON files')]: ['json'] },
       canSelectMany: false,
-      openLabel: 'Import product.json'
+      openLabel: l10n.t('Import product.json')
     });
     if (!productInstaller || productInstaller.length === 0 || !productInstaller[0]) {
       throw new MultiStepCancelledError();
@@ -31,15 +31,17 @@ export const installLocalMarketProduct = async (existingProjects: string[], cont
     if (state.sourceProductJson?.includes('${version}')) {
       state.version = await input.showTextInput({
         title: state.dialogTitle,
-        titleSuffix: ' - Resolve dynamic ${version} in product.json',
-        prompt: 'Enter a Maven version, which you made locally available by running `mvn clean install` from your product workspace.',
+        titleSuffix: l10n.t('Resolve dynamic ${version} in product.json'),
+        prompt: l10n.t(
+          'Enter a Maven version, which you made locally available by running `mvn clean install` from your product workspace.'
+        ),
         placeholder: '14.0.0-SNAPSHOT',
         currentStep: state.currentStep,
         totalSteps: state.totalSteps,
         value: state.version ?? '',
         validationFunction: (value: string) => {
           if (!value.trim()) {
-            return 'Version is required for product.json files with ${version} placeholder. Please enter a version.';
+            return l10n.t('Version is required for product.json files with ${version} placeholder. Please enter a version.');
           }
         }
       });
@@ -63,7 +65,7 @@ export const installLocalMarketProduct = async (existingProjects: string[], cont
     steps.unshift(stepVersion);
   }
   const installLocalMarketProductData = initState({
-    dialogTitle: 'Install Local Market Product',
+    dialogTitle: l10n.t('Install Local Market Product'),
     totalSteps: steps.length,
     sourceProductJson: productJsonFromFile // At this point, the ground truth JSON is already determined and fixed
   });
