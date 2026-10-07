@@ -1,5 +1,6 @@
 import { CaseMapClientJsonRpc, CaseMapEditor, ClientContextProvider, initQueryClient } from '@axonivy/case-map-editor';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import '@axonivy/case-map-editor/lib/editor.css';
 import { HotkeysProvider, ThemeProvider, Toaster } from '@axonivy/ui-components';
 import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
@@ -36,6 +37,7 @@ export async function start({ file }: InitializeConnection) {
               <CaseMapEditor context={context} />
               <Toaster closeButton={true} />
             </HotkeysProvider>
+            <ReactQueryDevtools initialIsOpen={false} buttonPosition={'bottom-left'} />
           </QueryClientProvider>
         </ClientContextProvider>
       </ThemeProvider>

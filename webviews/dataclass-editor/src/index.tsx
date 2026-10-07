@@ -1,5 +1,6 @@
 import { ClientContextProvider, ClientJsonRpc, DataClassEditor, initQueryClient } from '@axonivy/dataclass-editor';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import '@axonivy/dataclass-editor/lib/editor.css';
 import { HotkeysProvider, ThemeProvider, Toaster } from '@axonivy/ui-components';
 import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
@@ -30,6 +31,7 @@ export async function start({ file }: InitializeConnection) {
               <DataClassEditor context={{ app: '', project: '', file }} />
               <Toaster closeButton={true} />
             </HotkeysProvider>
+            <ReactQueryDevtools initialIsOpen={false} buttonPosition={'bottom-left'} />
           </QueryClientProvider>
         </ClientContextProvider>
       </ThemeProvider>

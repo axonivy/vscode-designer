@@ -3,6 +3,7 @@ import { type InitializeConnection, initMessenger, toConnection } from '@axonivy
 import '@axonivy/vscode-webview-common/css/colors.css';
 import { App, ClientContextProvider, WebServiceClientJsonRpc, initQueryClient } from '@axonivy/webservice-editor';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import '@axonivy/webservice-editor/lib/editor.css';
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -32,6 +33,7 @@ export async function start({ file }: InitializeConnection) {
               <App context={context} />
               <Toaster closeButton={true} />
             </HotkeysProvider>
+            <ReactQueryDevtools initialIsOpen={false} buttonPosition={'bottom-left'} />
           </QueryClientProvider>
         </ClientContextProvider>
       </ThemeProvider>

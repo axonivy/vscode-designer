@@ -1,5 +1,6 @@
 import { App, ClientContextProvider, PersistenceClientJsonRpc, initQueryClient } from '@axonivy/persistence-editor';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import '@axonivy/persistence-editor/lib/editor.css';
 import { HotkeysProvider, ThemeProvider, Toaster } from '@axonivy/ui-components';
 import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
@@ -32,6 +33,7 @@ export async function start({ file }: InitializeConnection) {
               <App context={context} />
               <Toaster closeButton={true} />
             </HotkeysProvider>
+            <ReactQueryDevtools initialIsOpen={false} buttonPosition={'bottom-left'} />
           </QueryClientProvider>
         </ClientContextProvider>
       </ThemeProvider>

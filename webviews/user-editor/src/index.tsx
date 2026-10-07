@@ -1,6 +1,7 @@
 import { HotkeysProvider, ThemeProvider, Toaster } from '@axonivy/ui-components';
 import { App, ClientContextProvider, UserClientJsonRpc, initQueryClient } from '@axonivy/user-editor';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import '@axonivy/user-editor/lib/editor.css';
 import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
 import '@axonivy/vscode-webview-common/css/colors.css';
@@ -32,6 +33,7 @@ export async function start({ file }: InitializeConnection) {
               <App context={context} />
               <Toaster closeButton={true} />
             </HotkeysProvider>
+            <ReactQueryDevtools initialIsOpen={false} buttonPosition={'bottom-left'} />
           </QueryClientProvider>
         </ClientContextProvider>
       </ThemeProvider>
