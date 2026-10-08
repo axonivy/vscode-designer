@@ -2,6 +2,7 @@ import path from 'path';
 import { l10n, Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import type { CreateProjectParams } from '../engine/api/engine-api';
+import type { ProjectBean } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import {
   type InputStep,
@@ -10,7 +11,7 @@ import {
   MultiStepInput,
   MultiStepInvalidStateError
 } from './utils/multi-step-input';
-import { validateDotSeparatedName, validateProjectArtifactId, validateProjectName } from './utils/util';
+import { validateDotSeparatedName, validateProjectArtifactId, validateProjectName as validateProjectNameSyntax } from './utils/util';
 
 interface NewProjectState extends MSStateBase {
   projectName?: string | undefined;
@@ -20,6 +21,21 @@ interface NewProjectState extends MSStateBase {
 }
 
 export const addNewProject = async (selectedUri: Uri) => {
+  const validateProjectName = (typedProjectName: string): string | undefined => {
+    return validateProjectNameSyntax(typedProjectName) ?? validateNotExisting(typedProjectName, selectedUri, deployedProjects);
+  };
+
+  const validateNotExisting = (typedProjectName: string, selectedUri: Uri, existingProjects: ProjectBean[]): string | undefined => {
+    const typedProjectPath = path.join(selectedUri.fsPath, typedProjectName);
+    if (existingProjects.some(project => project.id.name === typedProjectName)) {
+      return l10n.t('A project with this name already exists in the workspace or as a Maven dependency.');
+    }
+    if (existingProjects.some(project => project.projectDirectory === typedProjectPath)) {
+      return l10n.t('A project with this path already exists in the workspace or as a Maven dependency.');
+    }
+    return undefined;
+  };
+
   const stepProjectName: InputStep<NewProjectState> = async (input: MultiStepInput<NewProjectState>, state: NewProjectState) => {
     state.projectName = await input.showTextInput({
       title: state.dialogTitle,
@@ -85,6 +101,8 @@ export const addNewProject = async (selectedUri: Uri) => {
       }
     });
   };
+
+  const deployedProjects = (await IvyEngineManager.instance.projects(false)) ?? [];
 
   const steps: InputStep<NewProjectState>[] = [stepProjectName, stepGroupId, stepProjectId];
   const newProjectData: NewProjectState = {
