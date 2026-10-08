@@ -131,6 +131,6 @@ const checkMvnExecutable = async (executableRaw: string): Promise<boolean> => {
   }
 };
 
-const isExpectedMavenVersion = (versionOutput: string) => {
+export const isExpectedMavenVersion = (versionOutput: string) => {
   return new RegExp(`Apache Maven ${EXPECTED_MAVEN_VERSION.replace('.', '\\.')}\\.\\d+(?:\\s|$)`).test(versionOutput);
 };
