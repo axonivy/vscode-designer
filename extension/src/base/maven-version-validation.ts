@@ -7,7 +7,9 @@ const DEFAULT_MAVEN_EXECUTABLE = 'mvn';
 const MAVEN_SETTING_GROUP = 'maven';
 const MAVEN_SETTING_EXECUTABLE_PATH = 'executable.path';
 export const MAVEN_SETTING_KEY = `${MAVEN_SETTING_GROUP}.${MAVEN_SETTING_EXECUTABLE_PATH}`;
-const EXPECTED_MAVEN_VERSION = '3.9';
+const EXPECTED_MAVEN_MAJOR = 3;
+const EXPECTED_MINIMUM_MAVEN_MINOR = 9;
+const EXPECTED_MAVEN_VERSION_RANGE = `>=${EXPECTED_MAVEN_MAJOR}.${EXPECTED_MINIMUM_MAVEN_MINOR}.0 and <${EXPECTED_MAVEN_MAJOR + 1}.0.0`;
 
 const execAsync = promisify(exec);
 
@@ -33,7 +35,7 @@ export const validateMavenExecutable = async () => {
           MAVEN_SETTING_KEY,
           mvnExecutable.value,
           mvnExecutable.workspaceFolder?.uri.fsPath ?? '',
-          EXPECTED_MAVEN_VERSION
+          EXPECTED_MAVEN_VERSION_RANGE
         )
       );
     } else {
@@ -58,7 +60,7 @@ export const validateMavenExecutable = async () => {
           localizeScope(mvnExectuableUser.scope),
           MAVEN_SETTING_KEY,
           mvnExectuableUser.value,
-          EXPECTED_MAVEN_VERSION
+          EXPECTED_MAVEN_VERSION_RANGE
         )
       );
     } else {
@@ -80,7 +82,7 @@ export const validateMavenExecutable = async () => {
     logWarningMessage(
       l10n.t(
         'No valid Maven executable found.\nPlease ensure Maven {0} is installed and accessible in your PATH\nor the path to the executable is configured in your VS Code settings via "{1}".\nIgnoring this might lead to unexpected behavior.',
-        EXPECTED_MAVEN_VERSION,
+        EXPECTED_MAVEN_VERSION_RANGE,
         MAVEN_SETTING_KEY
       )
     );
@@ -132,5 +134,11 @@ const checkMvnExecutable = async (executableRaw: string): Promise<boolean> => {
 };
 
 export const isExpectedMavenVersion = (versionOutput: string) => {
-  return new RegExp(`Apache Maven ${EXPECTED_MAVEN_VERSION.replace('.', '\\.')}\\.\\d+(?:\\s|$)`).test(versionOutput);
+  const version = versionOutput.match(/Apache Maven (\d+)\.(\d+)\.(\d+)(?:\s|$)/);
+  if (!version) {
+    return false;
+  }
+  const major = Number(version[1]);
+  const minor = Number(version[2]);
+  return major === EXPECTED_MAVEN_MAJOR && minor >= EXPECTED_MINIMUM_MAVEN_MINOR;
 };
