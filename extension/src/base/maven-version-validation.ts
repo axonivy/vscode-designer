@@ -127,8 +127,7 @@ const checkMvnExecutable = async (executableRaw: string): Promise<boolean> => {
     const { stdout, stderr } = await execAsync(command, { encoding: 'utf8', windowsHide: true });
     const version = `${stdout}${stderr}`;
     return isExpectedMavenVersion(version);
-  } catch (error) {
-    console.log(`"${executableRaw}":`, error);
+  } catch {
     return false;
   }
 };
