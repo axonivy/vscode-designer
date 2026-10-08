@@ -16,7 +16,13 @@ export default defineConfig(() => ({
   build: {
     manifest: 'build.manifest.json',
     outDir: '../../extension/dist/webviews/process-editor',
-    chunkSizeWarningLimit: 5000
+    chunkSizeWarningLimit: 5000,
+    rolldownOptions: {
+      onLog(level, log, defaultHandler) {
+        if (level === 'warn' && log.code === 'MODULE_LEVEL_DIRECTIVE') return;
+        defaultHandler(level, log);
+      }
+    }
   },
   css: {
     lightningcss: {
