@@ -14,6 +14,8 @@ type TmpWorkspace = { tmpWorkspacePath: string; tmpWsConfig?: string };
 type TestFixtures = {
   workspace: string | null;
   closeWelcomePage: boolean;
+  isolatedUserDataDir: boolean;
+  userDataDir: string;
   tmpWorkspace?: TmpWorkspace;
   electronApp?: ElectronApplication;
   page: Page;
@@ -25,6 +27,16 @@ type TestFixtures = {
 export const test = base.extend<TestFixtures>({
   workspace: prebuiltWorkspacePath,
   closeWelcomePage: true,
+  isolatedUserDataDir: false,
+  userDataDir: async ({ isolatedUserDataDir }, take) => {
+    const userDataDir = isolatedUserDataDir
+      ? await fs.promises.mkdtemp(path.join(os.tmpdir(), 'vscode-test-user-data-'))
+      : path.resolve(process.cwd(), 'test-user-data-dir');
+    await take(userDataDir);
+    if (isolatedUserDataDir) {
+      await fs.promises.rm(userDataDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 1000 });
+    }
+  },
   tmpWorkspace: async ({ workspace }, take) => {
     const tmpWs = await createTmpWorkspace(workspace);
     await take(tmpWs);
@@ -32,9 +44,9 @@ export const test = base.extend<TestFixtures>({
       await removeTmpWorkspace(tmpWs?.tmpWorkspacePath);
     }
   },
-  electronApp: async ({ tmpWorkspace }, take) => {
+  electronApp: async ({ tmpWorkspace, userDataDir }, take) => {
     if (!runInBrowser) {
-      await runElectronAppTest(take, tmpWorkspace);
+      await runElectronAppTest(take, tmpWorkspace, userDataDir);
     } else {
       await take(undefined);
     }
@@ -82,10 +94,13 @@ const runBrowserTest = async (take: (r: Page) => Promise<void>, tmpWorkspace?: T
   await browser.close();
 };
 
-const runElectronAppTest = async (take: (r: ElectronApplication) => Promise<void>, tmpWorkspace?: TmpWorkspace) => {
+const runElectronAppTest = async (
+  take: (r: ElectronApplication) => Promise<void>,
+  tmpWorkspace: TmpWorkspace | undefined,
+  userDataDir: string
+) => {
   const vscodePath = await runDownloadAndUnzipVSCode();
   const extensionDir = path.resolve(process.cwd(), 'test-extension-dir');
-  const userDataDir = path.resolve(process.cwd(), 'test-user-data-dir');
   const electronApp = await _electron.launch({
     executablePath: vscodePath,
     args: [
