@@ -138,7 +138,7 @@ export class IvyEngineApi {
       { baseURL: this.designerUrl, ...options }
     )
       .then(res => res.data)
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, false));
   }
 
   public async createUserDialog(newUserDialogParams: CreateUserDialogParams) {

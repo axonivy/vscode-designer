@@ -388,8 +388,8 @@ export class StatusBar {
   async withStatusBarProgress<R>(options: StatusBarProgressOptions, action: () => Promise<R>): Promise<R | undefined> {
     const textDuring = options.text;
     const tooltip = newMarkdownString(options.tooltip ?? textDuring);
-    const textSuccess = options.textSuccess ?? l10n.t('Success: {0}', textDuring);
-    const textError = options.textError ?? l10n.t('Error: {0}', textDuring);
+    const textSuccess = options.textSuccess ?? l10n.t('Success - {0}', textDuring);
+    const textError = options.textError ?? l10n.t('Error - {0}', textDuring);
     const successMsgDuration = options.successMsgDuration ?? DEFAULT_SUCCESS_MESSAGE_DURATION;
 
     if (this.temporaryTimeout) {
@@ -435,7 +435,7 @@ export class StatusBar {
         icon: '$(error)',
         isError: true
       });
-      logErrorMessageWithActions(`${textError}\n\n${errorString}`, {
+      logErrorMessageWithActions(`${textError} - ${errorString}`, {
         [l10n.t('Open Runtime Log')]: () => showRuntimeLog(),
         [l10n.t('Open Extension Log')]: () => showExtensionLog(),
         [l10n.t('Open Engine Log')]: () => showEngineLog()
