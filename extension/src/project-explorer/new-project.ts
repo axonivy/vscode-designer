@@ -102,7 +102,7 @@ export const addNewProject = async (selectedUri: Uri) => {
     });
   };
 
-  const deployedProjects = (await IvyEngineManager.instance.projects(false)) ?? [];
+  const deployedProjects = (await IvyEngineManager.instance.projects()) ?? [];
 
   const steps: InputStep<NewProjectState>[] = [stepProjectName, stepGroupId, stepProjectId];
   const newProjectData: NewProjectState = {
