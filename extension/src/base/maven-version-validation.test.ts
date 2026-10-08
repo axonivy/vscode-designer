@@ -1,5 +1,5 @@
 import { beforeEach, expect, test, vi } from 'vitest';
-import { MAVEN_SETTING_KEY, validateMavenExecutable } from './maven-version-validation';
+import { isExpectedMavenVersion, MAVEN_SETTING_KEY, validateMavenExecutable } from './maven-version-validation';
 
 const mocks = vi.hoisted(() => ({
   inspect: vi.fn(),
@@ -71,6 +71,14 @@ beforeEach(() => {
   mocks.exec.mockImplementation((_command: string, _options: unknown, callback: (error: null, stdout: string, stderr: string) => void) => {
     callback(null, VALID_MAVEN_VERSION_OUTPUT, '');
   }); // by default, assume the Maven executable returns a valid version
+});
+
+test.each(['3.9.0', '3.9.11', '3.10.0', '3.99.999'])('accepts Maven version %s', version => {
+  expect(isExpectedMavenVersion(`Apache Maven ${version}`)).toBe(true);
+});
+
+test.each(['3.8.99', '4.0.0'])('rejects Maven version %s', version => {
+  expect(isExpectedMavenVersion(`Apache Maven ${version}`)).toBe(false);
 });
 
 test('valid Workspace only override', async () => {
