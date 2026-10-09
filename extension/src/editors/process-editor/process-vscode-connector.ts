@@ -1,5 +1,5 @@
-import { SetBreakpointAction, ToggleBreakpointAction } from '@axonivy/process-editor-protocol';
-import { SetModelAction } from '@eclipse-glsp/protocol';
+import { MoveIntoViewportAction, SetBreakpointAction, ToggleBreakpointAction } from '@axonivy/process-editor-protocol';
+import { NavigationTarget, SelectAction, SetModelAction } from '@eclipse-glsp/protocol';
 import {
   ActionMessage,
   GlspVscodeConnector,
@@ -28,6 +28,8 @@ export class ProcessVscodeConnector extends GlspVscodeConnector {
   protected readonly onDidChangeActiveGlspEditorEventEmitter = new EventEmitter<{ client: GlspVscodeClient }>();
   private readonly modelLoading: StatusBarItem;
   private readonly breakpointHandler: ProcessBreakpointHandler;
+  private readonly pendingNavigationSelections = new Map<string, string[]>();
+  private readonly clientsWithModel = new Set<string>();
 
   constructor(options: GlspVscodeConnectorOptions) {
     super(options);
@@ -49,6 +51,7 @@ export class ProcessVscodeConnector extends GlspVscodeConnector {
   override async registerClient(client: GlspVscodeClient): Promise<void> {
     this.onDidChangeActiveGlspEditorEventEmitter.fire({ client });
 
+    client.webviewEndpoint.webviewPanel.onDidDispose(() => this.clientsWithModel.delete(client.clientId));
     client.webviewEndpoint.webviewPanel.onDidChangeViewState(e => {
       if (e.webviewPanel.active) {
         this.onDidChangeActiveGlspEditorEventEmitter.fire({ client });
@@ -96,7 +99,7 @@ export class ProcessVscodeConnector extends GlspVscodeConnector {
     const absolutePath = args?.['absolutePath'] as string;
     if (absolutePath) {
       if (absolutePath.endsWith('.p.json')) {
-        this.openWithProcessEditor(absolutePath);
+        this.openWithProcessEditor(Uri.parse(absolutePath), NavigationTarget.getElementIds(message.action.target));
       } else {
         commands.executeCommand('vscode.open', Uri.parse(absolutePath));
       }
@@ -105,12 +108,42 @@ export class ProcessVscodeConnector extends GlspVscodeConnector {
     return super.handleNavigateToExternalTargetAction(message, _client, _origin);
   }
 
-  private openWithProcessEditor(absolutePath: string) {
-    commands.executeCommand('vscode.openWith', Uri.parse(absolutePath), ProcessEditorProvider.viewType);
+  private openWithProcessEditor(uri: Uri, elementIds: string[]) {
+    const uriKey = uri.toString();
+    const pendingSelection = elementIds.length > 0 ? elementIds : undefined;
+    if (pendingSelection) {
+      this.pendingNavigationSelections.set(uriKey, pendingSelection);
+    }
+    void commands.executeCommand('vscode.openWith', uri, ProcessEditorProvider.viewType).then(
+      () => {
+        const client = [...this.clientMap.values()].find(candidate => candidate.document.uri.toString() === uriKey);
+        if (client && this.clientsWithModel.has(client.clientId)) {
+          this.selectPendingNavigationElements(client.clientId);
+        }
+      },
+      error => {
+        if (pendingSelection && this.pendingNavigationSelections.get(uriKey) === pendingSelection) {
+          this.pendingNavigationSelections.delete(uriKey);
+        }
+        logErrorMessage(`Failed to open process editor: ${String(error)}`);
+      }
+    );
+  }
+
+  private selectPendingNavigationElements(clientId: string) {
+    const client = this.clientMap.get(clientId);
+    const elementIds = client && this.pendingNavigationSelections.get(client.document.uri.toString());
+    if (!elementIds) {
+      return;
+    }
+    this.pendingNavigationSelections.delete(client.document.uri.toString());
+    this.dispatchAction(SelectAction.create({ selectedElementsIDs: elementIds, deselectedElementsIDs: true }), clientId);
+    this.dispatchAction(MoveIntoViewportAction.create({ elementIds }), clientId);
   }
 
   protected override processMessage(message: unknown, origin: MessageOrigin): MessageProcessingResult {
     let syncBreakpointsAfterMessage = false;
+    let selectNavigationTargetAfterMessage = false;
     if (ActionMessage.is(message)) {
       if (SetModelAction.is(message.action)) {
         const action = message.action;
@@ -120,6 +153,10 @@ export class ProcessVscodeConnector extends GlspVscodeConnector {
         ivyClient.app = newRoot.args.app;
         ivyClient.project = newRoot.args.project;
         syncBreakpointsAfterMessage = origin === MessageOrigin.SERVER;
+        selectNavigationTargetAfterMessage = origin === MessageOrigin.SERVER;
+        if (selectNavigationTargetAfterMessage) {
+          this.clientsWithModel.add(message.clientId);
+        }
       }
       if (SetBreakpointAction.is(message.action)) {
         this.breakpointHandler.toggleBreakpoint(message.clientId, message.action.elementId);
@@ -131,6 +168,9 @@ export class ProcessVscodeConnector extends GlspVscodeConnector {
     const result = super.processMessage(message, origin);
     if (syncBreakpointsAfterMessage && ActionMessage.is(message)) {
       queueMicrotask(() => this.breakpointHandler.syncForClient(message.clientId));
+    }
+    if (selectNavigationTargetAfterMessage && ActionMessage.is(message)) {
+      queueMicrotask(() => this.selectPendingNavigationElements(message.clientId));
     }
     return result;
   }

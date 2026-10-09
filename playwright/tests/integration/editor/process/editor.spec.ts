@@ -86,6 +86,7 @@ test('Jump into Call Sub', async ({ wsPage }) => {
   await callSub.click();
   await wsPage.page.keyboard.press('KeyJ');
   const subEditor = new ProcessEditor(wsPage, 'CallMe.p.json', 1);
-  const nestedScript = subEditor.elementByPID('190E938617AE0413-f3');
-  await expect(nestedScript).toBeVisible();
+  const subStart = subEditor.elementByPID('190E938617AE0413-f0');
+  await expect(subStart).toBeVisible();
+  await expect(subStart).toHaveClass(/selected/);
 });
