@@ -26,7 +26,6 @@ public class CopilotIntegrationTest {
   @Test
   @Order(3)
   void createProject(AgentRuntime rt) throws Exception {
-    rt.ivyEngine().clearLog();
     var spans = rt.prompt("create an axon ivy project for a flight-simulator with folder named: flight-simulator");
     var tokenUsage = spans.tokenUsage();
     assertThat(tokenUsage.input()).isLessThan(150_000);
@@ -36,7 +35,7 @@ public class CopilotIntegrationTest {
     assertThat(flightSimulator)
         .as("project created in workspace")
         .exists();
-    assertThat(rt.ivyEngine().ivyLog())
+    assertThat(rt.ivyEngine().newLogs())
         .as("no-errors in log")
         .isEmpty();
     assertThat(spans.usedTools())

@@ -24,6 +24,35 @@ public class IvyEngine {
     }
   }
 
+  private long logOffset = 0;
+
+  public void mark() {
+    var ivyLog = engineDir.resolve("logs").resolve("ivy.log");
+    try {
+      this.logOffset = Files.exists(ivyLog) ? Files.size(ivyLog) : 0;
+    } catch (IOException ex) {
+      this.logOffset = 0;
+    }
+  }
+
+  public String newLogs() {
+    var ivyLog = engineDir.resolve("logs").resolve("ivy.log");
+    try {
+      if (!Files.exists(ivyLog)) {
+        return "";
+      }
+      long size = Files.size(ivyLog);
+      if (size <= logOffset) {
+        return "";
+      }
+      byte[] bytes = Files.readAllBytes(ivyLog);
+      int offset = (int) Math.min(logOffset, bytes.length);
+      return new String(bytes, offset, bytes.length - offset, java.nio.charset.StandardCharsets.UTF_8);
+    } catch (IOException ex) {
+      throw new UncheckedIOException(ex);
+    }
+  }
+
   public String ivyLog() {
     var ivyLog = engineDir.resolve("logs").resolve("ivy.log");
     try {

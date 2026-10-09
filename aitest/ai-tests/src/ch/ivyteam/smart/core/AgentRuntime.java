@@ -44,6 +44,7 @@ public class AgentRuntime {
 
   static AiTestReport reporter = new AiTestReport();
   static MarkdownReporter markdown;
+  static IvyEngine ivyEngine;
 
   private String currentTest;
 
@@ -119,6 +120,10 @@ public class AgentRuntime {
       throw new IllegalStateException("AgentRuntime is not attached to a test");
     }
     try {
+      ivyEngine().mark();
+    } catch (Exception ignored) {
+    }
+    try {
       copilot.prompt(prompt, resourceName);
     } catch (InterruptedException | IOException e) {
       throw new RuntimeException("Failed to prompt Copilot", e);
@@ -141,13 +146,17 @@ public class AgentRuntime {
   }
 
   public IvyEngine ivyEngine() {
+    if (ivyEngine != null) {
+      return ivyEngine;
+    }
     Path engines = userData.resolve("User").resolve("globalStorage").resolve("axonivy.vscode-designer-14").resolve("engines");
     var engineDirs = engines.toFile().listFiles();
     if (engineDirs == null || engineDirs.length == 0) {
       throw new IllegalStateException("No Ivy engines found under " + engines);
     }
     var firstEngine = engineDirs[0].toPath();
-    return new IvyEngine(firstEngine);
+    ivyEngine = new IvyEngine(firstEngine);
+    return ivyEngine;
   }
 
   private static void ensureNetworkExists() {
