@@ -26,14 +26,13 @@ export const addNewProject = async (selectedUri: Uri) => {
   };
 
   const validateNotExisting = (typedProjectName: string, selectedUri: Uri, existingProjects: ProjectBean[]): string | undefined => {
-    const typedProjectPath = path.join(selectedUri.fsPath, typedProjectName);
     if (existingProjects.some(project => project.id.name === typedProjectName)) {
       return l10n.t('A project with this name already exists in the workspace or as a Maven dependency.');
     }
+    const typedProjectPath = path.join(selectedUri.fsPath, typedProjectName);
     if (existingProjects.some(project => project.projectDirectory === typedProjectPath)) {
       return l10n.t('A project with this path already exists in the workspace or as a Maven dependency.');
     }
-    return undefined;
   };
 
   const stepProjectName: InputStep<NewProjectState> = async (input: MultiStepInput<NewProjectState>, state: NewProjectState) => {
