@@ -40,9 +40,11 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
     withFileSystemBind(javaHome, javaHome, BindMode.READ_ONLY);
     withEnv("JAVA_HOME", javaHome);
     withExposedPorts(MCP_PORT);
-    System.out.println("Waiting for MCP port " + MCP_PORT + " to be available in designer-mcp container...");
+    System.out.println("Waiting for MCP health endpoint on port " + MCP_PORT + " in designer-mcp container...");
     waitingFor(Wait
-        .forListeningPorts(MCP_PORT)
+        .forHttp("/health")
+        .forPort(MCP_PORT)
+        .forStatusCode(200)
         .withStartupTimeout(Duration.ofSeconds(600)));
 
     withLogConsumer(new SysoutLogger(NETWORK_ALIAS));
