@@ -26,7 +26,8 @@ public class CopilotIntegrationTest {
   @Test
   @Order(3)
   void createProject(AgentRuntime rt) throws Exception {
-    var spans = rt.prompt("create an axon ivy project for a flight-simulator");
+    rt.ivyEngine().clearLog();
+    var spans = rt.prompt("create an axon ivy project for a flight-simulator with folder named: flight-simulator");
     var tokenUsage = spans.tokenUsage();
     assertThat(tokenUsage.input()).isLessThan(150_000);
     assertThat(tokenUsage.output()).isLessThan(10_000);

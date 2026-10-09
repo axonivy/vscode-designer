@@ -11,7 +11,19 @@ We use test-containers to run the complete environment in Docker.
 - **Copilot**: runs copilot CLI with the designer MCP enabled.
 - **Aspire**: runs the opentelemetry compatible Aspire dashboard to trace the copilot execution. The collected spans are asserted to verify copilot behavior.
 
-The containers are kept running, after test-execution, to allow fast development cycles.
+The containers are kept running after test execution to allow fast development cycles. Container reuse requires two settings:
+
+1. **Project level (enabled by default for local development)**:
+   Controlled via the `TESTCONTAINERS_REUSE_ENABLE` environment variable (defaults to `true` locally, set to `false` in CI).
+   ```bash
+   export TESTCONTAINERS_REUSE_ENABLE=true
+   ```
+
+2. **Global level (user machine configuration)**:
+   Testcontainers requires container reuse to be explicitly enabled in your user home config (`~/.testcontainers.properties`), otherwise Ryuk will clean up the containers when the test process finishes:
+   ```bash
+   echo "testcontainers.reuse.enable=true" >> ~/.testcontainers.properties
+   ```
 
 ## Test Env
 

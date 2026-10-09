@@ -13,9 +13,23 @@ public class IvyEngine {
     this.engineDir = engineDir;
   }
 
+  public void clearLog() {
+    var ivyLog = engineDir.resolve("logs").resolve("ivy.log");
+    try {
+      if (Files.exists(ivyLog)) {
+        Files.writeString(ivyLog, "");
+      }
+    } catch (IOException ex) {
+      throw new UncheckedIOException(ex);
+    }
+  }
+
   public String ivyLog() {
     var ivyLog = engineDir.resolve("logs").resolve("ivy.log");
     try {
+      if (!Files.exists(ivyLog)) {
+        return "";
+      }
       return Files.readString(ivyLog);
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
