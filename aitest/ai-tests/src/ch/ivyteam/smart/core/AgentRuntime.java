@@ -57,14 +57,16 @@ public class AgentRuntime {
     ivyWorkspace = new IvyWorkspaceSetup(workspaceRoot).initialize();
     Path mcp = workspaceRoot.resolve("aitest/mcp.sh");
     userData = workspaceRoot.resolve("ci-user-data");
+    Path vscodeInsidersCache = workspaceRoot.resolve(".vscode-test");
     try {
       Files.createDirectories(userData);
+      Files.createDirectories(vscodeInsidersCache);
     } catch (IOException ex) {
-      throw new UncheckedIOException("Failed to create directory: " + userData.toString(), ex);
+      throw new UncheckedIOException("Failed to create user data or VS Code cache directory", ex);
     }
 
     String javaHome = System.getenv("JAVA_HOME");
-    var designerMcpContainer = new DesignerMcpContainer(ivyWorkspace, extensionDir, userData, javaHome, mcp);
+    var designerMcpContainer = new DesignerMcpContainer(ivyWorkspace, extensionDir, userData, vscodeInsidersCache, javaHome, mcp);
     startContainer(designerMcpContainer);
     
     var aspireContainer = new AspireContainer();

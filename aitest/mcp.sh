@@ -6,13 +6,14 @@ set -euo pipefail
 
 
 WORKSPACE_PATH="/workspace"
-CACHE_DIR="${HOME}/.cache/vscode-insiders"
+CACHE_DIR="/vscode-insiders"
 DOWNLOAD_DIR="${CACHE_DIR}/download"
 INSTALL_DIR="${CACHE_DIR}/install"
+EXTENSIONS_DIR="${CACHE_DIR}/extensions"
 ARCHIVE_PATH="${DOWNLOAD_DIR}/vscode-insiders.tar.gz"
 DOWNLOAD_URL="https://update.code.visualstudio.com/latest/linux-x64/insider"
 
-mkdir -p "${DOWNLOAD_DIR}" "${INSTALL_DIR}"
+mkdir -p "${DOWNLOAD_DIR}" "${INSTALL_DIR}" "${EXTENSIONS_DIR}"
 
 CODE_INSIDERS_BIN=""
 if [[ -z "$(find "${INSTALL_DIR}" -mindepth 1 -print -quit 2>/dev/null)" ]]; then
@@ -53,11 +54,9 @@ fi
 echo "VS Code Insiders version:"
 cat /tmp/code-insiders-version.txt
 
-EXTENSIONS_DIR="$(mktemp -d -t vscode-insiders-ext-XXXXXX)"
-
-echo "Installing extensions ..."
-run_code_insiders --list-extensions  --extensions-dir "${EXTENSIONS_DIR}"
+echo "Installing Java Extension Pack ..."
 run_code_insiders --install-extension vscjava.vscode-java-pack --extensions-dir "${EXTENSIONS_DIR}"
+echo "Installing/updating Designer extension ..."
 run_code_insiders --install-extension /extension/vscode-designer*.vsix --extensions-dir "${EXTENSIONS_DIR}"
 if ! run_code_insiders --list-extensions --extensions-dir "${EXTENSIONS_DIR}" | grep -q '^axonivy.vscode-designer-14$'; then
 	echo "Expected extension axonivy.vscode-designer-14 is not installed in ${EXTENSIONS_DIR}" >&2
