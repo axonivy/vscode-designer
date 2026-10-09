@@ -12,5 +12,5 @@ export const handleOpenProgram = async (args: InscriptionActionArgs) => {
     logWarningMessage(`Failed to open Java file. Project not found: ${args.context.project}`);
     return;
   }
-  new JavaProvider(Uri.parse(project.projectDirectory)).openDefinition(args.payload);
+  new JavaProvider(Uri.file(project.projectDirectory)).openDefinition(args.payload);
 };
