@@ -106,7 +106,7 @@ public class CopilotIntegrationTest {
   @Order(1)
   void process(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
-        in the purchase project, create a new process named 'treePlanting'.
+        create a new process for 'treePlanting' in 'purchase' project.
         The start must accept a 'name' parameter.
         After the start, a Script activity should print a 'Hello Ivy in.name!' log.
         """);
