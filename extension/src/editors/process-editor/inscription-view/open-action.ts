@@ -7,6 +7,10 @@ import { IvyEngineManager } from '../../../engine/engine-manager';
 export const handleOpenAction = async (command: KnownCommand, args: InscriptionActionArgs) => {
   const payload = parsePayload(command, args);
   const project = isOpenActionPayload(payload) ? payload.project : args.context.project;
+  openAction(command, project);
+};
+
+export const openAction = async (command: KnownCommand, project: string) => {
   const projectUri = await resolveProjectUri(project);
   executeCommand(command, projectUri);
 };

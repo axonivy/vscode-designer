@@ -13,6 +13,7 @@ const userDialogPID2 = '15254DCE818AD7A2-f14';
 const userTaskPID = '15254DCE818AD7A2-f17';
 const namespace = 'testNamespace';
 
+const actionsProcess = 'Actions.p.json';
 const actionsProcessPID = '1A0F1ED6FCC52C9A';
 
 test('Check Process Editor Connector', async ({ wsPage }) => {
@@ -285,7 +286,7 @@ test.describe('Open config actions', () => {
   test('Open Rest config', async ({ wsPage }) => {
     const restClientPid = `${actionsProcessPID}-f3`;
 
-    const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
+    const processEditor = new ProcessEditor(wsPage, actionsProcess);
     const restClientEditor = new RestClientEditor(wsPage);
 
     await processEditor.open();
@@ -310,7 +311,7 @@ test.describe('Open config actions', () => {
   test('Open WebService config', async ({ wsPage }) => {
     const webServicePid = `${actionsProcessPID}-f5`;
 
-    const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
+    const processEditor = new ProcessEditor(wsPage, actionsProcess);
     const webServiceClientEditor = new WebServiceClientEditor(wsPage);
 
     await processEditor.open();
@@ -335,7 +336,7 @@ test.describe('Open config actions', () => {
   test('Open Database client', async ({ wsPage }) => {
     const databasePid = `${actionsProcessPID}-f7`;
 
-    const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
+    const processEditor = new ProcessEditor(wsPage, actionsProcess);
     const databaseEditor = new DatabaseEditor(wsPage);
 
     await processEditor.open();
@@ -360,7 +361,7 @@ test.describe('Open config actions', () => {
   test('Open custom field configuration', async ({ wsPage }) => {
     const startPid = `${actionsProcessPID}-f0`;
 
-    const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
+    const processEditor = new ProcessEditor(wsPage, actionsProcess);
     const customFieldsEditor = new TextEditor(wsPage, 'custom-fields.yaml');
 
     await processEditor.open();
@@ -380,7 +381,7 @@ test.describe('Open config actions', () => {
   test('Open CMS Editor', async ({ wsPage }) => {
     const startPid = `${actionsProcessPID}-f0`;
 
-    const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
+    const processEditor = new ProcessEditor(wsPage, actionsProcess);
     const cmsEditor = new CmsEditor(wsPage);
 
     await processEditor.open();
@@ -395,7 +396,7 @@ test.describe('Open config actions', () => {
 
     const programPid = `${actionsProcessPID}-f12`;
 
-    const processEditor = new ProcessEditor(wsPage, 'Actions.p.json');
+    const processEditor = new ProcessEditor(wsPage, actionsProcess);
 
     await processEditor.open();
     const inscriptionView = await processEditor.openInscriptionView(programPid);
@@ -408,5 +409,30 @@ test.describe('Open config actions', () => {
     await processEditor.webViewFrame.getByRole('option', { name: 'Wait' }).click();
     await inscriptionView.clickButton('Open Java Class config');
     await new TextEditor(wsPage, 'Wait.java').expectTabActive();
+  });
+
+  test('Open End Page', async ({ wsPage }) => {
+    const endPid = `${actionsProcessPID}-f14`;
+
+    const processEditor = new ProcessEditor(wsPage, actionsProcess);
+
+    await processEditor.open();
+    const inscriptionView = await processEditor.openInscriptionView(endPid);
+    await inscriptionView.openInscriptionTab('End Page');
+    await inscriptionView.clickButton('Open file');
+    await new TextEditor(wsPage, 'test-end-page.html').expectTabActive();
+
+    const cmsEditor = new CmsEditor(wsPage);
+
+    await processEditor.open();
+    await inscriptionView.parent.getByRole('textbox').fill('/TestEndPage');
+    await inscriptionView.clickButton('Open file');
+    await cmsEditor.expectTabActive();
+
+    await processEditor.open();
+    await cmsEditor.expectTabInactive();
+    await inscriptionView.parent.getByRole('textbox').fill('/TestEndPage.ivc');
+    await inscriptionView.clickButton('Open file');
+    await cmsEditor.expectTabActive();
   });
 });
