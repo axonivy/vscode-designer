@@ -21,8 +21,11 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": ["/^playwright\\/tests\\/utils\\/download-vscode\\.ts$/"],
-      "matchStrings": ["version: '(?<currentValue>\\d+\\.\\d+\\.\\d+)'"],
+      "managerFilePatterns": [
+        "/^playwright\\/tests\\/utils\\/download-vscode\\.ts$/",
+        "/^aitest\\/mcp\\.sh$/"
+      ],
+      "matchStrings": ["VSCODE_VERSION\\s*=\\s*['\"](?<currentValue>\\d+\\.\\d+\\.\\d+)['\"]"],
       "depNameTemplate": "microsoft/vscode",
       "datasourceTemplate": "github-releases",
       "versioningTemplate": "semver"

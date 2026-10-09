@@ -59,7 +59,7 @@ jobs:
           retention-days: 5
           path: |
             ci-user-data/logs/**/*
-            ci-user-data/code-insiders.log
+            ci-user-data/code.log
             ci-user-data/xvfb-errors.log
             ci-user-data/process*.log
             **/*.log

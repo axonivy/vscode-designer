@@ -6,7 +6,7 @@ import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { updateTextDocumentContent } from '../content-writer';
 import { EditorWebSocketForwarder } from '../editor-websocket-forwarder';
-import { JavaCompletion } from '../java-completion';
+import { JavaProvider } from '../java-provider';
 import {
   hasEditorFileContent,
   InitializeConnectionRequest,
@@ -36,11 +36,11 @@ export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webv
 class DataClassEditorWebSocketForwarder extends EditorWebSocketForwarder {
   currentTypeSearch: { type: string; id: number } | undefined;
 
-  readonly javaCompletion: JavaCompletion;
+  readonly javaCompletion: JavaProvider;
 
   constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: TextDocument) {
     super(websocketUrl, 'ivy-data-class-lsp', messenger, messageParticipant, DataClassWebSocketMessage, document);
-    this.javaCompletion = new JavaCompletion(document.uri, 'data-class');
+    this.javaCompletion = new JavaProvider(document.uri);
   }
 
   protected override handleClientMessage(message: unknown) {
