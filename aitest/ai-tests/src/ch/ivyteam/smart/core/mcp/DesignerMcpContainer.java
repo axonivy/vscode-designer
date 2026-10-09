@@ -16,7 +16,7 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
   private static final String NETWORK_ALIAS = "designer-mcp";
   private static final int MCP_PORT = 32140;
 
-  public DesignerMcpContainer(Path ivyWorkspace, Path extensionDir, Path userData, Path vscodeInsidersCache, String javaHome, Path mcp) {
+  public DesignerMcpContainer(Path ivyWorkspace, Path extensionDir, Path userData, Path vscodeCache, String javaHome, Path mcp) {
     super(DockerImageName.parse("mcr.microsoft.com/playwright:v1.61.1-noble"));
 
     if (javaHome == null || javaHome.isBlank()) {
@@ -33,8 +33,8 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
       "/extension", BindMode.READ_ONLY);
     withFileSystemBind(userData.toString(),
       "/user-data", BindMode.READ_WRITE);
-    withFileSystemBind(vscodeInsidersCache.toString(),
-      "/vscode-insiders", BindMode.READ_WRITE);
+    withFileSystemBind(vscodeCache.toString(),
+      "/vscode", BindMode.READ_WRITE);
     withFileSystemBind(mcp.toString(),
       "/mcp.sh", BindMode.READ_ONLY);
     withFileSystemBind(javaHome, javaHome, BindMode.READ_ONLY);
