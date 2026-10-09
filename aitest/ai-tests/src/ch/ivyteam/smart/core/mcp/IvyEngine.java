@@ -8,44 +8,42 @@ import java.nio.file.Path;
 public class IvyEngine {
   
   private final Path engineDir;
+  private final Path logFile;
+  private long logOffset = 0;
 
   public IvyEngine(Path engineDir) {
     this.engineDir = engineDir;
+    this.logFile = engineDir.resolve("logs").resolve("ivy.log");
   }
 
   public void clearLog() {
-    var ivyLog = engineDir.resolve("logs").resolve("ivy.log");
     try {
-      if (Files.exists(ivyLog)) {
-        Files.writeString(ivyLog, "");
+      if (Files.exists(logFile)) {
+        Files.writeString(logFile, "");
       }
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
     }
   }
 
-  private long logOffset = 0;
-
   public void mark() {
-    var ivyLog = engineDir.resolve("logs").resolve("ivy.log");
     try {
-      this.logOffset = Files.exists(ivyLog) ? Files.size(ivyLog) : 0;
+      this.logOffset = Files.exists(logFile) ? Files.size(logFile) : 0;
     } catch (IOException ex) {
-      this.logOffset = 0;
+      throw new UncheckedIOException(ex);
     }
   }
 
   public String newLogs() {
-    var ivyLog = engineDir.resolve("logs").resolve("ivy.log");
     try {
-      if (!Files.exists(ivyLog)) {
+      if (!Files.exists(logFile)) {
         return "";
       }
-      long size = Files.size(ivyLog);
+      long size = Files.size(logFile);
       if (size <= logOffset) {
         return "";
       }
-      byte[] bytes = Files.readAllBytes(ivyLog);
+      byte[] bytes = Files.readAllBytes(logFile);
       int offset = (int) Math.min(logOffset, bytes.length);
       return new String(bytes, offset, bytes.length - offset, java.nio.charset.StandardCharsets.UTF_8);
     } catch (IOException ex) {
@@ -54,12 +52,11 @@ public class IvyEngine {
   }
 
   public String ivyLog() {
-    var ivyLog = engineDir.resolve("logs").resolve("ivy.log");
     try {
-      if (!Files.exists(ivyLog)) {
+      if (!Files.exists(logFile)) {
         return "";
       }
-      return Files.readString(ivyLog);
+      return Files.readString(logFile);
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
     }

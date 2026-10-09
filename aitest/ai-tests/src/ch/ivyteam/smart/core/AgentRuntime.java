@@ -122,7 +122,8 @@ public class AgentRuntime {
     }
     try {
       ivyEngine().mark();
-    } catch (Exception ignored) {
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to mark engine logs", e);
     }
     try {
       copilot.prompt(prompt, resourceName);
