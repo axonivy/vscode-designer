@@ -79,7 +79,6 @@ public class AgentRuntime {
     copilot.otlpEndpoint(aspireContainer.getAspireEndpoint());
     startContainer(copilotContainer);
     copilot.addMcp(designerMcpContainer.getMcpUri());
-    copilot.waitForMcpReady();
 
     markdown = new MarkdownReporter();
     reporter.register(markdown);

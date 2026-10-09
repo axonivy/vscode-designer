@@ -18,24 +18,15 @@ public class Copilot {
 
   public void prompt(String prompt, String testName) throws InterruptedException, IOException {
     var containerWorkspace = "/workspace";
-    int maxAttempts = 2;
-    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-      var result = container.execInContainer(
-          "sh", "-c", ""
-              + "cd \"$0\" && "
-              + "OTEL_SERVICE_NAME=\"$1\" "
-              + "copilot -p \"$2\" "
-              + "--add-dir \"$0\" --no-ask-user --yolo --allow-all-mcp-server-instructions --log-dir /user-data -s",
-          containerWorkspace, testName, prompt);
-      if (result.getExitCode() == 0) {
-        return;
-      }
-      if (attempt < maxAttempts) {
-        System.err.println("Copilot prompt failed (attempt " + attempt + "/" + maxAttempts + "), retrying: " + result.getStderr());
-        Thread.sleep(2_000);
-      } else {
-        throw new RuntimeException("Copilot command failed after " + maxAttempts + " attempts: " + result.getStderr());
-      }
+    var result = container.execInContainer(
+        "sh", "-c", ""
+            + "cd \"$0\" && "
+            + "OTEL_SERVICE_NAME=\"$1\" "
+            + "copilot -p \"$2\" "
+            + "--add-dir \"$0\" --no-ask-user --yolo --allow-all-mcp-server-instructions --log-dir /user-data -s",
+        containerWorkspace, testName, prompt);
+    if (result.getExitCode() != 0) {
+      throw new RuntimeException("Copilot command failed: " + result.getStderr());
     }
   }
 
@@ -95,25 +86,6 @@ public class Copilot {
     } catch (Exception e) {
       throw new RuntimeException("Failed to check MCP health in Copilot container", e);
     }
-  }
-
-  public void waitForMcpReady() {
-    long deadline = System.currentTimeMillis() + 60_000;
-    while (System.currentTimeMillis() < deadline) {
-      try {
-        if (mcpHealth() == 200 && listMcp().contains("axonivy-designer")) {
-          return;
-        }
-      } catch (Exception ignored) {
-      }
-      try {
-        Thread.sleep(1_000);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        throw new RuntimeException("Interrupted while waiting for MCP to be ready", e);
-      }
-    }
-    throw new IllegalStateException("Timed out waiting for MCP server to be healthy and list tools");
   }
 
 }
