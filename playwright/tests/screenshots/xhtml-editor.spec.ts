@@ -12,7 +12,7 @@ test('xhtml editor preview', async ({ wsPage, electronApp }) => {
 
   const timeout = { timeout: 3_000 };
   await wsPage.executeCommand('Axon Ivy: Deploy All Projects');
-  await wsPage.statusMessageContains('Axon Ivy: Success: Deploying project');
+  await wsPage.statusMessageContains('Axon Ivy: Success - Deploying project');
   const vscodeBrowser = await VsCodeBrowser.openBrowser(() => wsPage.executeCommand('Axon Ivy: Open Dialog Preview'), { electronApp });
   await expect(vscodeBrowser.browserPage.locator('#iFrameForm\\:frameTaskName')).toHaveText('Preview', timeout);
 

@@ -269,7 +269,7 @@ export class IvyEngineManager {
   }
 
   public async createProject(newProjectParams: CreateProjectParams) {
-    await StatusBar.withStatusBarProgress({ text: l10n.t('Creating and deploying new project') }, async () => {
+    await StatusBar.withStatusBarProgress({ text: l10n.t('Creating new project') }, async () => {
       try {
         increaseWorkspaceLock();
         await this.ivyEngineApi?.createProject(newProjectParams);
