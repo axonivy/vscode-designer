@@ -88,4 +88,23 @@ public class Copilot {
     }
   }
 
+  public void waitForMcpReady() {
+    long deadline = System.currentTimeMillis() + 60_000;
+    while (System.currentTimeMillis() < deadline) {
+      try {
+        if (mcpHealth() == 200 && listMcp().contains("axonivy-designer")) {
+          return;
+        }
+      } catch (Exception ignored) {
+      }
+      try {
+        Thread.sleep(1_000);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new RuntimeException("Interrupted while waiting for MCP to be ready", e);
+      }
+    }
+    throw new IllegalStateException("Timed out waiting for MCP server to be healthy and list tools");
+  }
+
 }
