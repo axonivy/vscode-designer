@@ -26,7 +26,7 @@ public class CopilotIntegrationTest {
   @Test
   @Order(3)
   void createProject(AgentRuntime rt) throws Exception {
-    var spans = rt.prompt("create an axon ivy project for a flight-simulator with folder named: flight-simulator");
+    var spans = rt.prompt("create a new Axon Ivy project called flight-simulator");
     var tokenUsage = spans.tokenUsage();
     assertThat(tokenUsage.input()).isLessThan(150_000);
     assertThat(tokenUsage.output()).isLessThan(10_000);
@@ -106,7 +106,7 @@ public class CopilotIntegrationTest {
   @Order(1)
   void process(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
-        create a new process for 'treePlanting' (purchase/process/treePlanting.p.json).
+        in the purchase project, create a new process named 'treePlanting'.
         The start must accept a 'name' parameter.
         After the start, a Script activity should print a 'Hello Ivy in.name!' log.
         """);
