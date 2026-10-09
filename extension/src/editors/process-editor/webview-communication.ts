@@ -32,7 +32,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType, RequestType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../views/browser/ivy-browser-view-provider';
-import { JavaCompletion } from '../java-completion';
+import { JavaProvider } from '../java-provider';
 import { isAllTypesSearchRequest, isSearchResult } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 import { handleActionLocal, type SendInscriptionNotification } from './inscription-view/action-handlers';
@@ -96,13 +96,13 @@ class InscriptionWebSocketForwarder extends WebSocketForwarder {
 
   currentTypeSearch: { type: string; id: number } | undefined;
 
-  readonly javaCompletion: JavaCompletion;
+  readonly javaCompletion: JavaProvider;
 
   constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: CustomDocument) {
     super(websocketUrl, 'ivy-inscription-lsp', messenger, messageParticipant, InscriptionWebSocketMessage);
     this.sendInscriptionNotification = (type: string) =>
       this.messenger.sendNotification(this.notificationType, this.messageParticipant, JSON.stringify({ method: type }));
-    this.javaCompletion = new JavaCompletion(document.uri, 'inscription');
+    this.javaCompletion = new JavaProvider(document.uri);
   }
 
   protected override handleClientMessage(message: unknown) {
@@ -139,11 +139,11 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
         completionStartCharacter: number;
       }
     | undefined;
-  readonly javaCompletion: JavaCompletion;
+  readonly javaCompletion: JavaProvider;
 
   constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: CustomDocument) {
     super(websocketUrl, 'ivy-script-lsp', messenger, messageParticipant, IvyScriptWebSocketMessage);
-    this.javaCompletion = new JavaCompletion(document.uri, 'ivy-script');
+    this.javaCompletion = new JavaProvider(document.uri);
   }
 
   protected override handleClientMessage(message: unknown) {
@@ -320,8 +320,7 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
 
   toDocumentPosition = (position: VSCodePosition, completionContext: { line: number; completionStartCharacter: number }): Position => {
     const line = completionContext.line + position.line;
-    const shiftedCharacter =
-      position.line === 0 ? Math.max(position.character - JavaCompletion.DUMMY_CONTENT_OFFSET, 0) : position.character;
+    const shiftedCharacter = position.line === 0 ? Math.max(position.character - JavaProvider.DUMMY_CONTENT.length, 0) : position.character;
     const character = position.line === 0 ? completionContext.completionStartCharacter + shiftedCharacter : shiftedCharacter;
     return Position.create(line, character);
   };
