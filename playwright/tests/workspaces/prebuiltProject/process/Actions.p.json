@@ -23,12 +23,6 @@
         { "id" : "f2", "to" : "f3" }
       ]
     }, {
-      "id" : "f1",
-      "type" : "TaskEnd",
-      "visual" : {
-        "at" : { "x" : 832, "y" : 64 }
-      }
-    }, {
       "id" : "f3",
       "type" : "RestClientCall",
       "visual" : {
@@ -65,7 +59,16 @@
         "at" : { "x" : 704, "y" : 64 }
       },
       "connect" : [
-        { "id" : "f13", "to" : "f1", "color" : "default" }
+        { "id" : "f15", "to" : "f14" }
       ]
+    }, {
+      "id" : "f14",
+      "type" : "TaskEndPage",
+      "config" : {
+        "page" : "view/test-end-page.html"
+      },
+      "visual" : {
+        "at" : { "x" : 832, "y" : 64 }
+      }
     } ]
 }

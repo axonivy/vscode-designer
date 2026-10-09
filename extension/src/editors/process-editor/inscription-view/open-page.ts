@@ -6,13 +6,28 @@ import { executeCommand } from '../../../base/commands';
 import { logInformationMessage } from '../../../base/logging-util';
 import { IvyProjectExplorer } from '../../../project-explorer/ivy-project-explorer';
 import { openUrlExternally } from '../../notification-helper';
+import { openAction } from './open-action';
 
-export const handleOpenPage = async (actionArgs: InscriptionActionArgs) => {
-  const path = actionArgs.payload.toString();
+export const handleOpenEndPage = async (args: InscriptionActionArgs) => {
+  const page = args.payload;
+  if (isCmsPage(page)) {
+    openAction('ivyEditor.openCmsEditor', args.context.project);
+    return;
+  }
+  openInExplorer(path.join('webContent', page));
+};
+
+function isCmsPage(page: string) {
+  const pagePath = path.parse(page);
+  return pagePath.ext === '.ivc' || pagePath.ext === '';
+}
+
+export const handleOpenPage = async (args: InscriptionActionArgs) => {
+  const path = args.payload;
   if (isUrl(path)) {
     openUrlExternally(path);
   } else {
-    openInExplorer(await getValideFilePath(path));
+    openInExplorer(path);
   }
 };
 
@@ -20,7 +35,7 @@ function isUrl(absolutePath: string) {
   return /^https?:\/\//i.test(absolutePath);
 }
 
-async function getValideFilePath(pathString: string) {
+async function getValidFilePath(pathString: string) {
   if (fs.existsSync(pathString)) {
     return pathString;
   }
@@ -31,7 +46,8 @@ async function getValideFilePath(pathString: string) {
   return null;
 }
 
-function openInExplorer(absolutePath: string | null) {
+async function openInExplorer(path: string) {
+  const absolutePath = await getValidFilePath(path);
   if (absolutePath) {
     executeCommand('vscode.open', Uri.file(absolutePath));
   } else {
