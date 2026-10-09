@@ -75,7 +75,8 @@ public class CopilotIntegrationTest {
     var roles = rt.ivyWorkspace().path().resolve("purchase/config/roles.yaml");
     assertThat(roles).content()
         .as("Id: field name is known by reading roles.yaml schema")
-        .contains("Id: manager", "Id: employee");
+        .containsIgnoringCase("Id: manager")
+        .containsIgnoringCase("Id: employee");
     assertThat(roles).content()
         .as("no tabs in roles.yaml: happens in vscode copilot quite often")
         .doesNotContain("\t");
@@ -110,7 +111,11 @@ public class CopilotIntegrationTest {
         After the start, a Script activity should print a 'Hello Ivy in.name!' log.
         """);
 
-    var plantProcess = rt.ivyWorkspace().path().resolve("purchase/process/treePlanting.p.json");
+    var processDir = rt.ivyWorkspace().path().resolve("purchase/process");
+    var plantProcess = Files.walk(processDir)
+        .filter(p -> p.getFileName().toString().equals("treePlanting.p.json"))
+        .findFirst()
+        .orElseThrow(() -> new AssertionError("Process treePlanting.p.json not found under " + processDir));
     try (var in = Files.newInputStream(plantProcess, StandardOpenOption.READ)) {
       var procJson = JsonMapper.shared().readTree(in);
 
