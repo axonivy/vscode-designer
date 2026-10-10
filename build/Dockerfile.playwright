@@ -1,8 +1,8 @@
-FROM mcr.microsoft.com/playwright:v1.63.0
+FROM mcr.microsoft.com/playwright:v1.64.0
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN npm install -g pnpm@12.8.2
+RUN npm install -g pnpm@12.10.1
 
 RUN apt-get update &&\
   apt-get install software-properties-common -y &&\
@@ -24,7 +24,7 @@ ENV JAVA_OPTS_IVY_SYSTEM="-Ddev.mode=true -Divy.engine.testheadless=true"
 ENV CI=true
 
 ARG INSTALL_CODE_SERVER=false
-ARG CODE_SERVER_VERSION=4.139.1
+ARG CODE_SERVER_VERSION=4.141.0
 RUN if [ "$INSTALL_CODE_SERVER" = "true" ]; then \
   curl -fsSL https://code-server.dev/install.sh | sh -s -- --version "$CODE_SERVER_VERSION"; \
   fi

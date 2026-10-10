@@ -8,7 +8,7 @@ set -euo pipefail
 WORKSPACE_PATH="/workspace"
 CACHE_DIR="/vscode"
 DOWNLOAD_DIR="${CACHE_DIR}/download"
-VSCODE_VERSION="1.140.0"
+VSCODE_VERSION="1.141.0"
 INSTALL_DIR="${CACHE_DIR}/install-${VSCODE_VERSION}"
 EXTENSIONS_DIR="${CACHE_DIR}/extensions"
 ARCHIVE_PATH="${DOWNLOAD_DIR}/vscode-stable-${VSCODE_VERSION}.tar.gz"
