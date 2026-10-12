@@ -4,7 +4,7 @@ import { logWarningMessage } from '../../../base/logging-util';
 import { isAction, noUnknownAction } from '../../notification-helper';
 import { handleNewProcess } from './new-process';
 import { handleNewHtmlDialog } from './new-user-dialog';
-import { handleOpenAction } from './open-action';
+import { handleNewAction, handleOpenAction } from './open-action';
 import { handleOpenEndPage, handleOpenPage } from './open-page';
 import { handleOpenProgram } from './open-program';
 
@@ -23,8 +23,10 @@ export const handleActionLocal = (msg: unknown, sendInscriptionNotification: Sen
         handleNewHtmlDialog(msg.params, sendInscriptionNotification);
         break;
       case 'openRestConfig':
-      case 'newRestClient':
         handleOpenAction('ivyEditor.openRestClientEditor', msg.params);
+        break;
+      case 'newRestClient':
+        handleNewAction('ivyEditor.openRestClientEditor', msg.params);
         break;
       case 'openWsConfig':
       case 'newWebServiceClient':
