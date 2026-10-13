@@ -8,6 +8,7 @@ export const empty = path.resolve(import.meta.dirname, './empty');
 export const emptyWithFolder = path.resolve(import.meta.dirname, './emptyWithFolder');
 export const embeddedEngineWorkspace = path.resolve(import.meta.dirname, './embeddedEngine');
 export const minimalProjectWorkspacePath = path.resolve(import.meta.dirname, './minimalProject');
+export const iarDependencyWorkspacePath = path.resolve(import.meta.dirname, './iarDependencyProject');
 export const outdatedProjectWorkspacePath = path.resolve(import.meta.dirname, './outdatedProject');
 export const portalPerformanceWorkspacePath = path.resolve(import.meta.dirname, './portalPerformance');
 export const multiRootWorkspacePath = path.resolve(import.meta.dirname, './multiProject/multiRootWorkspace.code-workspace');
