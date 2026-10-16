@@ -1,9 +1,9 @@
 import { ClientContextProvider, ClientJsonRpc, CmsEditor, initQueryClient } from '@axonivy/cms-editor';
-import { QueryClientProvider } from '@tanstack/react-query';
 import '@axonivy/cms-editor/lib/editor.css';
-import { HotkeysProvider, ThemeProvider, Toaster } from '@axonivy/ui-components';
+import { HotkeysProvider, ReadonlyProvider, ThemeProvider, Toaster } from '@axonivy/ui-components';
 import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
 import '@axonivy/vscode-webview-common/css/colors.css';
+import { QueryClientProvider } from '@tanstack/react-query';
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Messenger, type VsCodeApi } from 'vscode-messenger-webview';
@@ -12,7 +12,7 @@ import { initTranslation } from './i18n';
 declare function acquireVsCodeApi(): VsCodeApi;
 const messenger = new Messenger(acquireVsCodeApi());
 
-export async function start({ file }: InitializeConnection) {
+export async function start({ app = '', project = '', file, readOnly = false }: InitializeConnection) {
   const connection = toConnection(messenger, 'cmsWebSocketMessage');
   const client = await ClientJsonRpc.startClient(connection);
   const queryClient = initQueryClient();
@@ -21,17 +21,19 @@ export async function start({ file }: InitializeConnection) {
     throw new Error('Root element not found');
   }
   initTranslation();
-  const context = { app: '', project: '', file };
+  const context = { app, project, file };
   const initializePromise = client.initialize(context);
   createRoot(rootElement).render(
     <React.StrictMode>
       <ThemeProvider disabled={true}>
         <ClientContextProvider client={client}>
           <QueryClientProvider client={queryClient}>
-            <HotkeysProvider initiallyActiveScopes={['global']}>
-              <CmsEditor context={context} initializePromise={initializePromise} />
-              <Toaster closeButton={true} />
-            </HotkeysProvider>
+            <ReadonlyProvider readonly={readOnly}>
+              <HotkeysProvider initiallyActiveScopes={['global']}>
+                <CmsEditor context={context} initializePromise={initializePromise} />
+                <Toaster closeButton={true} />
+              </HotkeysProvider>
+            </ReadonlyProvider>
           </QueryClientProvider>
         </ClientContextProvider>
       </ThemeProvider>

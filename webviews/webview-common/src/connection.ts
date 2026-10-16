@@ -3,7 +3,7 @@ import { Messenger } from 'vscode-messenger-webview';
 import { WebviewMessageReader } from './message-reader';
 import { WebviewMessageWriter } from './message-writer';
 
-export type InitializeConnection = { file: string };
+export type InitializeConnection = { file: string; app?: string; project?: string; readOnly?: boolean };
 const WebviewReadyNotification: NotificationType<void> = { method: 'ready' };
 const InitializeConnectionNotification: NotificationType<InitializeConnection> = { method: 'initializeConnection' };
 
