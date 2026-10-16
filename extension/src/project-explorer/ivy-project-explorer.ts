@@ -33,10 +33,10 @@ export class IvyProjectExplorer {
   private constructor(context: ExtensionContext) {
     this.context = context;
     const activateEnginePromise = this.activateEngineIfNeeded();
-    this.treeDataProvider = new IvyProjectTreeDataProvider(activateEnginePromise);
+    this.treeDataProvider = new IvyProjectTreeDataProvider(activateEnginePromise, () => IvyEngineManager.instance.projects(true));
     this.treeView = window.createTreeView(VIEW_ID, { treeDataProvider: this.treeDataProvider });
     this.treeView.onDidChangeSelection(async (event: TreeViewSelectionChangeEvent<Entry>) => {
-      if (event.selection && event.selection.length > 0 && event.selection[0]?.uri) {
+      if (event.selection?.[0]?.uri && event.selection[0].kind === 'workspaceProject') {
         const projectUri = event.selection[0]?.uri;
         await commands.executeCommand('revealInExplorer', projectUri);
       }

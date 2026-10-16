@@ -53,6 +53,11 @@ export class ExplorerView {
     await this.isSelected(name);
   }
 
+  async expandNodeExact(name: string) {
+    await this.selectNodeExact(name);
+    await this.wsPage.page.keyboard.press('ArrowRight');
+  }
+
   async isSelected(name: string) {
     const selected = this.view.locator('.monaco-list-row.selected');
     await expect(selected).toContainText(name);
