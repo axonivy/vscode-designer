@@ -49,11 +49,6 @@ export class RestClientEditorProvider implements CustomTextEditorProvider {
     }
     if (editor.ready) {
       this.sendMessage(editor.messageParticipant, message);
-      messenger.sendNotification(
-        RestClientWebSocketMessage,
-        editor.messageParticipant,
-        JSON.stringify({ jsonrpc: '2.0', method: message.method, params: message.payload })
-      );
     } else {
       editor.pendingMessage = message;
     }
