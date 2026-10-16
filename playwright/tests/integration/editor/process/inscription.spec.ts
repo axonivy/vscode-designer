@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test';
+import { expect, type Locator } from '@playwright/test';
 import { test } from '~/fixtures/baseTest';
 import { CmsEditor } from '~/page-objects/cms-editor';
 import { DatabaseEditor } from '~/page-objects/database-editor';
@@ -283,29 +283,37 @@ test('Create Offline Dialog', async ({ wsPage }) => {
 });
 
 test.describe('Open config actions', () => {
+  const expectToHaveNoSelection = async (rows: Locator) => {
+    for (let i = 0; i < (await rows.count()); i++) {
+      await expect(rows.nth(i)).toHaveAttribute('data-state', 'unselected');
+    }
+  };
+
   test('Open Rest config', async ({ wsPage }) => {
     const restClientPid = `${actionsProcessPID}-f3`;
 
     const processEditor = new ProcessEditor(wsPage, actionsProcess);
-    const restClientEditor = new RestClientEditor(wsPage);
+    const restClientEditor = new RestClientEditor(wsPage, 1);
 
     await processEditor.open();
     const inscriptionView = await processEditor.openInscriptionView(restClientPid);
     await inscriptionView.openInscriptionTab('Request');
     await inscriptionView.clickButton('Open Rest config');
     await restClientEditor.expectTabActive();
+    await expectToHaveNoSelection(restClientEditor.rows);
 
-    await processEditor.open();
-    await restClientEditor.expectTabInactive();
+    await restClientEditor.close();
     await inscriptionView.parent.getByRole('combobox', { name: 'Client' }).click();
     await processEditor.webViewFrame.getByRole('option', { name: 'personService' }).click();
     await inscriptionView.clickButton('Open Rest config');
     await restClientEditor.expectTabActive();
+    await expect(restClientEditor.rows.filter({ hasText: 'personService' })).toHaveAttribute('data-state', 'selected');
 
     await processEditor.open();
     await restClientEditor.expectTabInactive();
     await inscriptionView.clickButton('Create new Rest Client');
     await restClientEditor.expectTabActive();
+    await expect(restClientEditor.webViewFrame.getByRole('dialog', { name: 'Add Rest Client' })).toBeVisible();
   });
 
   test('Open WebService config', async ({ wsPage }) => {
