@@ -1,7 +1,7 @@
 import path from 'path';
 import { l10n, Uri, workspace, type QuickPickItem } from 'vscode';
 import { localizeDialogLayout, localizeDialogType } from '../base/localized-labels';
-import { logErrorMessage, logInformationMessage } from '../base/logging-util';
+import { logErrorMessage } from '../base/logging-util';
 import type { CreateUserDialogParams } from '../engine/api/engine-api';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { type AddCommandSelectionContext } from './ivy-project-explorer';
@@ -113,7 +113,6 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
   const validateNotExisting = async (typedDialogNamespace: string): Promise<string | undefined> => {
     const typedNamespacePath = typedDialogNamespace.replace(/\./g, path.sep);
     for (const ext of fileExtensions) {
-      // logInformationMessage(`Checking for file with extension: ${ext}`);
       const absPathDialogFile = Uri.file(
         path.join(
           newUserDialogData.project?.path ?? '',
@@ -123,13 +122,8 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
           `${newUserDialogData.name ?? ''}${ext}`
         )
       );
-      logInformationMessage(`Checking existence of file: ${absPathDialogFile.fsPath}`);
-      // const existsStat = await workspace.fs.stat(absPathDialogFile);
-      // logInformationMessage(`File exists: ${existsStat}`);
-
       try {
         await workspace.fs.stat(absPathDialogFile);
-        logInformationMessage(`File exists: ${absPathDialogFile.fsPath}`);
         return l10n.t('A dialog with this name and namespace already exists in this project.');
       } catch {
         continue;

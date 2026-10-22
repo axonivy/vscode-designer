@@ -53,3 +53,15 @@ test('Add Form Dialog', async ({ wsPage }) => {
   await xhtmlEditor.expectTabVisible();
   await expect(xhtmlEditor.content).toContainText('<h:form id="form">');
 });
+
+test('Dialog validation', async ({ wsPage }) => {
+  // Validate Java Keywords Validation from Backend
+  const explorer = new FileExplorer(wsPage);
+  await explorer.addUserDialog('default', 'ch.ivyteam.test', 'Html Dialog (JSF)');
+  await expect(wsPage.toasts.first()).toContainText("Error validating Artifact Name: The input 'default' is not allowed (Java keywords are not allowed)");
+
+  // Validate duplicate
+  await explorer.addUserDialog('testForm', 'ch.form.test', 'Html Dialog (JSF)');
+  await expect(wsPage.quickInputMessage).toBeVisible();
+  await expect(wsPage.quickInputMessage).toHaveText('A dialog with this name and namespace already exists in this project.');
+});
