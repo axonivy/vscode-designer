@@ -1,7 +1,7 @@
 import path from 'path';
-import { l10n, type QuickPickItem } from 'vscode';
+import { l10n, Uri, workspace, type QuickPickItem } from 'vscode';
 import { localizeDialogLayout, localizeDialogType } from '../base/localized-labels';
-import { logErrorMessage } from '../base/logging-util';
+import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import type { CreateUserDialogParams } from '../engine/api/engine-api';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { type AddCommandSelectionContext } from './ivy-project-explorer';
@@ -19,6 +19,8 @@ import { validateDotSeparatedName, validateProjectArtifactName, type ResourceDir
 
 export const dialogTypes = ['JSF', 'Form', 'JSFOffline'] as const;
 export type DialogType = (typeof dialogTypes)[number];
+
+const fileExtensions = ['.xhtml', '.f.json'];
 
 const layouts = [
   'Page Responsive Grid 2 Columns',
@@ -104,6 +106,37 @@ const prepareAndValidateFinalState: (
 };
 
 export const addNewUserDialog = async (selectionContext: AddCommandSelectionContext, type: DialogType, pid?: string) => {
+  const validateFinal = async (typedDialogNamespace: string): Promise<string | undefined> => {
+    return validateDotSeparatedName(typedDialogNamespace) ?? (await validateNotExisting(typedDialogNamespace));
+  };
+
+  const validateNotExisting = async (typedDialogNamespace: string): Promise<string | undefined> => {
+    const typedNamespacePath = typedDialogNamespace.replace(/\./g, path.sep);
+    for (const ext of fileExtensions) {
+      // logInformationMessage(`Checking for file with extension: ${ext}`);
+      const absPathDialogFile = Uri.file(
+        path.join(
+          newUserDialogData.project?.path ?? '',
+          resourceDirectoryTarget,
+          typedNamespacePath,
+          newUserDialogData.name ?? '',
+          `${newUserDialogData.name ?? ''}${ext}`
+        )
+      );
+      logInformationMessage(`Checking existence of file: ${absPathDialogFile.fsPath}`);
+      // const existsStat = await workspace.fs.stat(absPathDialogFile);
+      // logInformationMessage(`File exists: ${existsStat}`);
+
+      try {
+        await workspace.fs.stat(absPathDialogFile);
+        logInformationMessage(`File exists: ${absPathDialogFile.fsPath}`);
+        return l10n.t('A dialog with this name and namespace already exists in this project.');
+      } catch {
+        continue;
+      }
+    }
+  };
+
   const resourceDirectoryTarget: ResourceDirectoryTarget = 'dialog';
   const existingProjects = selectionContext.existingIvyProjects;
   const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(
@@ -159,7 +192,7 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.namespace,
-      validationFunction: validateDotSeparatedName,
+      validationFunction: validateFinal,
       onBack: (typedValue: string) => {
         state.namespace = typedValue;
       }
