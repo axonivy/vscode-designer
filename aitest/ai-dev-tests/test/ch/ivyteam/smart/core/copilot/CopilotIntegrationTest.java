@@ -92,13 +92,7 @@ public class CopilotIntegrationTest {
 
     var purchase = rt.ivyWorkspace().path().resolve("purchase");
     var processDir = purchase.resolve("process");
-    Path plantProcess;
-    try (var stream = Files.walk(processDir)) {
-      plantProcess = stream
-          .filter(p -> p.getFileName().toString().equals("treePlanting.p.json"))
-          .findFirst()
-          .orElseThrow(() -> new AssertionError("Process treePlanting.p.json not found under " + processDir));
-    }
+    var plantProcess = findFile(processDir, "treePlanting.p.json");
     var procJson = readJson(plantProcess);
     assertThat(procJson.get("$schema").asString())
         .as("valid $schema was set by new_process_tool")
