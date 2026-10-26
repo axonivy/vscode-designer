@@ -23,8 +23,18 @@ import tools.jackson.databind.json.JsonMapper;
 @ExtendWith(AgentRuntimeExtension.class)
 public class CopilotIntegrationTest {
 
+  /**
+   * We run small single-resource skills before complexer ones, 
+   * to verify that single skills works well when used independently.
+   */
+  interface Complexity {
+    int INDEPENDENT = 1; // affects a single skill; targets one main resource
+    int COMPOSITE = 2; // affects multiple resources simultaneously (e.g. Process its DataClass)
+    int HEAVY = 3; // affects a large number of resources and multiple skills
+  }
+
   @Test
-  @Order(3)
+  @Order(Complexity.HEAVY)
   void createProject(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("create a new Axon Ivy project called flight-simulator");
     assertThat(spans)
@@ -41,7 +51,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
-  @Order(2)
+  @Order(Complexity.INDEPENDENT)
   void mcpON(AgentRuntime rt) throws Exception {
     assertThat(rt.copilot().listMcp())
         .as("MCP is configured for Copilot user")
@@ -61,7 +71,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
-  @Order(1) // before: createProject (let's fetch the schemas here for the first time)
+  @Order(Complexity.INDEPENDENT) // before: createProject (let's fetch the schemas here for the first time)
   void initEditRolesYaml(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("create the roles: manager and employee in purchase/config/roles.yaml");
 
@@ -82,7 +92,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
-  @Order(1)
+  @Order(Complexity.COMPOSITE)
   void process(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
         create a new process for 'treePlanting' in 'purchase' project.
@@ -92,13 +102,7 @@ public class CopilotIntegrationTest {
 
     var purchase = rt.ivyWorkspace().path().resolve("purchase");
     var processDir = purchase.resolve("process");
-    Path plantProcess;
-    try (var stream = Files.walk(processDir)) {
-      plantProcess = stream
-          .filter(p -> p.getFileName().toString().equals("treePlanting.p.json"))
-          .findFirst()
-          .orElseThrow(() -> new AssertionError("Process treePlanting.p.json not found under " + processDir));
-    }
+    var plantProcess = findFile(processDir, "treePlanting.p.json");
     var procJson = readJson(plantProcess);
     assertThat(procJson.get("$schema").asString())
         .as("valid $schema was set by new_process_tool")
@@ -132,7 +136,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
-  @Order(2)
+  @Order(Complexity.COMPOSITE)
   void formDialog(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
         create a new dialog 'OrderForm' in 'purchase' project.
@@ -170,7 +174,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
-  @Order(2)
+  @Order(Complexity.COMPOSITE)
   void jsfDialog(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
         create a new JSF dialog 'OrderOverview' in 'purchase' project.
@@ -203,7 +207,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
-  @Order(1)
+  @Order(Complexity.INDEPENDENT)
   void dataClass(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
         create a data class 'User' in the purchase project
@@ -223,7 +227,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
-  @Order(1)
+  @Order(Complexity.INDEPENDENT)
   void entityClass(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
         create an entity class 'UserEntity' in the purchase project

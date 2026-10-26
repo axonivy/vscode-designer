@@ -30,7 +30,7 @@ public class TestMarkdownReporter {
 
         Test file: `aitest/ai-dev-tests/test/ch/ivyteam/smart/core/copilot/CopilotIntegrationTest.java`
 
-        | Test | Input tokens | Output tokens | Tools used |
+        | 💬️ Test | ↪️ Input tokens | ↩️ Output tokens | 🛠️ Tools used |
         | --- | ---: | ---: | --- |
         | <details><summary>`myTest`</summary><strong>Prompt</strong><pre><code>%s</code></pre></details> | 38517 | 765 | <details><summary>axonivy-designer-new_axon_ivy_project</summary><br>%s</details> |
         """.formatted(promptDetail, toolDetail);

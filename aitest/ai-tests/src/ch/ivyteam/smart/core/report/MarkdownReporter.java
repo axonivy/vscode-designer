@@ -23,7 +23,7 @@ public class MarkdownReporter implements Reporter {
     lines.add("");
     lines.add("Test file: `aitest/ai-dev-tests/test/ch/ivyteam/smart/core/copilot/CopilotIntegrationTest.java`");
     lines.add("");
-    lines.add("| Test | Input tokens | Output tokens | Tools used |");
+    lines.add("| 💬️ Test | ↪️ Input tokens | ↩️ Output tokens | 🛠️ Tools used |");
     lines.add("| --- | ---: | ---: | --- |");
   }
 
