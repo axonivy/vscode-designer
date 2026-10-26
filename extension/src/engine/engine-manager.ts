@@ -26,7 +26,7 @@ import { UserEditorProvider } from '../editors/user-editor/user-editor-provider'
 import { VariableEditorProvider } from '../editors/variable-editor/variable-editor-provider';
 import { WebServiceEditorProvider } from '../editors/webservice-editor/webservice-editor-provider';
 import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language-client';
-import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
+import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { ProjectFileWatcherManager } from '../project-explorer/project-file-watcher';
 import { resolveDefaultNamespace } from '../project-explorer/utils/util';
 import { extensionVersion } from '../version/extension-version';
@@ -178,7 +178,7 @@ export class IvyEngineManager {
   }
 
   private async initExistingProjects() {
-    const ivyProjectDirectories = await this.ivyProjectDirectories();
+    const ivyProjectDirectories = await IvyProjectManager.instance.getIvyProjects();
     await this.initProjects(ivyProjectDirectories);
   }
 
@@ -220,7 +220,7 @@ export class IvyEngineManager {
     if (isWorkspaceLocked()) {
       return;
     }
-    const ivyProjectDirectories = ivyProjectDirectory ? [ivyProjectDirectory] : await this.ivyProjectDirectories();
+    const ivyProjectDirectories = ivyProjectDirectory ? [ivyProjectDirectory] : await IvyProjectManager.instance.getIvyProjects();
     let statusMessage = l10n.t('Deploying projects');
     if (ivyProjectDirectories.length === 1 && ivyProjectDirectories[0]) {
       const projectPath = ivyProjectDirectories[0];
@@ -259,7 +259,7 @@ export class IvyEngineManager {
       decreaseWorkspaceLock();
     }
     await runJavaProjectImport();
-    await IvyProjectExplorer.instance.refresh();
+    await IvyProjectManager.instance.refresh();
   }
 
   public async installMarketProduct(input: ProductInstallParams) {
@@ -272,7 +272,7 @@ export class IvyEngineManager {
       }
     });
     await runJavaProjectImport();
-    await IvyProjectExplorer.instance.refresh();
+    await IvyProjectManager.instance.refresh();
   }
 
   public async createUserDialog(newUserDialogParams: CreateUserDialogParams) {
@@ -301,7 +301,7 @@ export class IvyEngineManager {
         path: newProjectParams.path,
         namespace: await resolveDefaultNamespace(newProjectParams.path, 'process')
       });
-      await IvyProjectExplorer.instance.refresh();
+      await IvyProjectManager.instance.refresh();
     });
   }
 
@@ -403,10 +403,6 @@ export class IvyEngineManager {
 
   public async deployPortal() {
     return this.ivyEngineApi?.deployPortal();
-  }
-
-  async ivyProjectDirectories() {
-    return IvyProjectExplorer.instance.getIvyProjects();
   }
 
   async stop() {

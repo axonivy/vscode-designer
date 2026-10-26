@@ -1,9 +1,9 @@
 import { l10n, Uri, window } from 'vscode';
-import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
+import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { logErrorMessage } from './logging-util';
 
 export const selectIvyProjectDialog = async (dialogTitle?: string) => {
-  const projects = await IvyProjectExplorer.instance.getIvyProjects();
+  const projects = await IvyProjectManager.instance.getIvyProjects();
   let uri: string | undefined;
 
   if (!projects || projects.length === 0) {

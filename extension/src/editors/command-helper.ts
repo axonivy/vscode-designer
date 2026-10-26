@@ -3,7 +3,7 @@ import type { ExtensionContext } from 'vscode';
 import { Uri, commands, l10n, workspace } from 'vscode';
 import { registerCommand, type ConfigEditorCommand, type EditorCommand } from '../base/commands';
 import { logErrorMessage } from '../base/logging-util';
-import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
+import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { treeSelectionToProjectUri, treeUriToProjectPath, type TreeSelection } from '../project-explorer/tree-selection';
 
 export const registerOpenConfigEditorCmd = (command: ConfigEditorCommand, context: ExtensionContext, file: string) =>
@@ -22,7 +22,7 @@ export const registerOpenConfigEditorCmd = (command: ConfigEditorCommand, contex
   });
 
 export const getEditorCmdProjectPath = async (command: ConfigEditorCommand | EditorCommand, selection: TreeSelection) => {
-  const ivyProjects = IvyProjectExplorer.instance.getIvyProjects();
+  const ivyProjects = IvyProjectManager.instance.getIvyProjects();
   const projectUri = await treeSelectionToProjectUri(selection, ivyProjects);
   if (!projectUri) {
     return;

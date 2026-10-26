@@ -4,7 +4,7 @@ import * as path from 'path';
 import { l10n, Uri, window } from 'vscode';
 import { executeCommand } from '../../../base/commands';
 import { logInformationMessage } from '../../../base/logging-util';
-import { IvyProjectExplorer } from '../../../project-explorer/ivy-project-explorer';
+import { IvyProjectManager } from '../../../project-explorer/ivy-project-manager';
 import { openUrlExternally } from '../../notification-helper';
 import { openAction } from './open-action';
 
@@ -58,5 +58,5 @@ async function openInExplorer(path: string) {
 async function getProjectFolder() {
   const tabInput = window.tabGroups.activeTabGroup.activeTab?.input as { uri: Uri };
   const path = tabInput.uri.fsPath.toString();
-  return IvyProjectExplorer.instance.getIvyProjects().then(projects => projects.find(ivyProject => path.startsWith(ivyProject)));
+  return IvyProjectManager.instance.getIvyProjects().then(projects => projects.find(ivyProject => path.startsWith(ivyProject)));
 }

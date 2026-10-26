@@ -19,6 +19,7 @@ import { IvyEngineManager } from './engine/engine-manager';
 import { showEngineLog } from './engine/engine-output-channel';
 import { registerAddDependencyHandler } from './maven/add-dependency';
 import { IvyProjectExplorer } from './project-explorer/ivy-project-explorer';
+import { IvyProjectManager } from './project-explorer/ivy-project-manager';
 import { resolveExtensionVersion } from './version/extension-version';
 import { showRuntimeLog } from './views/runtimelog-view';
 
@@ -62,6 +63,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     IvyDiagnostics.init(context);
     conditionalWelcomePage(context);
 
+    IvyProjectManager.init(context);
     IvyProjectExplorer.init(context);
     registerAddDependencyHandler(context);
     StatusBar.refreshStatusBar();

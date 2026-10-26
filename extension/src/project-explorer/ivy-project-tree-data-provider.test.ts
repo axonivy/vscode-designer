@@ -8,9 +8,8 @@ import { IarContentFileSystemProvider, iarContentUri } from './iar-content-provi
 import { IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
 
 const mocks = vi.hoisted(() => ({
-  findFiles: vi.fn(),
-  findEngineProjects: vi.fn(),
-  executeCommand: vi.fn()
+  findWorkspaceProjects: vi.fn(),
+  findEngineProjects: vi.fn()
 }));
 
 vi.mock('vscode', () => {
@@ -82,13 +81,10 @@ vi.mock('vscode', () => {
     l10n: {
       t: (message: string, ...args: unknown[]) =>
         args.reduce<string>((text, arg, index) => text.replace(`{${index}}`, String(arg)), message)
-    },
-    workspace: { findFiles: mocks.findFiles }
+    }
   };
 });
 
-vi.mock('../base/commands', () => ({ executeCommand: mocks.executeCommand }));
-vi.mock('../base/configurations', () => ({ config: { projectExcludePattern: () => '', projectMaximumNumber: () => 50 } }));
 vi.mock('../engine/diagnostics', () => ({ IvyDiagnostics: { instance: { projectFileUrisToBeConverted: () => [] } } }));
 
 let directory: string;
@@ -102,7 +98,7 @@ beforeEach(() => {
   archive.addFile('META-INF/ivy/variables.yaml', Buffer.from('variables: {}'));
   archive.addFile('META-INF/services/service.txt', Buffer.from('service'));
   archive.writeZip(archivePath);
-  mocks.findFiles.mockResolvedValue([{ fsPath: '/workspace/local/.ivyproject' }]);
+  mocks.findWorkspaceProjects.mockResolvedValue(['/workspace/local']);
   mocks.findEngineProjects.mockResolvedValue([
     {
       artifactId: 'workspace-project',
@@ -126,7 +122,7 @@ afterEach(() => {
 });
 
 test('lists IAR projects in a separate read-only section', async () => {
-  const provider = new IvyProjectTreeDataProvider(mocks.findEngineProjects);
+  const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
 
   const roots = await provider.getChildren();
   expect(roots.map(entry => entry.kind)).toEqual(['workspaceProject', 'iarDependencyGroup']);
@@ -147,7 +143,7 @@ test('lists IAR projects in a separate read-only section', async () => {
 });
 
 test('shows only the META-INF/ivy tree and opens files as read-only documents', async () => {
-  const provider = new IvyProjectTreeDataProvider(mocks.findEngineProjects);
+  const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
   const [workspaceProject, iarGroup] = await provider.getChildren();
   const [iarDependency] = await provider.getChildren(iarGroup);
   const rootEntries = await provider.getChildren(iarDependency);

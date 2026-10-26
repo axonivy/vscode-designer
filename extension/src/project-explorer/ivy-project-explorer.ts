@@ -2,7 +2,7 @@ import path from 'path';
 import type { ExtensionContext, TreeView, TreeViewSelectionChangeEvent } from 'vscode';
 import { commands, l10n, TabInputCustom, TabInputText, Uri, window, workspace } from 'vscode';
 import { registerCommand, type KnownCommand } from '../base/commands';
-import { ensureJavaLightWeightMode, runJavaProjectImport } from '../base/java-extension-api';
+import { ensureJavaLightWeightMode } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { isWorkspaceLocked } from '../base/workspace-lock';
 import { convertDialogFormToJsf } from '../editors/form-editor/convert-dialog-form';
@@ -15,6 +15,7 @@ import { IAR_CONTENT_SCHEME, IarContentFileSystemProvider } from './iar-content-
 import { importIvyProject } from './import-ivy-project';
 import { importNewProcess } from './import-process';
 import { runProjectConversion } from './ivy-project-conversion';
+import { IvyProjectManager } from './ivy-project-manager';
 import { IvyProjectTreeDataProvider, type Entry } from './ivy-project-tree-data-provider';
 import { addNewCaseMap } from './new-case-map';
 import { addNewDataClass } from './new-data-class';
@@ -34,9 +35,12 @@ export class IvyProjectExplorer {
 
   private constructor(context: ExtensionContext) {
     this.context = context;
-    this.activateEngineIfNeeded();
     const iarContentProvider = new IarContentFileSystemProvider();
-    this.treeDataProvider = new IvyProjectTreeDataProvider(() => IvyEngineManager.instance.projects(true), iarContentProvider);
+    this.treeDataProvider = new IvyProjectTreeDataProvider(
+      () => IvyProjectManager.instance.getIvyProjects(),
+      () => IvyEngineManager.instance.projects(true),
+      iarContentProvider
+    );
     this.treeView = window.createTreeView(VIEW_ID, { treeDataProvider: this.treeDataProvider });
     context.subscriptions.push(
       iarContentProvider,
@@ -54,9 +58,8 @@ export class IvyProjectExplorer {
     context.subscriptions.push(this.treeView);
     this.registerCommands();
     context.subscriptions.push(
-      workspace.onDidChangeWorkspaceFolders(async () => {
-        await this.refresh();
-      })
+      IvyProjectManager.instance.onDidChangeProjects(() => this.treeDataProvider.refresh()),
+      IvyDiagnostics.instance.onDidRefresh(() => this.treeDataProvider.refresh())
     );
   }
 
@@ -67,18 +70,10 @@ export class IvyProjectExplorer {
     IvyProjectExplorer._instance = new IvyProjectExplorer(context);
   }
 
-  private async activateEngineIfNeeded() {
-    const workspaceHasOpenFolders = workspace.workspaceFolders && workspace.workspaceFolders.length > 0;
-    if (!workspaceHasOpenFolders) {
-      return;
-    }
-    await IvyEngineManager.instance.start();
-  }
-
   private registerCommands() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const registerCmd = (command: KnownCommand, callback: (...args: any[]) => any) => registerCommand(command, this.context, callback);
-    registerCmd(`${VIEW_ID}.refreshEntry`, () => this.refresh());
+    registerCmd(`${VIEW_ID}.refreshEntry`, () => IvyProjectManager.instance.refresh());
     registerCmd(`${VIEW_ID}.revealProjectInFileSystem`, async (s: TreeSelection) => this.revealInFileExplorer(s));
     registerCmd(`${VIEW_ID}.deployProject`, (s: TreeSelection) => this.deployProjects(s));
     registerCmd(`${VIEW_ID}.stopBpmEngine`, (s: TreeSelection) => this.stopBpmEngine(s));
@@ -103,27 +98,8 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.convertDialogFormToJsf`, (s: TreeSelection) => this.convertSelectedDialogFormToJsf(s));
   }
 
-  public async refresh() {
-    this.treeDataProvider.refresh();
-    await this.activateEngineIfNeeded();
-    await this.syncProjects();
-    await IvyDiagnostics.instance.refresh(true);
-  }
-
-  private async syncProjects() {
-    const appendMissingPathSeparator = (p: string) => (p.endsWith(path.sep) ? p : `${p}${path.sep}`);
-    const detectedProjects = (await this.getIvyProjects()).map(appendMissingPathSeparator);
-    const deployedProjects = (await IvyEngineManager.instance.projects())?.map(p => p.projectDirectory).map(appendMissingPathSeparator);
-    const projectsToBeDeployed = detectedProjects.filter(p => !deployedProjects?.includes(p));
-
-    await IvyEngineManager.instance.initProjects(projectsToBeDeployed);
-    if (projectsToBeDeployed.length > 0) {
-      await runJavaProjectImport();
-    }
-  }
-
   private async revealInFileExplorer(selection: TreeSelection) {
-    const projectUri = await treeSelectionToProjectUri(selection, this.getIvyProjects());
+    const projectUri = await treeSelectionToProjectUri(selection, IvyProjectManager.instance.getIvyProjects());
     if (projectUri) {
       const projectFileUri = Uri.joinPath(projectUri, IVY_PROJECT_FILE);
       if (projectFileUri) {
@@ -133,11 +109,11 @@ export class IvyProjectExplorer {
   }
 
   private async deployProjects(selection: TreeSelection) {
-    const projectUri = await treeSelectionToProjectUri(selection, this.getIvyProjects());
+    const projectUri = await treeSelectionToProjectUri(selection, IvyProjectManager.instance.getIvyProjects());
     if (!projectUri) {
       return;
     }
-    const project = await treeUriToProjectPath(projectUri, this.getIvyProjects());
+    const project = await treeUriToProjectPath(projectUri, IvyProjectManager.instance.getIvyProjects());
     if (!project) {
       return;
     }
@@ -145,11 +121,11 @@ export class IvyProjectExplorer {
   }
 
   private async stopBpmEngine(selection: TreeSelection) {
-    const projectUri = await treeSelectionToProjectUri(selection, this.getIvyProjects());
+    const projectUri = await treeSelectionToProjectUri(selection, IvyProjectManager.instance.getIvyProjects());
     if (!projectUri) {
       return;
     }
-    const project = await treeUriToProjectPath(projectUri, this.getIvyProjects());
+    const project = await treeUriToProjectPath(projectUri, IvyProjectManager.instance.getIvyProjects());
     if (!project) {
       return;
     }
@@ -165,7 +141,7 @@ export class IvyProjectExplorer {
       logInformationMessage(l10n.t('No valid workspace selected.'));
       return;
     }
-    const existingIvyProjects = await this.getIvyProjects();
+    const existingIvyProjects = await IvyProjectManager.instance.getIvyProjects();
     for (const existingProject of existingIvyProjects) {
       if (isSubdirectoryOrEqual(existingProject, selectedUri.fsPath)) {
         logErrorMessage(l10n.t('Cannot create a new project inside an existing Axon Ivy project. Select a valid directory.'));
@@ -195,11 +171,11 @@ export class IvyProjectExplorer {
   }
 
   private async importBpmnProcess(selection: TreeSelection) {
-    const projectUri = await treeSelectionToProjectUri(selection, this.getIvyProjects());
+    const projectUri = await treeSelectionToProjectUri(selection, IvyProjectManager.instance.getIvyProjects());
     if (!projectUri) {
       return;
     }
-    const project = await treeUriToProjectPath(projectUri, this.getIvyProjects());
+    const project = await treeUriToProjectPath(projectUri, IvyProjectManager.instance.getIvyProjects());
     if (!project) {
       return;
     }
@@ -215,7 +191,7 @@ export class IvyProjectExplorer {
       logInformationMessage(l10n.t('No valid import directory selected.'));
       return;
     }
-    const existingIvyProjects = await this.getIvyProjects();
+    const existingIvyProjects = await IvyProjectManager.instance.getIvyProjects();
     for (const existingProject of existingIvyProjects) {
       if (isSubdirectoryOrEqual(existingProject, selectedUri.fsPath)) {
         logErrorMessage(
@@ -241,7 +217,7 @@ export class IvyProjectExplorer {
     if (isWorkspaceLocked({ warn: true })) {
       return;
     }
-    await installLocalMarketProduct(await this.getIvyProjects(), this.context);
+    await installLocalMarketProduct(await IvyProjectManager.instance.getIvyProjects(), this.context);
   }
 
   private async installMarketProduct() {
@@ -249,7 +225,7 @@ export class IvyProjectExplorer {
       return;
     }
     const engineVersion = (await IvyEngineManager.instance.getEngineVersion()) ?? '';
-    await installMarketProduct(await this.getIvyProjects(), engineVersion);
+    await installMarketProduct(await IvyProjectManager.instance.getIvyProjects(), engineVersion);
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {
@@ -295,7 +271,7 @@ export class IvyProjectExplorer {
   private async convertProject(selection: TreeSelection, convertAll: boolean = false) {
     await ensureJavaLightWeightMode(l10n.t('Project conversion'));
     const uri = await treeSelectionToUri(selection);
-    const projectPath = uri ? await treeUriToProjectPath(uri, this.getIvyProjects()) : undefined;
+    const projectPath = uri ? await treeUriToProjectPath(uri, IvyProjectManager.instance.getIvyProjects()) : undefined;
     const quickPick = window.createQuickPick();
     quickPick.title = l10n.t('Convert Projects - Select Axon Ivy projects to be converted (1/1)');
     quickPick.canSelectMany = true;
@@ -335,7 +311,7 @@ export class IvyProjectExplorer {
       return;
     }
     const uri = Uri.file(formPath.trim());
-    const projectDirectory = await treeUriToProjectPath(uri, this.getIvyProjects());
+    const projectDirectory = await treeUriToProjectPath(uri, IvyProjectManager.instance.getIvyProjects());
     if (!projectDirectory) {
       logErrorMessage(`The selected dialog form does not belong to an Axon Ivy project: ${uri.fsPath}`);
       return;
@@ -351,34 +327,18 @@ export class IvyProjectExplorer {
     logInformationMessage(`Converted dialog form to JSF: ${uri.fsPath}`);
   }
 
-  public async getIvyProjects() {
-    return this.treeDataProvider.getIvyProjects();
-  }
-
-  public async getDiagnostics() {
-    return this.treeDataProvider.getDiagnostics();
-  }
-
-  private async hasIvyProjects() {
-    return this.treeDataProvider.hasIvyProjects();
-  }
-
-  private async selectWorkspace(selection: TreeSelection): Promise<Uri | undefined> {
+  private async selectWorkspace(selection: TreeSelection) {
     const treeSelectionUri = await treeSelectionToUri(selection);
     const selectedWorkspaceUri = (await isDirectory(treeSelectionUri)) ? treeSelectionUri : await getWorkspaceFolder();
     return selectedWorkspaceUri;
   }
 
-  private async getAddCommandSelectionContext(
-    selection: TreeSelection,
-    needsExistingIvyProjects: boolean = true
-  ): Promise<AddCommandSelectionContext | undefined> {
-    const hasIvyProjects = await this.hasIvyProjects();
-    if (needsExistingIvyProjects && !hasIvyProjects) {
+  private async getAddCommandSelectionContext(selection: TreeSelection) {
+    const existingProjects = await IvyProjectManager.instance.getIvyProjects();
+    if (existingProjects.length === 0) {
       logErrorMessage(l10n.t('No Axon Ivy projects in the workspace. Create an Axon Ivy project first.'));
       return;
     }
-    const existingProjects = await this.getIvyProjects();
     const uri = await treeSelectionToUri(selection);
     const projectPath = uri ? await treeUriToProjectPath(uri, Promise.resolve(existingProjects)) : undefined;
     return { existingIvyProjects: existingProjects, uriSelection: uri, projectPathSelection: projectPath };

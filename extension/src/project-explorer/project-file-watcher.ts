@@ -4,8 +4,7 @@ import { debouncedAction, hasDeployActionInQueue, type ActionKey } from '../base
 import { askToRunJavaCleanWorkspace } from '../base/java-extension-api';
 import { isWorkspaceLocked } from '../base/workspace-lock';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { IvyProjectExplorer } from './ivy-project-explorer';
-import { isIvyProject, IVY_PROJECT_FILE_PATTERN } from './ivy-project-tree-data-provider';
+import { isIvyProject, IVY_PROJECT_FILE_PATTERN, IvyProjectManager } from './ivy-project-manager';
 import { treeUriToProjectPath } from './tree-selection';
 
 export class ProjectFileWatcherManager {
@@ -28,7 +27,7 @@ export class ProjectFileWatcherManager {
       if (isWorkspaceLocked() || !isIvyProject(projectFile)) {
         return;
       }
-      await IvyProjectExplorer.instance.refresh();
+      await IvyProjectManager.instance.refresh();
     });
     const deleteProjectWatcher = workspace.createFileSystemWatcher('**/*', true, true, false);
     deleteProjectWatcher.onDidDelete(async e => {
@@ -62,17 +61,17 @@ export class ProjectFileWatcherManager {
   }
 
   private async deleteProjectOnEngine(project: string) {
-    const allProjects = await IvyProjectExplorer.instance.getIvyProjects();
+    const allProjects = await IvyProjectManager.instance.getIvyProjects();
     if (!allProjects.includes(project)) {
       return;
     }
     await IvyEngineManager.instance.deleteProject(project);
     await askToRunJavaCleanWorkspace(l10n.t('Project deleted'));
-    await IvyProjectExplorer.instance.refresh();
+    await IvyProjectManager.instance.refresh();
   }
 
   private async runEngineActionDebounced(action: (projectDir: string) => Promise<void>, actionKey: ActionKey, uri?: Uri) {
-    const project = await treeUriToProjectPath(uri, IvyProjectExplorer.instance.getIvyProjects());
+    const project = await treeUriToProjectPath(uri, IvyProjectManager.instance.getIvyProjects());
     if (!project) {
       return;
     }
