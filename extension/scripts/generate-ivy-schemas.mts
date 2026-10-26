@@ -84,4 +84,8 @@ async function generateIvySchemas(): Promise<void> {
   console.log(`[ivy-schemas] Generated ${files.length} schema(s) for ${schemaVersion}.`);
 }
 
-await generateIvySchemas();
+if (process.env.SKIP_IVY_SCHEMAS) {
+  console.log('[ivy-schemas] SKIP_IVY_SCHEMAS is set, keeping the committed schemas.');
+} else {
+  await generateIvySchemas();
+}

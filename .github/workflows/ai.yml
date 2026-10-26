@@ -35,6 +35,8 @@ jobs:
           install_dir="$RUNNER_TEMP/gh-skills"
           bash aitest/skill-install.sh "$install_dir"
       - name: Build VSC
+        env:
+          SKIP_IVY_SCHEMAS: '1'
         run: |
           corepack enable
           pnpm install
