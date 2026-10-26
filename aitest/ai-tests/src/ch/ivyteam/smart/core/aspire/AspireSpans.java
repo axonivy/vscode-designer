@@ -122,6 +122,10 @@ public class AspireSpans {
     public String arguments() {
       return findSpanAttributeValue(span, AttributeKey.stringKey("gen_ai.tool.call.arguments")).orElse(null);
     }
+
+    public String result(){
+      return findSpanAttributeValue(span, AttributeKey.stringKey("gen_ai.tool.call.result")).orElse(null);
+    }
   }
 
   private static ObjectNode rootSpan(JsonNode spans) {
@@ -151,5 +155,16 @@ public class AspireSpans {
         throw new RuntimeException("Failed to parse integer attribute " + key.getKey(), ex);
       }
     });
+  }
+
+  public String outputMessage() {
+    var outs = childSpans()
+      .filter(span -> findSpanAttributeValue(span, AttributeKey.stringKey("gen_ai.output.messages")).isPresent())
+      .toList(); 
+    if (outs.isEmpty()) {
+      return null;
+    }
+    var last = outs.get(outs.size() - 1);
+    return findSpanAttributeValue(last, AttributeKey.stringKey("gen_ai.output.messages")).orElse(null);
   }
 }
