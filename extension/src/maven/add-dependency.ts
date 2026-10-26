@@ -6,7 +6,7 @@ import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { logErrorMessage } from '../base/logging-util';
 import type { ProjectBean } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
+import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { treeUriToProjectPath } from '../project-explorer/tree-selection';
 import { registerPomCodeLensProvider } from './pom-code-lens-provider';
 
@@ -18,7 +18,7 @@ export const registerAddDependencyHandler = (context: ExtensionContext) => {
 const addDependencyHandler = async (uri: Uri) => {
   let targetProject: string | undefined;
   if (uri instanceof Uri) {
-    targetProject = await treeUriToProjectPath(uri, IvyProjectExplorer.instance.getIvyProjects());
+    targetProject = await treeUriToProjectPath(uri, IvyProjectManager.instance.getIvyProjects());
   }
   if (targetProject === undefined) {
     targetProject = await selectIvyProjectDialog(l10n.t('Select project to add dependency to')).then(uri => uri?.fsPath);

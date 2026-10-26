@@ -1,22 +1,16 @@
-import fs from 'fs';
 import * as path from 'path';
 import {
-  Diagnostic,
-  DiagnosticSeverity,
   EventEmitter,
   FileType,
   l10n,
-  Range,
   ThemeIcon,
   TreeItem,
   TreeItemCollapsibleState,
   Uri,
-  workspace,
   type TreeDataProvider,
   type Command as VSCodeCommand
 } from 'vscode';
-import { executeCommand, type KnownCommand } from '../base/commands';
-import { config } from '../base/configurations';
+import type { KnownCommand } from '../base/commands';
 import type { ProjectBean } from '../engine/api/generated/client';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IarContentFileSystemProvider, iarContentUri } from './iar-content-provider';
@@ -40,90 +34,27 @@ export interface Entry {
   command?: IvyCommand;
 }
 
-export const IVY_PROJECT_FILE_PATTERN = '**/{.ivyproject,.project}';
 const IVY_PROJECT_CONTEXT_VALUE = 'ivyProject';
 const IVY_PROJECT_REQUIRES_CONVERSION_CONTEXT_VALUE = 'requiresConversion';
 
-export const isIvyProject = (projectFile: Uri) => {
-  const projectFilePath = projectFile.fsPath;
-  try {
-    if (path.basename(projectFilePath) === '.ivyproject') {
-      return true;
-    }
-    const content = fs.readFileSync(projectFile.fsPath, 'utf8');
-    return content.includes('<nature>ch.ivyteam.ivy.project.IvyProjectNature</nature>');
-  } catch {
-    return false;
-  }
-};
-
-type ProjectFindResult = {
-  projects: string[];
-  diagnostics: Map<Uri, Diagnostic>;
-};
-
 export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
-  private ivyProjects: Promise<ProjectFindResult>;
   private iarProjects?: Promise<ProjectBean[]>;
   private _onDidChangeTreeData = new EventEmitter<Entry | undefined | null>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
   private entryCache = new Map<string, Entry>();
 
-  private readonly excludePattern: string;
-  private readonly maxResults: number;
-
   constructor(
+    private readonly findWorkspaceProjects: () => Promise<string[]>,
     private readonly findEngineProjects: () => Promise<ProjectBean[] | undefined>,
     private readonly iarContentProvider = new IarContentFileSystemProvider()
-  ) {
-    this.excludePattern = config.projectExcludePattern() ?? '';
-    this.maxResults = config.projectMaximumNumber() ?? 50;
-    this.ivyProjects = this.findIvyProjects();
-  }
+  ) {}
 
   private cacheEntry(entry: Entry) {
     this.entryCache.set(entry.uri.fsPath, entry);
   }
 
-  private async findIvyProjects() {
-    const projectFiles = await workspace.findFiles(IVY_PROJECT_FILE_PATTERN, this.excludePattern, this.maxResults);
-    const distinctProjectDirs = [...new Set(projectFiles.filter(p => isIvyProject(p)).map(p => path.dirname(p.fsPath)))];
-    const projectsPerBaseName = new Map<string, string[]>();
-    for (const projectDir of distinctProjectDirs) {
-      const baseName = path.basename(projectDir).toLowerCase();
-      projectsPerBaseName.set(baseName, [...(projectsPerBaseName.get(baseName) ?? []), projectDir]);
-    }
-    const validProjects: string[] = [];
-    const diagnostics = new Map<Uri, Diagnostic>();
-    [...projectsPerBaseName.entries()].forEach(([baseName, projectDirs]) => {
-      if (projectDirs.length === 1 && projectDirs[0]) {
-        validProjects.push(projectDirs[0]);
-      } else if (projectDirs.length > 1) {
-        projectDirs.forEach(dir => {
-          const message = `Multiple project directories with the same name '${baseName}' found: ${projectDirs.join(', ')}. Please cleanup the workspace.`;
-          diagnostics.set(Uri.file(dir), new Diagnostic(new Range(0, 0, 0, 0), message, DiagnosticSeverity.Error));
-        });
-      }
-    });
-    await executeCommand('setContext', 'ivy:hasIvyProjects', validProjects.length > 0);
-    return { projects: validProjects.sort(), diagnostics };
-  }
-
-  async hasIvyProjects(): Promise<boolean> {
-    return (await this.ivyProjects).projects.length > 0;
-  }
-
-  async getIvyProjects(): Promise<string[]> {
-    return this.ivyProjects.then(result => result.projects);
-  }
-
-  async getDiagnostics(): Promise<Map<Uri, Diagnostic>> {
-    return this.ivyProjects.then(result => result.diagnostics);
-  }
-
   refresh() {
-    this.ivyProjects = this.findIvyProjects();
     this.iarProjects = undefined;
     this.iarContentProvider.refresh();
     this._onDidChangeTreeData.fire(undefined);
@@ -190,7 +121,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
     if (element) {
       return [];
     }
-    const workspaceProjects = (await this.ivyProjects).projects.map(dir => this.createAndCacheRoot(dir));
+    const workspaceProjects = (await this.findWorkspaceProjects()).map(dir => this.createAndCacheRoot(dir));
     const iarProjects = await this.getIarProjects();
     if (iarProjects.length === 0) {
       return workspaceProjects;

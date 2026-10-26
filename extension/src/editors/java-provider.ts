@@ -1,7 +1,7 @@
 import { CompletionItem, CompletionItemKind, CompletionList, Location, Position, Uri, workspace, type LocationLink } from 'vscode';
 import { executeCommand } from '../base/commands';
 import { logWarningMessage } from '../base/logging-util';
-import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
+import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { treeUriToProjectPath } from '../project-explorer/tree-selection';
 
 export class JavaProvider {
@@ -11,7 +11,7 @@ export class JavaProvider {
   static readonly DUMMY_CONTENT = `private class ${JavaProvider.DUMMY_CLASS_NAME}{`;
 
   constructor(documentUri: Uri) {
-    this.dummyJavaFile = treeUriToProjectPath(documentUri, IvyProjectExplorer.instance.getIvyProjects()).then(project =>
+    this.dummyJavaFile = treeUriToProjectPath(documentUri, IvyProjectManager.instance.getIvyProjects()).then(project =>
       Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider', `java-provider.java`)
     );
   }

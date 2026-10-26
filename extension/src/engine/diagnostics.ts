@@ -1,9 +1,21 @@
 import fs from 'fs';
 import type { CodeActionContext, CodeActionProvider, DiagnosticCollection, ExtensionContext, Selection, TextDocument } from 'vscode';
-import { CodeAction, CodeActionKind, Diagnostic, DiagnosticSeverity, Position, Range, Uri, l10n, languages, workspace } from 'vscode';
+import {
+  CodeAction,
+  CodeActionKind,
+  Diagnostic,
+  DiagnosticSeverity,
+  EventEmitter,
+  Position,
+  Range,
+  Uri,
+  l10n,
+  languages,
+  workspace
+} from 'vscode';
 import { executeCommand } from '../base/commands';
 import { initialJavaCompileStatus, runJavaServerModeSwitch } from '../base/java-extension-api';
-import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
+import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import type { ProjectBean } from './api/generated/client';
 import { IvyEngineManager } from './engine-manager';
 
@@ -19,6 +31,8 @@ export const IVY_PROJECT_FILE = '.ivyproject';
 const POM_FILE = 'pom.xml';
 export class IvyDiagnostics {
   private static _instance: IvyDiagnostics;
+  private readonly _onDidRefresh = new EventEmitter<void>();
+  readonly onDidRefresh = this._onDidRefresh.event;
 
   private constructor(private diagnostics: DiagnosticCollection) {}
 
@@ -33,7 +47,7 @@ export class IvyDiagnostics {
           providedCodeActionKinds: [CodeActionKind.QuickFix]
         }
       );
-      context.subscriptions.push(diagnostics, codeActionProvider);
+      context.subscriptions.push(diagnostics, codeActionProvider, IvyDiagnostics._instance._onDidRefresh);
     }
     return IvyDiagnostics._instance;
   }
@@ -56,12 +70,13 @@ export class IvyDiagnostics {
           this.handleProjectDiagnostic(project);
         }
       });
-    const projectExplorerDiagnostics = await IvyProjectExplorer.instance.getDiagnostics();
-    projectExplorerDiagnostics.forEach((d, uri) => {
+    const projectDiagnostics = await IvyProjectManager.instance.getDiagnostics();
+    projectDiagnostics.forEach((d, uri) => {
       d.source = DIAGNOSTIC_SOURCE;
       this.diagnostics.set(uri, [...(this.diagnostics.get(uri) ?? []), d]);
       hasProjectWithError = true;
     });
+    this._onDidRefresh.fire();
     if (!hasProjectWithError) {
       await runJavaServerModeSwitch();
       await initialJavaCompileStatus();

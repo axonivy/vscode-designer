@@ -15,7 +15,7 @@ import {
 import { IvyEngineManager } from '../engine/engine-manager';
 import { showEngineLog } from '../engine/engine-output-channel';
 import { onWebIdeWebSocketStateChange, type WebSocketReadyState } from '../engine/web-ide-ws/web-ide-websocket-provider';
-import { IvyProjectExplorer } from '../project-explorer/ivy-project-explorer';
+import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { showRuntimeLog } from '../views/runtimelog-view';
 import { executeCommand, type KnownCommand } from './commands';
 import { animationSettings, config, onAnimationSettingsChange } from './configurations';
@@ -298,15 +298,15 @@ export class StatusBar {
   }
 
   private async buildProjectCountString() {
-    let ivyProjectExplorerInstance: IvyProjectExplorer;
+    let ivyProjectManagerInstance: IvyProjectManager;
     try {
-      ivyProjectExplorerInstance = IvyProjectExplorer.instance;
+      ivyProjectManagerInstance = IvyProjectManager.instance;
     } catch {
       return l10n.t('Loading projects...');
     }
 
     try {
-      const projects = await ivyProjectExplorerInstance.getIvyProjects();
+      const projects = await ivyProjectManagerInstance.getIvyProjects();
       return projects.length.toString();
     } catch {
       return l10n.t('Error loading projects');

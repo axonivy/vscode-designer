@@ -2,7 +2,7 @@ import path from 'path';
 import { l10n, type TextDocument } from 'vscode';
 import { logErrorMessage } from '../../../base/logging-util';
 import { IvyEngineManager } from '../../../engine/engine-manager';
-import { IvyProjectExplorer } from '../../../project-explorer/ivy-project-explorer';
+import { IvyProjectManager } from '../../../project-explorer/ivy-project-manager';
 import { treeUriToProjectPath } from '../../../project-explorer/tree-selection';
 import { resolveNamespaceFromPath } from '../../../project-explorer/utils/util';
 import { stripTrailingSeparator } from '../../../utils/path-utils';
@@ -23,7 +23,7 @@ export const dialogPreviewUrl = async (devContextPath: string) => {
     return undefined;
   }
 
-  const projectPath = await treeUriToProjectPath(document.uri, IvyProjectExplorer.instance.getIvyProjects());
+  const projectPath = await treeUriToProjectPath(document.uri, IvyProjectManager.instance.getIvyProjects());
   if (!projectPath) {
     logErrorMessage(l10n.t('Failed to find Ivy project associated with the active dialog file.'));
     return undefined;
@@ -64,7 +64,7 @@ export const isDialogPreviewSupported = async () => {
     return false;
   }
 
-  const projectPath = await treeUriToProjectPath(document.uri, IvyProjectExplorer.instance.getIvyProjects());
+  const projectPath = await treeUriToProjectPath(document.uri, IvyProjectManager.instance.getIvyProjects());
   if (!projectPath) {
     return false;
   }
