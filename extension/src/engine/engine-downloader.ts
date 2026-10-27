@@ -51,7 +51,7 @@ export class EngineDownloader {
         }
         return;
       }
-      const downloadLabel = l10n.t('Download new version');
+      const downloadLabel = l10n.t('Download and switch to new version');
       const pinVerionLabel = l10n.t('Pin current version');
       const cancelLabel = l10n.t('Cancel');
       const message = l10n.t(
