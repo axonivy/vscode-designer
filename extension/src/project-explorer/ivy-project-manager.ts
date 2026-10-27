@@ -1,6 +1,16 @@
 import fs from 'fs';
 import path from 'path';
-import { Diagnostic, DiagnosticSeverity, EventEmitter, Range, Uri, workspace, type ExtensionContext } from 'vscode';
+import {
+  Diagnostic,
+  DiagnosticSeverity,
+  EventEmitter,
+  languages,
+  Range,
+  Uri,
+  workspace,
+  type DiagnosticCollection,
+  type ExtensionContext
+} from 'vscode';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
 import { runJavaProjectImport } from '../base/java-extension-api';
@@ -8,6 +18,7 @@ import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 
 export const IVY_PROJECT_FILE_PATTERN = '**/{.ivyproject,.project}';
+const DIAGNOSTIC_SOURCE = 'Axon Ivy Project Search';
 
 export const isIvyProject = (projectFile: Uri) => {
   const projectFilePath = projectFile.fsPath;
@@ -22,26 +33,24 @@ export const isIvyProject = (projectFile: Uri) => {
   }
 };
 
-type ProjectFindResult = {
-  projects: string[];
-  diagnostics: Map<Uri, Diagnostic>;
-};
-
 export class IvyProjectManager {
   private static _instance: IvyProjectManager;
-  private ivyProjects: Promise<ProjectFindResult>;
+  private ivyProjects: Promise<string[]>;
   private readonly excludePattern: string;
   private readonly maxResults: number;
   private readonly _onDidChangeProjects = new EventEmitter<void>();
+  private readonly diagnostics: DiagnosticCollection;
   readonly onDidChangeProjects = this._onDidChangeProjects.event;
 
   private constructor(context: ExtensionContext) {
     this.excludePattern = config.projectExcludePattern() ?? '';
     this.maxResults = config.projectMaximumNumber() ?? 50;
+    this.diagnostics = languages.createDiagnosticCollection(DIAGNOSTIC_SOURCE);
     this.ivyProjects = this.findIvyProjects();
     context.subscriptions.push(
       this._onDidChangeProjects,
-      workspace.onDidChangeWorkspaceFolders(() => this.refresh())
+      workspace.onDidChangeWorkspaceFolders(() => this.refresh()),
+      this.diagnostics
     );
   }
 
@@ -53,7 +62,8 @@ export class IvyProjectManager {
     await IvyProjectManager._instance.activateEngineIfNeeded();
   }
 
-  private async findIvyProjects(): Promise<ProjectFindResult> {
+  private async findIvyProjects() {
+    this.diagnostics.clear();
     const projectFiles = await workspace.findFiles(IVY_PROJECT_FILE_PATTERN, this.excludePattern, this.maxResults);
     const distinctProjectDirs = [...new Set(projectFiles.filter(p => isIvyProject(p)).map(p => path.dirname(p.fsPath)))];
     const projectsPerBaseName = new Map<string, string[]>();
@@ -62,27 +72,33 @@ export class IvyProjectManager {
       projectsPerBaseName.set(baseName, [...(projectsPerBaseName.get(baseName) ?? []), projectDir]);
     }
     const validProjects: string[] = [];
-    const diagnostics = new Map<Uri, Diagnostic>();
     [...projectsPerBaseName.entries()].forEach(([baseName, projectDirs]) => {
       if (projectDirs.length === 1 && projectDirs[0]) {
         validProjects.push(projectDirs[0]);
       } else if (projectDirs.length > 1) {
         projectDirs.forEach(dir => {
           const message = `Multiple project directories with the same name '${baseName}' found: ${projectDirs.join(', ')}. Please cleanup the workspace.`;
-          diagnostics.set(Uri.file(dir), new Diagnostic(new Range(0, 0, 0, 0), message, DiagnosticSeverity.Error));
+          const diagnostic = new Diagnostic(new Range(0, 0, 0, 0), message, DiagnosticSeverity.Error);
+          diagnostic.source = DIAGNOSTIC_SOURCE;
+          this.diagnostics.set(Uri.file(dir), [new Diagnostic(new Range(0, 0, 0, 0), message, DiagnosticSeverity.Error)]);
         });
       }
     });
     await executeCommand('setContext', 'ivy:hasIvyProjects', validProjects.length > 0);
-    return { projects: validProjects.sort(), diagnostics };
+    return validProjects.sort();
   }
 
   async getIvyProjects() {
-    return this.ivyProjects.then(result => result.projects);
+    return this.ivyProjects;
   }
 
-  async getDiagnostics() {
-    return this.ivyProjects.then(result => result.diagnostics);
+  async hasErrors() {
+    await this.ivyProjects;
+    let hasError = false;
+    this.diagnostics.forEach(() => {
+      hasError = true;
+    });
+    return hasError;
   }
 
   async refresh() {
