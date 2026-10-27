@@ -34,6 +34,12 @@
      <version>3.27.7</version>
      <scope>test</scope>
    </dependency>
+   <dependency>
+     <groupId>tools.jackson.dataformat</groupId>
+     <artifactId>jackson-dataformat-yaml</artifactId>
+     <version>3.1.4</version>
+     <scope>test</scope>
+   </dependency>
   </dependencies>
 
   <!-- skip running in unit test suite -->
