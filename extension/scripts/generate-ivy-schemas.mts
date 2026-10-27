@@ -4,14 +4,16 @@ import { fileURLToPath } from 'node:url';
 
 const skillsRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../src/ai/skills');
 const schemaVersion = process.env.IVY_SCHEMA_VERSION ?? '14.0';
-const schemaIndexes = ['config', 'project'].map(directory => `https://json-schema.axonivy.com/${schemaVersion}/${directory}/`);
+const schemaIndexes = ['config', 'project', 'market'].map(directory => `https://json-schema.axonivy.com/${schemaVersion}/${directory}/`);
 const schemaRoots: Record<string, string> = {
   config: path.join(skillsRoot, 'ivy-yaml-files/schemas'),
-  project: path.join(skillsRoot, 'ivy-json-files/schemas')
+  project: path.join(skillsRoot, 'ivy-json-files/schemas'),
+  market: path.join(skillsRoot, 'ivy-market/schemas')
 };
 const cacheRoots: Record<string, string> = {
   config: path.join(schemaRoots.config, 'config'),
-  project: path.join(schemaRoots.project, 'project')
+  project: path.join(schemaRoots.project, 'project'),
+  market: path.join(schemaRoots.market, 'market')
 };
 const legacyCacheRoot = path.join(skillsRoot, 'schemas');
 

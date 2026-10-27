@@ -11,3 +11,8 @@ user-invocable: false
 Use a `web` tool to fetch the complete product listing; do not cap or truncate it:
 https://market.axonivy.com/stable/api/product
 Use the exact product `id` from the listing; never guess.
+
+## Install
+
+For every install request, fetch the listing first, then use `web` to GET the install endpoint with that product's `id`. If `web` is unavailable, report that; do not claim installation.
+https://market.axonivy.com/stable/api/product/${productId}/install

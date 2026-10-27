@@ -70,6 +70,32 @@ public class CopilotIntegrationTest {
 
   @Test
   @Order(Complexity.INDEPENDENT)
+  void market_install(AgentRuntime rt) throws Exception {
+    var spans = rt.prompt("install the JIRA connector from the marketplace");
+    assertThat(spans)
+        .loadedSkill("ivy-market")
+        .usedTools("web_fetch");
+    
+    var fetchCalls = spans.usedTools().stream().filter(tool -> tool.name().equals("web_fetch")).toList();
+    assertThat(fetchCalls.getFirst().arguments())
+      .contains("https://market.axonivy.com/stable/api/product\"");
+    assertThat(fetchCalls.getLast().arguments())
+      .contains("https://market.axonivy.com/stable/api/product/jira-connector/install");
+
+    var purchase = rt.ivyWorkspace().path().resolve("purchase");
+    var pom = purchase.resolve("pom.xml");
+    assertThat(PomParser.dependencies(pom))
+      .as("Jira connector dependency added to pom.xml")
+      .anySatisfy(dependency -> {
+        assertThat(dependency.groupId()).isEqualTo("com.axonivy.connector.jira");
+        assertThat(dependency.artifactId()).isEqualTo("jira-connector");
+        assertThat(dependency.version()).isNotBlank();
+        assertThat(dependency.type()).isEqualTo("iar");
+      });
+  }
+
+  @Test
+  @Order(Complexity.INDEPENDENT)
   void mcpON(AgentRuntime rt) throws Exception {
     assertThat(rt.copilot().listMcp())
         .as("MCP is configured for Copilot user")
