@@ -36,23 +36,37 @@ export const switchEngineReleaseTrain = async (reason?: string) => {
     })
   )?.label;
   if (selectedTrain === customValueLabel) {
-    const releaseTrainValidator = new ReleaseTrainValidator(extensionVersion);
-    selectedTrain = await window.showInputBox({
-      placeHolder: l10n.t("Enter custom release train, e.g. '14.0.1' or a path of an existing engine directory"),
-      validateInput: async (value: string) => {
-        const result = await releaseTrainValidator.validate(value);
-        if (result.valid) {
-          return;
-        }
-        return result.reason ?? l10n.t('Invalid release train tag');
-      },
-      ignoreFocusOut: true
-    });
+    selectedTrain = await askForCustomReleaseTrain();
   }
   if (selectedTrain) {
     await config.setReleaseTrainOnWorkspaceLevel(selectedTrain);
   }
   return selectedTrain;
+};
+
+export const pinCurrentReleaseTrain = async (engineVersion?: string) => {
+  const selection = await askForCustomReleaseTrain(engineVersion);
+  if (selection) {
+    await config.setReleaseTrainOnWorkspaceLevel(selection);
+  }
+};
+
+const askForCustomReleaseTrain = async (value?: string) => {
+  const title = l10n.t("Enter custom release train, e.g. '14.0.1' or a path of an existing engine directory");
+  const releaseTrainValidator = new ReleaseTrainValidator(extensionVersion);
+  const initialValidation = value ? (await releaseTrainValidator.validate(value)).valid : false;
+  return await window.showInputBox({
+    value: initialValidation ? value : undefined,
+    title,
+    validateInput: async (value: string) => {
+      const result = await releaseTrainValidator.validate(value);
+      if (result.valid) {
+        return;
+      }
+      return result.reason ?? l10n.t('Invalid release train tag');
+    },
+    ignoreFocusOut: true
+  });
 };
 
 export const permalinkVersionFromReleaseTrain = (releaseTrain: string) => {

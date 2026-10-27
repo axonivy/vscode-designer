@@ -31,7 +31,9 @@ export class ReleaseTrainValidator {
     }
   };
 
-  public isValidEngineDir = async (engineDir: string) => {
+  public isValidEngineDir = async (
+    engineDir: string
+  ): Promise<{ valid: boolean; isDirectory?: boolean; reason?: string; engineVersion?: string }> => {
     const pluginsDir = path.join(engineDir, 'system', 'plugins');
     if (!this.isDirectory(pluginsDir)) {
       return { valid: false, reason: l10n.t("Invalid release train tag or engine directory '{0}'", engineDir) };
@@ -56,7 +58,7 @@ export class ReleaseTrainValidator {
       };
     }
     const engineVersion = splittedBundleName[1].replace('.jar', '');
-    return { isDirectory, ...this.isValidEngineVersion(engineVersion) };
+    return { isDirectory, ...this.isValidEngineVersion(engineVersion), engineVersion };
   };
 
   private isValidEngineVersion = (engineVersion: string) => {
