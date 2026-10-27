@@ -19,6 +19,7 @@
   "Failed to derive preview information from the active dialog file.": "Failed to derive preview information from the active dialog file.",
   "Failed to find the current Ivy project in the running engine.": "Failed to find the current Ivy project in the running engine.",
   "Project deleted": "Project deleted",
+  "A dialog with this name and namespace already exists in this project.": "A dialog with this name and namespace already exists in this project.",
   "Choose project": "Choose project",
   "Select one of the available projects": "Select one of the available projects",
   "Choose name": "Choose name",
@@ -40,6 +41,7 @@
   "New Axon Ivy Project": "New Axon Ivy Project",
   "A process with this name and namespace already exists in this project.": "A process with this name and namespace already exists in this project.",
   "Enter Namespace separated by \"/\". Allowed characters: a-z, A-Z, 0-9, _, /": "Enter Namespace separated by \"/\". Allowed characters: a-z, A-Z, 0-9, _, /",
+  "A data class with this name and namespace already exists in this project in the {0} directory.": "A data class with this name and namespace already exists in this project in the {0} directory.",
   "Add New Case Map": "Add New Case Map",
   "IAR Dependencies": "IAR Dependencies",
   "No valid workspace selected.": "No valid workspace selected.",
@@ -195,6 +197,7 @@
   "An Axon Ivy process debug session is already running. Stop it before starting another one.": "An Axon Ivy process debug session is already running. Stop it before starting another one.",
   "Unable to resolve Axon Ivy debug connection: {0}": "Unable to resolve Axon Ivy debug connection: {0}",
   "No Axon Ivy debug port is configured for this debug session.": "No Axon Ivy debug port is configured for this debug session.",
+  "The action cannot be performed because the workspace is locked.": "The action cannot be performed because the workspace is locked.",
   "Fastest": "Fastest",
   "Fast": "Fast",
   "Normal": "Normal",
@@ -292,6 +295,7 @@
   "Install": "Install",
   "Language Support for Java by Red Hat extension is not installed.": "Language Support for Java by Red Hat extension is not installed.",
   "Installing Language Support for Java by Red Hat extension...": "Installing Language Support for Java by Red Hat extension...",
+  "Waiting for initial Java compile": "Waiting for initial Java compile",
   "No ivy-projects are open in the workspace.": "No ivy-projects are open in the workspace.",
   "Select an Ivy Project": "Select an Ivy Project",
   "Dangerous setting override found for setting \"{0}\".\nExpected {1} ({2}) but found {3} ({4}).\nRemove the setting and reload the window to ensure the extension works correctly.": "Dangerous setting override found for setting \"{0}\".\nExpected {1} ({2}) but found {3} ({4}).\nRemove the setting and reload the window to ensure the extension works correctly.",
@@ -307,8 +311,5 @@
   "New Axon Ivy {0}": "New Axon Ivy {0}",
   "{0} created successfully at '{1}'": "{0} created successfully at '{1}'",
   "Layout": "Layout",
-  "Template": "Template",
-  "Waiting for initial Java compile": "Waiting for initial Java compile",
-  "The action cannot be performed because the workspace is locked.": "The action cannot be performed because the workspace is locked.",
-  "A dialog with this name and namespace already exists in this project.": "A dialog with this name and namespace already exists in this project."
+  "Template": "Template"
 }
