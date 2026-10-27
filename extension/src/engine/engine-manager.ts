@@ -47,6 +47,7 @@ import { EngineDownloader } from './engine-downloader';
 import { engineOutputChannel } from './engine-output-channel';
 import { engineDirFromGlobalState, engineReleaseTrain, switchEngineReleaseTrain, updateGlobalStateEngineDir } from './engine-release-train';
 import { EngineRunner } from './engine-runner';
+import { JavaClassPathValidator } from './java-class-path-validator';
 import { ReleaseTrainValidator } from './release-train-validator';
 import { WebIdeWebSocketProvider } from './web-ide-ws/web-ide-websocket-provider';
 
@@ -164,6 +165,7 @@ export class IvyEngineManager {
 
     await this.deployProjects();
     ProjectFileWatcherManager.init(this.context);
+    JavaClassPathValidator.init(this.context);
     this.registerLanguageClients(this.websocketUrl);
     await IvyDiagnostics.instance.refresh();
   }

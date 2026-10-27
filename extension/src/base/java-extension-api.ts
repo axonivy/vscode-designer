@@ -1,5 +1,4 @@
-import type { Uri } from 'vscode';
-import { commands, extensions, l10n, window, workspace } from 'vscode';
+import { commands, extensions, l10n, Uri, window, workspace, type Disposable } from 'vscode';
 import { executeCommand, type JavaCommand } from './commands';
 import { logInformationMessage, logWarningMessage } from './logging-util';
 import { StatusBar } from './status-bar';
@@ -137,4 +136,23 @@ const runInitialJavaCompile = async () => {
   } catch {
     return CompileWorkspaceStatus.Unavailable;
   }
+};
+
+export const getClassPaths = async (projectDir: string) => {
+  const javaExtension = extensions.getExtension(JAVA_EXTENSION_ID);
+  if (!javaExtension) {
+    return [];
+  }
+  const api = await javaExtension.activate();
+  const result = await api.getClasspaths(Uri.file(projectDir).toString(), { scope: 'compile' });
+  return (result?.classpaths ?? []).filter((entry: string) => entry.endsWith('.iar')) as string[];
+};
+
+export const onDidClasspathUpdate = async (listener: (projectUri: Uri) => void): Promise<Disposable | undefined> => {
+  const javaExtension = extensions.getExtension(JAVA_EXTENSION_ID);
+  if (!javaExtension) {
+    return;
+  }
+  const api = await javaExtension.activate();
+  return api.onDidClasspathUpdate?.(listener);
 };
