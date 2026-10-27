@@ -15,7 +15,7 @@ test('Check existing warning and error', async ({ wsPage }) => {
 
   const script = editor.elementByPID('18D9CDFA8F58DA2B-f5');
   await editor.hasError(script);
-  await problemsView.hasError('Output code: A statement is expected, not an expression (maybe missing semicolon)');
+  await problemsView.hasError('f5 > output.code: A statement is expected, not an expression (maybe missing semicolon)');
 });
 
 test('Check live validation', async ({ wsPage }) => {
@@ -33,7 +33,7 @@ test('Check live validation', async ({ wsPage }) => {
   await wsPage.executeCommand('File: Save');
   await editor.hasError(script);
   const problemsView = await ProblemsView.initProblemsView(wsPage);
-  await problemsView.hasError("Output code: Unexpected token: identifier '");
+  await problemsView.hasError("f7 > output.code: Unexpected token: identifier '");
 });
 
 test('Worspace Validation', async ({ wsPage }) => {
