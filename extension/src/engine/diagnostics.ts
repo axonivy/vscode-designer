@@ -32,29 +32,31 @@ const POM_FILE = 'pom.xml';
 export class IvyDiagnostics {
   private static _instance: IvyDiagnostics;
   private readonly _onDidRefresh = new EventEmitter<void>();
+  private readonly diagnostics: DiagnosticCollection;
   readonly onDidRefresh = this._onDidRefresh.event;
 
-  private constructor(private diagnostics: DiagnosticCollection) {}
+  private constructor(context: ExtensionContext) {
+    this.diagnostics = languages.createDiagnosticCollection(DIAGNOSTIC_SOURCE);
+    const codeActionProvider = languages.registerCodeActionsProvider(
+      { pattern: `**/{${POM_FILE},${IVY_PROJECT_FILE}}` },
+      new ConvertProjectQuickFix(),
+      {
+        providedCodeActionKinds: [CodeActionKind.QuickFix]
+      }
+    );
+    context.subscriptions.push(this.diagnostics, codeActionProvider, this._onDidRefresh);
+  }
 
   static init(context: ExtensionContext) {
     if (!IvyDiagnostics._instance) {
-      const diagnostics = languages.createDiagnosticCollection(DIAGNOSTIC_SOURCE);
-      IvyDiagnostics._instance = new IvyDiagnostics(diagnostics);
-      const codeActionProvider = languages.registerCodeActionsProvider(
-        { pattern: `**/{${POM_FILE},${IVY_PROJECT_FILE}}` },
-        new ConvertProjectQuickFix(),
-        {
-          providedCodeActionKinds: [CodeActionKind.QuickFix]
-        }
-      );
-      context.subscriptions.push(diagnostics, codeActionProvider, IvyDiagnostics._instance._onDidRefresh);
+      IvyDiagnostics._instance = new IvyDiagnostics(context);
     }
     return IvyDiagnostics._instance;
   }
 
   public async refresh(refreshProjectStatuses = false) {
     this.diagnostics.clear();
-    let hasProjectWithError = false;
+    let hasFatalProjectError = false;
     if (refreshProjectStatuses) {
       await IvyEngineManager.instance.refreshProjectStatuses();
     }
@@ -63,21 +65,18 @@ export class IvyDiagnostics {
       ?.filter(p => p && p.errorMessage)
       .filter(p => !p.id.isIar || !p.errorMessage.startsWith(RUNNABLE_CONVERSION_PREFIX))
       .forEach(project => {
-        hasProjectWithError = true;
+        hasFatalProjectError = true;
         if (project.id.isIar) {
           this.handleIarDiagnostic(project, projects);
         } else {
           this.handleProjectDiagnostic(project);
         }
       });
-    const projectDiagnostics = await IvyProjectManager.instance.getDiagnostics();
-    projectDiagnostics.forEach((d, uri) => {
-      d.source = DIAGNOSTIC_SOURCE;
-      this.diagnostics.set(uri, [...(this.diagnostics.get(uri) ?? []), d]);
-      hasProjectWithError = true;
-    });
+    if (await IvyProjectManager.instance.hasErrors()) {
+      hasFatalProjectError = true;
+    }
     this._onDidRefresh.fire();
-    if (!hasProjectWithError) {
+    if (!hasFatalProjectError) {
       await runJavaServerModeSwitch();
       await initialJavaCompileStatus();
       await IvyEngineManager.instance.postCompileStart();
