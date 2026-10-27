@@ -45,25 +45,25 @@ export class EngineDownloader {
       const enginePath = path.join(this.globalEngieStoragePath, zipName.replace('.zip', ''));
       if (fs.existsSync(enginePath)) {
         if (globalStateEngineDir !== enginePath) {
-          engineOutputChannel.appendLine(`New Dev Axon Ivy Engine Version available locally, updating engine path to ${enginePath}`);
+          engineOutputChannel.appendLine(`New Axon Ivy Engine version available locally, updating Engine path to ${enginePath}`);
           await updateGlobalStateEngineDir(this.context, releaseTrain, enginePath);
           await askToReloadWindow(l10n.t('Axon Ivy Engine updated'));
         }
         return;
       }
-      const downloadLabel = l10n.t('Download new Version');
-      const pinTrainLabel = l10n.t('Pin current release train');
+      const downloadLabel = l10n.t('Download new version');
+      const pinVerionLabel = l10n.t('Pin current version');
       const cancelLabel = l10n.t('Cancel');
       const message = l10n.t(
-        'There is a new Dev Axon Ivy Engine Version available for release train {0}, switch from current engine version {1} to {2}',
+        'There is a new Axon Ivy Engine version available for release train {0}, switch from {1} to {2}',
         releaseTrain,
         path.basename(globalStateEngineDir),
         zipName
       );
       const selection = extensionVersion.isPreview
         ? await logInformationMessage(message, downloadLabel, cancelLabel)
-        : await logInformationMessage(message, downloadLabel, pinTrainLabel, cancelLabel);
-      if (selection === pinTrainLabel) {
+        : await logInformationMessage(message, downloadLabel, pinVerionLabel, cancelLabel);
+      if (selection === pinVerionLabel) {
         await pinCurrentReleaseTrain(engineVersion?.split('.').slice(0, 3).join('.'));
         return;
       }
