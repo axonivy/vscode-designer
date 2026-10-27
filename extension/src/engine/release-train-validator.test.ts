@@ -15,7 +15,7 @@ const validator = new ReleaseTrainValidator(extensionVersion);
 const testDir = (engineDir: string) => path.join(__dirname, 'release-train-validator-test', engineDir);
 
 test('valid sample', async () => {
-  expect(await validator.validate(testDir('engine'))).toEqual({ valid: true, isDirectory: true });
+  expect(await validator.validate(testDir('engine'))).toEqual({ valid: true, isDirectory: true, engineVersion: '13.2.10.123' });
 });
 
 test('wrong major', async () => {
@@ -23,7 +23,8 @@ test('wrong major', async () => {
   expect(await customValidator.validate(testDir('engine'))).toEqual({
     valid: false,
     isDirectory: true,
-    reason: "Engine major version '13.2.10.123' does not match expected major version '14.2.0'."
+    reason: "Engine major version '13.2.10.123' does not match expected major version '14.2.0'.",
+    engineVersion: '13.2.10.123'
   });
 });
 
@@ -32,7 +33,8 @@ test('wrong minor', async () => {
   expect(await customValidator.validate(testDir('engine'))).toEqual({
     valid: false,
     isDirectory: true,
-    reason: "Engine minor version '13.2.10.123' does not match expected minor version '13.3.0'."
+    reason: "Engine minor version '13.2.10.123' does not match expected minor version '13.3.0'.",
+    engineVersion: '13.2.10.123'
   });
 });
 
@@ -42,7 +44,8 @@ test('wrong patch', async () => {
   expect(await customValidator.validate(testDir('engine'))).toEqual({
     valid: false,
     isDirectory: true,
-    reason: "Engine patch version '13.2.10.123' is older than expected version '13.2.999'."
+    reason: "Engine patch version '13.2.10.123' is older than expected version '13.2.999'.",
+    engineVersion: '13.2.10.123'
   });
 });
 
