@@ -89,10 +89,13 @@ export class IvyEngineManager {
     }
     const engineDownloader = new EngineDownloader(this.context);
     const globalStateEngineDir = engineDirFromGlobalState(this.context, releaseTrain);
-    if (globalStateEngineDir && (await releaseTrainValidator.isValidEngineDir(globalStateEngineDir)).valid) {
-      engineDownloader.tryToUpdateDevEngine(releaseTrain, globalStateEngineDir);
-      this.resolvedEngineDir = globalStateEngineDir;
-      return globalStateEngineDir;
+    if (globalStateEngineDir) {
+      const result = await releaseTrainValidator.isValidEngineDir(globalStateEngineDir);
+      if (result.valid) {
+        engineDownloader.tryToUpdateDevEngine(releaseTrain, globalStateEngineDir, result.engineVersion);
+        this.resolvedEngineDir = globalStateEngineDir;
+        return globalStateEngineDir;
+      }
     }
     const newEngineDir = await engineDownloader.loadReleaseTrain(releaseTrain);
     if ((await releaseTrainValidator.isValidEngineDir(newEngineDir)).valid) {
