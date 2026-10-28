@@ -1,7 +1,7 @@
 import { App, ClientContextProvider, RestClientClientJsonRpc, initQueryClient } from '@axonivy/restclient-editor';
 import '@axonivy/restclient-editor/lib/editor.css';
 import { HotkeysProvider, ReadonlyProvider, ThemeProvider, Toaster } from '@axonivy/ui-components';
-import { type InitializeConnection, initMessenger, toConnection } from '@axonivy/vscode-webview-common';
+import { type InitializeConnection, initMessenger, notifyEditorReady, toConnection } from '@axonivy/vscode-webview-common';
 import '@axonivy/vscode-webview-common/css/colors.css';
 import { QueryClientProvider } from '@tanstack/react-query';
 import * as React from 'react';
@@ -30,7 +30,7 @@ export async function start({ app = '', project = '', file, readOnly = false }: 
           <QueryClientProvider client={queryClient}>
             <ReadonlyProvider readonly={readOnly}>
               <HotkeysProvider initiallyActiveScopes={['global']}>
-                <App context={context} />
+                <App context={context} onReady={() => notifyEditorReady(messenger)} />
                 <Toaster closeButton={true} />
               </HotkeysProvider>
             </ReadonlyProvider>

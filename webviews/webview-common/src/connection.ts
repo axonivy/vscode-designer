@@ -5,7 +5,10 @@ import { WebviewMessageWriter } from './message-writer';
 
 export type InitializeConnection = { file: string; app?: string; project?: string; readOnly?: boolean };
 const WebviewReadyNotification: NotificationType<void> = { method: 'ready' };
+const EditorReadyNotification: NotificationType<void> = { method: 'editorReady' };
 const InitializeConnectionNotification: NotificationType<InitializeConnection> = { method: 'initializeConnection' };
+
+export const notifyEditorReady = (messenger: Messenger) => messenger.sendNotification(EditorReadyNotification, HOST_EXTENSION);
 
 export const getVscodeLanguage = () => {
   const language = document.documentElement.lang.toLowerCase().split(/[-_]/)[0];

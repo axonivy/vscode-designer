@@ -27,9 +27,16 @@ import {
 } from '../notification-helper';
 import { runMavenCommand } from './maven-runner';
 
-const RestClientWebSocketMessage: NotificationType<unknown> = { method: 'restClientWebSocketMessage' };
+export const RestClientWebSocketMessage: NotificationType<unknown> = { method: 'restClientWebSocketMessage' };
+const RestClientEditorReadyNotification: NotificationType<void> = { method: 'editorReady' };
 
-export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webviewPanel: WebviewPanel, document: TextDocument) => {
+export const setupCommunication = (
+  websocketUrl: URL,
+  messenger: Messenger,
+  webviewPanel: WebviewPanel,
+  document: TextDocument,
+  onReady: () => void
+) => {
   const messageParticipant = messenger.registerWebviewPanel(webviewPanel);
   const toDispose = new DisposableCollection(
     new RestClientWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
@@ -38,8 +45,10 @@ export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webv
       () => messenger.sendNotification(InitializeConnectionRequest, messageParticipant, { file: document.fileName }),
       { sender: messageParticipant }
     ),
+    messenger.onNotification(RestClientEditorReadyNotification, onReady, { sender: messageParticipant }),
     webviewPanel.onDidDispose(() => toDispose.dispose())
   );
+  return messageParticipant;
 };
 
 class RestClientWebSocketForwarder extends EditorWebSocketForwarder {

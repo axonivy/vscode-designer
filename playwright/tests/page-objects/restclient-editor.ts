@@ -7,8 +7,8 @@ export class RestClientEditor extends WebViewEditor {
   detail: Locator;
   main: Locator;
 
-  constructor(wsPage: WorkspacePage, fileName = 'rest-clients.yaml') {
-    super(wsPage, fileName);
+  constructor(wsPage: WorkspacePage, nthFrame = 0) {
+    super(wsPage, 'rest-clients.yaml', nthFrame);
     this.rows = this.webViewFrame.locator('tbody > tr');
     this.detail = this.webViewFrame.locator('#restclient-editor-detail');
     this.main = this.webViewFrame.locator('#restclient-editor-main');

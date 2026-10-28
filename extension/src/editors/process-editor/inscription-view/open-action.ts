@@ -4,15 +4,33 @@ import { executeCommand, type KnownCommand } from '../../../base/commands';
 import { logErrorMessage } from '../../../base/logging-util';
 import { IvyEngineManager } from '../../../engine/engine-manager';
 
+export type OpenActionMessage =
+  | {
+      method: 'selectElement';
+      payload: string;
+    }
+  | {
+      method: 'openAdd';
+      payload?: never;
+    };
+
 export const handleOpenAction = async (command: KnownCommand, args: InscriptionActionArgs) => {
   const payload = parsePayload(command, args);
-  const project = isOpenActionPayload(payload) ? payload.project : args.context.project;
-  openAction(command, project);
+  const openActionPayload = isOpenActionPayload(payload) ? payload : undefined;
+  const project = openActionPayload?.project ?? args.context.project;
+  const message: OpenActionMessage | undefined = openActionPayload?.selection
+    ? { method: 'selectElement', payload: openActionPayload.selection }
+    : undefined;
+  openAction(command, project, message);
 };
 
-export const openAction = async (command: KnownCommand, project: string) => {
+export const handleNewAction = async (command: KnownCommand, args: InscriptionActionArgs) => {
+  openAction(command, args.context.project, { method: 'openAdd' });
+};
+
+export const openAction = async (command: KnownCommand, project: string, message?: OpenActionMessage) => {
   const projectUri = await resolveProjectUri(project);
-  executeCommand(command, projectUri);
+  executeCommand(command, projectUri, message);
 };
 
 const parsePayload = (command: KnownCommand, args: InscriptionActionArgs) => {
