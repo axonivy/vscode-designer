@@ -52,6 +52,27 @@ public class CopilotIntegrationTest {
         .isEmpty();
   }
 
+  @Test 
+  @Order(Complexity.INDEPENDENT)
+  void market_search(AgentRuntime rt) throws Exception {
+    var spans = rt.prompt("is there a built in facility to involve a JIRA instance in my process?");
+    assertThat(spans)
+        .as("fetches connectors from marketplace")
+        .loadedSkill("ivy-market")
+        .usedTools("web_fetch")
+        .toolCallArguments("market.axonivy.com");
+
+    var apiFetch = spans.usedTools().stream()
+        .filter(u -> u.name().equals("web_fetch"))
+        .filter(u -> u.arguments().contains("market.axonivy.com/stable/api/product"))
+        .findFirst().orElseThrow();
+    assertThat(apiFetch.result()).contains("adobe-acrobat");
+
+    assertThat(spans.outputMessage())
+        .containsIgnoringCase("Yes")
+        .containsIgnoringCase("Jira");
+  }
+
   @Test
   @Order(Complexity.INDEPENDENT)
   void mcpON(AgentRuntime rt) throws Exception {

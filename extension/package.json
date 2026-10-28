@@ -104,6 +104,10 @@
         "https://json-schema.axonivy.com": {
           "approveRequest": true,
           "approveResponse": true
+        },
+        "https://market.axonivy.com": {
+          "approveRequest": true,
+          "approveResponse": true
         }
       },
       "html.suggest.html5": false,
@@ -766,6 +770,9 @@
       },
       {
         "path": "./src/ai/skills/ivy-json-files/SKILL.md"
+      },
+      {
+        "path": "./src/ai/skills/ivy-market/SKILL.md"
       }
     ],
     "languageModelTools": [
