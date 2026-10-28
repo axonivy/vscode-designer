@@ -25,3 +25,8 @@ If either API call fails, report it; do not guess versions or coordinates.
 2. Read `maven-dependency` installer data using `schema/market/product.json`. Select required dependencies, only the requested member(s) of each `requireOneOfGroup`, and optional standalone add-ons only when requested. Ask if a group choice is unspecified.
 3. Edit the existing POM: add selected dependencies directly under `<dependencies>` with their exact coordinates, and add missing installer repositories. Preserve unrelated XML.
 
+## Source project imports
+
+For each `maven-import` installer, import projects in `data.projects` unless `importInWorkspace` is false (boolean or string); a missing value means true. These are IAR source projects, not dependencies to add to the consuming POM.
+
+Resolve each IAR from the installer's repository using its Maven coordinates (`groupId:artifactId:version:type`), allowing Maven to resolve snapshots. Extract only `META-INF/ivy/**`, strip that prefix, and place the contents in a workspace folder named for `artifactId`. Do not unpack the rest of the IAR. Verify the imported folder contains `.ivyproject` and project sources.

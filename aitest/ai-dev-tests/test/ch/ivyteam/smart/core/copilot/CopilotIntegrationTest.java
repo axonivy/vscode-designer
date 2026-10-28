@@ -130,6 +130,42 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Order(Complexity.HEAVY)
+  void market_install_import(AgentRuntime rt) throws Exception {
+    var spans = rt.prompt("install the Connectivity Features demo from the marketplace into my workspace");
+    assertThat(spans)
+        .loadedSkill("ivy-market")
+        .usedTools("web_fetch", "bash");
+
+    var fetchCalls = spans.usedTools().stream().filter(tool -> tool.name().equals("web_fetch")).toList();
+    var bestMatch = fetchCalls.stream()
+        .filter(call -> call.arguments().contains("/product-details/connectivity-demo/"))
+        .findFirst().orElseThrow();
+    var productVersion = JsonMapper.shared().readTree(bestMatch.result()).path("version").asString();
+    assertThat(fetchCalls.getLast().arguments())
+        .contains("/product/connectivity-demo/install?productVersion=" + productVersion);
+
+    assertThat(spans.usedTools().stream()
+        .filter(tool -> tool.name().equals("bash"))
+        .filter(tool -> tool.arguments().contains("maven.axonivy.com")))
+        .anySatisfy(download -> assertThat(download.arguments())
+            .contains("connectivity-demos", productVersion, "iar"));
+
+    var workspace = rt.ivyWorkspace().path();
+    var demo = workspace.resolve("connectivity-demos");
+    assertThat(demo.resolve(".ivyproject")).exists();
+    assertThat(demo.resolve("pom.xml")).exists();
+    assertThat(demo.resolve("process/soap/client/personClient.p.json")).exists();
+    assertThat(demo.resolve("META-INF")).doesNotExist();
+    assertThat(workspace.resolve("connectivity-demos-test")).doesNotExist();
+
+    var purchasePom = workspace.resolve("purchase/pom.xml");
+    assertThat(PomParser.dependencies(purchasePom))
+        .extracting(Dependency::artifactId)
+        .doesNotContain("connectivity-demos");
+  }
+
+  @Test
   @Disabled("speed")
   @Order(Complexity.INDEPENDENT)
   void mcpON(AgentRuntime rt) throws Exception {
