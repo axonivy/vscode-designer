@@ -30,3 +30,18 @@ test('Add new Entity Class', async ({ wsPage }) => {
   await expect(javaEditor.content).toContainText(`public class ${entityClassName} extends ch.ivyteam.ivy.scripting.objects.CompositeObject`);
   await expect(javaEditor.content).toContainText('@jakarta.persistence.Entity');
 });
+
+test('Data Class already exists', async ({ wsPage }) => {
+  const explorer = new FileExplorer(wsPage);
+  // Use existing dialog data class
+  const existingDataClassName = 'testFormData';
+  const existingDataClassNamespace = 'ch.form.test.testForm';
+
+  await explorer.addDataClass(existingDataClassName, existingDataClassNamespace);
+  await expect(wsPage.quickInputMessage).toBeVisible();
+  await expect(wsPage.quickInputMessage).toHaveText("A data class with this name and namespace already exists in this project in the '/dialog' directory.");
+
+  await explorer.addEntityClass(existingDataClassName, existingDataClassNamespace);
+  await expect(wsPage.quickInputMessage).toBeVisible();
+  await expect(wsPage.quickInputMessage).toHaveText("A data class with this name and namespace already exists in this project in the '/dialog' directory.");
+});

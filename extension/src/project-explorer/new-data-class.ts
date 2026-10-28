@@ -46,7 +46,7 @@ export const addNewDataClass = async (type: DataClassType, selectionContext: Add
       try {
         await workspace.fs.stat(dataClassPath);
         return l10n.t(
-          'A data class with this name and namespace already exists in this project in the {0} directory.',
+          "A data class with this name and namespace already exists in this project in the '/{0}' directory.",
           resourceDirectory
         );
       } catch {
