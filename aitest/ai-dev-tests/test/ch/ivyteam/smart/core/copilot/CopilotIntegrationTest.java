@@ -135,21 +135,32 @@ public class CopilotIntegrationTest {
     var spans = rt.prompt("install the Connectivity Features demo from the marketplace into my workspace");
     assertThat(spans)
         .loadedSkill("ivy-market")
-        .usedTools("web_fetch", "bash");
+        .usedTools("bash");
 
-    var fetchCalls = spans.usedTools().stream().filter(tool -> tool.name().equals("web_fetch")).toList();
-    var bestMatch = fetchCalls.stream()
+    var toolCalls = spans.usedTools();
+    var apiCalls = toolCalls.stream().filter(call -> call.arguments() != null).toList();
+    var bestMatch = apiCalls.stream()
         .filter(call -> call.arguments().contains("/product-details/connectivity-demo/"))
         .findFirst().orElseThrow();
-    var productVersion = JsonMapper.shared().readTree(bestMatch.result()).path("version").asString();
-    assertThat(fetchCalls.getLast().arguments())
+    var versionMatcher = Pattern.compile("[0-9]+\\.[0-9]+\\.[0-9]+(?:-[A-Za-z0-9.-]+)?")
+        .matcher(bestMatch.result());
+    assertThat(versionMatcher.find()).as("best-match response contains a product version").isTrue();
+    var productVersion = versionMatcher.group();
+    var installCall = apiCalls.stream()
+        .filter(call -> call.arguments().contains("/product/connectivity-demo/install?productVersion=" + productVersion))
+        .findFirst().orElseThrow();
+    assertThat(installCall.arguments())
         .contains("/product/connectivity-demo/install?productVersion=" + productVersion);
 
-    assertThat(spans.usedTools().stream()
+    assertThat(toolCalls.stream()
         .filter(tool -> tool.name().equals("bash"))
-        .filter(tool -> tool.arguments().contains("maven.axonivy.com")))
+        .filter(tool -> tool.arguments() != null))
         .anySatisfy(download -> assertThat(download.arguments())
-            .contains("connectivity-demos", productVersion, "iar"));
+            .contains("dependency:get", "com.axonivy.demo:connectivity-demos:" + productVersion + ":iar", "maven.axonivy.com"));
+    assertThat(toolCalls.stream()
+        .filter(tool -> tool.name().equals("bash"))
+        .filter(tool -> tool.arguments() != null))
+        .anySatisfy(extract -> assertThat(extract.arguments()).contains("META-INF/ivy", "connectivity-demos"));
 
     var workspace = rt.ivyWorkspace().path();
     var demo = workspace.resolve("connectivity-demos");
