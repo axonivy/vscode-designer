@@ -56,11 +56,14 @@ public class CopilotIntegrationTest {
     var spans = rt.prompt("is there a built in facility to involve a JIRA instance in my process?");
     assertThat(spans)
         .as("fetches connectors from marketplace")
+        .loadedSkill("ivy-market")
         .usedTools("web_fetch")
         .toolCallArguments("market.axonivy.com");
 
-    var apiFetch = spans.usedTools().stream().filter(u -> u.name().equals("web_fetch")).findFirst().orElseThrow();
-    assertThat(apiFetch.arguments()).contains("https://market.axonivy.com/stable");
+    var apiFetch = spans.usedTools().stream()
+        .filter(u -> u.name().equals("web_fetch"))
+        .filter(u -> u.arguments().contains("market.axonivy.com/stable/api/product"))
+        .findFirst().orElseThrow();
     assertThat(apiFetch.result()).contains("adobe-acrobat");
 
     assertThat(spans.outputMessage())
