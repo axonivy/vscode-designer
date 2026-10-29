@@ -29,7 +29,7 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        nodejs(nodeJSInstallationName: '24.18.0') {
+        nodejs(nodeJSInstallationName: '26.13.0') {
           bat 'pnpm install'
           bat 'pnpm run update:axonivy:next'
           bat 'pnpm run build:production'
@@ -43,7 +43,7 @@ pipeline {
 
     stage('Playwright Tests') {
       steps {
-        nodejs(nodeJSInstallationName: '24.18.0') {
+        nodejs(nodeJSInstallationName: '26.13.0') {
           catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
             bat 'start AxonIvyEngine/bin/AxonIvyEngine.exe'
             bat 'pnpm run test:playwright'
@@ -68,7 +68,7 @@ pipeline {
         expression { isReleasingBranch() }
       }
       steps {
-        nodejs(nodeJSInstallationName: '24.18.0') {
+        nodejs(nodeJSInstallationName: '26.13.0') {
           catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
             script {
               bat 'pnpm run openapi:download'
@@ -90,7 +90,7 @@ pipeline {
       }
       steps {
         script {
-          nodejs(nodeJSInstallationName: '24.18.0') {
+          nodejs(nodeJSInstallationName: '26.13.0') {
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
               def branchName = env.BRANCH_NAME.replace("/", "%%252F")
               bat 'pnpm install'
@@ -119,7 +119,7 @@ pipeline {
       }
       steps {
         script {
-          nodejs(nodeJSInstallationName: '24.18.0') {
+          nodejs(nodeJSInstallationName: '26.13.0') {
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
               def branchName = env.BRANCH_NAME.replace("/", "%%252F")
               bat 'pnpm install'
