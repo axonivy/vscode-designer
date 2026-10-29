@@ -1,3 +1,4 @@
+import path from 'path';
 import { expect } from '@playwright/test';
 import { test } from '~/fixtures/baseTest';
 import { TextEditor } from '~/page-objects/editor';
@@ -64,4 +65,11 @@ test('Dialog validation', async ({ wsPage }) => {
   await explorer.addUserDialog('testForm', 'ch.form.test', 'Html Dialog (JSF)');
   await expect(wsPage.quickInputMessage).toBeVisible();
   await expect(wsPage.quickInputMessage).toHaveText('A dialog with this name and namespace already exists in this project.');
+
+  // Validate dataclass conflict
+  await explorer.addUserDialog('formConflict', 'conflict', 'Html Dialog (JSF)');
+  await expect(wsPage.quickInputMessage).toBeVisible();
+  await expect(wsPage.quickInputMessage).toHaveText(
+    `This dialogs dataclass '${path.join('conflict', 'formConflict', 'formConflictData.d.json')}' that would be created already exists in the project in the '/dataclass' directory.`
+  );
 });

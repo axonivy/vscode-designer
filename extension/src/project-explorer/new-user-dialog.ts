@@ -111,16 +111,13 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
   };
 
   const validateNotExisting = async (typedDialogNamespace: string): Promise<string | undefined> => {
+    const projectPath = newUserDialogData.project?.path ?? '';
+    const typedName = newUserDialogData.name ?? '';
+
     const typedNamespacePath = typedDialogNamespace.replace(/\./g, path.sep);
     for (const ext of fileExtensions) {
       const absPathDialogFile = Uri.file(
-        path.join(
-          newUserDialogData.project?.path ?? '',
-          resourceDirectoryTarget,
-          typedNamespacePath,
-          newUserDialogData.name ?? '',
-          `${newUserDialogData.name ?? ''}${ext}`
-        )
+        path.join(projectPath, resourceDirectoryTarget, typedNamespacePath, typedName, `${typedName}${ext}`)
       );
       try {
         await workspace.fs.stat(absPathDialogFile);
@@ -129,9 +126,24 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
         continue;
       }
     }
+    // Also make sure that no dataclass exists that clashes with the dialogs new dataclass
+    const dataClassFQN = `${typedDialogNamespace}.${typedName}.${typedName}Data`;
+    const dataClassPath = dataClassFQN.replace(/\./g, path.sep) + '.d.json';
+    const absDataClassPath = Uri.file(path.join(projectPath, resourceDirectoryDataclassTarget, dataClassPath));
+    try {
+      await workspace.fs.stat(absDataClassPath);
+      return l10n.t(
+        `This dialogs dataclass '{0}' that would be created already exists in the project in the '/{1}' directory.`,
+        dataClassPath,
+        resourceDirectoryDataclassTarget
+      );
+    } catch {
+      return undefined;
+    }
   };
 
   const resourceDirectoryTarget: ResourceDirectoryTarget = 'dialog';
+  const resourceDirectoryDataclassTarget: ResourceDirectoryTarget = 'dataclass';
   const existingProjects = selectionContext.existingIvyProjects;
   const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(
     selectionContext,
