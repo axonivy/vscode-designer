@@ -1,5 +1,6 @@
+import fs from 'fs';
 import path from 'path';
-import { l10n, Uri, workspace, type QuickPickItem } from 'vscode';
+import { l10n, Uri, type QuickPickItem } from 'vscode';
 import { localizeDialogLayout, localizeDialogType } from '../base/localized-labels';
 import { logErrorMessage } from '../base/logging-util';
 import type { CreateUserDialogParams } from '../engine/api/engine-api';
@@ -21,6 +22,8 @@ export const dialogTypes = ['JSF', 'Form', 'JSFOffline'] as const;
 export type DialogType = (typeof dialogTypes)[number];
 
 const fileExtensions = ['.xhtml', '.f.json'];
+
+const dialogDataClassSuffix = 'Data';
 
 const layouts = [
   'Page Responsive Grid 2 Columns',
@@ -112,33 +115,24 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
 
   const validateNotExisting = async (typedDialogNamespace: string): Promise<string | undefined> => {
     const projectPath = newUserDialogData.project?.path ?? '';
-    const typedName = newUserDialogData.name ?? '';
-
+    const name = newUserDialogData.name ?? '';
     const typedNamespacePath = typedDialogNamespace.replace(/\./g, path.sep);
     for (const ext of fileExtensions) {
-      const absPathDialogFile = Uri.file(
-        path.join(projectPath, resourceDirectoryTarget, typedNamespacePath, typedName, `${typedName}${ext}`)
-      );
-      try {
-        await workspace.fs.stat(absPathDialogFile);
+      const absPathDialogFile = Uri.file(path.join(projectPath, resourceDirectoryTarget, typedNamespacePath, name, `${name}${ext}`)).fsPath;
+      if (fs.existsSync(absPathDialogFile)) {
         return l10n.t('A dialog with this name and namespace already exists in this project.');
-      } catch {
-        continue;
       }
     }
     // Also make sure that no dataclass exists that clashes with the dialogs new dataclass
-    const dataClassFQN = `${typedDialogNamespace}.${typedName}.${typedName}Data`;
+    const dataClassFQN = `${typedDialogNamespace}.${name}.${name}${dialogDataClassSuffix}`;
     const dataClassPath = dataClassFQN.replace(/\./g, path.sep) + '.d.json';
-    const absDataClassPath = Uri.file(path.join(projectPath, resourceDirectoryDataclassTarget, dataClassPath));
-    try {
-      await workspace.fs.stat(absDataClassPath);
+    const absPathDataClassFile = Uri.file(path.join(projectPath, resourceDirectoryDataclassTarget, dataClassPath)).fsPath;
+    if (fs.existsSync(absPathDataClassFile)) {
       return l10n.t(
         `This dialogs dataclass '{0}' that would be created already exists in the project in the '/{1}' directory.`,
         dataClassPath,
         resourceDirectoryDataclassTarget
       );
-    } catch {
-      return undefined;
     }
   };
 

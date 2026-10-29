@@ -1,7 +1,8 @@
+import fs from 'fs';
 import path from 'path';
-import { l10n, Uri, workspace } from 'vscode';
+import { l10n, Uri } from 'vscode';
 import { localizeDataClassType } from '../base/localized-labels';
-import { logErrorMessage } from '../base/logging-util';
+import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import type { CreateDataClassParams } from '../engine/api/engine-api';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { type AddCommandSelectionContext } from './ivy-project-explorer';
@@ -27,34 +28,25 @@ interface NewDataClassState extends MSStateBase {
 }
 
 export const addNewDataClass = async (type: DataClassType, selectionContext: AddCommandSelectionContext) => {
-  const resourceDirectoryTarget: ResourceDirectoryTarget = 'dataclass';
   const validateFinal = async (typedNamespace: string): Promise<string | undefined> => {
     return validateDotSeparatedName(typedNamespace) ?? (await validateNotExisting(typedNamespace));
   };
 
   const validateNotExisting = async (typedNamespace: string): Promise<string | undefined> => {
-    const namespacePath = typedNamespace.replace(/\./g, path.sep);
-    for (const resourceDirectory of ['dataclass', 'dialog']) {
-      const dataClassPath = Uri.file(
-        path.join(
-          newDataClassDialogData.project?.path ?? '',
-          resourceDirectory,
-          namespacePath,
-          `${newDataClassDialogData.name ?? ''}.d.json`
-        )
-      );
-      try {
-        await workspace.fs.stat(dataClassPath);
-        return l10n.t(
-          "A data class with this name and namespace already exists in this project in the '/{0}' directory.",
-          resourceDirectory
-        );
-      } catch {
-        continue;
+    const projectPath = newDataClassDialogData.project?.path ?? '';
+    const name = newDataClassDialogData.name ?? '';
+    const typedNamespacePath = typedNamespace.replace(/\./g, path.sep);
+    for (const resDir of [resourceDirectoryTarget, resourceDirectoryDialogTarget]) {
+      const absPathDataClassFile = Uri.file(path.join(projectPath, resDir, typedNamespacePath, `${name}.d.json`)).fsPath;
+      logInformationMessage(`Checking existence of data class file at: ${absPathDataClassFile}`);
+      if (fs.existsSync(absPathDataClassFile)) {
+        return l10n.t("A data class with this name and namespace already exists in this project in the '/{0}' directory.", resDir);
       }
     }
   };
 
+  const resourceDirectoryTarget: ResourceDirectoryTarget = 'dataclass';
+  const resourceDirectoryDialogTarget: ResourceDirectoryTarget = 'dialog';
   const existingProjects = selectionContext.existingIvyProjects;
   const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(
     selectionContext,

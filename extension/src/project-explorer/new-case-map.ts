@@ -1,5 +1,6 @@
+import fs from 'fs';
 import path from 'path';
-import { l10n, Uri, workspace } from 'vscode';
+import { l10n, Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { type AddCommandSelectionContext } from './ivy-project-explorer';
@@ -23,28 +24,20 @@ interface NewCaseMapState extends MSStateBase {
 }
 
 export const addNewCaseMap = async (selectionContext: AddCommandSelectionContext) => {
-  const resourceDirectoryTarget: ResourceDirectoryTarget = 'process';
   const validateFinal = async (typedNamespace: string): Promise<string | undefined> => {
     return validateNamespace(typedNamespace) ?? (await validateNotExisting(typedNamespace));
   };
 
   const validateNotExisting = async (typedNamespace: string): Promise<string | undefined> => {
-    try {
-      const caseMapPath = Uri.file(
-        path.join(
-          newCaseMapData.project?.path ?? '',
-          resourceDirectoryTarget,
-          typedNamespace,
-          `${newCaseMapData.name ?? ''}.m.json`
-        )
-      );
-      await workspace.fs.stat(caseMapPath);
+    const projectPath = newCaseMapData.project?.path ?? '';
+    const name = newCaseMapData.name ?? '';
+    const absPathCaseMapFile = Uri.file(path.join(projectPath, resourceDirectoryTarget, typedNamespace, `${name}.m.json`)).fsPath;
+    if (fs.existsSync(absPathCaseMapFile)) {
       return l10n.t('A case map with this name and namespace already exists in this project.');
-    } catch {
-      return undefined;
     }
   };
 
+  const resourceDirectoryTarget: ResourceDirectoryTarget = 'process';
   const existingProjects = selectionContext.existingIvyProjects;
   const { projectFromSelection, namespaceFromSelection } = await resolveAddCommandSelectionContext(
     selectionContext,
