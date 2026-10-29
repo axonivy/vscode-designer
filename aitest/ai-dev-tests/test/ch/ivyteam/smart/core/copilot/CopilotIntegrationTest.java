@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import ch.ivyteam.smart.core.AgentRuntime;
 import ch.ivyteam.smart.core.AgentRuntimeExtension;
+import ch.ivyteam.smart.core.copilot.PomParser.Dependency;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.dataformat.yaml.YAMLMapper;
@@ -97,6 +98,34 @@ public class CopilotIntegrationTest {
         assertThat(dependency.version()).isNotBlank();
         assertThat(dependency.type()).isEqualTo("iar");
       });
+  }
+
+  @Test
+  @Order(Complexity.INDEPENDENT)
+  void market_install_oneOf(AgentRuntime rt) throws Exception {
+    var spans = rt.prompt("install smart-workflow agent with anthropic.");
+    assertThat(spans)
+        .loadedSkill("ivy-market")
+        .usedTools("web_fetch");
+
+    var fetchCalls = spans.usedTools().stream().filter(tool -> tool.name().equals("web_fetch")).toList();
+    assertThat(fetchCalls.getFirst().arguments())
+        .contains("https://market.axonivy.com/stable/api/product\"");
+    assertThat(fetchCalls)
+        .as("resolves the product version for the project's Ivy version")
+        .anySatisfy(call -> assertThat(call.arguments())
+            .contains("/bestmatch?isShowDevVersion=true"));
+    assertThat(fetchCalls.getLast().arguments())
+        .contains("https://market.axonivy.com/stable/api/product/smart-workflow/install?productVersion=");
+
+    var purchase = rt.ivyWorkspace().path().resolve("purchase");
+    var pom = purchase.resolve("pom.xml");
+    var deps = PomParser.dependencies(pom).stream()
+      .filter(d -> d.groupId().equals("com.axonivy.utils.ai"))
+      .toList();
+    assertThat(deps).extracting(Dependency::artifactId)
+      .containsOnly("smart-workflow", "smart-workflow-anthropic");
+
   }
 
   @Test
