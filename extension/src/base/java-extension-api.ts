@@ -1,5 +1,6 @@
 import type { Uri } from 'vscode';
 import { commands, extensions, l10n, window, workspace } from 'vscode';
+import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { executeCommand, type JavaCommand } from './commands';
 import { logInformationMessage, logWarningMessage } from './logging-util';
 import { StatusBar } from './status-bar';
@@ -120,6 +121,9 @@ export const initialJavaCompileStatus = async () => {
 };
 
 const runInitialJavaCompile = async () => {
+  if ((await IvyProjectManager.instance.getIvyProjects()).length === 0) {
+    return CompileWorkspaceStatus.Unavailable;
+  }
   const javaExtension = extensions.getExtension(JAVA_EXTENSION_ID);
   if (!javaExtension) {
     return CompileWorkspaceStatus.Unavailable;
