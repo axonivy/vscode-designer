@@ -1,5 +1,5 @@
-import path from 'path';
 import { expect } from '@playwright/test';
+import path from 'path';
 import { test } from '~/fixtures/baseTest';
 import { TextEditor } from '~/page-objects/editor';
 import { FileExplorer } from '~/page-objects/explorer-view';
