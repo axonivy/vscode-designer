@@ -97,11 +97,11 @@ pipeline {
               bat 'pnpm run market:generate clean'
               bat '''
                 set artifacts=https://jenkins.ivyteam.io/job/core_json-schema/job/'''+branchName+'''/lastSuccessfulBuild/artifact
-                set devSchema=%artifacts%/workspace/ch.ivyteam.ivy.market.schema/target/schema/market/*/product.json/*zip*/schema.zip
-                curl -o schema.zip %devSchema%
+                set devSchema=%artifacts%/workspace/ch.ivyteam.ivy.market.schema/target/schema/*/market/product.json/*zip*/product.zip
+                curl -o product.zip %devSchema%
               '''
-              bat 'powershell -Command "Expand-Archive -Path schema.zip -DestinationPath . -Force"'
-              bat 'move 14.0.0\\product.json marketProduct.json'
+              bat 'powershell -Command "Expand-Archive -Path product.zip -DestinationPath . -Force"'
+              bat 'move 14.0\\market\\product.json marketProduct.json'
               bat 'pnpm run market:generate %cd%\\marketProduct.json'
               bat 'pnpm run type && pnpm run lint:ci'
             }
