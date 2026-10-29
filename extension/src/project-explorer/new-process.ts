@@ -1,5 +1,6 @@
+import fs from 'fs';
 import path from 'path';
-import { l10n, Uri, workspace } from 'vscode';
+import { l10n, Uri } from 'vscode';
 import { localizeProcessKind } from '../base/localized-labels';
 import { logErrorMessage } from '../base/logging-util';
 import type { CreateProcessParams } from '../engine/api/engine-api';
@@ -32,14 +33,11 @@ export const addNewProcess = async (selectionContext: AddCommandSelectionContext
   };
 
   const validateNotExisting = async (typedProcessNamespace: string): Promise<string | undefined> => {
-    try {
-      const absPathProcess = Uri.file(
-        path.join(newProcessData.project?.path ?? '', resourceDirectoryTarget, typedProcessNamespace, `${newProcessData.name ?? ''}.p.json`)
-      );
-      await workspace.fs.stat(absPathProcess);
+    const projectPath = newProcessData.project?.path ?? '';
+    const name = newProcessData.name ?? '';
+    const absPathProcessFile = Uri.file(path.join(projectPath, resourceDirectoryTarget, typedProcessNamespace, `${name}.p.json`)).fsPath;
+    if (fs.existsSync(absPathProcessFile)) {
       return l10n.t('A process with this name and namespace already exists in this project.');
-    } catch {
-      return undefined;
     }
   };
 
