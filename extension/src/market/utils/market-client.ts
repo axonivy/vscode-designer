@@ -7,6 +7,7 @@ import {
   type MavenArtifactVersionModel,
   type ProductModel
 } from '../generated/market-client';
+import { resolveMarketAssetUrl } from './market-fetch';
 
 export type Product = {
   id: string;
@@ -22,7 +23,7 @@ export async function searchMarketProduct(): Promise<Product[]> {
       id: product.id || '',
       name: product.names?.en || 'Unnamed Product',
       description: product.shortDescriptions?.en || '',
-      logoUrl: product.logoUrl || ''
+      logoUrl: product.logoUrl ? resolveMarketAssetUrl(product.logoUrl) : ''
     })) || []
   );
 }

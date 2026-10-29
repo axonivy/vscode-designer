@@ -1,5 +1,7 @@
 const MARKET_URL = 'https://axonivya.myhostpoint.ch/stable';
 
+export const resolveMarketAssetUrl = (url: string): string => new URL(url, `${MARKET_URL}/`).toString();
+
 const getUrl = (contextUrl: string): string => {
   const base = MARKET_URL;
   const apiPrefix = '/api';
