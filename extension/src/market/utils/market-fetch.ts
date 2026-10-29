@@ -1,4 +1,4 @@
-const MARKET_URL = 'https://market.axonivy.com/stable';
+const MARKET_URL = 'https://axonivya.myhostpoint.ch/stable';
 
 const getUrl = (contextUrl: string): string => {
   const base = MARKET_URL;
