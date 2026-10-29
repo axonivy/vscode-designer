@@ -52,7 +52,7 @@ public class CopilotContainer extends GenericContainer<CopilotContainer> {
     } catch (NotFoundException exception) {
       return new ImageFromDockerfile(IMAGE_NAME, false)
         .withDockerfileFromBuilder(builder -> builder
-          .from("node:24.18-slim")
+          .from("node:26.13-slim")
           .run("apt-get update && apt-get install -y --no-install-recommends ca-certificates curl && rm -rf /var/lib/apt/lists/*")
             .run("COPILOT_AUTO_UPDATE=false npm install -g @github/copilot@1.0.80")
             .run("mkdir -p /home/copilot/.copilot && chmod -R 0777 /home/copilot")
