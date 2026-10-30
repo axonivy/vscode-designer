@@ -23,12 +23,9 @@ export class JavaClassPathReader {
 
   private constructor(context: ExtensionContext) {
     this.diagnostics = languages.createDiagnosticCollection(DIAGNOSTIC_SOURCE);
-    context.subscriptions.push(
-      this.diagnostics,
-      IvyProjectManager.instance.onDidChangeProjects(() => this.validateAll()),
-      this
-    );
-    this.start();
+    context.subscriptions.push(this.diagnostics, this);
+    this.validateAll();
+    onDidClasspathUpdate(() => this.validateAll()).then(disposable => (this.classpathListener = disposable));
   }
 
   static init(context: ExtensionContext) {
@@ -38,12 +35,8 @@ export class JavaClassPathReader {
     JavaClassPathReader._instance = new JavaClassPathReader(context);
   }
 
-  private async start() {
-    await this.validateAll();
-    this.classpathListener = await onDidClasspathUpdate(() => this.validateAll());
-  }
-
   async validateAll() {
+    this.diagnostics.clear();
     const projects = await IvyProjectManager.instance.getIvyProjects();
     const iarsPerProject = new Map<string, Map<string, string>>();
     for (const project of projects) {
@@ -59,35 +52,29 @@ export class JavaClassPathReader {
     }
     const engineProjects = await IvyEngineManager.instance.projects();
     const workspaceProjectNames = new Set(engineProjects?.filter(project => project.id.isIar === false).map(project => project.id.name));
-    this.diagnostics.clear();
     for (const [project, iars] of iarsPerProject) {
       const pomUri = Uri.file(path.join(project, 'pom.xml'));
-      const diagnostics = await Promise.all(
-        [...iars.keys()]
-          .filter(key => (versionsPerArtifact.get(key)?.size ?? 0) > 1)
-          .map(async key => {
-            const versions = [...(versionsPerArtifact.get(key) ?? [])].sort().join(', ');
-            const artifactId = key.split('/').at(-1) ?? key;
-            const message = `IAR dependency '${artifactId}' is available in multiple versions: ${versions}`;
-            const range = await artifactIdRangeInPom(pomUri, artifactId);
-            return new Diagnostic(range, message, DiagnosticSeverity.Error);
-          })
-      );
+      const newDiagnostics: Diagnostic[] = [];
       for (const key of iars.keys()) {
         const artifactId = key.split('/').at(-1);
+        if ((versionsPerArtifact.get(key)?.size ?? 0) > 1) {
+          const versions = [...(versionsPerArtifact.get(key) ?? [])].sort().join(', ');
+          const message = l10n.t("Dependency '{0}' is available in multiple versions: {1}", artifactId ?? key, versions);
+          const range = await artifactIdRangeInPom(pomUri, artifactId ?? key);
+          const diagnostic = new Diagnostic(range, message, DiagnosticSeverity.Error);
+          diagnostic.source = DIAGNOSTIC_SOURCE;
+          newDiagnostics.push(diagnostic);
+        }
         if (artifactId && workspaceProjectNames.has(artifactId)) {
-          const message = l10n.t(
-            "IAR dependency '{0}' is on the Java classpath, but a workspace project with the same name is deployed on the engine.",
-            artifactId
-          );
+          const message = l10n.t("Dependency '{0}' conflicts with a workspace project", artifactId);
           const range = await artifactIdRangeInPom(pomUri, artifactId);
           const diagnostic = new Diagnostic(range, message, DiagnosticSeverity.Error);
           diagnostic.source = DIAGNOSTIC_SOURCE;
-          diagnostics.push(diagnostic);
+          newDiagnostics.push(diagnostic);
         }
       }
-      if (diagnostics.length > 0) {
-        this.diagnostics.set(pomUri, diagnostics);
+      if (newDiagnostics.length > 0) {
+        this.diagnostics.set(pomUri, newDiagnostics);
       }
     }
   }
