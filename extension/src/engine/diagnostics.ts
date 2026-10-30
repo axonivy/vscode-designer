@@ -97,27 +97,11 @@ export class IvyDiagnostics {
             )
           : iar.errorMessage;
         const message = l10n.t('Referenced dependency {0} has error: {1}', iar.artifactId, error);
-        const range = await this.dependencyRange(uri, iar);
+        const range = await artifactIdRangeInPom(uri, iar.artifactId);
         const diagnostic = new Diagnostic(range, message, DiagnosticSeverity.Error);
         diagnostic.source = DIAGNOSTIC_SOURCE;
         this.diagnostics.set(uri, [...(this.diagnostics.get(uri) ?? []), diagnostic]);
       });
-  }
-
-  private async dependencyRange(uri: Uri, iar: ProjectBean) {
-    const defaultRange = new Range(1, 0, 1, 0);
-    try {
-      const doc = await workspace.openTextDocument(uri);
-      const searchString = '>' + iar.artifactId + '<';
-      const offset = doc.getText().indexOf(searchString);
-      if (offset === -1) {
-        return defaultRange;
-      }
-      const start = doc.positionAt(offset);
-      return new Range(start, new Position(start.line, start.character + searchString.length));
-    } catch {
-      return new Range(1, 0, 1, 0);
-    }
   }
 
   private async handleProjectDiagnostic(project: ProjectBean) {
@@ -174,3 +158,19 @@ const isConversionDiagnostic = (diagnostic: Diagnostic) =>
   diagnostic.source === DIAGNOSTIC_SOURCE && isConversionMessage(diagnostic.message);
 
 const isConversionMessage = (message: string) => CONVERSION_PREFIXES.some(prefix => message.startsWith(prefix));
+
+export const artifactIdRangeInPom = async (uri: Uri, artifactId: string) => {
+  const defaultRange = new Range(1, 0, 1, 0);
+  try {
+    const doc = await workspace.openTextDocument(uri);
+    const searchString = '>' + artifactId + '<';
+    const offset = doc.getText().indexOf(searchString);
+    if (offset === -1) {
+      return defaultRange;
+    }
+    const start = doc.positionAt(offset);
+    return new Range(start, new Position(start.line, start.character + searchString.length));
+  } catch {
+    return new Range(1, 0, 1, 0);
+  }
+};

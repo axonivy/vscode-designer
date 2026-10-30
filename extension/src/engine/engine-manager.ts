@@ -4,6 +4,7 @@ import { commands, l10n, Uri } from 'vscode';
 import { DidChangeWatchedFilesNotification } from 'vscode-languageserver-protocol';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
+import { JavaClassPathReader } from '../base/java-class-path-reader';
 import { runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
@@ -160,6 +161,8 @@ export class IvyEngineManager {
     RestClientEditorProvider.register(this.context, this.websocketUrl);
     WebServiceEditorProvider.register(this.context, this.websocketUrl);
     CustomFieldEditorProvider.register(this.context);
+
+    JavaClassPathReader.init(this.context);
 
     RuntimeLogViewProvider(this.websocketUrl);
     registerProcessDebugging(this.context, this.ivyEngineApi);
