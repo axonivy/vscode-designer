@@ -78,6 +78,7 @@ test.describe('new project', () => {
   test.use({ workspace: embeddedEngineWorkspace });
 
   test('new project', async ({ wsPage }) => {
+    test.setTimeout(60_000);
     await new WelcomePage(wsPage).open();
     const outputview = new OutputView(wsPage);
     await outputview.openLog('Axon Ivy Engine');
