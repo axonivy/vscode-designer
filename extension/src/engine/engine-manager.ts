@@ -222,12 +222,12 @@ export class IvyEngineManager {
     });
   }
 
-  public async deployProjects(ivyProjectDirectory: string | string[] | null = null) {
+  public async deployProjects(ivyProjectDirectory?: string | string[]) {
     if (isWorkspaceLocked()) {
       return;
     }
     const ivyProjectDirectories =
-      ivyProjectDirectory === null
+      ivyProjectDirectory === undefined
         ? await IvyProjectManager.instance.getIvyProjects()
         : typeof ivyProjectDirectory === 'string'
           ? [ivyProjectDirectory]
