@@ -96,7 +96,7 @@ export class IvyDiagnostics {
               'Project is outdated and needs to be converted. Update to a newer compatible version or import the project to VS Code to convert the project.'
             )
           : iar.errorMessage;
-        const message = l10n.t('Referenced dependency {0} has error: {1}', iar.artifactId, error);
+        const message = l10n.t("Dependency '{0}' has error: {1}", iar.artifactId, error);
         const range = await artifactIdRangeInPom(uri, iar.artifactId);
         const diagnostic = new Diagnostic(range, message, DiagnosticSeverity.Error);
         diagnostic.source = DIAGNOSTIC_SOURCE;
