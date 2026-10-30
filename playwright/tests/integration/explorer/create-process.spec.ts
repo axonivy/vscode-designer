@@ -6,12 +6,16 @@ import { ProcessEditor } from '~/page-objects/process-editor';
 const processName = 'testCreateProcess';
 
 test('Add business process, execute, edit and redeploy', { tag: '@serial' }, async ({ wsPage }) => {
+  await wsPage.activateExpensiveJavaStandardMode();
   const explorer = new FileExplorer(wsPage);
+  await wsPage.hasReadyStatusMessage();
   await explorer.addProcess(processName, 'Business Process');
   await explorer.hasNodeExact(`${processName}.p.json`);
   const processEditor = new ProcessEditor(wsPage, `${processName}.p.json`);
   const start = processEditor.elementByType('start:requestStart');
   const end = processEditor.elementByType('end:taskEnd');
+  await wsPage.hasStatusMessage('Axon Ivy: Success - Invalidating class loader');
+  await wsPage.hasReadyStatusMessage();
   await processEditor.startProcessAndAssertExecuted(start, end);
 
   await processEditor.appendActivity(start, 'Script');
