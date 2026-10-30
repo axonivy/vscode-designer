@@ -1,5 +1,4 @@
-import type { Uri } from 'vscode';
-import { commands, extensions, l10n, window, workspace } from 'vscode';
+import { commands, extensions, l10n, Uri, window, workspace, type Event } from 'vscode';
 import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { executeCommand, type JavaCommand } from './commands';
 import { logInformationMessage, logWarningMessage } from './logging-util';
@@ -124,12 +123,11 @@ const runInitialJavaCompile = async () => {
   if ((await IvyProjectManager.instance.getIvyProjects()).length === 0) {
     return CompileWorkspaceStatus.Unavailable;
   }
-  const javaExtension = extensions.getExtension(JAVA_EXTENSION_ID);
-  if (!javaExtension) {
+  const api = await javaExtensionApi();
+  if (!api) {
     return CompileWorkspaceStatus.Unavailable;
   }
   try {
-    const api = await javaExtension.activate();
     if (api.serverMode === 'LightWeight') {
       return CompileWorkspaceStatus.Unavailable;
     }
@@ -142,3 +140,23 @@ const runInitialJavaCompile = async () => {
     return CompileWorkspaceStatus.Unavailable;
   }
 };
+
+export const getClassPaths = async (projectDir: string) => {
+  const api = await javaExtensionApi();
+  return await api?.getClasspaths(Uri.file(projectDir).toString(), { scope: 'compile' });
+};
+
+export const onDidClasspathUpdate = async (listener: () => void) => {
+  const api = await javaExtensionApi();
+  return api?.onDidClasspathUpdate?.(listener);
+};
+
+interface JavaExtensionApi {
+  serverMode: 'Standard' | 'Hybrid' | 'LightWeight';
+  serverReady: () => Promise<boolean>;
+  getClasspaths: (uri: string, options: { scope: string }) => Promise<{ classpaths: string[]; modulepaths: string[]; projectRoot: string }>;
+  onDidClasspathUpdate: Event<Uri>;
+}
+
+const javaExtensionApi = async (): Promise<JavaExtensionApi | undefined> =>
+  await extensions.getExtension<JavaExtensionApi>(JAVA_EXTENSION_ID)?.activate();

@@ -14,3 +14,4 @@ export const portalPerformanceWorkspacePath = path.resolve(import.meta.dirname, 
 export const multiRootWorkspacePath = path.resolve(import.meta.dirname, './multiProject/multiRootWorkspace.code-workspace');
 export const screenshotProject = path.resolve(import.meta.dirname, './screenshotProject');
 export const multiProjectWithoutDuplicatesWorkspacePath = path.resolve(import.meta.dirname, './multiProjectWithoutDuplicates');
+export const dependencyClashWorkspacePath = path.resolve(import.meta.dirname, './dependencyClash');

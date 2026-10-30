@@ -110,7 +110,7 @@
   "Project archive {0} has been exported to \"{1}\".": "Das Projektarchiv {0} wurde nach „{1}“ exportiert.",
   "Project is outdated and needs to be converted. Update to a newer compatible version or import the project to VS Code to convert the project.": "Das Projekt ist veraltet und muss konvertiert werden. Aktualisieren Sie auf eine neuere kompatible Version oder importieren Sie das Projekt in VS Code, um es zu konvertieren.",
   "IAR Dependencies": "IAR-Abhängigkeiten",
-  "Referenced dependency {0} has error: {1}": "Die referenzierte Abhängigkeit {0} weist folgenden Fehler auf: {1}",
+  "Dependency '{0}' has error: {1}": "Die Abhängigkeit '{0}' weist folgenden Fehler auf: {1}",
   "Axon Ivy: Convert Project": "Axon Ivy: Projekt konvertieren",
   "Reload": "Neu laden",
   "Reload Java workspace and window": "Java-Arbeitsbereich und Fenster neu laden",
@@ -313,5 +313,7 @@
   "No valid Java found under JAVA_HOME={0} or java.jdt.ls.java.home={1}.\nEither set env variable JAVA_HOME to valid Java {2} installation path,\nor configure VS Code setting 'java.jdt.ls.java.home'.": "Unter JAVA_HOME={0} oder java.jdt.ls.java.home={1} wurde keine gültige Java-Version gefunden.\nSetzen Sie JAVA_HOME auf den Pfad einer gültigen Java-{2}-Installation\noder konfigurieren Sie die VS Code-Einstellung „java.jdt.ls.java.home“.",
   "Updating 'java.jdt.ls.java.home' to match JAVA_HOME and restarting extension host...": "java.jdt.ls.java.home wird an JAVA_HOME angepasst und der Erweiterungshost neu gestartet ...",
   "Waiting for initial Java compile": "Warten auf die erste Java-Kompilierung",
-  "The action cannot be performed because the workspace is locked.": "Die Aktion kann nicht ausgeführt werden, da der Arbeitsbereich gesperrt ist."
+  "The action cannot be performed because the workspace is locked.": "Die Aktion kann nicht ausgeführt werden, da der Arbeitsbereich gesperrt ist.",
+  "Dependency '{0}' is available in multiple versions: {1}": "Abhängigkeit '{0}' ist in mehreren Versionen verfügbar: {1}",
+  "Dependency '{0}' conflicts with a workspace project": "Abhängigkeit '{0}' steht im Konflikt mit einem Arbeitsbereichsprojekt"
 }
