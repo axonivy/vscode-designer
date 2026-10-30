@@ -110,7 +110,7 @@
   "Project archive {0} has been exported to \"{1}\".": "プロジェクトアーカイブ {0} を \"{1}\" にエクスポートしました。",
   "Project is outdated and needs to be converted. Update to a newer compatible version or import the project to VS Code to convert the project.": "プロジェクトは古くなっているため、変換が必要です。互換性のある新しいバージョンに更新するか、プロジェクトを VS Code にインポートして変換してください。",
   "IAR Dependencies": "IAR の依存関係",
-  "Referenced dependency {0} has error: {1}": "参照先の依存関係 {0} にエラーがあります: {1}",
+  "Dependency '{0}' has error: {1}": "依存関係 '{0}' にエラーがあります: {1}",
   "Axon Ivy: Convert Project": "Axon Ivy: プロジェクトを変換",
   "Reload": "再読み込み",
   "Reload Java workspace and window": "Java ワークスペースとウィンドウを再読み込み",
@@ -313,5 +313,7 @@
   "No valid Java found under JAVA_HOME={0} or java.jdt.ls.java.home={1}.\nEither set env variable JAVA_HOME to valid Java {2} installation path,\nor configure VS Code setting 'java.jdt.ls.java.home'.": "JAVA_HOME={0} または java.jdt.ls.java.home={1} に有効な Java が見つかりません。\nJAVA_HOME に有効な Java {2} のインストールパスを設定するか、\nVS Code 設定 'java.jdt.ls.java.home' を構成してください。",
   "Updating 'java.jdt.ls.java.home' to match JAVA_HOME and restarting extension host...": "java.jdt.ls.java.home を JAVA_HOME に合わせて更新し、拡張機能ホストを再起動しています...",
   "Waiting for initial Java compile": "Javaの初回コンパイルを待っています",
-  "The action cannot be performed because the workspace is locked.": "ワークスペースがロックされているため、この操作を実行できません。"
+  "The action cannot be performed because the workspace is locked.": "ワークスペースがロックされているため、この操作を実行できません。",
+  "Dependency '{0}' is available in multiple versions: {1}": "依存関係 '{0}' は複数のバージョンで利用可能です: {1}",
+  "Dependency '{0}' conflicts with a workspace project": "依存関係 '{0}' がワークスペースプロジェクトと競合しています"
 }

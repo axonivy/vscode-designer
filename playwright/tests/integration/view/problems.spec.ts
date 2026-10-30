@@ -1,9 +1,10 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from 'fs';
+import path from 'path';
 import { expect, test } from '~/fixtures/baseTest';
 import { FormEditor } from '~/page-objects/form-editor';
 import { ProblemsView } from '~/page-objects/problems-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
+import { dependencyClashWorkspacePath } from '~/workspaces/workspace';
 
 test('Check existing warning and error', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage, 'Validation.p.json');
@@ -49,25 +50,27 @@ test('Worspace Validation', async ({ wsPage }) => {
   await problemsView.hasError('Button action cannot be empty');
 });
 
-test('Outdated iar dependency error', async ({ wsPage, tmpWorkspace }) => {
-  const pomPath = path.join(tmpWorkspace!.tmpWorkspacePath, 'pom.xml');
-  const newPomContent = (await fs.promises.readFile(pomPath, 'utf-8')).replace(
-    '</dependencies>',
-    `<dependency>
-      <groupId>com.axonivy.connector.excel</groupId>
-      <artifactId>excel-connector</artifactId>
-      <version>13.2.0</version>
-      <type>iar</type>
-    </dependency>
-    </dependencies>`
-  );
-  await fs.promises.writeFile(pomPath, newPomContent, 'utf-8');
-  const problemsView = await ProblemsView.initProblemsView(wsPage);
-  await expect(async () => {
-    await wsPage.executeCommand('Axon Ivy: Refresh Project Explorer');
+test.describe('IAR Dependency related errors', () => {
+  test.use({ workspace: dependencyClashWorkspacePath });
+
+  test('Ensure dependency clash and outdated dependency are reported', async ({ wsPage, tmpWorkspace }) => {
+    const problemsView = await ProblemsView.initProblemsView(wsPage);
     await problemsView.hasError(
-      'Referenced dependency excel-connector has error: Project is outdated and needs to be converted. Update to a newer compatible version or import the project to VS Code to convert the project.',
-      2_000
+      "Dependency 'tel-search-ch-connector' has error: Project is outdated and needs to be converted. Update to a newer compatible version or import the project to VS Code to convert the project."
     );
-  }).toPass();
+    await problemsView.hasError("Dependency 'excel-connector' conflicts with a workspace project");
+    await problemsView.hasError("Dependency 'tel-search-ch-connector' is available in multiple versions: 12.0.0, 13.2.0");
+
+    for (const pomPath of [path.join(tmpWorkspace!.tmpWorkspacePath, 'project1', 'pom.xml'), path.join(tmpWorkspace!.tmpWorkspacePath, 'project2', 'pom.xml')]) {
+      const pomContent = await fs.promises.readFile(pomPath, 'utf8');
+      const pomWithoutDependencies = pomContent.replace(/^[ \t]*<dependencies>[\s\S]*?^[ \t]*<\/dependencies>\r?\n?/m, '');
+      await fs.promises.writeFile(pomPath, pomWithoutDependencies);
+    }
+
+    const errorMarker = problemsView.view.locator('div.marker-icon.error');
+    await expect(async () => {
+      await wsPage.executeCommand('Axon Ivy: Refresh Project Explorer');
+      await expect(errorMarker).toHaveCount(0, { timeout: 2000 });
+    }).toPass();
+  });
 });
