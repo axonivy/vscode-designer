@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { l10n, Uri } from 'vscode';
 import { localizeDataClassType } from '../base/localized-labels';
-import { logErrorMessage, logInformationMessage } from '../base/logging-util';
+import { logErrorMessage } from '../base/logging-util';
 import type { CreateDataClassParams } from '../engine/api/engine-api';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { type AddCommandSelectionContext } from './ivy-project-explorer';
@@ -38,7 +38,6 @@ export const addNewDataClass = async (type: DataClassType, selectionContext: Add
     const typedNamespacePath = typedNamespace.replace(/\./g, path.sep);
     for (const resDir of [resourceDirectoryTarget, resourceDirectoryDialogTarget]) {
       const absPathDataClassFile = Uri.file(path.join(projectPath, resDir, typedNamespacePath, `${name}.d.json`)).fsPath;
-      logInformationMessage(`Checking existence of data class file at: ${absPathDataClassFile}`);
       if (fs.existsSync(absPathDataClassFile)) {
         return l10n.t("A data class with this name and namespace already exists in this project in the '/{0}' directory.", resDir);
       }
