@@ -201,7 +201,7 @@ export class IvyEngineManager {
           await this.ivyEngineApi?.findOrCreateProject(projectDir);
         }
         if (!isWorkspaceLocked()) {
-          await this.ivyEngineApi?.deployProjects({ projectDirs: ivyProjectDirectories });
+          await this.deployProjects(ivyProjectDirectories);
         }
       }
     );
@@ -222,11 +222,16 @@ export class IvyEngineManager {
     });
   }
 
-  public async deployProjects(ivyProjectDirectory?: string) {
+  public async deployProjects(ivyProjectDirectory: string | string[] | null = null) {
     if (isWorkspaceLocked()) {
       return;
     }
-    const ivyProjectDirectories = ivyProjectDirectory ? [ivyProjectDirectory] : await IvyProjectManager.instance.getIvyProjects();
+    const ivyProjectDirectories =
+      ivyProjectDirectory === null
+        ? await IvyProjectManager.instance.getIvyProjects()
+        : typeof ivyProjectDirectory === 'string'
+          ? [ivyProjectDirectory]
+          : ivyProjectDirectory;
     let statusMessage = l10n.t('Deploying projects');
     if (ivyProjectDirectories.length === 1 && ivyProjectDirectories[0]) {
       const projectPath = ivyProjectDirectories[0];
