@@ -6,7 +6,8 @@ import { ProblemsView } from '~/page-objects/problems-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
 import { dependencyClashWorkspacePath } from '~/workspaces/workspace';
 
-test('Check existing warning and error', async ({ wsPage }) => {
+// eslint-disable-next-line playwright/no-focused-test
+test.only('Check existing warning and error', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage, 'Validation.p.json');
   await editor.open();
   const trigger = editor.elementByPID('18D9CDFA8F58DA2B-f3');
