@@ -1,6 +1,6 @@
 import { downloadAndUnzipVSCode } from '@vscode/test-electron';
 
-const VSCODE_VERSION = '1.143.1';
+const VSCODE_VERSION = '1.144.0';
 
 export const runDownloadAndUnzipVSCode = async () => {
   return await downloadAndUnzipVSCode({ version: VSCODE_VERSION });
