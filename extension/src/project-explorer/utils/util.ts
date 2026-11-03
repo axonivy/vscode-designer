@@ -4,6 +4,10 @@ import path from 'path';
 import type { FileStat } from 'vscode';
 import { FileType, InputBoxValidationSeverity, l10n, Uri, window, workspace } from 'vscode';
 
+export type ResourceDirectoryTarget = 'process' | 'dialog' | 'dataclass';
+
+const PROJECT_NAME_MAX_LENGTH = 40;
+
 const defaultNamespaceOf = (projecDir: string) => {
   const designerPrefs = Uri.joinPath(Uri.file(projecDir), 'pom.xml');
   return workspace.fs.readFile(designerPrefs).then(
@@ -17,8 +21,6 @@ const defaultNamespaceOf = (projecDir: string) => {
     () => ''
   );
 };
-
-export type ResourceDirectoryTarget = 'process' | 'dialog' | 'dataclass';
 
 export const resolveNamespaceFromPath = async (selectedUri: Uri, projectDir: string, target: ResourceDirectoryTarget) => {
   let fileStat: FileStat;
@@ -144,5 +146,5 @@ export const sanitizeProjectName = (fileName: string) => {
     .replace(/\.iar/gi, '') // remove ALL .iar, also in the middle of the filename
     .replace(/\./g, '-')
     .replace(/[^\w-]/g, '_');
-  return sanitized.slice(0, 40);
+  return sanitized.slice(0, PROJECT_NAME_MAX_LENGTH);
 };
