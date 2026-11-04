@@ -6,7 +6,8 @@ import { FileType, InputBoxValidationSeverity, l10n, Uri, window, workspace } fr
 
 export type ResourceDirectoryTarget = 'process' | 'dialog' | 'dataclass';
 
-const PROJECT_NAME_MAX_LENGTH = 40;
+// Duplicated from core CommonFormats.java
+export const PROJECT_NAME_MAX_LENGTH = 40;
 
 const defaultNamespaceOf = (projecDir: string) => {
   const designerPrefs = Uri.joinPath(Uri.file(projecDir), 'pom.xml');
@@ -90,6 +91,10 @@ export const validateProjectArtifactName = (value: string) => {
 };
 
 export const validateProjectName = (value: string) => {
+  // First check the max length
+  if (value.length > PROJECT_NAME_MAX_LENGTH) {
+    return l10n.t('Project name cannot exceed {0} characters', PROJECT_NAME_MAX_LENGTH);
+  }
   const pattern = /^[\w-]+$/;
   if (pattern.test(value)) {
     return;

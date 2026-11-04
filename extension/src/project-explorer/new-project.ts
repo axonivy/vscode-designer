@@ -11,7 +11,7 @@ import {
   MultiStepInput,
   MultiStepInvalidStateError
 } from './utils/multi-step-input';
-import { validateDotSeparatedName, validateProjectArtifactId, validateProjectName as validateProjectNameSyntax } from './utils/util';
+import { validateDotSeparatedName, validateProjectArtifactId, validateProjectName as validateProjectNameLenAndSyntax } from './utils/util';
 
 interface NewProjectState extends MSStateBase {
   projectName?: string | undefined;
@@ -22,7 +22,7 @@ interface NewProjectState extends MSStateBase {
 
 export const addNewProject = async (selectedUri: Uri) => {
   const validateProjectName = (typedProjectName: string): string | undefined => {
-    return validateProjectNameSyntax(typedProjectName) ?? validateNotExisting(typedProjectName, deployedProjects);
+    return validateProjectNameLenAndSyntax(typedProjectName) ?? validateNotExisting(typedProjectName, deployedProjects);
   };
 
   const validateNotExisting = (typedProjectName: string, existingProjects: ProjectBean[]): string | undefined => {
