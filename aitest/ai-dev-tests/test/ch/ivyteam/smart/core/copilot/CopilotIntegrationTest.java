@@ -265,6 +265,26 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Order(Complexity.INDEPENDENT)
+  void dialogPrefersForm(AgentRuntime rt) throws Exception {
+    var spans = rt.prompt("""
+        in the 'purchase' project, create a 'PurchaseRequest' dialog
+        where an employee requests an item: name, quantity and a short reason.
+        """);
+
+    var dialog = rt.ivyWorkspace().path().resolve("purchase/dialog/com/acme/demo/PurchaseRequest");
+    assertThat(dialog.resolve("PurchaseRequest.f.json"))
+        .as("a form is preferred over JSF")
+        .exists();
+    assertThat(dialog.resolve("PurchaseRequest.xhtml")).doesNotExist();
+
+    assertThat(spans)
+        .usedTools("axonivy-designer-new_axon_ivy_dialog")
+        .calledToolWithout("axonivy-designer-new_axon_ivy_dialog", "JSF")
+        .viewed("skills/ivy-json-files/schemas/project/form.json");
+  }
+
+  @Test
   @Order(Complexity.COMPOSITE)
   void jsfDialog(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
