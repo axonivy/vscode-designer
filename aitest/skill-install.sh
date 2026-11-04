@@ -18,6 +18,7 @@ expected_yaml_files=(
 )
 expected_json_files=(
   SKILL.md
+  references/form.md
   schemas/project/casemap.json
   schemas/project/data-class.json
   schemas/project/form.json

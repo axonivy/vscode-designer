@@ -261,6 +261,7 @@ public class CopilotIntegrationTest {
         .usedTools("skill", "axonivy-designer-new_axon_ivy_dialog")
         .calledToolWithout("axonivy-designer-new_axon_ivy_dialog", "namespace") // no guessed namespace
         .viewed("skills/ivy-json-files/schemas/project/form.json")
+        .viewed("skills/ivy-json-files/references/form.md")
         .didNotUseTools("web_fetch", "web_search");
   }
 
@@ -281,7 +282,8 @@ public class CopilotIntegrationTest {
     assertThat(spans)
         .usedTools("axonivy-designer-new_axon_ivy_dialog")
         .calledToolWithout("axonivy-designer-new_axon_ivy_dialog", "JSF")
-        .viewed("skills/ivy-json-files/schemas/project/form.json");
+        .viewed("skills/ivy-json-files/schemas/project/form.json")
+        .viewed("skills/ivy-json-files/references/form.md");
   }
 
   @Test
