@@ -1,7 +1,7 @@
-import { test } from '~/fixtures/baseTest';
-import { ProjectExplorerView } from '~/page-objects/explorer-view';
+import { expect, test } from '~/fixtures/baseTest';
+import { FileExplorer, ProjectExplorerView } from '~/page-objects/explorer-view';
 import { ProblemsView } from '~/page-objects/problems-view';
-import { multiProjectWorkspacePath, multiRootWorkspacePath } from '~/workspaces/workspace';
+import { multiProjectWithoutDuplicatesWorkspacePath, multiProjectWorkspacePath, multiRootWorkspacePath } from '~/workspaces/workspace';
 
 test.describe('Project Explorer', () => {
   test.use({ workspace: multiProjectWorkspacePath });
@@ -32,5 +32,21 @@ test.describe('Multi root workspace', () => {
     await explorer.hasNodeExact('ivy-project-1');
     await explorer.hasNodeExact('connector');
     await explorer.hasNoNode('ivy-project-2');
+  });
+});
+
+test.describe('Delete project', () => {
+  test.use({ workspace: multiProjectWithoutDuplicatesWorkspacePath });
+
+  test('Delete existing project', async ({ wsPage }) => {
+    const fileExplorer = new FileExplorer(wsPage);
+    const projectExplorer = new ProjectExplorerView(wsPage);
+    await projectExplorer.openView();
+    await projectExplorer.hasNodeExact('ivy-project-1');
+    await fileExplorer.view.getByText('ivy-project-1').click({ button: 'right' });
+    await wsPage.page.getByRole('menu').getByRole('menuitem', { name: 'Delete' }).click({ delay: 500 });
+    await fileExplorer.hasNoNode('ivy-project-1');
+    await projectExplorer.hasNoNode('ivy-project-1');
+    await expect(wsPage.page.locator('div.quick-input-widget')).toContainText('Reload Java workspace and window');
   });
 });
