@@ -14,10 +14,11 @@ import {
 import { localizeDialogLayout, localizeDialogType } from '../../base/localized-labels';
 import type { CreateUserDialogParams } from '../../engine/api/engine-api';
 import { IvyEngineManager } from '../../engine/engine-manager';
+import { resolveDefaultNamespace } from '../../project-explorer/utils/util';
 
 type NewDialogToolArgs = {
   name: string;
-  namespace: string;
+  namespace?: string;
   projectPath: string;
   type?: DialogType;
   layout?: DialogLayout;
@@ -43,10 +44,12 @@ export class NewDialogTool implements LanguageModelTool<NewDialogToolArgs> {
     const dialogType = newDialogParams.type ?? 'Form';
     const confirmationLines = [
       l10n.t('Create an Axon Ivy {0} with the following details?', localizeDialogType(dialogType)),
-      `- ${l10n.t('Name')}: ${newDialogParams.name}`,
-      `- ${l10n.t('Namespace')}: ${newDialogParams.namespace}`,
-      `- ${l10n.t('Project')}: ${path.basename(newDialogParams.projectDir ?? '')}`
+      `- ${l10n.t('Name')}: ${newDialogParams.name}`
     ];
+    if (options.input.namespace) {
+      confirmationLines.push(`- ${l10n.t('Namespace')}: ${options.input.namespace}`);
+    }
+    confirmationLines.push(`- ${l10n.t('Project')}: ${path.basename(newDialogParams.projectDir)}`);
     if (dialogType === 'JSF') {
       confirmationLines.push(`- ${l10n.t('Layout')}: ${localizeDialogLayout(newDialogParams.layout ?? '')}`);
       if (newDialogParams.layout !== 'Component') {
@@ -65,7 +68,10 @@ export class NewDialogTool implements LanguageModelTool<NewDialogToolArgs> {
 }
 
 export const createNewDialog = async (input: NewDialogToolArgs): Promise<string> => {
-  const newDialogParams = resolvedParams(input);
+  const newDialogParams: CreateUserDialogParams = {
+    ...resolvedParams(input),
+    namespace: input.namespace || (await resolveDefaultNamespace(input.projectPath, 'dialog'))
+  };
   const dialogType = newDialogParams.type ?? 'Form';
   const hdBean = await IvyEngineManager.instance.createUserDialog(newDialogParams);
   const dialogPath = hdBean?.uri ? Uri.parse(hdBean.uri).fsPath : '<unknown location>';
@@ -73,9 +79,8 @@ export const createNewDialog = async (input: NewDialogToolArgs): Promise<string>
 };
 
 const resolvedParams = (args: NewDialogToolArgs) => {
-  const params: CreateUserDialogParams = {
+  const params: Omit<CreateUserDialogParams, 'namespace'> = {
     name: args.name,
-    namespace: args.namespace,
     projectDir: args.projectPath,
     type: args.type ?? 'Form'
   };
