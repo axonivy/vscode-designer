@@ -233,7 +233,10 @@ public class CopilotIntegrationTest {
         """);
 
     var purchase = rt.ivyWorkspace().path().resolve("purchase");
-    var form = findFile(purchase.resolve("dialog"), "OrderForm.f.json");
+    var form = purchase.resolve("dialog/com/acme/demo/OrderForm/OrderForm.f.json");
+    assertThat(form)
+        .as("project's namespace is used by default")
+        .exists();
     assertThat(form.getParent().toFile().list())
         .as("Form dialog consists of form, data class and process")
         .containsExactlyInAnyOrder("OrderForm.f.json", "OrderFormData.d.json", "OrderFormProcess.p.json");
@@ -256,6 +259,7 @@ public class CopilotIntegrationTest {
     assertThat(spans)
         .as("Must use create-tool for initial correct creation; then the skill to edit the form")
         .usedTools("skill", "axonivy-designer-new_axon_ivy_dialog")
+        .calledToolWithout("axonivy-designer-new_axon_ivy_dialog", "namespace") // no guessed namespace
         .viewed("skills/ivy-json-files/schemas/project/form.json")
         .didNotUseTools("web_fetch", "web_search");
   }
@@ -271,7 +275,10 @@ public class CopilotIntegrationTest {
         """);
 
     var purchase = rt.ivyWorkspace().path().resolve("purchase");
-    var view = findFile(purchase.resolve("dialog"), "OrderOverview.xhtml");
+    var view = purchase.resolve("dialog/com/acme/demo/OrderOverview/OrderOverview.xhtml");
+    assertThat(view)
+        .as("project's namespace is used by default")
+        .exists();
     assertThat(view.getParent().toFile().list())
         .as("JSF dialog consists of view, data class and process")
         .containsExactlyInAnyOrder("OrderOverview.xhtml", "OrderOverviewData.d.json", "OrderOverviewProcess.p.json");
@@ -289,6 +296,7 @@ public class CopilotIntegrationTest {
     assertThat(spans)
         .as("Must use create-tool for initial correct creation; then the skill to edit the data class")
         .usedTools("skill", "axonivy-designer-new_axon_ivy_dialog")
+        .calledToolWithout("axonivy-designer-new_axon_ivy_dialog", "namespace") // no guessed namespace
         .viewed("skills/ivy-json-files/schemas/project/data-class.json")
         .didNotUseTools("web_fetch", "web_search");
   }

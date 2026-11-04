@@ -898,7 +898,7 @@
             },
             "namespace": {
               "type": "string",
-              "description": "Dot-separated namespace"
+              "description": "Dot-separated namespace. MUST only be set if the user explicitly asks for a namespace, DO NOT derive from the project name or path. When omitted, the tool will use the project's default namespace."
             },
             "projectPath": {
               "type": "string",
@@ -940,7 +940,6 @@
           },
           "required": [
             "name",
-            "namespace",
             "projectPath"
           ]
         },
