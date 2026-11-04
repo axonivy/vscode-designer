@@ -935,7 +935,7 @@
                 "basic-10"
               ],
               "default": "frame-10",
-              "description": "Template to use for the new Dialog. Only applicable if type is 'JSF' and layout is not 'Component'."
+              "description": "Template to use for the new Dialog. Only applicable if type is 'JSF' and layout is not 'Component'. MUST only be set if user explicitly asks for a specific template. When omitted, the default template will be used."
             }
           },
           "required": [
