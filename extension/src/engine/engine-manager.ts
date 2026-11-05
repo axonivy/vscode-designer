@@ -244,7 +244,7 @@ export class IvyEngineManager {
   }
 
   public async deployIarProjects(iars: string[]) {
-    const statusMessage = l10n.t('Deploying IAR projects');
+    const statusMessage = l10n.t('Deploying IAR dependencies');
     await StatusBar.withStatusBarProgress({ text: statusMessage }, async () => await this.ivyEngineApi?.deployIarProjects({ iars }));
   }
 
