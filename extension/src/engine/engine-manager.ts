@@ -243,6 +243,11 @@ export class IvyEngineManager {
     );
   }
 
+  public async deployIarProjects(iars: string[]) {
+    const statusMessage = l10n.t('Deploying IAR projects');
+    await StatusBar.withStatusBarProgress({ text: statusMessage }, async () => await this.ivyEngineApi?.deployIarProjects({ iars }));
+  }
+
   public async stopBpmEngine(ivyProjectDirectory: string) {
     await StatusBar.withStatusBarProgress(
       { text: l10n.t('Stopping BPM Engine of {0}', path.basename(ivyProjectDirectory)) },

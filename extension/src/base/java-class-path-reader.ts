@@ -10,7 +10,7 @@ import {
   type ExtensionContext
 } from 'vscode';
 import { getClassPaths, onDidClasspathUpdate } from '../base/java-extension-api';
-import { artifactIdRangeInPom } from '../engine/diagnostics';
+import { artifactIdRangeInPom, IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { logErrorMessage } from './logging-util';
@@ -21,6 +21,7 @@ export class JavaClassPathReader {
   private static _instance: JavaClassPathReader;
   private readonly diagnostics: DiagnosticCollection;
   private classpathListener?: Disposable;
+  private hasDeployedIars = false;
 
   private constructor(context: ExtensionContext) {
     this.diagnostics = languages.createDiagnosticCollection(DIAGNOSTIC_SOURCE);
@@ -44,10 +45,12 @@ export class JavaClassPathReader {
     this.diagnostics.clear();
     const projects = await IvyProjectManager.instance.getIvyProjects();
     const iarsPerProject = new Map<string, Map<string, string>>();
+    const allClassPathIars: string[] = [];
     for (const project of projects) {
       const classPaths = await getClassPaths(project);
       const iars = classPaths?.classpaths.filter(entry => entry.endsWith('.iar')) ?? [];
       iarsPerProject.set(project, this.parseIars(iars));
+      allClassPathIars.push(...iars);
     }
     const versionsPerArtifact = new Map<string, Set<string>>();
     for (const iars of iarsPerProject.values()) {
@@ -55,8 +58,7 @@ export class JavaClassPathReader {
         versionsPerArtifact.set(key, (versionsPerArtifact.get(key) ?? new Set<string>()).add(version));
       }
     }
-    const engineProjects = await IvyEngineManager.instance.projects();
-    const workspaceProjectNames = new Set(engineProjects?.filter(project => project.id.isIar === false).map(project => project.id.name));
+    let hasError = false;
     for (const [project, iars] of iarsPerProject) {
       const pomUri = Uri.file(path.join(project, 'pom.xml'));
       const newDiagnostics: Diagnostic[] = [];
@@ -70,18 +72,26 @@ export class JavaClassPathReader {
           diagnostic.source = DIAGNOSTIC_SOURCE;
           newDiagnostics.push(diagnostic);
         }
-        if (artifactId && workspaceProjectNames.has(artifactId)) {
-          const message = l10n.t("Dependency '{0}' conflicts with a workspace project", artifactId);
-          const range = await artifactIdRangeInPom(pomUri, artifactId);
-          const diagnostic = new Diagnostic(range, message, DiagnosticSeverity.Error);
-          diagnostic.source = DIAGNOSTIC_SOURCE;
-          newDiagnostics.push(diagnostic);
-        }
       }
       if (newDiagnostics.length > 0) {
+        hasError = true;
         this.diagnostics.set(pomUri, newDiagnostics);
       }
     }
+    if (hasError) {
+      return;
+    }
+    await this.deployIarsIfNeeded(allClassPathIars);
+  }
+
+  private async deployIarsIfNeeded(allClassPathIars: string[]) {
+    const uniqueIars = Array.from(new Set(allClassPathIars));
+    if (uniqueIars.length === 0 && !this.hasDeployedIars) {
+      return;
+    }
+    this.hasDeployedIars = true;
+    await IvyEngineManager.instance.deployIarProjects(uniqueIars);
+    await IvyDiagnostics.instance.refresh();
   }
 
   // expects maven repository layout: <groupId path>/<artifactId>/<version>/<artifactId>-<version>.iar
