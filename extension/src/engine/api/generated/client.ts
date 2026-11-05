@@ -93,6 +93,11 @@ export interface ProcessBean {
   pid?: string;
 }
 
+export interface DeployIarProjectsRequest {
+  workspaceId: string;
+  iars: string[];
+}
+
 export interface DeployProjectsRequest {
   workspaceId: string;
   projectDirs: string[];
@@ -357,6 +362,24 @@ export const getCreateProcessUrl = () => {
     })
     .getUri({
       url: `/web-ide/process`,
+      baseURL: ''
+    });
+};
+
+export const deployIarProjects = (
+  deployIarProjectsRequest?: DeployIarProjectsRequest,
+  options?: AxiosRequestConfig
+): Promise<AxiosResponse<unknown>> => {
+  return axios.post(`/web-ide/projects/deployIarProjects`, deployIarProjectsRequest, options);
+};
+export const getDeployIarProjectsUrl = () => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/projects/deployIarProjects`,
       baseURL: ''
     });
 };
@@ -631,6 +654,7 @@ export type ComponentFormResult = AxiosResponse<HdBean>;
 export type CreateHdResult = AxiosResponse<HdBean>;
 export type ImportProcessResult = AxiosResponse<unknown>;
 export type CreateProcessResult = AxiosResponse<ProcessBean>;
+export type DeployIarProjectsResult = AxiosResponse<unknown>;
 export type DeployProjectsResult = AxiosResponse<unknown>;
 export type ProjectsResult = AxiosResponse<ProjectBean[]>;
 export type RefreshProjectStatusesResult = AxiosResponse<ProjectBean[]>;

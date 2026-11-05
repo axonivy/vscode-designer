@@ -4,7 +4,7 @@ import { l10n } from 'vscode';
 import { type ExtensionVersion } from '../version/extension-version';
 import { PREVIEW_TRAINS, stableTrains } from './engine-release-train';
 
-const MIN_PATCH_VERSION = 0; // to be maintained manually
+export const MIN_PATCH_VERSION = 2; // to be maintained manually
 
 export class ReleaseTrainValidator {
   private minPatchVersion = MIN_PATCH_VERSION;

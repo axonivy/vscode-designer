@@ -10,6 +10,7 @@ import {
   type ConvertProjectParams,
   type DataClassInit,
   type DeleteProjectParams,
+  type DeployIarProjectsRequest,
   type DeployProjectsRequest,
   type HdInit,
   type ImportProcessBody,
@@ -32,6 +33,7 @@ import {
   createProjectAndProjectFiles,
   createWorkspace,
   deleteProject,
+  deployIarProjects,
   deployPortal,
   deployProjects,
   findOrCreateProject,
@@ -100,6 +102,12 @@ export class IvyEngineApi {
 
   public async deployProjects(params: Omit<DeployProjectsRequest, 'workspaceId'>) {
     await deployProjects({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options }).catch(handleAxiosError);
+  }
+
+  public async deployIarProjects(params: Omit<DeployIarProjectsRequest, 'workspaceId'>) {
+    await deployIarProjects({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options }).catch(
+      handleAxiosError
+    );
   }
 
   public async stopBpmEngine(params: Omit<StopBpmEngineParams, 'workspaceId'>) {

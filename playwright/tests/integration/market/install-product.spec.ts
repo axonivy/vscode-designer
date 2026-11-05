@@ -1,6 +1,6 @@
 import path from 'path';
 import { expect, test } from '~/fixtures/baseTest';
-import { FileExplorer } from '~/page-objects/explorer-view';
+import { FileExplorer, ProjectExplorerView } from '~/page-objects/explorer-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
 
 test('Install product without maven-dependency from Market website', async ({ wsPage }) => {
@@ -17,7 +17,36 @@ test('Install product without maven-dependency from Market website', async ({ ws
   await processEditor.open();
 });
 
-test('Install product with maven-dependency from Market website', async ({ wsPage }) => {
+test('Install up-to-date product with maven-dependency from Market website', async ({ wsPage }) => {
+  await wsPage.activateExpensiveJavaStandardMode();
+  const explorer = new FileExplorer(wsPage);
+  await explorer.installProduct('excel-connector');
+  await wsPage.provideUserInput('14.0.0-SNAPSHOT');
+  const header = wsPage.page.locator('div.quick-input-header');
+  const checkbox = header.getByRole('checkbox', { name: 'Toggle all checkboxes' });
+  await checkbox.check();
+  await wsPage.provideUserInput();
+  await expect(wsPage.quickInputBox).toBeVisible();
+  await wsPage.provideUserInput('prebuiltProject');
+
+  await explorer.hasNoNodeExact('excel-connector-demo');
+  await explorer.hasNoNodeExact('excel-connector');
+
+  const projectExplorer = new ProjectExplorerView(wsPage);
+  await projectExplorer.openView();
+  await projectExplorer.expandNodeExact('IAR Dependencies');
+
+  const iarProject = projectExplorer.view.getByRole('treeitem').filter({ has: wsPage.page.getByText('excel-connector', { exact: true }) });
+  await projectExplorer.expandNodeExact('excel-connector');
+  await expect(iarProject.locator('.codicon-lock')).toBeVisible();
+  await expect(iarProject).toContainText('14.0.0-SNAPSHOT');
+
+  await projectExplorer.expandNodeExact('excel-connector');
+  await projectExplorer.hasNodeExact('config');
+  await projectExplorer.expandNodeExact('config');
+});
+
+test('Install outdated product with maven-dependency from Market website', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.installProduct('excel-connector');
   await wsPage.provideUserInput('13.1.2');
@@ -29,6 +58,8 @@ test('Install product with maven-dependency from Market website', async ({ wsPag
   await wsPage.provideUserInput('prebuiltProject');
   await wsPage.executeCommand('Refresh Explorer');
   await explorer.selectNodeExact('excel-connector-demo');
+  // outdated maven-dependency is copied to the workspace
+  await explorer.selectNodeExact('excel-connector');
 });
 
 test('Install product with conflicting project folder', async ({ wsPage }) => {
