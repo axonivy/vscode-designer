@@ -198,10 +198,15 @@ export class IvyEngineManager {
       const previousRawNames = sanitizedNames.get(nameSanitized) ?? [];
       for (const previousName of previousRawNames) {
         logErrorMessageWithActions(
-          `Project names derived from file path conflict. Cannot create and deploy all projects in workspace. Please rename one of the projects: "${previousName}" and "${nameRaw}" map to the same sanitized name "${nameSanitized}"`,
-          { ['Show Extension Log']: () => showExtensionLog() }
+          l10n.t(
+            'Project names derived from file path conflict. Cannot create and deploy all projects in workspace. Please rename one of the projects: "{0}" and "{1}" map to the same sanitized name "{2}"',
+            previousName,
+            nameRaw,
+            nameSanitized
+          ),
+          { [l10n.t('Show Extension Log')]: () => showExtensionLog() }
         );
-        logErrorMessageWithActions(explainSanitizedProjectName(), { ['Show Extension Log']: () => showExtensionLog() });
+        logErrorMessageWithActions(explainSanitizedProjectName(), { [l10n.t('Show Extension Log')]: () => showExtensionLog() });
       }
       previousRawNames.push(nameRaw);
       sanitizedNames.set(nameSanitized, previousRawNames);
