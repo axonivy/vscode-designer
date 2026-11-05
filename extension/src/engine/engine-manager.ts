@@ -1,6 +1,6 @@
 import path from 'path';
 import type { ExtensionContext } from 'vscode';
-import { commands, l10n, Uri } from 'vscode';
+import { commands, l10n, Uri, window } from 'vscode';
 import { DidChangeWatchedFilesNotification } from 'vscode-languageserver-protocol';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
@@ -381,6 +381,36 @@ export class IvyEngineManager {
       { text: l10n.t('Refreshing project statuses') },
       async () => await this.ivyEngineApi?.refreshProjectStatuses()
     );
+  }
+
+  public async migrateProgramConfigs() {
+    if (!this.ivyEngineApi || isWorkspaceLocked({ warn: true })) {
+      return;
+    }
+    const migrateLabel = l10n.t('Migrate');
+    const confirmation = await window.showWarningMessage(
+      l10n.t('This will migrate Program configurations across every process in this workspace and save changed process files.'),
+      { modal: true },
+      migrateLabel
+    );
+    if (confirmation !== migrateLabel) {
+      return;
+    }
+    const result = await StatusBar.withStatusBarProgress(
+      { text: l10n.t('Migrating Program configurations') },
+      async () => await this.ivyEngineApi?.migrateProgramConfigs()
+    );
+    if (!result) {
+      return;
+    }
+    const modifiedCount = result.modifiedProcessFiles.length;
+    const message =
+      modifiedCount === 0
+        ? l10n.t('All Program configurations are already up to date.')
+        : modifiedCount === 1
+          ? l10n.t('Migrated Program configurations in one process file.')
+          : l10n.t('Migrated Program configurations in {0} process files.', modifiedCount);
+    await window.showInformationMessage(message);
   }
 
   public async invalidateClassLoader(ivyProjectDirectory: string) {

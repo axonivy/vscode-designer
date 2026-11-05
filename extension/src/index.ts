@@ -46,6 +46,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     resolveExtensionVersion(context);
     ivyEngineManager = IvyEngineManager.init(context);
     registerCommand('engine.deployProjects', context, () => ivyEngineManager.deployProjects());
+    registerCommand('ivyProjects.migrateProgramConfigs', context, () => ivyEngineManager.migrateProgramConfigs());
     registerCommand('engine.switchEngineReleaseTrain', context, () => ivyEngineManager.switchEngineReleaseTrain());
     registerCommand('engine.activateAnimation', context, async () => await config.setProcessAnimationAnimate(true));
     registerCommand('engine.deactivateAnimation', context, async () => await config.setProcessAnimationAnimate(false));

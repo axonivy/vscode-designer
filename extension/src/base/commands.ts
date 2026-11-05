@@ -61,6 +61,7 @@ type ProjectViewCommand =
   | 'ivyProjects.stopBpmEngine'
   | 'ivyProjects.convertProject'
   | 'ivyProjects.convertAllProjects'
+  | 'ivyProjects.migrateProgramConfigs'
   | 'ivyProjects.convertDialogFormToJsf'
   | 'ivyProjects.addDependency';
 type ViewCommand =
