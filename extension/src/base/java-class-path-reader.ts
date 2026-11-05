@@ -21,12 +21,13 @@ export class JavaClassPathReader {
   private static _instance: JavaClassPathReader;
   private readonly diagnostics: DiagnosticCollection;
   private classpathListener?: Disposable;
+  private scanQueue: Promise<void> = Promise.resolve();
   private hasDeployedIars = false;
 
   private constructor(context: ExtensionContext) {
     this.diagnostics = languages.createDiagnosticCollection(DIAGNOSTIC_SOURCE);
     context.subscriptions.push(this.diagnostics, this);
-    onDidClasspathUpdate(() => this.readAndValidate()).then(disposable => (this.classpathListener = disposable));
+    onDidClasspathUpdate(() => this.queuedReadAndValidate()).then(disposable => (this.classpathListener = disposable));
   }
 
   static async init(context: ExtensionContext) {
@@ -34,11 +35,15 @@ export class JavaClassPathReader {
       throw new Error('JavaClassPathReader has already been initialized');
     }
     JavaClassPathReader._instance = new JavaClassPathReader(context);
-    try {
-      await JavaClassPathReader._instance.readAndValidate();
-    } catch (error) {
+    await JavaClassPathReader._instance.queuedReadAndValidate();
+  }
+
+  private async queuedReadAndValidate() {
+    const scan = this.scanQueue.then(() => this.readAndValidate());
+    this.scanQueue = scan.catch(error => {
       logErrorMessage(`Failed to read and validate Java classpath, ${error}`);
-    }
+    });
+    return this.scanQueue;
   }
 
   private async readAndValidate() {
