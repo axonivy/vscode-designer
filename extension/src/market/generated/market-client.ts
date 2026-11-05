@@ -53,6 +53,10 @@ export interface InstallContent {
   [key: string]: unknown;
 }
 
+export interface BestMatchVersion {
+  version?: string;
+}
+
 export type FindProductsParams = {
   type?: FindProductsType;
   keyword?: string;
@@ -89,6 +93,10 @@ export type FindProductJsonContentParams = {
    * The version is required for a successful response; omitting it returns 404.
    */
   productVersion?: string;
+};
+
+export type FindBestMatchProductDetailsByVersionParams = {
+  isShowDevVersion?: boolean;
 };
 
 export type findProductsResponse200 = {
@@ -236,6 +244,68 @@ export const findProductJsonContent = async (
   options?: Parameters<typeof marketFetch>[1]
 ): Promise<findProductJsonContentResponse> => {
   return marketFetch<findProductJsonContentResponse>(getFindProductJsonContentUrl(id, params), {
+    ...options,
+    method: 'GET'
+  });
+};
+
+export type findBestMatchProductDetailsByVersionResponse200 = {
+  data: BestMatchVersion;
+  status: 200;
+};
+
+export type findBestMatchProductDetailsByVersionResponse404 = {
+  data: ErrorResponse;
+  status: 404;
+};
+
+export type findBestMatchProductDetailsByVersionResponse503 = {
+  data: ErrorResponse;
+  status: 503;
+};
+
+export type findBestMatchProductDetailsByVersionResponseSuccess = findBestMatchProductDetailsByVersionResponse200 & {
+  headers: Headers;
+};
+export type findBestMatchProductDetailsByVersionResponseError = (
+  findBestMatchProductDetailsByVersionResponse404 | findBestMatchProductDetailsByVersionResponse503
+) & {
+  headers: Headers;
+};
+
+export type findBestMatchProductDetailsByVersionResponse =
+  findBestMatchProductDetailsByVersionResponseSuccess | findBestMatchProductDetailsByVersionResponseError;
+
+export const getFindBestMatchProductDetailsByVersionUrl = (
+  id: string,
+  version: string,
+  params?: FindBestMatchProductDetailsByVersionParams
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/product-details/${id}/${version}/bestmatch?${stringifiedParams}`
+    : `/api/product-details/${id}/${version}/bestmatch`;
+};
+
+/**
+ * @summary Find the first available version in the requested major line
+ */
+export const findBestMatchProductDetailsByVersion = async (
+  id: string,
+  version: string,
+  params?: FindBestMatchProductDetailsByVersionParams,
+  options?: Parameters<typeof marketFetch>[1]
+): Promise<findBestMatchProductDetailsByVersionResponse> => {
+  return marketFetch<findBestMatchProductDetailsByVersionResponse>(getFindBestMatchProductDetailsByVersionUrl(id, version, params), {
     ...options,
     method: 'GET'
   });
