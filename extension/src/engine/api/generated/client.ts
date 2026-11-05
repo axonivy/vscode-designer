@@ -110,7 +110,6 @@ export interface ProjectBean {
   groupId: string;
   id: ProjectIdentifier;
   version: string;
-  isDeletable: boolean;
   defaultNamespace: string;
   projectDirectory: string;
   dependencies: ProjectIdentifier[];
@@ -159,6 +158,11 @@ export interface ProductInstallParams {
 export interface MarketInstallResult {
   installedProjects: string[];
   demoProcesses: ProcessBean[];
+}
+
+export interface ProgramConfigMigrationResult {
+  /** URIs of process files changed and saved by this migration */
+  modifiedProcessFiles: string[];
 }
 
 export type ComponentFormParams = {
@@ -599,6 +603,24 @@ export const getInstallMarketProductUrl = (id: string) => {
     });
 };
 
+/**
+ * Explicitly runs ProgramConfigMigrator on every process in every project in this workspace and saves only changed process files.
+ */
+export const migrateProgramConfigs = (id: string, options?: AxiosRequestConfig): Promise<AxiosResponse<ProgramConfigMigrationResult>> => {
+  return axios.post(`/web-ide/workspace/migrateProgramConfigs/${id}`, undefined, options);
+};
+export const getMigrateProgramConfigsUrl = (id: string) => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/workspace/migrateProgramConfigs/${id}`,
+      baseURL: ''
+    });
+};
+
 export type ProcessDebuggerResult = AxiosResponse<number>;
 export type CreateCaseMapResult = AxiosResponse<CaseMapBean>;
 export type CreateDataClassResult = AxiosResponse<DataClassBean>;
@@ -621,3 +643,4 @@ export type CreateWorkspaceResult = AxiosResponse<WorkspaceBean>;
 export type DeployPortalResult = AxiosResponse<PortalDeploymentResult>;
 export type ImportProjectsResult = AxiosResponse<unknown>;
 export type InstallMarketProductResult = AxiosResponse<MarketInstallResult>;
+export type MigrateProgramConfigsResult = AxiosResponse<ProgramConfigMigrationResult>;
