@@ -92,9 +92,9 @@ export class IvyEngineApi {
 
   public async findOrCreateProject(projectDir: string) {
     const name = path.basename(projectDir);
-    await findOrCreateProject({ workspaceId: this.workspace.id, name, path: projectDir }, { baseURL: this.designerUrl, ...options }).catch(
-      handleAxiosError
-    );
+    await findOrCreateProject({ workspaceId: this.workspace.id, name, path: projectDir }, { baseURL: this.designerUrl, ...options })
+      .then(res => res.data)
+      .catch(handleAxiosError);
   }
 
   public async deployProjects(params: Omit<DeployProjectsRequest, 'workspaceId'>) {
