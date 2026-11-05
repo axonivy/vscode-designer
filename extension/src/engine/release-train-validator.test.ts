@@ -1,6 +1,6 @@
 import path from 'path';
 import { expect, test, vi } from 'vitest';
-import { ReleaseTrainValidator } from './release-train-validator';
+import { MIN_PATCH_VERSION, ReleaseTrainValidator } from './release-train-validator';
 
 vi.mock('vscode', () => ({
   l10n: {
@@ -23,7 +23,7 @@ test('wrong major', async () => {
   expect(await customValidator.validate(testDir('engine'))).toEqual({
     valid: false,
     isDirectory: true,
-    reason: "Engine major version '13.2.10.123' does not match expected major version '14.2.0'.",
+    reason: `Engine major version '13.2.10.123' does not match expected major version '14.2.${MIN_PATCH_VERSION}'.`,
     engineVersion: '13.2.10.123'
   });
 });
@@ -33,7 +33,7 @@ test('wrong minor', async () => {
   expect(await customValidator.validate(testDir('engine'))).toEqual({
     valid: false,
     isDirectory: true,
-    reason: "Engine minor version '13.2.10.123' does not match expected minor version '13.3.0'.",
+    reason: `Engine minor version '13.2.10.123' does not match expected minor version '13.3.${MIN_PATCH_VERSION}'.`,
     engineVersion: '13.2.10.123'
   });
 });
@@ -104,7 +104,7 @@ test('lts train', async () => {
   const customValidator = new ReleaseTrainValidator({ ...extensionVersion, major: 14, minor: 0, patch: 10, isPreview: false });
   expect((await customValidator.validate('nightly-14')).valid).toBeTruthy();
   expect((await customValidator.validate('14')).valid).toBeTruthy();
-  expect((await customValidator.validate('14.0.0')).valid).toBeTruthy();
+  expect((await customValidator.validate(`14.0.${MIN_PATCH_VERSION}`)).valid).toBeTruthy();
   expect((await customValidator.validate('14.0.999')).valid).toBeTruthy();
 
   expect(await customValidator.validate('14.b')).toEqual({
@@ -112,6 +112,7 @@ test('lts train', async () => {
     reason: "Invalid release train tag or engine directory '14.b'"
   });
   expect((await customValidator.validate('14.0')).valid).toBeFalsy();
+  expect((await customValidator.validate(`14.0.${MIN_PATCH_VERSION - 1}`)).valid).toBeFalsy();
   expect((await customValidator.validate('14.0.0.')).valid).toBeFalsy();
   expect((await customValidator.validate('14.1')).valid).toBeFalsy();
   expect((await customValidator.validate('14.')).valid).toBeFalsy();
