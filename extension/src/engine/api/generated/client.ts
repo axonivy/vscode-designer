@@ -110,7 +110,6 @@ export interface ProjectBean {
   groupId: string;
   id: ProjectIdentifier;
   version: string;
-  isDeletable: boolean;
   defaultNamespace: string;
   projectDirectory: string;
   dependencies: ProjectIdentifier[];
@@ -159,6 +158,11 @@ export interface ProductInstallParams {
 export interface MarketInstallResult {
   installedProjects: string[];
   demoProcesses: ProcessBean[];
+}
+
+export interface ProgramConfigMigrationResult {
+  /** URIs of process files changed and saved by this migration */
+  modifiedProcessFiles: string[];
 }
 
 export type ComponentFormParams = {
@@ -448,7 +452,7 @@ export const getCreateProjectAndProjectFilesUrl = () => {
     });
 };
 
-export const findOrCreateProject = (projectParams?: ProjectParams, options?: AxiosRequestConfig): Promise<AxiosResponse<unknown>> => {
+export const findOrCreateProject = (projectParams?: ProjectParams, options?: AxiosRequestConfig): Promise<AxiosResponse<ProjectBean>> => {
   return axios.post(`/web-ide/project`, projectParams, options);
 };
 export const getFindOrCreateProjectUrl = () => {
@@ -599,6 +603,24 @@ export const getInstallMarketProductUrl = (id: string) => {
     });
 };
 
+/**
+ * Explicitly runs ProgramConfigMigrator on every process in every project in this workspace and saves only changed process files.
+ */
+export const migrateProgramConfigs = (id: string, options?: AxiosRequestConfig): Promise<AxiosResponse<ProgramConfigMigrationResult>> => {
+  return axios.post(`/web-ide/workspace/migrateProgramConfigs/${id}`, undefined, options);
+};
+export const getMigrateProgramConfigsUrl = (id: string) => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/workspace/migrateProgramConfigs/${id}`,
+      baseURL: ''
+    });
+};
+
 export type ProcessDebuggerResult = AxiosResponse<number>;
 export type CreateCaseMapResult = AxiosResponse<CaseMapBean>;
 export type CreateDataClassResult = AxiosResponse<DataClassBean>;
@@ -613,7 +635,7 @@ export type ProjectsResult = AxiosResponse<ProjectBean[]>;
 export type RefreshProjectStatusesResult = AxiosResponse<ProjectBean[]>;
 export type ConvertProjectResult = AxiosResponse<unknown>;
 export type CreateProjectAndProjectFilesResult = AxiosResponse<ProjectBean>;
-export type FindOrCreateProjectResult = AxiosResponse<unknown>;
+export type FindOrCreateProjectResult = AxiosResponse<ProjectBean>;
 export type DeleteProjectResult = AxiosResponse<unknown>;
 export type InvalidateClassLoaderResult = AxiosResponse<unknown>;
 export type StopBpmEngineResult = AxiosResponse<unknown>;
@@ -621,3 +643,4 @@ export type CreateWorkspaceResult = AxiosResponse<WorkspaceBean>;
 export type DeployPortalResult = AxiosResponse<PortalDeploymentResult>;
 export type ImportProjectsResult = AxiosResponse<unknown>;
 export type InstallMarketProductResult = AxiosResponse<MarketInstallResult>;
+export type MigrateProgramConfigsResult = AxiosResponse<ProgramConfigMigrationResult>;
