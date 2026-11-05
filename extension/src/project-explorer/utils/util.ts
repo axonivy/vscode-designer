@@ -3,11 +3,9 @@ import fs from 'node:fs';
 import path from 'path';
 import type { FileStat } from 'vscode';
 import { FileType, InputBoxValidationSeverity, l10n, Uri, window, workspace } from 'vscode';
+import { PROJECT_NAME_MAX_LENGTH } from './project-name-sanitizer';
 
 export type ResourceDirectoryTarget = 'process' | 'dialog' | 'dataclass';
-
-// Duplicated from core CommonFormats.java
-export const PROJECT_NAME_MAX_LENGTH = 40;
 
 const defaultNamespaceOf = (projecDir: string) => {
   const designerPrefs = Uri.joinPath(Uri.file(projecDir), 'pom.xml');
@@ -140,16 +138,4 @@ export const validateExportPath = (fileName: string, folderPath: Uri) => {
       severity: InputBoxValidationSeverity.Warning
     };
   }
-};
-
-export const sanitizeProjectName = (fileName: string) => {
-  /**
-   * Sanitize logic is duplicated from core ProjectService.java sanitizeProjectName
-   * Must be kept in sync with that logic
-   */
-  const sanitized = fileName
-    .replace(/\.iar/gi, '') // remove ALL .iar, also in the middle of the filename
-    .replace(/\./g, '-')
-    .replace(/[^\w-]/g, '_');
-  return sanitized.slice(0, PROJECT_NAME_MAX_LENGTH);
 };

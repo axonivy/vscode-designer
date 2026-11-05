@@ -1,6 +1,6 @@
 import { expect, test, vi } from 'vitest';
+import { sanitizeProjectName } from './project-name-sanitizer';
 import {
-  sanitizeProjectName,
   validateDotSeparatedName,
   validateNamespace,
   validateProjectArtifactId,

@@ -8,7 +8,7 @@ import { showRememberedFileDialog } from '../base/remembered-file-dialog';
 import { StatusBar } from '../base/status-bar';
 import type { ImportProjectsBody } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { sanitizeProjectName } from './utils/util';
+import { sanitizeProjectName } from './utils/project-name-sanitizer';
 
 export const importIvyProject = async (selectedWorkspaceUri: Uri, context: Pick<ExtensionContext, 'globalState'>) => {
   const selectedTargetPath = selectedWorkspaceUri.fsPath;
