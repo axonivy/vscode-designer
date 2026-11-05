@@ -97,7 +97,9 @@ export const validateProjectName = (value: string) => {
   if (pattern.test(value)) {
     return;
   }
-  return l10n.t('Only letters, digits, underscores, and hyphens are allowed -- No spaces -- Cannot be empty');
+  return l10n.t(
+    `Only letters, digits, underscores, and hyphens are allowed -- No spaces -- Cannot be empty -- Max ${PROJECT_NAME_MAX_LENGTH} characters`
+  );
 };
 
 export const validateDotSeparatedName = (value: string, label?: string) => {
