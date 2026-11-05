@@ -47,7 +47,7 @@ test.describe('Project validation', () => {
     await wsPage.executeCommand('Axon Ivy: New Project');
     await wsPage.provideUserInput(projectNameInvalidChar);
     await expect(wsPage.quickInputMessage).toBeVisible();
-    await expect(wsPage.quickInputMessage).toHaveText('Only letters, digits, underscores, and hyphens are allowed -- No spaces -- Cannot be empty');
+    await expect(wsPage.quickInputMessage).toHaveText('Only letters, digits, underscores, and hyphens are allowed -- No spaces -- Cannot be empty -- Max 40 characters');
 
     const projectNameInvalidCharTooLong = projectNameInvalidChar + 'a';
     await wsPage.executeCommand('Axon Ivy: New Project');

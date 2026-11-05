@@ -203,7 +203,8 @@ test.describe('validateProjectName', () => {
   });
 
   test('error invalid characters', () => {
-    const errorMessageInvalidChar = 'Only letters, digits, underscores, and hyphens are allowed -- No spaces -- Cannot be empty';
+    const errorMessageInvalidChar =
+      'Only letters, digits, underscores, and hyphens are allowed -- No spaces -- Cannot be empty -- Max 40 characters';
     const invalidChars = ['', ' ', 'a ', ' a', 'a a', '/', 'a/a', '.', 'a.a'];
     invalidChars.forEach(name => {
       const res = validateProjectName(name);
@@ -220,7 +221,7 @@ test.describe('validateProjectName', () => {
     expect(res).toBe('Project name cannot exceed 40 characters');
     res = validateProjectName(projectName.substring(0, 40));
     expect(res).toBeTruthy();
-    expect(res).toBe('Only letters, digits, underscores, and hyphens are allowed -- No spaces -- Cannot be empty');
+    expect(res).toBe('Only letters, digits, underscores, and hyphens are allowed -- No spaces -- Cannot be empty -- Max 40 characters');
   });
 });
 

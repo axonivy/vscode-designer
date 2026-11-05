@@ -98,7 +98,8 @@ export const validateProjectName = (value: string) => {
     return;
   }
   return l10n.t(
-    `Only letters, digits, underscores, and hyphens are allowed -- No spaces -- Cannot be empty -- Max ${PROJECT_NAME_MAX_LENGTH} characters`
+    'Only letters, digits, underscores, and hyphens are allowed -- No spaces -- Cannot be empty -- Max {0} characters',
+    PROJECT_NAME_MAX_LENGTH
   );
 };
 
