@@ -329,6 +329,18 @@ test.describe('validateProjectArtifactId', () => {
 });
 
 test.describe('sanitizeProjectName', () => {
+  test('empty string', () => {
+    expect(sanitizeProjectName('')).toBe('');
+  });
+
+  test('iar only', () => {
+    expect(sanitizeProjectName('.iar')).toBe('');
+  });
+
+  test('iar only duplicated', () => {
+    expect(sanitizeProjectName('iar.iar')).toBe('iar');
+  });
+
   test('removes a trailing .iar extension', () => {
     expect(sanitizeProjectName('MyProject.iar')).toBe('MyProject');
   });
