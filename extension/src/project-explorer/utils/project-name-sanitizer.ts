@@ -1,3 +1,5 @@
+import { l10n } from 'vscode';
+
 // Duplicated from core CommonFormats.java
 export const PROJECT_NAME_MAX_LENGTH = 40;
 
@@ -14,10 +16,8 @@ export const sanitizeProjectName = (fileName: string) => {
 };
 
 export const explainSanitizedProjectName = () => {
-  return `Project name is sanitized as follows:
-  All occurrences of ".iar" are removed.
-  Dots are replaced with hyphens.
-  Any character that is not a letter, digit, underscore, or hyphen is replaced with an underscore.
-  The resulting name is truncated to a maximum of ${PROJECT_NAME_MAX_LENGTH} characters.
-  `;
+  return l10n.t(
+    'Project name is sanitized as follows:\n  All occurrences of ".iar" are removed.\n  Dots are replaced with hyphens.\n  Any character that is not a letter, digit, underscore, or hyphen is replaced with an underscore.\n  The resulting name is truncated to a maximum of {0} characters.\n  ',
+    PROJECT_NAME_MAX_LENGTH
+  );
 };
