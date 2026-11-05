@@ -55,22 +55,28 @@ test.describe('IAR Dependency related errors', () => {
 
   test('Ensure dependency clash and outdated dependency are reported', async ({ wsPage, tmpWorkspace }) => {
     const problemsView = await ProblemsView.initProblemsView(wsPage);
+    await problemsView.hasError("Dependency 'tel-search-ch-connector' is available in multiple versions: 12.0.0, 13.2.0");
+    await problemsView.hasNumOfMarkers(2);
+
+    const pom1 = path.join(tmpWorkspace!.tmpWorkspacePath, 'project1', 'pom.xml');
+    const pom2 = path.join(tmpWorkspace!.tmpWorkspacePath, 'project2', 'pom.xml');
+
+    const pomContent = (await fs.promises.readFile(pom2, 'utf8')).replace('12.0.0', '13.2.0');
+    await fs.promises.writeFile(pom2, pomContent);
     await problemsView.hasError(
       "Dependency 'tel-search-ch-connector' has error: Project is outdated and needs to be converted. Update to a newer compatible version or import the project to VS Code to convert the project."
     );
-    await problemsView.hasError("Dependency 'excel-connector' conflicts with a workspace project");
-    await problemsView.hasError("Dependency 'tel-search-ch-connector' is available in multiple versions: 12.0.0, 13.2.0");
+    await problemsView.hasError(
+      "Dependency 'excel-connector' has error: Project is outdated and needs to be converted. Update to a newer compatible version or import the project to VS Code to convert the project."
+    );
 
-    for (const pomPath of [path.join(tmpWorkspace!.tmpWorkspacePath, 'project1', 'pom.xml'), path.join(tmpWorkspace!.tmpWorkspacePath, 'project2', 'pom.xml')]) {
+    for (const pomPath of [pom1, pom2]) {
       const pomContent = await fs.promises.readFile(pomPath, 'utf8');
       const pomWithoutDependencies = pomContent.replace(/^[ \t]*<dependencies>[\s\S]*?^[ \t]*<\/dependencies>\r?\n?/m, '');
       await fs.promises.writeFile(pomPath, pomWithoutDependencies);
     }
 
     const errorMarker = problemsView.view.locator('div.marker-icon.error');
-    await expect(async () => {
-      await wsPage.executeCommand('Axon Ivy: Refresh Project Explorer');
-      await expect(errorMarker).toHaveCount(0, { timeout: 2000 });
-    }).toPass();
+    await expect(errorMarker).toHaveCount(0);
   });
 });
