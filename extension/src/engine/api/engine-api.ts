@@ -40,6 +40,7 @@ import {
   importProjects,
   installMarketProduct,
   invalidateClassLoader,
+  migrateProgramConfigs,
   processDebugger,
   projects,
   refreshProjectStatuses,
@@ -186,6 +187,12 @@ export class IvyEngineApi {
 
   public async refreshProjectStatuses() {
     return refreshProjectStatuses({ workspaceId: this.workspace.id }, { baseURL: this.designerUrl, ...options })
+      .then(res => res.data)
+      .catch(handleAxiosError);
+  }
+
+  public async migrateProgramConfigs() {
+    return migrateProgramConfigs(this.workspace.id, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }

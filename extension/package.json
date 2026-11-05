@@ -404,6 +404,13 @@
         "enablement": "ivy:hasProjectsToConvert"
       },
       {
+        "command": "ivyProjects.migrateProgramConfigs",
+        "title": "%command.migrateProgramConfigs%",
+        "category": "%category.axonIvy%",
+        "icon": "$(wrench)",
+        "enablement": "ivy:hasIvyProjects"
+      },
+      {
         "command": "ivyProjects.addBusinessProcess",
         "title": "%command.newBusinessProcess%",
         "category": "%category.axonIvy%"
