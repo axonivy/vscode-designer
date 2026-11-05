@@ -4,8 +4,7 @@ import {
   findProducts,
   findProductVersionsById,
   type BestMatchVersion,
-  type MavenArtifactVersionModel,
-  type ProductModel
+  type MavenArtifactVersionModel
 } from '../generated/market-client';
 
 export type Product = {
@@ -17,14 +16,15 @@ export type Product = {
 
 export async function searchMarketProduct(): Promise<Product[]> {
   const response = await findProducts({ type: 'all', language: 'en' });
-  return (
-    response.data.map((product: ProductModel) => ({
-      id: product.id || '',
-      name: product.names?.en || 'Unnamed Product',
-      description: product.shortDescriptions?.en || '',
-      logoUrl: product.logoUrl || ''
-    })) || []
-  );
+  if (response.status !== 200) {
+    throw new Error(response.data.message ?? `Failed to search Market products (HTTP ${response.status})`);
+  }
+  return response.data.map(product => ({
+    id: product.id || '',
+    name: product.names?.en || 'Unnamed Product',
+    description: product.shortDescriptions?.en || '',
+    logoUrl: product.logoUrl || ''
+  }));
 }
 
 export async function getAvailableVersions(productId: string, engineVersion: string) {
