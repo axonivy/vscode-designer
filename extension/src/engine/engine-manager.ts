@@ -4,9 +4,10 @@ import { commands, l10n, Uri } from 'vscode';
 import { DidChangeWatchedFilesNotification } from 'vscode-languageserver-protocol';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
+import { showExtensionLog } from '../base/extension-output-channel';
 import { JavaClassPathReader } from '../base/java-class-path-reader';
 import { runJavaProjectImport } from '../base/java-extension-api';
-import { logErrorMessage, logWarningMessage } from '../base/logging-util';
+import { logErrorMessage, logErrorMessageWithActions } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { StatusBar } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
@@ -29,6 +30,7 @@ import { WebServiceEditorProvider } from '../editors/webservice-editor/webservic
 import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language-client';
 import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { ProjectFileWatcherManager } from '../project-explorer/project-file-watcher';
+import { explainSanitizedProjectName, sanitizeProjectName } from '../project-explorer/utils/project-name-sanitizer';
 import { resolveDefaultNamespace } from '../project-explorer/utils/util';
 import { extensionVersion } from '../version/extension-version';
 import { IvyBrowserViewProvider } from '../views/browser/ivy-browser-view-provider';
@@ -49,7 +51,6 @@ import { engineOutputChannel } from './engine-output-channel';
 import { engineDirFromGlobalState, engineReleaseTrain, switchEngineReleaseTrain, updateGlobalStateEngineDir } from './engine-release-train';
 import { EngineRunner } from './engine-runner';
 import { ReleaseTrainValidator } from './release-train-validator';
-import { sanitizeProjectName } from './utils/util';
 import { WebIdeWebSocketProvider } from './web-ide-ws/web-ide-websocket-provider';
 
 export class IvyEngineManager {
@@ -190,31 +191,44 @@ export class IvyEngineManager {
   }
 
   private validateInitProjectNames(ivyProjectPaths: string[]) {
-    const sanitizedNames = new Map<string, string>();
-    const ivyProjectInits = ivyProjectPaths.map(projectPath => {
+    const sanitizedNames = new Map<string, string[]>();
+    for (const projectPath of ivyProjectPaths) {
       const nameRaw = path.basename(projectPath);
       const nameSanitized = sanitizeProjectName(nameRaw);
-      if (nameRaw !== nameSanitized) {
-        logWarningMessage(`Project name derived from directory was sanitized from "${nameRaw}" to "${nameSanitized}"`);
+      const previousRawNames = sanitizedNames.get(nameSanitized) ?? [];
+      for (const previousName of previousRawNames) {
+        logErrorMessageWithActions(
+          `Project names derived from file path conflict. Cannot create and deploy all projects in workspace. Please rename one of the projects: "${previousName}" and "${nameRaw}" map to the same sanitized name "${nameSanitized}"`,
+          { ['Show Extension Log']: () => showExtensionLog() }
+        );
+        logErrorMessageWithActions(explainSanitizedProjectName(), { ['Show Extension Log']: () => showExtensionLog() });
       }
-    });
+      previousRawNames.push(nameRaw);
+      sanitizedNames.set(nameSanitized, previousRawNames);
+    }
   }
 
   public async initProjects(ivyProjectPaths: string[]) {
     if (ivyProjectPaths.length === 0) {
       return;
     }
-    this.validateInitProjectNames(ivyProjectPaths);
     await StatusBar.withStatusBarProgress(
       {
         text: l10n.t('Initialize projects')
       },
       async () => {
+        this.validateInitProjectNames(ivyProjectPaths);
+        const ivyProjectsToDeploy = [];
         for (const projectDir of ivyProjectPaths) {
-          await this.ivyEngineApi?.findOrCreateProject(projectDir);
+          try {
+            await this.ivyEngineApi?.findOrCreateProject(projectDir);
+            ivyProjectsToDeploy.push(projectDir);
+          } catch {
+            continue;
+          }
         }
         if (!isWorkspaceLocked()) {
-          await this.deployProjects(ivyProjectPaths);
+          await this.deployProjects(ivyProjectsToDeploy);
         }
       }
     );
