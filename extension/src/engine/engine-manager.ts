@@ -162,13 +162,12 @@ export class IvyEngineManager {
     WebServiceEditorProvider.register(this.context, this.websocketUrl);
     CustomFieldEditorProvider.register(this.context);
 
-    JavaClassPathReader.init(this.context);
-
     RuntimeLogViewProvider(this.websocketUrl);
     registerProcessDebugging(this.context, this.ivyEngineApi);
     decreaseWorkspaceLock();
 
     await this.deployProjects();
+    await JavaClassPathReader.init(this.context);
     ProjectFileWatcherManager.init(this.context);
     this.registerLanguageClients(this.websocketUrl);
     await IvyDiagnostics.instance.refresh();

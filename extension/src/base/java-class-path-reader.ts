@@ -13,6 +13,7 @@ import { getClassPaths, onDidClasspathUpdate } from '../base/java-extension-api'
 import { artifactIdRangeInPom } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
+import { logErrorMessage } from './logging-util';
 
 const DIAGNOSTIC_SOURCE = 'Axon Ivy Java Classpath';
 
@@ -24,18 +25,22 @@ export class JavaClassPathReader {
   private constructor(context: ExtensionContext) {
     this.diagnostics = languages.createDiagnosticCollection(DIAGNOSTIC_SOURCE);
     context.subscriptions.push(this.diagnostics, this);
-    this.validateAll();
-    onDidClasspathUpdate(() => this.validateAll()).then(disposable => (this.classpathListener = disposable));
+    onDidClasspathUpdate(() => this.readAndValidate()).then(disposable => (this.classpathListener = disposable));
   }
 
-  static init(context: ExtensionContext) {
+  static async init(context: ExtensionContext) {
     if (JavaClassPathReader._instance) {
       throw new Error('JavaClassPathReader has already been initialized');
     }
     JavaClassPathReader._instance = new JavaClassPathReader(context);
+    try {
+      await JavaClassPathReader._instance.readAndValidate();
+    } catch (error) {
+      logErrorMessage(`Failed to read and validate Java classpath, ${error}`);
+    }
   }
 
-  async validateAll() {
+  private async readAndValidate() {
     this.diagnostics.clear();
     const projects = await IvyProjectManager.instance.getIvyProjects();
     const iarsPerProject = new Map<string, Map<string, string>>();
