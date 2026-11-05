@@ -6,7 +6,7 @@ import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
 import { JavaClassPathReader } from '../base/java-class-path-reader';
 import { runJavaProjectImport } from '../base/java-extension-api';
-import { logErrorMessage } from '../base/logging-util';
+import { logErrorMessage, logWarningMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { StatusBar } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
@@ -49,6 +49,7 @@ import { engineOutputChannel } from './engine-output-channel';
 import { engineDirFromGlobalState, engineReleaseTrain, switchEngineReleaseTrain, updateGlobalStateEngineDir } from './engine-release-train';
 import { EngineRunner } from './engine-runner';
 import { ReleaseTrainValidator } from './release-train-validator';
+import { sanitizeProjectName } from './utils/util';
 import { WebIdeWebSocketProvider } from './web-ide-ws/web-ide-websocket-provider';
 
 export class IvyEngineManager {
@@ -184,24 +185,36 @@ export class IvyEngineManager {
   }
 
   private async initExistingProjects() {
-    const ivyProjectDirectories = await IvyProjectManager.instance.getIvyProjects();
-    await this.initProjects(ivyProjectDirectories);
+    const ivyProjectPaths = await IvyProjectManager.instance.getIvyProjects();
+    await this.initProjects(ivyProjectPaths);
   }
 
-  public async initProjects(ivyProjectDirectories: string[]) {
-    if (ivyProjectDirectories.length === 0) {
+  private validateInitProjectNames(ivyProjectPaths: string[]) {
+    const sanitizedNames = new Map<string, string>();
+    const ivyProjectInits = ivyProjectPaths.map(projectPath => {
+      const nameRaw = path.basename(projectPath);
+      const nameSanitized = sanitizeProjectName(nameRaw);
+      if (nameRaw !== nameSanitized) {
+        logWarningMessage(`Project name derived from directory was sanitized from "${nameRaw}" to "${nameSanitized}"`);
+      }
+    });
+  }
+
+  public async initProjects(ivyProjectPaths: string[]) {
+    if (ivyProjectPaths.length === 0) {
       return;
     }
+    this.validateInitProjectNames(ivyProjectPaths);
     await StatusBar.withStatusBarProgress(
       {
         text: l10n.t('Initialize projects')
       },
       async () => {
-        for (const projectDir of ivyProjectDirectories) {
+        for (const projectDir of ivyProjectPaths) {
           await this.ivyEngineApi?.findOrCreateProject(projectDir);
         }
         if (!isWorkspaceLocked()) {
-          await this.deployProjects(ivyProjectDirectories);
+          await this.deployProjects(ivyProjectPaths);
         }
       }
     );
