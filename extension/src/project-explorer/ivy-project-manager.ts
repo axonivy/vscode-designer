@@ -81,11 +81,15 @@ export class IvyProjectManager {
     this.diagnostics.clear();
     const projectFiles = await workspace.findFiles(IVY_PROJECT_FILE_PATTERN, this.excludePattern, this.maxResults);
     const distinctProjectPaths = [...new Set(projectFiles.filter(p => isIvyProject(p)).map(p => path.dirname(p.fsPath)))];
-    const projectPaths: ProjectPathName[] = distinctProjectPaths.map(projectPath => ({
-      path: projectPath,
-      name: path.basename(projectPath),
-      nameSanitized: sanitizeProjectName(path.basename(projectPath))
-    }));
+    const projectPaths: ProjectPathName[] = distinctProjectPaths.map(projectPath => {
+      const name = path.basename(projectPath).toLowerCase();
+      const nameSanitized = sanitizeProjectName(name);
+      return {
+        path: projectPath,
+        name,
+        nameSanitized
+      };
+    });
     const projectsPerName = new Map<string, ProjectPathName[]>();
     const projectsPerSanitizedName = new Map<string, ProjectPathName[]>();
     const projectPathCollisionMap = new Map<ProjectPathName, ProjectPathCollision>();
