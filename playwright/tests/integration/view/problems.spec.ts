@@ -87,5 +87,8 @@ test.describe('Workspace folder names resolution and sanitization errors', () =>
   test('Projects are visible', async ({ wsPage }) => {
     const problemsView = await ProblemsView.initProblemsView(wsPage);
     await problemsView.hasBadgeCount(8);
+
+    const errorToast = wsPage.toasts.filter({ hasText: 'Project name is sanitized as follows' });
+    await expect(errorToast).toHaveCount(1);
   });
 });
