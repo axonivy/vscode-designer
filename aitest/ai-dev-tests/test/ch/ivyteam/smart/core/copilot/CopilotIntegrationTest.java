@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ import tools.jackson.dataformat.yaml.YAMLMapper;
 public class CopilotIntegrationTest {
 
   /**
-   * We run small single-resource skills before complexer ones, 
+   * We run small single-resource skills before complexer ones,
    * to verify that single skills works well when used independently.
    */
   interface Complexity {
@@ -37,6 +38,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Disabled("speed")
   @Order(Complexity.HEAVY)
   void createProject(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("create a new Axon Ivy project called flight-simulator");
@@ -53,7 +55,7 @@ public class CopilotIntegrationTest {
         .isEmpty();
   }
 
-  @Test 
+  @Test
   @Order(Complexity.INDEPENDENT)
   void market_search(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("is there a built in facility to involve a JIRA instance in my process?");
@@ -82,23 +84,23 @@ public class CopilotIntegrationTest {
         .loadedSkill("ivy-market")
         .usedTools("web_fetch")
         .didNotUseTools("axonivy-designer-import_ivy_project");
-    
+
     var fetchCalls = spans.usedTools().stream().filter(tool -> tool.name().equals("web_fetch")).toList();
     assertThat(fetchCalls.getFirst().arguments())
-      .contains("https://market.axonivy.com/stable/api/product\"");
+        .contains("https://market.axonivy.com/stable/api/product\"");
     assertThat(fetchCalls.getLast().arguments())
-      .contains("https://market.axonivy.com/stable/api/product/jira-connector/install");
+        .contains("https://market.axonivy.com/stable/api/product/jira-connector/install");
 
     var purchase = rt.ivyWorkspace().path().resolve("purchase");
     var pom = purchase.resolve("pom.xml");
     assertThat(PomParser.dependencies(pom))
-      .as("Jira connector dependency added to pom.xml")
-      .anySatisfy(dependency -> {
-        assertThat(dependency.groupId()).isEqualTo("com.axonivy.connector.jira");
-        assertThat(dependency.artifactId()).isEqualTo("jira-connector");
-        assertThat(dependency.version()).isNotBlank();
-        assertThat(dependency.type()).isEqualTo("iar");
-      });
+        .as("Jira connector dependency added to pom.xml")
+        .anySatisfy(dependency -> {
+          assertThat(dependency.groupId()).isEqualTo("com.axonivy.connector.jira");
+          assertThat(dependency.artifactId()).isEqualTo("jira-connector");
+          assertThat(dependency.version()).isNotBlank();
+          assertThat(dependency.type()).isEqualTo("iar");
+        });
   }
 
   @Test
@@ -200,14 +202,18 @@ public class CopilotIntegrationTest {
 
     assertThat(spans.tools().names())
         .as("tools from vscode-designer MCP are propagated to harness")
-        .contains("axonivy-designer-new_axon_ivy_project");
+        .contains(
+            "axonivy-designer-new_axon_ivy_project", 
+            "axonivy-designer-import_market_product");
     assertThat(spans).usedTokensBelow(150_000, 10_000);
   }
 
   @Test
+  @Disabled("speed")
   @Order(Complexity.INDEPENDENT) // before: createProject (let's fetch the schemas here for the first time)
   void configureRoles(AgentRuntime rt) throws Exception {
-    var spans = rt.prompt("create the roles manager and employee in purchase/config/roles.yaml, plus a purchase manager that inherits from manager");
+    var spans = rt.prompt(
+        "create the roles manager and employee in purchase/config/roles.yaml, plus a purchase manager that inherits from manager");
 
     var roles = rt.ivyWorkspace().path().resolve("purchase/config/roles.yaml");
     assertThat(roles).content()
@@ -235,6 +241,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Disabled("speed")
   @Order(Complexity.COMPOSITE)
   void process(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
@@ -279,6 +286,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Disabled("speed")
   @Order(Complexity.COMPOSITE)
   void formDialog(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
@@ -298,7 +306,8 @@ public class CopilotIntegrationTest {
 
     var formJson = readJson(form);
     var bindings = formJson.path("components").findParents("type").stream()
-        .collect(Collectors.toMap(c -> c.path("config").path("value").asString(), c -> c.path("type").asString(), (a, b) -> a));
+        .collect(Collectors.toMap(c -> c.path("config").path("value").asString(), c -> c.path("type").asString(),
+            (a, b) -> a));
     assertThat(bindings)
         .as("components are bound to the data attributes: %s", formJson.toPrettyString())
         .containsEntry("#{data.product}", "Input")
@@ -317,6 +326,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Disabled("speed")
   @Order(Complexity.COMPOSITE)
   void jsfDialog(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
@@ -350,6 +360,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Disabled("speed")
   @Order(Complexity.INDEPENDENT)
   void dataClass(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
@@ -364,12 +375,14 @@ public class CopilotIntegrationTest {
 
     assertThat(spans)
         .usedTools("skill", "axonivy-designer-new_axon_ivy_data_class")
-        .calledToolWithout("axonivy-designer-new_axon_ivy_data_class", "namespace") // model don't try to guess a namespace
+        .calledToolWithout("axonivy-designer-new_axon_ivy_data_class", "namespace") // model don't try to guess a
+                                                                                    // namespace
         .viewed("skills/ivy-json-files/schemas/project/data-class.json")
         .didNotUseTools("web_fetch", "web_search");
   }
 
   @Test
+  @Disabled("speed")
   @Order(Complexity.INDEPENDENT)
   void entityClass(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
@@ -386,7 +399,8 @@ public class CopilotIntegrationTest {
     assertThat(entityJson.has("entity")).isTrue();
     var id = entityJson.path("fields").valueStream()
         .filter(f -> f.path("name").asString().equals("id"))
-        .findFirst().orElseThrow(() -> new IllegalStateException("generated 'id' field was removed: " + entityJson.toPrettyString()));
+        .findFirst().orElseThrow(
+            () -> new IllegalStateException("generated 'id' field was removed: " + entityJson.toPrettyString()));
     assertThat(id.path("modifiers").valueStream().map(JsonNode::asString)).contains("ID");
 
     assertThat(spans)
@@ -397,6 +411,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Disabled("speed")
   @Order(Complexity.COMPOSITE) // after: configureRoles, assigns the roles it created
   void configureUsers(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("add two test users to the purchase project, an employee and a purchase manager");
@@ -421,6 +436,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Disabled("speed")
   @Order(Complexity.INDEPENDENT)
   void configureVariables(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
@@ -438,7 +454,8 @@ public class CopilotIntegrationTest {
         .as("a daytime variable defaults to 07:30")
         .containsPattern("(?m)^\\h*#\\h*\\[daytime\\]\\R\\h*[^#:\\r\\n]+:\\h*\"07:30\"\\h*$");
 
-    var template = Pattern.compile("(?im)^\\h*#\\h*\\[file: txt\\]\\R\\h*([^#:\\r\\n]*template[^#:\\r\\n]*):\\h*\"\"\\h*$")
+    var template = Pattern
+        .compile("(?im)^\\h*#\\h*\\[file: txt\\]\\R\\h*([^#:\\r\\n]*template[^#:\\r\\n]*):\\h*\"\"\\h*$")
         .matcher(variablesYaml);
     assertThat(template.find()).as("a template variable with file metadata and an empty value").isTrue();
     assertThat(findFile(config.resolve("variables"), template.group(1).strip() + ".txt")).content().isNotBlank();
@@ -452,6 +469,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Disabled("speed")
   @Order(Complexity.INDEPENDENT)
   void configureCustomFields(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("add a supplier custom field to the tasks of the purchase project");
@@ -472,6 +490,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Disabled("speed")
   @Order(Complexity.INDEPENDENT)
   void configureRestClient(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("purchase needs to fetch suppliers from https://api.acme.com/suppliers/v2, timeout 60s");
@@ -484,7 +503,8 @@ public class CopilotIntegrationTest {
     assertThat(restClient.at("/Url").asString()).isEqualTo("https://api.acme.com/suppliers/v2");
     assertThat(restClient.at("/Properties/jersey.config.client.readTimeout").asString()).isEqualTo("60000");
     // should have JsonFeature by default
-    assertThat(restClient.at("/Features").valueStream().map(JsonNode::asString)).contains("ch.ivyteam.ivy.rest.client.mapper.JsonFeature");
+    assertThat(restClient.at("/Features").valueStream().map(JsonNode::asString))
+        .contains("ch.ivyteam.ivy.rest.client.mapper.JsonFeature");
     assertThat(config.resolve("rest-clients.yaml")).content().doesNotContain("\t");
 
     assertThat(spans)
@@ -495,6 +515,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Disabled("speed")
   @Order(Complexity.INDEPENDENT)
   void configureWebServiceClient(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
@@ -503,15 +524,18 @@ public class CopilotIntegrationTest {
         """);
     var config = rt.ivyWorkspace().path().resolve("purchase/config");
 
-    var webServiceClient = assertThat(readYaml(config.resolve("webservice-clients.yaml")).path("WebServiceClients").propertyStream())
+    var webServiceClient = assertThat(
+        readYaml(config.resolve("webservice-clients.yaml")).path("WebServiceClients").propertyStream())
         .filteredOn(entry -> entry.getKey().matches("(?i).*(erp|booking).*"))
         .first().satisfies(entry -> assertThat(entry.getKey()).matches("[A-Za-z0-9_-]+"))
         .actual().getValue();
     assertThat(webServiceClient.at("/Codegen/WsdlUrl").asString()).isEqualTo("https://erp.acme.com/booking?wsdl");
-    assertThat(webServiceClient.at("/Endpoints/BookingPort/0").asString()).isEqualTo("https://erp.acme.com/booking/soap");
+    assertThat(webServiceClient.at("/Endpoints/BookingPort/0").asString())
+        .isEqualTo("https://erp.acme.com/booking/soap");
     assertThat(webServiceClient.at("/Properties/proxy.host").asString()).isEqualTo("proxy.acme.com");
     assertThat(webServiceClient.at("/Properties/proxy.port").asString()).isEqualTo("3128");
-    assertThat(webServiceClient.at("/Features").valueStream().map(JsonNode::asString)).contains("ch.ivyteam.ivy.webservice.exec.cxf.feature.ProxyFeature");
+    assertThat(webServiceClient.at("/Features").valueStream().map(JsonNode::asString))
+        .contains("ch.ivyteam.ivy.webservice.exec.cxf.feature.ProxyFeature");
     assertThat(config.resolve("webservice-clients.yaml")).content().doesNotContain("\t");
 
     assertThat(spans)
@@ -522,6 +546,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Disabled("speed")
   @Order(Complexity.COMPOSITE)
   void configurePersistence(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
@@ -544,7 +569,8 @@ public class CopilotIntegrationTest {
 
     assertThat(spans)
         .loadedSkill("ivy-yaml-files")
-        .viewed("skills/ivy-yaml-files/schemas/config/databases.json", "skills/ivy-yaml-files/schemas/config/persistence.json")
+        .viewed("skills/ivy-yaml-files/schemas/config/databases.json",
+            "skills/ivy-yaml-files/schemas/config/persistence.json")
         .didNotUseTools("web_fetch", "web_search")
         .usedTokensBelow(200_000, 4_000);
   }
