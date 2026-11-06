@@ -17,7 +17,7 @@ test.describe('Project Explorer', () => {
     await explorer.hasNoNode('exclude-me');
     await explorer.hasNoNode('ivy-project-duplicated');
     const problemsView = await ProblemsView.initProblemsView(wsPage);
-    await problemsView.hasError("Multiple project directories with the same name 'ivy-project-duplicated' found:");
+    await problemsView.hasError("Multiple project directories resolve to the same name 'ivy-project-duplicated'");
   });
 });
 
