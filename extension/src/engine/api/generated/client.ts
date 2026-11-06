@@ -4,8 +4,8 @@
  * Axon Ivy OpenAPI
  * OpenAPI spec version: 0.1.0
  */
-import axios from 'axios';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios from 'axios';
 
 export interface CaseMapInit {
   name: string;
@@ -475,7 +475,7 @@ export const getCreateProjectAndProjectFilesUrl = () => {
     });
 };
 
-export const findOrCreateProject = (projectParams?: ProjectParams, options?: AxiosRequestConfig): Promise<AxiosResponse<ProjectBean>> => {
+export const findOrCreateProject = (projectParams?: ProjectParams, options?: AxiosRequestConfig): Promise<AxiosResponse<unknown>> => {
   return axios.post(`/web-ide/project`, projectParams, options);
 };
 export const getFindOrCreateProjectUrl = () => {
@@ -659,7 +659,7 @@ export type ProjectsResult = AxiosResponse<ProjectBean[]>;
 export type RefreshProjectStatusesResult = AxiosResponse<ProjectBean[]>;
 export type ConvertProjectResult = AxiosResponse<unknown>;
 export type CreateProjectAndProjectFilesResult = AxiosResponse<ProjectBean>;
-export type FindOrCreateProjectResult = AxiosResponse<ProjectBean>;
+export type FindOrCreateProjectResult = AxiosResponse<unknown>;
 export type DeleteProjectResult = AxiosResponse<unknown>;
 export type InvalidateClassLoaderResult = AxiosResponse<unknown>;
 export type StopBpmEngineResult = AxiosResponse<unknown>;
