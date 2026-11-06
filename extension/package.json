@@ -950,7 +950,7 @@
       {
         "name": "import_market_product",
         "displayName": "%tool.importIvyProject%",
-        "modelDescription": "For an explicitly requested demo/source project, pass its exact Market product ID and the complete product.json returned by that product's install endpoint. Imports only projects allowed by this tool's product whitelist through the Axon Ivy Engine market installer. Do not use for product-only installs.",
+        "modelDescription": "For an explicitly requested demo/source project, pass its exact Market product ID and the complete product.json returned by that product's install endpoint. Imports Maven projects marked for workspace import by the product metadata through the Axon Ivy Engine market installer. Do not use for product-only installs.",
         "inputSchema": {
           "type": "object",
           "properties": {

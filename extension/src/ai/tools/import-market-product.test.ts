@@ -28,13 +28,13 @@ const productJson = JSON.stringify({
       id: 'maven-import',
       data: {
         projects: [
-          { groupId: 'com.axonivy.demo', artifactId: 'connectivity-demos', version: '14.0.2-SNAPSHOT', type: 'iar' },
+          { groupId: 'org.example.demos', artifactId: 'sample-demo', version: '1.2.3', type: 'iar' },
           {
-            groupId: 'com.axonivy.demo',
-            artifactId: 'connectivity-demos-test',
-            version: '14.0.2-SNAPSHOT',
+            groupId: 'org.example.demos',
+            artifactId: 'sample-demo-test',
+            version: '1.2.3',
             type: 'iar',
-            importInWorkspace: 'false'
+            importInWorkspace: false
           }
         ],
         repositories: [{ id: 'maven.axonivy.com', url: 'https://maven.axonivy.com', snapshots: { enabled: 'true' } }]
@@ -54,10 +54,10 @@ beforeEach(() => {
   mockStartEngine.mockReset().mockResolvedValue(undefined);
 });
 
-test('installs only allowlisted projects through the Engine market client', async () => {
-  const result = await importMarketProduct({ productId: 'connectivity-demo', productJson });
+test('imports workspace-selected Maven projects from any Market product', async () => {
+  const result = await importMarketProduct({ productId: 'sample-demo-product', productJson });
 
-  expect(result).toContain('com.axonivy.demo:connectivity-demos');
+  expect(result).toContain('org.example.demos:sample-demo');
   expect(mockStartEngine).toHaveBeenCalledOnce();
   expect(mockInstallMarketProduct).toHaveBeenCalledOnce();
   const [input] = mockInstallMarketProduct.mock.calls[0] as [{ productJson: string; dependentProjectPath: string }];
@@ -69,16 +69,16 @@ test('installs only allowlisted projects through the Engine market client', asyn
         data: {
           projects: [
             {
-              groupId: 'com.axonivy.demo',
-              artifactId: 'connectivity-demos',
-              version: '14.0.2-SNAPSHOT',
+              groupId: 'org.example.demos',
+              artifactId: 'sample-demo',
+              version: '1.2.3',
               type: 'iar',
               importInWorkspace: true
             },
             {
-              groupId: 'com.axonivy.demo',
-              artifactId: 'connectivity-demos-test',
-              version: '14.0.2-SNAPSHOT',
+              groupId: 'org.example.demos',
+              artifactId: 'sample-demo-test',
+              version: '1.2.3',
               type: 'iar',
               importInWorkspace: false
             }
@@ -90,17 +90,17 @@ test('installs only allowlisted projects through the Engine market client', asyn
   });
 });
 
-test('rejects products outside the import allowlist', async () => {
-  await expect(importMarketProduct({ productId: 'some-other-product', productJson })).rejects.toThrow('not allowed');
-  expect(mockInstallMarketProduct).not.toHaveBeenCalled();
-});
-
-test('rejects allowlisted products without an approved import project', async () => {
+test('rejects products without a Maven project selected for workspace import', async () => {
   const unrelatedProduct = JSON.stringify({
-    installers: [{ id: 'maven-import', data: { projects: [{ groupId: 'com.axonivy.demo', artifactId: 'connectivity-demos-test' }] } }]
+    installers: [
+      {
+        id: 'maven-import',
+        data: { projects: [{ groupId: 'org.example.demos', artifactId: 'sample-demo-test', importInWorkspace: false }] }
+      }
+    ]
   });
-  await expect(importMarketProduct({ productId: 'connectivity-demo', productJson: unrelatedProduct })).rejects.toThrow(
-    'contains no allowlisted Maven import projects'
+  await expect(importMarketProduct({ productId: 'another-demo-product', productJson: unrelatedProduct })).rejects.toThrow(
+    'contains no Maven import projects selected for workspace import'
   );
   expect(mockInstallMarketProduct).not.toHaveBeenCalled();
 });

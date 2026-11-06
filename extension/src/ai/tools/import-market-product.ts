@@ -13,22 +13,14 @@ type ImportMarketProductArgs = {
 };
 
 const MAX_PRODUCT_JSON_SIZE = 256 * 1024;
-const IMPORTABLE_PROJECTS: Readonly<Record<string, readonly string[]>> = {
-  'connectivity-demo': ['com.axonivy.demo:connectivity-demos']
-};
 
 export async function importMarketProduct(input: unknown): Promise<string> {
   const args = parseArguments(input);
-  const allowedProjects = IMPORTABLE_PROJECTS[args.productId];
-  if (!allowedProjects) {
-    throw new Error(`Market product '${args.productId}' is not allowed to import projects.`);
-  }
-
   const selectedProjects = parseAvailableProjectItems(parseProduct(args.productJson)).filter(
-    project => project.mavenType === 'maven-import' && allowedProjects.includes(`${project.groupId}:${project.artifactId}`)
+    project => project.mavenType === 'maven-import' && project.isPicked
   );
   if (selectedProjects.length === 0) {
-    throw new Error(`Market product '${args.productId}' contains no allowlisted Maven import projects.`);
+    throw new Error(`Market product '${args.productId}' contains no Maven import projects selected for workspace import.`);
   }
 
   const productJson = markProjectsForInstall(args.productJson, selectedProjects);
