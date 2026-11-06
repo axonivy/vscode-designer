@@ -4,10 +4,12 @@ import type { WorkspacePage } from './workspace-page';
 export class ProblemsView {
   readonly tab: Locator;
   readonly view: Locator;
+  readonly badge: Locator;
 
   constructor(readonly wsPage: WorkspacePage) {
     this.tab = wsPage.page.locator('li.action-item:has-text("Problems")');
     this.view = wsPage.page.locator('div.markers-panel-container');
+    this.badge = this.tab.locator('div.badge-content');
   }
 
   static async initProblemsView(wsPage: WorkspacePage) {
@@ -45,5 +47,9 @@ export class ProblemsView {
     if (count === 0) {
       await expect(this.view).toContainText('No problems have been detected in the workspace.');
     }
+  }
+
+  async hasBadgeCount(count: number) {
+    await expect(this.badge).toHaveText(String(count));
   }
 }

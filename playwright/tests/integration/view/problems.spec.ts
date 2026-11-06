@@ -4,7 +4,7 @@ import { expect, test } from '~/fixtures/baseTest';
 import { FormEditor } from '~/page-objects/form-editor';
 import { ProblemsView } from '~/page-objects/problems-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
-import { dependencyClashWorkspacePath } from '~/workspaces/workspace';
+import { dependencyClashWorkspacePath, projectNameConflictPath } from '~/workspaces/workspace';
 
 test('Check existing warning and error', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage, 'Validation.p.json');
@@ -78,5 +78,14 @@ test.describe('IAR Dependency related errors', () => {
 
     const errorMarker = problemsView.view.locator('div.marker-icon.error');
     await expect(errorMarker).toHaveCount(0);
+  });
+});
+
+test.describe('Workspace folder names resolution and sanitization errors', () => {
+  test.use({ workspace: projectNameConflictPath });
+
+  test('Projects are visible', async ({ wsPage }) => {
+    const problemsView = await ProblemsView.initProblemsView(wsPage);
+    await problemsView.hasBadgeCount(8);
   });
 });
