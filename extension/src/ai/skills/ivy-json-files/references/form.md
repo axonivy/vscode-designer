@@ -1,10 +1,17 @@
 # Form
 
-Follow the shared JSON rules in SKILL.md, then apply the relevant steps:
+Follow the shared JSON rules in SKILL.md. Use `ivy-ui` for dialog technology, UI composition, component interfaces, and extraction decisions.
 
-1. **Data bindings:** when adding or changing bindings, read `<Name>Data.d.json` and add missing attributes before referencing them. Bind component values as `#{data.<attr>}`, never `in.<attr>`.
-2. **Embedded components:** when adding or changing a `Composite`, read the embedded component's User Dialog Start (`<Name>Process.p.json`) and data class. Each `parameters` entry must match a parameter in `config.input.params`, be mapped into component data by `config.input.map`, and be referenced through that data by the component's inputs.
-3. **Form edits:** apply the requested changes using the schema. For `FORM`, consider Cancel and Proceed buttons as described below. This does not apply to `COMPONENT`.
+## Data bindings
+
+When adding or changing bindings, read `<Name>Data.d.json` and add missing attributes before referencing them. Bind component values as `#{data.<attr>}`, never `in.<attr>`.
+
+## Form Components and embedding
+
+- Add the component's interface attributes to its data class.
+- When adding or changing a `Composite`, read the embedded component's User Dialog Start (`<Name>Process.p.json`) and data class.
+- Declare start parameters in `config.input.params` and map them into component data with `config.input.map`. Bind the component's inputs to that data. For returned values, declare `config.result.params` and map them with `config.result.map`; keep names and types consistent with the interface.
+- Configure the Form type and `Composite` fields according to the schema, using the embedded component's actual User Dialog Start interface.
 
 ## Dialog buttons
 

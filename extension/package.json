@@ -779,6 +779,9 @@
         "path": "./src/ai/skills/ivy-json-files/SKILL.md"
       },
       {
+        "path": "./src/ai/skills/ivy-ui/SKILL.md"
+      },
+      {
         "path": "./src/ai/skills/ivy-market/SKILL.md"
       }
     ],
@@ -931,7 +934,7 @@
                 "Component"
               ],
               "default": "Page Responsive Grid 2 Columns",
-              "description": "Layout to use for the new Dialog. Only applicable if type is 'JSF'."
+              "description": "Layout of a JSF Dialog; set only if type is 'JSF'. The page layouts create a Faces Dialog page, 'Component' creates an HTML Dialog Component."
             },
             "template": {
               "type": "string",
