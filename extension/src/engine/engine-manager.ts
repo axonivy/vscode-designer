@@ -189,7 +189,7 @@ export class IvyEngineManager {
     await this.initProjects(ivyProjectPaths);
   }
 
-  private validateInitProjectNames(ivyProjectPaths: string[]) {
+  private checkAndWarnProjectNames(ivyProjectPaths: string[]) {
     const sanitizedNames = new Map<string, string[]>();
     for (const projectPath of ivyProjectPaths) {
       const nameRaw = path.basename(projectPath);
@@ -221,7 +221,7 @@ export class IvyEngineManager {
         text: l10n.t('Initialize projects')
       },
       async () => {
-        this.validateInitProjectNames(ivyProjectPaths);
+        this.checkAndWarnProjectNames(ivyProjectPaths);
         const ivyProjectsToDeploy = [];
         for (const projectDir of ivyProjectPaths) {
           try {
