@@ -1,9 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import {
+  commands,
   Diagnostic,
   DiagnosticSeverity,
   EventEmitter,
+  l10n,
   languages,
   Range,
   Uri,
@@ -14,11 +16,24 @@ import {
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
 import { runJavaProjectImport } from '../base/java-extension-api';
+import { logErrorMessageWithActions } from '../base/logging-util';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
+import { explainSanitizedProjectName, sanitizeProjectName } from './utils/project-name-sanitizer';
 
 export const IVY_PROJECT_FILE_PATTERN = '**/{.ivyproject,.project}';
 const DIAGNOSTIC_SOURCE = 'Axon Ivy Project Search';
+
+interface ProjectPathName {
+  path: string;
+  name: string;
+  nameSanitized: string;
+}
+
+interface ProjectPathCollision {
+  sameName: ProjectPathName[];
+  sameSanitizedName: ProjectPathName[];
+}
 
 export const isIvyProject = (projectFile: Uri) => {
   const projectFilePath = projectFile.fsPath;
@@ -65,23 +80,66 @@ export class IvyProjectManager {
   private async findIvyProjects() {
     this.diagnostics.clear();
     const projectFiles = await workspace.findFiles(IVY_PROJECT_FILE_PATTERN, this.excludePattern, this.maxResults);
-    const distinctProjectDirs = [...new Set(projectFiles.filter(p => isIvyProject(p)).map(p => path.dirname(p.fsPath)))];
-    const projectsPerBaseName = new Map<string, string[]>();
-    for (const projectDir of distinctProjectDirs) {
-      const baseName = path.basename(projectDir).toLowerCase();
-      projectsPerBaseName.set(baseName, [...(projectsPerBaseName.get(baseName) ?? []), projectDir]);
+    const distinctProjectPaths = [...new Set(projectFiles.filter(p => isIvyProject(p)).map(p => path.dirname(p.fsPath)))];
+    const projectPaths: ProjectPathName[] = distinctProjectPaths.map(projectPath => {
+      const name = path.basename(projectPath).toLowerCase();
+      const nameSanitized = sanitizeProjectName(name);
+      return {
+        path: projectPath,
+        name,
+        nameSanitized
+      };
+    });
+    const projectsPerName = new Map<string, ProjectPathName[]>();
+    const projectsPerSanitizedName = new Map<string, ProjectPathName[]>();
+    const projectPathCollisionMap = new Map<ProjectPathName, ProjectPathCollision>();
+    for (const project of projectPaths) {
+      const sameName = projectsPerName.get(project.name) ?? [];
+      const sameSanitizedName = projectsPerSanitizedName.get(project.nameSanitized) ?? [];
+      sameName.push(project);
+      sameSanitizedName.push(project);
+      projectsPerName.set(project.name, sameName);
+      projectsPerSanitizedName.set(project.nameSanitized, sameSanitizedName);
+      projectPathCollisionMap.set(project, { sameName, sameSanitizedName });
     }
     const validProjects: string[] = [];
-    [...projectsPerBaseName.entries()].forEach(([baseName, projectDirs]) => {
-      if (projectDirs.length === 1 && projectDirs[0]) {
-        validProjects.push(projectDirs[0]);
-      } else if (projectDirs.length > 1) {
-        projectDirs.forEach(dir => {
-          const message = `Multiple project directories with the same name '${baseName}' found: ${projectDirs.join(', ')}. Please cleanup the workspace.`;
-          const diagnostic = new Diagnostic(new Range(0, 0, 0, 0), message, DiagnosticSeverity.Error);
-          diagnostic.source = DIAGNOSTIC_SOURCE;
-          this.diagnostics.set(Uri.file(dir), [new Diagnostic(new Range(0, 0, 0, 0), message, DiagnosticSeverity.Error)]);
+    projectPathCollisionMap.forEach(({ sameName, sameSanitizedName }, projectPath) => {
+      const diagnostics: Diagnostic[] = [];
+      if (sameName.length > 1) {
+        const diagnostic = new Diagnostic(
+          new Range(0, 0, 0, 0),
+          l10n.t(
+            "Multiple project directories resolve to the same name '{0}':\n{1}.\nPlease cleanup the workspace.",
+            projectPath.name,
+            sameName.map(p => p.path).join('\n')
+          ),
+          DiagnosticSeverity.Error
+        );
+        diagnostic.source = DIAGNOSTIC_SOURCE;
+        diagnostics.push(diagnostic);
+      }
+      if (sameSanitizedName.length > 1) {
+        const diagnostic = new Diagnostic(
+          new Range(0, 0, 0, 0),
+          l10n.t(
+            "Multiple project directories resolve to the same sanitized name '{0}':\n{1}.\nPlease cleanup the workspace.",
+            projectPath.nameSanitized,
+            sameSanitizedName.map(p => p.path).join('\n')
+          ),
+          DiagnosticSeverity.Error
+        );
+        diagnostic.source = DIAGNOSTIC_SOURCE;
+        diagnostics.push(diagnostic);
+        logErrorMessageWithActions(explainSanitizedProjectName(), {
+          [l10n.t('Show Problem View')]: () => {
+            commands.executeCommand('workbench.panel.markers.view.focus');
+          }
         });
+      }
+      if (diagnostics.length === 0) {
+        validProjects.push(projectPath.path);
+      } else {
+        this.diagnostics.set(Uri.file(projectPath.path), diagnostics);
       }
     });
     await executeCommand('setContext', 'ivy:hasIvyProjects', validProjects.length > 0);

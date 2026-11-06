@@ -183,12 +183,12 @@ export class IvyEngineManager {
   }
 
   private async initExistingProjects() {
-    const ivyProjectDirectories = await IvyProjectManager.instance.getIvyProjects();
-    await this.initProjects(ivyProjectDirectories);
+    const ivyProjectPaths = await IvyProjectManager.instance.getIvyProjects();
+    await this.initProjects(ivyProjectPaths);
   }
 
-  public async initProjects(ivyProjectDirectories: string[]) {
-    if (ivyProjectDirectories.length === 0) {
+  public async initProjects(ivyProjectPaths: string[]) {
+    if (ivyProjectPaths.length === 0) {
       return;
     }
     await StatusBar.withStatusBarProgress(
@@ -196,11 +196,17 @@ export class IvyEngineManager {
         text: l10n.t('Initialize projects')
       },
       async () => {
-        for (const projectDir of ivyProjectDirectories) {
-          await this.ivyEngineApi?.findOrCreateProject(projectDir);
+        const ivyProjectsToDeploy = [];
+        for (const projectDir of ivyProjectPaths) {
+          try {
+            await this.ivyEngineApi?.findOrCreateProject(projectDir);
+            ivyProjectsToDeploy.push(projectDir);
+          } catch {
+            continue;
+          }
         }
         if (!isWorkspaceLocked()) {
-          await this.deployProjects(ivyProjectDirectories);
+          await this.deployProjects(ivyProjectsToDeploy);
         }
       }
     );

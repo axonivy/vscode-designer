@@ -25,7 +25,7 @@ test.describe('Add Project and execute init Process', () => {
   });
 });
 
-test.describe('Project already exists', () => {
+test.describe('Project validation', () => {
   test.use({ workspace: multiProjectWithoutDuplicatesWorkspacePath });
 
   test('Existing Project', async ({ wsPage }) => {
@@ -34,5 +34,26 @@ test.describe('Project already exists', () => {
     await wsPage.provideUserInput(projectName);
     await expect(wsPage.quickInputMessage).toBeVisible();
     await expect(wsPage.quickInputMessage).toHaveText('A project with this name already exists in the workspace or as a Maven dependency.');
+  });
+
+  test('Name too long', async ({ wsPage }) => {
+    const projectName = 'a'.repeat(39);
+    await wsPage.executeCommand('Axon Ivy: New Project');
+    await wsPage.provideUserInput(projectName);
+    await expect(wsPage.quickInputMessage).toBeVisible();
+    await expect(wsPage.quickInputMessage).toHaveText("Press 'Enter' to confirm your input or 'Escape' to cancel");
+    await wsPage.page.keyboard.press('Escape');
+
+    const projectNameInvalidChar = projectName + '~';
+    await wsPage.executeCommand('Axon Ivy: New Project');
+    await wsPage.provideUserInput(projectNameInvalidChar);
+    await expect(wsPage.quickInputMessage).toBeVisible();
+    await expect(wsPage.quickInputMessage).toHaveText('Only letters, digits, underscores, and hyphens are allowed -- No spaces -- Cannot be empty -- Max 40 characters');
+
+    const projectNameInvalidCharTooLong = projectNameInvalidChar + 'a';
+    await wsPage.executeCommand('Axon Ivy: New Project');
+    await wsPage.provideUserInput(projectNameInvalidCharTooLong);
+    await expect(wsPage.quickInputMessage).toBeVisible();
+    await expect(wsPage.quickInputMessage).toHaveText('Project name cannot exceed 40 characters');
   });
 });

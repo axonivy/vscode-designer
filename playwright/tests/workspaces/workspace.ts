@@ -15,3 +15,4 @@ export const multiRootWorkspacePath = path.resolve(import.meta.dirname, './multi
 export const screenshotProject = path.resolve(import.meta.dirname, './screenshotProject');
 export const multiProjectWithoutDuplicatesWorkspacePath = path.resolve(import.meta.dirname, './multiProjectWithoutDuplicates');
 export const dependencyClashWorkspacePath = path.resolve(import.meta.dirname, './dependencyClash');
+export const projectNameConflictPath = path.resolve(import.meta.dirname, './projectNameConflict');

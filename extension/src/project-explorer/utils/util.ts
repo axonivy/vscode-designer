@@ -3,6 +3,9 @@ import fs from 'node:fs';
 import path from 'path';
 import type { FileStat } from 'vscode';
 import { FileType, InputBoxValidationSeverity, l10n, Uri, window, workspace } from 'vscode';
+import { PROJECT_NAME_MAX_LENGTH } from './project-name-sanitizer';
+
+export type ResourceDirectoryTarget = 'process' | 'dialog' | 'dataclass';
 
 const defaultNamespaceOf = (projecDir: string) => {
   const designerPrefs = Uri.joinPath(Uri.file(projecDir), 'pom.xml');
@@ -17,8 +20,6 @@ const defaultNamespaceOf = (projecDir: string) => {
     () => ''
   );
 };
-
-export type ResourceDirectoryTarget = 'process' | 'dialog' | 'dataclass';
 
 export const resolveNamespaceFromPath = async (selectedUri: Uri, projectDir: string, target: ResourceDirectoryTarget) => {
   let fileStat: FileStat;
@@ -88,11 +89,18 @@ export const validateProjectArtifactName = (value: string) => {
 };
 
 export const validateProjectName = (value: string) => {
+  // First check the max length
+  if (value.length > PROJECT_NAME_MAX_LENGTH) {
+    return l10n.t('Project name cannot exceed {0} characters', PROJECT_NAME_MAX_LENGTH);
+  }
   const pattern = /^[\w-]+$/;
   if (pattern.test(value)) {
     return;
   }
-  return l10n.t('Only letters, digits, underscores, and hyphens are allowed -- No spaces -- Cannot be empty');
+  return l10n.t(
+    'Only letters, digits, underscores, and hyphens are allowed -- No spaces -- Cannot be empty -- Max {0} characters',
+    PROJECT_NAME_MAX_LENGTH
+  );
 };
 
 export const validateDotSeparatedName = (value: string, label?: string) => {
@@ -133,16 +141,4 @@ export const validateExportPath = (fileName: string, folderPath: Uri) => {
       severity: InputBoxValidationSeverity.Warning
     };
   }
-};
-
-export const sanitizeProjectName = (fileName: string) => {
-  /**
-   * Sanitize logic is duplicated from core ProjectService.java sanitizeProjectName
-   * Must be kept in sync with that logic
-   */
-  const sanitized = fileName
-    .replace(/\.iar/gi, '') // remove ALL .iar, also in the middle of the filename
-    .replace(/\./g, '-')
-    .replace(/[^\w-]/g, '_');
-  return sanitized.slice(0, 40);
 };
