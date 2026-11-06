@@ -119,7 +119,7 @@ export const initialJavaCompileStatus = async () => {
   await javaCompileStatus;
 };
 
-const runInitialJavaCompile = async () => {
+export const runInitialJavaCompile = async () => {
   if ((await IvyProjectManager.instance.getIvyProjects()).length === 0) {
     return CompileWorkspaceStatus.Unavailable;
   }
