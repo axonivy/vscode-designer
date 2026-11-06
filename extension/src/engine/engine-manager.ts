@@ -56,6 +56,7 @@ export class IvyEngineManager {
   private readonly engineRunner: EngineRunner;
   private ivyEngineApi?: IvyEngineApi;
   private started = false;
+  private startPromise?: Promise<void>;
   private postCompileStarted = false;
   private resolvedEngineUrl?: string;
   private resolvedEngineDir?: string;
@@ -124,9 +125,20 @@ export class IvyEngineManager {
 
   async start() {
     if (this.started) {
-      return;
+      return this.startPromise;
     }
     this.started = true;
+    this.startPromise = this.startEngine();
+    try {
+      await this.startPromise;
+    } catch (error) {
+      this.started = false;
+      this.startPromise = undefined;
+      throw error;
+    }
+  }
+
+  private async startEngine() {
     this.resolvedEngineUrl = await this.resolveEngineUrl();
     await executeCommand('setContext', 'ivy:isStarted', 'true');
     this.ivyEngineApi = await IvyEngineApi.init(this.resolvedEngineUrl.toString());
@@ -266,10 +278,14 @@ export class IvyEngineManager {
   }
 
   public async installMarketProduct(input: ProductInstallParams) {
+    const engineApi = this.ivyEngineApi;
+    if (!engineApi) {
+      throw new Error('Axon Ivy Engine is not ready to install a Market Product.');
+    }
     await StatusBar.withStatusBarProgress({ text: l10n.t('Importing market product') }, async () => {
       try {
         increaseWorkspaceLock();
-        await this.ivyEngineApi?.installMarketProduct(input);
+        await engineApi.installMarketProduct(input);
       } finally {
         decreaseWorkspaceLock();
       }

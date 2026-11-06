@@ -80,7 +80,8 @@ public class CopilotIntegrationTest {
     var spans = rt.prompt("install the JIRA connector from the marketplace");
     assertThat(spans)
         .loadedSkill("ivy-market")
-        .usedTools("web_fetch");
+        .usedTools("web_fetch")
+        .didNotUseTools("axonivy-designer-import_ivy_project");
     
     var fetchCalls = spans.usedTools().stream().filter(tool -> tool.name().equals("web_fetch")).toList();
     assertThat(fetchCalls.getFirst().arguments())
@@ -106,7 +107,8 @@ public class CopilotIntegrationTest {
     var spans = rt.prompt("install smart-workflow agent with anthropic.");
     assertThat(spans)
         .loadedSkill("ivy-market")
-        .usedTools("web_fetch");
+        .usedTools("web_fetch")
+        .didNotUseTools("axonivy-designer-import_ivy_project");
 
     var fetchCalls = spans.usedTools().stream().filter(tool -> tool.name().equals("web_fetch")).toList();
     assertThat(fetchCalls.getFirst().arguments())
@@ -121,11 +123,65 @@ public class CopilotIntegrationTest {
     var purchase = rt.ivyWorkspace().path().resolve("purchase");
     var pom = purchase.resolve("pom.xml");
     var deps = PomParser.dependencies(pom).stream()
-      .filter(d -> d.groupId().equals("com.axonivy.utils.ai"))
-      .toList();
+        .filter(d -> d.groupId().equals("com.axonivy.utils.ai"))
+        .toList();
     assertThat(deps).extracting(Dependency::artifactId)
-      .containsOnly("smart-workflow", "smart-workflow-anthropic");
+        .containsOnly("smart-workflow", "smart-workflow-anthropic");
+  }
 
+  @Test
+  @Order(Complexity.HEAVY)
+  void market_install_import(AgentRuntime rt) throws Exception {
+    var spans = rt.prompt("install the Connectivity Features demo from the marketplace into my workspace");
+    assertThat(spans)
+        .loadedSkill("ivy-market")
+        .usedTools("axonivy-designer-import_market_product");
+
+    var toolCalls = spans.usedTools();
+    var apiCalls = toolCalls.stream().filter(call -> call.arguments() != null).toList();
+    var bestMatch = apiCalls.stream()
+        .filter(call -> call.arguments().contains("/product-details/connectivity-demo/"))
+        .findFirst().orElseThrow();
+    assertThat(bestMatch.arguments()).contains("/product-details/connectivity-demo/");
+    var installCall = apiCalls.stream()
+        .filter(call -> call.arguments().contains("/product/connectivity-demo/install?productVersion="))
+        .findFirst().orElseThrow();
+    var versionMatcher = Pattern.compile("productVersion=([0-9]+\\.[0-9]+\\.[0-9]+(?:-[A-Za-z0-9.-]+)?)")
+        .matcher(installCall.arguments());
+    assertThat(versionMatcher.find()).as("install request contains a product version").isTrue();
+    var productVersion = versionMatcher.group(1);
+    assertThat(installCall.arguments())
+        .contains("/product/connectivity-demo/install?productVersion=" + productVersion);
+
+    var importCall = toolCalls.stream()
+        .filter(call -> call.name().equals("axonivy-designer-import_market_product"))
+        .findFirst().orElseThrow();
+    assertThat(importCall.arguments())
+        .contains("\"productId\":\"connectivity-demo\"")
+        .contains("connectivity-demos")
+        .contains(productVersion)
+        .doesNotContain("filePath", "targetPath");
+    assertThat(toolCalls.stream()
+        .filter(call -> call.name().equals("bash"))
+        .filter(call -> call.arguments() != null)
+        .filter(call -> call.arguments().contains("connectivity-demos") && call.arguments().contains(".iar")))
+        .isEmpty();
+
+    var workspace = rt.ivyWorkspace().path();
+    var demo = workspace.resolve("connectivity-demos");
+    assertThat(demo.resolve(".ivyproject"))
+        .as("Market import result: %s; Copilot response: %s", importCall.result(), spans.outputMessage())
+        .exists();
+    assertThat(demo.resolve("pom.xml")).exists();
+    assertThat(demo.resolve("connectivity-demos")).doesNotExist();
+    assertThat(demo.resolve("process/soap/client/personClient.p.json")).exists();
+    assertThat(demo.resolve("META-INF")).doesNotExist();
+    assertThat(workspace.resolve("connectivity-demos-test")).doesNotExist();
+
+    var purchasePom = workspace.resolve("purchase/pom.xml");
+    assertThat(PomParser.dependencies(purchasePom))
+        .extracting(Dependency::artifactId)
+        .doesNotContain("connectivity-demos");
   }
 
   @Test

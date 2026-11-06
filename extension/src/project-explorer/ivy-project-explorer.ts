@@ -12,7 +12,7 @@ import { installMarketProduct } from '../market/market-install';
 import { installLocalMarketProduct } from '../market/market-install-local';
 import { exportIvyProject } from './export-ivy-project';
 import { IAR_CONTENT_SCHEME, IarContentFileSystemProvider } from './iar-content-provider';
-import { importIvyProject } from './import-ivy-project';
+import { importIvyProject, importIvyProjectFromFile } from './import-ivy-project';
 import { importNewProcess } from './import-process';
 import { runProjectConversion } from './ivy-project-conversion';
 import { IvyProjectManager } from './ivy-project-manager';
@@ -81,7 +81,9 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.addCallableSubProcess`, (s: TreeSelection) => this.addProcess(s, 'Callable Sub Process'));
     registerCmd(`${VIEW_ID}.addWebServiceProcess`, (s: TreeSelection) => this.addProcess(s, 'Web Service Process'));
     registerCmd(`${VIEW_ID}.importBpmnProcess`, (s: TreeSelection) => this.importBpmnProcess(s));
-    registerCmd(`${VIEW_ID}.importIvyProject`, (s: TreeSelection) => this.importIvyProject(s));
+    registerCmd(`${VIEW_ID}.importIvyProject`, (selection: TreeSelection | string, targetPath?: string) =>
+      this.importIvyProject(selection, targetPath)
+    );
     registerCmd(`${VIEW_ID}.exportIvyProject`, (s: TreeSelection) => this.exportIvyProject(s));
     registerCmd(`${VIEW_ID}.installLocalMarketProduct`, () => this.installLocalMarketProduct());
     registerCmd(`${VIEW_ID}.installMarketProduct`, () => this.installMarketProduct());
@@ -182,15 +184,27 @@ export class IvyProjectExplorer {
     await importNewProcess(project, this.context);
   }
 
-  private async importIvyProject(selection: TreeSelection) {
+  private async importIvyProject(selection: TreeSelection | string, targetPathArgument?: string) {
+    const filePath = typeof selection === 'string' ? selection : undefined;
     if (isWorkspaceLocked({ warn: true })) {
+      if (filePath !== undefined) {
+        throw new Error('The workspace is locked and cannot import an Ivy project.');
+      }
       return;
     }
-    const selectedUri = await this.selectWorkspace(selection);
-    if (!selectedUri) {
-      logInformationMessage(l10n.t('No valid import directory selected.'));
-      return;
+
+    let selectedUri: Uri | undefined;
+    if (filePath !== undefined) {
+      return importIvyProjectFromFile(targetPathArgument ?? '', filePath);
+    } else {
+      const treeSelection: TreeSelection = typeof selection === 'string' ? undefined : selection;
+      selectedUri = await this.selectWorkspace(treeSelection);
+      if (!selectedUri) {
+        logInformationMessage(l10n.t('No valid import directory selected.'));
+        return;
+      }
     }
+
     const existingIvyProjects = await IvyProjectManager.instance.getIvyProjects();
     for (const existingProject of existingIvyProjects) {
       if (isSubdirectoryOrEqual(existingProject, selectedUri.fsPath)) {

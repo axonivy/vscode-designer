@@ -25,3 +25,6 @@ If either API call fails, report it; do not guess versions or coordinates.
 2. Read `maven-dependency` installer data using `schema/market/product.json`. Select required dependencies, only the requested member(s) of each `requireOneOfGroup`, and optional standalone add-ons only when requested. Ask if a group choice is unspecified.
 3. Edit the existing POM: add selected dependencies directly under `<dependencies>` with their exact coordinates, and add missing installer repositories. Preserve unrelated XML.
 
+## Importing demos
+
+Only import a demo/source project when the user explicitly asks for it in the workspace. After fetching the product's exact install response, call `axonivy-designer-import_market_product` with its exact `productId` and the complete `product.json`. The tool applies its import allowlist and delegates Maven resolution and project import to the Axon Ivy Engine market installer. Currently, only `connectivity-demo`'s `com.axonivy.demo:connectivity-demos` project is allowlisted; its companion test artifact is not imported. Do not use shell commands to download or unpack artifacts. Wait for tool success and verify the project's `.ivyproject` and `pom.xml`; product-only installs do not import advertised demos.
