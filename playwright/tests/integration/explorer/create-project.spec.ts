@@ -13,6 +13,7 @@ test.describe('Add Project and execute init Process', () => {
     const explorer = new FileExplorer(wsPage);
     await explorer.addNestedProject('parent', projectName);
     await wsPage.hasStatusMessage('Axon Ivy: Success - Invalidating class loader');
+    await wsPage.hasReadyStatusMessage();
     await explorer.hasNodeExact(`parent${path.sep}${projectName}`);
 
     const processEditor = new ProcessEditor(wsPage, 'BusinessProcess.p.json');
