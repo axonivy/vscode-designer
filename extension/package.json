@@ -950,13 +950,20 @@
       {
         "name": "import_market_product",
         "displayName": "%tool.importIvyProject%",
-        "modelDescription": "For an explicitly requested demo/source project, pass its exact Market product ID and the complete product.json returned by that product's install endpoint. Imports Maven projects marked for workspace import by the product metadata through the Axon Ivy Engine market installer. Do not use for product-only installs.",
+        "modelDescription": "For explicitly requested demo/source projects, set productId to an array of exact artifactIds the user named from the maven-import installer (use a one-item array for one project), and pass the complete product.json from the Market product's install endpoint. Import only those named projects regardless of importInWorkspace metadata. Do not infer artifactIds from installer defaults or use for product-only installs.",
         "inputSchema": {
           "type": "object",
           "properties": {
             "productId": {
-              "type": "string",
-              "description": "Exact product ID from the Market product listing."
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[^:\\s]+$"
+                }
+              ,
+              "minItems": 1,
+              "uniqueItems": true,
+              "description": "Array of exact artifactIds of the maven-import projects explicitly named by the user."
             },
             "productJson": {
               "type": "string",

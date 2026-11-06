@@ -8,7 +8,7 @@ import { IvyEngineManager } from '../../engine/engine-manager';
 import { markProjectsForInstall, parseAvailableProjectItems, parseProduct } from '../../market/utils/market-install-util';
 
 type ImportMarketProductArgs = {
-  productId: string;
+  productId: string[];
   productJson: string;
 };
 
@@ -16,18 +16,28 @@ const MAX_PRODUCT_JSON_SIZE = 256 * 1024;
 
 export async function importMarketProduct(input: unknown): Promise<string> {
   const args = parseArguments(input);
-  const selectedProjects = parseAvailableProjectItems(parseProduct(args.productJson)).filter(
-    project => project.mavenType === 'maven-import' && project.isPicked
+  const requestedArtifactIds = args.productId;
+  const availableProjects = parseAvailableProjectItems(parseProduct(args.productJson)).filter(project => project.mavenType === 'maven-import');
+  const unavailableArtifactIds = requestedArtifactIds.filter(
+    requested => !availableProjects.some(project => project.artifactId === requested)
   );
-  if (selectedProjects.length === 0) {
-    throw new Error(`Market product '${args.productId}' contains no Maven import projects selected for workspace import.`);
+  if (unavailableArtifactIds.length > 0) {
+    throw new Error(`No Maven import project(s) found with artifactId(s): ${unavailableArtifactIds.join(', ')}.`);
   }
+  const ambiguousArtifactIds = requestedArtifactIds.filter(
+    requested => availableProjects.filter(project => project.artifactId === requested).length > 1
+  );
+  if (ambiguousArtifactIds.length > 0) {
+    throw new Error(`Multiple Maven import projects have artifactId(s): ${ambiguousArtifactIds.join(', ')}.`);
+  }
+  const requestedArtifactIdSet = new Set(requestedArtifactIds);
+  const selectedProjects = availableProjects.filter(project => project.artifactId !== undefined && requestedArtifactIdSet.has(project.artifactId));
 
   const productJson = markProjectsForInstall(args.productJson, selectedProjects);
   const engine = IvyEngineManager.instance;
   await engine.start();
   await engine.installMarketProduct({ productJson, dependentProjectPath: '' });
-  return `Imported ${selectedProjects.map(project => `${project.groupId}:${project.artifactId}`).join(', ')} from '${args.productId}'.`;
+  return `Imported ${selectedProjects.map(project => `${project.groupId}:${project.artifactId}`).join(', ')}.`;
 }
 
 export class ImportMarketProductTool implements LanguageModelTool<ImportMarketProductArgs> {
@@ -41,15 +51,18 @@ function parseArguments(input: unknown): ImportMarketProductArgs {
   if (
     !isRecord(input) ||
     Object.keys(input).some(key => key !== 'productId' && key !== 'productJson') ||
-    typeof input.productId !== 'string' ||
+    !Array.isArray(input.productId) ||
+    input.productId.length === 0 ||
+    input.productId.some(id => typeof id !== 'string' || !/^[^:\s]+$/.test(id)) ||
+    new Set(input.productId).size !== input.productId.length ||
     typeof input.productJson !== 'string'
   ) {
-    throw new Error('Expected only productId and productJson string arguments.');
+    throw new Error('Expected productId as a non-empty list of unique artifactIds, and productJson.');
   }
   if (Buffer.byteLength(input.productJson, 'utf8') > MAX_PRODUCT_JSON_SIZE) {
     throw new Error('productJson exceeds the 256 KiB limit.');
   }
-  return { productId: input.productId, productJson: input.productJson };
+  return { productId: input.productId as string[], productJson: input.productJson };
 }
 
 function isRecord(input: unknown): input is Record<string, unknown> {

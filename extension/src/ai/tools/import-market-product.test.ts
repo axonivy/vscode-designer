@@ -28,14 +28,15 @@ const productJson = JSON.stringify({
       id: 'maven-import',
       data: {
         projects: [
-          { groupId: 'org.example.demos', artifactId: 'sample-demo', version: '1.2.3', type: 'iar' },
+          { groupId: 'org.example.demos', artifactId: 'sample-demo', version: '1.2.3', type: 'iar', importInWorkspace: false },
           {
             groupId: 'org.example.demos',
             artifactId: 'sample-demo-test',
             version: '1.2.3',
             type: 'iar',
             importInWorkspace: false
-          }
+          },
+          { groupId: 'org.example.demos', artifactId: 'unrequested-demo', version: '1.2.3', type: 'iar' }
         ],
         repositories: [{ id: 'maven.axonivy.com', url: 'https://maven.axonivy.com', snapshots: { enabled: 'true' } }]
       }
@@ -54,10 +55,15 @@ beforeEach(() => {
   mockStartEngine.mockReset().mockResolvedValue(undefined);
 });
 
-test('imports workspace-selected Maven projects from any Market product', async () => {
-  const result = await importMarketProduct({ productId: 'sample-demo-product', productJson });
+test('imports only explicitly named artifactIds, ignoring workspace defaults', async () => {
+  const result = await importMarketProduct({
+    productId: ['sample-demo', 'sample-demo-test'],
+    productJson,
+  });
 
   expect(result).toContain('org.example.demos:sample-demo');
+  expect(result).toContain('org.example.demos:sample-demo-test');
+  expect(result).not.toContain('unrequested-demo');
   expect(mockStartEngine).toHaveBeenCalledOnce();
   expect(mockInstallMarketProduct).toHaveBeenCalledOnce();
   const [input] = mockInstallMarketProduct.mock.calls[0] as [{ productJson: string; dependentProjectPath: string }];
@@ -80,6 +86,13 @@ test('imports workspace-selected Maven projects from any Market product', async 
               artifactId: 'sample-demo-test',
               version: '1.2.3',
               type: 'iar',
+              importInWorkspace: true
+            },
+            {
+              groupId: 'org.example.demos',
+              artifactId: 'unrequested-demo',
+              version: '1.2.3',
+              type: 'iar',
               importInWorkspace: false
             }
           ],
@@ -90,17 +103,17 @@ test('imports workspace-selected Maven projects from any Market product', async 
   });
 });
 
-test('rejects products without a Maven project selected for workspace import', async () => {
-  const unrelatedProduct = JSON.stringify({
-    installers: [
-      {
-        id: 'maven-import',
-        data: { projects: [{ groupId: 'org.example.demos', artifactId: 'sample-demo-test', importInWorkspace: false }] }
-      }
-    ]
-  });
-  await expect(importMarketProduct({ productId: 'another-demo-product', productJson: unrelatedProduct })).rejects.toThrow(
-    'contains no Maven import projects selected for workspace import'
+test('accepts a single artifactId', async () => {
+  const result = await importMarketProduct({ productId: ['sample-demo'], productJson });
+
+  expect(result).toContain('org.example.demos:sample-demo');
+  expect(result).not.toContain('sample-demo-test');
+});
+
+test('rejects empty or unknown artifactId selections', async () => {
+  await expect(importMarketProduct({ productId: [], productJson })).rejects.toThrow('non-empty list of unique artifactIds');
+  await expect(importMarketProduct({ productId: ['unrelated'], productJson })).rejects.toThrow(
+    'No Maven import project(s) found with artifactId(s): unrelated'
   );
   expect(mockInstallMarketProduct).not.toHaveBeenCalled();
 });
