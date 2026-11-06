@@ -104,7 +104,11 @@ export class IvyProjectManager {
       if (sameName.length > 1) {
         const diagnostic = new Diagnostic(
           new Range(0, 0, 0, 0),
-          `Multiple project directories resolve to the same name '${projectPath.name}':\n${sameName.map(p => p.path).join('\n')}.\nPlease cleanup the workspace.`,
+          l10n.t(
+            "Multiple project directories resolve to the same name '{0}':\n{1}.\nPlease cleanup the workspace.",
+            projectPath.name,
+            sameName.map(p => p.path).join('\n')
+          ),
           DiagnosticSeverity.Error
         );
         diagnostic.source = DIAGNOSTIC_SOURCE;
@@ -113,7 +117,11 @@ export class IvyProjectManager {
       if (sameSanitizedName.length > 1) {
         const diagnostic = new Diagnostic(
           new Range(0, 0, 0, 0),
-          `Multiple project directories resolve to the same sanitized name '${projectPath.nameSanitized}':\n${sameSanitizedName.map(p => p.path).join('\n')}.\nPlease cleanup the workspace.`,
+          l10n.t(
+            "Multiple project directories resolve to the same sanitized name '{0}':\n{1}.\nPlease cleanup the workspace.",
+            projectPath.nameSanitized,
+            sameSanitizedName.map(p => p.path).join('\n')
+          ),
           DiagnosticSeverity.Error
         );
         diagnostic.source = DIAGNOSTIC_SOURCE;
