@@ -779,6 +779,9 @@
         "path": "./src/ai/skills/ivy-json-files/SKILL.md"
       },
       {
+        "path": "./src/ai/skills/ivy-ui/SKILL.md"
+      },
+      {
         "path": "./src/ai/skills/ivy-market/SKILL.md"
       }
     ],
@@ -895,7 +898,7 @@
       {
         "name": "new_axon_ivy_dialog",
         "displayName": "%tool.newDialog%",
-        "modelDescription": "Creates a new Axon Ivy Dialog. MUST be called for every request to create, add, scaffold, initialize, or generate an Axon Ivy Dialog. Do NOT attempt to create the Dialog by writing files, or inspecting and copying existing Dialogs — only this tool produces a valid, registered Dialog.",
+        "modelDescription": "Creates a new Axon Ivy Dialog. MUST be called for every request to create, add, scaffold, initialize, or generate an Axon Ivy Dialog. Determine UI compatibility and select the dialog type before calling. Do NOT attempt to create the Dialog by writing files, or inspecting and copying existing Dialogs — only this tool produces a valid, registered Dialog.",
         "inputSchema": {
           "type": "object",
           "properties": {
@@ -919,7 +922,7 @@
                 "JSFOffline"
               ],
               "default": "Form",
-              "description": "Type of the Dialog to create"
+              "description": "Dialog type to create. Honor an explicitly requested type; otherwise prefer Form, including for reusable UI. Choose JSF only for requirements Form cannot satisfy."
             },
             "layout": {
               "type": "string",
@@ -931,7 +934,7 @@
                 "Component"
               ],
               "default": "Page Responsive Grid 2 Columns",
-              "description": "Layout to use for the new Dialog. Only applicable if type is 'JSF'."
+              "description": "Layout of a JSF Dialog; set only if type is 'JSF'. The page layouts create a Faces Dialog page, 'Component' creates an HTML Dialog Component."
             },
             "template": {
               "type": "string",

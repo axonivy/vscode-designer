@@ -18,10 +18,14 @@ expected_yaml_files=(
 )
 expected_json_files=(
   SKILL.md
+  references/form.md
   schemas/project/casemap.json
   schemas/project/data-class.json
   schemas/project/form.json
   schemas/project/process.json
+)
+expected_ui_files=(
+  SKILL.md
 )
 
 assert() {
@@ -42,4 +46,5 @@ gh skill install "$source_dir" --from-local --all --dir "$install_dir"
 
 assert expected_yaml_files "$install_dir/ivy-yaml-files"
 assert expected_json_files "$install_dir/ivy-json-files"
+assert expected_ui_files "$install_dir/ivy-ui"
 exit "$exit_code"
