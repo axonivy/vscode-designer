@@ -105,6 +105,7 @@ const QUICK_PICK_OPTIONS = [
   },
   { label: l10n.t('New ...'), kind: QuickPickItemKind.Separator },
   { label: `$(repo-create)  ${l10n.t('New Project')}`, id: 'newProject', command: 'ivyProjects.addNewProject' },
+  { label: `$(repo-create)  ${l10n.t('New Test Project')}`, id: 'newTestProject', command: 'ivyProjects.addNewTestProject' },
   {
     label: `$(repo-create)  ${l10n.t('Import Axon Ivy Project')}`,
     id: 'importProject',
