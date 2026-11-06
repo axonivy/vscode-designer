@@ -58,7 +58,13 @@ cat /tmp/code-version.txt
 echo "Installing Java Extension Pack ..."
 run_code --install-extension vscjava.vscode-java-pack --extensions-dir "${EXTENSIONS_DIR}"
 echo "Installing/updating Designer extension ..."
-run_code --install-extension /extension/vscode-designer*.vsix --extensions-dir "${EXTENSIONS_DIR}"
+DESIGNER_VSIX_NAME="$(find /extension -maxdepth 1 -type f -name 'vscode-designer-*.vsix' -printf '%f\n' | sort -V | tail -n 1)"
+if [[ -z "${DESIGNER_VSIX_NAME}" ]]; then
+	echo "No Designer VSIX found in /extension" >&2
+	exit 1
+fi
+echo "Installing ${DESIGNER_VSIX_NAME}"
+run_code --install-extension "/extension/${DESIGNER_VSIX_NAME}" --extensions-dir "${EXTENSIONS_DIR}"
 if ! run_code --list-extensions --extensions-dir "${EXTENSIONS_DIR}" | grep -q '^axonivy.vscode-designer-14$'; then
 	echo "Expected extension axonivy.vscode-designer-14 is not installed in ${EXTENSIONS_DIR}" >&2
 	exit 1

@@ -1,5 +1,6 @@
 package ch.ivyteam.smart.core.mcp;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
 
@@ -23,6 +24,9 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
       throw new IllegalStateException("JAVA_HOME must be set to run designer-mcp container");
     }
 
+    Path javaHomePath = toRealPath(Path.of(javaHome));
+    Path trustStore = toRealPath(javaHomePath.resolve("lib/security/cacerts"));
+
     withWorkingDirectory("/workspace");
     
     HostUser.configure(this, "designer-mcp");
@@ -37,8 +41,12 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
       "/vscode", BindMode.READ_WRITE);
     withFileSystemBind(mcp.toString(),
       "/mcp.sh", BindMode.READ_ONLY);
-    withFileSystemBind(javaHome, javaHome, BindMode.READ_ONLY);
-    withEnv("JAVA_HOME", javaHome);
+    withFileSystemBind(javaHomePath.toString(), javaHomePath.toString(), BindMode.READ_ONLY);
+    if (!trustStore.startsWith(javaHomePath)) {
+      Path trustStoreDirectory = trustStore.getParent();
+      withFileSystemBind(trustStoreDirectory.toString(), trustStoreDirectory.toString(), BindMode.READ_ONLY);
+    }
+    withEnv("JAVA_HOME", javaHomePath.toString());
     withExposedPorts(MCP_PORT);
     System.out.println("Waiting for MCP health endpoint on port " + MCP_PORT + " in designer-mcp container...");
     waitingFor(Wait
@@ -55,6 +63,15 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
             + "/mcp.sh\n"
             + "exec tail -f /dev/null");
   }
+
+  private static Path toRealPath(Path path) {
+    try {
+      return path.toRealPath();
+    } catch (IOException e) {
+      throw new IllegalStateException("Could not resolve Java truststore path: " + path, e);
+    }
+  }
+
   public String getMcpUri() {
     return "http://" + NETWORK_ALIAS + ":" + MCP_PORT + "/mcp";
   }
