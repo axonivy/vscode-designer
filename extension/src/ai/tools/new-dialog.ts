@@ -74,8 +74,18 @@ export const createNewDialog = async (input: NewDialogToolArgs): Promise<string>
   };
   const dialogType = newDialogParams.type ?? 'Form';
   const hdBean = await IvyEngineManager.instance.createUserDialog(newDialogParams);
-  const dialogPath = hdBean?.uri ? Uri.parse(hdBean.uri).fsPath : '<unknown location>';
-  return l10n.t("{0} created successfully at '{1}'", localizeDialogType(dialogType), dialogPath);
+  if (!hdBean?.uri) {
+    return l10n.t("{0} created successfully at '{1}'", localizeDialogType(dialogType), '<unknown location>');
+  }
+  const viewPath = Uri.parse(hdBean.uri).fsPath;
+  const dialogDir = path.dirname(viewPath);
+  return l10n.t(
+    "{0} created successfully:\n- View: '{1}'\n- Data class: '{2}'\n- Process: '{3}'",
+    localizeDialogType(dialogType),
+    viewPath,
+    path.join(dialogDir, `${newDialogParams.name}Data.d.json`),
+    path.join(dialogDir, `${newDialogParams.name}Process.p.json`)
+  );
 };
 
 const resolvedParams = (args: NewDialogToolArgs) => {
