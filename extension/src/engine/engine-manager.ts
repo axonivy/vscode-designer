@@ -326,6 +326,25 @@ export class IvyEngineManager {
     });
   }
 
+  public async createTestProject(newTestProjectParams: CreateProjectParams) {
+    await StatusBar.withStatusBarProgress({ text: l10n.t('Creating new test project') }, async () => {
+      try {
+        increaseWorkspaceLock();
+        await this.ivyEngineApi?.createProject(newTestProjectParams);
+      } finally {
+        decreaseWorkspaceLock();
+      }
+      await runJavaProjectImport();
+      await this.createAndOpenProcess({
+        name: 'MyProcess',
+        kind: 'Business Process',
+        path: newTestProjectParams.path,
+        namespace: await resolveDefaultNamespace(newTestProjectParams.path, 'process')
+      });
+      await IvyProjectManager.instance.refresh();
+    });
+  }
+
   public async createDataClass(params: CreateDataClassParams) {
     const dataClassBean = await StatusBar.withStatusBarProgress(
       { text: l10n.t('Creating new Data Class') },
