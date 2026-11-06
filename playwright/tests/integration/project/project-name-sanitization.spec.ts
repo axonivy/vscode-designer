@@ -1,8 +1,8 @@
 import { expect } from '@playwright/test';
 import { test } from '~/fixtures/baseTest';
-import { projectNameSanitizationClashWorkspacePath } from '~/workspaces/workspace';
+import { projectNameConflictPath } from '~/workspaces/workspace';
 
-test.use({ workspace: projectNameSanitizationClashWorkspacePath });
+test.use({ workspace: projectNameConflictPath });
 
 test('Project dir resolve to same name warn', async ({ wsPage }) => {
   await wsPage.executeCommand('Axon Ivy: Open Axon Ivy Extension Log');
