@@ -4,10 +4,9 @@ import { commands, l10n, Uri, window } from 'vscode';
 import { DidChangeWatchedFilesNotification } from 'vscode-languageserver-protocol';
 import { executeCommand } from '../base/commands';
 import { config } from '../base/configurations';
-import { showExtensionLog } from '../base/extension-output-channel';
 import { JavaClassPathReader } from '../base/java-class-path-reader';
 import { runJavaProjectImport } from '../base/java-extension-api';
-import { logErrorMessage, logErrorMessageWithActions } from '../base/logging-util';
+import { logErrorMessage } from '../base/logging-util';
 import { askToReloadWindow } from '../base/reload-window';
 import { StatusBar } from '../base/status-bar';
 import { toWebSocketUrl } from '../base/url-util';
@@ -30,7 +29,6 @@ import { WebServiceEditorProvider } from '../editors/webservice-editor/webservic
 import { XhtmlLanguageClientProvider } from '../editors/xhtml-lsp/xhtml-language-client';
 import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { ProjectFileWatcherManager } from '../project-explorer/project-file-watcher';
-import { explainSanitizedProjectName, sanitizeProjectName } from '../project-explorer/utils/project-name-sanitizer';
 import { resolveDefaultNamespace } from '../project-explorer/utils/util';
 import { extensionVersion } from '../version/extension-version';
 import { IvyBrowserViewProvider } from '../views/browser/ivy-browser-view-provider';
@@ -189,29 +187,6 @@ export class IvyEngineManager {
     await this.initProjects(ivyProjectPaths);
   }
 
-  private checkAndWarnProjectNames(ivyProjectPaths: string[]) {
-    const sanitizedNames = new Map<string, string[]>();
-    for (const projectPath of ivyProjectPaths) {
-      const nameRaw = path.basename(projectPath);
-      const nameSanitized = sanitizeProjectName(nameRaw);
-      const previousRawNames = sanitizedNames.get(nameSanitized) ?? [];
-      for (const previousName of previousRawNames) {
-        logErrorMessageWithActions(
-          l10n.t(
-            'Project names derived from file path conflict. Cannot create and deploy all projects in workspace. Please rename one of the projects: "{0}" and "{1}" map to the same sanitized name "{2}"',
-            previousName,
-            nameRaw,
-            nameSanitized
-          ),
-          { [l10n.t('Show Extension Log')]: () => showExtensionLog() }
-        );
-        logErrorMessageWithActions(explainSanitizedProjectName(), { [l10n.t('Show Extension Log')]: () => showExtensionLog() });
-      }
-      previousRawNames.push(nameRaw);
-      sanitizedNames.set(nameSanitized, previousRawNames);
-    }
-  }
-
   public async initProjects(ivyProjectPaths: string[]) {
     if (ivyProjectPaths.length === 0) {
       return;
@@ -221,7 +196,6 @@ export class IvyEngineManager {
         text: l10n.t('Initialize projects')
       },
       async () => {
-        this.checkAndWarnProjectNames(ivyProjectPaths);
         const ivyProjectsToDeploy = [];
         for (const projectDir of ivyProjectPaths) {
           try {
