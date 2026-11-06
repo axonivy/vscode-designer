@@ -115,7 +115,6 @@ export interface ProjectBean {
   groupId: string;
   id: ProjectIdentifier;
   version: string;
-  isDeletable: boolean;
   defaultNamespace: string;
   projectDirectory: string;
   dependencies: ProjectIdentifier[];
