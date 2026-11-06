@@ -946,6 +946,37 @@
         },
         "canBeReferencedInPrompt": true,
         "toolReferenceName": "newAxonIvyDialog"
+      },
+      {
+        "name": "import_market_product",
+        "displayName": "%tool.importIvyProject%",
+        "modelDescription": "For explicitly requested demo/source projects, set productId to an array of exact artifactIds the user named from the maven-import installer (use a one-item array for one project), and pass the complete product.json from the Market product's install endpoint. Import only those named projects regardless of importInWorkspace metadata. Do not infer artifactIds from installer defaults or use for product-only installs.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "productId": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[^:\\s]+$"
+                }
+              ,
+              "minItems": 1,
+              "uniqueItems": true,
+              "description": "Array of exact artifactIds of the maven-import projects explicitly named by the user."
+            },
+            "productJson": {
+              "type": "string",
+              "description": "Complete product.json response from /product/{productId}/install?productVersion=... ."
+            }
+          },
+          "required": [
+            "productId",
+            "productJson"
+          ]
+        },
+        "canBeReferencedInPrompt": true,
+        "toolReferenceName": "importMarketProduct"
       }
     ],
     "viewsContainers": {
