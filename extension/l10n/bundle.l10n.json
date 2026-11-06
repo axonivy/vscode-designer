@@ -153,6 +153,7 @@
   "Project names derived from file path conflict. Cannot create and deploy all projects in workspace. Please rename one of the projects: \"{0}\" and \"{1}\" map to the same sanitized name \"{2}\"": "Project names derived from file path conflict. Cannot create and deploy all projects in workspace. Please rename one of the projects: \"{0}\" and \"{1}\" map to the same sanitized name \"{2}\"",
   "Initialize projects": "Initialize projects",
   "Deploying projects": "Deploying projects",
+  "Deploying IAR dependencies": "Deploying IAR dependencies",
   "Deploying project {0}": "Deploying project {0}",
   "Stopping BPM Engine of {0}": "Stopping BPM Engine of {0}",
   "Importing BPMN process": "Importing BPMN process",
@@ -166,6 +167,12 @@
   "Deleting project": "Deleting project",
   "Converting project": "Converting project",
   "Refreshing project statuses": "Refreshing project statuses",
+  "Migrate": "Migrate",
+  "This will migrate Program configurations across every process in this workspace and save changed process files.": "This will migrate Program configurations across every process in this workspace and save changed process files.",
+  "Migrating Program configurations": "Migrating Program configurations",
+  "All Program configurations are already up to date.": "All Program configurations are already up to date.",
+  "Migrated Program configurations in one process file.": "Migrated Program configurations in one process file.",
+  "Migrated Program configurations in {0} process files.": "Migrated Program configurations in {0} process files.",
   "Invalidating class loader": "Invalidating class loader",
   "Downloading Axon Ivy Engine": "Downloading Axon Ivy Engine",
   "Failed to download engine from {0}, error: {1}": "Failed to download engine from {0}, error: {1}",
@@ -317,6 +324,8 @@
   "Creating new Axon Ivy {0} \"{1}\"": "Creating new Axon Ivy {0} \"{1}\"",
   "New Axon Ivy {0}": "New Axon Ivy {0}",
   "{0} created successfully at '{1}'": "{0} created successfully at '{1}'",
+  "{0} created successfully:\n- View: '{1}'\n- Data class: '{2}'\n- Process: '{3}'": "{0} created successfully:\n- View: '{1}'\n- Data class: '{2}'\n- Process: '{3}'",
   "Layout": "Layout",
-  "Template": "Template"
+  "Template": "Template",
+  "Dependency '{0}' is available in multiple versions: {1}": "Dependency '{0}' is available in multiple versions: {1}"
 }

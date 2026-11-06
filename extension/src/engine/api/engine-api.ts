@@ -10,6 +10,7 @@ import {
   type ConvertProjectParams,
   type DataClassInit,
   type DeleteProjectParams,
+  type DeployIarProjectsRequest,
   type DeployProjectsRequest,
   type HdInit,
   type ImportProcessBody,
@@ -32,6 +33,7 @@ import {
   createProjectAndProjectFiles,
   createWorkspace,
   deleteProject,
+  deployIarProjects,
   deployPortal,
   deployProjects,
   findOrCreateProject,
@@ -40,6 +42,7 @@ import {
   importProjects,
   installMarketProduct,
   invalidateClassLoader,
+  migrateProgramConfigs,
   processDebugger,
   projects,
   refreshProjectStatuses,
@@ -99,6 +102,12 @@ export class IvyEngineApi {
 
   public async deployProjects(params: Omit<DeployProjectsRequest, 'workspaceId'>) {
     await deployProjects({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options }).catch(handleAxiosError);
+  }
+
+  public async deployIarProjects(params: Omit<DeployIarProjectsRequest, 'workspaceId'>) {
+    await deployIarProjects({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options }).catch(
+      handleAxiosError
+    );
   }
 
   public async stopBpmEngine(params: Omit<StopBpmEngineParams, 'workspaceId'>) {
@@ -186,6 +195,12 @@ export class IvyEngineApi {
 
   public async refreshProjectStatuses() {
     return refreshProjectStatuses({ workspaceId: this.workspace.id }, { baseURL: this.designerUrl, ...options })
+      .then(res => res.data)
+      .catch(handleAxiosError);
+  }
+
+  public async migrateProgramConfigs() {
+    return migrateProgramConfigs(this.workspace.id, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }

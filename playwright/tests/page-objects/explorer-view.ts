@@ -43,6 +43,11 @@ export class ExplorerView {
     await expect(node).not.toBeAttached();
   }
 
+  async hasNoNodeExact(name: string) {
+    const node = this.view.getByText(name, { exact: true });
+    await expect(node).not.toBeAttached();
+  }
+
   async selectNode(name: string) {
     await this.view.getByText(name).click();
     await this.isSelected(name);

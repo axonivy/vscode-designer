@@ -84,6 +84,12 @@
   "Loading projects...": "Projekte werden geladen ...",
   "Local MCP server failed to start: {0}": "Der lokale MCP-Server konnte nicht gestartet werden: {0}",
   "Market installation failed: {0}": "Die Market-Installation ist fehlgeschlagen: {0}",
+  "Migrate": "Migrieren",
+  "This will migrate Program configurations across every process in this workspace and save changed process files.": "Dadurch werden die Program-Konfigurationen in allen Prozessen dieses Arbeitsbereichs migriert und geänderte Prozessdateien gespeichert.",
+  "Migrating Program configurations": "Program-Konfigurationen werden migriert",
+  "All Program configurations are already up to date.": "Alle Program-Konfigurationen sind auf dem neuesten Stand.",
+  "Migrated Program configurations in one process file.": "Program-Konfigurationen in einer Prozessdatei migriert.",
+  "Migrated Program configurations in {0} process files.": "Program-Konfigurationen in {0} Prozessdateien migriert.",
   "Maven pack-iar command failed with exit code {0} for command: {1}": "Der Maven-Befehl pack-iar ist mit Exitcode {0} fehlgeschlagen. Befehl: {1}",
   "No Axon Ivy debug port is configured for this debug session.": "Für diese Debugsitzung ist kein Axon Ivy-Debugport konfiguriert.",
   "No Axon Ivy process debug session is running. Do you want to start one now?": "Es läuft keine Axon Ivy-Prozessdebugsitzung. Möchten Sie jetzt eine starten?",
@@ -149,6 +155,7 @@
   "Project name is sanitized as follows:\n  All occurrences of \".iar\" are removed.\n  Dots are replaced with hyphens.\n  Any character that is not a letter, digit, underscore, or hyphen is replaced with an underscore.\n  The resulting name is truncated to a maximum of {0} characters.\n  ": "Der Projektname wird wie folgt bereinigt:\n  Alle Vorkommen von „.iar“ werden entfernt.\n  Punkte werden durch Bindestriche ersetzt.\n  Jedes Zeichen, das kein Buchstabe, keine Ziffer, kein Unterstrich und kein Bindestrich ist, wird durch einen Unterstrich ersetzt.\n  Der resultierende Name wird auf maximal {0} Zeichen gekürzt.\n  ",
   "Project names derived from file path conflict. Cannot create and deploy all projects in workspace. Please rename one of the projects: \"{0}\" and \"{1}\" map to the same sanitized name \"{2}\"": "Die aus den Dateipfaden abgeleiteten Projektnamen stehen im Konflikt. Es können nicht alle Projekte im Arbeitsbereich erstellt und bereitgestellt werden. Benennen Sie eines der Projekte um: „{0}“ und „{1}“ ergeben denselben bereinigten Namen „{2}“",
   "Deploying projects": "Projekte werden bereitgestellt",
+  "Deploying IAR dependencies": "IAR-Abhängigkeiten werden bereitgestellt",
   "Importing BPMN process": "BPMN-Prozess wird importiert",
   "Importing market product": "Market-Produkt wird importiert",
   "Creating new User Dialog": "Neuer Benutzerdialog wird erstellt",
@@ -296,6 +303,7 @@
   "Create an Axon Ivy {0} with the following details?": "Axon Ivy-Element {0} mit den folgenden Angaben erstellen?",
   "Project": "Projekt",
   "{0} created successfully at '{1}'": "{0} wurde erfolgreich erstellt unter „{1}“",
+  "{0} created successfully:\n- View: '{1}'\n- Data class: '{2}'\n- Process: '{3}'": "{0} wurde erfolgreich erstellt:\n- Ansicht: „{1}“\n- Datenklasse: „{2}“\n- Prozess: „{3}“",
   "Layout": "Layout",
   "Template": "Vorlage",
   "No available product versions found that satisfy your engine version. Your current Ivy Engine version: {0}. Please update your Ivy Engine.": "Es wurden keine verfügbaren Produktversionen gefunden, die mit Ihrer Engine-Version kompatibel sind. Ihre aktuelle Ivy Engine-Version: {0}. Aktualisieren Sie Ihre Ivy Engine.",
@@ -317,6 +325,5 @@
   "Updating 'java.jdt.ls.java.home' to match JAVA_HOME and restarting extension host...": "java.jdt.ls.java.home wird an JAVA_HOME angepasst und der Erweiterungshost neu gestartet ...",
   "Waiting for initial Java compile": "Warten auf die erste Java-Kompilierung",
   "The action cannot be performed because the workspace is locked.": "Die Aktion kann nicht ausgeführt werden, da der Arbeitsbereich gesperrt ist.",
-  "Dependency '{0}' is available in multiple versions: {1}": "Abhängigkeit '{0}' ist in mehreren Versionen verfügbar: {1}",
-  "Dependency '{0}' conflicts with a workspace project": "Abhängigkeit '{0}' steht im Konflikt mit einem Arbeitsbereichsprojekt"
+  "Dependency '{0}' is available in multiple versions: {1}": "Abhängigkeit '{0}' ist in mehreren Versionen verfügbar: {1}"
 }
