@@ -10,7 +10,6 @@
   <properties>
     <!-- Will be raise by the raise-deps.sh script -->
     <openapi.version>14.0.2-SNAPSHOT</openapi.version>
-    <project.build.plugin.version>14.0.2-SNAPSHOT</project.build.plugin.version>
   </properties>
 
   <repositories>
@@ -32,31 +31,8 @@
     </dependency>
   </dependencies>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <id>maven.axonivy.com</id>
-      <url>https://maven.axonivy.com</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </pluginRepository>
-  </pluginRepositories>
-
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>com.axonivy.ivy.ci</groupId>
-          <artifactId>project-build-plugin</artifactId>
-          <version>${project.build.plugin.version}</version>
-          <configuration>
-            <osArchitecture>All_x64</osArchitecture>
-            <engineDirectory>AxonIvyEngine</engineDirectory>
-            <useLatestMinor>true</useLatestMinor>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
+    
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
