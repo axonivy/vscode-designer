@@ -24,7 +24,7 @@ update_version() {
 for pkg in webviews/*/package.json extension/package.json package.json; do
   update_version "$pkg"
 done
-mvn --batch-mode versions:set-property versions:commit -Dproperty=openapi.version -DnewVersion=${1} -DallowSnapshots=true
+mvn --batch-mode versions:set-property versions:commit -f build/openapi/pom.xml -Dproperty=openapi.version -DnewVersion=${1} -DallowSnapshots=true
 
 # Skip install, because transient dependencies are not available yet
 if [ "$DRY_RUN" = false ]; then

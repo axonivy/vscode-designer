@@ -3,79 +3,14 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>ch.ivyteam.vscode</groupId>
-  <artifactId>vscode-designer</artifactId>
+  <artifactId>vscode-designer-modules</artifactId>
   <version>14.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <properties>
-    <!-- Will be raise by the raise-deps.sh script -->
-    <openapi.version>14.0.2-SNAPSHOT</openapi.version>
-    <project.build.plugin.version>14.0.2-SNAPSHOT</project.build.plugin.version>
-  </properties>
+  <modules>
+    <module>build/openapi</module>
+    <module>aitest</module>
+    <module>playwright/tests/screenshots/pom.xml</module>
+  </modules>
 
-  <repositories>
-    <repository>
-      <id>nexus.ivyteam.io</id>
-      <url>https://nexus.ivyteam.io/repository/maven/</url>
-      <snapshots>
-        <updatePolicy>always</updatePolicy>
-      </snapshots>
-    </repository>
-  </repositories>
-
-  <dependencies>
-    <dependency>
-      <groupId>ch.ivyteam.openapi</groupId>
-      <artifactId>openapi</artifactId>
-      <version>${openapi.version}</version>
-      <type>json</type>
-    </dependency>
-  </dependencies>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>maven.axonivy.com</id>
-      <url>https://maven.axonivy.com</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </pluginRepository>
-  </pluginRepositories>
-
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>com.axonivy.ivy.ci</groupId>
-          <artifactId>project-build-plugin</artifactId>
-          <version>${project.build.plugin.version}</version>
-          <configuration>
-            <osArchitecture>All_x64</osArchitecture>
-            <engineDirectory>AxonIvyEngine</engineDirectory>
-            <useLatestMinor>true</useLatestMinor>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.11.0</version>
-        <executions>
-          <execution>
-            <id>copy-dependencies</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/engine/</outputDirectory>
-              <stripVersion>true</stripVersion>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
 </project>

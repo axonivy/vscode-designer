@@ -15,7 +15,6 @@ NEXT_TAG="$(to_next_tag "$VERSION")"
 NEXT_MAJOR="$(to_next_major "$VERSION")"
 
 mvn --batch-mode -f pom.xml versions:set versions:commit -DnewVersion="$VERSION"
-mvn --batch-mode -f playwright/tests/screenshots/pom.xml versions:set versions:commit -DnewVersion="$VERSION"
 
 pnpm install
 pnpm run raise:version "$NEXT_VERSION"
