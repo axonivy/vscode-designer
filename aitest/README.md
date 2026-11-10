@@ -62,7 +62,7 @@ The tests report token usage from Aspire spans, assert tool calls where applicab
    mvn clean verify
 
    # or in vscode
-   code aitest
+   code ai-designer.code-workspace
    # 1. Open File: CopilotIntegrationTest.java
    # 2. Command: `Java: Run Tests`
    ```

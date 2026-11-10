@@ -1,0 +1,47 @@
+{
+  "extensions": {
+    "recommendations": [
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "vscjava.vscode-java-pack",
+      "vitest.explorer",
+    ]
+  },
+  "folders": [
+    {
+      "name": "root",
+      "path": "./"
+    },
+    {
+      "name": "AI Test",
+      "path": "aitest"
+    },
+    {
+      "name": "Designer Extension",
+      "path": "extension"
+    },
+    {
+      "name": "AI Extensions",
+      "path": "extension/src/ai"
+    },
+    {
+      "name": "AI documentation",
+      "path": "doc"
+    }
+  ],
+  "settings": {
+    "editor.formatOnSave": true,
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/lib": true,
+      "**/target": true
+    },
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/target": true
+    },
+    "task.autoDetect": "off"
+  }
+}
