@@ -1,0 +1,38 @@
+name: Dev-Package
+on:
+  schedule:
+    - cron: '0 1 * * *' # 1 AM every day
+  push:
+    branches:
+      - master
+      - release/*
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26
+      - name: Build VSC
+        env:
+          SKIP_IVY_SCHEMAS: '1'
+        run: |
+          corepack enable
+          pnpm install
+          pnpm run build:production
+          pnpm run package
+      - name: Archive Dev Package
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: dev-package
+          retention-days: 5
+          path: |
+            extension/*.vsix
