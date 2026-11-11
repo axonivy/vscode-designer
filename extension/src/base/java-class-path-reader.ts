@@ -22,7 +22,7 @@ export class JavaClassPathReader {
   private readonly diagnostics: DiagnosticCollection;
   private classpathListener?: Disposable;
   private scanQueue: Promise<void> = Promise.resolve();
-  private hasDeployedIars = false;
+  private isInitialCall = true;
 
   private constructor(context: ExtensionContext) {
     this.diagnostics = languages.createDiagnosticCollection(DIAGNOSTIC_SOURCE);
@@ -47,6 +47,8 @@ export class JavaClassPathReader {
   }
 
   private async readAndValidate() {
+    const isInitialCall = this.isInitialCall;
+    this.isInitialCall = false;
     this.diagnostics.clear();
     const projects = await IvyProjectManager.instance.getIvyProjects();
     const iarsPerProject = new Map<string, Map<string, string>>();
@@ -83,18 +85,14 @@ export class JavaClassPathReader {
         this.diagnostics.set(pomUri, newDiagnostics);
       }
     }
-    if (hasError) {
+    if (hasError || (isInitialCall && allClassPathIars.length === 0)) {
       return;
     }
-    await this.deployIarsIfNeeded(allClassPathIars);
+    await this.deployDependencies(allClassPathIars);
   }
 
-  private async deployIarsIfNeeded(allClassPathIars: string[]) {
+  private async deployDependencies(allClassPathIars: string[]) {
     const uniqueIars = Array.from(new Set(allClassPathIars));
-    if (uniqueIars.length === 0 && !this.hasDeployedIars) {
-      return;
-    }
-    this.hasDeployedIars = true;
     await IvyEngineManager.instance.deployIarProjects(uniqueIars);
     await IvyDiagnostics.instance.refresh();
   }
