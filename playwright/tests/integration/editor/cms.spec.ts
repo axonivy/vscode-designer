@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { test } from '~/fixtures/baseTest';
+import { test as baseTest, sharedTest as test } from '~/fixtures/baseTest';
 import { CmsEditor } from '~/page-objects/cms-editor';
 import { TextEditor } from '~/page-objects/editor';
 import { FileExplorer } from '~/page-objects/explorer-view';
@@ -37,7 +37,7 @@ test('Open help', async ({ wsPage }) => {
   await outputView.expectLogEntry(/https:\/\/developer\.axonivy\.com.*cms\/cms-editor.html/);
 });
 
-test('Reuse and reveal existing panel', async ({ wsPage }) => {
+baseTest('Reuse and reveal existing panel', async ({ wsPage }) => {
   const editor = new CmsEditor(wsPage);
   const explorer = new FileExplorer(wsPage);
   await explorer.selectNode('cms');

@@ -51,20 +51,61 @@ export const test = base.extend<TestFixtures>({
   },
   isReady: [
     async ({ tmpWorkspace, page, wsPage, closeWelcomePage }, take) => {
-      if (tmpWorkspace) {
-        await expect(wsPage.ivyStatusBar).toContainText(/Axon Ivy: Connected|Success - Deploying|Waiting for initial Java compile/);
-      }
-      if (closeWelcomePage) {
-        await page
-          .getByRole('tab', { name: 'Axon Ivy PRO Designer' })
-          .getByRole('button', { name: 'Close' })
-          .click({ delay: 100, force: true });
-      }
+      await waitUntilReady(page, wsPage, !!tmpWorkspace, closeWelcomePage);
       await take();
     },
     { auto: true }
   ]
 });
+
+type SharedWorkerFixtures = { sharedPage: Page };
+type SharedTestFixtures = { page: Page; wsPage: WorkspacePage };
+
+/**
+ * Like `test`, but VS Code is started once per worker (on the prebuilt workspace) and shared by all tests of the worker.
+ * All tabs are closed after each test. Tests must not leave state behind that other tests depend on.
+ */
+export const sharedTest = base.extend<SharedTestFixtures, SharedWorkerFixtures>({
+  sharedPage: [
+    async ({}, take) => {
+      const tmpWs = await createTmpWorkspace(prebuiltWorkspacePath);
+      try {
+        const run = runInBrowser
+          ? runBrowserTest
+          : (takePage: (page: Page) => Promise<void>, ws?: TmpWorkspace) =>
+              runElectronAppTest(electronApp => pageOfElectronAppTest(electronApp, takePage, 'shared app'), ws);
+        await run(async page => {
+          await waitUntilReady(page, new WorkspacePage(page), true, true);
+          await take(page);
+        }, tmpWs);
+      } finally {
+        if (!process.env.CI) {
+          await removeTmpWorkspace(tmpWs?.tmpWorkspacePath);
+        }
+      }
+    },
+    { scope: 'worker', timeout: 120_000 }
+  ],
+  page: async ({ sharedPage }, take, testInfo) => {
+    await take(sharedPage);
+    // after a failure Playwright discards the worker (and the app) anyway
+    if (testInfo.status === testInfo.expectedStatus) {
+      await new WorkspacePage(sharedPage).closeAllTabs();
+    }
+  },
+  wsPage: async ({ page }, take) => {
+    await take(new WorkspacePage(page));
+  }
+});
+
+const waitUntilReady = async (page: Page, wsPage: WorkspacePage, withWorkspace: boolean, closeWelcomePage: boolean) => {
+  if (withWorkspace) {
+    await expect(wsPage.ivyStatusBar).toContainText(/Axon Ivy: Connected|Success - Deploying|Waiting for initial Java compile/);
+  }
+  if (closeWelcomePage) {
+    await page.getByRole('tab', { name: 'Axon Ivy PRO Designer' }).getByRole('button', { name: 'Close' }).click({ delay: 100, force: true });
+  }
+};
 
 const runBrowserTest = async (take: (r: Page) => Promise<void>, tmpWorkspace?: TmpWorkspace) => {
   const browser = await chromium.launch({ args: ['--disable-web-security'] }); // disable-web-security because of https://chromestatus.com/feature/5152728072060928
@@ -110,12 +151,12 @@ const runElectronAppTest = async (take: (r: ElectronApplication) => Promise<void
   }
 };
 
-const pageOfElectronAppTest = async (electronApp: ElectronApplication, take: (r: Page) => Promise<void>) => {
+const pageOfElectronAppTest = async (electronApp: ElectronApplication, take: (r: Page) => Promise<void>, title?: string) => {
   const page = await electronApp.firstWindow();
   if (process.env.CI) {
     await page.setViewportSize({ width: 1920, height: 1080 });
   }
-  await page.context().tracing.start({ screenshots: true, snapshots: true, title: test.info().title });
+  await page.context().tracing.start({ screenshots: true, snapshots: true, title: title ?? test.info().title });
   await take(page);
 };
 

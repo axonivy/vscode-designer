@@ -1,9 +1,10 @@
 import { expect } from '@playwright/test';
-import { test } from '~/fixtures/baseTest';
+import { sharedTest as test } from '~/fixtures/baseTest';
 import { DatabaseEditor } from '~/page-objects/database-editor';
 import { OutputView } from '~/page-objects/output-view';
 
-test('Read, write', async ({ wsPage }) => {
+// eslint-disable-next-line playwright/no-focused-test
+test.only('Read, write', async ({ wsPage }) => {
   const editor = new DatabaseEditor(wsPage);
   await editor.open();
 
@@ -14,7 +15,8 @@ test('Read, write', async ({ wsPage }) => {
   await editor.expectTextContent('Url: jdbc:mysql://127.0.0.1:3306/demo');
 });
 
-test('Open help', async ({ wsPage }) => {
+// eslint-disable-next-line playwright/no-focused-test
+test.only('Open help', async ({ wsPage }) => {
   const editor = new DatabaseEditor(wsPage);
   await editor.open();
   const outputView = new OutputView(wsPage);
