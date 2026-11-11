@@ -344,6 +344,52 @@ public class CopilotIntegrationTest {
 
   @Test
   @Order(Complexity.COMPOSITE)
+  void formEditsTableRowsInPopup(AgentRuntime rt) throws Exception {
+    var spans = rt.prompt("""
+        In the purchase project, create a PurchaseOrder dialog where a buyer lists the items
+        to order with name, quantity and unit price in euros; show the prices with their currency.
+        Items are added and changed in a popup, and each item can be removed. In the popup, the name
+        is picked from a dropdown of 10 technical products that you invent.
+        The buyer can sort and search the items by name, and sees 10 items per page.
+        """);
+
+    var purchase = rt.ivyWorkspace().path().resolve("purchase");
+    var form = readJson(findFile(purchase.resolve("dialog"), "PurchaseOrder.f.json"));
+    var table = formComponents(form, "DataTable").getFirst();
+    assertThat(table.at("/config/paginator").asBoolean()).as("items are paged").isTrue();
+    assertThat(formComponents(form, "DataTableColumn"))
+        .as("a column can be sorted and searched")
+        .anySatisfy(column -> {
+          assertThat(column.at("/config/sortable").asBoolean()).isTrue();
+          assertThat(column.at("/config/filterable").asBoolean()).isTrue();
+        });
+
+    var popup = formComponents(form, "Dialog").stream()
+        .filter(dialog -> dialog.path("cid").asString().equals(table.at("/config/editDialogId").asString()))
+        .findFirst().orElseThrow(() -> new IllegalStateException("editDialogId names no Dialog: " + form.toPrettyString()));
+    assertThat(popup.at("/config/linkedComponent").asString())
+        .as("the popup is linked back to the table")
+        .isEqualTo(table.path("cid").asString());
+
+    var buttons = formComponents(form, "Button").stream()
+        .collect(Collectors.toMap(b -> b.at("/config/type").asString(), b -> b.path("config"), (a, b) -> a));
+    assertThat(buttons).as("row and popup buttons").containsKeys("EDIT", "DELETE", "DIALOGCANCEL", "DIALOGSAVE");
+    assertThat(buttons.get("EDIT").path("action").asString()).as("EDIT action is the plain word").isEqualTo("editRow");
+    assertThat(buttons.get("DELETE").path("action").asString()).as("DELETE action is the plain word").isEqualTo("deleteRow");
+    assertThat(buttons.get("DIALOGCANCEL").path("name").asString()).as("popup Cancel has a label").isNotBlank();
+    assertThat(buttons.get("DIALOGSAVE").path("name").asString()).as("popup Save has a label").isNotBlank();
+
+    assertThat(formComponents(popup.path("config"), "Select")).as("the name is picked from a dropdown in the popup").isNotEmpty();
+
+    assertThat(spans)
+        .usedTools("axonivy-designer-new_axon_ivy_dialog")
+        .loadedSkill("ivy-ui")
+        .viewed("skills/ivy-json-files/schemas/project/form.json")
+        .didNotUseTools("web_fetch", "web_search");
+  }
+
+  @Test
+  @Order(Complexity.COMPOSITE)
   void jsfDialog(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
         create a new JSF dialog 'OrderOverview' in 'purchase' project.
