@@ -1,11 +1,11 @@
 import path from 'path';
-import { l10n, Uri, workspace, type QuickPickItem } from 'vscode';
+import { l10n, Range, Uri, workspace, WorkspaceEdit, type QuickPickItem } from 'vscode';
 import { runInitialJavaCompile, runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage } from '../base/logging-util';
 import type { CreateProjectParams } from '../engine/api/engine-api';
 import type { ProjectBean } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { addMavenProjectDependencyByPath, addMavenTestDependency, setMavenPackaging } from '../maven/add-dependency';
+import { addMavenProjectDependencyByPath, addMavenTestDependency } from '../maven/add-dependency';
 import type { AddCommandSelectionContext } from './ivy-project-explorer';
 import {
   MultiStepCancelledError,
@@ -24,28 +24,32 @@ import {
   type ResourceDirectoryTarget
 } from './utils/util';
 
-interface TestSelection extends QuickPickItem {
-  label: string;
-}
-
 interface NewTestProjectState extends MSStateBase {
   projectName?: string | undefined;
   projectPath?: string | undefined;
   groupId?: string | undefined;
   projectId?: string | undefined;
   projectReference?: ProjectSelection | undefined;
-  testSelections?: TestSelection[];
+  testSelections?: QuickPickItem[];
   projectFromSelection?: ProjectSelection | undefined;
 }
+
+const processName = 'ProcessForTest';
+
+const testTemplates = [
+  { selection: 'IvyTest', template: 'ivy-test.java.template', output: 'SampleIvyTest.java' },
+  { selection: 'ProcessTest', template: 'process-test.java.template', output: 'SampleProcessTest.java' },
+  { selection: 'WebIT', template: 'web-it.java.template', output: 'SampleWebIT.java' }
+];
 
 const configureTestProject = async (
   projectPath: string,
   groupId: string,
   referenceProject: ProjectBean,
-  testSelections: TestSelection[],
+  testSelections: QuickPickItem[],
   extensionUri: Uri
 ) => {
-  const selected = new Set(testSelections?.map(test => test.label) ?? []);
+  const selected = new Set(testSelections.map(test => test.label) ?? []);
 
   const needsUnitTester = selected.has('IvyTest') || selected.has('ProcessTest');
   const needsWebTester = selected.has('WebIT');
@@ -62,32 +66,45 @@ const configureTestProject = async (
       groupId: 'com.axonivy.ivy.api.test',
       artifactId: 'ivy-web-test-api'
     });
-    await setMavenPackaging(projectPath, 'iar-integration-test');
+    await setMavenPackaging(projectPath);
   }
 
-  const templates = [
-    { selection: 'IvyTest', template: 'ivy-test.java.template', output: 'SampleIvyTest.java' },
-    { selection: 'ProcessTest', template: 'process-test.java.template', output: 'SampleProcessTest.java' },
-    { selection: 'WebIT', template: 'web-it.java.template', output: 'SampleWebIT.java' }
-  ];
-  for (const item of templates) {
+  for (const item of testTemplates) {
     if (!selected.has(item.selection)) {
       continue;
     }
 
     const packageName = `${referenceProject.defaultNamespace}.${item.selection === 'WebIT' ? 'webtest' : 'test'}`;
-    const processPath = `${groupId.split('.').join('/')}/MyProcess`;
+    const processPath = `${groupId.split('.').join('/')}/${processName}`;
     const templateUri = Uri.joinPath(extensionUri, 'assets', 'test-project-templates', item.template);
     const templateBytes = await workspace.fs.readFile(templateUri);
     const javaSource = new TextDecoder()
       .decode(templateBytes)
       .replace('{{packageName}}', packageName)
-      .replace('{{MyProcess}}', processPath);
+      .replace('{{ProcessForTest}}', processPath);
     const outputDir = Uri.joinPath(Uri.file(projectPath), 'src_test', ...packageName.split('.'));
     await workspace.fs.createDirectory(outputDir);
 
     const outputFile = Uri.joinPath(outputDir, item.output);
     await workspace.fs.writeFile(outputFile, new TextEncoder().encode(javaSource));
+  }
+};
+
+const setMavenPackaging = async (projectDirectory: string) => {
+  const pomUri = Uri.joinPath(Uri.file(projectDirectory), 'pom.xml');
+  const document = await workspace.openTextDocument(pomUri);
+  const match = document.getText().match(/<packaging>iar<\/packaging>/);
+  if (match?.index === undefined) {
+    throw new Error(`Could not find <packaging>iar</packaging> in ${pomUri.fsPath}.`);
+  }
+  const edit = new WorkspaceEdit();
+  edit.replace(
+    pomUri,
+    new Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length)),
+    `<packaging>iar-integration-test</packaging>`
+  );
+  if (!(await workspace.applyEdit(edit)) || !(await document.save())) {
+    throw new Error(`Could not set packaging to iar-integration-test in ${pomUri.fsPath}.`);
   }
 };
 
@@ -219,7 +236,7 @@ export const addNewTestProject = async (selectionContext: AddCommandSelectionCon
     input: MultiStepInput<NewTestProjectState>,
     state: NewTestProjectState
   ) => {
-    state.testSelections = await input.showQuickPick<TestSelection, true>({
+    state.testSelections = await input.showQuickPick<QuickPickItem, true>({
       title: state.dialogTitle,
       titleSuffix: l10n.t('Choose test types'),
       placeholder: l10n.t('Select one or more of the available test types'),
@@ -227,7 +244,7 @@ export const addNewTestProject = async (selectionContext: AddCommandSelectionCon
       totalSteps: state.totalSteps,
       canSelectMany: true,
       selectedItems: state.testSelections,
-      items: ['IvyTest', 'ProcessTest', 'WebIT'].map(label => ({ label })),
+      items: testTemplates.map(({ selection }) => ({ label: selection })),
       onBack: (_filterText, selectedItems) => {
         state.testSelections = selectedItems;
       }
@@ -291,7 +308,7 @@ export const addNewTestProject = async (selectionContext: AddCommandSelectionCon
 
     if (newTestProjectData.testSelections?.some(item => item.label === 'ProcessTest')) {
       await IvyEngineManager.instance.createProcess({
-        name: 'MyProcess',
+        name: processName,
         kind: 'Business Process',
         path: newTestProjectData.projectPath,
         namespace: await resolveDefaultNamespace(newTestProjectData.projectPath, 'process')

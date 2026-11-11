@@ -29,7 +29,7 @@ import ch.ivyteam.ivy.workflow.CaseState;
 @IvyProcessTest
 public class SampleProcessTest{
   
-  private static final BpmProcess testee = BpmProcess.path("{{MyProcess}}");
+  private static final BpmProcess testee = BpmProcess.path("{{ProcessForTest}}");
   
   @Test
   public void callProcess(BpmClient bpmClient){

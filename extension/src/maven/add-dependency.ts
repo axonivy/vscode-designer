@@ -116,25 +116,7 @@ const replaceVersionWithTestScope = async (projectDirectory: string, { groupId, 
   }
 };
 
-export const setMavenPackaging = async (projectDirectory: string, packaging: string) => {
-  const pomUri = Uri.joinPath(Uri.file(projectDirectory), 'pom.xml');
-  const document = await workspace.openTextDocument(pomUri);
-  const match = document.getText().match(/<packaging>[^<]*<\/packaging>/);
-  if (match?.index === undefined) {
-    throw new Error(`Could not find <packaging> in ${pomUri.fsPath}.`);
-  }
-  const edit = new WorkspaceEdit();
-  edit.replace(
-    pomUri,
-    new Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length)),
-    `<packaging>${packaging}</packaging>`
-  );
-  if (!(await workspace.applyEdit(edit)) || !(await document.save())) {
-    throw new Error(`Could not set packaging to ${packaging} in ${pomUri.fsPath}.`);
-  }
-};
-
-export const addMavenProjectDependency = async (
+const addMavenProjectDependency = async (
   target: ProjectBean,
   dependency: Pick<ProjectBean, 'groupId' | 'artifactId'> & Partial<Pick<ProjectBean, 'version'>>
 ) => {

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { expect, test } from '~/fixtures/baseTest';
-import { multiProjectWithoutDuplicatesWorkspacePath, multiProjectWithTestProjectWorkspacePath } from '~/workspaces/workspace';
+import { multiProjectWithoutDuplicatesWorkspacePath } from '~/workspaces/workspace';
 
 test.describe('Add Test Project', () => {
   test.use({ workspace: multiProjectWithoutDuplicatesWorkspacePath });
@@ -31,14 +31,14 @@ test.describe('Add Test Project', () => {
 });
 
 test.describe('Test Project already exists', () => {
-  test.use({ workspace: multiProjectWithTestProjectWorkspacePath });
+  test.use({ workspace: multiProjectWithoutDuplicatesWorkspacePath });
 
   test('Existing Test Project', async ({ wsPage }) => {
     await wsPage.hasReadyStatusMessage();
-    const testProjectName = 'test-ivy-project-1';
+    const projectName = 'ivy-project-1';
     await wsPage.executeCommand('Axon Ivy: New Test Project');
-    await wsPage.provideUserInput('ivy-project-1');
-    await wsPage.provideUserInput(testProjectName);
+    await wsPage.provideUserInput(projectName);
+    await wsPage.provideUserInput(projectName);
     await expect(wsPage.quickInputMessage).toBeVisible();
     await expect(wsPage.quickInputMessage).toHaveText('A test project with this name already exists in the workspace or as a Maven dependency.');
   });
