@@ -25,9 +25,7 @@ test.describe('Add Test Project', () => {
     const srcTest = path.join(tmpWorkspace!.tmpWorkspacePath, 'test-ivy-project-1', 'src_test');
     await expect(async () => {
       const files = await fs.promises.readdir(srcTest, { recursive: true });
-      expect(files.map(file => path.basename(file))).toEqual(
-        expect.arrayContaining(['SampleIvyTest.java', 'SampleProcessTest.java', 'SampleWebIT.java'])
-      );
+      expect(files.map(file => path.basename(file))).toEqual(expect.arrayContaining(['SampleIvyTest.java', 'SampleProcessTest.java', 'SampleWebIT.java']));
     }).toPass();
   });
 });
@@ -36,6 +34,7 @@ test.describe('Test Project already exists', () => {
   test.use({ workspace: multiProjectWithTestProjectWorkspacePath });
 
   test('Existing Test Project', async ({ wsPage }) => {
+    await wsPage.hasReadyStatusMessage();
     const testProjectName = 'test-ivy-project-1';
     await wsPage.executeCommand('Axon Ivy: New Test Project');
     await wsPage.provideUserInput('ivy-project-1');

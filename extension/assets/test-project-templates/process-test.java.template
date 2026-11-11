@@ -49,7 +49,7 @@ public class SampleProcessTest{
     String myUser = "myUser";
     ExecutionResult result = bpmClient.start().process(startable).as().user(myUser).execute();
     assertThat(result.workflow().activeCase()).isEqualTo(CaseState.RUNNING);
-    assertThat(result.workflow().executedTask().activator().name()).isEqualTo(myUser);
+    assertThat(result.workflow().executedTask().responsibles().all().getFirst()).isEqualTo(myUser);
     
     // continue after task/switch
     bpmClient.start().anyActiveTask(result).as().role("supervisor").execute();

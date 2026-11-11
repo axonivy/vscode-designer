@@ -334,14 +334,6 @@ export class IvyEngineManager {
       } finally {
         decreaseWorkspaceLock();
       }
-      await runJavaProjectImport();
-      await this.createAndOpenProcess({
-        name: 'MyProcess',
-        kind: 'Business Process',
-        path: newTestProjectParams.path,
-        namespace: await resolveDefaultNamespace(newTestProjectParams.path, 'process')
-      });
-      await IvyProjectManager.instance.refresh();
     });
   }
 

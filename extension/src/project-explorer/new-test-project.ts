@@ -5,7 +5,7 @@ import { logErrorMessage } from '../base/logging-util';
 import type { CreateProjectParams } from '../engine/api/engine-api';
 import type { ProjectBean } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
-import { addMavenProjectDependencyByPath, addMavenTestDependency } from '../maven/add-dependency';
+import { addMavenProjectDependencyByPath, addMavenTestDependency, setMavenPackaging } from '../maven/add-dependency';
 import type { AddCommandSelectionContext } from './ivy-project-explorer';
 import {
   MultiStepCancelledError,
@@ -62,6 +62,7 @@ const configureTestProject = async (
       groupId: 'com.axonivy.ivy.api.test',
       artifactId: 'ivy-web-test-api'
     });
+    await setMavenPackaging(projectPath, 'iar-integration-test');
   }
 
   const templates = [
@@ -203,7 +204,7 @@ export const addNewTestProject = async (selectionContext: AddCommandSelectionCon
     state.projectId = await input.showTextInput({
       title: state.dialogTitle,
       titleSuffix: l10n.t('Choose an Artifact ID'),
-      placeholder: l10n.t('Enter an Artifact ID (e. g. another-project-id). Allowed characters: a-z, A-Z, 0-9, _'),
+      placeholder: l10n.t('Enter an Artifact ID (e.g. another-project-id). Allowed characters: a-z, A-Z, 0-9, _'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.projectId,
@@ -288,17 +289,17 @@ export const addNewTestProject = async (selectionContext: AddCommandSelectionCon
       extensionUri
     );
 
-    await IvyEngineManager.instance.createProcess({
-      name: 'MyProcess',
-      kind: 'Business Process',
-      path: newTestProjectData.projectPath,
-      namespace: await resolveDefaultNamespace(newTestProjectData.projectPath, 'process')
-    });
+    if (newTestProjectData.testSelections?.some(item => item.label === 'ProcessTest')) {
+      await IvyEngineManager.instance.createProcess({
+        name: 'MyProcess',
+        kind: 'Business Process',
+        path: newTestProjectData.projectPath,
+        namespace: await resolveDefaultNamespace(newTestProjectData.projectPath, 'process')
+      });
+    }
     await runJavaProjectImport();
-
     await runInitialJavaCompile();
     await IvyEngineManager.instance.deployProjects(newTestProjectData.projectPath);
-    // await IvyProjectManager.instance.refresh();
   } else {
     throw new MultiStepInvalidStateError(
       'Test Project creation failed due to corrupted input state. Current input state: ' + JSON.stringify(newTestProjectData)

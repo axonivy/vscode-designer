@@ -1,6 +1,6 @@
 import path from 'path';
 import type { ExtensionContext } from 'vscode';
-import { Uri, WorkspaceEdit, commands, l10n, window, workspace } from 'vscode';
+import { Range, Uri, WorkspaceEdit, commands, l10n, window, workspace } from 'vscode';
 import { registerCommand } from '../base/commands';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { logErrorMessage } from '../base/logging-util';
@@ -15,11 +15,9 @@ type MavenTestDependency = {
   artifactId: string;
 };
 
-type MavenDependency = {
-  groupId: string;
-  artifactId: string;
-  version: string;
-  packaging: string;
+type MavenDependency = MavenTestDependency & {
+  version?: string;
+  packaging?: string;
 };
 
 export const registerAddDependencyHandler = (context: ExtensionContext) => {
@@ -96,53 +94,50 @@ const addMavenDependency = async (projectDirectory: string, dependency: MavenDep
 };
 
 export const addMavenTestDependency = async (projectDirectory: string, dependency: MavenTestDependency) => {
+  await addMavenDependency(projectDirectory, { ...dependency, version: 'managed' });
+  await replaceVersionWithTestScope(projectDirectory, dependency);
+};
+
+const replaceVersionWithTestScope = async (projectDirectory: string, { groupId, artifactId }: MavenTestDependency) => {
   const pomUri = Uri.joinPath(Uri.file(projectDirectory), 'pom.xml');
   const document = await workspace.openTextDocument(pomUri);
-  const pom = document.getText();
-
-  const sections = Array.from(pom.matchAll(/<dependencies\b[^>]*>[\s\S]*?<\/dependencies>/g));
-  const section = sections[0];
-
-  if (sections.length !== 1 || !section || section.index === undefined) {
-    throw new Error(`Expected one <dependencies> section in ${pomUri.fsPath}.`);
-  }
-
-  const getTagValue = (block: string, tag: string) => block.match(new RegExp(`<${tag}>\\s*([^<]+?)\\s*</${tag}>`))?.[1]?.trim();
-
-  const blocks = Array.from(section[0].matchAll(/<dependency\b[^>]*>[\s\S]*?<\/dependency>/g));
-  const alreadyExists = blocks.some(
-    ([block]) =>
-      block !== undefined &&
-      getTagValue(block, 'groupId') === dependency.groupId &&
-      getTagValue(block, 'artifactId') === dependency.artifactId
+  const block = Array.from(document.getText().matchAll(/<dependency>[\s\S]*?<\/dependency>/g)).find(
+    ([b]) => b.includes(`<groupId>${groupId}</groupId>`) && b.includes(`<artifactId>${artifactId}</artifactId>`)
   );
-
-  if (alreadyExists) {
-    throw new Error(`Dependency ${dependency.groupId}:${dependency.artifactId} already exists.`);
+  const version = block?.[0].match(/<version>[^<]*<\/version>/);
+  if (block?.index === undefined || version?.index === undefined) {
+    throw new Error(`Could not find dependency ${groupId}:${artifactId} with version in ${pomUri.fsPath}.`);
   }
-
-  const dependencyXml = [
-    '    <dependency>',
-    `      <groupId>${dependency.groupId}</groupId>`,
-    `      <artifactId>${dependency.artifactId}</artifactId>`,
-    '      <scope>test</scope>',
-    '    </dependency>'
-  ].join('\n');
-
-  const closeTagIndex = section.index + section[0].lastIndexOf('</dependencies>');
-  const insertionLine = pom.lastIndexOf('\n', closeTagIndex) + 1;
+  const start = block.index + version.index;
   const edit = new WorkspaceEdit();
-  edit.insert(pomUri, document.positionAt(insertionLine), `${dependencyXml}\n`);
-
-  if (!(await workspace.applyEdit(edit))) {
-    throw new Error(`Could not add ${dependency.groupId}:${dependency.artifactId} to ${pomUri.fsPath}.`);
-  }
-  if (!(await document.save())) {
-    throw new Error(`Could not save ${pomUri.fsPath}.`);
+  edit.replace(pomUri, new Range(document.positionAt(start), document.positionAt(start + version[0].length)), '<scope>test</scope>');
+  if (!(await workspace.applyEdit(edit)) || !(await document.save())) {
+    throw new Error(`Could not set test scope for ${groupId}:${artifactId} in ${pomUri.fsPath}.`);
   }
 };
 
-const addMavenProjectDependency = async (target: ProjectBean, dependency: ProjectBean) => {
+export const setMavenPackaging = async (projectDirectory: string, packaging: string) => {
+  const pomUri = Uri.joinPath(Uri.file(projectDirectory), 'pom.xml');
+  const document = await workspace.openTextDocument(pomUri);
+  const match = document.getText().match(/<packaging>[^<]*<\/packaging>/);
+  if (match?.index === undefined) {
+    throw new Error(`Could not find <packaging> in ${pomUri.fsPath}.`);
+  }
+  const edit = new WorkspaceEdit();
+  edit.replace(
+    pomUri,
+    new Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length)),
+    `<packaging>${packaging}</packaging>`
+  );
+  if (!(await workspace.applyEdit(edit)) || !(await document.save())) {
+    throw new Error(`Could not set packaging to ${packaging} in ${pomUri.fsPath}.`);
+  }
+};
+
+export const addMavenProjectDependency = async (
+  target: ProjectBean,
+  dependency: Pick<ProjectBean, 'groupId' | 'artifactId'> & Partial<Pick<ProjectBean, 'version'>>
+) => {
   await addMavenDependency(target.projectDirectory, {
     groupId: dependency.groupId,
     artifactId: dependency.artifactId,
