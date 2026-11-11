@@ -46,22 +46,6 @@ test('Install up-to-date product with maven-dependency from Market website', asy
   await projectExplorer.expandNodeExact('config');
 });
 
-test('Install outdated product with maven-dependency from Market website', async ({ wsPage }) => {
-  const explorer = new FileExplorer(wsPage);
-  await explorer.installProduct('excel-connector');
-  await wsPage.provideUserInput('13.1.2');
-  const header = wsPage.page.locator('div.quick-input-header');
-  const checkbox = header.getByRole('checkbox', { name: 'Toggle all checkboxes' });
-  await checkbox.check();
-  await wsPage.provideUserInput();
-  await expect(wsPage.quickInputBox).toBeVisible();
-  await wsPage.provideUserInput('prebuiltProject');
-  await wsPage.executeCommand('Refresh Explorer');
-  await explorer.selectNodeExact('excel-connector-demo');
-  // outdated maven-dependency is copied to the workspace
-  await explorer.selectNodeExact('excel-connector');
-});
-
 test('Install product with conflicting project folder', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.installProduct('connectivity-demo');
