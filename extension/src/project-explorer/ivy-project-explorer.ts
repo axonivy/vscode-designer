@@ -282,7 +282,9 @@ export class IvyProjectExplorer {
   }
 
   private async convertProject(selection: TreeSelection, convertAll: boolean = false) {
-    await ensureJavaLightWeightMode(l10n.t('Project conversion'));
+    if (await IvyDiagnostics.instance.hasFatalError()) {
+      await ensureJavaLightWeightMode(l10n.t('Project conversion'));
+    }
     const uri = await treeSelectionToUri(selection);
     const projectPath = uri ? await treeUriToProjectPath(uri, IvyProjectManager.instance.getIvyProjects()) : undefined;
     const quickPick = window.createQuickPick();

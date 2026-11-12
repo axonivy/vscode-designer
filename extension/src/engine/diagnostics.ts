@@ -56,7 +56,6 @@ export class IvyDiagnostics {
 
   public async refresh(refreshProjectStatuses = false) {
     this.diagnostics.clear();
-    let hasFatalProjectError = false;
     if (refreshProjectStatuses) {
       await IvyEngineManager.instance.refreshProjectStatuses();
     }
@@ -65,23 +64,28 @@ export class IvyDiagnostics {
       ?.filter(p => p && p.errorMessage)
       .filter(p => !p.id.isIar || !p.errorMessage.startsWith(RUNNABLE_CONVERSION_PREFIX))
       .forEach(project => {
-        hasFatalProjectError = true;
         if (project.id.isIar) {
           this.handleIarDiagnostic(project, projects);
         } else {
           this.handleProjectDiagnostic(project);
         }
       });
-    if (await IvyProjectManager.instance.hasErrors()) {
-      hasFatalProjectError = true;
-    }
     this._onDidRefresh.fire();
-    if (!hasFatalProjectError) {
+    if (!(await this.hasFatalError())) {
       await runJavaServerModeSwitch();
       await initialJavaCompileStatus();
       await IvyEngineManager.instance.postCompileStart();
     }
     await executeCommand('setContext', 'ivy:hasProjectsToConvert', this.projectFileUrisToBeConverted().length > 0);
+  }
+
+  public async hasFatalError() {
+    for (const [, diagnostics] of this.diagnostics) {
+      if (diagnostics.some(diagnostic => diagnostic.severity === DiagnosticSeverity.Error)) {
+        return true;
+      }
+    }
+    return IvyProjectManager.instance.hasErrors();
   }
 
   private async handleIarDiagnostic(iar: ProjectBean, projects: ProjectBean[]) {
@@ -110,7 +114,8 @@ export class IvyDiagnostics {
     if (!fs.existsSync(uri.fsPath)) {
       uri = Uri.joinPath(projectUri, POM_FILE);
     }
-    const diagnostic = new Diagnostic(new Range(1, 0, 1, 0), project.errorMessage, DiagnosticSeverity.Error);
+    const severity = project.errorMessage.startsWith(RUNNABLE_CONVERSION_PREFIX) ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
+    const diagnostic = new Diagnostic(new Range(1, 0, 1, 0), project.errorMessage, severity);
     diagnostic.source = DIAGNOSTIC_SOURCE;
     this.diagnostics.set(uri, [diagnostic]);
   }
