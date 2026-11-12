@@ -9,8 +9,7 @@ import { empty, multiProjectWithoutDuplicatesWorkspacePath } from '~/workspaces/
 test.describe('Add Project and execute init Process', () => {
   test.use({ workspace: empty });
 
-  // eslint-disable-next-line playwright/no-focused-test
-  test.only('Nested Project', { tag: '@serial' }, async ({ wsPage }) => {
+  test('Nested Project', { tag: '@serial' }, async ({ wsPage }) => {
     const projectName = 'testProject';
     const output = new OutputView(wsPage);
     await output.openLog('Axon Ivy Extension');
