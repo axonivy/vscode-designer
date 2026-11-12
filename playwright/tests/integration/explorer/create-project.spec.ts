@@ -9,12 +9,16 @@ import { empty, multiProjectWithoutDuplicatesWorkspacePath } from '~/workspaces/
 test.describe('Add Project and execute init Process', () => {
   test.use({ workspace: empty });
 
-  test('Nested Project', { tag: '@serial' }, async ({ wsPage }) => {
+  // eslint-disable-next-line playwright/no-focused-test
+  test.only('Nested Project', { tag: '@serial' }, async ({ wsPage }) => {
     const projectName = 'testProject';
-    const explorer = new FileExplorer(wsPage);
-    await explorer.addNestedProject('parent', projectName);
     const output = new OutputView(wsPage);
     await output.openLog('Axon Ivy Extension');
+    await output.expectLogEntry('Success - Deploying projects');
+    await output.clearOutput();
+
+    const explorer = new FileExplorer(wsPage);
+    await explorer.addNestedProject('parent', projectName);
     await output.expectLogEntry('Success - Invalidating class loader');
     await output.expectLogEntry('Success - Deploying IAR dependencies');
     await explorer.hasNodeExact(`parent${path.sep}${projectName}`);
