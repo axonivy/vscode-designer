@@ -30,8 +30,7 @@ export const parseProduct = (productJson: string) => {
   return product;
 };
 
-export const markProjectsForInstall = (productJson: string, selectedProjects: ProductProjectSelection[]): string => {
-  const product = parseProduct(productJson);
+export const markProjectsForInstall = (product: MarketProduct, selectedProjects: ProductProjectSelection[]): string => {
   if (!product.installers || product.installers.length === 0) {
     throw new Error('No installers found in product.json');
   }
