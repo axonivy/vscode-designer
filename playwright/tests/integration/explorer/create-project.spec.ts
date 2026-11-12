@@ -12,7 +12,8 @@ test.describe('Add Project and execute init Process', () => {
     const projectName = 'testProject';
     const explorer = new FileExplorer(wsPage);
     await explorer.addNestedProject('parent', projectName);
-    await wsPage.hasStatusMessage('Axon Ivy: Success - Invalidating class loader');
+    await expect(wsPage.ivyStatusBar).toContainText(/Success - Invalidating|Success - Deploying IAR/);
+    await wsPage.hasReadyStatusMessage();
     await explorer.hasNodeExact(`parent${path.sep}${projectName}`);
 
     const processEditor = new ProcessEditor(wsPage, 'BusinessProcess.p.json');

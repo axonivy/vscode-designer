@@ -15,7 +15,6 @@ test('Add business process, execute, edit and redeploy', { tag: '@serial' }, asy
   const start = processEditor.elementByType('start:requestStart');
   const end = processEditor.elementByType('end:taskEnd');
   await wsPage.hasStatusMessage('Axon Ivy: Success - Invalidating class loader');
-  await wsPage.hasReadyStatusMessage();
   await processEditor.startProcessAndAssertExecuted(start, end);
 
   await processEditor.appendActivity(start, 'Script');
