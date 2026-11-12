@@ -3,6 +3,7 @@ import {
   EventEmitter,
   FileType,
   l10n,
+  ThemeColor,
   ThemeIcon,
   TreeItem,
   TreeItemCollapsibleState,
@@ -14,6 +15,7 @@ import type { KnownCommand } from '../base/commands';
 import type { ProjectBean } from '../engine/api/generated/client';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IarContentFileSystemProvider, iarContentUri } from './iar-content-provider';
+import { dependencyVersionOf } from './utils/util';
 
 const __dirname = import.meta.dirname;
 interface IvyCommand extends VSCodeCommand {
@@ -105,24 +107,36 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
 
   async getChildren(element?: Entry): Promise<Entry[]> {
     if (element?.kind === 'workspaceProject') {
-      return (await this.getIarDependenciesForWorkspaceProject(element.uri.fsPath)).length > 0 ? [this.createIarGroup(element)] : [];
+      return (await this.getEngineIarDependenciesForWorkspaceProject(element.uri.fsPath)).length > 0 ? [this.createIarGroup(element)] : [];
     }
     if (element?.kind === 'iarDependencyGroup') {
-      const dependencies = element.parent ? await this.getIarDependenciesForWorkspaceProject(element.parent.uri.fsPath) : [];
-      return dependencies.map(project => {
-        const iarContentUriValue = iarContentUri(project.projectDirectory, 'META-INF/ivy');
-        return {
-          uri: iarContentUriValue,
-          type: FileType.Directory,
-          label: project.artifactId,
-          description: project.version,
-          tooltip: `${project.groupId}:${project.artifactId}:${project.version}`,
-          iconPath: new ThemeIcon('lock'),
-          collapsibleState: TreeItemCollapsibleState.Collapsed,
-          kind: 'iarDependency',
-          parent: element
-        };
-      });
+      const dependencies = element.parent ? await this.getEngineIarDependenciesForWorkspaceProject(element.parent.uri.fsPath) : [];
+      return Promise.all(
+        dependencies.map(async project => {
+          const depVersionProject = project.version;
+          const depVersionPom = element.parent
+            ? await dependencyVersionOf(element.parent.uri.fsPath, project.groupId, project.artifactId)
+            : undefined;
+          const versionsMatch = depVersionPom === depVersionProject;
+          return {
+            uri: iarContentUri(project.projectDirectory, 'META-INF/ivy'),
+            type: FileType.Directory,
+            label: project.artifactId,
+            description: versionsMatch ? depVersionProject : `${depVersionProject} (mismatch to pom.xml)`,
+            tooltip: versionsMatch
+              ? `${project.groupId}:${project.artifactId}:${depVersionProject}`
+              : l10n.t(
+                  'Dependency version on engine ({0}) does not match version in pom.xml ({1}). Check the Problems view.',
+                  depVersionProject,
+                  depVersionPom ?? 'not specified'
+                ),
+            iconPath: new ThemeIcon('lock', versionsMatch ? undefined : new ThemeColor('problemsErrorIcon.foreground')),
+            collapsibleState: TreeItemCollapsibleState.Collapsed,
+            kind: 'iarDependency' as const,
+            parent: element
+          };
+        })
+      );
     }
     if (element?.kind === 'iarDependency' || element?.kind === 'iarContentDirectory') {
       return this.getIarContentChildren(element);
@@ -132,7 +146,9 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
     }
     const projectDirectories = await this.findWorkspaceProjects();
     return Promise.all(
-      projectDirectories.map(async dir => this.createAndCacheRoot(dir, (await this.getIarDependenciesForWorkspaceProject(dir)).length > 0))
+      projectDirectories.map(async dir =>
+        this.createAndCacheRoot(dir, (await this.getEngineIarDependenciesForWorkspaceProject(dir)).length > 0)
+      )
     );
   }
 
@@ -154,7 +170,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
     return this.iarProjects;
   }
 
-  private async getIarDependenciesForWorkspaceProject(projectDirectory: string) {
+  private async getEngineIarDependenciesForWorkspaceProject(projectDirectory: string) {
     const [engineProjects, iarProjects] = await Promise.all([this.getEngineProjects(), this.getIarProjects()]);
     const workspaceProject = engineProjects.find(
       project => !project.id.isIar && path.resolve(project.projectDirectory) === path.resolve(projectDirectory)

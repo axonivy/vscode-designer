@@ -3,13 +3,14 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import { FileType, ThemeIcon, TreeItemCollapsibleState, Uri, type FileSystemProvider } from 'vscode';
+import { FileType, ThemeColor, ThemeIcon, TreeItemCollapsibleState, Uri, type FileSystemProvider } from 'vscode';
 import { IarContentFileSystemProvider, iarContentUri } from './iar-content-provider';
 import { IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
 
 const mocks = vi.hoisted(() => ({
   findWorkspaceProjects: vi.fn(),
-  findEngineProjects: vi.fn()
+  findEngineProjects: vi.fn(),
+  dependencyVersionOf: vi.fn()
 }));
 
 vi.mock('vscode', () => {
@@ -31,6 +32,12 @@ vi.mock('vscode', () => {
     ) {}
   }
   class ThemeIcon {
+    constructor(
+      public id: string,
+      public color?: unknown
+    ) {}
+  }
+  class ThemeColor {
     constructor(public id: string) {}
   }
   class Range {
@@ -69,6 +76,7 @@ vi.mock('vscode', () => {
     EventEmitter,
     FileSystemError,
     FileType: { File: 1, Directory: 2 },
+    ThemeColor,
     Range,
     ThemeIcon,
     TreeItem,
@@ -86,6 +94,7 @@ vi.mock('vscode', () => {
 });
 
 vi.mock('../engine/diagnostics', () => ({ IvyDiagnostics: { instance: { projectFileUrisToBeConverted: () => [] } } }));
+vi.mock('./utils/util', () => ({ dependencyVersionOf: mocks.dependencyVersionOf }));
 
 let directory: string;
 let archivePath: string;
@@ -116,6 +125,7 @@ beforeEach(() => {
       projectDirectory: archivePath
     }
   ]);
+  mocks.dependencyVersionOf.mockResolvedValue('2.1.0');
 });
 
 afterEach(() => {
@@ -149,7 +159,24 @@ test('lists IAR projects below each workspace project in a read-only section', a
   });
   expect(dependencies[0]?.iconPath).toBeInstanceOf(ThemeIcon);
   expect((dependencies[0]?.iconPath as ThemeIcon).id).toBe('lock');
+  expect((dependencies[0]?.iconPath as ThemeIcon).color).toBeUndefined();
+  expect(dependencies[0]?.tooltip).toBe('com.example:shared-project:2.1.0');
+  expect(mocks.dependencyVersionOf).toHaveBeenCalledWith('/workspace/local', 'com.example', 'shared-project');
   expect(provider.getTreeItem(dependencies[0]!).contextValue).toBeUndefined();
+});
+
+test('marks IAR dependencies red when the POM version differs', async () => {
+  mocks.dependencyVersionOf.mockResolvedValue('2.0.0');
+  const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
+  const [workspaceProject] = await provider.getChildren();
+  const [iarGroup] = await provider.getChildren(workspaceProject);
+
+  const [dependency] = await provider.getChildren(iarGroup);
+
+  expect((dependency?.iconPath as ThemeIcon).color).toEqual(new ThemeColor('problemsErrorIcon.foreground'));
+  expect(dependency?.tooltip).toBe(
+    'Dependency version on engine (2.1.0) does not match version in pom.xml (2.0.0). Check the Problems view.'
+  );
 });
 
 test('shows the same IAR dependency below every workspace project', async () => {

@@ -1,6 +1,8 @@
 import { expect, test, vi } from 'vitest';
+import { Uri, workspace } from 'vscode';
 import { sanitizeProjectName } from './project-name-sanitizer';
 import {
+  dependencyVersionOf,
   validateDotSeparatedName,
   validateNamespace,
   validateProjectArtifactId,
@@ -17,6 +19,36 @@ vi.mock('vscode', () => ({
   Uri: { joinPath: vi.fn(), file: vi.fn() },
   workspace: { fs: { readFile: vi.fn(), stat: vi.fn() } }
 }));
+
+test.describe('dependencyVersionOf', () => {
+  test('returns the version for the matching dependency', async () => {
+    vi.mocked(workspace.fs.readFile).mockResolvedValue(
+      Buffer.from(`<project>
+        <dependencies>
+          <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>other</artifactId>
+            <version>1.0.0</version>
+          </dependency>
+          <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>shared</artifactId>
+            <version>2.1.0</version>
+          </dependency>
+        </dependencies>
+      </project>`)
+    );
+
+    await expect(dependencyVersionOf('/workspace/project', 'com.example', 'shared')).resolves.toBe('2.1.0');
+    expect(Uri.joinPath).toHaveBeenCalledWith(Uri.file('/workspace/project'), 'pom.xml');
+  });
+
+  test('returns undefined when the dependency is not declared', async () => {
+    vi.mocked(workspace.fs.readFile).mockResolvedValue(Buffer.from('<project><dependencies /></project>'));
+
+    await expect(dependencyVersionOf('/workspace/project', 'com.example', 'shared')).resolves.toBeUndefined();
+  });
+});
 
 test.describe('validateDotSeparatedName', () => {
   test('valid single character not underscore', () => {
