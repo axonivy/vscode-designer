@@ -38,6 +38,7 @@ const IVY_PROJECT_CONTEXT_VALUE = 'ivyProject';
 const IVY_PROJECT_REQUIRES_CONVERSION_CONTEXT_VALUE = 'requiresConversion';
 
 export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
+  private engineProjects?: Promise<ProjectBean[]>;
   private iarProjects?: Promise<ProjectBean[]>;
   private _onDidChangeTreeData = new EventEmitter<Entry | undefined | null>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
@@ -55,6 +56,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   }
 
   refresh() {
+    this.engineProjects = undefined;
     this.iarProjects = undefined;
     this.iarContentProvider.refresh();
     this._onDidChangeTreeData.fire(undefined);
@@ -103,20 +105,24 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
 
   async getChildren(element?: Entry): Promise<Entry[]> {
     if (element?.kind === 'workspaceProject') {
-      return (await this.getIarProjects()).length > 0 ? [this.createIarGroup(element)] : [];
+      return (await this.getIarDependenciesForWorkspaceProject(element.uri.fsPath)).length > 0 ? [this.createIarGroup(element)] : [];
     }
     if (element?.kind === 'iarDependencyGroup') {
-      return (await this.getIarProjects()).map(project => ({
-        uri: iarContentUri(project.projectDirectory, 'META-INF/ivy'),
-        type: FileType.Directory,
-        label: project.artifactId,
-        description: project.version,
-        tooltip: `${project.groupId}:${project.artifactId}:${project.version}`,
-        iconPath: new ThemeIcon('lock'),
-        collapsibleState: TreeItemCollapsibleState.Collapsed,
-        kind: 'iarDependency',
-        parent: element
-      }));
+      const dependencies = element.parent ? await this.getIarDependenciesForWorkspaceProject(element.parent.uri.fsPath) : [];
+      return dependencies.map(project => {
+        const iarContentUriValue = iarContentUri(project.projectDirectory, 'META-INF/ivy');
+        return {
+          uri: iarContentUriValue,
+          type: FileType.Directory,
+          label: project.artifactId,
+          description: project.version,
+          tooltip: `${project.groupId}:${project.artifactId}:${project.version}`,
+          iconPath: new ThemeIcon('lock'),
+          collapsibleState: TreeItemCollapsibleState.Collapsed,
+          kind: 'iarDependency',
+          parent: element
+        };
+      });
     }
     if (element?.kind === 'iarDependency' || element?.kind === 'iarContentDirectory') {
       return this.getIarContentChildren(element);
@@ -124,13 +130,20 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
     if (element) {
       return [];
     }
-    const [projectDirectories, iarProjects] = await Promise.all([this.findWorkspaceProjects(), this.getIarProjects()]);
-    return projectDirectories.map(dir => this.createAndCacheRoot(dir, iarProjects.length > 0));
+    const projectDirectories = await this.findWorkspaceProjects();
+    return Promise.all(
+      projectDirectories.map(async dir => this.createAndCacheRoot(dir, (await this.getIarDependenciesForWorkspaceProject(dir)).length > 0))
+    );
+  }
+
+  private getEngineProjects() {
+    this.engineProjects ??= this.findEngineProjects().then(projects => projects ?? []);
+    return this.engineProjects;
   }
 
   private async getIarProjects() {
-    this.iarProjects ??= this.findEngineProjects().then(projects =>
-      (projects ?? [])
+    this.iarProjects ??= this.getEngineProjects().then(projects =>
+      projects
         .filter(project => project.id.isIar)
         .sort((a, b) => {
           const aCoordinate = `${a.groupId}:${a.artifactId}:${a.version}`;
@@ -139,6 +152,18 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
         })
     );
     return this.iarProjects;
+  }
+
+  private async getIarDependenciesForWorkspaceProject(projectDirectory: string) {
+    const [engineProjects, iarProjects] = await Promise.all([this.getEngineProjects(), this.getIarProjects()]);
+    const workspaceProject = engineProjects.find(
+      project => !project.id.isIar && path.resolve(project.projectDirectory) === path.resolve(projectDirectory)
+    );
+    if (!workspaceProject) {
+      return [];
+    }
+    const dependencyIds = new Set(workspaceProject.dependencies.map(dependency => dependency.id));
+    return iarProjects.filter(project => dependencyIds.has(project.id.id));
   }
 
   private getIarContentChildren(parent: Entry): Entry[] {

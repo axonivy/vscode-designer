@@ -105,7 +105,8 @@ beforeEach(() => {
       groupId: 'com.example',
       id: { id: 'workspace-project', isIar: false },
       version: '1.0.0',
-      projectDirectory: '/workspace/local'
+      projectDirectory: '/workspace/local',
+      dependencies: [{ id: 'shared-project' }]
     },
     {
       artifactId: 'shared-project',
@@ -153,6 +154,12 @@ test('lists IAR projects below each workspace project in a read-only section', a
 
 test('shows the same IAR dependency below every workspace project', async () => {
   mocks.findWorkspaceProjects.mockResolvedValue(['/workspace/p1', '/workspace/p2']);
+  const [workspaceProject, iarProject] = await mocks.findEngineProjects();
+  mocks.findEngineProjects.mockResolvedValue([
+    { ...workspaceProject, projectDirectory: '/workspace/p1' },
+    { ...workspaceProject, projectDirectory: '/workspace/p2' },
+    iarProject
+  ]);
   const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
 
   const roots = await provider.getChildren();
@@ -168,6 +175,29 @@ test('shows the same IAR dependency below every workspace project', async () => 
   expect(groups[0]?.[0]).not.toBe(groups[1]?.[0]);
   expect(dependencies[0]?.[0]?.parent).toBe(groups[0]?.[0]);
   expect(dependencies[1]?.[0]?.parent).toBe(groups[1]?.[0]);
+});
+
+test('does not show IAR dependencies below projects that do not declare them', async () => {
+  mocks.findWorkspaceProjects.mockResolvedValue(['/workspace/with-iar', '/workspace/without-iar']);
+  const [workspaceProject, iarProject] = await mocks.findEngineProjects();
+  mocks.findEngineProjects.mockResolvedValue([
+    { ...workspaceProject, projectDirectory: '/workspace/with-iar' },
+    {
+      ...workspaceProject,
+      artifactId: 'project-without-iar',
+      id: { id: 'project-without-iar', isIar: false },
+      projectDirectory: '/workspace/without-iar',
+      dependencies: []
+    },
+    iarProject
+  ]);
+  const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
+
+  const roots = await provider.getChildren();
+  const children = await Promise.all(roots.map(root => provider.getChildren(root)));
+
+  expect(children.map(projectChildren => projectChildren.map(child => child.label))).toEqual([['IAR Dependencies'], []]);
+  expect(roots.map(root => root.collapsibleState)).toEqual([TreeItemCollapsibleState.Collapsed, undefined]);
 });
 
 test('shows only the META-INF/ivy tree and opens files as read-only documents', async () => {
