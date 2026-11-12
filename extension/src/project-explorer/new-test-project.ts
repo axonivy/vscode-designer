@@ -1,6 +1,6 @@
 import path from 'path';
 import { l10n, Range, Uri, workspace, WorkspaceEdit, type QuickPickItem } from 'vscode';
-import { runInitialJavaCompile, runJavaProjectImport } from '../base/java-extension-api';
+import { runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage } from '../base/logging-util';
 import type { CreateProjectParams } from '../engine/api/engine-api';
 import type { ProjectBean } from '../engine/api/generated/client';
@@ -315,8 +315,6 @@ export const addNewTestProject = async (selectionContext: AddCommandSelectionCon
       });
     }
     await runJavaProjectImport();
-    await runInitialJavaCompile();
-    await IvyEngineManager.instance.deployProjects(newTestProjectData.projectPath);
   } else {
     throw new MultiStepInvalidStateError(
       'Test Project creation failed due to corrupted input state. Current input state: ' + JSON.stringify(newTestProjectData)

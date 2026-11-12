@@ -9,10 +9,11 @@ import {
   type Disposable,
   type ExtensionContext
 } from 'vscode';
-import { getClassPaths, onDidClasspathUpdate } from '../base/java-extension-api';
+import { getClassPaths, onDidClasspathUpdate, onDidProjectsImport } from '../base/java-extension-api';
 import { artifactIdRangeInPom, IvyDiagnostics } from '../engine/diagnostics';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
+import { debouncedAction } from './debounce';
 import { logErrorMessage } from './logging-util';
 
 const DIAGNOSTIC_SOURCE = 'Axon Ivy Java Classpath';
@@ -21,13 +22,16 @@ export class JavaClassPathReader {
   private static _instance: JavaClassPathReader;
   private readonly diagnostics: DiagnosticCollection;
   private classpathListener?: Disposable;
+  private projectsImportListener?: Disposable;
   private scanQueue: Promise<void> = Promise.resolve();
   private isInitialCall = true;
 
   private constructor(context: ExtensionContext) {
     this.diagnostics = languages.createDiagnosticCollection(DIAGNOSTIC_SOURCE);
     context.subscriptions.push(this.diagnostics, this);
-    onDidClasspathUpdate(() => this.queuedReadAndValidate()).then(disposable => (this.classpathListener = disposable));
+    const debouncedReadAndValidate = debouncedAction(() => this.queuedReadAndValidate(), 'readJavaClassPath');
+    onDidProjectsImport(debouncedReadAndValidate).then(disposable => (this.projectsImportListener = disposable));
+    onDidClasspathUpdate(debouncedReadAndValidate).then(disposable => (this.classpathListener = disposable));
   }
 
   static async init(context: ExtensionContext) {
@@ -112,5 +116,6 @@ export class JavaClassPathReader {
 
   dispose() {
     this.classpathListener?.dispose();
+    this.projectsImportListener?.dispose();
   }
 }

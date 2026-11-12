@@ -151,11 +151,17 @@ export const onDidClasspathUpdate = async (listener: () => void) => {
   return api?.onDidClasspathUpdate?.(listener);
 };
 
+export const onDidProjectsImport = async (listener: () => void) => {
+  const api = await javaExtensionApi();
+  return api?.onDidProjectsImport?.(listener);
+};
+
 interface JavaExtensionApi {
   serverMode: 'Standard' | 'Hybrid' | 'LightWeight';
   serverReady: () => Promise<boolean>;
   getClasspaths: (uri: string, options: { scope: string }) => Promise<{ classpaths: string[]; modulepaths: string[]; projectRoot: string }>;
   onDidClasspathUpdate: Event<Uri>;
+  onDidProjectsImport: Event<Uri[]>;
 }
 
 const javaExtensionApi = async (): Promise<JavaExtensionApi | undefined> =>
