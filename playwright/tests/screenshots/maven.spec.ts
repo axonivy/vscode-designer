@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { expect, test } from '~/fixtures/baseTest';
-import { ExplorerView, FileExplorer, ProjectExplorerView } from '~/page-objects/explorer-view';
+import { FileExplorer, ProjectExplorerView } from '~/page-objects/explorer-view';
+import { MavenView } from '~/page-objects/maven-view';
 import { mavenScreenshotWorkspacePath } from '~/workspaces/workspace';
 import { screenshot } from './screenshot-util';
 
@@ -40,19 +41,12 @@ test.describe('maven modules', () => {
     await wsPage.quickInputBox.press('Enter', { delay: 100 });
     await projectExplorer.hasNodeExact('crmIntegrationTests');
 
+    // 'New Test Project' still edits the pom.xml after the project is listed, wait for it before closing the editors
     const testPom = path.join(workspaceRoot, 'crmIntegrationTests', 'pom.xml');
     await expect(async () => {
       const content = await fs.promises.readFile(testPom, 'utf8');
       expect(content).toContain('<artifactId>crm</artifactId>');
       expect(content).toContain('<scope>test</scope>');
-    }).toPass();
-    const dirtyTab = wsPage.page.locator('div.tab.dirty');
-    await expect(async () => {
-      if ((await dirtyTab.count()) > 0) {
-        await dirtyTab.first().click();
-        await wsPage.page.keyboard.press('ControlOrMeta+KeyS');
-      }
-      await expect(dirtyTab).toHaveCount(0, { timeout: 2_000 });
     }).toPass();
     await wsPage.closeAllTabs();
 
@@ -65,28 +59,11 @@ test.describe('maven modules', () => {
     await rootPom.dblclick();
     await wsPage.isTabWithNameVisible('pom.xml');
 
-    const mavenView = new ExplorerView(wsPage, 'Maven');
-    const mavenHeader = wsPage.page.getByRole('button', { name: 'Maven Section', exact: true });
-    if ((await mavenHeader.getAttribute('aria-expanded')) !== 'true') {
-      await mavenHeader.click();
-    }
-    await expect(mavenHeader).toHaveAttribute('aria-expanded', 'true');
+    const mavenView = new MavenView(wsPage);
+    await mavenView.openView();
     await mavenView.hasNodeExact('crm.modules');
     await mavenView.hasNodeExact('crmIntegrationTests');
-
-    const verifyOption = wsPage.page.getByRole('menuitem', { name: 'verify', exact: true });
-    const openRunMavenCommands = async () => {
-      const runMavenCommands = wsPage.page.getByRole('menuitem', { name: 'Run Maven Commands...' });
-      await expect(async () => {
-        await wsPage.page.keyboard.press('Escape');
-        await mavenView.view.getByText('crm.modules', { exact: true }).click({ button: 'right' });
-        await expect(runMavenCommands).toBeVisible({ timeout: 2_000 });
-      }).toPass();
-      await runMavenCommands.hover();
-      await expect(verifyOption).toBeVisible();
-    };
-    await openRunMavenCommands();
-    await verifyOption.click({ delay: 100 });
+    await mavenView.runGoal('crm.modules', 'verify');
 
     const testProjectTarget = path.join(workspaceRoot, 'crmIntegrationTests', 'target');
     await expect(async () => {
@@ -95,8 +72,7 @@ test.describe('maven modules', () => {
     }).toPass({ timeout: 540_000 });
     await wsPage.page.waitForTimeout(5_000); // let the terminal print the build summary
 
-    await openRunMavenCommands();
-    await verifyOption.hover();
+    await mavenView.hoverGoal('crm.modules', 'verify');
     await screenshot(wsPage.page, 'maven-view');
   });
 });
