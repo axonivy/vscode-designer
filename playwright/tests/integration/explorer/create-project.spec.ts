@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 import path from 'path';
 import { test } from '~/fixtures/baseTest';
 import { FileExplorer } from '~/page-objects/explorer-view';
+import { OutputView } from '~/page-objects/output-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
 import { empty, multiProjectWithoutDuplicatesWorkspacePath } from '~/workspaces/workspace';
 
@@ -12,7 +13,10 @@ test.describe('Add Project and execute init Process', () => {
     const projectName = 'testProject';
     const explorer = new FileExplorer(wsPage);
     await explorer.addNestedProject('parent', projectName);
-    await wsPage.hasStatusMessage('Axon Ivy: Success - Invalidating class loader');
+    const output = new OutputView(wsPage);
+    await output.openLog('Axon Ivy Extension');
+    await output.expectLogEntry('Success - Invalidating class loader');
+    await output.expectLogEntry('Success - Deploying IAR dependencies');
     await explorer.hasNodeExact(`parent${path.sep}${projectName}`);
 
     const processEditor = new ProcessEditor(wsPage, 'BusinessProcess.p.json');

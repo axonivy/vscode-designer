@@ -39,4 +39,9 @@ export class OutputView {
   async expectLogEntry(entry: string | RegExp, timeout?: number) {
     await expect(this.logEntries).toContainText(entry, { timeout });
   }
+
+  async clearOutput() {
+    await this.open();
+    await this.wsPage.executeCommand('View: Clear Output');
+  }
 }

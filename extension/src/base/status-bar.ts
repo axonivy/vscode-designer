@@ -19,7 +19,7 @@ import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { showRuntimeLog } from '../views/runtimelog-view';
 import { executeCommand, type KnownCommand } from './commands';
 import { animationSettings, config, onAnimationSettingsChange } from './configurations';
-import { showExtensionLog } from './extension-output-channel';
+import { extensionLogOutputChannel, showExtensionLog } from './extension-output-channel';
 import { logErrorMessageWithActions } from './logging-util';
 
 const DEFAULT_PREFIX = 'Axon Ivy';
@@ -411,6 +411,7 @@ export class StatusBar {
 
     try {
       const result = await action();
+      extensionLogOutputChannel.info(textSuccess);
       this.overrideStatusBar({
         text: textSuccess,
         tooltip: previousTooltip.appendMarkdown(
