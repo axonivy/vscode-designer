@@ -18,3 +18,7 @@ Apply these rules whenever creating or editing a JSON file in this repository:
 - No routine post-edit validation is required. Check only when the user asks or a concrete tool-reported problem needs diagnosis.
 - For a new file, use `new_axon_ivy_...`; inspect its `$schema` and apply the same local-schema rule before follow-up edits.
 - Always indent with 2 spaces, never tabs.
+
+## Known issues
+
+- VS Code Copilot Chat only: `apply_patch` writes indentation as tabs on a file with no indented lines yet, such as a new Form (`{}`), and still reports success. After that patch, read the file again and replace each leading tab with 2 spaces. Skip this for files that already had lines indented with spaces.
