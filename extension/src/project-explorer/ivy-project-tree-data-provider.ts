@@ -112,19 +112,19 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
     if (element?.kind === 'iarDependencyGroup') {
       const dependencies = element.parent ? await this.getEngineIarDependenciesForWorkspaceProject(element.parent.uri.fsPath) : [];
       return Promise.all(
-        dependencies.map(async project => {
-          const depVersionProject = project.version;
+        dependencies.map(async depProject => {
+          const depVersionProject = depProject.version;
           const depVersionPom = element.parent
-            ? await dependencyVersionOf(element.parent.uri.fsPath, project.groupId, project.artifactId)
+            ? await dependencyVersionOf(element.parent.uri.fsPath, depProject.groupId, depProject.artifactId)
             : undefined;
           const versionsMatch = depVersionPom === depVersionProject;
           return {
-            uri: iarContentUri(project.projectDirectory, 'META-INF/ivy'),
+            uri: iarContentUri(depProject.projectDirectory, 'META-INF/ivy'),
             type: FileType.Directory,
-            label: project.artifactId,
-            description: versionsMatch ? depVersionProject : `${depVersionProject} (mismatch to pom.xml)`,
+            label: depProject.artifactId,
+            description: versionsMatch ? depVersionProject : l10n.t('{0} (mismatch to pom.xml)', depVersionProject),
             tooltip: versionsMatch
-              ? `${project.groupId}:${project.artifactId}:${depVersionProject}`
+              ? `${depProject.groupId}:${depProject.artifactId}:${depVersionProject}`
               : l10n.t(
                   'Dependency version on engine ({0}) does not match version in pom.xml ({1}). Check the Problems view.',
                   depVersionProject,
