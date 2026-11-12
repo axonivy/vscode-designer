@@ -1,3 +1,4 @@
+import path from 'path';
 import { expect, test } from '~/fixtures/baseTest';
 import { TextEditor } from '~/page-objects/editor';
 import { ProjectExplorerView } from '~/page-objects/explorer-view';
@@ -13,10 +14,12 @@ test.beforeAll(async () => {
 test.describe('IAR project dependencies', () => {
   test.use({ workspace: iarDependencyWorkspacePath });
 
-  test('shows the IAR dependencies', async ({ wsPage }) => {
+  test('shows the IAR dependencies', async ({ wsPage, tmpWorkspace }) => {
+    const projectName = path.basename(tmpWorkspace!.tmpWorkspacePath);
     const projectExplorer = new ProjectExplorerView(wsPage);
     await projectExplorer.openView();
-    await projectExplorer.expandNodeExact('iarDependencyProject');
+    await projectExplorer.hasNodeExactCollapsible(projectName);
+    await projectExplorer.expandNodeExact(projectName);
     await projectExplorer.expandNodeExact('IAR Dependencies');
 
     const iarProject = projectExplorer.view.getByRole('treeitem').filter({ hasText: projectExplorerItem }).first();
@@ -30,10 +33,12 @@ test.describe('IAR project dependencies', () => {
     await projectExplorer.hasNodeExact('rest-clients.yaml');
   });
 
-  test('opens an IAR file in the text editor and keeps it read-only', async ({ wsPage }) => {
+  test('opens an IAR file in the text editor and keeps it read-only', async ({ wsPage, tmpWorkspace }) => {
+    const projectName = path.basename(tmpWorkspace!.tmpWorkspacePath);
     const projectExplorer = new ProjectExplorerView(wsPage);
     await projectExplorer.openView();
-    await projectExplorer.expandNodeExact('iarDependencyProject');
+    await projectExplorer.hasNodeExactCollapsible(projectName);
+    await projectExplorer.expandNodeExact(projectName);
     await projectExplorer.expandNodeExact('IAR Dependencies');
     await projectExplorer.expandNodeExact(projectExplorerItem);
     await projectExplorer.expandNodeExact('config');
