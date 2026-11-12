@@ -33,13 +33,13 @@ test.describe('dependencyVersionOf', () => {
           <dependency>
             <groupId>com.example</groupId>
             <artifactId>shared</artifactId>
-            <version>2.1.0</version>
+            <version>2.10.9</version>
           </dependency>
         </dependencies>
       </project>`)
     );
 
-    await expect(dependencyVersionOf('/workspace/project', 'com.example', 'shared')).resolves.toBe('2.1.0');
+    await expect(dependencyVersionOf('/workspace/project', 'com.example', 'shared')).resolves.toBe('2.10.9');
     expect(Uri.joinPath).toHaveBeenCalledWith(Uri.file('/workspace/project'), 'pom.xml');
   });
 
