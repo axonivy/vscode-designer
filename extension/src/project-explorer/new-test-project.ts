@@ -49,7 +49,7 @@ const configureTestProject = async (
   testSelections: QuickPickItem[],
   extensionUri: Uri
 ) => {
-  const selected = new Set(testSelections.map(test => test.label) ?? []);
+  const selected = new Set(testSelections.map(test => test.label));
 
   const needsUnitTester = selected.has('IvyTest') || selected.has('ProcessTest');
   const needsWebTester = selected.has('WebIT');
