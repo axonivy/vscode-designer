@@ -3,7 +3,7 @@ import path from 'path';
 import { test } from '~/fixtures/baseTest';
 import { FileExplorer } from '~/page-objects/explorer-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
-import { empty, multiProjectWithoutDuplicatesWorkspacePath } from '~/workspaces/workspace';
+import { empty, properMultiProjectPath } from '~/workspaces/workspace';
 
 test.describe('Add Project and execute init Process', () => {
   test.use({ workspace: empty });
@@ -25,7 +25,7 @@ test.describe('Add Project and execute init Process', () => {
 });
 
 test.describe('Project validation', () => {
-  test.use({ workspace: multiProjectWithoutDuplicatesWorkspacePath });
+  test.use({ workspace: properMultiProjectPath });
 
   test('Existing Project', async ({ wsPage }) => {
     const projectName = 'ivy-project-1';

@@ -1,7 +1,7 @@
 import { expect, test } from '~/fixtures/baseTest';
 import { FileExplorer, ProjectExplorerView } from '~/page-objects/explorer-view';
 import { ProblemsView } from '~/page-objects/problems-view';
-import { multiProjectWithoutDuplicatesWorkspacePath, multiProjectWorkspacePath, multiRootWorkspacePath } from '~/workspaces/workspace';
+import { multiProjectWorkspacePath, multiRootWorkspacePath, properMultiProjectPath } from '~/workspaces/workspace';
 
 test.describe('Project Explorer', () => {
   test.use({ workspace: multiProjectWorkspacePath });
@@ -36,7 +36,7 @@ test.describe('Multi root workspace', () => {
 });
 
 test.describe('Delete project', () => {
-  test.use({ workspace: multiProjectWithoutDuplicatesWorkspacePath });
+  test.use({ workspace: properMultiProjectPath });
 
   test('Delete existing project', async ({ wsPage }) => {
     const fileExplorer = new FileExplorer(wsPage);

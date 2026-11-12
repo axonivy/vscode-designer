@@ -74,7 +74,13 @@ const configureTestProject = async (
       continue;
     }
 
-    const packageName = `${referenceProject.defaultNamespace}.${item.selection === 'WebIT' ? 'webtest' : 'test'}`;
+    const toJavaPackage = (namespace: string) =>
+      namespace
+        .split('.')
+        .map(part => part.replace(/[^A-Za-z0-9_]/g, '_').replace(/^(\d)/, '_$1'))
+        .join('.');
+
+    const packageName = `${toJavaPackage(referenceProject.defaultNamespace)}.${item.selection === 'WebIT' ? 'webtest' : 'test'}`;
     const processPath = `${groupId.split('.').join('/')}/${processName}`;
     const templateUri = Uri.joinPath(extensionUri, 'assets', 'test-project-templates', item.template);
     const templateBytes = await workspace.fs.readFile(templateUri);

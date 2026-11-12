@@ -105,6 +105,24 @@ export class WorkspacePage {
     }).toPass();
   }
 
+  async runTests(timeout = 120_000) {
+    const lightweightMode = this.page.locator('div.statusbar-item[id*="redhat.java"]').filter({ hasText: 'Java: Lightweight Mode' });
+    if (await lightweightMode.isVisible()) {
+      await this.activateExpensiveJavaStandardMode();
+    }
+    await expect(this.page.locator('.editor-group-container.active .codicon-testing-run-icon').first()).toBeVisible({ timeout });
+    await this.executeCommand('Test: Run Tests in Current File');
+  }
+
+  async expectTestsToPass(timeout = 120_000) {
+    const editor = this.page.locator('.editor-group-container.active');
+    const failed = editor.locator('.codicon-testing-failed-icon, .codicon-testing-error-icon');
+    const anyOutcome = editor.locator('.codicon-testing-passed-icon, .codicon-testing-failed-icon, .codicon-testing-error-icon');
+    await expect(anyOutcome.first(), 'no test result in editor: run never started or is still building').toBeVisible({ timeout });
+    await expect(failed).toHaveCount(0);
+    await expect(editor.locator('.codicon-testing-passed-icon').first()).toBeVisible();
+  }
+
   async hasReadyStatusMessage() {
     await this.hasStatusMessage('Axon Ivy: Connected');
   }
