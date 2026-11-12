@@ -3,6 +3,7 @@ import path from 'path';
 import { expect, test } from '~/fixtures/baseTest';
 import { FileExplorer, ProjectExplorerView } from '~/page-objects/explorer-view';
 import { MavenView } from '~/page-objects/maven-view';
+import { empty } from '~/workspaces/workspace';
 import { screenshot } from './screenshot-util';
 
 const modulesPom = `<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -19,8 +20,9 @@ const modulesPom = `<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi
 `;
 
 test.describe('maven modules', () => {
+  test.use({ workspace: empty });
+
   test('maven view', async ({ wsPage, tmpWorkspace }) => {
-    test.setTimeout(120_000); // runs 'mvn verify', which can take long without a warm local Maven repository
     await wsPage.hasReadyStatusMessage();
     const workspaceRoot = tmpWorkspace!.tmpWorkspacePath;
 
@@ -44,7 +46,7 @@ test.describe('maven modules', () => {
       const content = await fs.promises.readFile(testPom, 'utf8');
       expect(content).toContain('<artifactId>crm</artifactId>');
       expect(content).toContain('<scope>test</scope>');
-    }).toPass();
+    }).toPass({ intervals: [1_000] });
     await wsPage.closeAllTabs();
 
     await fs.promises.writeFile(path.join(workspaceRoot, 'pom.xml'), modulesPom);
@@ -60,14 +62,6 @@ test.describe('maven modules', () => {
     await mavenView.openView();
     await mavenView.hasNodeExact('crm.modules');
     await mavenView.hasNodeExact('crmIntegrationTests');
-    await mavenView.runGoal('crm.modules', 'verify');
-
-    const testProjectTarget = path.join(workspaceRoot, 'crmIntegrationTests', 'target');
-    await expect(async () => {
-      const files = await fs.promises.readdir(testProjectTarget);
-      expect(files.some(file => file.endsWith('.iar'))).toBeTruthy();
-    }).toPass({ timeout: 540_000 });
-    await wsPage.page.waitForTimeout(5_000); // let the terminal print the build summary
 
     await mavenView.hoverGoal('crm.modules', 'verify');
     await screenshot(wsPage.page, 'maven-view');

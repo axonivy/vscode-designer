@@ -38,11 +38,6 @@ export class MavenView extends ExplorerView {
     await runMavenCommands.hover();
   }
 
-  async runGoal(project: string, goal: string) {
-    await this.openRunMavenCommands(project);
-    await this.goal(goal).click({ delay: 100 });
-  }
-
   async hoverGoal(project: string, goal: string) {
     await this.openRunMavenCommands(project);
     await this.goal(goal).hover();
