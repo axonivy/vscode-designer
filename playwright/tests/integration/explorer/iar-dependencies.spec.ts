@@ -16,6 +16,7 @@ test.describe('IAR project dependencies', () => {
   test('shows the IAR dependencies', async ({ wsPage }) => {
     const projectExplorer = new ProjectExplorerView(wsPage);
     await projectExplorer.openView();
+    await projectExplorer.expandNodeExact('iarDependencyProject');
     await projectExplorer.expandNodeExact('IAR Dependencies');
 
     const iarProject = projectExplorer.view.getByRole('treeitem').filter({ hasText: projectExplorerItem }).first();
@@ -32,6 +33,7 @@ test.describe('IAR project dependencies', () => {
   test('opens an IAR file in the text editor and keeps it read-only', async ({ wsPage }) => {
     const projectExplorer = new ProjectExplorerView(wsPage);
     await projectExplorer.openView();
+    await projectExplorer.expandNodeExact('iarDependencyProject');
     await projectExplorer.expandNodeExact('IAR Dependencies');
     await projectExplorer.expandNodeExact(projectExplorerItem);
     await projectExplorer.expandNodeExact('config');

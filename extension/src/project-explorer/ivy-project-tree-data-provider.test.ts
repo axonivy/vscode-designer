@@ -121,15 +121,24 @@ afterEach(() => {
   fs.rmSync(directory, { recursive: true, force: true });
 });
 
-test('lists IAR projects in a separate read-only section', async () => {
+test('lists IAR projects below each workspace project in a read-only section', async () => {
   const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
 
   const roots = await provider.getChildren();
-  expect(roots.map(entry => entry.kind)).toEqual(['workspaceProject', 'iarDependencyGroup']);
-  expect(roots[1]?.label).toBe('IAR Dependencies');
-  expect(roots[1]?.collapsibleState).toBe(TreeItemCollapsibleState.Collapsed);
+  expect(roots.map(entry => entry.kind)).toEqual(['workspaceProject']);
+  expect(roots[0]?.collapsibleState).toBe(TreeItemCollapsibleState.Collapsed);
 
-  const dependencies = await provider.getChildren(roots[1]);
+  const [iarGroup] = await provider.getChildren(roots[0]);
+  expect(iarGroup).toMatchObject({
+    label: 'IAR Dependencies',
+    kind: 'iarDependencyGroup',
+    collapsibleState: TreeItemCollapsibleState.Collapsed,
+    parent: roots[0]
+  });
+  expect(iarGroup?.iconPath).toBeInstanceOf(ThemeIcon);
+  expect((iarGroup?.iconPath as ThemeIcon).id).toBe('library');
+
+  const dependencies = await provider.getChildren(iarGroup);
   expect(dependencies).toHaveLength(1);
   expect(dependencies[0]).toMatchObject({
     label: 'shared-project',
@@ -142,9 +151,29 @@ test('lists IAR projects in a separate read-only section', async () => {
   expect(provider.getTreeItem(dependencies[0]!).contextValue).toBeUndefined();
 });
 
+test('shows the same IAR dependency below every workspace project', async () => {
+  mocks.findWorkspaceProjects.mockResolvedValue(['/workspace/p1', '/workspace/p2']);
+  const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
+
+  const roots = await provider.getChildren();
+  const groups = await Promise.all(roots.map(root => provider.getChildren(root)));
+  const dependencies = await Promise.all(groups.map(([group]) => provider.getChildren(group)));
+
+  expect(roots.map(root => root.uri.fsPath)).toEqual(['/workspace/p1', '/workspace/p2']);
+  expect(groups.map(group => group[0]?.label)).toEqual(['IAR Dependencies', 'IAR Dependencies']);
+  expect(dependencies.map(projects => projects.map(project => project.label))).toEqual([
+    ['shared-project'],
+    ['shared-project']
+  ]);
+  expect(groups[0]?.[0]).not.toBe(groups[1]?.[0]);
+  expect(dependencies[0]?.[0]?.parent).toBe(groups[0]?.[0]);
+  expect(dependencies[1]?.[0]?.parent).toBe(groups[1]?.[0]);
+});
+
 test('shows only the META-INF/ivy tree and opens files as read-only documents', async () => {
   const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
-  const [workspaceProject, iarGroup] = await provider.getChildren();
+  const [workspaceProject] = await provider.getChildren();
+  const [iarGroup] = await provider.getChildren(workspaceProject);
   const [iarDependency] = await provider.getChildren(iarGroup);
   const rootEntries = await provider.getChildren(iarDependency);
 

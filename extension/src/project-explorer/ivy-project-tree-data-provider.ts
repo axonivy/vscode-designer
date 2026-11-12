@@ -102,6 +102,9 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   }
 
   async getChildren(element?: Entry): Promise<Entry[]> {
+    if (element?.kind === 'workspaceProject') {
+      return (await this.getIarProjects()).length > 0 ? [this.createIarGroup(element)] : [];
+    }
     if (element?.kind === 'iarDependencyGroup') {
       return (await this.getIarProjects()).map(project => ({
         uri: iarContentUri(project.projectDirectory, 'META-INF/ivy'),
@@ -121,12 +124,8 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
     if (element) {
       return [];
     }
-    const workspaceProjects = (await this.findWorkspaceProjects()).map(dir => this.createAndCacheRoot(dir));
-    const iarProjects = await this.getIarProjects();
-    if (iarProjects.length === 0) {
-      return workspaceProjects;
-    }
-    return [...workspaceProjects, this.createIarGroup()];
+    const [projectDirectories, iarProjects] = await Promise.all([this.findWorkspaceProjects(), this.getIarProjects()]);
+    return projectDirectories.map(dir => this.createAndCacheRoot(dir, iarProjects.length > 0));
   }
 
   private async getIarProjects() {
@@ -166,22 +165,24 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
       });
   }
 
-  private createIarGroup(): Entry {
+  private createIarGroup(parent: Entry): Entry {
     return {
       uri: Uri.parse('axonivy:iar-dependencies'),
       type: FileType.Directory,
       label: l10n.t('IAR Dependencies'),
       iconPath: new ThemeIcon('library'),
       collapsibleState: TreeItemCollapsibleState.Collapsed,
-      kind: 'iarDependencyGroup'
+      kind: 'iarDependencyGroup',
+      parent
     };
   }
 
-  private createAndCacheRoot(ivyProjectDir: string): Entry {
+  private createAndCacheRoot(ivyProjectDir: string, hasIarDependencies: boolean): Entry {
     const entry: Entry = {
       uri: Uri.file(ivyProjectDir),
       type: FileType.Directory,
       iconPath: path.join(__dirname, '..', 'assets', 'ivy-logo-black-background.svg'),
+      collapsibleState: hasIarDependencies ? TreeItemCollapsibleState.Collapsed : undefined,
       contextValue: IVY_PROJECT_CONTEXT_VALUE,
       kind: 'workspaceProject'
     };
