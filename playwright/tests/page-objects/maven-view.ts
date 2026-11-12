@@ -17,18 +17,11 @@ export class MavenView extends ExplorerView {
     await expect(this.header).toHaveAttribute('aria-expanded', 'true');
   }
 
-  override async closeView() {
-    if ((await this.header.getAttribute('aria-expanded')) === 'true') {
-      await this.header.click();
-    }
-    await expect(this.header).toHaveAttribute('aria-expanded', 'false');
-  }
-
-  goal(name: string) {
+  private goal(name: string) {
     return this.wsPage.page.getByRole('menuitem', { name, exact: true });
   }
 
-  async openRunMavenCommands(project: string) {
+  private async openRunMavenCommands(project: string) {
     const runMavenCommands = this.wsPage.page.getByRole('menuitem', { name: 'Run Maven Commands...' });
     await expect(async () => {
       await this.wsPage.page.keyboard.press('Escape');
