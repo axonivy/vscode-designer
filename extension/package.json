@@ -458,6 +458,12 @@
         "icon": "$(add)"
       },
       {
+        "command": "ivyProjects.addNewTestProject",
+        "title": "%command.newTestProject%",
+        "category": "%category.axonIvy%",
+        "icon": "$(add)"
+      },
+      {
         "command": "ivyProjects.addNewHtmlDialog",
         "title": "%command.newHtmlDialog%",
         "category": "%category.axonIvy%"
@@ -1105,8 +1111,12 @@
           "group": "1@1"
         },
         {
-          "command": "ivyProjects.importIvyProject",
+          "command": "ivyProjects.addNewTestProject",
           "group": "1@2"
+        },
+        {
+          "command": "ivyProjects.importIvyProject",
+          "group": "1@3"
         }
       ],
       "view/item/context": [
@@ -1216,6 +1226,10 @@
         {
           "command": "ivyProjects.addNewProject",
           "group": "1@1"
+        },
+        {
+          "command": "ivyProjects.addNewTestProject",
+          "group": "1@2"
         },
         {
           "submenu": "explorer.ivy.new.process",

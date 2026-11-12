@@ -52,6 +52,7 @@ type ProjectViewCommand =
   | 'ivyProjects.installLocalMarketProduct'
   | 'ivyProjects.installMarketProduct'
   | 'ivyProjects.addNewProject'
+  | 'ivyProjects.addNewTestProject'
   | 'ivyProjects.addNewHtmlDialog'
   | 'ivyProjects.addNewFormDialog'
   | 'ivyProjects.addNewOfflineDialog'

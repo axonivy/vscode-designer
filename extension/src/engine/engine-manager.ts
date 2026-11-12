@@ -326,6 +326,17 @@ export class IvyEngineManager {
     });
   }
 
+  public async createTestProject(newTestProjectParams: CreateProjectParams) {
+    await StatusBar.withStatusBarProgress({ text: l10n.t('Creating new test project') }, async () => {
+      try {
+        increaseWorkspaceLock();
+        await this.ivyEngineApi?.createProject(newTestProjectParams);
+      } finally {
+        decreaseWorkspaceLock();
+      }
+    });
+  }
+
   public async createDataClass(params: CreateDataClassParams) {
     const dataClassBean = await StatusBar.withStatusBarProgress(
       { text: l10n.t('Creating new Data Class') },

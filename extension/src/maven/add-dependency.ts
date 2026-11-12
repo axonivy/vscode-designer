@@ -1,6 +1,6 @@
 import path from 'path';
 import type { ExtensionContext } from 'vscode';
-import { Uri, commands, l10n, window } from 'vscode';
+import { Range, Uri, WorkspaceEdit, commands, l10n, window, workspace } from 'vscode';
 import { registerCommand } from '../base/commands';
 import { selectIvyProjectDialog } from '../base/ivyProjectSelection';
 import { logErrorMessage } from '../base/logging-util';
@@ -9,6 +9,16 @@ import { IvyEngineManager } from '../engine/engine-manager';
 import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { treeUriToProjectPath } from '../project-explorer/tree-selection';
 import { registerPomCodeLensProvider } from './pom-code-lens-provider';
+
+type MavenTestDependency = {
+  groupId: string;
+  artifactId: string;
+};
+
+type MavenDependency = MavenTestDependency & {
+  version?: string;
+  packaging?: string;
+};
 
 export const registerAddDependencyHandler = (context: ExtensionContext) => {
   registerCommand('ivyProjects.addDependency', context, addDependencyHandler);
@@ -44,8 +54,7 @@ const addDependencyHandler = async (uri: Uri) => {
   if (!newDependency) {
     return;
   }
-  commands.executeCommand('maven.project.addDependency', {
-    pomPath,
+  await addMavenDependency(targetProject, {
     groupId: newDependency.groupId,
     artifactId: newDependency.artifactId,
     version: newDependency.version === targetProjectBean.version ? '${project.version}' : newDependency.version,
@@ -77,4 +86,63 @@ const showDependencyPick = async (projects: ProjectBean[]) => {
     placeHolder: projects.length > 0 ? l10n.t('Select an Ivy Project Dependency') : l10n.t('No Ivy Project Dependencies left to add')
   });
   return selected?.project;
+};
+
+const addMavenDependency = async (projectDirectory: string, dependency: MavenDependency) => {
+  const pomPath = Uri.joinPath(Uri.file(projectDirectory), 'pom.xml').fsPath;
+  await commands.executeCommand('maven.project.addDependency', { pomPath, ...dependency });
+};
+
+export const addMavenTestDependency = async (projectDirectory: string, dependency: MavenTestDependency) => {
+  await addMavenDependency(projectDirectory, { ...dependency, version: 'managed' });
+  await replaceVersionWithTestScope(projectDirectory, dependency);
+};
+
+const replaceVersionWithTestScope = async (projectDirectory: string, { groupId, artifactId }: MavenTestDependency) => {
+  const pomUri = Uri.joinPath(Uri.file(projectDirectory), 'pom.xml');
+  const document = await workspace.openTextDocument(pomUri);
+  const block = Array.from(document.getText().matchAll(/<dependency>[\s\S]*?<\/dependency>/g)).find(
+    ([b]) => b.includes(`<groupId>${groupId}</groupId>`) && b.includes(`<artifactId>${artifactId}</artifactId>`)
+  );
+  const version = block?.[0].match(/<version>[^<]*<\/version>/);
+  if (block?.index === undefined || version?.index === undefined) {
+    throw new Error(`Could not find dependency ${groupId}:${artifactId} with version in ${pomUri.fsPath}.`);
+  }
+  const start = block.index + version.index;
+  const edit = new WorkspaceEdit();
+  edit.replace(pomUri, new Range(document.positionAt(start), document.positionAt(start + version[0].length)), '<scope>test</scope>');
+  if (!(await workspace.applyEdit(edit)) || !(await document.save())) {
+    throw new Error(`Could not set test scope for ${groupId}:${artifactId} in ${pomUri.fsPath}.`);
+  }
+};
+
+const addMavenProjectDependency = async (
+  target: ProjectBean,
+  dependency: Pick<ProjectBean, 'groupId' | 'artifactId'> & Partial<Pick<ProjectBean, 'version'>>
+) => {
+  await addMavenDependency(target.projectDirectory, {
+    groupId: dependency.groupId,
+    artifactId: dependency.artifactId,
+    version: dependency.version === target.version ? '${project.version}' : dependency.version,
+    packaging: 'iar'
+  });
+};
+
+export const addMavenProjectDependencyByPath = async (targetPath: string, dependencyPath: string) => {
+  const deployedProjects = await IvyEngineManager.instance.projects(true);
+  if (!deployedProjects || deployedProjects.length === 0) {
+    throw new Error(l10n.t('No deployed projects found.'));
+  }
+
+  const targetProjectBean = deployedProjects.find(bean => path.resolve(bean.projectDirectory) === path.resolve(targetPath));
+  if (!targetProjectBean) {
+    throw new Error(l10n.t('Target project not found in deployed projects.'));
+  }
+
+  const newDependency = deployedProjects.find(project => path.resolve(project.projectDirectory) === path.resolve(dependencyPath));
+  if (!newDependency) {
+    throw new Error(l10n.t('New dependency project not found in deployed projects.'));
+  }
+
+  await addMavenProjectDependency(targetProjectBean, newDependency);
 };

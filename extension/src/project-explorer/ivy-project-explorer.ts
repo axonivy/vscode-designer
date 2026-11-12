@@ -21,6 +21,7 @@ import { addNewCaseMap } from './new-case-map';
 import { addNewDataClass } from './new-data-class';
 import { addNewProcess, type ProcessKind } from './new-process';
 import { addNewProject } from './new-project';
+import { addNewTestProject } from './new-test-project';
 import { addNewUserDialog, type DialogType } from './new-user-dialog';
 import { treeSelectionToProjectUri, treeSelectionToUri, treeUriToProjectPath, type TreeSelection } from './tree-selection';
 import { getWorkspaceFolder, isDirectory, isSubdirectoryOrEqual } from './utils/util';
@@ -87,6 +88,7 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.installMarketProduct`, () => this.installMarketProduct());
 
     registerCmd(`${VIEW_ID}.addNewProject`, (s: TreeSelection) => this.addProject(s));
+    registerCmd(`${VIEW_ID}.addNewTestProject`, (s: TreeSelection) => this.addTestProject(s));
     registerCmd(`${VIEW_ID}.addNewHtmlDialog`, (s: TreeSelection) => this.addUserDialog(s, 'JSF'));
     registerCmd(`${VIEW_ID}.addNewFormDialog`, (s: TreeSelection) => this.addUserDialog(s, 'Form'));
     registerCmd(`${VIEW_ID}.addNewOfflineDialog`, (s: TreeSelection) => this.addUserDialog(s, 'JSFOffline'));
@@ -149,6 +151,17 @@ export class IvyProjectExplorer {
       }
     }
     await addNewProject(selectedUri);
+  }
+
+  public async addTestProject(selection: TreeSelection) {
+    if (isWorkspaceLocked({ warn: true })) {
+      return;
+    }
+    const addCommandSelectionContext = await this.getAddCommandSelectionContext(selection);
+    if (!addCommandSelectionContext) {
+      return;
+    }
+    await addNewTestProject(addCommandSelectionContext, this.context.extensionUri);
   }
 
   public async addProcess(selection: TreeSelection, kind: ProcessKind, pid?: string) {
