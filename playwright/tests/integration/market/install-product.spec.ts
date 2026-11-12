@@ -1,6 +1,7 @@
 import path from 'path';
 import { expect, test } from '~/fixtures/baseTest';
 import { FileExplorer, ProjectExplorerView } from '~/page-objects/explorer-view';
+import { OutputView } from '~/page-objects/output-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
 
 test('Install product without maven-dependency from Market website', async ({ wsPage }) => {
@@ -18,7 +19,12 @@ test('Install product without maven-dependency from Market website', async ({ ws
 });
 
 test('Install up-to-date product with maven-dependency from Market website', async ({ wsPage }) => {
-  await wsPage.activateExpensiveJavaStandardMode();
+  await wsPage.activateExpensiveJavaStandardMode({ waitForReady: false });
+  const output = new OutputView(wsPage);
+  await output.openLog('Axon Ivy Extension');
+  await output.expectLogEntry('Success - Invalidating class loader');
+  await output.expectLogEntry('Success - Deploying IAR dependencies');
+
   const explorer = new FileExplorer(wsPage);
   await explorer.installProduct('excel-connector');
   await wsPage.provideUserInput('14.0.0-SNAPSHOT');
