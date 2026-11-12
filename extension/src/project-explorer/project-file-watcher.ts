@@ -36,28 +36,17 @@ export class ProjectFileWatcherManager {
       }
       await this.deleteProjectOnEngine(e.fsPath);
     });
-    const deployProject = (uri: Uri) => {
-      if (isWorkspaceLocked()) {
-        return;
-      }
-      this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.deployProjects(d), 'deploy', uri);
-    };
-    // a newly created folder may be reported as a single event without its content (e.g. Maven creating mvn-deps with its jars)
-    const mvnDepsWatcher = workspace.createFileSystemWatcher('**/target/{lib,lib/mvn-deps,lib/mvn-deps/*.jar}');
-    mvnDepsWatcher.onDidCreate(deployProject);
-    mvnDepsWatcher.onDidChange(deployProject);
-    mvnDepsWatcher.onDidDelete(deployProject);
-    const targetWatcher = workspace.createFileSystemWatcher('**/target/classes/**/*.*');
     const invalidateClassLoader = (uri: Uri) => {
       if (isWorkspaceLocked() || hasDeployActionInQueue()) {
         return;
       }
       this.runEngineActionDebounced((d: string) => IvyEngineManager.instance.invalidateClassLoader(d), 'invalidate', uri);
     };
+    const targetWatcher = workspace.createFileSystemWatcher('**/target/classes/**/*.*');
     targetWatcher.onDidChange(invalidateClassLoader);
     targetWatcher.onDidCreate(invalidateClassLoader);
     targetWatcher.onDidDelete(invalidateClassLoader);
-    context.subscriptions.push(ivyProjectFileWatcher, deleteProjectWatcher, mvnDepsWatcher, targetWatcher);
+    context.subscriptions.push(ivyProjectFileWatcher, deleteProjectWatcher, targetWatcher);
   }
 
   private async deleteProjectOnEngine(project: string) {

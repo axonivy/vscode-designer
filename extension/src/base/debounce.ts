@@ -1,6 +1,6 @@
 const timers = new Map<string, NodeJS.Timeout>();
 
-export type ActionKey = 'deploy' | 'invalidate';
+export type ActionKey = 'deploy' | 'invalidate' | 'readJavaClassPath';
 
 export const debouncedAction = (action: () => void, actionKey: ActionKey, keyPrefix?: string) => {
   return () => {
