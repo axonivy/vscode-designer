@@ -4,7 +4,7 @@ export default defineConfig({
   use: {
     permissions: ['clipboard-read'],
     headless: true,
-    trace: 'retain-on-failure',
+    trace: 'on-first-retry',
     screenshot: 'only-on-failure'
   },
   workers: process.env.RUN_IN_BROWSER ? 3 : 1,

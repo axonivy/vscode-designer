@@ -8,6 +8,19 @@ test.describe('Engine started by extension', () => {
   test.use({ workspace: embeddedEngineWorkspace });
 
   test('Engine is terminated with extension reload', { tag: '@serial' }, async ({ wsPage }) => {
+    const outputview = new OutputView(wsPage);
+    await outputview.checkIfEngineStarted();
+    const engineUrl = await outputview.getEngineUrl();
+    expect(engineUrl).toBeDefined();
+    expect(engineUrl?.startsWith('http')).toBeTruthy();
+    const engineResponse = await fetch(engineUrl!);
+    expect(engineResponse.ok).toBeTruthy();
+    await wsPage.executeCommand('Developer: Reload Window');
+    await expect(async () => {
+      await expect(fetch(engineUrl!)).rejects.toThrow();
+    }).toPass({ intervals: [200] });
+    await outputview.checkIfEngineStarted();
+
     const settingsView = new SettingsView(wsPage);
     await settingsView.openDefaultSettings();
     await settingsView.containsSetting('"axonivy.engine.runByExtension": true');
@@ -20,16 +33,6 @@ test.describe('Engine started by extension', () => {
 
     await settingsView.openWorkspaceSettings();
     await settingsView.containsSetting('"axonivy.engine.runByExtension": true');
-
-    const outputview = new OutputView(wsPage);
-    await outputview.checkIfEngineStarted();
-    const engineUrl = await outputview.getEngineUrl();
-    expect(engineUrl).toBeDefined();
-    expect(engineUrl?.startsWith('http')).toBeTruthy();
-    await wsPage.executeCommand('Developer: Reload Window');
-    await outputview.checkIfEngineStarted();
-    const engineUrlAfterReload = await outputview.getEngineUrl();
-    expect(engineUrl).toBe(engineUrlAfterReload);
   });
 });
 
