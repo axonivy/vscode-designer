@@ -3,7 +3,6 @@ import path from 'path';
 import { expect, test } from '~/fixtures/baseTest';
 import { FileExplorer, ProjectExplorerView } from '~/page-objects/explorer-view';
 import { MavenView } from '~/page-objects/maven-view';
-import { mavenScreenshotWorkspacePath } from '~/workspaces/workspace';
 import { screenshot } from './screenshot-util';
 
 const modulesPom = `<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -20,10 +19,8 @@ const modulesPom = `<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi
 `;
 
 test.describe('maven modules', () => {
-  test.use({ workspace: mavenScreenshotWorkspacePath });
-
   test('maven view', async ({ wsPage, tmpWorkspace }) => {
-    test.setTimeout(600_000); // runs 'mvn verify', which can take long without a warm local Maven repository
+    test.setTimeout(120_000); // runs 'mvn verify', which can take long without a warm local Maven repository
     await wsPage.hasReadyStatusMessage();
     const workspaceRoot = tmpWorkspace!.tmpWorkspacePath;
 

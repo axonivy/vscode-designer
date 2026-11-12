@@ -12,7 +12,6 @@ export const iarDependencyWorkspacePath = path.resolve(import.meta.dirname, './i
 export const outdatedProjectWorkspacePath = path.resolve(import.meta.dirname, './outdatedProject');
 export const portalPerformanceWorkspacePath = path.resolve(import.meta.dirname, './portalPerformance');
 export const multiRootWorkspacePath = path.resolve(import.meta.dirname, './multiProject/multiRootWorkspace.code-workspace');
-export const mavenScreenshotWorkspacePath = path.resolve(import.meta.dirname, './mavenScreenshot');
 export const screenshotProject = path.resolve(import.meta.dirname, './screenshotProject');
 export const multiProjectWithoutDuplicatesWorkspacePath = path.resolve(import.meta.dirname, './multiProjectWithoutDuplicates');
 export const dependencyClashWorkspacePath = path.resolve(import.meta.dirname, './dependencyClash');
