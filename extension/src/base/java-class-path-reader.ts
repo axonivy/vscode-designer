@@ -118,4 +118,11 @@ export class JavaClassPathReader {
     this.classpathListener?.dispose();
     this.projectsImportListener?.dispose();
   }
+
+  static get instance() {
+    if (JavaClassPathReader._instance) {
+      return JavaClassPathReader._instance;
+    }
+    throw new Error('JavaClassPathReader has not been initialized');
+  }
 }
