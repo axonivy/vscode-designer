@@ -105,15 +105,6 @@ export class WorkspacePage {
     }).toPass();
   }
 
-  async runTests(timeout = 120_000) {
-    const lightweightMode = this.page.locator('div.statusbar-item[id*="redhat.java"]').filter({ hasText: 'Java: Lightweight Mode' });
-    if (await lightweightMode.isVisible()) {
-      await this.activateExpensiveJavaStandardMode();
-    }
-    await expect(this.page.locator('.editor-group-container.active .codicon-testing-run-icon').first()).toBeVisible({ timeout });
-    await this.executeCommand('Test: Run Tests in Current File');
-  }
-
   async expectTestsToPass(timeout = 120_000) {
     const editor = this.page.locator('.editor-group-container.active');
     const failed = editor.locator('.codicon-testing-failed-icon, .codicon-testing-error-icon');

@@ -1,10 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import { expect, test } from '~/fixtures/baseTest';
-import { properMultiProjectPath } from '~/workspaces/workspace';
+import type { WorkspacePage } from '~/page-objects/workspace-page';
+import { properMultiProjectJavaPath, properMultiProjectPath } from '~/workspaces/workspace';
 
 test.describe('Add Test Project', () => {
-  test.use({ workspace: properMultiProjectPath });
+  test.use({ workspace: properMultiProjectJavaPath });
 
   test('should create a test project', async ({ wsPage, tmpWorkspace }) => {
     await wsPage.hasReadyStatusMessage();
@@ -48,9 +49,7 @@ test.describe('Add Test Project', () => {
       expect(files.map(file => path.basename(file))).toContain('SampleIvyTest.java');
     }).toPass({ intervals: [1_000] });
 
-    await wsPage.openEditorFile('SampleIvyTest.java');
-    await wsPage.runTests();
-    await wsPage.expectTestsToPass();
+    await runTestsAndExpectPass(wsPage, 'SampleIvyTest.java');
   });
 
   test('should create ProcessTests and tests should pass', async ({ wsPage, tmpWorkspace }) => {
@@ -72,14 +71,12 @@ test.describe('Add Test Project', () => {
       expect(files.map(file => path.basename(file))).toContain('SampleProcessTest.java');
     }).toPass({ intervals: [1_000] });
 
-    await wsPage.openEditorFile('SampleProcessTest.java');
-    await wsPage.runTests();
-    await wsPage.expectTestsToPass();
+    await runTestsAndExpectPass(wsPage, 'SampleProcessTest.java');
   });
 });
 
 test.describe('WebIT Test Project', () => {
-  test.use({ workspace: properMultiProjectPath });
+  test.use({ workspace: properMultiProjectJavaPath });
   test.skip(process.env.RUN_IN_BROWSER === 'true');
 
   test('should create WebIT and tests should pass', async ({ wsPage, tmpWorkspace }) => {
@@ -101,9 +98,7 @@ test.describe('WebIT Test Project', () => {
       expect(files.map(file => path.basename(file))).toContain('SampleWebIT.java');
     }).toPass({ intervals: [1_000] });
 
-    await wsPage.openEditorFile('SampleWebIT.java');
-    await wsPage.runTests();
-    await wsPage.expectTestsToPass();
+    await runTestsAndExpectPass(wsPage, 'SampleWebIT.java');
   });
 });
 
@@ -120,3 +115,14 @@ test.describe('Test Project already exists', () => {
     await expect(wsPage.quickInputMessage).toHaveText('A test project with this name already exists in the workspace or as a Maven dependency.');
   });
 });
+
+const runTestsAndExpectPass = async (wsPage: WorkspacePage, fileName: string) => {
+  await wsPage.openEditorFile(fileName);
+  const editor = wsPage.page.locator('.editor-group-container.active');
+  await expect(editor.locator('.codicon-testing-run-icon').first()).toBeVisible({ timeout: 120_000 });
+  await wsPage.executeCommand('Test: Run Tests in Current File');
+  const anyOutcome = editor.locator('.codicon-testing-passed-icon, .codicon-testing-failed-icon, .codicon-testing-error-icon');
+  await expect(anyOutcome.first(), 'no test result in editor: run never started or is still building').toBeVisible({ timeout: 120_000 });
+  await expect(editor.locator('.codicon-testing-failed-icon, .codicon-testing-error-icon')).toHaveCount(0);
+  await expect(editor.locator('.codicon-testing-passed-icon').first()).toBeVisible();
+};

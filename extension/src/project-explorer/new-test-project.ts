@@ -42,31 +42,25 @@ const testTemplates = [
   { selection: 'WebIT', template: 'web-it.java.template', output: 'SampleWebIT.java' }
 ];
 
-const configureTestProject = async (
-  projectPath: string,
-  groupId: string,
-  referenceProject: ProjectBean,
-  testSelections: QuickPickItem[],
-  extensionUri: Uri
-) => {
+const configureTestProject = async (testProject: ProjectBean, testSelections: QuickPickItem[], extensionUri: Uri) => {
   const selected = new Set(testSelections.map(test => test.label));
 
   const needsUnitTester = selected.has('IvyTest') || selected.has('ProcessTest');
   const needsWebTester = selected.has('WebIT');
 
   if (needsUnitTester) {
-    await addMavenTestDependency(projectPath, {
+    await addMavenTestDependency(testProject.projectDirectory, {
       groupId: 'com.axonivy.ivy.api.test',
       artifactId: 'ivy-test-api'
     });
   }
 
   if (needsWebTester) {
-    await addMavenTestDependency(projectPath, {
+    await addMavenTestDependency(testProject.projectDirectory, {
       groupId: 'com.axonivy.ivy.api.test',
       artifactId: 'ivy-web-test-api'
     });
-    await setMavenPackaging(projectPath);
+    await setMavenPackaging(testProject.projectDirectory);
   }
 
   for (const item of testTemplates) {
@@ -74,21 +68,15 @@ const configureTestProject = async (
       continue;
     }
 
-    const toJavaPackage = (namespace: string) =>
-      namespace
-        .split('.')
-        .map(part => part.replace(/[^A-Za-z0-9_]/g, '_').replace(/^(\d)/, '_$1'))
-        .join('.');
-
-    const packageName = `${toJavaPackage(referenceProject.defaultNamespace)}.${item.selection === 'WebIT' ? 'webtest' : 'test'}`;
-    const processPath = `${groupId.split('.').join('/')}/${processName}`;
+    const packageName = `${testProject.defaultNamespace}.${item.selection === 'WebIT' ? 'webtest' : 'test'}`;
+    const processPath = `${testProject.groupId.split('.').join('/')}/${processName}`;
     const templateUri = Uri.joinPath(extensionUri, 'assets', 'test-project-templates', item.template);
     const templateBytes = await workspace.fs.readFile(templateUri);
     const javaSource = new TextDecoder()
       .decode(templateBytes)
       .replace('{{packageName}}', packageName)
       .replace('{{ProcessForTest}}', processPath);
-    const outputDir = Uri.joinPath(Uri.file(projectPath), 'src_test', ...packageName.split('.'));
+    const outputDir = Uri.joinPath(Uri.file(testProject.projectDirectory), 'src_test', ...packageName.split('.'));
     await workspace.fs.createDirectory(outputDir);
 
     const outputFile = Uri.joinPath(outputDir, item.output);
@@ -288,29 +276,17 @@ export const addNewTestProject = async (selectionContext: AddCommandSelectionCon
     newTestProjectData.projectPath !== undefined &&
     referenceProject?.path !== undefined
   ) {
-    const referenceBean = existingDeployedProjects.find(
-      project => path.resolve(project.projectDirectory) === path.resolve(referenceProject.path)
-    );
-    if (!referenceBean) {
-      throw new Error(`Reference project not found: ${referenceProject.path}`);
-    }
-
     const createTestProjectInput: CreateProjectParams = {
       name: newTestProjectData.projectName,
       groupId: newTestProjectData.groupId,
       projectId: newTestProjectData.projectId,
       path: newTestProjectData.projectPath
     };
-    await IvyEngineManager.instance.createTestProject(createTestProjectInput);
+    const testProject = await IvyEngineManager.instance.createTestProject(createTestProjectInput);
+    if (!testProject) {
+      throw new Error(`Test project could not be created: ${newTestProjectData.projectPath}`);
+    }
     await addMavenProjectDependencyByPath(newTestProjectData.projectPath, referenceProject.path);
-
-    await configureTestProject(
-      newTestProjectData.projectPath,
-      newTestProjectData.groupId,
-      referenceBean,
-      newTestProjectData.testSelections ?? [],
-      extensionUri
-    );
 
     if (newTestProjectData.testSelections?.some(item => item.label === 'ProcessTest')) {
       await IvyEngineManager.instance.createProcess({
@@ -320,6 +296,8 @@ export const addNewTestProject = async (selectionContext: AddCommandSelectionCon
         namespace: await resolveDefaultNamespace(newTestProjectData.projectPath, 'process')
       });
     }
+
+    await configureTestProject(testProject, newTestProjectData.testSelections ?? [], extensionUri);
     await runJavaProjectImport();
   } else {
     throw new MultiStepInvalidStateError(
