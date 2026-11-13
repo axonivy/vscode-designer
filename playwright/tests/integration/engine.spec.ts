@@ -2,15 +2,10 @@ import { expect } from '@playwright/test';
 import { test } from '../fixtures/baseTest';
 import { OutputView } from '../page-objects/output-view';
 import { SettingsView } from '../page-objects/settings-view';
-import { embeddedEngineWorkspace, noEngineWorkspacePath, noProjectWorkspacePath } from '../workspaces/workspace';
+import { embeddedEngineWorkspace, minimalProjectWorkspacePath } from '../workspaces/workspace';
 
-test.describe('Engine run by extension', () => {
+test.describe('Engine started by extension', () => {
   test.use({ workspace: embeddedEngineWorkspace });
-
-  test('check if extension can download and start engine', { tag: '@serial' }, async ({ wsPage }) => {
-    const outputview = new OutputView(wsPage);
-    await outputview.checkIfEngineStarted();
-  });
 
   test('Engine is terminated with extension reload', { tag: '@serial' }, async ({ wsPage }) => {
     const outputview = new OutputView(wsPage);
@@ -18,17 +13,14 @@ test.describe('Engine run by extension', () => {
     const engineUrl = await outputview.getEngineUrl();
     expect(engineUrl).toBeDefined();
     expect(engineUrl?.startsWith('http')).toBeTruthy();
+    const engineResponse = await fetch(engineUrl!);
+    expect(engineResponse.ok).toBeTruthy();
     await wsPage.executeCommand('Developer: Reload Window');
+    await expect(async () => {
+      await expect(fetch(engineUrl!)).rejects.toThrow();
+    }).toPass({ intervals: [200] });
     await outputview.checkIfEngineStarted();
-    const engineUrlAfterReload = await outputview.getEngineUrl();
-    expect(engineUrl).toBe(engineUrlAfterReload);
-  });
-});
 
-test.describe('Engine noProjectWorkspacePath', () => {
-  test.use({ workspace: noProjectWorkspacePath });
-
-  test('check default engine settings and ensure engine is started even if no projects in workspace', { tag: '@serial' }, async ({ wsPage }) => {
     const settingsView = new SettingsView(wsPage);
     await settingsView.openDefaultSettings();
     await settingsView.containsSetting('"axonivy.engine.runByExtension": true');
@@ -41,13 +33,11 @@ test.describe('Engine noProjectWorkspacePath', () => {
 
     await settingsView.openWorkspaceSettings();
     await settingsView.containsSetting('"axonivy.engine.runByExtension": true');
-    const outputview = new OutputView(wsPage);
-    await outputview.checkIfEngineStarted();
   });
 });
 
-test.describe('Engine noEngineWorkspacePath', () => {
-  test.use({ workspace: noEngineWorkspacePath });
+test.describe('Engine not started by extension', () => {
+  test.use({ workspace: minimalProjectWorkspacePath });
 
   test('ensure that engine is not started due to settings', async ({ wsPage }) => {
     const settingsView = new SettingsView(wsPage);

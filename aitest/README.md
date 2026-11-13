@@ -41,6 +41,7 @@ The tests report token usage from Aspire spans, assert tool calls where applicab
    ```bash
    # see .github/workflows/ai.yml
    pnpm install
+   export SKIP_IVY_SCHEMAS=1
    pnpm run build:production
    pnpm run package
    ```

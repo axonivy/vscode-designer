@@ -1,21 +1,29 @@
 import { expect } from '@playwright/test';
 import { test } from '~/fixtures/baseTest';
 import { FileExplorer } from '~/page-objects/explorer-view';
+import { OutputView } from '~/page-objects/output-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
 
 const processName = 'testCreateProcess';
 
 test('Add business process, execute, edit and redeploy', { tag: '@serial' }, async ({ wsPage }) => {
-  await wsPage.activateExpensiveJavaStandardMode();
+  await wsPage.activateExpensiveJavaStandardMode({ waitForReady: false });
   const explorer = new FileExplorer(wsPage);
-  await wsPage.hasReadyStatusMessage();
+
+  const output = new OutputView(wsPage);
+  await output.openLog('Axon Ivy Extension');
+  await output.expectLogEntry('Success - Invalidating class loader');
+  await output.expectLogEntry('Success - Deploying IAR dependencies');
+  await output.clearOutput();
+
   await explorer.addProcess(processName, 'Business Process');
   await explorer.hasNodeExact(`${processName}.p.json`);
   const processEditor = new ProcessEditor(wsPage, `${processName}.p.json`);
   const start = processEditor.elementByType('start:requestStart');
   const end = processEditor.elementByType('end:taskEnd');
-  await wsPage.hasStatusMessage('Axon Ivy: Success - Invalidating class loader');
-  await wsPage.hasReadyStatusMessage();
+
+  await output.expectLogEntry('Success - Invalidating class loader');
+
   await processEditor.startProcessAndAssertExecuted(start, end);
 
   await processEditor.appendActivity(start, 'Script');

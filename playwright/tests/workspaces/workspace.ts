@@ -1,8 +1,6 @@
 import * as path from 'path';
 
 export const prebuiltWorkspacePath = path.resolve(import.meta.dirname, './prebuiltProject');
-export const noEngineWorkspacePath = path.resolve(import.meta.dirname, './noEngine');
-export const noProjectWorkspacePath = path.resolve(import.meta.dirname, './noProject');
 export const multiProjectWorkspacePath = path.resolve(import.meta.dirname, './multiProject');
 export const empty = path.resolve(import.meta.dirname, './empty');
 export const emptyWithFolder = path.resolve(import.meta.dirname, './emptyWithFolder');

@@ -92,9 +92,12 @@ export class WorkspacePage {
     return this.page.locator('.notifications-center');
   }
 
-  async activateExpensiveJavaStandardMode() {
+  async activateExpensiveJavaStandardMode(options: { waitForReady?: boolean } = { waitForReady: true }) {
     const javaStatusBar = this.page.locator('div.statusbar-item[id*="redhat.java"]');
     await javaStatusBar.filter({ hasText: 'Java: Lightweight Mode' }).click();
+    if (!options.waitForReady) {
+      return;
+    }
     await expect(javaStatusBar.filter({ hasText: 'Java: Activating...' })).toBeVisible();
     await expect(async () => {
       await expect(javaStatusBar.filter({ hasText: 'Java: Ready' })).toBeVisible({ timeout: 500 });
