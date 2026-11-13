@@ -122,14 +122,10 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
             uri: iarContentUri(depProject.projectDirectory, 'META-INF/ivy'),
             type: FileType.Directory,
             label: depProject.artifactId,
-            description: versionsMatch ? depVersionProject : l10n.t('{0} (mismatch to pom.xml)', depVersionProject),
+            description: versionsMatch ? depVersionProject : l10n.t('Version error'),
             tooltip: versionsMatch
               ? `${depProject.groupId}:${depProject.artifactId}:${depVersionProject}`
-              : l10n.t(
-                  'Dependency version on engine ({0}) does not match version in pom.xml ({1}). Check the Problems view.',
-                  depVersionProject,
-                  depVersionPom ?? 'not specified'
-                ),
+              : l10n.t('Dependency version error. There are conflicting versions specified. Check the Problems view.'),
             iconPath: new ThemeIcon('lock', versionsMatch ? undefined : new ThemeColor('problemsErrorIcon.foreground')),
             collapsibleState: TreeItemCollapsibleState.Collapsed,
             kind: 'iarDependency' as const,
