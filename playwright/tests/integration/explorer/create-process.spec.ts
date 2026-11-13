@@ -27,13 +27,12 @@ test('Add business process, execute, edit and refresh rdm', { tag: '@serial' }, 
   await processEditor.startProcessAndAssertExecuted(start, end);
 
   await processEditor.appendActivity(start, 'Script');
-  await processEditor.expectTabDirty();
-  await processEditor.save();
+  await processEditor.saveAll();
   const script = processEditor.elementByType('script');
   await expect(script).toHaveClass(/selected/);
   await expect(start).not.toHaveClass(/executed/);
   // engine does rdm refresh async on file change event, so wait a bit
-  await wsPage.page.waitForTimeout(1_000 );
+  await wsPage.page.waitForTimeout(1_000);
   await processEditor.startProcessAndAssertExecuted(start, script);
 });
 
