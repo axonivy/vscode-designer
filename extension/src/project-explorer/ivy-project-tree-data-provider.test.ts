@@ -174,9 +174,7 @@ test('marks IAR dependencies red when the POM version differs', async () => {
   const [dependency] = await provider.getChildren(iarGroup);
 
   expect((dependency?.iconPath as ThemeIcon).color).toEqual(new ThemeColor('problemsErrorIcon.foreground'));
-  expect(dependency?.tooltip).toBe(
-    'Dependency version on engine (2.1.0) does not match version in pom.xml (2.0.0). Check the Problems view.'
-  );
+  expect(dependency?.tooltip).toBe('Dependency version error. There are conflicting versions specified. Check the Problems view.');
 });
 
 test('shows the same IAR dependency below every workspace project', async () => {
@@ -195,10 +193,7 @@ test('shows the same IAR dependency below every workspace project', async () => 
 
   expect(roots.map(root => root.uri.fsPath)).toEqual(['/workspace/p1', '/workspace/p2']);
   expect(groups.map(group => group[0]?.label)).toEqual(['IAR Dependencies', 'IAR Dependencies']);
-  expect(dependencies.map(projects => projects.map(project => project.label))).toEqual([
-    ['shared-project'],
-    ['shared-project']
-  ]);
+  expect(dependencies.map(projects => projects.map(project => project.label))).toEqual([['shared-project'], ['shared-project']]);
   expect(groups[0]?.[0]).not.toBe(groups[1]?.[0]);
   expect(dependencies[0]?.[0]?.parent).toBe(groups[0]?.[0]);
   expect(dependencies[1]?.[0]?.parent).toBe(groups[1]?.[0]);
