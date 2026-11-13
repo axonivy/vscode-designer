@@ -41,7 +41,7 @@ const IVY_PROJECT_REQUIRES_CONVERSION_CONTEXT_VALUE = 'requiresConversion';
 
 export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   private engineProjects?: Promise<ProjectBean[]>;
-  private iarProjects?: Promise<ProjectBean[]>;
+  private engineIarProjects?: Promise<ProjectBean[]>;
   private _onDidChangeTreeData = new EventEmitter<Entry | undefined | null>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
@@ -59,7 +59,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
 
   refresh() {
     this.engineProjects = undefined;
-    this.iarProjects = undefined;
+    this.engineIarProjects = undefined;
     this.iarContentProvider.refresh();
     this._onDidChangeTreeData.fire(undefined);
   }
@@ -154,7 +154,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   }
 
   private async getIarProjects() {
-    this.iarProjects ??= this.getEngineProjects().then(projects =>
+    this.engineIarProjects ??= this.getEngineProjects().then(projects =>
       projects
         .filter(project => project.id.isIar)
         .sort((a, b) => {
@@ -163,11 +163,11 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
           return aCoordinate.localeCompare(bCoordinate);
         })
     );
-    return this.iarProjects;
+    return this.engineIarProjects;
   }
 
   private async getEngineIarDependenciesForWorkspaceProject(projectDirectory: string) {
-    const [engineProjects, iarProjects] = await Promise.all([this.getEngineProjects(), this.getIarProjects()]);
+    const [engineProjects, engineIarProjects] = await Promise.all([this.getEngineProjects(), this.getIarProjects()]);
     const workspaceProject = engineProjects.find(
       project => !project.id.isIar && path.resolve(project.projectDirectory) === path.resolve(projectDirectory)
     );
@@ -175,7 +175,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
       return [];
     }
     const dependencyIds = new Set(workspaceProject.dependencies.map(dependency => dependency.id));
-    return iarProjects.filter(project => dependencyIds.has(project.id.id));
+    return engineIarProjects.filter(project => dependencyIds.has(project.id.id));
   }
 
   private getIarContentChildren(parent: Entry): Entry[] {
