@@ -3,6 +3,7 @@ import { window } from 'vscode';
 import { messenger } from '../..';
 import { registerOpenConfigEditorCmd } from '../command-helper';
 import { createWebViewContent } from '../webview-helper';
+import { IAR_CONTENT_SCHEME, iarContentEngineFileName } from '../../project-explorer/iar-content-provider';
 import { setupCommunication } from './webview-communication';
 
 export class VariableEditorProvider implements CustomTextEditorProvider {
@@ -21,7 +22,9 @@ export class VariableEditorProvider implements CustomTextEditorProvider {
   }
 
   resolveCustomTextEditor(document: TextDocument, webviewPanel: WebviewPanel) {
-    setupCommunication(this.websocketUrl, messenger, webviewPanel, document);
+    const readOnly = document.uri.scheme === IAR_CONTENT_SCHEME;
+    const engineFileName = readOnly ? iarContentEngineFileName(document.uri) : document.fileName;
+    setupCommunication(this.websocketUrl, messenger, webviewPanel, document, engineFileName, readOnly);
     webviewPanel.webview.options = { enableScripts: true };
     webviewPanel.webview.html = createWebViewContent(this.context, webviewPanel.webview, 'variable-editor');
   }

@@ -4,7 +4,9 @@ import type { NotificationType } from 'vscode-messenger-common';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 
 export const WebviewReadyNotification: NotificationType<void> = { method: 'ready' };
-export const InitializeConnectionRequest: NotificationType<{ file: string }> = { method: 'initializeConnection' };
+export const InitializeConnectionRequest: NotificationType<{ file: string; readOnly?: boolean }> = {
+  method: 'initializeConnection'
+};
 
 export const isAction = <T>(obj: unknown): obj is { method: string; params: T } => {
   return (

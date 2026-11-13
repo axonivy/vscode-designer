@@ -10,13 +10,14 @@ export class EditorWebSocketForwarder extends WebSocketForwarder {
     messenger: Messenger,
     messageParticipant: MessageParticipant,
     notificationType: NotificationType<unknown>,
-    readonly document: TextDocument
+    readonly document: TextDocument,
+    private readonly engineFileName = document.fileName
   ) {
     super(websocketUrl, websocketEndpoint, messenger, messageParticipant, notificationType);
   }
 
   override dispose(): void {
-    this.webSocket.send(JSON.stringify({ method: 'refreshRdm', params: { app: '', project: '', file: this.document.fileName } }));
+    this.webSocket.send(JSON.stringify({ method: 'refreshRdm', params: { app: '', project: '', file: this.engineFileName } }));
     super.dispose();
   }
 }
