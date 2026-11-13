@@ -29,6 +29,13 @@ abstract class Editor {
     await this.expectTabNotDirty();
   }
 
+  async saveAll() {
+    await this.expectTabDirty();
+    await this.tab.focus();
+    await this.wsPage.executeCommand('File: Save All Files');
+    await this.expectTabNotDirty();
+  }
+
   async expectTabDirty() {
     await expect(this.tab).toHaveClass(/dirty/);
   }
