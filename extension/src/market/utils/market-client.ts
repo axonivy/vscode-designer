@@ -34,7 +34,7 @@ export async function getAvailableVersions(productId: string, engineVersion: str
 }
 
 export const getBestVersion = async (productId: string, designerVersion: string) => {
-  const response = await findBestMatchProductDetailsByVersion(productId, designerVersion, { isShowDevVersion: true });
+  const response = await findBestMatchProductDetailsByVersion(productId, designerVersion, { isShowDevVersion: false });
   const data = response.data as BestMatchVersion;
   return data.version || '';
 };
