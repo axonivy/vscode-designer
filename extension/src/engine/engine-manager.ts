@@ -327,10 +327,10 @@ export class IvyEngineManager {
   }
 
   public async createTestProject(newTestProjectParams: CreateProjectParams) {
-    await StatusBar.withStatusBarProgress({ text: l10n.t('Creating new test project') }, async () => {
+    return await StatusBar.withStatusBarProgress({ text: l10n.t('Creating new test project') }, async () => {
       try {
         increaseWorkspaceLock();
-        await this.ivyEngineApi?.createProject(newTestProjectParams);
+        return await this.ivyEngineApi?.createProject(newTestProjectParams);
       } finally {
         decreaseWorkspaceLock();
       }
