@@ -46,10 +46,12 @@ public class AgentRuntime {
   private final AiTestReport reporter = new AiTestReport();
   private MarkdownReporter markdown;
   private IvyEngine ivyEngine;
+  private String testUnit;
 
   private String currentTest;
 
-  public void start() {
+  public void start(String testUnit) {
+    this.testUnit = testUnit;
     System.out.println("Container reuse: " + reuseContainers);
     ensureNetworkExists();
 
@@ -86,7 +88,7 @@ public class AgentRuntime {
     markdown = new MarkdownReporter();
     reporter.register(markdown);
     reporter.register(new SysoutReporter());
-    reporter.resetReport();
+    reporter.resetReport(testUnit);
   }
 
   private void startContainer(GenericContainer<?> container) {
@@ -105,6 +107,12 @@ public class AgentRuntime {
       container.stop();
     }
     Path reportFile = Path.of(System.getProperty("ai.report.file", "target/ai-test-report.md"));
+    String fileName = reportFile.getFileName().toString();
+    int extension = fileName.lastIndexOf('.');
+    String unitReportName = extension > 0
+        ? fileName.substring(0, extension) + "-" + testUnit + fileName.substring(extension)
+        : fileName + "-" + testUnit;
+    reportFile = reportFile.resolveSibling(unitReportName);
     markdown.toMarkdownFile(reportFile);
   }
 

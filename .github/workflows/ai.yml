@@ -53,9 +53,13 @@ jobs:
       - name: Print AI test report
         if: always()
         run: |
-          report="aitest/ai-dev-tests/target/ai-test-report.md"
-          if [[ -s "$report" ]]; then
-            cat "$report" | tee -a "$GITHUB_STEP_SUMMARY"
+          shopt -s nullglob
+          reports=(aitest/ai-dev-tests/target/ai-test-report-*.md)
+          if ((${#reports[@]})); then
+            for report in "${reports[@]}"; do
+              cat "$report" | tee -a "$GITHUB_STEP_SUMMARY"
+              printf '\n' | tee -a "$GITHUB_STEP_SUMMARY"
+            done
           else
             echo 'No AI test metrics were recorded.' | tee -a "$GITHUB_STEP_SUMMARY"
           fi
@@ -71,7 +75,7 @@ jobs:
             ci-user-data/xvfb-errors.log
             ci-user-data/process*.log
             **/*.log
-            aitest/ai-dev-tests/target/ai-test-report.md
+            aitest/ai-dev-tests/target/ai-test-report-*.md
             aitest/ai-dev-tests/target/surefire-reports/*.xml
       # - name: Publish Test Results
       #   uses: EnricoMi/publish-unit-test-result-action@v2

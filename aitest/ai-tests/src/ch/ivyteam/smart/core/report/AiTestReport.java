@@ -9,8 +9,8 @@ public class AiTestReport {
 
   private List<Reporter> reporters = new ArrayList<>();
 
-  public void resetReport() {
-    reporters.stream().forEach(r -> r.init("CopilotIntegration"));
+  public void resetReport(String testUnit) {
+    reporters.stream().forEach(r -> r.init(testUnit));
   }
 
   public void report(String testName, AspireSpans spans) {
