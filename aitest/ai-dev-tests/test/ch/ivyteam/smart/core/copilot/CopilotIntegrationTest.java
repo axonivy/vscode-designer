@@ -28,7 +28,7 @@ import tools.jackson.dataformat.yaml.YAMLMapper;
 public class CopilotIntegrationTest {
 
   /**
-   * We run small single-resource skills before complexer ones, 
+   * We run small single-resource skills before complexer ones,
    * to verify that single skills works well when used independently.
    */
   interface Complexity {
@@ -54,7 +54,7 @@ public class CopilotIntegrationTest {
         .isEmpty();
   }
 
-  @Test 
+  @Test
   @Order(Complexity.INDEPENDENT)
   void market_search(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("is there a built in facility to involve a JIRA instance in my process?");
@@ -200,7 +200,8 @@ public class CopilotIntegrationTest {
   @Test
   @Order(Complexity.INDEPENDENT) // before: createProject (let's fetch the schemas here for the first time)
   void configureRoles(AgentRuntime rt) throws Exception {
-    var spans = rt.prompt("create the roles manager and employee in purchase/config/roles.yaml, plus a purchase manager that inherits from manager");
+    var spans = rt.prompt(
+        "create the roles manager and employee in purchase/config/roles.yaml, plus a purchase manager that inherits from manager");
 
     var roles = rt.ivyWorkspace().path().resolve("purchase/config/roles.yaml");
     assertThat(roles).content()
@@ -294,7 +295,8 @@ public class CopilotIntegrationTest {
 
     var formJson = readJson(form);
     var bindings = formJson.path("components").findParents("type").stream()
-        .collect(Collectors.toMap(c -> c.path("config").path("value").asString(), c -> c.path("type").asString(), (a, b) -> a));
+        .collect(Collectors.toMap(c -> c.path("config").path("value").asString(), c -> c.path("type").asString(),
+            (a, b) -> a));
     assertThat(bindings)
         .as("components are bound to the data attributes: %s", formJson.toPrettyString())
         .containsEntry("#{data.product}", "Input")
@@ -327,7 +329,8 @@ public class CopilotIntegrationTest {
         .as("JSF is used, since forms have no file upload")
         .exists();
 
-    var dialogCalls = spans.usedTools().stream().filter(tool -> tool.name().equals("axonivy-designer-new_axon_ivy_dialog")).toList();
+    var dialogCalls = spans.usedTools().stream()
+        .filter(tool -> tool.name().equals("axonivy-designer-new_axon_ivy_dialog")).toList();
     assertThat(dialogCalls)
         .as("no tool call to create a form")
         .isNotEmpty()
@@ -378,7 +381,8 @@ public class CopilotIntegrationTest {
     var purchase = rt.ivyWorkspace().path().resolve("purchase");
     var form = findFile(purchase.resolve("dialog"), "SupplierCertificate.f.json");
     var composites = formComponents(readJson(form), "Composite");
-    var componentDir = purchase.resolve("dialog/" + composites.getFirst().at("/config/name").asString().replace('.', '/'));
+    var componentDir = purchase
+        .resolve("dialog/" + composites.getFirst().at("/config/name").asString().replace('.', '/'));
     assertThat(componentDir.resolve(componentDir.getFileName() + ".xhtml"))
         .as("the embedded upload component uses JSF")
         .exists();
@@ -414,7 +418,8 @@ public class CopilotIntegrationTest {
 
     var popup = formComponents(form, "Dialog").stream()
         .filter(dialog -> dialog.path("cid").asString().equals(table.at("/config/editDialogId").asString()))
-        .findFirst().orElseThrow(() -> new IllegalStateException("editDialogId names no Dialog: " + form.toPrettyString()));
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException("editDialogId names no Dialog: " + form.toPrettyString()));
     assertThat(popup.at("/config/linkedComponent").asString())
         .as("the popup is linked back to the table")
         .isEqualTo(table.path("cid").asString());
@@ -423,11 +428,13 @@ public class CopilotIntegrationTest {
         .collect(Collectors.toMap(b -> b.at("/config/type").asString(), b -> b.path("config"), (a, b) -> a));
     assertThat(buttons).as("row and popup buttons").containsKeys("EDIT", "DELETE", "DIALOGCANCEL", "DIALOGSAVE");
     assertThat(buttons.get("EDIT").path("action").asString()).as("EDIT action is the plain word").isEqualTo("editRow");
-    assertThat(buttons.get("DELETE").path("action").asString()).as("DELETE action is the plain word").isEqualTo("deleteRow");
+    assertThat(buttons.get("DELETE").path("action").asString()).as("DELETE action is the plain word")
+        .isEqualTo("deleteRow");
     assertThat(buttons.get("DIALOGCANCEL").path("name").asString()).as("popup Cancel has a label").isNotBlank();
     assertThat(buttons.get("DIALOGSAVE").path("name").asString()).as("popup Save has a label").isNotBlank();
 
-    assertThat(formComponents(popup.path("config"), "Select")).as("the name is picked from a dropdown in the popup").isNotEmpty();
+    assertThat(formComponents(popup.path("config"), "Select")).as("the name is picked from a dropdown in the popup")
+        .isNotEmpty();
 
     assertThat(spans)
         .usedTools("axonivy-designer-new_axon_ivy_dialog")
@@ -490,7 +497,8 @@ public class CopilotIntegrationTest {
 
     assertThat(spans)
         .usedTools("skill", "axonivy-designer-new_axon_ivy_data_class")
-        .calledToolWithout("axonivy-designer-new_axon_ivy_data_class", "namespace") // model don't try to guess a namespace
+        .calledToolWithout("axonivy-designer-new_axon_ivy_data_class", "namespace") // model don't try to guess a
+                                                                                    // namespace
         .viewed("skills/ivy-json-files/schemas/project/data-class.json")
         .didNotUseTools("web_fetch", "web_search");
   }
@@ -512,7 +520,8 @@ public class CopilotIntegrationTest {
     assertThat(entityJson.has("entity")).isTrue();
     var id = entityJson.path("fields").valueStream()
         .filter(f -> f.path("name").asString().equals("id"))
-        .findFirst().orElseThrow(() -> new IllegalStateException("generated 'id' field was removed: " + entityJson.toPrettyString()));
+        .findFirst().orElseThrow(
+            () -> new IllegalStateException("generated 'id' field was removed: " + entityJson.toPrettyString()));
     assertThat(id.path("modifiers").valueStream().map(JsonNode::asString)).contains("ID");
 
     assertThat(spans)
@@ -564,7 +573,8 @@ public class CopilotIntegrationTest {
         .as("a daytime variable defaults to 07:30")
         .containsPattern("(?m)^\\h*#\\h*\\[daytime\\]\\R\\h*[^#:\\r\\n]+:\\h*\"07:30\"\\h*$");
 
-    var template = Pattern.compile("(?im)^\\h*#\\h*\\[file: txt\\]\\R\\h*([^#:\\r\\n]*template[^#:\\r\\n]*):\\h*\"\"\\h*$")
+    var template = Pattern
+        .compile("(?im)^\\h*#\\h*\\[file: txt\\]\\R\\h*([^#:\\r\\n]*template[^#:\\r\\n]*):\\h*\"\"\\h*$")
         .matcher(variablesYaml);
     assertThat(template.find()).as("a template variable with file metadata and an empty value").isTrue();
     assertThat(findFile(config.resolve("variables"), template.group(1).strip() + ".txt")).content().isNotBlank();
@@ -610,7 +620,8 @@ public class CopilotIntegrationTest {
     assertThat(restClient.at("/Url").asString()).isEqualTo("https://api.acme.com/suppliers/v2");
     assertThat(restClient.at("/Properties/jersey.config.client.readTimeout").asString()).isEqualTo("60000");
     // should have JsonFeature by default
-    assertThat(restClient.at("/Features").valueStream().map(JsonNode::asString)).contains("ch.ivyteam.ivy.rest.client.mapper.JsonFeature");
+    assertThat(restClient.at("/Features").valueStream().map(JsonNode::asString))
+        .contains("ch.ivyteam.ivy.rest.client.mapper.JsonFeature");
     assertThat(config.resolve("rest-clients.yaml")).content().doesNotContain("\t");
 
     assertThat(spans)
@@ -629,15 +640,18 @@ public class CopilotIntegrationTest {
         """);
     var config = rt.ivyWorkspace().path().resolve("purchase/config");
 
-    var webServiceClient = assertThat(readYaml(config.resolve("webservice-clients.yaml")).path("WebServiceClients").propertyStream())
+    var webServiceClient = assertThat(
+        readYaml(config.resolve("webservice-clients.yaml")).path("WebServiceClients").propertyStream())
         .filteredOn(entry -> entry.getKey().matches("(?i).*(erp|booking).*"))
         .first().satisfies(entry -> assertThat(entry.getKey()).matches("[A-Za-z0-9_-]+"))
         .actual().getValue();
     assertThat(webServiceClient.at("/Codegen/WsdlUrl").asString()).isEqualTo("https://erp.acme.com/booking?wsdl");
-    assertThat(webServiceClient.at("/Endpoints/BookingPort/0").asString()).isEqualTo("https://erp.acme.com/booking/soap");
+    assertThat(webServiceClient.at("/Endpoints/BookingPort/0").asString())
+        .isEqualTo("https://erp.acme.com/booking/soap");
     assertThat(webServiceClient.at("/Properties/proxy.host").asString()).isEqualTo("proxy.acme.com");
     assertThat(webServiceClient.at("/Properties/proxy.port").asString()).isEqualTo("3128");
-    assertThat(webServiceClient.at("/Features").valueStream().map(JsonNode::asString)).contains("ch.ivyteam.ivy.webservice.exec.cxf.feature.ProxyFeature");
+    assertThat(webServiceClient.at("/Features").valueStream().map(JsonNode::asString))
+        .contains("ch.ivyteam.ivy.webservice.exec.cxf.feature.ProxyFeature");
     assertThat(config.resolve("webservice-clients.yaml")).content().doesNotContain("\t");
 
     assertThat(spans)
@@ -670,7 +684,8 @@ public class CopilotIntegrationTest {
 
     assertThat(spans)
         .loadedSkill("ivy-yaml-files")
-        .viewed("skills/ivy-yaml-files/schemas/config/databases.json", "skills/ivy-yaml-files/schemas/config/persistence.json")
+        .viewed("skills/ivy-yaml-files/schemas/config/databases.json",
+            "skills/ivy-yaml-files/schemas/config/persistence.json")
         .didNotUseTools("web_fetch", "web_search")
         .usedTokensBelow(200_000, 4_000);
   }
