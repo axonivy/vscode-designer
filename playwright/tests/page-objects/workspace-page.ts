@@ -108,15 +108,6 @@ export class WorkspacePage {
     }).toPass();
   }
 
-  async expectTestsToPass(timeout = 120_000) {
-    const editor = this.page.locator('.editor-group-container.active');
-    const failed = editor.locator('.codicon-testing-failed-icon, .codicon-testing-error-icon');
-    const anyOutcome = editor.locator('.codicon-testing-passed-icon, .codicon-testing-failed-icon, .codicon-testing-error-icon');
-    await expect(anyOutcome.first(), 'no test result in editor: run never started or is still building').toBeVisible({ timeout });
-    await expect(failed).toHaveCount(0);
-    await expect(editor.locator('.codicon-testing-passed-icon').first()).toBeVisible();
-  }
-
   async hasReadyStatusMessage() {
     await this.hasStatusMessage('Axon Ivy: Connected');
   }
