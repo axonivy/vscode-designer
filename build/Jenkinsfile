@@ -15,21 +15,21 @@ pipeline {
   }
 
   parameters {
-    string(name: 'version', description: 'Version to release.')
+    string(name: 'version', defaultValue: '', description: 'Version to release.')
     booleanParam(name: 'publishToMarket', description: 'Publish to VS Code Marketplace?')
     string(name: 'milestone', description: "Optional milestone number (e.g. 31 for Milestone 31). Only enter positive integers. Unset or empty publishes as a normal non-milestone release with the date timestamp.")
   }
 
   stages {
     stage('Validate preparations') {
-      when {
-        expression { params.publishToMarket }
-      }
       steps {
         script {
-          assertReleaseBranch(env.BRANCH_NAME)
+          if (params.publishToMarket) {
+            assertReleaseBranch(env.BRANCH_NAME)
+          }
           assertReleaseVersionFormat(params.version)
           assertReleaseVersionMatchesExtensionVersion(params.version)
+          currentBuild.description = !params.publishToMarket ? "Dry run (${params.version})" : params.version
         }
       }
     }
@@ -37,7 +37,6 @@ pipeline {
     stage('Build') {
       steps {
         script {
-          currentBuild.description = params.publishToMarket ? params.version : 'Dry run'
           catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
             sh 'pnpm install && pnpm run update:axonivy:next'
             sh 'pnpm run build:production'
