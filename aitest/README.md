@@ -77,6 +77,7 @@ The tests report token usage from Aspire spans, assert tool calls where applicab
       ```bash
       echo "testcontainers.reuse.enable=true" >> ~/.testcontainers.properties
       ```
+   3.  **Workspace behavior:** When reuse is disabled, each test class gets a fresh workspace copied from `ivy-template` and its containers are stopped afterward. With reuse enabled, the existing workspace is preserved between classes so the long-running VS Code container does not have to recover from out-of-band file deletions; the fixture is copied if the workspace is missing.
 
 ## ❤️‍🩹 Troubleshooting
 

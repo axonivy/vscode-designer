@@ -29,33 +29,33 @@ public class AgentRuntime {
   private static final String NETWORK_NAME = "smart-test-network";
 
   /*
-  * Reuse containers between test runs to speed up development.
-  * Enabled by default for local development, disabled in CI.
-  * https://java.testcontainers.org/features/reuse/
-  */
-  static boolean reuseContainers = Boolean.parseBoolean(System.getenv().getOrDefault("TESTCONTAINERS_REUSE_ENABLE", Boolean.TRUE.toString()));
+   * Reuse containers between test runs to speed up development.
+   * Enabled by default for local development, disabled in CI.
+   * https://java.testcontainers.org/features/reuse/
+   */
+  static boolean reuseContainers = Boolean
+      .parseBoolean(System.getenv().getOrDefault("TESTCONTAINERS_REUSE_ENABLE", Boolean.TRUE.toString()));
 
-  static List<GenericContainer<?>> containers = new ArrayList<>();
+  private final List<GenericContainer<?>> containers = new ArrayList<>();
 
-  static Copilot copilot;
-  static AspireAPI aspireApi;
-  static Path ivyWorkspace;
-  static Path userData;
+  private Copilot copilot;
+  private AspireAPI aspireApi;
+  private Path ivyWorkspace;
+  private Path userData;
 
-  static AiTestReport reporter = new AiTestReport();
-  static MarkdownReporter markdown;
-  static IvyEngine ivyEngine;
+  private final AiTestReport reporter = new AiTestReport();
+  private MarkdownReporter markdown;
+  private IvyEngine ivyEngine;
 
   private String currentTest;
-
 
   public void start() {
     System.out.println("Container reuse: " + reuseContainers);
     ensureNetworkExists();
-    
+
     Path workspaceRoot = findWorkspaceRoot();
     Path extensionDir = workspaceRoot.resolve("extension");
-    ivyWorkspace = new IvyWorkspaceSetup(workspaceRoot).initialize();
+    ivyWorkspace = new IvyWorkspaceSetup(workspaceRoot).initialize(!reuseContainers);
     Path mcp = workspaceRoot.resolve("aitest/mcp.sh");
     userData = workspaceRoot.resolve("ci-user-data");
     Path vscodeCache = workspaceRoot.resolve(".vscode-test");
@@ -67,14 +67,15 @@ public class AgentRuntime {
     }
 
     String javaHome = System.getenv("JAVA_HOME");
-    var designerMcpContainer = new DesignerMcpContainer(ivyWorkspace, extensionDir, userData, vscodeCache, javaHome, mcp);
+    var designerMcpContainer = new DesignerMcpContainer(ivyWorkspace, extensionDir, userData, vscodeCache, javaHome,
+        mcp);
     startContainer(designerMcpContainer);
-    
+
     var aspireContainer = new AspireContainer();
     startContainer(aspireContainer);
     aspireApi = AspireAPI.create("http://" + aspireContainer.getHost() + ":" + aspireContainer.getMappedPort(18888));
     System.out.println("Aspire dashboard bound: " + aspireApi);
-    
+
     var copilotSkills = extensionDir.resolve("src/ai/skills");
     var copilotContainer = new CopilotContainer(ivyWorkspace, userData, copilotSkills);
     copilot = new Copilot(copilotContainer);
@@ -151,7 +152,8 @@ public class AgentRuntime {
     if (ivyEngine != null) {
       return ivyEngine;
     }
-    Path engines = userData.resolve("User").resolve("globalStorage").resolve("axonivy.vscode-designer-14").resolve("engines");
+    Path engines = userData.resolve("User").resolve("globalStorage").resolve("axonivy.vscode-designer-14")
+        .resolve("engines");
     var engineDirs = engines.toFile().listFiles();
     if (engineDirs == null || engineDirs.length == 0) {
       throw new IllegalStateException("No Ivy engines found under " + engines);
