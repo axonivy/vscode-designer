@@ -28,9 +28,11 @@ public class UiTest {
   @Order(Complexity.COMPOSITE)
   void formDialog(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
-        create a new dialog 'OrderForm' in 'purchase' project.
+        First create a data class 'User' in the 'purchase' project
+        with the fields 'fullName', 'address', 'phone' (text) and 'age' (integer).
+        Then create a new dialog 'OrderForm' in 'purchase' project.
         The form lets the user enter an order: 'product' (text), 'quantity' (number) and 'deliveryDate' (date),
-        and the 'customer' as the existing data class 'User' with all its fields.
+        and the 'customer' as the data class 'User' created above, with all its fields.
         Each input is bound to the dialog data.
         """);
 
@@ -61,10 +63,11 @@ public class UiTest {
 
     assertThat(spans)
         .as("Must use create-tool for initial correct creation; then the skill to edit the form")
-        .usedTools("skill", "axonivy-designer-new_axon_ivy_dialog")
+        .usedTools("skill", "axonivy-designer-new_axon_ivy_data_class", "axonivy-designer-new_axon_ivy_dialog")
         .loadedSkill("ivy-ui")
         .calledToolWithout("axonivy-designer-new_axon_ivy_dialog", "namespace") // no guessed namespace
-        .viewed("skills/ivy-json-files/schemas/project/form.json")
+        .viewed("skills/ivy-json-files/schemas/project/data-class.json",
+            "skills/ivy-json-files/schemas/project/form.json")
         .didNotUseTools("web_fetch", "web_search");
   }
 
@@ -199,9 +202,11 @@ public class UiTest {
   @Order(Complexity.COMPOSITE)
   void jsfDialog(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
-        create a new JSF dialog 'OrderOverview' in 'purchase' project.
+        First create a data class 'User' in the 'purchase' project
+        with the fields 'fullName', 'address', 'phone' (text) and 'age' (integer).
+        Then create a new JSF dialog 'OrderOverview' in 'purchase' project.
         The view lets the user enter an order: 'product' (text), 'quantity' (number) and 'deliveryDate' (date),
-        and the 'customer' as the existing data class 'User' with all its fields.
+        and the 'customer' as the data class 'User' created above, with all its fields.
         Each input is bound to the dialog data.
         """);
 
@@ -226,7 +231,7 @@ public class UiTest {
 
     assertThat(spans)
         .as("Must use create-tool for initial correct creation; then the skill to edit the data class")
-        .usedTools("skill", "axonivy-designer-new_axon_ivy_dialog")
+        .usedTools("skill", "axonivy-designer-new_axon_ivy_data_class", "axonivy-designer-new_axon_ivy_dialog")
         .loadedSkill("ivy-ui")
         .calledToolWithout("axonivy-designer-new_axon_ivy_dialog", "namespace") // no guessed namespace
         .viewed("skills/ivy-json-files/schemas/project/data-class.json")
