@@ -2,6 +2,7 @@ import path from 'path';
 import {
   Diagnostic,
   DiagnosticSeverity,
+  EventEmitter,
   l10n,
   languages,
   Uri,
@@ -20,6 +21,8 @@ const DIAGNOSTIC_SOURCE = 'Axon Ivy Java Classpath';
 
 export class JavaClassPathReader {
   private static _instance: JavaClassPathReader;
+  private static readonly _onDidReadAndValidate = new EventEmitter<void>();
+  static readonly onDidReadAndValidate = JavaClassPathReader._onDidReadAndValidate.event;
   private readonly diagnostics: DiagnosticCollection;
   private classpathListener?: Disposable;
   private projectsImportListener?: Disposable;
@@ -45,7 +48,10 @@ export class JavaClassPathReader {
   }
 
   private async queuedReadAndValidate() {
-    const scan = this.scanQueue.then(() => this.readAndValidate());
+    const scan = this.scanQueue.then(async () => {
+      await this.readAndValidate();
+      JavaClassPathReader._onDidReadAndValidate.fire();
+    });
     this.scanQueue = scan.catch(error => {
       logErrorMessage(`Failed to read and validate Java classpath, ${error}`);
     });
