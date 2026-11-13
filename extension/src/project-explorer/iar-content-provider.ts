@@ -15,6 +15,25 @@ import {
 export const IAR_CONTENT_SCHEME = 'axonivy-iar-content';
 const IVY_CONTENT_PATH = 'META-INF/ivy';
 
+const resolveIarContentUri = (uri: Uri) => {
+  const archivePath = new URLSearchParams(uri.query).get('archive');
+  if (!archivePath) {
+    throw FileSystemError.FileNotFound(uri);
+  }
+  const segments = uri.path.split('/').filter(Boolean).slice(1);
+  if (segments.some(segment => segment === '..' || segment === '.' || segment.includes('\\') || segment.includes('\0'))) {
+    throw FileSystemError.NoPermissions(uri);
+  }
+  const relativePath = segments.join('/');
+  const entryPath = relativePath ? path.posix.join(IVY_CONTENT_PATH, relativePath) : IVY_CONTENT_PATH;
+  return { archivePath, entryPath };
+};
+
+export const iarContentEngineFileName = (uri: Uri) => {
+  const { archivePath, entryPath } = resolveIarContentUri(uri);
+  return `${archivePath}!/${entryPath}`;
+};
+
 export const iarContentUri = (archivePath: string, entryPath: string) => {
   const contentPath = entryPath.replace(/^META-INF\/ivy\/?/, '');
   const uriPath = [path.basename(archivePath), ...contentPath.split('/').filter(Boolean)]
@@ -152,18 +171,12 @@ export class IarContentFileSystemProvider implements FileSystemProvider {
     throw FileSystemError.NoPermissions(oldUri);
   }
 
+  tranformToAbsoluteUri(uri: Uri) {
+    return Uri.parse(iarContentEngineFileName(uri));
+  }
+
   private resolveUri(uri: Uri) {
-    const archivePath = new URLSearchParams(uri.query).get('archive');
-    if (!archivePath) {
-      throw FileSystemError.FileNotFound(uri);
-    }
-    const segments = uri.path.split('/').filter(Boolean).slice(1);
-    if (segments.some(segment => segment === '..' || segment === '.' || segment.includes('\\') || segment.includes('\0'))) {
-      throw FileSystemError.NoPermissions(uri);
-    }
-    const relativePath = segments.join('/');
-    const entryPath = relativePath ? path.posix.join(IVY_CONTENT_PATH, relativePath) : IVY_CONTENT_PATH;
-    return { archivePath, entryPath };
+    return resolveIarContentUri(uri);
   }
 
   private localPath(archivePath: string, entryPath: string) {
