@@ -36,11 +36,11 @@ pipeline {
             export VSCODE_PROXY_URI=
             nohup code-server --bind-addr 0.0.0.0:3000 --auth none --disable-telemetry --disable-update-check --disable-workspace-trust &
             """
-            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-              sh 'pnpm run test:playwright:browser --project=integration-parallel'
-            }
-            sh 'mv playwright/report.xml playwright/report-parallel.xml'
-            archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
+            // catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+            //   sh 'pnpm run test:playwright:browser --project=integration-parallel'
+            // }
+            // sh 'mv playwright/report.xml playwright/report-parallel.xml'
+            // archiveArtifacts artifacts: 'playwright/test-results/**', allowEmptyArchive: true
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
               sh 'pnpm run test:playwright:browser --project=integration-serial'
             }

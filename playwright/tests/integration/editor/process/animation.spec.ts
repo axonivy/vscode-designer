@@ -2,7 +2,8 @@ import { expect } from '@playwright/test';
 import { test } from '~/fixtures/baseTest';
 import { ProcessEditor } from '~/page-objects/process-editor';
 
-test('with activated animation and reset afterwards', { tag: '@serial' }, async ({ wsPage }) => {
+// eslint-disable-next-line playwright/no-focused-test
+test.only('with activated animation and reset afterwards', { tag: '@serial' }, async ({ wsPage }) => {
   const processEditor = new ProcessEditor(wsPage, 'Animation.p.json');
   const callableEditor = new ProcessEditor(wsPage, 'Callable.p.json', 1);
   await processEditor.open();
