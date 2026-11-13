@@ -6,6 +6,12 @@ on:
     branches:
       - ai.*
   workflow_dispatch:
+    inputs:
+      test_unit:
+        description: Test class name without .java, e.g. MarketTest, ConfigurationTest, or UiTest. Leave empty to run all.
+        type: string
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -46,10 +52,15 @@ jobs:
         run: |
           export HOST_UID="$(id -u)"
           export HOST_GID="$(id -g)"
-          mvn clean verify -f aitest/pom.xml -ntp -fail-at-end
+          maven_args=(-f aitest/pom.xml -ntp -fail-at-end)
+          if [[ -n "$TEST_UNIT" ]]; then
+            maven_args+=("-Dtest=$TEST_UNIT" "-Dsurefire.failIfNoSpecifiedTests=false")
+          fi
+          mvn clean verify "${maven_args[@]}"
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_TOKEN }}
           TESTCONTAINERS_REUSE_ENABLE: 'false'
+          TEST_UNIT: ${{ inputs.test_unit }}
       - name: Print AI test report
         if: always()
         run: |
