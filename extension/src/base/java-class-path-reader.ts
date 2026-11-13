@@ -25,9 +25,11 @@ export class JavaClassPathReader {
   private projectsImportListener?: Disposable;
   private scanQueue: Promise<void> = Promise.resolve();
   private isInitialCall = true;
+  private iarsPerProject: Map<string, Map<string, string>>;
 
   private constructor(context: ExtensionContext) {
     this.diagnostics = languages.createDiagnosticCollection(DIAGNOSTIC_SOURCE);
+    this.iarsPerProject = new Map<string, Map<string, string>>();
     context.subscriptions.push(this.diagnostics, this);
     const debouncedReadAndValidate = debouncedAction(() => this.queuedReadAndValidate(), 'readJavaClassPath');
     onDidProjectsImport(debouncedReadAndValidate).then(disposable => (this.projectsImportListener = disposable));
@@ -63,6 +65,7 @@ export class JavaClassPathReader {
       iarsPerProject.set(project, this.parseIars(iars));
       allClassPathIars.push(...iars);
     }
+    this.iarsPerProject = iarsPerProject;
     const versionsPerArtifact = new Map<string, Set<string>>();
     for (const iars of iarsPerProject.values()) {
       for (const [key, version] of iars) {
@@ -93,6 +96,10 @@ export class JavaClassPathReader {
       return;
     }
     await this.deployDependencies(allClassPathIars);
+  }
+
+  public getIarsPerProject() {
+    return this.iarsPerProject;
   }
 
   private async deployDependencies(allClassPathIars: string[]) {

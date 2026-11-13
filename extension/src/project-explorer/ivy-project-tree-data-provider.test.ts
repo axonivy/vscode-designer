@@ -10,7 +10,7 @@ import { IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
 const mocks = vi.hoisted(() => ({
   findWorkspaceProjects: vi.fn(),
   findEngineProjects: vi.fn(),
-  dependencyVersionOf: vi.fn()
+  getIarsPerProject: vi.fn()
 }));
 
 vi.mock('vscode', () => {
@@ -94,7 +94,9 @@ vi.mock('vscode', () => {
 });
 
 vi.mock('../engine/diagnostics', () => ({ IvyDiagnostics: { instance: { projectFileUrisToBeConverted: () => [] } } }));
-vi.mock('./utils/util', () => ({ dependencyVersionOf: mocks.dependencyVersionOf }));
+vi.mock('../base/java-class-path-reader', () => ({
+  JavaClassPathReader: { instance: { getIarsPerProject: mocks.getIarsPerProject } }
+}));
 
 let directory: string;
 let archivePath: string;
@@ -125,7 +127,9 @@ beforeEach(() => {
       projectDirectory: archivePath
     }
   ]);
-  mocks.dependencyVersionOf.mockResolvedValue('2.1.0');
+  mocks.getIarsPerProject.mockReturnValue(
+    new Map([['/workspace/local', new Map([['/maven/repository/com/example/shared-project', '2.1.0']])]])
+  );
 });
 
 afterEach(() => {
@@ -161,12 +165,13 @@ test('lists IAR projects below each workspace project in a read-only section', a
   expect((dependencies[0]?.iconPath as ThemeIcon).id).toBe('lock');
   expect((dependencies[0]?.iconPath as ThemeIcon).color).toBeUndefined();
   expect(dependencies[0]?.tooltip).toBe('com.example:shared-project:2.1.0');
-  expect(mocks.dependencyVersionOf).toHaveBeenCalledWith('/workspace/local', 'com.example', 'shared-project');
   expect(provider.getTreeItem(dependencies[0]!).contextValue).toBeUndefined();
 });
 
 test('marks IAR dependencies red when the POM version differs', async () => {
-  mocks.dependencyVersionOf.mockResolvedValue('2.0.0');
+  mocks.getIarsPerProject.mockReturnValue(
+    new Map([['/workspace/local', new Map([['/maven/repository/com/example/shared-project', '2.0.0']])]])
+  );
   const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
   const [workspaceProject] = await provider.getChildren();
   const [iarGroup] = await provider.getChildren(workspaceProject);

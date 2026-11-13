@@ -21,22 +21,6 @@ const defaultNamespaceOf = (projecDir: string) => {
   );
 };
 
-export const dependencyVersionOf = (projectDir: string, groupId: string, artifactId: string) => {
-  const pomUri = Uri.joinPath(Uri.file(projectDir), 'pom.xml');
-  return workspace.fs.readFile(pomUri).then(
-    content => {
-      const pom = new XMLParser().parse(content);
-      const dependencies = pom.project?.dependencies?.dependency;
-      const dependencyList = Array.isArray(dependencies) ? dependencies : dependencies ? [dependencies] : [];
-      const dependency = dependencyList.find((entry: { groupId?: string; artifactId?: string }) => {
-        return entry.groupId === groupId && entry.artifactId === artifactId;
-      });
-      return dependency?.version === undefined ? undefined : `${dependency.version}`;
-    },
-    () => undefined
-  );
-};
-
 export const resolveNamespaceFromPath = async (selectedUri: Uri, projectDir: string, target: ResourceDirectoryTarget) => {
   let fileStat: FileStat;
   try {

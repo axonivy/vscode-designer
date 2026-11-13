@@ -12,10 +12,10 @@ import {
   type Command as VSCodeCommand
 } from 'vscode';
 import type { KnownCommand } from '../base/commands';
+import { JavaClassPathReader } from '../base/java-class-path-reader';
 import type { ProjectBean } from '../engine/api/generated/client';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IarContentFileSystemProvider, iarContentUri } from './iar-content-provider';
-import { dependencyVersionOf } from './utils/util';
 
 const __dirname = import.meta.dirname;
 interface IvyCommand extends VSCodeCommand {
@@ -110,29 +110,12 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
       return (await this.getEngineIarDependenciesForWorkspaceProject(element.uri.fsPath)).length > 0 ? [this.createIarGroup(element)] : [];
     }
     if (element?.kind === 'iarDependencyGroup') {
-      const dependencies = element.parent ? await this.getEngineIarDependenciesForWorkspaceProject(element.parent.uri.fsPath) : [];
-      return Promise.all(
-        dependencies.map(async depProject => {
-          const depVersionProject = depProject.version;
-          const depVersionPom = element.parent
-            ? await dependencyVersionOf(element.parent.uri.fsPath, depProject.groupId, depProject.artifactId)
-            : undefined;
-          const versionsMatch = depVersionPom === depVersionProject;
-          return {
-            uri: iarContentUri(depProject.projectDirectory, 'META-INF/ivy'),
-            type: FileType.Directory,
-            label: depProject.artifactId,
-            description: versionsMatch ? depVersionProject : l10n.t('Version error'),
-            tooltip: versionsMatch
-              ? `${depProject.groupId}:${depProject.artifactId}:${depVersionProject}`
-              : l10n.t('Dependency version error. There are conflicting versions specified. Check the Problems view.'),
-            iconPath: new ThemeIcon('lock', versionsMatch ? undefined : new ThemeColor('problemsErrorIcon.foreground')),
-            collapsibleState: TreeItemCollapsibleState.Collapsed,
-            kind: 'iarDependency' as const,
-            parent: element
-          };
-        })
-      );
+      if (!element.parent) {
+        return [];
+      }
+      const projectPath = element.parent.uri.fsPath;
+      const dependencies = element.parent ? await this.getEngineIarDependenciesForWorkspaceProject(projectPath) : [];
+      return Promise.all(dependencies.map(depProject => this.getIarDependency(projectPath, element, depProject)));
     }
     if (element?.kind === 'iarDependency' || element?.kind === 'iarContentDirectory') {
       return this.getIarContentChildren(element);
@@ -146,6 +129,29 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
         this.createAndCacheRoot(dir, (await this.getEngineIarDependenciesForWorkspaceProject(dir)).length > 0)
       )
     );
+  }
+
+  private async getIarDependency(projectPath: string, parent: Entry, depProject: ProjectBean): Promise<Entry> {
+    const depVersionEngine = depProject.version;
+    const depRelPath = `${depProject.groupId.replaceAll('.', '/')}/${depProject.artifactId}`;
+    const depVersionPom = [...(JavaClassPathReader.instance.getIarsPerProject().get(projectPath) ?? [])].find(([iarPath]) =>
+      iarPath.endsWith(depRelPath)
+    )?.[1];
+    // If we cannot resolve the POM version, we do not assume we have an error
+    const versionsMatch = depVersionPom ? depVersionPom === depVersionEngine : true;
+    return {
+      uri: iarContentUri(depProject.projectDirectory, 'META-INF/ivy'),
+      type: FileType.Directory,
+      label: depProject.artifactId,
+      description: versionsMatch ? depVersionEngine : l10n.t('Version error'),
+      tooltip: versionsMatch
+        ? `${depProject.groupId}:${depProject.artifactId}:${depVersionEngine}`
+        : l10n.t('Dependency version error. There are conflicting versions specified. Check the Problems view.'),
+      iconPath: new ThemeIcon('lock', versionsMatch ? undefined : new ThemeColor('problemsErrorIcon.foreground')),
+      collapsibleState: TreeItemCollapsibleState.Collapsed,
+      kind: 'iarDependency',
+      parent
+    };
   }
 
   private getEngineProjects() {
