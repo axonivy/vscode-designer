@@ -33,10 +33,15 @@ vi.mock('./new-dialog', () => ({
   createNewDialog: mockCreateNewDialog
 }));
 
+vi.mock('./import-market-product', () => ({
+  ImportMarketProductTool: vi.fn(),
+  importMarketProduct: vi.fn().mockResolvedValue('Market product imported')
+}));
+
 vi.mock('vscode', () => ({
   lm: mockLm,
   LanguageModelTextPart: class {
-    constructor(public value: string) {}
+    constructor(public value: string) { }
   },
   window: {
     createOutputChannel: vi.fn(() => mockOutputChannel)

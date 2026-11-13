@@ -81,24 +81,26 @@ public class CopilotIntegrationTest {
     var spans = rt.prompt("install the JIRA connector from the marketplace");
     assertThat(spans)
         .loadedSkill("ivy-market")
-        .usedTools("web_fetch");
-    
+        .usedTools("web_fetch")
+        .didNotUseTools("axonivy-designer-import_ivy_project");
+
     var fetchCalls = spans.usedTools().stream().filter(tool -> tool.name().equals("web_fetch")).toList();
-    assertThat(fetchCalls.getFirst().arguments())
-      .contains("https://market.axonivy.com/stable/api/product\"");
-    assertThat(fetchCalls.getLast().arguments())
-      .contains("https://market.axonivy.com/stable/api/product/jira-connector/install");
+    assertThat(fetchCalls)
+        .anySatisfy(call -> assertThat(call.arguments())
+            .contains("https://market.axonivy.com/stable/api/product\""))
+        .anySatisfy(call -> assertThat(call.arguments())
+            .contains("https://market.axonivy.com/stable/api/product/jira-connector/install"));
 
     var purchase = rt.ivyWorkspace().path().resolve("purchase");
     var pom = purchase.resolve("pom.xml");
     assertThat(PomParser.dependencies(pom))
-      .as("Jira connector dependency added to pom.xml")
-      .anySatisfy(dependency -> {
-        assertThat(dependency.groupId()).isEqualTo("com.axonivy.connector.jira");
-        assertThat(dependency.artifactId()).isEqualTo("jira-connector");
-        assertThat(dependency.version()).isNotBlank();
-        assertThat(dependency.type()).isEqualTo("iar");
-      });
+        .as("Jira connector dependency added to pom.xml")
+        .anySatisfy(dependency -> {
+          assertThat(dependency.groupId()).isEqualTo("com.axonivy.connector.jira");
+          assertThat(dependency.artifactId()).isEqualTo("jira-connector");
+          assertThat(dependency.version()).isNotBlank();
+          assertThat(dependency.type()).isEqualTo("iar");
+        });
   }
 
   @Test
@@ -107,26 +109,70 @@ public class CopilotIntegrationTest {
     var spans = rt.prompt("install smart-workflow agent with anthropic.");
     assertThat(spans)
         .loadedSkill("ivy-market")
-        .usedTools("web_fetch");
+        .usedTools("web_fetch")
+        .didNotUseTools("axonivy-designer-import_ivy_project");
 
-    var fetchCalls = spans.usedTools().stream().filter(tool -> tool.name().equals("web_fetch")).toList();
-    assertThat(fetchCalls.getFirst().arguments())
-        .contains("https://market.axonivy.com/stable/api/product\"");
-    assertThat(fetchCalls)
+    var apiCalls = spans.usedTools().stream().filter(call -> call.arguments() != null).toList();
+    assertThat(apiCalls)
+        .anyMatch(call -> call.arguments().contains("https://market.axonivy.com/stable/api/product\""));
+    assertThat(apiCalls)
         .as("resolves the product version for the project's Ivy version")
-        .anySatisfy(call -> assertThat(call.arguments())
-            .contains("/bestmatch?isShowDevVersion=true"));
-    assertThat(fetchCalls.getLast().arguments())
-        .contains("https://market.axonivy.com/stable/api/product/smart-workflow/install?productVersion=");
+        .anyMatch(call -> call.arguments().contains("/bestmatch?isShowDevVersion=true"));
+    assertThat(apiCalls)
+        .anyMatch(call -> call.arguments().contains("/product/smart-workflow/install?productVersion="));
 
     var purchase = rt.ivyWorkspace().path().resolve("purchase");
     var pom = purchase.resolve("pom.xml");
     var deps = PomParser.dependencies(pom).stream()
-      .filter(d -> d.groupId().equals("com.axonivy.utils.ai"))
-      .toList();
+        .filter(d -> d.groupId().equals("com.axonivy.utils.ai"))
+        .toList();
     assertThat(deps).extracting(Dependency::artifactId)
-      .containsOnly("smart-workflow", "smart-workflow-anthropic");
+        .containsOnly("smart-workflow", "smart-workflow-anthropic");
+  }
 
+  @Test
+  @Order(Complexity.HEAVY)
+  void market_install_import(AgentRuntime rt) throws Exception {
+    var spans = rt.prompt("""
+        Install the `connectivity-demos` from the marketplace into my workspace.
+        """);
+    assertThat(spans)
+        .loadedSkill("ivy-market")
+        .usedTools("axonivy-designer-import_market_product");
+
+    var toolCalls = spans.usedTools();
+    var apiCalls = toolCalls.stream().filter(call -> call.arguments() != null).toList();
+    assertThat(apiCalls)
+        .anyMatch(call -> call.arguments().contains("/product-details/connectivity-demo/"))
+        .anyMatch(call -> call.arguments().contains("/product/connectivity-demo/install?productVersion="));
+
+    var importCall = toolCalls.stream()
+        .filter(call -> call.name().equals("axonivy-designer-import_market_product"))
+        .findFirst().orElseThrow();
+    assertThat(importCall.arguments())
+        .contains("\"productId\":[\"connectivity-demos\"]")
+        .contains("connectivity-demos")
+        .doesNotContain("filePath", "targetPath");
+
+    var workspace = rt.ivyWorkspace().path();
+    var demo = workspace.resolve("connectivity-demos");
+    assertThat(demo.resolve(".ivyproject"))
+        .as("Market import result: %s; Copilot response: %s", importCall.result(), spans.outputMessage())
+        .exists();
+    assertThat(demo.resolve("pom.xml")).exists();
+    assertThat(demo.resolve("process/soap/client/personClient.p.json")).exists();
+    assertThat(demo.resolve("META-INF"))
+        .as("Project was properly unwrapped from META-INF/ivy")
+        .doesNotExist();
+    assertThat(workspace.resolve("connectivity-demos-test"))
+        .as("No other artifact from import-installer were imported.")
+        .doesNotExist();
+
+    var purchasePom = workspace.resolve("purchase/pom.xml");
+    assertThat(PomParser.dependencies(purchasePom))
+        .extracting(Dependency::artifactId)
+        .as("Import install was added to workspace, not set as pom.xml dependency")
+        .doesNotContain("connectivity-demos");
   }
 
   @Test
@@ -145,7 +191,9 @@ public class CopilotIntegrationTest {
 
     assertThat(spans.tools().names())
         .as("tools from vscode-designer MCP are propagated to harness")
-        .contains("axonivy-designer-new_axon_ivy_project");
+        .contains(
+            "axonivy-designer-new_axon_ivy_project",
+            "axonivy-designer-import_market_product");
     assertThat(spans).usedTokensBelow(150_000, 10_000);
   }
 
