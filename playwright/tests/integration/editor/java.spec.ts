@@ -2,8 +2,7 @@ import { expect, test } from '~/fixtures/baseTest';
 import { TextEditor } from '~/page-objects/editor';
 import { ProcessEditor } from '~/page-objects/process-editor';
 
-// eslint-disable-next-line playwright/no-focused-test
-test.only('Compile java and invalidate class loader', { tag: '@serial' }, async ({ wsPage }) => {
+test('Compile java and invalidate class loader', { tag: '@serial' }, async ({ wsPage }) => {
   test.setTimeout(60_000); // slow test due to java activation
   const processEditor = new ProcessEditor(wsPage, 'CallJavaMethod.p.json');
   await processEditor.open();
