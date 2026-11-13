@@ -6,7 +6,6 @@ import { embeddedEngineWorkspace, minimalProjectWorkspacePath } from '../workspa
 
 test.describe('Engine started by extension', () => {
   test.use({ workspace: embeddedEngineWorkspace });
-    test.skip(process.env.RUN_IN_BROWSER === 'true');
 
   test('Engine is terminated with extension reload', { tag: '@serial' }, async ({ wsPage }) => {
     const outputview = new OutputView(wsPage);
