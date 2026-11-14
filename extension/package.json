@@ -991,6 +991,25 @@
         },
         "canBeReferencedInPrompt": true,
         "toolReferenceName": "importMarketProduct"
+      },
+      {
+        "name": "convert_dialog_form_to_jsf",
+        "displayName": "%command.convertDialogFormToJsf%",
+        "modelDescription": "Converts an existing Axon Ivy Dialog Form (.f.json) to JSF (.xhtml), preserving its data class and process. One-way: overwrites matching dialog files and deletes the Form JSON. Returns the XHTML path. For new dialogs, use new_axon_ivy_dialog.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "formPath": {
+              "type": "string",
+              "description": "Absolute filesystem path to the existing source .f.json file inside a workspace Axon Ivy project's dialog directory."
+            }
+          },
+          "required": [
+            "formPath"
+          ]
+        },
+        "canBeReferencedInPrompt": true,
+        "toolReferenceName": "axonIvyDialogConvertFormToJsf"
       }
     ],
     "viewsContainers": {
