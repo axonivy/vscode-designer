@@ -2,6 +2,7 @@ import path from 'path';
 import {
   Diagnostic,
   DiagnosticSeverity,
+  EventEmitter,
   l10n,
   languages,
   Uri,
@@ -20,14 +21,18 @@ const DIAGNOSTIC_SOURCE = 'Axon Ivy Java Classpath';
 
 export class JavaClassPathReader {
   private static _instance: JavaClassPathReader;
+  private static readonly _onDidReadAndValidate = new EventEmitter<void>();
+  static readonly onDidReadAndValidate = JavaClassPathReader._onDidReadAndValidate.event;
   private readonly diagnostics: DiagnosticCollection;
   private classpathListener?: Disposable;
   private projectsImportListener?: Disposable;
   private scanQueue: Promise<void> = Promise.resolve();
   private isInitialCall = true;
+  private iarsPerProject: Map<string, Map<string, string>>;
 
   private constructor(context: ExtensionContext) {
     this.diagnostics = languages.createDiagnosticCollection(DIAGNOSTIC_SOURCE);
+    this.iarsPerProject = new Map<string, Map<string, string>>();
     context.subscriptions.push(this.diagnostics, this);
     const debouncedReadAndValidate = debouncedAction(() => this.queuedReadAndValidate(), 'readJavaClassPath');
     onDidProjectsImport(debouncedReadAndValidate).then(disposable => (this.projectsImportListener = disposable));
@@ -43,7 +48,10 @@ export class JavaClassPathReader {
   }
 
   private async queuedReadAndValidate() {
-    const scan = this.scanQueue.then(() => this.readAndValidate());
+    const scan = this.scanQueue.then(async () => {
+      await this.readAndValidate();
+      JavaClassPathReader._onDidReadAndValidate.fire();
+    });
     this.scanQueue = scan.catch(error => {
       logErrorMessage(`Failed to read and validate Java classpath, ${error}`);
     });
@@ -63,6 +71,7 @@ export class JavaClassPathReader {
       iarsPerProject.set(project, this.parseIars(iars));
       allClassPathIars.push(...iars);
     }
+    this.iarsPerProject = iarsPerProject;
     const versionsPerArtifact = new Map<string, Set<string>>();
     for (const iars of iarsPerProject.values()) {
       for (const [key, version] of iars) {
@@ -95,6 +104,10 @@ export class JavaClassPathReader {
     await this.deployDependencies(allClassPathIars);
   }
 
+  public getIarsPerProject() {
+    return this.iarsPerProject;
+  }
+
   private async deployDependencies(allClassPathIars: string[]) {
     const uniqueIars = Array.from(new Set(allClassPathIars));
     await IvyEngineManager.instance.deployIarProjects(uniqueIars);
@@ -117,5 +130,12 @@ export class JavaClassPathReader {
   dispose() {
     this.classpathListener?.dispose();
     this.projectsImportListener?.dispose();
+  }
+
+  static get instance() {
+    if (JavaClassPathReader._instance) {
+      return JavaClassPathReader._instance;
+    }
+    throw new Error('JavaClassPathReader has not been initialized');
   }
 }

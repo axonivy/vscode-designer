@@ -3,13 +3,14 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import { FileType, ThemeIcon, TreeItemCollapsibleState, Uri, type FileSystemProvider } from 'vscode';
+import { FileType, ThemeColor, ThemeIcon, TreeItemCollapsibleState, Uri, type FileSystemProvider } from 'vscode';
 import { IarContentFileSystemProvider, iarContentUri } from './iar-content-provider';
 import { IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
 
 const mocks = vi.hoisted(() => ({
   findWorkspaceProjects: vi.fn(),
-  findEngineProjects: vi.fn()
+  findEngineProjects: vi.fn(),
+  getIarsPerProject: vi.fn()
 }));
 
 vi.mock('vscode', () => {
@@ -31,6 +32,12 @@ vi.mock('vscode', () => {
     ) {}
   }
   class ThemeIcon {
+    constructor(
+      public id: string,
+      public color?: unknown
+    ) {}
+  }
+  class ThemeColor {
     constructor(public id: string) {}
   }
   class Range {
@@ -69,6 +76,7 @@ vi.mock('vscode', () => {
     EventEmitter,
     FileSystemError,
     FileType: { File: 1, Directory: 2 },
+    ThemeColor,
     Range,
     ThemeIcon,
     TreeItem,
@@ -86,6 +94,9 @@ vi.mock('vscode', () => {
 });
 
 vi.mock('../engine/diagnostics', () => ({ IvyDiagnostics: { instance: { projectFileUrisToBeConverted: () => [] } } }));
+vi.mock('../base/java-class-path-reader', () => ({
+  JavaClassPathReader: { instance: { getIarsPerProject: mocks.getIarsPerProject } }
+}));
 
 let directory: string;
 let archivePath: string;
@@ -105,7 +116,8 @@ beforeEach(() => {
       groupId: 'com.example',
       id: { id: 'workspace-project', isIar: false },
       version: '1.0.0',
-      projectDirectory: '/workspace/local'
+      projectDirectory: '/workspace/local',
+      dependencies: [{ id: 'shared-project' }]
     },
     {
       artifactId: 'shared-project',
@@ -115,21 +127,33 @@ beforeEach(() => {
       projectDirectory: archivePath
     }
   ]);
+  mocks.getIarsPerProject.mockReturnValue(
+    new Map([['/workspace/local', new Map([['/maven/repository/com/example/shared-project', '2.1.0']])]])
+  );
 });
 
 afterEach(() => {
   fs.rmSync(directory, { recursive: true, force: true });
 });
 
-test('lists IAR projects in a separate read-only section', async () => {
+test('lists IAR projects below each workspace project in a read-only section', async () => {
   const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
 
   const roots = await provider.getChildren();
-  expect(roots.map(entry => entry.kind)).toEqual(['workspaceProject', 'iarDependencyGroup']);
-  expect(roots[1]?.label).toBe('IAR Dependencies');
-  expect(roots[1]?.collapsibleState).toBe(TreeItemCollapsibleState.Collapsed);
+  expect(roots.map(entry => entry.kind)).toEqual(['workspaceProject']);
+  expect(roots[0]?.collapsibleState).toBe(TreeItemCollapsibleState.Collapsed);
 
-  const dependencies = await provider.getChildren(roots[1]);
+  const [iarGroup] = await provider.getChildren(roots[0]);
+  expect(iarGroup).toMatchObject({
+    label: 'IAR Dependencies',
+    kind: 'iarDependencyGroup',
+    collapsibleState: TreeItemCollapsibleState.Collapsed,
+    parent: roots[0]
+  });
+  expect(iarGroup?.iconPath).toBeInstanceOf(ThemeIcon);
+  expect((iarGroup?.iconPath as ThemeIcon).id).toBe('library');
+
+  const dependencies = await provider.getChildren(iarGroup);
   expect(dependencies).toHaveLength(1);
   expect(dependencies[0]).toMatchObject({
     label: 'shared-project',
@@ -139,12 +163,74 @@ test('lists IAR projects in a separate read-only section', async () => {
   });
   expect(dependencies[0]?.iconPath).toBeInstanceOf(ThemeIcon);
   expect((dependencies[0]?.iconPath as ThemeIcon).id).toBe('lock');
+  expect((dependencies[0]?.iconPath as ThemeIcon).color).toBeUndefined();
+  expect(dependencies[0]?.tooltip).toBe('com.example:shared-project:2.1.0');
   expect(provider.getTreeItem(dependencies[0]!).contextValue).toBeUndefined();
+});
+
+test('marks IAR dependencies red when the POM version differs', async () => {
+  mocks.getIarsPerProject.mockReturnValue(
+    new Map([['/workspace/local', new Map([['/maven/repository/com/example/shared-project', '2.0.0']])]])
+  );
+  const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
+  const [workspaceProject] = await provider.getChildren();
+  const [iarGroup] = await provider.getChildren(workspaceProject);
+
+  const [dependency] = await provider.getChildren(iarGroup);
+
+  expect((dependency?.iconPath as ThemeIcon).color).toEqual(new ThemeColor('problemsErrorIcon.foreground'));
+  expect(dependency?.tooltip).toBe('Dependency version error. There are conflicting versions specified. Check the Problems view.');
+});
+
+test('shows the same IAR dependency below every workspace project', async () => {
+  mocks.findWorkspaceProjects.mockResolvedValue(['/workspace/p1', '/workspace/p2']);
+  const [workspaceProject, iarProject] = await mocks.findEngineProjects();
+  mocks.findEngineProjects.mockResolvedValue([
+    { ...workspaceProject, projectDirectory: '/workspace/p1' },
+    { ...workspaceProject, projectDirectory: '/workspace/p2' },
+    iarProject
+  ]);
+  const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
+
+  const roots = await provider.getChildren();
+  const groups = await Promise.all(roots.map(root => provider.getChildren(root)));
+  const dependencies = await Promise.all(groups.map(([group]) => provider.getChildren(group)));
+
+  expect(roots.map(root => root.uri.fsPath)).toEqual(['/workspace/p1', '/workspace/p2']);
+  expect(groups.map(group => group[0]?.label)).toEqual(['IAR Dependencies', 'IAR Dependencies']);
+  expect(dependencies.map(projects => projects.map(project => project.label))).toEqual([['shared-project'], ['shared-project']]);
+  expect(groups[0]?.[0]).not.toBe(groups[1]?.[0]);
+  expect(dependencies[0]?.[0]?.parent).toBe(groups[0]?.[0]);
+  expect(dependencies[1]?.[0]?.parent).toBe(groups[1]?.[0]);
+});
+
+test('does not show IAR dependencies below projects that do not declare them', async () => {
+  mocks.findWorkspaceProjects.mockResolvedValue(['/workspace/with-iar', '/workspace/without-iar']);
+  const [workspaceProject, iarProject] = await mocks.findEngineProjects();
+  mocks.findEngineProjects.mockResolvedValue([
+    { ...workspaceProject, projectDirectory: '/workspace/with-iar' },
+    {
+      ...workspaceProject,
+      artifactId: 'project-without-iar',
+      id: { id: 'project-without-iar', isIar: false },
+      projectDirectory: '/workspace/without-iar',
+      dependencies: []
+    },
+    iarProject
+  ]);
+  const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
+
+  const roots = await provider.getChildren();
+  const children = await Promise.all(roots.map(root => provider.getChildren(root)));
+
+  expect(children.map(projectChildren => projectChildren.map(child => child.label))).toEqual([['IAR Dependencies'], []]);
+  expect(roots.map(root => root.collapsibleState)).toEqual([TreeItemCollapsibleState.Collapsed, undefined]);
 });
 
 test('shows only the META-INF/ivy tree and opens files as read-only documents', async () => {
   const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
-  const [workspaceProject, iarGroup] = await provider.getChildren();
+  const [workspaceProject] = await provider.getChildren();
+  const [iarGroup] = await provider.getChildren(workspaceProject);
   const [iarDependency] = await provider.getChildren(iarGroup);
   const rootEntries = await provider.getChildren(iarDependency);
 

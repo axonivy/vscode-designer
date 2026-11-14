@@ -2,6 +2,7 @@ import path from 'path';
 import type { ExtensionContext, TreeView, TreeViewSelectionChangeEvent } from 'vscode';
 import { commands, l10n, TabInputCustom, TabInputText, Uri, window, workspace } from 'vscode';
 import { registerCommand, type KnownCommand } from '../base/commands';
+import { JavaClassPathReader } from '../base/java-class-path-reader';
 import { ensureJavaLightWeightMode } from '../base/java-extension-api';
 import { logErrorMessage, logInformationMessage } from '../base/logging-util';
 import { isWorkspaceLocked } from '../base/workspace-lock';
@@ -59,6 +60,7 @@ export class IvyProjectExplorer {
     context.subscriptions.push(this.treeView);
     this.registerCommands();
     context.subscriptions.push(
+      JavaClassPathReader.onDidReadAndValidate(() => this.treeDataProvider.refresh()),
       IvyProjectManager.instance.onDidChangeProjects(() => this.treeDataProvider.refresh()),
       IvyDiagnostics.instance.onDidRefresh(() => this.treeDataProvider.refresh())
     );

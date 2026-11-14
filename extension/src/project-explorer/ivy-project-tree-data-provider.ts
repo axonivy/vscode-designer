@@ -3,6 +3,7 @@ import {
   EventEmitter,
   FileType,
   l10n,
+  ThemeColor,
   ThemeIcon,
   TreeItem,
   TreeItemCollapsibleState,
@@ -11,6 +12,7 @@ import {
   type Command as VSCodeCommand
 } from 'vscode';
 import type { KnownCommand } from '../base/commands';
+import { JavaClassPathReader } from '../base/java-class-path-reader';
 import type { ProjectBean } from '../engine/api/generated/client';
 import { IvyDiagnostics } from '../engine/diagnostics';
 import { IarContentFileSystemProvider, iarContentUri } from './iar-content-provider';
@@ -38,7 +40,8 @@ const IVY_PROJECT_CONTEXT_VALUE = 'ivyProject';
 const IVY_PROJECT_REQUIRES_CONVERSION_CONTEXT_VALUE = 'requiresConversion';
 
 export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
-  private iarProjects?: Promise<ProjectBean[]>;
+  private engineProjects?: Promise<ProjectBean[]>;
+  private engineIarProjects?: Promise<ProjectBean[]>;
   private _onDidChangeTreeData = new EventEmitter<Entry | undefined | null>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
@@ -55,7 +58,8 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   }
 
   refresh() {
-    this.iarProjects = undefined;
+    this.engineProjects = undefined;
+    this.engineIarProjects = undefined;
     this.iarContentProvider.refresh();
     this._onDidChangeTreeData.fire(undefined);
   }
@@ -102,18 +106,16 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
   }
 
   async getChildren(element?: Entry): Promise<Entry[]> {
+    if (element?.kind === 'workspaceProject') {
+      return (await this.getEngineIarDependenciesForWorkspaceProject(element.uri.fsPath)).length > 0 ? [this.createIarGroup(element)] : [];
+    }
     if (element?.kind === 'iarDependencyGroup') {
-      return (await this.getIarProjects()).map(project => ({
-        uri: iarContentUri(project.projectDirectory, 'META-INF/ivy'),
-        type: FileType.Directory,
-        label: project.artifactId,
-        description: project.version,
-        tooltip: `${project.groupId}:${project.artifactId}:${project.version}`,
-        iconPath: new ThemeIcon('lock'),
-        collapsibleState: TreeItemCollapsibleState.Collapsed,
-        kind: 'iarDependency',
-        parent: element
-      }));
+      if (!element.parent) {
+        return [];
+      }
+      const projectPath = element.parent.uri.fsPath;
+      const dependencies = element.parent ? await this.getEngineIarDependenciesForWorkspaceProject(projectPath) : [];
+      return Promise.all(dependencies.map(depProject => this.getIarDependency(projectPath, element, depProject)));
     }
     if (element?.kind === 'iarDependency' || element?.kind === 'iarContentDirectory') {
       return this.getIarContentChildren(element);
@@ -121,17 +123,45 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
     if (element) {
       return [];
     }
-    const workspaceProjects = (await this.findWorkspaceProjects()).map(dir => this.createAndCacheRoot(dir));
-    const iarProjects = await this.getIarProjects();
-    if (iarProjects.length === 0) {
-      return workspaceProjects;
-    }
-    return [...workspaceProjects, this.createIarGroup()];
+    const projectDirectories = await this.findWorkspaceProjects();
+    return Promise.all(
+      projectDirectories.map(async dir =>
+        this.createAndCacheRoot(dir, (await this.getEngineIarDependenciesForWorkspaceProject(dir)).length > 0)
+      )
+    );
+  }
+
+  private async getIarDependency(projectPath: string, parent: Entry, depProject: ProjectBean): Promise<Entry> {
+    const depVersionEngine = depProject.version;
+    const depRelPath = `${depProject.groupId.replaceAll('.', '/')}/${depProject.artifactId}`;
+    const depVersionPom = [...(JavaClassPathReader.instance.getIarsPerProject().get(projectPath) ?? [])].find(([iarPath]) =>
+      iarPath.endsWith(depRelPath)
+    )?.[1];
+    // If we cannot resolve the POM version, we do not assume we have an error
+    const versionsMatch = depVersionPom ? depVersionPom === depVersionEngine : true;
+    return {
+      uri: iarContentUri(depProject.projectDirectory, 'META-INF/ivy'),
+      type: FileType.Directory,
+      label: depProject.artifactId,
+      description: versionsMatch ? depVersionEngine : l10n.t('Version error'),
+      tooltip: versionsMatch
+        ? `${depProject.groupId}:${depProject.artifactId}:${depVersionEngine}`
+        : l10n.t('Dependency version error. There are conflicting versions specified. Check the Problems view.'),
+      iconPath: new ThemeIcon('lock', versionsMatch ? undefined : new ThemeColor('problemsErrorIcon.foreground')),
+      collapsibleState: TreeItemCollapsibleState.Collapsed,
+      kind: 'iarDependency',
+      parent
+    };
+  }
+
+  private getEngineProjects() {
+    this.engineProjects ??= this.findEngineProjects().then(projects => projects ?? []);
+    return this.engineProjects;
   }
 
   private async getIarProjects() {
-    this.iarProjects ??= this.findEngineProjects().then(projects =>
-      (projects ?? [])
+    this.engineIarProjects ??= this.getEngineProjects().then(projects =>
+      projects
         .filter(project => project.id.isIar)
         .sort((a, b) => {
           const aCoordinate = `${a.groupId}:${a.artifactId}:${a.version}`;
@@ -139,7 +169,19 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
           return aCoordinate.localeCompare(bCoordinate);
         })
     );
-    return this.iarProjects;
+    return this.engineIarProjects;
+  }
+
+  private async getEngineIarDependenciesForWorkspaceProject(projectDirectory: string) {
+    const [engineProjects, engineIarProjects] = await Promise.all([this.getEngineProjects(), this.getIarProjects()]);
+    const workspaceProject = engineProjects.find(
+      project => !project.id.isIar && path.resolve(project.projectDirectory) === path.resolve(projectDirectory)
+    );
+    if (!workspaceProject) {
+      return [];
+    }
+    const dependencyIds = new Set(workspaceProject.dependencies.map(dependency => dependency.id));
+    return engineIarProjects.filter(project => dependencyIds.has(project.id.id));
   }
 
   private getIarContentChildren(parent: Entry): Entry[] {
@@ -166,22 +208,24 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
       });
   }
 
-  private createIarGroup(): Entry {
+  private createIarGroup(parent: Entry): Entry {
     return {
       uri: Uri.parse('axonivy:iar-dependencies'),
       type: FileType.Directory,
       label: l10n.t('IAR Dependencies'),
       iconPath: new ThemeIcon('library'),
       collapsibleState: TreeItemCollapsibleState.Collapsed,
-      kind: 'iarDependencyGroup'
+      kind: 'iarDependencyGroup',
+      parent
     };
   }
 
-  private createAndCacheRoot(ivyProjectDir: string): Entry {
+  private createAndCacheRoot(ivyProjectDir: string, hasIarDependencies: boolean): Entry {
     const entry: Entry = {
       uri: Uri.file(ivyProjectDir),
       type: FileType.Directory,
       iconPath: path.join(__dirname, '..', 'assets', 'ivy-logo-black-background.svg'),
+      collapsibleState: hasIarDependencies ? TreeItemCollapsibleState.Collapsed : undefined,
       contextValue: IVY_PROJECT_CONTEXT_VALUE,
       kind: 'workspaceProject'
     };
