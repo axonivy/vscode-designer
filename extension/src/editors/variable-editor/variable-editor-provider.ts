@@ -1,9 +1,9 @@
 import type { CustomTextEditorProvider, ExtensionContext, TextDocument, WebviewPanel } from 'vscode';
 import { window } from 'vscode';
 import { messenger } from '../..';
+import { IAR_CONTENT_SCHEME, iarContentEngineFileName } from '../../project-explorer/iar-content-provider';
 import { registerOpenConfigEditorCmd } from '../command-helper';
 import { createWebViewContent } from '../webview-helper';
-import { IAR_CONTENT_SCHEME, iarContentEngineFileName } from '../../project-explorer/iar-content-provider';
 import { setupCommunication } from './webview-communication';
 
 export class VariableEditorProvider implements CustomTextEditorProvider {

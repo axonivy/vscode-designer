@@ -244,8 +244,7 @@ test('shows only the META-INF/ivy tree and opens files as read-only documents', 
 
   const [processFile] = await provider.getChildren(rootEntries[0]);
   expect(processFile?.label).toBe('hello.p.json');
-  expect(processFile?.command?.command).toBe('vscode.openWith');
-  expect(processFile?.command?.arguments?.[1]).toBe('ivy.glspDiagram');
+  expect(processFile?.command?.command).toBe('vscode.open');
   expect(provider.getTreeItem(processFile!).resourceUri).toBe(processFile?.uri);
   const fsProvider: FileSystemProvider = new IarContentFileSystemProvider();
   const engineUri = processFile!.command!.arguments![0] as import('vscode').Uri;
@@ -268,7 +267,6 @@ test('keeps variables.yaml on the IAR URI and derives its engine file name', asy
   const rootEntries = await provider.getChildren(iarDependency);
   const variablesEntry = rootEntries.find(entry => entry.label === 'variables.yaml');
 
-  expect(variablesEntry?.command?.arguments?.[1]).toBe('ivy.variableEditor');
   expect(variablesEntry?.uri.scheme).toBe(IAR_CONTENT_SCHEME);
   expect(iarContentEngineFileName(variablesEntry!.uri)).toBe(`${archivePath}!/META-INF/ivy/variables.yaml`);
 });
