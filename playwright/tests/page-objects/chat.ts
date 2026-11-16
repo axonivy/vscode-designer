@@ -1,17 +1,15 @@
 import { expect, type Locator } from '@playwright/test';
 import type { WorkspacePage } from './workspace-page';
 
-export type ChatToolsGroup = 'Built-In' | 'Axon Ivy PRO Designer 14';
-
 export class ChatPage {
   readonly chatArea: Locator;
-  readonly toolsLocator: Locator;
   readonly skillsLocator: Locator;
+  readonly customizationsLocator: Locator;
 
   constructor(readonly wsPage: WorkspacePage) {
     this.chatArea = wsPage.page.locator('.interactive-session');
-    this.toolsLocator = wsPage.page.getByText('Configure ToolsThe selected');
     this.skillsLocator = wsPage.page.locator('div.quick-input-widget');
+    this.customizationsLocator = wsPage.page.locator('.ai-customization-management-editor');
   }
 
   async open() {
@@ -19,10 +17,10 @@ export class ChatPage {
     await expect(this.chatArea).toBeVisible();
   }
 
-  async toolsDialog() {
-    await this.open();
-    await this.wsPage.page.getByRole('button', { name: /Configure Tools/i }).click();
-    await expect(this.toolsLocator).toBeVisible();
+  async openCustomizationsTools() {
+    await this.wsPage.executeCommand('Chat: Open Customizations');
+    await this.wsPage.page.getByRole('listitem', { name: /^Tools(?:, \d+ items)?$/ }).click();
+    await expect(this.wsPage.page.getByRole('heading', { name: 'Tools', exact: true })).toBeVisible();
   }
 
   async skillsDialog() {
@@ -31,15 +29,33 @@ export class ChatPage {
     await expect(this.skillsLocator).toBeVisible();
   }
 
-  async expandGroup(group: ChatToolsGroup, expanded: boolean) {
-    const groupCheckbox = this.wsPage.page.getByRole('checkbox', { name: group, exact: true });
-    await expect(groupCheckbox).toBeVisible();
-
-    const isExpanded = (await groupCheckbox.getAttribute('aria-expanded')) === 'true';
+  async setGroupExpanded(group: string, expanded: boolean, visibleChild?: string) {
+    const groupItem = this.wsPage.page.getByRole('treeitem', { name: group, exact: true });
+    await expect(groupItem).toBeVisible();
+    const isExpanded = visibleChild ? await this.visibleEntry(visibleChild).isVisible() : await this.isGroupExpanded(group);
     if (isExpanded !== expanded) {
-      await groupCheckbox.click({ position: { x: 8, y: 8 } });
+      await groupItem.click({ position: { x: visibleChild ? 44 : 8, y: 22 } });
     }
 
-    await expect(groupCheckbox).toHaveAttribute('aria-expanded', String(expanded));
+    if (visibleChild) {
+      const child = this.visibleEntry(visibleChild);
+      if (expanded) {
+        await expect(child).toBeVisible();
+      } else {
+        await expect(child).toBeHidden();
+      }
+    } else {
+      await expect(groupItem).toHaveAttribute('aria-expanded', String(expanded));
+    }
+  }
+
+  async isGroupExpanded(group: string) {
+    const groupItem = this.wsPage.page.getByRole('treeitem', { name: group, exact: true });
+    const expanded = await groupItem.getAttribute('aria-expanded');
+    return expanded === 'true';
+  }
+
+  private visibleEntry(child: string) {
+    return this.wsPage.page.getByText(child, { exact: true });
   }
 }
