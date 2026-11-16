@@ -14,12 +14,18 @@ test('chat: window', async ({ wsPage }) => {
 
 test('chat: tools', async ({ wsPage }) => {
   const chatPage = new ChatPage(wsPage);
-  await chatPage.toolsDialog();
-  await chatPage.expandGroup('Built-In', false);
-  await chatPage.expandGroup('Axon Ivy PRO Designer 14', true);
+  await chatPage.openCustomizationsTools();
+  await chatPage.setGroupExpanded('Built-in', false);
+  expect(await chatPage.isGroupExpanded('User')).toBe(true);
+  await chatPage.setGroupExpanded('Axon Ivy PRO Designer 14', true, 'New Axon Ivy project');
 
-  await expect(wsPage.page.getByRole('checkbox', { name: /^newAxonIvy/ })).toHaveCount(4);
-  await screenshotLocator(wsPage.page, chatPage.toolsLocator, 'chat-configure-tools');
+  await screenshotLocator(wsPage.page, chatPage.customizationsLocator, 'chat-configure-tools', {
+    margin: 0,
+    marginTop: 44,
+    marginLeft: 12,
+    marginRight: 3,
+    marginBottom: 3
+  });
 });
 
 test('chat: skills', async ({ wsPage }) => {
