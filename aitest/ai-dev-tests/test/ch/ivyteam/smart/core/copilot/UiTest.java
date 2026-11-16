@@ -18,28 +18,25 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import ch.ivyteam.smart.core.AgentRuntime;
 import ch.ivyteam.smart.core.AgentRuntimeExtension;
+import ch.ivyteam.smart.core.IvyFixtures;
 import tools.jackson.databind.JsonNode;
 
+@IvyFixtures({"purchase", "employee-management"})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ExtendWith(AgentRuntimeExtension.class)
 public class UiTest {
 
   @Test
   @Order(Complexity.INDEPENDENT)
-  void convertsFormToJsf(AgentRuntime rt) throws Exception {
-    rt.prompt("""
-        In the purchase project, create a Dialog Form named EmployeeNote
-        with a note text input bound to its dialog data.
-        """);
+  void convertsExistingFormToJsf(AgentRuntime rt) throws Exception {
+    var project = rt.ivyWorkspace().path().resolve("employee-management");
+    var dialog = project.resolve("dialog/com/acme/demo/EquipmentHandover");
+    var form = dialog.resolve("EquipmentHandover.f.json");
 
-    var purchase = rt.ivyWorkspace().path().resolve("purchase");
-    var form = findFile(purchase.resolve("dialog"), "EmployeeNote.f.json");
-    assertThat(form).exists();
-
-    var spans = rt.prompt("Convert the EmployeeNote Dialog Form in the purchase project to JSF.");
+    var spans = rt.prompt("Convert the EquipmentHandover Dialog Form in the employee-management project to JSF.");
 
     assertThat(spans).usedTools("axonivy-designer-convert_dialog_form_to_jsf");
-    assertThat(form.resolveSibling("EmployeeNote.xhtml")).exists();
+    assertThat(dialog.resolve("EquipmentHandover.xhtml")).exists();
     assertThat(form).doesNotExist();
   }
 
