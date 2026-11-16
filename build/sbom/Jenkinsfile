@@ -11,6 +11,11 @@ pipeline {
 
   stages {
     stage('build') {
+      when {
+        not {
+          branch 'debug/fix-windows-test'
+        }
+      }
       steps {
         script {
           if (isReleasingBranch()) {

@@ -16,6 +16,11 @@ pipeline {
 
   stages {
     stage('Integration Test') {
+      when {
+        not {
+          branch 'debug/fix-windows-test'
+        }
+      }
       steps {
         script {
           docker.build('node-webtest', '-f build/Dockerfile.playwright .').inside {

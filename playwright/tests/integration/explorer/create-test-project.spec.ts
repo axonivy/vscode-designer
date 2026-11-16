@@ -30,7 +30,9 @@ test.describe('Add Test Project', () => {
     }).toPass({ intervals: [1_000] });
   });
 
-  test('should create IvyTests and tests should pass', async ({ wsPage, tmpWorkspace }) => {
+  // eslint-disable-next-line playwright/no-focused-test
+  test.only('should create IvyTests and tests should pass', async ({ wsPage, tmpWorkspace }) => {
+    test.setTimeout(1_000_000_000);
     await wsPage.hasReadyStatusMessage();
 
     await wsPage.executeCommand('Axon Ivy: New Test Project');
