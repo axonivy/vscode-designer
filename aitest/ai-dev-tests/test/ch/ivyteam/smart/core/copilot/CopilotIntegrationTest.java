@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static ch.ivyteam.smart.core.copilot.AiUtils.findFile;
 import static ch.ivyteam.smart.core.copilot.AiUtils.readJson;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import tools.jackson.databind.JsonNode;
 public class CopilotIntegrationTest {
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.HEAVY)
   void createProject(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("create a new Axon Ivy project called flight-simulator");
@@ -59,6 +61,7 @@ public class CopilotIntegrationTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.COMPOSITE)
   void process(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""

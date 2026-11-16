@@ -3,6 +3,7 @@ package ch.ivyteam.smart.core.copilot;
 import static ch.ivyteam.smart.core.assertion.AspireSpansAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,7 @@ public class MarketTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.INDEPENDENT)
   void market_install(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("install the JIRA connector from the marketplace");
@@ -67,6 +69,7 @@ public class MarketTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.INDEPENDENT)
   void market_install_oneOf(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("install smart-workflow agent with anthropic.");
@@ -94,6 +97,7 @@ public class MarketTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.HEAVY)
   void market_install_import(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""

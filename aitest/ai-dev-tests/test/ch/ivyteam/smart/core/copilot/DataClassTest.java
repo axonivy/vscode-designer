@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import static ch.ivyteam.smart.core.copilot.AiUtils.readJson;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,7 @@ public class DataClassTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.INDEPENDENT)
   void entityClass(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""

@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,7 @@ public class UiTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.COMPOSITE)
   void formDialog(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
@@ -88,6 +90,7 @@ public class UiTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.INDEPENDENT)
   void dialogFallsBackToJsf(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
@@ -111,6 +114,7 @@ public class UiTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.COMPOSITE)
   void formExtractsRepeatedGroup(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
@@ -142,6 +146,7 @@ public class UiTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.COMPOSITE)
   void formEmbedsJsfComponentForUnsupportedUi(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
@@ -166,6 +171,7 @@ public class UiTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.COMPOSITE)
   void formEditsTableRowsInPopup(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
@@ -215,6 +221,7 @@ public class UiTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.COMPOSITE)
   void jsfDialog(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""

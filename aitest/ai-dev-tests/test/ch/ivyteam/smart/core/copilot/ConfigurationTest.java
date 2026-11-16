@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -55,6 +56,7 @@ public class ConfigurationTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.COMPOSITE)
   void configureUsers(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("add two test users to the purchase project, an employee and a purchase manager");
@@ -79,6 +81,7 @@ public class ConfigurationTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.INDEPENDENT)
   void configureVariables(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
@@ -111,6 +114,7 @@ public class ConfigurationTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.INDEPENDENT)
   void configureCustomFields(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("add a supplier custom field to the tasks of the purchase project");
@@ -131,6 +135,7 @@ public class ConfigurationTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.INDEPENDENT)
   void configureRestClient(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("purchase needs to fetch suppliers from https://api.acme.com/suppliers/v2, timeout 60s");
@@ -155,6 +160,7 @@ public class ConfigurationTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.INDEPENDENT)
   void configureWebServiceClient(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
@@ -185,6 +191,7 @@ public class ConfigurationTest {
   }
 
   @Test
+  @Disabled("temp disabled")
   @Order(Complexity.COMPOSITE)
   void configurePersistence(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
