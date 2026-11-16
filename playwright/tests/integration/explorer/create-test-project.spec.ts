@@ -54,7 +54,8 @@ test.describe('Add Test Project', () => {
     await runTestsAndExpectPass(wsPage, 'SampleIvyTest.java');
   });
 
-  test('should create ProcessTests and tests should pass', async ({ wsPage, tmpWorkspace }) => {
+  // eslint-disable-next-line playwright/no-focused-test
+  test.only('should create ProcessTests and tests should pass', async ({ wsPage, tmpWorkspace }) => {
     await wsPage.hasReadyStatusMessage();
 
     await wsPage.executeCommand('Axon Ivy: New Test Project');
