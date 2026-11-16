@@ -61,7 +61,8 @@ export const createSteps = (
     }
 
     const sourceProductJson = await getProductFromSource(state);
-    const requiredItems = parseAvailableProjectItems(parseProduct(sourceProductJson)).filter(item => item.requireOneOfGroup);
+    const product = parseProduct(sourceProductJson);
+    const requiredItems = parseAvailableProjectItems(product).filter(item => item.requireOneOfGroup);
     if (requiredItems.length > 0) {
       const selectedRequired = await input.showQuickPick<ProductProjectSelection, true>({
         title: state.dialogTitle,
@@ -83,7 +84,7 @@ export const createSteps = (
       });
       state.projects = [...(state.projects?.filter(project => !project.requireOneOfGroup) ?? []), ...selectedRequired];
     }
-    state.installProductJson = markProjectsForInstall(sourceProductJson, state.projects ?? []);
+    state.installProductJson = markProjectsForInstall(product, state.projects ?? []);
   };
 
   const stepDependentProject: InputStep<InstallMarketProductState> = async (input, state) => {
