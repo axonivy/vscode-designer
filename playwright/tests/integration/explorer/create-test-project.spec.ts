@@ -4,7 +4,10 @@ import { expect, test } from '~/fixtures/baseTest';
 import type { WorkspacePage } from '~/page-objects/workspace-page';
 import { properMultiProjectJavaPath, properMultiProjectPath } from '~/workspaces/workspace';
 
+const TIMEOUT = 80_000;
+
 test.describe('Add Test Project', () => {
+  test.setTimeout(TIMEOUT);
   test.use({ workspace: properMultiProjectJavaPath });
 
   test('should create a test project', async ({ wsPage, tmpWorkspace }) => {
@@ -32,7 +35,6 @@ test.describe('Add Test Project', () => {
 
   // eslint-disable-next-line playwright/no-focused-test
   test.only('should create IvyTests and tests should pass', async ({ wsPage, tmpWorkspace }) => {
-    test.setTimeout(1_000_000_000);
     await wsPage.hasReadyStatusMessage();
 
     await wsPage.executeCommand('Axon Ivy: New Test Project');
