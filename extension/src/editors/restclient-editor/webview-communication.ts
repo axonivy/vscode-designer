@@ -15,6 +15,7 @@ import { updateTextDocumentContent } from '../content-writer';
 import { EditorWebSocketForwarder } from '../editor-websocket-forwarder';
 import { pickFile } from '../file-picker';
 import {
+  createJsonRpcErrorResponse,
   createJsonRpcSuccessResponse,
   hasEditorFileContent,
   InitializeConnectionRequest,
@@ -35,14 +36,16 @@ export const setupCommunication = (
   messenger: Messenger,
   webviewPanel: WebviewPanel,
   document: TextDocument,
-  onReady: () => void
+  onReady: () => void,
+  engineFileName: string,
+  readOnly: boolean
 ) => {
   const messageParticipant = messenger.registerWebviewPanel(webviewPanel);
   const toDispose = new DisposableCollection(
-    new RestClientWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
+    new RestClientWebSocketForwarder(websocketUrl, messenger, messageParticipant, document, engineFileName, readOnly),
     messenger.onNotification(
       WebviewReadyNotification,
-      () => messenger.sendNotification(InitializeConnectionRequest, messageParticipant, { file: document.fileName }),
+      () => messenger.sendNotification(InitializeConnectionRequest, messageParticipant, { file: engineFileName, readOnly }),
       { sender: messageParticipant }
     ),
     messenger.onNotification(RestClientEditorReadyNotification, onReady, { sender: messageParticipant }),
@@ -52,12 +55,23 @@ export const setupCommunication = (
 };
 
 class RestClientWebSocketForwarder extends EditorWebSocketForwarder {
-  constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: TextDocument) {
-    super(websocketUrl, 'ivy-restclient-lsp', messenger, messageParticipant, RestClientWebSocketMessage, document);
+  constructor(
+    websocketUrl: URL,
+    messenger: Messenger,
+    messageParticipant: MessageParticipant,
+    document: TextDocument,
+    engineFileName: string,
+    private readonly readOnly: boolean
+  ) {
+    super(websocketUrl, 'ivy-restclient-lsp', messenger, messageParticipant, RestClientWebSocketMessage, document, engineFileName);
   }
 
   protected override handleClientMessage(message: unknown) {
     if (isIntegrationRequest(message)) {
+      if (this.readOnly) {
+        super.handleServerMessage(createJsonRpcErrorResponse(message, -32000, l10n.t('Editor is read-only')));
+        return;
+      }
       switch (message.method) {
         case 'integration/generate':
           void generateClient(message.params as OpenApiGeneratorConfig, this.document).then(result => {
@@ -93,7 +107,7 @@ class RestClientWebSocketForwarder extends EditorWebSocketForwarder {
 
   protected override handleServerMessage(message: string) {
     const obj = JSON.parse(message);
-    if (hasEditorFileContent(obj)) {
+    if (hasEditorFileContent(obj) && !this.readOnly) {
       updateTextDocumentContent(this.document, obj.result).then(() => super.handleServerMessage(message));
     } else {
       super.handleServerMessage(message);
