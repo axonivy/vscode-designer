@@ -23,11 +23,6 @@ pipeline {
 
   stages {
     stage('Build') {
-      when {
-        not {
-          branch 'debug/fix-windows-test'
-        }
-      }
       steps {
         script {
           catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
@@ -46,13 +41,8 @@ pipeline {
     }
 
     stage('Publish to VS Code Marketplace') {
-      when {
-        allOf {
-          not {
-            branch 'debug/fix-windows-test'
-          }
-          expression { params.publishToMarket }
-        }
+      when{
+        expression { params.publishToMarket }
       }
       steps {
         script {
@@ -66,11 +56,6 @@ pipeline {
     }
 
     stage('Package') {
-      when {
-        not {
-          branch 'debug/fix-windows-test'
-        }
-      }
       steps {
         script {
           sh "MILESTONE='${params.milestone}' pnpm run package"

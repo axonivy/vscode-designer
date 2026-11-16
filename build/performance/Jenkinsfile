@@ -24,11 +24,6 @@ pipeline {
   stages {
 
     stage('Build') {
-      when {
-        not {
-          branch 'debug/fix-windows-test'
-        }
-      }
       steps {
         nodejs(nodeJSInstallationName: '26.13.0') {
           bat 'pnpm install'
@@ -45,11 +40,6 @@ pipeline {
     }
 
     stage('Playwright Performance Tests') {
-      when {
-        not {
-          branch 'debug/fix-windows-test'
-        }
-      }
       steps {
         nodejs(nodeJSInstallationName: '26.13.0') {
           catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {

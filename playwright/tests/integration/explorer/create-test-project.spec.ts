@@ -33,8 +33,7 @@ test.describe('Add Test Project', () => {
     }).toPass({ intervals: [1_000] });
   });
 
-  // eslint-disable-next-line playwright/no-focused-test
-  test.only('should create IvyTests and tests should pass', async ({ wsPage, tmpWorkspace }) => {
+  test('should create IvyTests and tests should pass', async ({ wsPage, tmpWorkspace }) => {
     await wsPage.hasReadyStatusMessage();
 
     await wsPage.executeCommand('Axon Ivy: New Test Project');
@@ -56,8 +55,7 @@ test.describe('Add Test Project', () => {
     await runTestsAndExpectPass(wsPage, 'SampleIvyTest.java');
   });
 
-  // eslint-disable-next-line playwright/no-focused-test
-  test.only('should create ProcessTests and tests should pass', async ({ wsPage, tmpWorkspace }) => {
+  test('should create ProcessTests and tests should pass', async ({ wsPage, tmpWorkspace }) => {
     await wsPage.hasReadyStatusMessage();
 
     await wsPage.executeCommand('Axon Ivy: New Test Project');

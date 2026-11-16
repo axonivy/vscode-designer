@@ -20,11 +20,6 @@ pipeline {
 
   stages {
     stage('Integration Test') {
-      when {
-        not {
-          branch 'debug/fix-windows-test'
-        }
-      }
       steps {
         script {
           docker.build("node-webtest:${new Date().format('yyyyMMdd')}", '-f build/Dockerfile.playwright --build-arg INSTALL_CODE_SERVER=true .').inside {

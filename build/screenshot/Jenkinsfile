@@ -16,11 +16,6 @@ pipeline {
 
   stages {
     stage('Screenshots') {
-      when {
-        not {
-          branch 'debug/fix-windows-test'
-        }
-      }
       steps {
         script {
           docker.build('node-webtest', '-f build/Dockerfile.playwright .').inside {
@@ -47,12 +42,7 @@ pipeline {
     }
     stage('Deploy') {
       when {
-        allOf {
-          not {
-            branch 'debug/fix-windows-test'
-          }
-          expression { isReleasingBranch() && currentBuild.currentResult == 'SUCCESS' }
-        }
+        expression { isReleasingBranch() && currentBuild.currentResult == 'SUCCESS' }
       }
       steps {
         script {
