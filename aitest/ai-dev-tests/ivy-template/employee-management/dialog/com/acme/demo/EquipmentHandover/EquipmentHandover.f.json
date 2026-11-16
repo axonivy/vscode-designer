@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.axonivy.com/14.0/project/form.json",
+  "config": {
+    "title": "Equipment Handover",
+    "type": "FORM"
+  },
+  "components": [
+    {
+      "cid": "input1",
+      "type": "Input",
+      "config": {
+        "id": "employeeName",
+        "type": "TEXT",
+        "label": "Employee name",
+        "value": "#{data.employeeName}",
+        "required": "true",
+        "requiredMessage": "Employee name is required."
+      }
+    },
+    {
+      "cid": "select2",
+      "type": "Select",
+      "config": {
+        "id": "department",
+        "label": "Department",
+        "value": "#{data.department}",
+        "staticItems": [
+          { "label": "Engineering", "value": "Engineering" },
+          { "label": "Sales", "value": "Sales" },
+          { "label": "Finance", "value": "Finance" },
+          { "label": "HR", "value": "HR" }
+        ]
+      }
+    },
+    {
+      "cid": "datepicker3",
+      "type": "DatePicker",
+      "config": {
+        "id": "handoverDate",
+        "label": "Handover date",
+        "value": "#{data.handoverDate}",
+        "datePattern": "yyyy-MM-dd"
+      }
+    },
+    {
+      "cid": "layout4",
+      "type": "Layout",
+      "config": {
+        "type": "FLEX",
+        "justifyContent": "END",
+        "components": [
+          {
+            "cid": "button5",
+            "type": "Button",
+            "config": {
+              "name": "Cancel",
+              "action": "#{ivyWorkflowView.cancel()}",
+              "processOnlySelf": true,
+              "variant": "SECONDARY",
+              "style": "FLAT"
+            }
+          },
+          {
+            "cid": "button6",
+            "type": "Button",
+            "config": {
+              "name": "Proceed",
+              "type": "SUBMIT",
+              "action": "#{logic.close}",
+              "icon": "ti ti-check"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

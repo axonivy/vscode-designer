@@ -1,0 +1,19 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
+  "simpleName" : "EquipmentHandoverData",
+  "namespace" : "com.acme.demo.EquipmentHandover",
+  "fields" : [
+    {
+      "name" : "employeeName",
+      "type" : "String"
+    },
+    {
+      "name" : "department",
+      "type" : "String"
+    },
+    {
+      "name" : "handoverDate",
+      "type" : "Date"
+    }
+  ]
+}
