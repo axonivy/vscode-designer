@@ -16,15 +16,16 @@ public class IvyWorkspaceSetup {
     workspace = workspaceRoot.resolve("aitest/ai-dev-tests/ivy");
   }
 
-  public Path initialize() {
-    return initialize(true);
-  }
-
-  public Path initialize(boolean reset) {
+  public Path initialize(boolean reuse, String... selectedFixtures) {
     try {
-      if (reset || !Files.isDirectory(workspace.resolve("purchase"))) {
+      if (!reuse) {
         deleteFirstLevel();
-        copyProjects();
+      }
+      var projects = selectedFixtures.length == 0 ? new String[] {"purchase"} : selectedFixtures;
+      for (var project : projects) {
+        if (!reuse || !Files.exists(workspace.resolve(project))) {
+          copyProject(template.resolve(project));
+        }
       }
       return workspace;
     } catch (IOException exception) {
@@ -46,12 +47,6 @@ public class IvyWorkspaceSetup {
       paths.sorted(Comparator.reverseOrder()).forEach(this::delete);
     } catch (IOException exception) {
       throw new UncheckedIOException("Failed to delete workspace path: " + path, exception);
-    }
-  }
-
-  private void copyProjects() throws IOException {
-    try (var projects = Files.list(template)) {
-      projects.forEach(this::copyProject);
     }
   }
 

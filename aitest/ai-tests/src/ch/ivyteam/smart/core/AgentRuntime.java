@@ -50,14 +50,14 @@ public class AgentRuntime {
 
   private String currentTest;
 
-  public void start(String testUnit) {
+  public void start(String testUnit, String... fixtures) {
     this.testUnit = testUnit;
     System.out.println("Container reuse: " + reuseContainers);
     ensureNetworkExists();
 
     Path workspaceRoot = findWorkspaceRoot();
     Path extensionDir = workspaceRoot.resolve("extension");
-    ivyWorkspace = new IvyWorkspaceSetup(workspaceRoot).initialize(!reuseContainers);
+    ivyWorkspace = new IvyWorkspaceSetup(workspaceRoot).initialize(reuseContainers, fixtures);
     Path mcp = workspaceRoot.resolve("aitest/mcp.sh");
     userData = workspaceRoot.resolve("ci-user-data");
     Path vscodeCache = workspaceRoot.resolve(".vscode-test");

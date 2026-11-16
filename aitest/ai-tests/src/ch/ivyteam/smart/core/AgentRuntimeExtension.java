@@ -12,7 +12,9 @@ public class AgentRuntimeExtension implements BeforeAllCallback, AfterAllCallbac
   @Override
   public void beforeAll(ExtensionContext context) {
     runtime = new AgentRuntime();
-    runtime.start(context.getRequiredTestClass().getSimpleName());
+    var testClass = context.getRequiredTestClass();
+    var fixtures = testClass.getAnnotation(IvyFixtures.class);
+    runtime.start(testClass.getSimpleName(), fixtures == null ? new String[0] : fixtures.value());
   }
 
   @Override
