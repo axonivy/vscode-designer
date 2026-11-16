@@ -17,9 +17,15 @@ public class IvyWorkspaceSetup {
   }
 
   public Path initialize() {
+    return initialize(true);
+  }
+
+  public Path initialize(boolean reset) {
     try {
-      deleteFirstLevel();
-      copyProjects();
+      if (reset || !Files.isDirectory(workspace.resolve("purchase"))) {
+        deleteFirstLevel();
+        copyProjects();
+      }
       return workspace;
     } catch (IOException exception) {
       throw new UncheckedIOException("Failed to initialize Ivy workspace from: " + template, exception);

@@ -38,6 +38,15 @@ export class ExplorerView {
     await expect(node).toBeVisible();
   }
 
+  async hasNodeExactCollapsible(name: string) {
+    const twistie = this.view
+      .locator('.monaco-tl-row')
+      .filter({ has: this.wsPage.page.getByText(name, { exact: true }) })
+      .locator('.monaco-tl-twistie.collapsible');
+    await expect(twistie).toHaveCount(1);
+    await expect(twistie).toBeVisible();
+  }
+
   async hasNoNode(name: string) {
     const node = this.view.getByText(name);
     await expect(node).not.toBeAttached();

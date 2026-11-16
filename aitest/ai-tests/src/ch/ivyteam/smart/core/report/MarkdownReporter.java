@@ -21,7 +21,7 @@ public class MarkdownReporter implements Reporter {
   public void init(String testUnit) {
     lines.add("## AI test report");
     lines.add("");
-    lines.add("Test file: `aitest/ai-dev-tests/test/ch/ivyteam/smart/core/copilot/CopilotIntegrationTest.java`");
+    lines.add("Test file: `aitest/ai-dev-tests/test/ch/ivyteam/smart/core/copilot/" + testUnit + ".java`");
     lines.add("");
     lines.add("| 💬️ Test | ↪️ Input tokens | ↩️ Output tokens | 🛠️ Tools used |");
     lines.add("| --- | ---: | ---: | --- |");
@@ -41,18 +41,19 @@ public class MarkdownReporter implements Reporter {
       tools = "<details><summary>" + escapeHtml(toolNames) + "</summary><br>" + tools + "</details>";
     }
     var test = "<details><summary>`" + escapeHtml(name) + "`</summary><strong>Prompt</strong><pre><code>"
-      + escapeHtml(userMessage).replace("\r\n", "&#13;&#10;").replace("\r", "&#13;").replace("\n", "&#10;")
+        + escapeHtml(userMessage).replace("\r\n", "&#13;&#10;").replace("\r", "&#13;").replace("\n", "&#10;")
         + "</code></pre></details>";
     lines.add(String.format("| %s | %d | %d | %s |", test,
         tokenUsage.input(), tokenUsage.output(), tools));
   }
 
   private static String toolDetails(UsedTool tool) {
-    var arguments = tool.arguments() == null ? "" : escapeHtml(tool.arguments())
-        .replace("\r\n", "&#13;&#10;")
-        .replace("\r", "&#13;")
-        .replace("\n", "&#10;")
-        .replace("\t", "&#9;");
+    var arguments = tool.arguments() == null ? ""
+        : escapeHtml(tool.arguments())
+            .replace("\r\n", "&#13;&#10;")
+            .replace("\r", "&#13;")
+            .replace("\n", "&#10;")
+            .replace("\t", "&#9;");
     return "<strong>" + escapeHtml(tool.name()) + "</strong><pre><code>" + arguments + "</code></pre>";
   }
 

@@ -16,14 +16,14 @@ public class TestMarkdownReporter {
   @Test
   void writesMarkdownTable() {
     var reporter = new MarkdownReporter();
-    reporter.init("CopilotIntegration");
+    reporter.init("CopilotIntegrationTest");
     var spans = TestAspireSpans.read("spans-copilot.json");
     reporter.append("myTest", spans.userMessage(), spans.tokenUsage(), spans.usedTools());
 
     var promptDetail = """
-      &lt;current_datetime&gt;2026-08-18T11:26:59.664+00:00&lt;/current_datetime&gt;&#10;&#10;create an axon ivy project for a flight-simulator&#10;&#10;&lt;system_reminder&gt;&#10;&lt;sql_tables&gt;Available tables: todos, todo_deps&lt;/sql_tables&gt;&#10;&lt;/system_reminder&gt;""";
+        &lt;current_datetime&gt;2026-08-18T11:26:59.664+00:00&lt;/current_datetime&gt;&#10;&#10;create an axon ivy project for a flight-simulator&#10;&#10;&lt;system_reminder&gt;&#10;&lt;sql_tables&gt;Available tables: todos, todo_deps&lt;/sql_tables&gt;&#10;&lt;/system_reminder&gt;""";
     var toolDetail = """
-      <strong>axonivy-designer-new_axon_ivy_project</strong><pre><code>{"groupId":"com.example","name":"flight-simulator","path":"/workspace","projectId":"flight-simulator"}</code></pre>""";
+        <strong>axonivy-designer-new_axon_ivy_project</strong><pre><code>{"groupId":"com.example","name":"flight-simulator","path":"/workspace","projectId":"flight-simulator"}</code></pre>""";
 
     var expected = """
         ## AI test report
@@ -33,7 +33,8 @@ public class TestMarkdownReporter {
         | 💬️ Test | ↪️ Input tokens | ↩️ Output tokens | 🛠️ Tools used |
         | --- | ---: | ---: | --- |
         | <details><summary>`myTest`</summary><strong>Prompt</strong><pre><code>%s</code></pre></details> | 38517 | 765 | <details><summary>axonivy-designer-new_axon_ivy_project</summary><br>%s</details> |
-        """.formatted(promptDetail, toolDetail);
+        """
+        .formatted(promptDetail, toolDetail);
 
     assertThat(reporter.toMarkdownContent()).isEqualTo(expected);
   }
@@ -41,11 +42,20 @@ public class TestMarkdownReporter {
   @Test
   void writesNoneWhenNoToolsWereUsed() {
     var reporter = new MarkdownReporter();
-    reporter.init("CopilotIntegration");
+    reporter.init("CopilotIntegrationTest");
     reporter.append("myTest", "user message", new TokenUsage(1, 2), List.of());
 
     assertThat(reporter.toMarkdownContent()).contains("<summary>`myTest`</summary>")
-      .contains("| 1 | 2 | None |");
+        .contains("| 1 | 2 | None |");
+  }
+
+  @Test
+  void namesReportForTestUnit() {
+    var reporter = new MarkdownReporter();
+    reporter.init("UiTest");
+
+    assertThat(reporter.toMarkdownContent())
+        .contains("Test file: `aitest/ai-dev-tests/test/ch/ivyteam/smart/core/copilot/UiTest.java`");
   }
 
   @Test
@@ -57,7 +67,7 @@ public class TestMarkdownReporter {
         ]}
         """);
     var reporter = new MarkdownReporter();
-    reporter.init("CopilotIntegration");
+    reporter.init("CopilotIntegrationTest");
     reporter.append("myTest", "user message", new TokenUsage(1, 2),
         List.of(new UsedTool(toolSpan), new UsedTool(toolSpan)));
 
