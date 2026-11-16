@@ -196,16 +196,9 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
       .map(([name, type]) => {
         let uri = Uri.joinPath(parent.uri, name);
         const isDirectory = type === FileType.Directory;
-        let editor = 'default';
         if (!isDirectory) {
           if (name.match(/\.p\.json$/)) {
-            console.log('Found .p.json file:', name);
-            editor = 'ivy.glspDiagram';
             uri = this.iarContentProvider.tranformToAbsoluteUri(uri);
-          }
-          if (name == 'variables.yaml') {
-            console.log('Found variables.yaml file:', name);
-            editor = 'ivy.variableEditor';
           }
         }
         return {
@@ -214,7 +207,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
           label: name,
           collapsibleState: isDirectory ? TreeItemCollapsibleState.Collapsed : undefined,
           kind: isDirectory ? 'iarContentDirectory' : 'iarContentFile',
-          command: isDirectory ? undefined : { command: 'vscode.openWith', title: 'Open', arguments: [uri, editor] },
+          command: isDirectory ? undefined : { command: 'vscode.open', title: 'Open', arguments: [uri] },
           parent
         };
       });
