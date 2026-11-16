@@ -3,6 +3,7 @@ import { NewDataClassTool, createNewDataClass } from './new-data-class';
 import { NewDialogTool, createNewDialog } from './new-dialog';
 import { NewProcessTool, createNewProcess } from './new-process';
 import { NewProjectTool, createNewProject } from './new-project';
+import { ImportMarketProductTool, importMarketProduct } from './import-market-product';
 
 type OwnToolInvoker = (args: Record<string, unknown>) => Promise<string>;
 
@@ -32,6 +33,11 @@ const OWN_TOOL_DEFINITIONS = [
     name: 'new_axon_ivy_dialog',
     createTool: () => new NewDialogTool(),
     invokeHeadless: async args => createNewDialog(args as Awaited<Parameters<typeof createNewDialog>[0]>)
+  },
+  {
+    name: 'import_market_product',
+    createTool: () => new ImportMarketProductTool(),
+    invokeHeadless: async args => importMarketProduct(args)
   }
 ] as const satisfies ReadonlyArray<OwnToolDefinition>;
 

@@ -25,3 +25,6 @@ If either API call fails, report it; do not guess versions or coordinates.
 2. Read `maven-dependency` installer data using `schema/market/product.json`. Select required dependencies, only the requested member(s) of each `requireOneOfGroup`, and optional standalone add-ons only when requested. Ask if a group choice is unspecified.
 3. Edit the existing POM: add selected dependencies directly under `<dependencies>` with their exact coordinates, and add missing installer repositories. Preserve unrelated XML.
 
+## Importing demos
+
+Import only demos the user explicitly requests. Use the full Market install response and exact `maven-import` artifactIds; ask if names are missing or ambiguous. Pass those IDs in `productId` to `import_market_product`. Never infer selections or download/unpack artifacts manually. After success, verify `.ivyproject` and `pom.xml`.
