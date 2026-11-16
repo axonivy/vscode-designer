@@ -25,6 +25,10 @@ pipeline {
 
     stage('Build') {
       when {
+        expression {
+          echo "Jenkins debug: JOB_NAME=${env.JOB_NAME}, BRANCH_NAME=${env.BRANCH_NAME}, CHANGE_BRANCH=${env.CHANGE_BRANCH}"
+          return true
+        }
         not {
           branch 'debug/fix-windows-test'
         }
