@@ -61,9 +61,6 @@
     },
     "Map(String,DatabaseSchema)": {
       "type": "object",
-      "propertyNames": {
-        "pattern": "^[A-Za-z0-9_-]+$"
-      },
       "additionalProperties": {
         "$ref": "#/$defs/Database"
       }
@@ -78,7 +75,10 @@
   "type": "object",
   "properties": {
     "Databases": {
-      "$ref": "#/$defs/Map(String,DatabaseSchema)"
+      "$ref": "#/$defs/Map(String,DatabaseSchema)",
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9_-]+$"
+      }
     }
   },
   "additionalProperties": false

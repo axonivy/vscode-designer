@@ -44,7 +44,7 @@
       "type": "object",
       "properties": {
         "id": {
-          "$ref": "#/$defs/ElementId"
+          "type": "string"
         },
         "bpmnId": {
           "type": "string"
@@ -218,7 +218,7 @@
           "type": "string"
         },
         "id": {
-          "$ref": "#/$defs/ElementId"
+          "type": "string"
         },
         "label": {
           "$ref": "#/$defs/VisualConnectorLabel"
@@ -401,11 +401,6 @@
         "example.project.ExampleDialog:start(String,Number)"
       ]
     },
-    "DialogStartGuid": {
-      "type": "string",
-      "pattern": "^[A-F0-9]{16,}$",
-      "description": "Unique ID of this start. Keep existing values; generate a new one for a new start."
-    },
     "ElementAlternative": {
       "type": "object",
       "properties": {
@@ -525,115 +520,51 @@
     },
     "ElementHtmlDialogEventStart": {
       "type": "object",
-      "description": "Config of an HtmlDialogEventStart: an event without parameters. The element name is the event name the view calls as #{logic.<name>}.",
       "properties": {
         "output": {
           "$ref": "#/$defs/ScriptMapCode"
         },
         "guid": {
-          "$ref": "#/$defs/DialogStartGuid"
+          "type": "string"
         }
       },
       "additionalProperties": false
     },
     "ElementHtmlDialogMethodStart": {
       "type": "object",
-      "description": "Config of an HtmlDialogMethodStart: a method the view calls as #{logic.<signature>(<args>)}. The element name is <signature>(<simple parameter types>).",
       "properties": {
         "result": {
-          "$ref": "#/$defs/ScriptParameterizedMapCode",
-          "description": "Applied when the flow reaches an HtmlDialogEnd.",
-          "examples": [
-            {
-              "params": [
-                {
-                  "name": "address",
-                  "type": "com.acme.Address"
-                }
-              ],
-              "map": {
-                "result.address": "in.address"
-              }
-            }
-          ]
+          "$ref": "#/$defs/ScriptParameterizedMapCode"
         },
         "input": {
-          "$ref": "#/$defs/ScriptParameterizedMapCode",
-          "examples": [
-            {
-              "params": [
-                {
-                  "name": "address",
-                  "type": "com.acme.Address"
-                }
-              ],
-              "map": {
-                "out.address": "param.address"
-              }
-            }
-          ]
+          "$ref": "#/$defs/ScriptParameterizedMapCode"
         },
         "signature": {
-          "$ref": "#/$defs/MethodSignature"
+          "type": "string"
         },
         "guid": {
-          "$ref": "#/$defs/DialogStartGuid"
+          "type": "string"
         }
       },
       "additionalProperties": false
     },
     "ElementHtmlDialogStart": {
       "type": "object",
-      "description": "Config of an HtmlDialogStart: a start method that a DialogCall, UserTask or Form Composite invokes. The element name is <signature>(<simple parameter types>).",
       "properties": {
         "result": {
-          "$ref": "#/$defs/ScriptParameterizedMapCode",
-          "description": "Applied when the flow reaches an HtmlDialogExit.",
-          "examples": [
-            {
-              "params": [
-                {
-                  "name": "address",
-                  "type": "com.acme.Address"
-                }
-              ],
-              "map": {
-                "result.address": "in.address"
-              }
-            }
-          ]
+          "$ref": "#/$defs/ScriptParameterizedMapCode"
         },
         "input": {
-          "$ref": "#/$defs/ScriptParameterizedMapCode",
-          "examples": [
-            {
-              "params": [
-                {
-                  "name": "address",
-                  "type": "com.acme.Address"
-                }
-              ],
-              "map": {
-                "out.address": "param.address"
-              }
-            }
-          ]
+          "$ref": "#/$defs/ScriptParameterizedMapCode"
         },
         "signature": {
-          "$ref": "#/$defs/MethodSignature"
+          "type": "string"
         },
         "guid": {
-          "$ref": "#/$defs/DialogStartGuid"
+          "type": "string"
         }
       },
       "additionalProperties": false
-    },
-    "ElementId": {
-      "type": "string",
-      "description": "Unique within the process; new elements and connectors take the next f<number>. Keep existing IDs.",
-      "examples": [
-        "f3"
-      ]
     },
     "ElementJoin": {
       "type": "object",
@@ -871,7 +802,6 @@
     },
     "ElementTypes": {
       "type": "string",
-      "description": "Element type. In HTML_DIALOG processes: HtmlDialogStart is a start method of the dialog; HtmlDialogMethodStart is a method the view calls as #{logic.<signature>(<args>)}; HtmlDialogEventStart is an event the view calls as #{logic.<name>}; HtmlDialogEnd ends that flow and the dialog stays open; HtmlDialogExit closes the dialog and returns the start result to the caller.",
       "enum": [
         "Alternative",
         "CallSubEnd",
@@ -1149,14 +1079,6 @@
         "type": "string"
       }
     },
-    "MethodSignature": {
-      "type": "string",
-      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
-      "description": "Method name, case-sensitive. With the input parameter types it forms the signature callers reference.",
-      "examples": [
-        "start"
-      ]
-    },
     "ProcessConfig": {
       "type": "object",
       "properties": {
@@ -1339,7 +1261,6 @@
       "type": "object",
       "properties": {
         "code": {
-          "description": "IvyScript statements, run after map. A string, or one string per line.",
           "anyOf": [
             {
               "type": "string"
@@ -1361,25 +1282,14 @@
     },
     "ScriptMappings": {
       "type": "object",
-      "description": "Target to IvyScript expression. call maps pass caller data into param.<name>; input maps take param.<name> into out.<attr>; result maps set result.<name>; output maps take data back into out.<attr>. Without an output map the data stays unchanged; otherwise start with \"out\": \"in\" and map only what changes. Mapped attributes must exist in the process data class.",
       "additionalProperties": {
         "type": "string"
-      },
-      "examples": [
-        {
-          "param.address": "in.address"
-        },
-        {
-          "out": "in",
-          "out.address": "result.address"
-        }
-      ]
+      }
     },
     "ScriptParameterizedMapCode": {
       "type": "object",
       "properties": {
         "code": {
-          "description": "IvyScript statements, run after map. A string, or one string per line.",
           "anyOf": [
             {
               "type": "string"
@@ -1412,39 +1322,10 @@
           "type": "string"
         },
         "name": {
-          "type": "string",
-          "description": "Parameter name, used as param.<name> or result.<name> in mappings and code."
+          "type": "string"
         },
         "type": {
-          "type": "string",
-          "description": "List: List<type>",
-          "anyOf": [
-            {
-              "enum": [
-                "Boolean",
-                "Number",
-                "String",
-                "Binary",
-                "Date",
-                "DateTime",
-                "Duration",
-                "File",
-                "Record",
-                "Recordset",
-                "Time",
-                "Tree",
-                "Xml"
-              ],
-              "description": "Ivy Script data type"
-            },
-            {
-              "description": "Data class or Java type, fully qualified",
-              "examples": [
-                "com.acme.Address",
-                "java.lang.Integer"
-              ]
-            }
-          ]
+          "type": "string"
         }
       },
       "additionalProperties": false

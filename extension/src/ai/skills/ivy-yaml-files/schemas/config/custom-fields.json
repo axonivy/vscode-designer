@@ -3,7 +3,6 @@
   "$defs": {
     "CustomField": {
       "type": "object",
-      "description": "Metadata of the custom field with this name. Values are set at runtime, e.g. `ivy.task.customFields().stringField(\"branchOffice\").set(\"Zug\")`.",
       "properties": {
         "Category": {
           "type": "string"
@@ -17,12 +16,13 @@
         },
         "Label": {
           "type": "string",
-          "description": "Display label, shown instead of the field name."
+          "description": "Display label, shown to end users instead of the field name."
         },
         "Type": {
           "$ref": "#/$defs/CustomFieldType"
         }
       },
+      "description": "Metadata of the custom field with this name. Values are set at runtime, e.g. `ivy.task.customFields().stringField(\"branchOffice\").set(\"Zug\")`.",
       "additionalProperties": {
         "type": "string"
       }

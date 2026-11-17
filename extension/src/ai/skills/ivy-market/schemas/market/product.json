@@ -10,11 +10,11 @@
           "anyOf": [
             {
               "const": "maven-import",
-              "description": "Imports IvyProjects into the workspace; it does not add them as dependencies to a project."
+              "description": "Imports IvyProjects into your workspace without actually adding dependencies to it into your project pom.xml. This is handy to integrate large demo projects into your workspace."
             },
             {
               "const": "maven-dependency",
-              "description": "Adds Maven dependencies to an existing project."
+              "description": "Adds Maven dependencies to an existing project pom.xml. You may use it to integrate existing frameworks and drivers from the Maven ecosystem."
             }
           ]
         },
@@ -58,18 +58,17 @@
       ]
     },
     "MavenDependencyInstaller": {
-      "description": "Add the selected dependencies and required repositories to the consuming project's pom.xml.",
       "type": "object",
       "properties": {
         "dependencies": {
-          "description": "Include all standalone dependencies and the selected entry from each requireOneOfGroup.",
+          "description": "ivy projects as maven dependencies",
           "type": "array",
           "items": {
             "$ref": "#/$defs/ProjectDependency"
           }
         },
         "repositories": {
-          "description": "Repositories needed to resolve these dependencies.",
+          "description": "maven repositories where the projects are available",
           "type": "array",
           "items": {
             "$ref": "#/$defs/Repository"
@@ -111,8 +110,8 @@
         },
         "importInWorkspace": {
           "type": "boolean",
-          "description": "Whether the project should be imported into the workspace.",
-          "default": true
+          "description": "wether project should be imported or not",
+          "default": "true"
         },
         "type": {
           "type": "string",
@@ -131,29 +130,29 @@
       "properties": {
         "artifactId": {
           "type": "string",
-          "description": "Maven artifact ID."
+          "description": "maven artifact id"
         },
         "groupId": {
           "type": "string",
-          "description": "Maven group ID."
+          "description": "maven group id"
         },
         "optional": {
           "type": "boolean",
-          "description": "Set Maven's optional flag. This does not exclude the dependency from the project.",
-          "default": false
+          "description": "Hint to mark the dependency as optional",
+          "default": "false"
         },
         "requireOneOfGroup": {
           "type": "string",
-          "description": "Qualifier group key. Include at least one entry per key, choose the entry matching the requested qualifier, and omit unselected alternatives."
+          "description": "Defines the depenendency group. For all dependencies with the same 'group', the installation of at least one dependency is expected."
         },
         "type": {
           "type": "string",
-          "description": "Maven artifact type.",
-          "default": "jar"
+          "description": "maven type",
+          "default": "true"
         },
         "version": {
           "type": "string",
-          "description": "Maven version."
+          "description": "maven version"
         }
       },
       "additionalProperties": false

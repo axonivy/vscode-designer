@@ -3,10 +3,6 @@
   "$defs": {
     "Map(String,RestClientSchema)": {
       "type": "object",
-      "description": "REST clients by key. The key survives renames; it has only letters, digits, `-` and `_`, usually `Name` with spaces as `-`. `#` lines directly above a key describe the client.",
-      "propertyNames": {
-        "pattern": "^[A-Za-z0-9_-]+$"
-      },
       "additionalProperties": {
         "$ref": "#/$defs/RestClient"
       }
@@ -44,7 +40,7 @@
           "type": "string"
         },
         "Features": {
-          "description": "Full qualified class names, that contribute REST-client features, such as authentication. New clients must include `ch.ivyteam.ivy.rest.client.mapper.JsonFeature` for JSON mapping.",
+          "description": "Full qualified class names, that contribute REST-client features, such as authentication.",
           "type": "array",
           "items": {
             "type": "string"
@@ -512,6 +508,10 @@
           "type": "boolean",
           "default": false
         },
+        "JSON.DateTime.ALWAYS_WRITE_SUBSECOND_DIGITS": {
+          "type": "boolean",
+          "default": false
+        },
         "JSON.DateTime.NORMALIZE_DESERIALIZED_ZONE_ID": {
           "type": "boolean",
           "default": true
@@ -644,7 +644,11 @@
   "type": "object",
   "properties": {
     "RestClients": {
-      "$ref": "#/$defs/Map(String,RestClientSchema)"
+      "$ref": "#/$defs/Map(String,RestClientSchema)",
+      "description": "REST clients by key. The key survives renames; it has only letters, digits, `-` and `_`, usually `Name` with spaces as `-`. `#` lines directly above a key describe the client.",
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9_-]+$"
+      }
     }
   },
   "additionalProperties": false

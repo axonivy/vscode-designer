@@ -43,10 +43,6 @@
     },
     "Map(String,WebServiceClientSchema)": {
       "type": "object",
-      "description": "Web service clients by key. The key survives renames; it has only letters, digits, `-` and `_`, usually `Name` with spaces as `-`. `#` lines directly above a key describe the client.",
-      "propertyNames": {
-        "pattern": "^[A-Za-z0-9_-]+$"
-      },
       "additionalProperties": {
         "$ref": "#/$defs/WebServiceClient"
       }
@@ -226,7 +222,11 @@
   "type": "object",
   "properties": {
     "WebServiceClients": {
-      "$ref": "#/$defs/Map(String,WebServiceClientSchema)"
+      "$ref": "#/$defs/Map(String,WebServiceClientSchema)",
+      "description": "Web service clients by key. The key survives renames; it has only letters, digits, `-` and `_`, usually `Name` with spaces as `-`. `#` lines directly above a key describe the client.",
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9_-]+$"
+      }
     }
   },
   "additionalProperties": false

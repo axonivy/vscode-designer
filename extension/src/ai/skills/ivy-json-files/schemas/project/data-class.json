@@ -97,35 +97,7 @@
           "type": "string"
         },
         "type": {
-          "type": "string",
-          "default": "String",
-          "description": "List: List<type>",
-          "anyOf": [
-            {
-              "enum": [
-                "Boolean",
-                "Number",
-                "Binary",
-                "Date",
-                "DateTime",
-                "Duration",
-                "File",
-                "Record",
-                "Recordset",
-                "Time",
-                "Tree",
-                "Xml"
-              ],
-              "description": "Ivy Script data type"
-            },
-            {
-              "description": "Data class or Java type, fully qualified",
-              "examples": [
-                "com.acme.Address",
-                "java.lang.Integer"
-              ]
-            }
-          ]
+          "type": "string"
         }
       },
       "required": [
