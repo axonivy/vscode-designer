@@ -15,9 +15,9 @@ pipeline {
   }
 
   parameters {
-    string(name: 'version', defaultValue: '', description: 'Version to release.')
+    string(name: 'version', defaultValue: '', description: 'Version to release (e.g. \'14.0.2\').')
     booleanParam(name: 'publishToMarket', defaultValue: false, description: 'Publish to VS Code Marketplace?')
-    string(name: 'milestone', defaultValue: '', description: "Optional milestone number (e.g. 31 for Milestone 31). Only enter positive integers. Unset or empty publishes as a normal non-milestone release with the date timestamp.")
+    string(name: 'milestone', defaultValue: '', description: "Optional positive milestone number (e.g. \'31\' for Milestone 31). Unset or empty publishes as a normal non-milestone release with the date timestamp.")
   }
 
   stages {
