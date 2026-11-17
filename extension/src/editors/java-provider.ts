@@ -96,12 +96,18 @@ export class JavaProvider {
 
   public async openDefinition(fullyQualifiedName: string) {
     const javaFile = await this.dummyJavaFile;
-    const javaFileContent = `${JavaProvider.DUMMY_CONTENT}${fullyQualifiedName}`;
+    let typeName = fullyQualifiedName;
+    if (!typeName.includes('.')) {
+      const matchingType = (await this.javaTypes(typeName)).find(type => type.simpleName === typeName);
+      typeName = matchingType?.fullQualifiedName || typeName;
+    }
+    const declarationPrefix = `class ${JavaProvider.DUMMY_CLASS_NAME} { `;
+    const javaFileContent = `${declarationPrefix}${typeName} definition; }`;
     await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
     const locations = await executeCommand<Array<Location | LocationLink>>(
       'vscode.executeDefinitionProvider',
       javaFile,
-      new Position(0, javaFileContent.length)
+      new Position(0, declarationPrefix.length + typeName.length)
     );
     if (locations.length > 1) {
       logWarningMessage(
