@@ -8,6 +8,7 @@ export class JavaProvider {
   readonly dummyJavaFile: Promise<Uri>;
   readonly dummyHoverJavaFile: Promise<Uri>;
   readonly dummyContextJavaFile: Promise<Uri>;
+  private readonly sourceAttachmentWarmups = new Map<string, Promise<void>>();
 
   static readonly DUMMY_CLASS_NAME = 'Dummy';
   static readonly DUMMY_CONTENT = `private class ${JavaProvider.DUMMY_CLASS_NAME}{`;
@@ -48,16 +49,65 @@ export class JavaProvider {
     const importContent = imports.length > 0 ? `${imports.join('\n')}\n` : '';
     const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${code}; } }`;
     await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
-    const javaPosition = new Position(imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + position.character);
-    const completionList = await executeCommand<CompletionList>(
-      'vscode.executeCompletionItemProvider',
-      javaFile,
-      javaPosition,
-      undefined,
-      itemResolveCount
-    );
-    return completionList.items;
+
+    const requestCompletionItems = async () => {
+      const javaPosition = new Position(imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + position.character);
+      const completionList = await executeCommand<CompletionList>(
+        'vscode.executeCompletionItemProvider',
+        javaFile,
+        javaPosition,
+        undefined,
+        itemResolveCount
+      );
+      return completionList.items;
+    };
+
+    let items = await requestCompletionItems();
+    const receiverPosition = this.memberReceiverPosition(code, position);
+    if (!receiverPosition || !items.some(this.hasMissingMethodDocumentation)) {
+      return items;
+    }
+
+    // JDT LS may attach Maven sources lazily on hover. Trigger that path for this receiver only,
+    // then resolve completion items again instead of downloading sources for every dependency at import.
+    const memberSeparator = code.lastIndexOf('.', position.character);
+    const sourceKey = `${imports.join('\n')}\n${code.slice(0, memberSeparator).trim()}`;
+    let sourceAttachmentWarmup = this.sourceAttachmentWarmups.get(sourceKey);
+    if (!sourceAttachmentWarmup) {
+      sourceAttachmentWarmup = this.hover(code, receiverPosition, imports).then(
+        () => undefined,
+        () => {
+          this.sourceAttachmentWarmups.delete(sourceKey);
+        }
+      );
+      this.sourceAttachmentWarmups.set(sourceKey, sourceAttachmentWarmup);
+    }
+    await sourceAttachmentWarmup;
+    items = await requestCompletionItems();
+    return items;
   }
+
+  private hasMissingMethodDocumentation = (item: CompletionItem) => {
+    if (item.kind !== CompletionItemKind.Method) {
+      return false;
+    }
+    if (!item.documentation) {
+      return true;
+    }
+    return item.documentation instanceof MarkdownString ? !item.documentation.value.trim() : !item.documentation.trim();
+  };
+
+  private memberReceiverPosition = (code: string, position: Position) => {
+    const memberSeparator = code.lastIndexOf('.', position.character);
+    if (memberSeparator <= 0) {
+      return undefined;
+    }
+    let character = memberSeparator - 1;
+    while (character >= 0 && /\s/.test(code[character] ?? '')) {
+      character--;
+    }
+    return character < 0 ? undefined : new Position(position.line, character);
+  };
 
   public async hover(toBeHovered: string, position: Position, imports: string[] = []) {
     const javaFile = await this.dummyHoverJavaFile;
