@@ -161,4 +161,22 @@ class InscriptionView {
   get monacoContentAssist() {
     return this.parent.locator('div.editor-widget.suggest-widget');
   }
+
+  get monacoCompletionDetails() {
+    return this.parent.locator('.suggest-details');
+  }
+
+  async expectMonacoCompletionDocumentation(completionLabel: string, documentation: string) {
+    const completion = this.monacoContentAssist.getByText(completionLabel).first();
+    const details = this.monacoCompletionDetails;
+    await completion.hover();
+    if (!(await details.isVisible())) {
+      await this.wsPage.page.keyboard.press('Control+Space');
+    }
+    await expect(details.locator('.docs')).toContainText(documentation);
+  }
+
+  get monacoHoverContents() {
+    return this.parent.locator('.monaco-hover .code-hover-contents');
+  }
 }

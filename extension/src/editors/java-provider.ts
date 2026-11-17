@@ -1,4 +1,4 @@
-import { CompletionItem, CompletionItemKind, CompletionList, Location, Position, Uri, workspace, type LocationLink } from 'vscode';
+import { CompletionItem, CompletionItemKind, CompletionList, Hover, Location, MarkdownString, Position, Uri, workspace, type LocationLink } from 'vscode';
 import { executeCommand } from '../base/commands';
 import { logWarningMessage } from '../base/logging-util';
 import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
@@ -6,13 +6,21 @@ import { treeUriToProjectPath } from '../project-explorer/tree-selection';
 
 export class JavaProvider {
   readonly dummyJavaFile: Promise<Uri>;
+  readonly dummyHoverJavaFile: Promise<Uri>;
+  readonly dummyContextJavaFile: Promise<Uri>;
 
   static readonly DUMMY_CLASS_NAME = 'Dummy';
   static readonly DUMMY_CONTENT = `private class ${JavaProvider.DUMMY_CLASS_NAME}{`;
+  static readonly DUMMY_HOVER_CONTENT = `class ${JavaProvider.DUMMY_CLASS_NAME} { void dummy() {`;
 
   constructor(documentUri: Uri) {
-    this.dummyJavaFile = treeUriToProjectPath(documentUri, IvyProjectManager.instance.getIvyProjects()).then(project =>
-      Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider', `java-provider.java`)
+    const projectPath = treeUriToProjectPath(documentUri, IvyProjectManager.instance.getIvyProjects());
+    this.dummyJavaFile = projectPath.then(project => Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider', 'java-provider.java'));
+    this.dummyHoverJavaFile = projectPath.then(project =>
+      Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider', 'java-provider-hover.java')
+    );
+    this.dummyContextJavaFile = projectPath.then(project =>
+      Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider', 'java-provider-context.java')
     );
   }
 
@@ -33,6 +41,42 @@ export class JavaProvider {
           item.kind === CompletionItemKind.Class || item.kind === CompletionItemKind.Interface || item.kind === CompletionItemKind.Enum
       )
       .filter(item => item.detail !== JavaProvider.DUMMY_CLASS_NAME);
+  }
+
+  public async contextualCompletionItems(code: string, position: Position, imports: string[], itemResolveCount: number) {
+    const javaFile = await this.dummyContextJavaFile;
+    const importContent = imports.length > 0 ? `${imports.join('\n')}\n` : '';
+    const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${code}; } }`;
+    await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
+    const javaPosition = new Position(imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + position.character);
+    const completionList = await executeCommand<CompletionList>(
+      'vscode.executeCompletionItemProvider',
+      javaFile,
+      javaPosition,
+      undefined,
+      itemResolveCount
+    );
+    return completionList.items;
+  }
+
+  public async hover(toBeHovered: string, position: Position, imports: string[] = []) {
+    const javaFile = await this.dummyHoverJavaFile;
+    const importContent = imports.length > 0 ? `${imports.join('\n')}\n` : '';
+    const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${toBeHovered}; } }`;
+    await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
+    const javaPosition = new Position(imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + position.character);
+    const hovers = await executeCommand<Hover[] | undefined>('vscode.executeHoverProvider', javaFile, javaPosition);
+    const documentation = hovers?.flatMap(hover => hover.contents).map(content => {
+      if (typeof content === 'string') {
+        return content;
+      }
+      if (content instanceof MarkdownString) {
+        return content.value;
+      }
+      return `\`\`\`${content.language}\n${content.value}\n\`\`\``;
+    });
+    const result = documentation?.filter(Boolean).join('\n\n');
+    return result || undefined;
   }
 
   public async javaTypes(toBeCompleted: string) {
