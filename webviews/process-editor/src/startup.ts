@@ -58,7 +58,11 @@ export class StandaloneDiagramStartup implements IDiagramStartup {
   private setupDefinitionNavigation() {
     type DefinitionEditor = ReturnType<MonacoApi['editor']['getEditors']>[number];
     let lastFocusedEditor: DefinitionEditor | undefined;
-    const sendDefinitionActivation = (target: EventTarget | null, useLastFocusedEditor = false) => {
+    const sendDefinitionActivation = (
+      target: EventTarget | null,
+      useLastFocusedEditor = false,
+      clientPoint?: { x: number; y: number }
+    ) => {
       void MonacoUtil.monaco().then(monaco => {
         const targetNode = target instanceof Node ? target : undefined;
         const editor =
@@ -66,7 +70,8 @@ export class StandaloneDiagramStartup implements IDiagramStartup {
           monaco.editor.getEditors().find(candidate => candidate.hasTextFocus()) ??
           (useLastFocusedEditor ? lastFocusedEditor : undefined);
         const model = editor?.getModel();
-        const position = editor?.getPosition();
+        const mouseTarget = clientPoint && editor ? editor.getTargetAtClientPoint(clientPoint.x, clientPoint.y) : undefined;
+        const position = mouseTarget?.position ?? editor?.getPosition();
         if (!model || !position) {
           return;
         }
@@ -88,7 +93,11 @@ export class StandaloneDiagramStartup implements IDiagramStartup {
       const isGoToDefinitionAction = actionLabel?.startsWith('Go to Definition') ?? false;
       const isModifierClick = event.metaKey || event.ctrlKey;
       if (isModifierClick || isGoToDefinitionAction) {
-        sendDefinitionActivation(target, isGoToDefinitionAction);
+        sendDefinitionActivation(
+          target,
+          isGoToDefinitionAction,
+          isModifierClick ? { x: event.clientX, y: event.clientY } : undefined
+        );
       }
     };
     const rememberFocusedEditor = (target: EventTarget | null) => {

@@ -153,6 +153,7 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
       }
     | undefined;
   private currentHover: { id: number; documentation: Promise<string | undefined> } | undefined;
+  private readonly resolvedJavaDefinitions = new Map<string, VSCodeLocation | VSCodeLocationLink>();
   private readonly currentDefinitions = new Map<
     number,
     {
@@ -269,12 +270,14 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
 
   handleDidOpen = (params: DidOpenTextDocumentParams) => {
     const textDocument = params.textDocument;
+    this.clearResolvedJavaDefinitions(textDocument.uri);
     const doc = TextDocument.create(textDocument.uri, textDocument.languageId, textDocument.version, textDocument.text);
     this.documents.set(textDocument.uri, doc);
   };
 
   handleDidChange = (params: DidChangeTextDocumentParams) => {
     const textDocument = params.textDocument;
+    this.clearResolvedJavaDefinitions(textDocument.uri);
     const currentDoc = this.documents.get(textDocument.uri);
     if (!currentDoc) {
       return;
@@ -296,8 +299,17 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     const imports = lines.filter(sourceLine => /^\s*import\s+(?:static\s+)?[\w.$*]+\s*;\s*$/.test(sourceLine));
     const javaPosition = new VSCodePosition(0, Math.min(params.position.character, line.length));
     const range = this.definitionWordRange(line, params.position);
+    const key = this.definitionKey(params.textDocument.uri, range);
     this.currentDefinitions.set(id, {
-      location: this.javaCompletion.definitionAt(line, javaPosition, imports).catch(() => undefined),
+      location: this.javaCompletion
+        .definitionAt(line, javaPosition, imports)
+        .then(location => {
+          if (location) {
+            this.resolvedJavaDefinitions.set(key, location);
+          }
+          return location ?? this.resolvedJavaDefinitions.get(key);
+        })
+        .catch(() => this.resolvedJavaDefinitions.get(key)),
       textDocumentUri: params.textDocument.uri,
       range
     });
@@ -311,7 +323,26 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     const lines = document.getText().split(/\r\n|\n|\r/);
     const line = lines[position.line] ?? '';
     const imports = lines.filter(sourceLine => /^\s*import\s+(?:static\s+)?[\w.$*]+\s*;\s*$/.test(sourceLine));
-    return this.javaCompletion.openDefinitionAt(line, new VSCodePosition(0, Math.min(position.character, line.length)), imports);
+    const key = this.definitionKey(uri, this.definitionWordRange(line, position));
+    const location =
+      this.resolvedJavaDefinitions.get(key) ??
+      (await this.javaCompletion.definitionAt(line, new VSCodePosition(0, Math.min(position.character, line.length)), imports));
+    if (!location) {
+      return false;
+    }
+    this.resolvedJavaDefinitions.set(key, location);
+    await this.javaCompletion.openJavaLocation(location);
+    return true;
+  };
+
+  definitionKey = (uri: string, range: Range) => `${uri}:${range.start.line}:${range.start.character}:${range.end.character}`;
+
+  clearResolvedJavaDefinitions = (uri: string) => {
+    for (const key of this.resolvedJavaDefinitions.keys()) {
+      if (key.startsWith(`${uri}:`)) {
+        this.resolvedJavaDefinitions.delete(key);
+      }
+    }
   };
 
   definitionWordRange = (line: string, position: Position): Range => {
