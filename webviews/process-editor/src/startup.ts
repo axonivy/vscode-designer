@@ -20,6 +20,7 @@ import { setupSelectAllShortcutHandler } from './select-all-shortcut';
 const WebviewConnectionReadyNotification: NotificationType<void> = { method: 'connectionReady' };
 const InitializeConnectionRequest: RequestType<void, void> = { method: 'initializeConnection' };
 const SaveDocumentNotification: NotificationType<void> = { method: 'document/save' };
+const DefinitionModifierStateNotification: NotificationType<boolean> = { method: 'definitionModifierState' };
 
 @injectable()
 export class StandaloneDiagramStartup implements IDiagramStartup {
@@ -39,6 +40,8 @@ export class StandaloneDiagramStartup implements IDiagramStartup {
     this.messenger.sendNotification(WebviewConnectionReadyNotification, HOST_EXTENSION);
     this.actionDispatcher.dispatch(EnableHistoryAction.create());
 
+    this.setupDefinitionModifierState();
+
     // Setup clipboard handler for Monaco editors in webview
     setupPasteShortcutHandler();
     setupCutShortcutHandler();
@@ -46,6 +49,30 @@ export class StandaloneDiagramStartup implements IDiagramStartup {
 
     // Setup save shortcut handler for Monaco editors
     setupSaveShortcutHandler(() => this.messenger.sendNotification(SaveDocumentNotification, HOST_EXTENSION));
+  }
+
+  private setupDefinitionModifierState() {
+    let definitionModifierActive = false;
+    const updateDefinitionModifierState = (active: boolean) => {
+      if (definitionModifierActive === active) {
+        return;
+      }
+      definitionModifierActive = active;
+      this.messenger.sendNotification(DefinitionModifierStateNotification, HOST_EXTENSION, active);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Meta' || event.key === 'Control' || event.metaKey || event.ctrlKey) {
+        updateDefinitionModifierState(true);
+      }
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (event.key === 'Meta' || event.key === 'Control') {
+        updateDefinitionModifierState(event.metaKey || event.ctrlKey);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown, true);
+    document.addEventListener('keyup', onKeyUp, true);
+    window.addEventListener('blur', () => updateDefinitionModifierState(false));
   }
 
   private initConnection() {

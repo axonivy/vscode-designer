@@ -10,7 +10,9 @@ import {
   CompletionItemKind as VSCodeCompletionItemKind,
   Position as VSCodePosition,
   Range as VSCodeRange,
-  window
+  window,
+  type Location as VSCodeLocation,
+  type LocationLink as VSCodeLocationLink
 } from 'vscode';
 import {
   CompletionItem,
@@ -44,6 +46,7 @@ const StartProcessRequest: RequestType<string, Promise<void>> = { method: 'start
 
 // Save document notification - allow webview to trigger save when Monaco captures Cmd+S
 const SaveDocumentNotification: NotificationType<void> = { method: 'document/save' };
+const DefinitionModifierStateNotification: NotificationType<boolean> = { method: 'definitionModifierState' };
 
 const InscriptionWebSocketMessage: NotificationType<unknown> = { method: 'inscriptionWebSocketMessage' };
 const IvyScriptWebSocketMessage: NotificationType<unknown> = { method: 'ivyScriptWebSocketMessage' };
@@ -58,9 +61,16 @@ export const setupCommunication = (
   if (messageParticipant === undefined) {
     return;
   }
+  const inscriptionForwarder = new InscriptionWebSocketForwarder(websocketUrl, messenger, messageParticipant, document);
+  const ivyScriptForwarder = new IvyScriptWebSocketForwarder(websocketUrl, messenger, messageParticipant, document);
   const toDispose = new DisposableCollection(
-    new InscriptionWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
-    new IvyScriptWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
+    inscriptionForwarder,
+    ivyScriptForwarder,
+    messenger.onNotification(
+      DefinitionModifierStateNotification,
+      active => ivyScriptForwarder.setDefinitionLinkMode(active),
+      { sender: messageParticipant }
+    ),
     messenger.onNotification(WebviewConnectionReadyNotification, () => handleWebviewReadyNotification(messenger, messageParticipant), {
       sender: messageParticipant
     }),
@@ -141,7 +151,17 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
       }
     | undefined;
   private currentHover: { id: number; documentation: Promise<string | undefined> } | undefined;
-  private readonly currentDefinitions = new Map<number, Promise<boolean>>();
+  private readonly currentDefinitions = new Map<
+    number,
+    {
+      location: Promise<VSCodeLocation | VSCodeLocationLink | undefined>;
+      textDocumentUri: string;
+      range: Range;
+      openOnActivation: boolean;
+    }
+  >();
+  private readonly pendingDefinitionLinkKeys = new Set<string>();
+  private definitionLinkModeActive = false;
   private initializationRequestId: number | undefined;
   readonly javaCompletion: JavaProvider;
 
@@ -149,6 +169,16 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     super(websocketUrl, 'ivy-script-lsp', messenger, messageParticipant, IvyScriptWebSocketMessage);
     this.javaCompletion = new JavaProvider(document.uri);
   }
+
+  setDefinitionLinkMode = (active: boolean) => {
+    if (this.definitionLinkModeActive === active) {
+      return;
+    }
+    this.definitionLinkModeActive = active;
+    if (!active) {
+      this.pendingDefinitionLinkKeys.clear();
+    }
+  };
 
   protected override handleClientMessage(message: unknown) {
     if (this.hasMethodAndParams(message)) {
@@ -204,8 +234,12 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
       const definition = this.currentDefinitions.get(response.id);
       if (definition) {
         this.currentDefinitions.delete(response.id);
-        if (await definition) {
-          response.result = null;
+        const location = await definition.location;
+        if (location) {
+          if (definition.openOnActivation) {
+            await this.javaCompletion.openJavaLocation(location);
+          }
+          response.result = [{ uri: definition.textDocumentUri, range: definition.range }];
           delete response.error;
           message = JSON.stringify(response);
         }
@@ -275,7 +309,38 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     const line = lines[params.position.line] ?? '';
     const imports = lines.filter(sourceLine => /^\s*import\s+(?:static\s+)?[\w.$*]+\s*;\s*$/.test(sourceLine));
     const javaPosition = new VSCodePosition(0, Math.min(params.position.character, line.length));
-    this.currentDefinitions.set(id, this.javaCompletion.openDefinitionAt(line, javaPosition, imports).catch(() => false));
+    const range = this.definitionWordRange(line, params.position);
+    const key = `${params.textDocument.uri}:${range.start.line}:${range.start.character}:${range.end.character}`;
+    const openOnActivation = !this.definitionLinkModeActive || this.pendingDefinitionLinkKeys.has(key);
+    if (this.definitionLinkModeActive) {
+      if (openOnActivation) {
+        this.pendingDefinitionLinkKeys.delete(key);
+      } else {
+        this.pendingDefinitionLinkKeys.add(key);
+      }
+    }
+    this.currentDefinitions.set(id, {
+      location: this.javaCompletion.definitionAt(line, javaPosition, imports).catch(() => undefined),
+      textDocumentUri: params.textDocument.uri,
+      range,
+      openOnActivation
+    });
+  };
+
+  definitionWordRange = (line: string, position: Position): Range => {
+    const isWordCharacter = (character: string | undefined) => character !== undefined && /[\w$]/.test(character);
+    let start = Math.max(0, Math.min(position.character, line.length));
+    if (!isWordCharacter(line[start]) && isWordCharacter(line[start - 1])) {
+      start--;
+    }
+    let end = start;
+    while (start > 0 && isWordCharacter(line[start - 1])) {
+      start--;
+    }
+    while (end < line.length && isWordCharacter(line[end])) {
+      end++;
+    }
+    return Range.create(Position.create(position.line, start), Position.create(position.line, end));
   };
 
   handleHoverRequest = (params: { textDocument: { uri: string }; position: Position }, id?: number) => {

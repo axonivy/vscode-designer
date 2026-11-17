@@ -197,6 +197,33 @@ test('Monaco Editor Go to Definition in Java code', async ({ wsPage }) => {
   await expect(javaEditor).toContainText('current');
 });
 
+test('Monaco Editor Cmd-hover previews and click opens Java definition', async ({ wsPage }) => {
+  test.setTimeout(60_000);
+  await wsPage.activateExpensiveJavaStandardMode();
+  const editor = new ProcessEditor(wsPage);
+  await editor.open();
+  const inscriptionView = await editor.openInscriptionView('15254DCE818AD7A2-f0');
+  await inscriptionView.openInscriptionTab('Start');
+  await inscriptionView.openCollapsible('Code');
+  const monacoEditor = inscriptionView.monacoEditor;
+  await monacoEditor.click();
+  await wsPage.page.keyboard.type('import ch.ivyteam.ivy.security.ISecurityContext;');
+  await wsPage.page.keyboard.press('Enter');
+  await wsPage.page.keyboard.type('ISecurityContext.current()');
+  const target = monacoEditor.getByText('ISecurityContext', { exact: true }).nth(1);
+  await target.hover();
+  const modifier = process.platform === 'darwin' ? 'Meta' : 'Control';
+  await wsPage.page.keyboard.down(modifier);
+  await expect(monacoEditor.locator('.goto-definition-link')).toBeVisible();
+  await editor.expectTabActive();
+
+  await target.click({ modifiers: [modifier] });
+  await wsPage.page.keyboard.up(modifier);
+
+  await expect(wsPage.page.locator('div.tab.active')).toContainText('ISecurityContext.java');
+  await expect(wsPage.page.locator('.editor-container')).toContainText('current');
+});
+
 test('Monaco Editor Go to Definition in macro field', async ({ wsPage }) => {
   test.setTimeout(60_000);
   await wsPage.activateExpensiveJavaStandardMode();

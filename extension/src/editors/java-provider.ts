@@ -123,7 +123,7 @@ export class JavaProvider {
     await this.openJavaLocation(location);
   }
 
-  public async openDefinitionAt(code: string, position: Position, imports: string[] = []) {
+  public async definitionAt(code: string, position: Position, imports: string[] = []) {
     const macroStart = code.lastIndexOf('<%=', position.character);
     const macroEnd = code.indexOf('%>', position.character);
     const isMacro = macroStart >= 0 && macroEnd >= 0;
@@ -139,7 +139,11 @@ export class JavaProvider {
       javaFile,
       javaPosition
     );
-    const location = locations?.[0];
+    return locations?.[0];
+  }
+
+  public async openDefinitionAt(code: string, position: Position, imports: string[] = []) {
+    const location = await this.definitionAt(code, position, imports);
     if (!location) {
       return false;
     }
@@ -147,7 +151,7 @@ export class JavaProvider {
     return true;
   }
 
-  private async openJavaLocation(location: Location | LocationLink) {
+  public async openJavaLocation(location: Location | LocationLink) {
     if (this.isLocation(location)) {
       await executeCommand('vscode.open', location.uri, { selection: location.range });
       return;
