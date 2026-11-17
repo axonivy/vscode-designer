@@ -1,8 +1,13 @@
 import {
+  l10n,
   LanguageModelTextPart,
+  MarkdownString,
   LanguageModelToolResult,
   type LanguageModelTool,
-  type LanguageModelToolInvocationOptions
+  type LanguageModelToolInvocationOptions,
+  type LanguageModelToolInvocationPrepareOptions,
+  type PreparedToolInvocation,
+  type ProviderResult
 } from 'vscode';
 import { IvyEngineManager } from '../../engine/engine-manager';
 import { markProjectsForInstall, parseAvailableProjectItems, parseProduct } from '../../market/utils/market-install-util';
@@ -43,6 +48,17 @@ export class ImportMarketProductTool implements LanguageModelTool<ImportMarketPr
   async invoke(options: LanguageModelToolInvocationOptions<ImportMarketProductArgs>): Promise<LanguageModelToolResult> {
     const message = await importMarketProduct(options.input);
     return new LanguageModelToolResult([new LanguageModelTextPart(message)]);
+  }
+
+  prepareInvocation?(options: LanguageModelToolInvocationPrepareOptions<ImportMarketProductArgs>): ProviderResult<PreparedToolInvocation> {
+    const confirmationMessage = options.input.productId.map(id => `- ${id}`).join('\n');
+    return {
+      invocationMessage: l10n.t('Importing market product'),
+      confirmationMessages: {
+        title: l10n.t('Importing market product'),
+        message: new MarkdownString(confirmationMessage)
+      }
+    };
   }
 }
 
