@@ -1,6 +1,6 @@
 ---
 name: ivy-ui
-description: 'MUST use when creating, modifying, composing, or extracting Axon Ivy dialog UIs, including Forms (*.f.json) and JSF XHTML views (*.xhtml).'
+description: 'Use when creating, modifying, composing, or extracting Axon Ivy dialog UIs, including Forms (*.f.json) and JSF XHTML views (*.xhtml). FOR TOOL-ONLY OPERATIONS: If a dedicated tool completes the request without additional UI design or content editing, invoke it directly — no skill needed.'
 user-invocable: false
 ---
 
@@ -10,9 +10,9 @@ Follow these steps for new dialogs and changes to existing ones.
 
 ## 1. Plan parts and components
 
-Before creating any file, split the request into named parts with one responsibility each, and write the plan in your reply. Decide each part by the first rule that matches. Reuse a matching existing component before creating one.
+Before creating files, use the rules below to plan each part: what it does, whether it uses Form or JSF, and whether it is inline or a component. State the plan in your reply.
 
-1. **Unsupported:** no Form feature covers it → a JSF HTML Dialog Component (`new_axon_ivy_dialog`, `type: "JSF"`, `layout: "Component"`), embedded in the Form with a `Composite`. Form features: text, email, password, and number inputs; textareas; date pickers; selects; comboboxes; radios; checkboxes; buttons; links; text; data tables; panels; fieldsets; grid and flex layouts.
+1. **Unsupported:** no Form feature covers it → a JSF HTML Dialog Component (`new_axon_ivy_dialog`, `type: "JSF"`, `layout: "Component"`), embedded in the Form with a `Composite`. If the user explicitly requires it inline without a component, first explain that conversion is one-way and removes the `.f.json` source, then convert the existing Form to JSF with `convert_dialog_form_to_jsf`. Form features: text, email, password, and number inputs; textareas; date pickers; selects; comboboxes; radios; checkboxes; buttons; links; text; data tables; panels; fieldsets; grid and flex layouts.
 2. **Repeated:** the same group of fields appears more than once in this or another dialog (e.g. billing and delivery address) → one component used for every occurrence, even with different labels or data. A fieldset per occurrence is still inline. Keep it inline only if the user explicitly asks for inline controls.
 3. **Large, self-contained or requested:** a sizable section of a long page with its own piece of data, a part whose actions work only on its own data, or a part the user asks to make reusable → its own component.
 4. Otherwise keep it inline.
