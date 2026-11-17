@@ -24,12 +24,17 @@ pipeline {
     stage('Validate preparations') {
       steps {
         script {
+          def version = params.version
+          if (!params.publishToMarket && !version) {
+            version = getExtensionVersion()
+          }
+          env.RELEASE_VERSION = version
           if (params.publishToMarket) {
             assertReleaseBranch(env.BRANCH_NAME)
           }
-          assertReleaseVersionFormat(params.version)
-          assertReleaseVersionMatchesExtensionVersion(params.version)
-          currentBuild.description = !params.publishToMarket ? "Dry run (${params.version})" : params.version
+          assertReleaseVersionFormat(version)
+          assertReleaseVersionMatchesExtensionVersion(version)
+          currentBuild.description = !params.publishToMarket ? "Dry run (${version})" : version
         }
       }
     }
@@ -65,8 +70,8 @@ pipeline {
           sh "MILESTONE='${params.milestone}' pnpm run publish:next"
         }
         script {
-          def majorVersion = params.version.tokenize('.')[0]
-          currentBuild.description = "<a href='https://marketplace.visualstudio.com/items?itemName=axonivy.vscode-designer-${majorVersion}'>${params.version}</a>"
+          def majorVersion = env.RELEASE_VERSION.tokenize('.')[0]
+          currentBuild.description = "<a href='https://marketplace.visualstudio.com/items?itemName=axonivy.vscode-designer-${majorVersion}'>${env.RELEASE_VERSION}</a>"
         }
       }
     }
