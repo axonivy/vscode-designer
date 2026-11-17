@@ -85,6 +85,7 @@ The tests report token usage from Aspire spans, assert tool calls where applicab
   @IvyFixtures({"purchase", "employee-management"})
   ```
 - Each test owns its fixture resources; nothing is restored between methods. Do not commit generated `target/` files.
+- Before prompts, each class uses Testcontainers' HTTP wait for the Designer engine's workspace project endpoint to return HTTP 200. This runs after fresh and reused container startup, with a five-minute timeout. It confirms workspace availability, not completion of fixture registration. The test container maps engine port `8080` to a random host port for this read-only probe.
 
 ## ❤️‍🩹 Troubleshooting
 

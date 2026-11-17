@@ -46,16 +46,14 @@ public class UiTest {
   @Order(Complexity.COMPOSITE)
   void formDialog(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
-        First create a data class 'User' in the 'purchase' project
-        with the fields 'fullName', 'address', 'phone' (text) and 'age' (integer).
-        Then create a new dialog 'OrderForm' in 'purchase' project.
+        Create a new dialog 'OrderForm' in the 'employee-management' project.
         The form lets the user enter an order: 'product' (text), 'quantity' (number) and 'deliveryDate' (date),
-        and the 'customer' as the data class 'User' created above, with all its fields.
+        and the 'customer' as the existing data class 'User', with all its fields.
         Each input is bound to the dialog data.
         """);
 
-    var purchase = rt.ivyWorkspace().path().resolve("purchase");
-    var form = purchase.resolve("dialog/com/acme/demo/OrderForm/OrderForm.f.json");
+    var project = rt.ivyWorkspace().path().resolve("employee-management");
+    var form = project.resolve("dialog/com/acme/demo/OrderForm/OrderForm.f.json");
     assertThat(form)
         .as("project's namespace is used by default")
         .exists();
@@ -63,7 +61,7 @@ public class UiTest {
         .as("Form dialog consists of form, data class and process")
         .containsExactlyInAnyOrder("OrderForm.f.json", "OrderFormData.d.json", "OrderFormProcess.p.json");
 
-    assertOrderData(form.resolveSibling("OrderFormData.d.json"), userType(purchase));
+    assertOrderData(form.resolveSibling("OrderFormData.d.json"), userType(project));
 
     var formJson = readJson(form);
     var bindings = formJson.path("components").findParents("type").stream()
@@ -81,7 +79,7 @@ public class UiTest {
 
     assertThat(spans)
         .as("Must use create-tool for initial correct creation; then the skill to edit the form")
-        .usedTools("skill", "axonivy-designer-new_axon_ivy_data_class", "axonivy-designer-new_axon_ivy_dialog")
+        .usedTools("skill", "axonivy-designer-new_axon_ivy_dialog")
         .loadedSkill("ivy-ui")
         .calledToolWithout("axonivy-designer-new_axon_ivy_dialog", "namespace") // no guessed namespace
         .viewed("skills/ivy-json-files/schemas/project/data-class.json",
@@ -225,16 +223,14 @@ public class UiTest {
   @Order(Complexity.COMPOSITE)
   void jsfDialog(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""
-        First create a data class 'User' in the 'purchase' project
-        with the fields 'fullName', 'address', 'phone' (text) and 'age' (integer).
-        Then create a new JSF dialog 'OrderOverview' in 'purchase' project.
+        Create a new JSF dialog 'OrderOverview' in the 'employee-management' project.
         The view lets the user enter an order: 'product' (text), 'quantity' (number) and 'deliveryDate' (date),
-        and the 'customer' as the data class 'User' created above, with all its fields.
+        and the 'customer' as the existing data class 'User', with all its fields.
         Each input is bound to the dialog data.
         """);
 
-    var purchase = rt.ivyWorkspace().path().resolve("purchase");
-    var view = purchase.resolve("dialog/com/acme/demo/OrderOverview/OrderOverview.xhtml");
+    var project = rt.ivyWorkspace().path().resolve("employee-management");
+    var view = project.resolve("dialog/com/acme/demo/OrderOverview/OrderOverview.xhtml");
     assertThat(view)
         .as("project's namespace is used by default")
         .exists();
@@ -242,7 +238,7 @@ public class UiTest {
         .as("JSF dialog consists of view, data class and process")
         .containsExactlyInAnyOrder("OrderOverview.xhtml", "OrderOverviewData.d.json", "OrderOverviewProcess.p.json");
 
-    assertOrderData(view.resolveSibling("OrderOverviewData.d.json"), userType(purchase));
+    assertOrderData(view.resolveSibling("OrderOverviewData.d.json"), userType(project));
 
     assertThat(view).content()
         .as("requested template is used by the view")
@@ -254,7 +250,7 @@ public class UiTest {
 
     assertThat(spans)
         .as("Must use create-tool for initial correct creation; then the skill to edit the data class")
-        .usedTools("skill", "axonivy-designer-new_axon_ivy_data_class", "axonivy-designer-new_axon_ivy_dialog")
+        .usedTools("skill", "axonivy-designer-new_axon_ivy_dialog")
         .loadedSkill("ivy-ui")
         .calledToolWithout("axonivy-designer-new_axon_ivy_dialog", "namespace") // no guessed namespace
         .viewed("skills/ivy-json-files/schemas/project/data-class.json")

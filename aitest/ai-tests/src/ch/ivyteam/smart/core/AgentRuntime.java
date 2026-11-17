@@ -72,6 +72,7 @@ public class AgentRuntime {
     var designerMcpContainer = new DesignerMcpContainer(ivyWorkspace, extensionDir, userData, vscodeCache, javaHome,
         mcp);
     startContainer(designerMcpContainer);
+    designerMcpContainer.awaitProjectsReady(IvyWorkspaceSetup.projects(fixtures));
 
     var aspireContainer = new AspireContainer();
     startContainer(aspireContainer);

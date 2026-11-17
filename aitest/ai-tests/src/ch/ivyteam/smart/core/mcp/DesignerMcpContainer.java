@@ -3,6 +3,8 @@ package ch.ivyteam.smart.core.mcp;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.regex.Pattern;
 
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
@@ -16,6 +18,7 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
 
   private static final String NETWORK_ALIAS = "designer-mcp";
   private static final int MCP_PORT = 32140;
+  private static final int ENGINE_PORT = 8080;
 
   public DesignerMcpContainer(Path ivyWorkspace, Path extensionDir, Path userData, Path vscodeCache, String javaHome, Path mcp) {
     super(DockerImageName.parse("mcr.microsoft.com/playwright:v1.61.1-noble"));
@@ -47,7 +50,8 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
       withFileSystemBind(trustStoreDirectory.toString(), trustStoreDirectory.toString(), BindMode.READ_ONLY);
     }
     withEnv("JAVA_HOME", javaHomePath.toString());
-    withExposedPorts(MCP_PORT);
+    withEnv("DONT_PROMPT_WSL_INSTALL", "1");
+    withExposedPorts(MCP_PORT, ENGINE_PORT);
     System.out.println("Waiting for MCP health endpoint on port " + MCP_PORT + " in designer-mcp container...");
     waitingFor(Wait
         .forHttp("/health")
@@ -74,6 +78,17 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
 
   public String getMcpUri() {
     return "http://" + NETWORK_ALIAS + ":" + MCP_PORT + "/mcp";
+  }
+
+  public void awaitProjectsReady(String... projects) {
+    Wait.forHttp("/designer/api/web-ide/projects?workspaceId=workspace")
+        .forPort(ENGINE_PORT)
+        .withHeader("X-Requested-By", "aitest")
+        .forStatusCode(200)
+        .forResponsePredicate(body -> Arrays.stream(projects)
+            .allMatch(project -> Pattern.compile("\"/workspace/" + Pattern.quote(project) + "/?\"").matcher(body).find()))
+        .withStartupTimeout(Duration.ofMinutes(5))
+        .waitUntilReady(this);
   }
 
 }

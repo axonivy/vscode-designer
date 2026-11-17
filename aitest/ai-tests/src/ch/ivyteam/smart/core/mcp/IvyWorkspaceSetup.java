@@ -21,8 +21,7 @@ public class IvyWorkspaceSetup {
       if (!reuse) {
         deleteFirstLevel();
       }
-      var projects = selectedFixtures.length == 0 ? new String[] {"purchase"} : selectedFixtures;
-      for (var project : projects) {
+      for (var project : projects(selectedFixtures)) {
         if (!reuse || !Files.exists(workspace.resolve(project))) {
           copyProject(template.resolve(project));
         }
@@ -31,6 +30,10 @@ public class IvyWorkspaceSetup {
     } catch (IOException exception) {
       throw new UncheckedIOException("Failed to initialize Ivy workspace from: " + template, exception);
     }
+  }
+
+  public static String[] projects(String... selectedFixtures) {
+    return selectedFixtures.length == 0 ? new String[] {"purchase"} : selectedFixtures;
   }
 
   private void deleteFirstLevel() throws IOException {
