@@ -28,6 +28,7 @@ type VSCodeCommand =
   | 'vscode.openWith'
   | 'vscode.executeCompletionItemProvider'
   | 'vscode.executeDefinitionProvider'
+  | 'vscode.executeHoverProvider'
   | 'copyFilePath'
   | 'workbench.action.openSettings'
   | 'workbench.action.reloadWindow'

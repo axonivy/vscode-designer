@@ -136,11 +136,22 @@ test('Monaco Editor completion with JDT language server', async ({ wsPage }) => 
   await inscriptionView.openInscriptionTab('Start');
   await inscriptionView.openCollapsible('Code');
   const monacoEditor = inscriptionView.monacoEditor;
+  const contentAssist = inscriptionView.monacoContentAssist;
+  const javadoc = 'Gets the current security context.';
   await monacoEditor.click();
   await expect(monacoEditor).toHaveText('');
   await inscriptionView.writeToMonacoEditorWithCompletion('ISecurityCon', 'ISecurityContext');
   await inscriptionView.writeToMonacoEditorWithCompletion('.cur', 'current()');
   await expect(monacoEditor).toHaveText('import ch.ivyteam.ivy.security.ISecurityContext;ISecurityContext.current()');
+
+  await wsPage.page.keyboard.press('ArrowLeft');
+  await wsPage.page.keyboard.press('ArrowLeft');
+  await wsPage.page.keyboard.press('ArrowLeft');
+  await wsPage.page.keyboard.press('ControlOrMeta+K');
+  await wsPage.page.keyboard.press('ControlOrMeta+I');
+  await expect(inscriptionView.monacoHoverContents).toContainText(javadoc);
+  await wsPage.page.keyboard.press('Escape');
+
   await inscriptionView.closeCollapsible('Code');
   await expect(monacoEditor).toBeHidden();
 
@@ -148,8 +159,19 @@ test('Monaco Editor completion with JDT language server', async ({ wsPage }) => 
   await inscriptionView.parent.locator('div.script-input').focus();
   await expect(monacoEditor).toHaveText('');
   await inscriptionView.writeToMonacoEditorWithCompletion('ISecurityCont', 'ISecurityContext');
-  await inscriptionView.writeToMonacoEditorWithCompletion('.cur', 'current()');
+  await wsPage.page.keyboard.type('.cur', { delay: 50 });
+  await expect(contentAssist).toBeVisible();
+  await inscriptionView.expectMonacoCompletionDocumentation('current()', javadoc);
+  await contentAssist.getByText('current()').first().locator('span.highlight').click();
   await expect(monacoEditor).toHaveText('ch.ivyteam.ivy.security.ISecurityContext.current()');
+
+  await wsPage.page.keyboard.press('ArrowLeft');
+  await wsPage.page.keyboard.press('ArrowLeft');
+  await wsPage.page.keyboard.press('ArrowLeft');
+  await wsPage.page.keyboard.press('ControlOrMeta+K');
+  await wsPage.page.keyboard.press('ControlOrMeta+I');
+  await expect(inscriptionView.monacoHoverContents).toContainText(javadoc);
+  await wsPage.page.keyboard.press('Escape');
 });
 
 test('Monaco Editor shortcuts', async ({ wsPage }) => {
