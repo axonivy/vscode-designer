@@ -1,1 +1,43 @@
-{"$schema":"https://json-schema.org/draft/2019-09/schema","$defs":{"Role":{"type":"object","properties":{"Id":{"type":"string","description":"Unique role identifier"},"Name":{"type":"string","description":"Display name"},"Parent":{"type":"string","description":"Parent role id"},"Members":{"description":"Linked member role ids","type":"array","items":{"type":"string"}}},"required":["Id"],"additionalProperties":false}},"type":"object","properties":{"Roles":{"type":"array","items":{"$ref":"#/$defs/Role"}}},"additionalProperties":false}
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$defs": {
+    "Role": {
+      "type": "object",
+      "properties": {
+        "Id": {
+          "type": "string",
+          "description": "Unique role identifier"
+        },
+        "Name": {
+          "type": "string",
+          "description": "Display name"
+        },
+        "Parent": {
+          "type": "string",
+          "description": "Parent role id"
+        },
+        "Members": {
+          "description": "Linked member role ids",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "Id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "properties": {
+    "Roles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Role"
+      }
+    }
+  },
+  "additionalProperties": false
+}

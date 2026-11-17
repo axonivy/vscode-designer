@@ -1,1 +1,97 @@
-{"$schema":"https://json-schema.org/draft/2019-09/schema","$defs":{"ProcessPreCondition":{"type":"object","properties":{"label":{"type":"string"},"script":{"type":"string"}},"additionalProperties":false},"StageModel":{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"icon":{"type":"string"},"isTerminating":{"type":"boolean"},"processes":{"type":"array","items":{"$ref":"#/$defs/StageProcessModel"}},"sidesteps":{"type":"array","items":{"$ref":"#/$defs/StageProcessModel"}}},"additionalProperties":false},"StageProcessModel":{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"processToExecute":{"type":"string"},"preCondition":{"$ref":"#/$defs/ProcessPreCondition"}},"additionalProperties":false}},"type":"object","properties":{"$schema":{"type":"string"},"uuid":{"type":"string","format":"uuid"},"id":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"stages":{"type":"array","items":{"$ref":"#/$defs/StageModel"}}},"additionalProperties":false}
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$defs": {
+    "ProcessPreCondition": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "script": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "StageModel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "isTerminating": {
+          "type": "boolean"
+        },
+        "processes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StageProcessModel"
+          }
+        },
+        "sidesteps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StageProcessModel"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "StageProcessModel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "processToExecute": {
+          "type": "string"
+        },
+        "preCondition": {
+          "$ref": "#/$defs/ProcessPreCondition"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "uuid": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/StageModel"
+      }
+    }
+  },
+  "additionalProperties": false
+}
