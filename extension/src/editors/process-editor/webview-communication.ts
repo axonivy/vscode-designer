@@ -47,6 +47,9 @@ const StartProcessRequest: RequestType<string, Promise<void>> = { method: 'start
 // Save document notification - allow webview to trigger save when Monaco captures Cmd+S
 const SaveDocumentNotification: NotificationType<void> = { method: 'document/save' };
 const DefinitionModifierStateNotification: NotificationType<boolean> = { method: 'definitionModifierState' };
+const DefinitionLinkActivationNotification: NotificationType<{ uri: string; position: Position }> = {
+  method: 'definitionLinkActivation'
+};
 
 const InscriptionWebSocketMessage: NotificationType<unknown> = { method: 'inscriptionWebSocketMessage' };
 const IvyScriptWebSocketMessage: NotificationType<unknown> = { method: 'ivyScriptWebSocketMessage' };
@@ -69,6 +72,11 @@ export const setupCommunication = (
     messenger.onNotification(
       DefinitionModifierStateNotification,
       active => ivyScriptForwarder.setDefinitionLinkMode(active),
+      { sender: messageParticipant }
+    ),
+    messenger.onNotification(
+      DefinitionLinkActivationNotification,
+      activation => void ivyScriptForwarder.openDefinitionAtPosition(activation.uri, activation.position).catch(() => undefined),
       { sender: messageParticipant }
     ),
     messenger.onNotification(WebviewConnectionReadyNotification, () => handleWebviewReadyNotification(messenger, messageParticipant), {
@@ -160,7 +168,6 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
       openOnActivation: boolean;
     }
   >();
-  private readonly pendingDefinitionLinkKeys = new Set<string>();
   private definitionLinkModeActive = false;
   private initializationRequestId: number | undefined;
   readonly javaCompletion: JavaProvider;
@@ -175,9 +182,6 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
       return;
     }
     this.definitionLinkModeActive = active;
-    if (!active) {
-      this.pendingDefinitionLinkKeys.clear();
-    }
   };
 
   protected override handleClientMessage(message: unknown) {
@@ -310,21 +314,24 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     const imports = lines.filter(sourceLine => /^\s*import\s+(?:static\s+)?[\w.$*]+\s*;\s*$/.test(sourceLine));
     const javaPosition = new VSCodePosition(0, Math.min(params.position.character, line.length));
     const range = this.definitionWordRange(line, params.position);
-    const key = `${params.textDocument.uri}:${range.start.line}:${range.start.character}:${range.end.character}`;
-    const openOnActivation = !this.definitionLinkModeActive || this.pendingDefinitionLinkKeys.has(key);
-    if (this.definitionLinkModeActive) {
-      if (openOnActivation) {
-        this.pendingDefinitionLinkKeys.delete(key);
-      } else {
-        this.pendingDefinitionLinkKeys.add(key);
-      }
-    }
+    const openOnActivation = !this.definitionLinkModeActive;
     this.currentDefinitions.set(id, {
       location: this.javaCompletion.definitionAt(line, javaPosition, imports).catch(() => undefined),
       textDocumentUri: params.textDocument.uri,
       range,
       openOnActivation
     });
+  };
+
+  openDefinitionAtPosition = async (uri: string, position: Position) => {
+    const document = this.documents.get(uri);
+    if (!document) {
+      return false;
+    }
+    const lines = document.getText().split(/\r\n|\n|\r/);
+    const line = lines[position.line] ?? '';
+    const imports = lines.filter(sourceLine => /^\s*import\s+(?:static\s+)?[\w.$*]+\s*;\s*$/.test(sourceLine));
+    return this.javaCompletion.openDefinitionAt(line, new VSCodePosition(0, Math.min(position.character, line.length)), imports);
   };
 
   definitionWordRange = (line: string, position: Position): Range => {

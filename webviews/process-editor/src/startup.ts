@@ -9,6 +9,7 @@ import {
 import { ContainerModule, inject, injectable } from 'inversify';
 
 import { EnableInscriptionAction } from '@axonivy/process-editor-inscription';
+import { MonacoUtil } from '@axonivy/process-editor-inscription-view';
 import { EnableHistoryAction, EnableViewportAction, UpdatePaletteItems } from '@axonivy/process-editor-protocol';
 import { toConnection } from '@axonivy/vscode-webview-common';
 import { HOST_EXTENSION, type NotificationType, type RequestType } from 'vscode-messenger-common';
@@ -21,6 +22,10 @@ const WebviewConnectionReadyNotification: NotificationType<void> = { method: 'co
 const InitializeConnectionRequest: RequestType<void, void> = { method: 'initializeConnection' };
 const SaveDocumentNotification: NotificationType<void> = { method: 'document/save' };
 const DefinitionModifierStateNotification: NotificationType<boolean> = { method: 'definitionModifierState' };
+const DefinitionLinkActivationNotification: NotificationType<{
+  uri: string;
+  position: { line: number; character: number };
+}> = { method: 'definitionLinkActivation' };
 
 @injectable()
 export class StandaloneDiagramStartup implements IDiagramStartup {
@@ -66,12 +71,36 @@ export class StandaloneDiagramStartup implements IDiagramStartup {
       }
     };
     const onKeyUp = (event: KeyboardEvent) => {
-      if (event.key === 'Meta' || event.key === 'Control') {
-        updateDefinitionModifierState(event.metaKey || event.ctrlKey);
+      if (event.key === 'Meta') {
+        updateDefinitionModifierState(event.ctrlKey);
+      } else if (event.key === 'Control') {
+        updateDefinitionModifierState(event.metaKey);
       }
+    };
+    const onClick = (event: MouseEvent) => {
+      if (!event.metaKey && !event.ctrlKey) {
+        return;
+      }
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
+      }
+      void MonacoUtil.monaco().then(monaco => {
+        const editor = monaco.editor.getEditors().find(candidate => candidate.getDomNode()?.contains(target));
+        const model = editor?.getModel();
+        const position = editor?.getPosition();
+        if (!model || !position) {
+          return;
+        }
+        this.messenger.sendNotification(DefinitionLinkActivationNotification, HOST_EXTENSION, {
+          uri: model.uri.toString(true),
+          position: { line: position.lineNumber - 1, character: position.column - 1 }
+        });
+      });
     };
     document.addEventListener('keydown', onKeyDown, true);
     document.addEventListener('keyup', onKeyUp, true);
+    document.addEventListener('click', onClick, true);
     window.addEventListener('blur', () => updateDefinitionModifierState(false));
   }
 
