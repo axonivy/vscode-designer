@@ -58,6 +58,19 @@ export class StandaloneDiagramStartup implements IDiagramStartup {
   private setupDefinitionNavigation() {
     type DefinitionEditor = ReturnType<MonacoApi['editor']['getEditors']>[number];
     let lastFocusedEditor: DefinitionEditor | undefined;
+    void MonacoUtil.monaco().then(monaco => {
+      const enableDefinitionLinksForMacroEditors = (editor: DefinitionEditor) => {
+        const updateMacroOptions = () => {
+          if (editor.getModel()?.getLanguageId() === 'ivyMacro') {
+            editor.updateOptions({ contextmenu: true, links: true });
+          }
+        };
+        updateMacroOptions();
+        editor.onDidChangeModel(updateMacroOptions);
+      };
+      monaco.editor.getEditors().forEach(enableDefinitionLinksForMacroEditors);
+      monaco.editor.onDidCreateEditor(enableDefinitionLinksForMacroEditors);
+    });
     const sendDefinitionActivation = (
       target: EventTarget | null,
       useLastFocusedEditor = false,
