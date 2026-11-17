@@ -141,6 +141,7 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
       }
     | undefined;
   private currentHover: { id: number; documentation: Promise<string | undefined> } | undefined;
+  private readonly currentDefinitions = new Map<number, Promise<boolean>>();
   readonly javaCompletion: JavaProvider;
 
   constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: CustomDocument) {
@@ -162,12 +163,34 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
           break;
         case 'textDocument/hover':
           this.handleHoverRequest(message.params as { textDocument: { uri: string }; position: Position }, message.id);
+          break;
+        case 'textDocument/definition':
+          this.handleDefinitionRequest(message.params as { textDocument: { uri: string }; position: Position }, message.id);
+          break;
       }
     }
     super.handleClientMessage(message);
   }
 
   protected override async handleServerMessage(message: string) {
+    const response = JSON.parse(message);
+    if (
+      typeof response === 'object' &&
+      response !== null &&
+      'id' in response &&
+      typeof response.id === 'number' &&
+      !('method' in response)
+    ) {
+      const definition = this.currentDefinitions.get(response.id);
+      if (definition) {
+        this.currentDefinitions.delete(response.id);
+        if (await definition) {
+          response.result = null;
+          delete response.error;
+          message = JSON.stringify(response);
+        }
+      }
+    }
     if (this.currentHover) {
       const { id, documentation } = this.currentHover;
       const obj = JSON.parse(message);
@@ -218,6 +241,21 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     }
     const newDoc = TextDocument.update(currentDoc, params.contentChanges, textDocument.version);
     this.documents.set(textDocument.uri, newDoc);
+  };
+
+  handleDefinitionRequest = (params: { textDocument: { uri: string }; position: Position }, id?: number) => {
+    if (id === undefined) {
+      return;
+    }
+    const document = this.documents.get(params.textDocument.uri);
+    if (!document) {
+      return;
+    }
+    const lines = document.getText().split(/\r\n|\n|\r/);
+    const line = lines[params.position.line] ?? '';
+    const imports = lines.filter(sourceLine => /^\s*import\s+(?:static\s+)?[\w.$*]+\s*;\s*$/.test(sourceLine));
+    const javaPosition = new VSCodePosition(0, Math.min(params.position.character, line.length));
+    this.currentDefinitions.set(id, this.javaCompletion.openDefinitionAt(line, javaPosition, imports).catch(() => false));
   };
 
   handleHoverRequest = (params: { textDocument: { uri: string }; position: Position }, id?: number) => {

@@ -174,6 +174,50 @@ test('Monaco Editor completion with JDT language server', async ({ wsPage }) => 
   await wsPage.page.keyboard.press('Escape');
 });
 
+test('Monaco Editor Go to Definition in Java code', async ({ wsPage }) => {
+  test.setTimeout(60_000);
+  await wsPage.activateExpensiveJavaStandardMode();
+  const editor = new ProcessEditor(wsPage);
+  await editor.open();
+  const inscriptionView = await editor.openInscriptionView('15254DCE818AD7A2-f0');
+  await inscriptionView.openInscriptionTab('Start');
+  await inscriptionView.openCollapsible('Code');
+  const monacoEditor = inscriptionView.monacoEditor;
+  await monacoEditor.click();
+  await wsPage.page.keyboard.type('import ch.ivyteam.ivy.security.ISecurityContext;');
+  await wsPage.page.keyboard.press('Enter');
+  await wsPage.page.keyboard.type('ISecurityContext.current()');
+  await wsPage.page.keyboard.press('Home');
+  await wsPage.page.keyboard.press('ArrowRight');
+  await wsPage.page.keyboard.press('ArrowRight');
+  await wsPage.page.keyboard.press('ArrowRight');
+  await wsPage.executeCommand('Go to Definition');
+
+  const javaEditor = wsPage.page.locator('.editor-container');
+  await expect(wsPage.page.locator('div.tab.active')).toContainText('ISecurityContext.java');
+  await expect(javaEditor).toContainText('current');
+});
+
+test('Monaco Editor Go to Definition in macro field', async ({ wsPage }) => {
+  test.setTimeout(60_000);
+  await wsPage.activateExpensiveJavaStandardMode();
+  const editor = new ProcessEditor(wsPage);
+  await editor.open();
+  const inscriptionView = await editor.openInscriptionView('15254DCE818AD7A2-f0');
+  await inscriptionView.openInscriptionTab('Start');
+  const macroEditor = inscriptionView.parent.locator('div.script-input .view-lines.monaco-mouse-cursor-text').first();
+  await macroEditor.click();
+  await wsPage.page.keyboard.type('ch.ivyteam.ivy.security.ISecurityContext.current()');
+  await wsPage.page.keyboard.press('ArrowLeft');
+  await wsPage.page.keyboard.press('ArrowLeft');
+  await wsPage.page.keyboard.press('ArrowLeft');
+  await wsPage.executeCommand('Go to Definition');
+
+  const javaEditor = wsPage.page.locator('.editor-container');
+  await expect(wsPage.page.locator('div.tab.active')).toContainText('ISecurityContext.java');
+  await expect(javaEditor).toContainText('current');
+});
+
 test('Monaco Editor shortcuts', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage);
   await editor.open();

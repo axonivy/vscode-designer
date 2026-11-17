@@ -8,6 +8,7 @@ export class JavaProvider {
   readonly dummyJavaFile: Promise<Uri>;
   readonly dummyHoverJavaFile: Promise<Uri>;
   readonly dummyContextJavaFile: Promise<Uri>;
+  readonly dummyDefinitionJavaFile: Promise<Uri>;
 
   static readonly DUMMY_CLASS_NAME = 'Dummy';
   static readonly DUMMY_CONTENT = `private class ${JavaProvider.DUMMY_CLASS_NAME}{`;
@@ -21,6 +22,9 @@ export class JavaProvider {
     );
     this.dummyContextJavaFile = projectPath.then(project =>
       Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider', 'java-provider-context.java')
+    );
+    this.dummyDefinitionJavaFile = projectPath.then(project =>
+      Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider', 'java-provider-definition.java')
     );
   }
 
@@ -110,11 +114,39 @@ export class JavaProvider {
       logWarningMessage(`Failed to open Java file. No definition found for: ${fullyQualifiedName}`);
       return;
     }
+    await this.openJavaLocation(location);
+  }
+
+  public async openDefinitionAt(code: string, position: Position, imports: string[] = []) {
+    const macroStart = code.lastIndexOf('<%=', position.character);
+    const macroEnd = code.indexOf('%>', position.character);
+    const isMacro = macroStart >= 0 && macroEnd >= 0;
+    const source = isMacro ? code.slice(macroStart + 3, macroEnd) : code;
+    const sourcePosition = isMacro ? new Position(0, position.character - macroStart - 3) : position;
+    const javaFile = await this.dummyDefinitionJavaFile;
+    const importContent = imports.length > 0 ? `${imports.join('\n')}\n` : '';
+    const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${source}; } }`;
+    await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
+    const javaPosition = new Position(imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + sourcePosition.character);
+    const locations = await executeCommand<Array<Location | LocationLink> | undefined>(
+      'vscode.executeDefinitionProvider',
+      javaFile,
+      javaPosition
+    );
+    const location = locations?.[0];
+    if (!location) {
+      return false;
+    }
+    await this.openJavaLocation(location);
+    return true;
+  }
+
+  private async openJavaLocation(location: Location | LocationLink) {
     if (this.isLocation(location)) {
-      executeCommand('vscode.open', location.uri, { selection: location.range });
+      await executeCommand('vscode.open', location.uri, { selection: location.range });
       return;
     }
-    executeCommand('vscode.open', location.targetUri, { selection: location.targetRange });
+    await executeCommand('vscode.open', location.targetUri, { selection: location.targetRange });
   }
 
   private toPrettyString = (locations: Array<Location | LocationLink>) =>
