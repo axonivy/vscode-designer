@@ -187,11 +187,10 @@ test('Monaco Editor Go to Definition in Java code', async ({ wsPage }) => {
   await wsPage.page.keyboard.type('import ch.ivyteam.ivy.security.ISecurityContext;');
   await wsPage.page.keyboard.press('Enter');
   await wsPage.page.keyboard.type('ISecurityContext.current()');
-  await wsPage.page.keyboard.press('Home');
-  await wsPage.page.keyboard.press('ArrowRight');
-  await wsPage.page.keyboard.press('ArrowRight');
-  await wsPage.page.keyboard.press('ArrowRight');
-  await wsPage.executeCommand('Go to Definition');
+  await monacoEditor.getByText('ISecurityContext', { exact: true }).nth(1).click({ button: 'right' });
+  const goToDefinition = wsPage.page.getByText('Go to Definition', { exact: true });
+  await expect(goToDefinition).toBeVisible();
+  await goToDefinition.click();
 
   const javaEditor = wsPage.page.locator('.editor-container');
   await expect(wsPage.page.locator('div.tab.active')).toContainText('ISecurityContext.java');
@@ -208,10 +207,10 @@ test('Monaco Editor Go to Definition in macro field', async ({ wsPage }) => {
   const macroEditor = inscriptionView.parent.locator('div.script-input .view-lines.monaco-mouse-cursor-text').first();
   await macroEditor.click();
   await wsPage.page.keyboard.type('ch.ivyteam.ivy.security.ISecurityContext.current()');
-  await wsPage.page.keyboard.press('ArrowLeft');
-  await wsPage.page.keyboard.press('ArrowLeft');
-  await wsPage.page.keyboard.press('ArrowLeft');
-  await wsPage.executeCommand('Go to Definition');
+  await macroEditor.getByText('ISecurityContext', { exact: true }).click({ button: 'right' });
+  const goToDefinition = wsPage.page.getByText('Go to Definition', { exact: true });
+  await expect(goToDefinition).toBeVisible();
+  await goToDefinition.click();
 
   const javaEditor = wsPage.page.locator('.editor-container');
   await expect(wsPage.page.locator('div.tab.active')).toContainText('ISecurityContext.java');

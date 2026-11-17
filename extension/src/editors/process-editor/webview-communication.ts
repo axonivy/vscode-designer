@@ -142,6 +142,7 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     | undefined;
   private currentHover: { id: number; documentation: Promise<string | undefined> } | undefined;
   private readonly currentDefinitions = new Map<number, Promise<boolean>>();
+  private initializationRequestId: number | undefined;
   readonly javaCompletion: JavaProvider;
 
   constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: CustomDocument) {
@@ -152,6 +153,9 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
   protected override handleClientMessage(message: unknown) {
     if (this.hasMethodAndParams(message)) {
       switch (message.method) {
+        case 'initialize':
+          this.initializationRequestId = message.id;
+          break;
         case DidOpenTextDocumentNotification.method:
           this.handleDidOpen(message.params as DidOpenTextDocumentParams);
           break;
@@ -174,6 +178,22 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
 
   protected override async handleServerMessage(message: string) {
     const response = JSON.parse(message);
+    if (
+      typeof response === 'object' &&
+      response !== null &&
+      typeof this.initializationRequestId === 'number' &&
+      response.id === this.initializationRequestId
+    ) {
+      this.initializationRequestId = undefined;
+      if (typeof response.result === 'object' && response.result !== null) {
+        // This bridge handles Java definition requests locally through the VS Code Java provider.
+        response.result.capabilities = {
+          ...(response.result.capabilities ?? {}),
+          definitionProvider: true
+        };
+        message = JSON.stringify(response);
+      }
+    }
     if (
       typeof response === 'object' &&
       response !== null &&
