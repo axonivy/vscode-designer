@@ -4,7 +4,12 @@ import os from 'os';
 import path from 'path';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { FileType, ThemeColor, ThemeIcon, TreeItemCollapsibleState, Uri, type FileSystemProvider } from 'vscode';
-import { IAR_CONTENT_SCHEME, IarContentFileSystemProvider, iarContentEngineFileName, iarContentUri } from './iar-content-provider';
+import {
+  IAR_CONTENT_SCHEME,
+  IarContentFileSystemProvider,
+  iarContentEngineFileName,
+  iarContentUri
+} from './iar-content-provider';
 import { IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
 
 const mocks = vi.hoisted(() => ({
@@ -231,7 +236,7 @@ test('does not show IAR dependencies below projects that do not declare them', a
   expect(roots.map(root => root.collapsibleState)).toEqual([TreeItemCollapsibleState.Collapsed, undefined]);
 });
 
-test('shows only the META-INF/ivy tree and opens files as read-only documents', async () => {
+test('shows only the META-INF/ivy tree and opens process files with their engine URI', async () => {
   const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
   const [workspaceProject] = await provider.getChildren();
   const [iarGroup] = await provider.getChildren(workspaceProject);
@@ -247,9 +252,9 @@ test('shows only the META-INF/ivy tree and opens files as read-only documents', 
   expect(processFile?.command?.command).toBe('vscode.open');
   expect(provider.getTreeItem(processFile!).resourceUri).toBe(processFile?.uri);
   const fsProvider: FileSystemProvider = new IarContentFileSystemProvider();
-  const engineUri = processFile!.command!.arguments![0] as import('vscode').Uri;
+  const openUri = processFile!.command!.arguments![0] as import('vscode').Uri;
   const fileUri = iarContentUri(archivePath, 'META-INF/ivy/process/hello.p.json');
-  expect(engineUri.path).toBe(iarContentEngineFileName(fileUri));
+  expect(openUri.path).toBe(iarContentEngineFileName(fileUri));
   expect(Buffer.from((await fsProvider.readFile(fileUri)) as Uint8Array).toString('utf8')).toBe('{"name":"IAR process"}');
   expect(fsProvider.readDirectory(iarDependency!.uri)).toEqual([
     ['process', FileType.Directory],

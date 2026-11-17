@@ -15,7 +15,7 @@ import type { KnownCommand } from '../base/commands';
 import { JavaClassPathReader } from '../base/java-class-path-reader';
 import type { ProjectBean } from '../engine/api/generated/client';
 import { IvyDiagnostics } from '../engine/diagnostics';
-import { IarContentFileSystemProvider, iarContentUri } from './iar-content-provider';
+import { IarContentFileSystemProvider, iarContentEngineUri, iarContentUri } from './iar-content-provider';
 
 const __dirname = import.meta.dirname;
 interface IvyCommand extends VSCodeCommand {
@@ -196,10 +196,8 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
       .map(([name, type]) => {
         let uri = Uri.joinPath(parent.uri, name);
         const isDirectory = type === FileType.Directory;
-        if (!isDirectory) {
-          if (name.match(/\.p\.json$/)) {
-            uri = this.iarContentProvider.tranformToAbsoluteUri(uri);
-          }
+        if (!isDirectory && name.endsWith('.p.json')) {
+          uri = iarContentEngineUri(uri);
         }
         return {
           uri,

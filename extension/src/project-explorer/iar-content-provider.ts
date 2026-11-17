@@ -34,6 +34,8 @@ export const iarContentEngineFileName = (uri: Uri) => {
   return `${archivePath}!/${entryPath}`;
 };
 
+export const iarContentEngineUri = (uri: Uri) => Uri.parse(iarContentEngineFileName(uri));
+
 export const iarContentUri = (archivePath: string, entryPath: string) => {
   const contentPath = entryPath.replace(/^META-INF\/ivy\/?/, '');
   const uriPath = [path.basename(archivePath), ...contentPath.split('/').filter(Boolean)]
@@ -169,10 +171,6 @@ export class IarContentFileSystemProvider implements FileSystemProvider {
 
   rename(oldUri: Uri): void {
     throw FileSystemError.NoPermissions(oldUri);
-  }
-
-  tranformToAbsoluteUri(uri: Uri) {
-    return Uri.parse(iarContentEngineFileName(uri));
   }
 
   private resolveUri(uri: Uri) {

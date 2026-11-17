@@ -61,20 +61,13 @@ class WebServiceClientWebSocketForwarder extends EditorWebSocketForwarder {
     engineFileName: string,
     private readonly readOnly: boolean
   ) {
-    super(
-      websocketUrl,
-      'ivy-webservice-lsp',
-      messenger,
-      messageParticipant,
-      WebServiceClientWebSocketMessage,
-      document,
-      engineFileName
-    );
+    super(websocketUrl, 'ivy-webservice-lsp', messenger, messageParticipant, WebServiceClientWebSocketMessage, document, engineFileName);
   }
 
   protected override handleClientMessage(message: unknown) {
     if (isIntegrationRequest(message)) {
       if (this.readOnly) {
+        logErrorMessage(l10n.t('Editor is read-only'));
         super.handleServerMessage(createJsonRpcErrorResponse(message, -32000, l10n.t('Editor is read-only')));
         return;
       }
