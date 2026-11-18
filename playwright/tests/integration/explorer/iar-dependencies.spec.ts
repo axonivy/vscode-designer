@@ -1,7 +1,7 @@
 import path from 'path';
 import { expect, test } from '~/fixtures/baseTest';
-import { TextEditor } from '~/page-objects/editor';
 import { ProjectExplorerView } from '~/page-objects/explorer-view';
+import { RestClientEditor } from '~/page-objects/restclient-editor';
 import { installTestIar, testIarCoordinates } from '~/utils/test-iar';
 import { iarDependencyWorkspacePath } from '~/workspaces/workspace';
 
@@ -34,6 +34,8 @@ test.describe('IAR project dependencies', () => {
   });
 
   test('opens an IAR file in the text editor and keeps it read-only', async ({ wsPage, tmpWorkspace }) => {
+    const restClientFileName = 'rest-clients.yaml';
+
     const projectName = path.basename(tmpWorkspace!.tmpWorkspacePath);
     const projectExplorer = new ProjectExplorerView(wsPage);
     await projectExplorer.openView();
@@ -42,25 +44,17 @@ test.describe('IAR project dependencies', () => {
     await projectExplorer.expandNodeExact('IAR Dependencies');
     await projectExplorer.expandNodeExact(projectExplorerItem);
     await projectExplorer.expandNodeExact('config');
-    await projectExplorer.scrollToNodeExact('rest-clients.yaml');
-    await projectExplorer.selectNodeExact('rest-clients.yaml');
+    await projectExplorer.scrollToNodeExact(restClientFileName);
+    await projectExplorer.selectNodeExact(restClientFileName);
 
-    // TODO: Replace with web editor as soon as supported
-    const editor = new TextEditor(wsPage, 'rest-clients.yaml');
+    const editor = new RestClientEditor(wsPage);
     await editor.expectTabVisible();
     await editor.expectTabActive();
-    await editor.expectTabNotDirty();
-    await expect(editor.content).toContainText('personService');
-    await editor.expectHasBreadCrumbs('prebuiltProject-1.0.0-SNAPSHOT.iar', 'config', 'rest-clients.yaml');
-
-    // const editor = new RestClientEditor(wsPage, restClientFileName);
-    // await editor.expectTabVisible();
-    // await editor.expectTabActive();
-    // await editor.expectWebViewVisible();
-    // await expect(editor.webViewFrame.getByRole('button', { name: /Add Rest Client/ })).toHaveCount(0);
-    // await editor.rows.first().click();
-    // const keyInput = editor.detail.getByRole('textbox', { name: 'Key' });
-    // await expect(keyInput).toHaveValue('personService');
-    // await expect(keyInput).toBeDisabled();
+    await editor.expectWebViewVisible();
+    await expect(editor.webViewFrame.getByRole('button', { name: /Add Rest Client/ })).toHaveCount(0);
+    await editor.rows.first().click();
+    const keyInput = editor.detail.getByRole('textbox', { name: 'Key' });
+    await expect(keyInput).toHaveValue('personService');
+    await expect(keyInput).toBeDisabled();
   });
 });
