@@ -9,7 +9,7 @@ user-invocable: false
 ## Search
 
 Use a `web` tool to fetch the complete product listing; do not cap or truncate it:
-https://market.axonivy.com/stable/api/product
+`GET https://market.axonivy.com/stable/api/product?llm&designerVersion=${ivyVersion}`
 Use the exact product `id` from the listing; never guess.
 
 ## Install
