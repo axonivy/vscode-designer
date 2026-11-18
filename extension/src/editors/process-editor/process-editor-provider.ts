@@ -4,9 +4,10 @@ import {
   SocketGlspVscodeServer,
   configureDefaultCommands
 } from '@eclipse-glsp/vscode-integration';
-import type { CancellationToken, CustomDocument, ExtensionContext, WebviewPanel } from 'vscode';
+import type { CancellationToken, CustomDocument, CustomDocumentOpenContext, ExtensionContext, Uri, WebviewPanel } from 'vscode';
 import { window } from 'vscode';
 import { messenger } from '../..';
+import { logInformationMessage } from '../../base/logging-util';
 import { createWebViewContent } from '../webview-helper';
 import { breakpointSnapshot, remapBreakpoints } from './process-breakpoint-handler';
 import { ProcessVscodeConnector } from './process-vscode-connector';
@@ -72,5 +73,14 @@ export default class ProcessEditorProvider extends GlspEditorProvider {
     workflowServer.start();
 
     configureDefaultCommands({ extensionContext: context, connector: ivyVscodeConnector, diagramPrefix: 'workflow' });
+  }
+
+  override openCustomDocument(
+    uri: Uri,
+    _openContext: CustomDocumentOpenContext,
+    _token: CancellationToken
+  ): CustomDocument | Thenable<CustomDocument> {
+    logInformationMessage(`Opening custom document: ${uri.toString()}`);
+    return super.openCustomDocument(uri, _openContext, _token);
   }
 }

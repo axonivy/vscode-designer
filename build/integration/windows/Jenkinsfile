@@ -59,6 +59,7 @@ pipeline {
       post {
         always {
           archiveArtifacts artifacts: 'AxonIvyEngine/logs/ivy.log', allowEmptyArchive: true
+          archiveArtifacts artifacts: 'ivy-engine-console.out', allowEmptyArchive: true
         }
       }
     }
