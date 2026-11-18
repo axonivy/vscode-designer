@@ -1,9 +1,11 @@
 import type { DataActionArgs, DataClassTypeSearchRequest } from '@axonivy/dataclass-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
+import fs from 'fs';
 import type { TextDocument, WebviewPanel } from 'vscode';
 import { commands, Uri } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
+import { logErrorMessage } from '../../base/logging-util';
 import { updateTextDocumentContent } from '../content-writer';
 import { EditorWebSocketForwarder } from '../editor-websocket-forwarder';
 import { JavaProvider } from '../java-provider';
@@ -55,7 +57,7 @@ class DataClassEditorWebSocketForwarder extends EditorWebSocketForwarder {
           commands.executeCommand('vscode.open', Uri.parse(`${path}Process.p.json`));
           break;
         case 'openForm':
-          commands.executeCommand('vscode.open', Uri.parse(`${path}.f.json`));
+          openDialog(path);
           break;
         default:
           noUnknownAction(message.params.actionId);
@@ -78,3 +80,12 @@ class DataClassEditorWebSocketForwarder extends EditorWebSocketForwarder {
     super.handleServerMessage(message);
   }
 }
+
+const openDialog = async (path: string) => {
+  try {
+    const dialogUri = fs.existsSync(`${path}.f.json`) ? `${path}.f.json` : `${path}.xhtml`;
+    await commands.executeCommand('vscode.open', Uri.file(dialogUri));
+  } catch (error) {
+    logErrorMessage(String(error));
+  }
+};
