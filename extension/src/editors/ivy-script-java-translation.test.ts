@@ -22,6 +22,47 @@ test('maps the IvyScript case and task members to their Java API methods', () =>
   });
 });
 
+test('maps casemap to the generic Java service lookup and adds its type import', () => {
+  const code = 'ivy.casemap.find()';
+  const context = toJavaSourceContext(code, code.indexOf('find') + 1);
+
+  expect(context).toEqual({
+    code: 'Ivy.get(ICaseMapService.class).find()',
+    character: code.indexOf('find') + 'Ivy.get(ICaseMapService.class)'.length - 'ivy.casemap'.length + 1,
+    imports: [IVY_IMPORT, 'import ch.ivyteam.ivy.casemap.runtime.ICaseMapService;']
+  });
+});
+
+test('maps the casemap alias itself to its Java service type', () => {
+  const context = toJavaSourceContext('ivy.casemap.find()', 4);
+
+  expect(context.character).toBe('Ivy.get(ICaseMapService.class)'.indexOf('ICaseMapService'));
+});
+
+test('supports all standard Ivy environment accessors', () => {
+  const members: Array<[string, string]> = [
+    ['cal', 'cal'],
+    ['cm', 'cm'],
+    ['cms', 'cms'],
+    ['datacache', 'datacache'],
+    ['extensions', 'extensions'],
+    ['html', 'html'],
+    ['log', 'log'],
+    ['persistence', 'persistence'],
+    ['repo', 'repo'],
+    ['request', 'request'],
+    ['response', 'response'],
+    ['rest', 'rest'],
+    ['security', 'security'],
+    ['session', 'session'],
+    ['var', 'var'],
+    ['wf', 'wf']
+  ];
+  const code = members.map(([member]) => `ivy.${member}`).join(' + ');
+
+  expect(toJavaSourceContext(code, 0).code).toBe(members.map(([, method]) => `Ivy.${method}()`).join(' + '));
+});
+
 test('maps the cursor on the IvyScript task member to the corresponding Java method name', () => {
   expect(toJavaSourceContext('ivy.task.customField()', 4).character).toBe('Ivy.wfTask()'.indexOf('Task'));
 });

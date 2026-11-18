@@ -5,6 +5,7 @@ export type JavaSourceContext = {
 };
 
 const IVY_IMPORT = 'import ch.ivyteam.ivy.environment.Ivy;';
+const CASE_MAP_SERVICE_IMPORT = 'import ch.ivyteam.ivy.casemap.runtime.ICaseMapService;';
 const IVY_MEMBERS: Record<string, string> = {
   cal: 'cal',
   request: 'request',
@@ -26,14 +27,38 @@ const IVY_MEMBERS: Record<string, string> = {
   repo: 'repo'
 };
 
+const ivyMemberMapping = (member: string) => {
+  if (member === 'casemap') {
+    const selection = 'ICaseMapService';
+    const replacement = `Ivy.get(${selection}.class)`;
+    return {
+      replacement,
+      selectionStart: replacement.indexOf(selection),
+      selectionLength: selection.length,
+      imports: [IVY_IMPORT, CASE_MAP_SERVICE_IMPORT]
+    };
+  }
+  const method = IVY_MEMBERS[member];
+  if (!method) {
+    return undefined;
+  }
+  const replacement = `Ivy.${method}()`;
+  return {
+    replacement,
+    selectionStart: replacement.indexOf(method) + method.length - member.length,
+    selectionLength: member.length,
+    imports: [IVY_IMPORT]
+  };
+};
+
 export const toJavaSourceContext = (code: string, character: number, imports: string[] = []): JavaSourceContext => {
   const matches = [...code.matchAll(/\bivy\.([A-Za-z_$][\w$]*)/g)].flatMap(match => {
     const member = match[1];
-    const method = member ? IVY_MEMBERS[member] : undefined;
-    if (!member || !method || match.index === undefined) {
+    const mapping = member ? ivyMemberMapping(member) : undefined;
+    if (!member || !mapping || match.index === undefined) {
       return [];
     }
-    return [{ start: match.index, end: match.index + match[0].length, member, method, replacement: `Ivy.${method}()` }];
+    return [{ start: match.index, end: match.index + match[0].length, member, ...mapping }];
   });
 
   if (matches.length === 0) {
@@ -59,13 +84,19 @@ export const toJavaSourceContext = (code: string, character: number, imports: st
         translatedCharacter = match.start + characterDelta + relativeCharacter;
       } else {
         const memberCharacter = relativeCharacter - 4;
-        const methodPrefixLength = match.method.length - match.member.length;
-        translatedCharacter = match.start + characterDelta + 4 + methodPrefixLength + Math.min(memberCharacter, match.method.length - 1);
+        translatedCharacter =
+          match.start + characterDelta + match.selectionStart + Math.min(memberCharacter, match.selectionLength - 1);
       }
     }
   }
   translatedCode += code.slice(originalEnd);
 
-  const javaImports = imports.some(statement => statement.trim() === IVY_IMPORT) ? imports : [...imports, IVY_IMPORT];
+  const requiredImports = new Set(matches.flatMap(match => match.imports));
+  const javaImports = [...imports];
+  for (const statement of requiredImports) {
+    if (!javaImports.some(existing => existing.trim() === statement)) {
+      javaImports.push(statement);
+    }
+  }
   return { code: translatedCode, character: translatedCharacter, imports: javaImports };
 };
