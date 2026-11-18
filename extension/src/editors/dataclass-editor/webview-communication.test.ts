@@ -1,6 +1,8 @@
 import fs from 'fs';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import type { TextDocument } from 'vscode';
+import { FileSystemError } from 'vscode';
+import { logErrorMessage } from '../../base/logging-util';
 import { setupCommunication } from './webview-communication';
 
 const mocks = vi.hoisted(() => ({
@@ -8,13 +10,31 @@ const mocks = vi.hoisted(() => ({
     throw new Error(`No message handler for ${String(message)}`);
   },
   executeCommand: vi.fn(),
-  uriFile: vi.fn()
+  uriFile: vi.fn(),
+  stat: vi.fn()
 }));
 
-vi.mock('vscode', () => ({
-  commands: { executeCommand: mocks.executeCommand },
-  Uri: { file: mocks.uriFile }
-}));
+vi.mock('vscode', () => {
+  class FileSystemError extends Error {
+    constructor(readonly code: string) {
+      super(code);
+    }
+
+    static FileNotFound() {
+      return new FileSystemError('FileNotFound');
+    }
+
+    static NoPermissions() {
+      return new FileSystemError('NoPermissions');
+    }
+  }
+  return {
+    commands: { executeCommand: mocks.executeCommand },
+    FileSystemError,
+    Uri: { file: mocks.uriFile },
+    workspace: { fs: { stat: mocks.stat } }
+  };
+});
 
 vi.mock('@eclipse-glsp/vscode-integration', () => ({
   DisposableCollection: class {
@@ -52,6 +72,7 @@ vi.mock('../../base/logging-util', () => ({ logErrorMessage: vi.fn(), logInforma
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.uriFile.mockImplementation(path => ({ scheme: 'file', path }));
+  mocks.stat.mockReset().mockResolvedValue({});
 });
 
 afterEach(() => {
@@ -73,22 +94,54 @@ const openForm = (uri: object, readOnly: boolean) => {
   mocks.dispatch({ method: 'action', params: { actionId: 'openForm' } });
 };
 
-test('opens the read-only XHTML sibling with the archive URI', () => {
-  const dialogUri = { scheme: 'axonivy-iar-content', path: '/shared.iar/dialog/My Dialog.xhtml', query: 'archive=%2Fdeps%2Fshared.iar' };
+const archiveDocumentUri = () => {
   const uri = {
-    scheme: dialogUri.scheme,
+    scheme: 'axonivy-iar-content',
     path: '/shared.iar/dialog/My DialogData.d.json',
-    query: dialogUri.query,
-    with: vi.fn().mockReturnValue(dialogUri)
+    query: 'archive=%2Fdeps%2Fshared.iar',
+    with: vi.fn(({ path }: { path: string }) => ({ scheme: uri.scheme, path, query: uri.query }))
   };
+  return uri;
+};
+
+test.each([
+  [true, '.f.json'],
+  [false, '.xhtml']
+])('opens the read-only dialog with archive form existence %s', async (formExists, extension) => {
+  const uri = archiveDocumentUri();
   const exists = vi.spyOn(fs, 'existsSync');
+  if (!formExists) {
+    mocks.stat.mockRejectedValue(FileSystemError.FileNotFound());
+  }
 
   openForm(uri, true);
 
-  expect(uri.with).toHaveBeenCalledWith({ path: '/shared.iar/dialog/My Dialog.xhtml' });
-  expect(mocks.executeCommand).toHaveBeenCalledWith('vscode.open', dialogUri);
+  await vi.waitFor(() =>
+    expect(mocks.executeCommand).toHaveBeenCalledWith('vscode.open', {
+      scheme: uri.scheme,
+      path: `/shared.iar/dialog/My Dialog${extension}`,
+      query: uri.query
+    })
+  );
+  expect(mocks.stat).toHaveBeenCalledWith({
+    scheme: uri.scheme,
+    path: '/shared.iar/dialog/My Dialog.f.json',
+    query: uri.query
+  });
   expect(exists).not.toHaveBeenCalled();
   expect(mocks.uriFile).not.toHaveBeenCalled();
+});
+
+test('reports archive access errors without falling back to XHTML', async () => {
+  const uri = archiveDocumentUri();
+  const error = FileSystemError.NoPermissions();
+  mocks.stat.mockRejectedValue(error);
+
+  openForm(uri, true);
+
+  await vi.waitFor(() => expect(logErrorMessage).toHaveBeenCalledWith(String(error)));
+  expect(mocks.executeCommand).not.toHaveBeenCalled();
+  expect(uri.with).not.toHaveBeenCalledWith({ path: '/shared.iar/dialog/My Dialog.xhtml' });
 });
 
 test.each([

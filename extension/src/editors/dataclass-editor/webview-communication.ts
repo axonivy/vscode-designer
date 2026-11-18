@@ -2,7 +2,7 @@ import type { DataActionArgs, DataClassTypeSearchRequest } from '@axonivy/datacl
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
 import fs from 'fs';
 import type { TextDocument, WebviewPanel } from 'vscode';
-import { commands, Uri } from 'vscode';
+import { commands, FileSystemError, Uri, workspace } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { logErrorMessage } from '../../base/logging-util';
@@ -55,15 +55,7 @@ class DataClassEditorWebSocketForwarder extends EditorWebSocketForwarder {
     private readonly resolvedEngineFileName: string,
     private readonly readOnly: boolean
   ) {
-    super(
-      websocketUrl,
-      'ivy-data-class-lsp',
-      messenger,
-      messageParticipant,
-      DataClassWebSocketMessage,
-      document,
-      resolvedEngineFileName
-    );
+    super(websocketUrl, 'ivy-data-class-lsp', messenger, messageParticipant, DataClassWebSocketMessage, document, resolvedEngineFileName);
     this.javaCompletion = new JavaProvider(document.uri);
   }
 
@@ -106,9 +98,19 @@ class DataClassEditorWebSocketForwarder extends EditorWebSocketForwarder {
 const openDialog = async (documentUri: Uri, readOnly: boolean) => {
   try {
     const path = documentUri.path.substring(0, documentUri.path.lastIndexOf('Data.d.json'));
-    const dialogUri = readOnly
-      ? documentUri.with({ path: `${path}.xhtml` })
+    let dialogUri = readOnly
+      ? documentUri.with({ path: `${path}.f.json` })
       : Uri.file(fs.existsSync(`${path}.f.json`) ? `${path}.f.json` : `${path}.xhtml`);
+    if (readOnly) {
+      try {
+        await workspace.fs.stat(dialogUri);
+      } catch (error) {
+        if (!(error instanceof FileSystemError) || error.code !== 'FileNotFound') {
+          throw error;
+        }
+        dialogUri = documentUri.with({ path: `${path}.xhtml` });
+      }
+    }
     await commands.executeCommand('vscode.open', dialogUri);
   } catch (error) {
     logErrorMessage(String(error));
