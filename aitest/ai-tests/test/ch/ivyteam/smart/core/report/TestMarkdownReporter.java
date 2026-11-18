@@ -16,7 +16,7 @@ public class TestMarkdownReporter {
   @Test
   void writesMarkdownTable() {
     var reporter = new MarkdownReporter();
-    reporter.init("CopilotIntegrationTest");
+    reporter.init("MyAiTest");
     var spans = TestAspireSpans.read("spans-copilot.json");
     reporter.append("myTest", spans.userMessage(), spans.tokenUsage(), spans.usedTools());
 
@@ -26,9 +26,9 @@ public class TestMarkdownReporter {
         <strong>axonivy-designer-new_axon_ivy_project</strong><pre><code>{"groupId":"com.example","name":"flight-simulator","path":"/workspace","projectId":"flight-simulator"}</code></pre>""";
 
     var expected = """
-        ## AI test report
+        ## MyAiTest
 
-        Test file: `aitest/ai-dev-tests/test/ch/ivyteam/smart/core/copilot/CopilotIntegrationTest.java`
+        Test file: `aitest/ai-dev-tests/test/ch/ivyteam/smart/core/copilot/MyAiTest.java`
 
         | 💬️ Test | ↪️ Input tokens | ↩️ Output tokens | 🛠️ Tools used |
         | --- | ---: | ---: | --- |

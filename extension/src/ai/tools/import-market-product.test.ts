@@ -13,6 +13,9 @@ vi.mock('vscode', () => ({
   },
   LanguageModelToolResult: class {
     constructor(public content: unknown[]) { }
+  },
+  MarkdownString: class {
+    constructor(public value: string) { }
   }
 }));
 
@@ -20,7 +23,7 @@ vi.mock('../../engine/engine-manager', () => ({
   IvyEngineManager: { instance: { installMarketProduct: mockInstallMarketProduct, start: mockStartEngine } }
 }));
 
-import { importMarketProduct } from './import-market-product';
+import { ImportMarketProductTool, importMarketProduct } from './import-market-product';
 
 const productJson = JSON.stringify({
   installers: [
@@ -47,6 +50,20 @@ const productJson = JSON.stringify({
 beforeEach(() => {
   mockInstallMarketProduct.mockReset().mockResolvedValue(undefined);
   mockStartEngine.mockReset().mockResolvedValue(undefined);
+});
+
+test('asks for confirmation before importing selected projects', () => {
+  const confirmation = new ImportMarketProductTool().prepareInvocation?.({
+    input: { productId: ['sample-demo', 'sample-demo-test'], productJson }
+  });
+
+  expect(confirmation).toMatchObject({
+    invocationMessage: 'Importing market product',
+    confirmationMessages: {
+      title: 'Importing market product',
+      message: { value: '- sample-demo\n- sample-demo-test' }
+    }
+  });
 });
 
 test('imports only explicitly named artifactIds, ignoring workspace defaults', async () => {

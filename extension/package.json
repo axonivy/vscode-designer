@@ -52,7 +52,7 @@
     "@eclipse-glsp/protocol": "2.7.0",
     "@eclipse-glsp/vscode-integration": "2.7.0",
     "@modelcontextprotocol/sdk": "^1.30.0",
-    "axios": "1.21.0",
+    "axios": "1.21.1",
     "dom-serializer": "3.1.1",
     "domhandler": "6.0.1",
     "fast-xml-parser": "5.12.0",
@@ -69,7 +69,7 @@
     "@types/vscode": "1.98.0",
     "@types/vscode-webview": "1.57.5",
     "@vscode/l10n-dev": "0.0.35",
-    "@vscode/vsce": "4.1.0",
+    "@vscode/vsce": "4.1.1",
     "esbuild": "0.28.2",
     "fonteditor-core": "2.6.3",
     "json-schema-to-typescript": "^16.0.0",
@@ -991,6 +991,25 @@
         },
         "canBeReferencedInPrompt": true,
         "toolReferenceName": "importMarketProduct"
+      },
+      {
+        "name": "convert_dialog_form_to_jsf",
+        "displayName": "%command.convertDialogFormToJsf%",
+        "modelDescription": "Converts an existing Axon Ivy Dialog Form (.f.json) to JSF (.xhtml), preserving its data class and process. One-way: overwrites matching dialog files and deletes the Form JSON. Returns the XHTML path. For new dialogs, use new_axon_ivy_dialog.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "formPath": {
+              "type": "string",
+              "description": "Absolute filesystem path to the existing source .f.json file inside a workspace Axon Ivy project's dialog directory."
+            }
+          },
+          "required": [
+            "formPath"
+          ]
+        },
+        "canBeReferencedInPrompt": true,
+        "toolReferenceName": "axonIvyDialogConvertFormToJsf"
       }
     ],
     "viewsContainers": {

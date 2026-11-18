@@ -25,6 +25,25 @@ import tools.jackson.databind.JsonNode;
 public class UiTest {
 
   @Test
+  @Order(Complexity.INDEPENDENT)
+  void convertsFormToJsf(AgentRuntime rt) throws Exception {
+    rt.prompt("""
+        In the purchase project, create a Dialog Form named EmployeeNote
+        with a note text input bound to its dialog data.
+        """);
+
+    var purchase = rt.ivyWorkspace().path().resolve("purchase");
+    var form = findFile(purchase.resolve("dialog"), "EmployeeNote.f.json");
+    assertThat(form).exists();
+
+    var spans = rt.prompt("Convert the EmployeeNote Dialog Form in the purchase project to JSF.");
+
+    assertThat(spans).usedTools("axonivy-designer-convert_dialog_form_to_jsf");
+    assertThat(form.resolveSibling("EmployeeNote.xhtml")).exists();
+    assertThat(form).doesNotExist();
+  }
+
+  @Test
   @Order(Complexity.COMPOSITE)
   void formDialog(AgentRuntime rt) throws Exception {
     var spans = rt.prompt("""

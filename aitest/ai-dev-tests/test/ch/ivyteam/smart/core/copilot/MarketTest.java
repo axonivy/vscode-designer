@@ -27,11 +27,11 @@ public class MarketTest {
         .usedTools("web_fetch")
         .toolCallArguments("market.axonivy.com");
 
-    var apiFetch = spans.usedTools().stream()
-        .filter(u -> u.name().equals("web_fetch"))
-        .filter(u -> u.arguments().contains("market.axonivy.com/stable/api/product"))
-        .findFirst().orElseThrow();
-    assertThat(apiFetch.result()).contains("adobe-acrobat");
+    var fetchCalls = spans.usedTools().stream().filter(tool -> tool.name().equals("web_fetch")).toList();
+    assertThat(fetchCalls)
+        .anySatisfy(call -> assertThat(call.arguments())
+            .contains("https://market.axonivy.com/stable/api/product?llm"));
+    assertThat(fetchCalls.get(0).result()).contains("adobe-acrobat");
 
     assertThat(spans.outputMessage())
         .containsIgnoringCase("Yes")
@@ -50,7 +50,7 @@ public class MarketTest {
     var fetchCalls = spans.usedTools().stream().filter(tool -> tool.name().equals("web_fetch")).toList();
     assertThat(fetchCalls)
         .anySatisfy(call -> assertThat(call.arguments())
-            .contains("https://market.axonivy.com/stable/api/product\""))
+            .contains("https://market.axonivy.com/stable/api/product?llm"))
         .anySatisfy(call -> assertThat(call.arguments())
             .contains("https://market.axonivy.com/stable/api/product/jira-connector/install"));
 
@@ -77,7 +77,7 @@ public class MarketTest {
 
     var apiCalls = spans.usedTools().stream().filter(call -> call.arguments() != null).toList();
     assertThat(apiCalls)
-        .anyMatch(call -> call.arguments().contains("https://market.axonivy.com/stable/api/product\""));
+        .anyMatch(call -> call.arguments().contains("https://market.axonivy.com/stable/api/product?llm"));
     assertThat(apiCalls)
         .as("resolves the product version for the project's Ivy version")
         .anyMatch(call -> call.arguments().contains("/bestmatch?isShowDevVersion=true"));

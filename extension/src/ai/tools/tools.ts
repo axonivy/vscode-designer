@@ -1,4 +1,5 @@
 import { lm, type ExtensionContext, type LanguageModelTool } from 'vscode';
+import { ConvertDialogFormToJsfTool, convertDialogFormToJsf } from './convert-dialog-form-to-jsf';
 import { NewDataClassTool, createNewDataClass } from './new-data-class';
 import { NewDialogTool, createNewDialog } from './new-dialog';
 import { NewProcessTool, createNewProcess } from './new-process';
@@ -38,6 +39,11 @@ const OWN_TOOL_DEFINITIONS = [
     name: 'import_market_product',
     createTool: () => new ImportMarketProductTool(),
     invokeHeadless: async args => importMarketProduct(args)
+  },
+  {
+    name: 'convert_dialog_form_to_jsf',
+    createTool: () => new ConvertDialogFormToJsfTool(),
+    invokeHeadless: args => convertDialogFormToJsf(args as Parameters<typeof convertDialogFormToJsf>[0])
   }
 ] as const satisfies ReadonlyArray<OwnToolDefinition>;
 

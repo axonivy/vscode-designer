@@ -134,11 +134,13 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     | {
         id: number;
         completionItems: Promise<VSCodeCompletionItem[]>;
+        contextualJavaCompletionItems: Promise<VSCodeCompletionItem[]>;
         document: TextDocument;
         position: Position;
         completionStartCharacter: number;
       }
     | undefined;
+  private currentHover: { id: number; documentation: Promise<string | undefined> } | undefined;
   readonly javaCompletion: JavaProvider;
 
   constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: CustomDocument) {
@@ -157,19 +159,43 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
           break;
         case CompletionRequest.method:
           this.handleCompletionRequest(message.params as CompletionParams, message.id);
+          break;
+        case 'textDocument/hover':
+          this.handleHoverRequest(message.params as { textDocument: { uri: string }; position: Position }, message.id);
       }
     }
     super.handleClientMessage(message);
   }
 
   protected override async handleServerMessage(message: string) {
+    if (this.currentHover) {
+      const { id, documentation } = this.currentHover;
+      const obj = JSON.parse(message);
+      if (this.isHoverResult(obj, id)) {
+        const javaDocumentation = await documentation;
+        if (javaDocumentation) {
+          const existingDocumentation = this.toMarkdown(obj.result?.contents);
+          obj.result = {
+            ...(obj.result ?? {}),
+            contents: {
+              kind: 'markdown',
+              value: [existingDocumentation, javaDocumentation].filter(Boolean).join('\n\n')
+            }
+          };
+          message = JSON.stringify(obj);
+        }
+        this.currentHover = undefined;
+      }
+    }
     if (this.currentCompletion) {
-      const { id, completionItems, document, position, completionStartCharacter } = this.currentCompletion;
+      const { id, completionItems, contextualJavaCompletionItems, document, position, completionStartCharacter } = this.currentCompletion;
       const obj = JSON.parse(message);
       if (this.isCompletionResult(obj, id)) {
-        const lspCompletionItems = (await completionItems).map(item =>
+        const [javaTypeItems, contextualJavaItems] = await Promise.all([completionItems, contextualJavaCompletionItems]);
+        const lspCompletionItems = javaTypeItems.map(item =>
           this.toLspCompletItem(item, document, { line: position.line, completionStartCharacter })
         );
+        this.addJavaDocumentation(obj.result.items, contextualJavaItems);
         obj.result.items.push(...lspCompletionItems);
         message = JSON.stringify(obj);
         this.currentCompletion = undefined;
@@ -194,6 +220,24 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     this.documents.set(textDocument.uri, newDoc);
   };
 
+  handleHoverRequest = (params: { textDocument: { uri: string }; position: Position }, id?: number) => {
+    if (id === undefined) {
+      return;
+    }
+    const document = this.documents.get(params.textDocument.uri);
+    if (!document) {
+      return;
+    }
+    const lines = document.getText().split(/\r\n|\n|\r/);
+    const line = lines[params.position.line] ?? '';
+    const imports = lines.filter(sourceLine => /^\s*import\s+(?:static\s+)?[\w.$*]+\s*;\s*$/.test(sourceLine));
+    const javaPosition = new VSCodePosition(0, Math.min(params.position.character, line.length));
+    this.currentHover = {
+      id,
+      documentation: this.javaCompletion.hover(line, javaPosition, imports)
+    };
+  };
+
   handleCompletionRequest = (params: CompletionParams, id?: number) => {
     if (id === undefined) {
       return;
@@ -212,9 +256,19 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     );
     const completionStartCharacter = Math.max(completionStartingIndex + 1, 0);
     const toBeCompleted = currentTextLine.substring(completionStartCharacter);
+    const lines = document.getText().split(/\r\n|\n|\r/);
+    const currentLine = lines[params.position.line] ?? '';
+    const imports = lines.filter(sourceLine => /^\s*import\s+(?:static\s+)?[\w.$*]+\s*;\s*$/.test(sourceLine));
+    const cursorCharacter = Math.min(params.position.character, currentLine.length);
+    const javaPosition = new VSCodePosition(0, cursorCharacter);
+    const isMemberCompletion = /\.\s*[\w$]*$/.test(currentLine.slice(0, cursorCharacter));
     this.currentCompletion = {
       id,
-      completionItems: this.javaCompletion.completionItems(toBeCompleted, 10),
+      completionItems: this.javaCompletion.completionItems(toBeCompleted, 50),
+      // Empty/short member prefixes can have many candidates; resolve all JDT candidates so their docs aren't lost by ranking.
+      contextualJavaCompletionItems: isMemberCompletion
+        ? this.javaCompletion.contextualCompletionItems(currentLine, javaPosition, imports, 1000)
+        : Promise.resolve([]),
       document,
       position: params.position,
       completionStartCharacter
@@ -232,6 +286,59 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
       message.params !== null
     );
   };
+
+  isHoverResult = (obj: unknown, id: number): obj is { result: { contents?: unknown; [key: string]: unknown } | null } => {
+    return typeof obj === 'object' && obj !== null && 'id' in obj && obj.id === id && 'result' in obj;
+  };
+
+  toMarkdown = (contents: unknown): string => {
+    if (typeof contents === 'string') {
+      return contents;
+    }
+    if (Array.isArray(contents)) {
+      return contents.map(content => this.toMarkdown(content)).filter(Boolean).join('\n\n');
+    }
+    if (typeof contents === 'object' && contents !== null) {
+      if ('value' in contents && typeof contents.value === 'string') {
+        if ('kind' in contents) {
+          return contents.value;
+        }
+        if ('language' in contents && typeof contents.language === 'string') {
+          return `\`\`\`${contents.language}\n${contents.value}\n\`\`\``;
+        }
+      }
+    }
+    return '';
+  };
+
+  addJavaDocumentation = (completionItems: CompletionItem[], javaItems: VSCodeCompletionItem[]) => {
+    const documentationByLabel = new Map<string, VSCodeCompletionItem['documentation']>();
+    for (const javaItem of javaItems) {
+      if (!javaItem.documentation) {
+        continue;
+      }
+      const label = this.normalizeCompletionLabel(this.toLabel(javaItem).label);
+      if (!documentationByLabel.has(label)) {
+        documentationByLabel.set(label, javaItem.documentation);
+      }
+    }
+
+    for (const item of completionItems) {
+      const javaDocumentation = documentationByLabel.get(this.normalizeCompletionLabel(item.label));
+      const markdown = this.toDocumentation(javaDocumentation);
+      if (!markdown) {
+        continue;
+      }
+      const existingDocumentation = this.toMarkdown(item.documentation);
+      const javaDocumentationMarkdown = this.toMarkdown(markdown);
+      item.documentation = {
+        kind: 'markdown',
+        value: [existingDocumentation, javaDocumentationMarkdown].filter(Boolean).join('\n\n')
+      };
+    }
+  };
+
+  normalizeCompletionLabel = (label: string) => label.trim().replace(/\s+/g, ' ').replace(/\s*\(.*$/, '');
 
   isCompletionResult = (obj: unknown, id: number): obj is { result: CompletionList } => {
     return (

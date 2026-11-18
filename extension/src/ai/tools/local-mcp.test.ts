@@ -38,6 +38,11 @@ vi.mock('./import-market-product', () => ({
   importMarketProduct: vi.fn().mockResolvedValue('Market product imported')
 }));
 
+vi.mock('./convert-dialog-form-to-jsf', () => ({
+  ConvertDialogFormToJsfTool: vi.fn(),
+  convertDialogFormToJsf: vi.fn().mockResolvedValue('Dialog Form converted to JSF')
+}));
+
 vi.mock('vscode', () => ({
   lm: mockLm,
   LanguageModelTextPart: class {
@@ -363,3 +368,4 @@ test('executes additional own tools headlessly in MCP mode', async () => {
     text: "Data Class created successfully at '/tmp/ivy/dataclass/my/pkg/Demo.d.json'"
   });
 });
+
