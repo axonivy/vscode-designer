@@ -3,6 +3,7 @@ import { executeCommand } from '../base/commands';
 import { logWarningMessage } from '../base/logging-util';
 import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { treeUriToProjectPath } from '../project-explorer/tree-selection';
+import { toJavaSourceContext } from './ivy-script-java-translation';
 
 export class JavaProvider {
   readonly dummyJavaFile: Promise<Uri>;
@@ -49,10 +50,11 @@ export class JavaProvider {
 
   public async contextualCompletionItems(code: string, position: Position, imports: string[], itemResolveCount: number) {
     const javaFile = await this.dummyContextJavaFile;
-    const importContent = imports.length > 0 ? `${imports.join('\n')}\n` : '';
-    const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${code}; } }`;
+    const source = toJavaSourceContext(code, position.character, imports);
+    const importContent = source.imports.length > 0 ? `${source.imports.join('\n')}\n` : '';
+    const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${source.code}; } }`;
     await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
-    const javaPosition = new Position(imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + position.character);
+    const javaPosition = new Position(source.imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + source.character);
     const completionList = await executeCommand<CompletionList>(
       'vscode.executeCompletionItemProvider',
       javaFile,
@@ -65,10 +67,11 @@ export class JavaProvider {
 
   public async hover(toBeHovered: string, position: Position, imports: string[] = []) {
     const javaFile = await this.dummyHoverJavaFile;
-    const importContent = imports.length > 0 ? `${imports.join('\n')}\n` : '';
-    const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${toBeHovered}; } }`;
+    const source = toJavaSourceContext(toBeHovered, position.character, imports);
+    const importContent = source.imports.length > 0 ? `${source.imports.join('\n')}\n` : '';
+    const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${source.code}; } }`;
     await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
-    const javaPosition = new Position(imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + position.character);
+    const javaPosition = new Position(source.imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + source.character);
     const hovers = await executeCommand<Hover[] | undefined>('vscode.executeHoverProvider', javaFile, javaPosition);
     const documentation = hovers?.flatMap(hover => hover.contents).map(content => {
       if (typeof content === 'string') {
@@ -129,11 +132,12 @@ export class JavaProvider {
     const isMacro = macroStart >= 0 && macroEnd >= 0;
     const source = isMacro ? code.slice(macroStart + 3, macroEnd) : code;
     const sourcePosition = isMacro ? new Position(0, position.character - macroStart - 3) : position;
+    const javaSource = toJavaSourceContext(source, sourcePosition.character, imports);
     const javaFile = await this.dummyDefinitionJavaFile;
-    const importContent = imports.length > 0 ? `${imports.join('\n')}\n` : '';
-    const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${source}; } }`;
+    const importContent = javaSource.imports.length > 0 ? `${javaSource.imports.join('\n')}\n` : '';
+    const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${javaSource.code}; } }`;
     await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
-    const javaPosition = new Position(imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + sourcePosition.character);
+    const javaPosition = new Position(javaSource.imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + javaSource.character);
     const locations = await executeCommand<Array<Location | LocationLink> | undefined>(
       'vscode.executeDefinitionProvider',
       javaFile,
