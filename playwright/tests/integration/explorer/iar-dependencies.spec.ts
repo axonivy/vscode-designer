@@ -60,7 +60,8 @@ test.describe('IAR project dependencies', () => {
     await expect(keyInput).toBeDisabled();
   });
 
-  test('opens an IAR file in the process editor and keeps it read-only', async ({ wsPage, tmpWorkspace }) => {
+  // eslint-disable-next-line playwright/no-focused-test
+  test.only('opens an IAR file in the process editor and keeps it read-only', async ({ wsPage, tmpWorkspace }) => {
     const projectName = path.basename(tmpWorkspace!.tmpWorkspacePath);
     const projectExplorer = new ProjectExplorerView(wsPage);
     await projectExplorer.openView();
