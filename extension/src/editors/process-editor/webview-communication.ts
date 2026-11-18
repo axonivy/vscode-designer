@@ -35,6 +35,7 @@ import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType, RequestType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../views/browser/ivy-browser-view-provider';
 import { JavaProvider } from '../java-provider';
+import { toJavaEnvironmentCompletionLabel } from '../ivy-script-java-translation';
 import { isAllTypesSearchRequest, isSearchResult } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 import { handleActionLocal, type SendInscriptionNotification } from './inscription-view/action-handlers';
@@ -465,7 +466,9 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     }
 
     for (const item of completionItems) {
-      const javaDocumentation = documentationByLabel.get(this.normalizeCompletionLabel(item.label));
+      const label = this.normalizeCompletionLabel(item.label);
+      const javaAlias = this.normalizeCompletionLabel(toJavaEnvironmentCompletionLabel(label));
+      const javaDocumentation = documentationByLabel.get(label) ?? documentationByLabel.get(javaAlias);
       const markdown = this.toDocumentation(javaDocumentation);
       if (!markdown) {
         continue;

@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { toJavaSourceContext } from './ivy-script-java-translation';
+import { toJavaEnvironmentCompletionLabel, toJavaSourceContext } from './ivy-script-java-translation';
 
 const IVY_IMPORT = 'import ch.ivyteam.ivy.environment.Ivy;';
 
@@ -37,6 +37,20 @@ test('maps the casemap alias itself to its Java service type', () => {
   const context = toJavaSourceContext('ivy.casemap.find()', 4);
 
   expect(context.character).toBe('Ivy.get(ICaseMapService.class)'.indexOf('ICaseMapService'));
+});
+
+test('translates the open Ivy environment prefix used for completions', () => {
+  expect(toJavaSourceContext('ivy.', 4)).toEqual({
+    code: 'Ivy.',
+    character: 4,
+    imports: [IVY_IMPORT]
+  });
+});
+
+test('maps IvyScript completion aliases to the Java API labels', () => {
+  expect(toJavaEnvironmentCompletionLabel('case')).toBe('wfCase');
+  expect(toJavaEnvironmentCompletionLabel('task')).toBe('wfTask');
+  expect(toJavaEnvironmentCompletionLabel('cal')).toBe('cal');
 });
 
 test('supports all standard Ivy environment accessors', () => {

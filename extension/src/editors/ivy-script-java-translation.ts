@@ -27,6 +27,8 @@ const IVY_MEMBERS: Record<string, string> = {
   repo: 'repo'
 };
 
+export const toJavaEnvironmentCompletionLabel = (label: string) => IVY_MEMBERS[label] ?? label;
+
 const ivyMemberMapping = (member: string) => {
   if (member === 'casemap') {
     const selection = 'ICaseMapService';
@@ -52,6 +54,7 @@ const ivyMemberMapping = (member: string) => {
 };
 
 export const toJavaSourceContext = (code: string, character: number, imports: string[] = []): JavaSourceContext => {
+  const trailingIvyRoot = /\bivy\.$/.exec(code);
   const matches = [...code.matchAll(/\bivy\.([A-Za-z_$][\w$]*)/g)].flatMap(match => {
     const member = match[1];
     const mapping = member ? ivyMemberMapping(member) : undefined;
@@ -61,7 +64,7 @@ export const toJavaSourceContext = (code: string, character: number, imports: st
     return [{ start: match.index, end: match.index + match[0].length, member, ...mapping }];
   });
 
-  if (matches.length === 0) {
+  if (matches.length === 0 && !trailingIvyRoot) {
     return { code, character, imports };
   }
 
@@ -90,8 +93,14 @@ export const toJavaSourceContext = (code: string, character: number, imports: st
     }
   }
   translatedCode += code.slice(originalEnd);
+  if (trailingIvyRoot) {
+    translatedCode = `${translatedCode.slice(0, -4)}Ivy.`;
+  }
 
   const requiredImports = new Set(matches.flatMap(match => match.imports));
+  if (trailingIvyRoot) {
+    requiredImports.add(IVY_IMPORT);
+  }
   const javaImports = [...imports];
   for (const statement of requiredImports) {
     if (!javaImports.some(existing => existing.trim() === statement)) {
