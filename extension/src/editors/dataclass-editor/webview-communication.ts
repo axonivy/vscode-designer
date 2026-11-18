@@ -79,7 +79,7 @@ class DataClassEditorWebSocketForwarder extends EditorWebSocketForwarder {
           commands.executeCommand('vscode.open', Uri.parse(`${path}Process.p.json`));
           break;
         case 'openForm':
-          openDialog(path);
+          openDialog(this.document.uri, this.readOnly);
           break;
         default:
           noUnknownAction(message.params.actionId);
@@ -103,10 +103,13 @@ class DataClassEditorWebSocketForwarder extends EditorWebSocketForwarder {
   }
 }
 
-const openDialog = async (path: string) => {
+const openDialog = async (documentUri: Uri, readOnly: boolean) => {
   try {
-    const dialogUri = fs.existsSync(`${path}.f.json`) ? `${path}.f.json` : `${path}.xhtml`;
-    await commands.executeCommand('vscode.open', Uri.file(dialogUri));
+    const path = documentUri.path.substring(0, documentUri.path.lastIndexOf('Data.d.json'));
+    const dialogUri = readOnly
+      ? documentUri.with({ path: `${path}.xhtml` })
+      : Uri.file(fs.existsSync(`${path}.f.json`) ? `${path}.f.json` : `${path}.xhtml`);
+    await commands.executeCommand('vscode.open', dialogUri);
   } catch (error) {
     logErrorMessage(String(error));
   }
