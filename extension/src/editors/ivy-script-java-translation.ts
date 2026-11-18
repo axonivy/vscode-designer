@@ -28,6 +28,8 @@ const IVY_MEMBERS: Record<string, string> = {
 };
 
 export const toJavaEnvironmentCompletionLabel = (label: string) => IVY_MEMBERS[label] ?? label;
+export const isIvyEnvironmentCompletionPrefix = (prefix: string) => /\bivy(?:\.[A-Za-z_$]*)*\.?$/.test(prefix);
+export const isIvyEnvironmentRootCompletionPrefix = (prefix: string) => /\bivy\.$/.test(prefix);
 
 const ivyMemberMapping = (member: string) => {
   if (member === 'casemap') {

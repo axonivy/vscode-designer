@@ -35,7 +35,11 @@ import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType, RequestType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../views/browser/ivy-browser-view-provider';
 import { JavaProvider } from '../java-provider';
-import { toJavaEnvironmentCompletionLabel } from '../ivy-script-java-translation';
+import {
+  isIvyEnvironmentCompletionPrefix,
+  isIvyEnvironmentRootCompletionPrefix,
+  toJavaEnvironmentCompletionLabel
+} from '../ivy-script-java-translation';
 import { isAllTypesSearchRequest, isSearchResult } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 import { handleActionLocal, type SendInscriptionNotification } from './inscription-view/action-handlers';
@@ -277,7 +281,7 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
         ]);
         const hasIvyEnvironmentAliases = obj.result.items.some(item => ['case', 'task'].includes(this.normalizeCompletionLabel(item.label)));
         const ivyEnvironmentDocs = hasIvyEnvironmentAliases
-          ? await withTimeout(this.javaCompletion.ivyEnvironmentCompletionDocumentation(), { case: undefined, task: undefined }, 1000)
+          ? await withTimeout(this.javaCompletion.ivyEnvironmentCompletionDocumentation(), { case: undefined, task: undefined }, 100)
           : {};
         const lspCompletionItems = javaTypeItems.map(item =>
           this.toLspCompletItem(item, document, { line: position.line, completionStartCharacter })
@@ -430,12 +434,16 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     const javaPosition = new VSCodePosition(0, cursorCharacter);
     const completionPrefix = currentLine.slice(0, cursorCharacter);
     const isMemberCompletion = /\.\s*[\w$]*$/.test(completionPrefix);
-    const isIvyEnvironmentRootCompletion = /\bivy\.$/.test(completionPrefix);
+    const isIvyEnvironmentCompletion = isIvyEnvironmentCompletionPrefix(completionPrefix);
+    const isIvyEnvironmentRootCompletion = isIvyEnvironmentRootCompletionPrefix(completionPrefix);
+    if (isIvyEnvironmentRootCompletion) {
+      void this.javaCompletion.ivyEnvironmentCompletionDocumentation();
+    }
     this.currentCompletion = {
       id,
       completionItems: isMemberCompletion ? Promise.resolve([]) : this.javaCompletion.completionItems(toBeCompleted, 50),
       // Empty/short member prefixes can have many candidates; resolve all JDT candidates so their docs aren't lost by ranking.
-      contextualJavaCompletionItems: isMemberCompletion && !isIvyEnvironmentRootCompletion
+      contextualJavaCompletionItems: isMemberCompletion && !isIvyEnvironmentCompletion
         ? this.javaCompletion.contextualCompletionItems(currentLine, javaPosition, imports, 1000)
         : Promise.resolve([]),
       document,

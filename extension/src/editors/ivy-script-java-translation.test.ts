@@ -1,5 +1,10 @@
 import { expect, test } from 'vitest';
-import { toJavaEnvironmentCompletionLabel, toJavaSourceContext } from './ivy-script-java-translation';
+import {
+  isIvyEnvironmentCompletionPrefix,
+  isIvyEnvironmentRootCompletionPrefix,
+  toJavaEnvironmentCompletionLabel,
+  toJavaSourceContext
+} from './ivy-script-java-translation';
 
 const IVY_IMPORT = 'import ch.ivyteam.ivy.environment.Ivy;';
 
@@ -45,6 +50,16 @@ test('translates the open Ivy environment prefix used for completions', () => {
     character: 4,
     imports: [IVY_IMPORT]
   });
+});
+
+test('recognizes Ivy environment completion prefixes without matching similar identifiers', () => {
+  expect(isIvyEnvironmentRootCompletionPrefix('ivy.')).toBe(true);
+  expect(isIvyEnvironmentCompletionPrefix('ivy.')).toBe(true);
+  expect(isIvyEnvironmentCompletionPrefix('ivy.t')).toBe(true);
+  expect(isIvyEnvironmentCompletionPrefix('ivy.task.')).toBe(true);
+  expect(isIvyEnvironmentCompletionPrefix('ivy.task.customFields')).toBe(true);
+  expect(isIvyEnvironmentCompletionPrefix('myivy.task.')).toBe(false);
+  expect(isIvyEnvironmentRootCompletionPrefix('ivy.task.')).toBe(false);
 });
 
 test('maps IvyScript completion aliases to the Java API labels', () => {
