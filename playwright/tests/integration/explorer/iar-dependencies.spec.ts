@@ -33,7 +33,7 @@ test.describe('IAR project dependencies', () => {
     await projectExplorer.hasNodeExact('rest-clients.yaml');
   });
 
-  test('opens an IAR file in the text editor and keeps it read-only', async ({ wsPage, tmpWorkspace }) => {
+  test('opens an IAR file in the correct editor and keeps it read-only', async ({ wsPage, tmpWorkspace }) => {
     const restClientFileName = 'rest-clients.yaml';
 
     const projectName = path.basename(tmpWorkspace!.tmpWorkspacePath);
