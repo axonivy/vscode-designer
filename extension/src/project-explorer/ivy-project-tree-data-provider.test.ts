@@ -254,7 +254,7 @@ test('shows only the META-INF/ivy tree and opens process files with their engine
   const fsProvider: FileSystemProvider = new IarContentFileSystemProvider();
   const openUri = processFile!.command!.arguments![0] as import('vscode').Uri;
   const fileUri = iarContentUri(archivePath, 'META-INF/ivy/process/hello.p.json');
-  expect(openUri.path).toBe(iarContentEngineFileName(fileUri));
+  expect(openUri.fsPath).toBe(iarContentEngineFileName(fileUri));
   expect(Buffer.from((await fsProvider.readFile(fileUri)) as Uint8Array).toString('utf8')).toBe('{"name":"IAR process"}');
   expect(fsProvider.readDirectory(iarDependency!.uri)).toEqual([
     ['process', FileType.Directory],
