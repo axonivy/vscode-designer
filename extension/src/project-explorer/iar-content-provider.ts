@@ -45,6 +45,17 @@ export const iarContentUri = (archivePath: string, entryPath: string) => {
   return Uri.parse(`${IAR_CONTENT_SCHEME}:/${uriPath}?${query.toString()}`);
 };
 
+export const iarContentUriFromEngineUri = (uri: Uri) => {
+  const marker = `!/${IVY_CONTENT_PATH}/`;
+  const markerIndex = uri.path.indexOf(marker);
+  if (markerIndex < 0) {
+    return undefined;
+  }
+  const archivePath = uri.path.slice(0, markerIndex);
+  const entryPath = uri.path.slice(markerIndex + 2);
+  return iarContentUri(archivePath, entryPath);
+};
+
 export class IarContentFileSystemProvider implements FileSystemProvider {
   private readonly onDidChangeFileEmitter = new EventEmitter<FileChangeEvent[]>();
   readonly onDidChangeFile = this.onDidChangeFileEmitter.event;

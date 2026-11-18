@@ -8,7 +8,8 @@ import {
   IAR_CONTENT_SCHEME,
   IarContentFileSystemProvider,
   iarContentEngineFileName,
-  iarContentUri
+  iarContentUri,
+  iarContentUriFromEngineUri
 } from './iar-content-provider';
 import { IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
 
@@ -103,6 +104,7 @@ vi.mock('vscode', () => {
 });
 
 vi.mock('../engine/diagnostics', () => ({ IvyDiagnostics: { instance: { projectFileUrisToBeConverted: () => [] } } }));
+vi.mock('../base/logging-util', () => ({ logInformationMessage: vi.fn() }));
 vi.mock('../base/java-class-path-reader', () => ({
   JavaClassPathReader: { instance: { getIarsPerProject: mocks.getIarsPerProject } }
 }));
@@ -274,6 +276,15 @@ test('keeps variables.yaml on the IAR URI and derives its engine file name', asy
 
   expect(variablesEntry?.uri.scheme).toBe(IAR_CONTENT_SCHEME);
   expect(iarContentEngineFileName(variablesEntry!.uri)).toBe(`${archivePath}!/META-INF/ivy/variables.yaml`);
+});
+
+test('converts engine file URIs inside IARs to archive content URIs', () => {
+  const engineUri = Uri.parse(`file://${archivePath}!/META-INF/ivy/dataclasses/ExampleData.d.json`);
+  const contentUri = iarContentUriFromEngineUri(engineUri);
+
+  expect(contentUri?.scheme).toBe(IAR_CONTENT_SCHEME);
+  expect(iarContentEngineFileName(contentUri!)).toBe(`${archivePath}!/META-INF/ivy/dataclasses/ExampleData.d.json`);
+  expect(iarContentUriFromEngineUri(Uri.parse('file:///workspace/project/dataclasses/ExampleData.d.json'))).toBeUndefined();
 });
 
 test('supports implicit archive directories and reports uncompressed file sizes', () => {
