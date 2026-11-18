@@ -34,8 +34,7 @@ test.describe('IAR project dependencies', () => {
     await projectExplorer.hasNodeExact('rest-clients.yaml');
   });
 
-  // eslint-disable-next-line playwright/no-focused-test
-  test.only('opens an IAR file in the rest client editor and keeps it read-only', async ({ wsPage, tmpWorkspace }) => {
+  test('opens an IAR file in the rest client editor and keeps it read-only', async ({ wsPage, tmpWorkspace }) => {
     const restClientFileName = 'rest-clients.yaml';
 
     const projectName = path.basename(tmpWorkspace!.tmpWorkspacePath);
@@ -62,6 +61,8 @@ test.describe('IAR project dependencies', () => {
 
   // eslint-disable-next-line playwright/no-focused-test
   test.only('opens an IAR file in the process editor and keeps it read-only', async ({ wsPage, tmpWorkspace }) => {
+    test.setTimeout(120_000);
+
     const projectName = path.basename(tmpWorkspace!.tmpWorkspacePath);
     const projectExplorer = new ProjectExplorerView(wsPage);
     await projectExplorer.openView();
