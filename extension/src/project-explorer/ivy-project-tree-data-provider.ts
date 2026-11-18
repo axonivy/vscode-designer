@@ -15,7 +15,7 @@ import type { KnownCommand } from '../base/commands';
 import { JavaClassPathReader } from '../base/java-class-path-reader';
 import type { ProjectBean } from '../engine/api/generated/client';
 import { IvyDiagnostics } from '../engine/diagnostics';
-import { iarContentEngineUri, IarContentFileSystemProvider, iarContentUri } from './iar-content-provider';
+import { iarContentEngineFileUri, IarContentFileSystemProvider, iarContentUri } from './iar-content-provider';
 
 const __dirname = import.meta.dirname;
 interface IvyCommand extends VSCodeCommand {
@@ -200,7 +200,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
         const isDirectory = type === FileType.Directory;
         if (!isDirectory) {
           if (name.endsWith('.p.json')) {
-            uri = iarContentEngineUri(uri);
+            uri = iarContentEngineFileUri(uri);
           }
           // TODO: Remove this cms workaround as soon as the cms editor provider can handle IAR documents
           if (name.startsWith('cms_') && name.endsWith('.yaml')) {

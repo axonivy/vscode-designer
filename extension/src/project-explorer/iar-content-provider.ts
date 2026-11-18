@@ -34,7 +34,7 @@ export const iarContentEngineFileName = (uri: Uri) => {
   return `${archivePath}!/${entryPath}`;
 };
 
-export const iarContentEngineUri = (uri: Uri) => Uri.parse(iarContentEngineFileName(uri));
+export const iarContentEngineFileUri = (uri: Uri) => Uri.file(iarContentEngineFileName(uri));
 
 export const iarContentUri = (archivePath: string, entryPath: string) => {
   const contentPath = entryPath.replace(/^META-INF\/ivy\/?/, '');
