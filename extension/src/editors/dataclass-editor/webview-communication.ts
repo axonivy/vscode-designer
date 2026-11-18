@@ -1,6 +1,5 @@
 import type { DataActionArgs, DataClassTypeSearchRequest } from '@axonivy/dataclass-editor-protocol';
 import { DisposableCollection } from '@eclipse-glsp/vscode-integration';
-import fs from 'fs';
 import type { TextDocument, WebviewPanel } from 'vscode';
 import { commands, FileSystemError, Uri, workspace } from 'vscode';
 import { Messenger } from 'vscode-messenger';
@@ -71,7 +70,7 @@ class DataClassEditorWebSocketForwarder extends EditorWebSocketForwarder {
           commands.executeCommand('vscode.open', Uri.parse(`${path}Process.p.json`));
           break;
         case 'openForm':
-          openDialog(this.document.uri, this.readOnly);
+          openDialog(this.document.uri);
           break;
         default:
           noUnknownAction(message.params.actionId);
@@ -95,21 +94,17 @@ class DataClassEditorWebSocketForwarder extends EditorWebSocketForwarder {
   }
 }
 
-const openDialog = async (documentUri: Uri, readOnly: boolean) => {
+const openDialog = async (documentUri: Uri) => {
   try {
     const path = documentUri.path.substring(0, documentUri.path.lastIndexOf('Data.d.json'));
-    let dialogUri = readOnly
-      ? documentUri.with({ path: `${path}.f.json` })
-      : Uri.file(fs.existsSync(`${path}.f.json`) ? `${path}.f.json` : `${path}.xhtml`);
-    if (readOnly) {
-      try {
-        await workspace.fs.stat(dialogUri);
-      } catch (error) {
-        if (!(error instanceof FileSystemError) || error.code !== 'FileNotFound') {
-          throw error;
-        }
-        dialogUri = documentUri.with({ path: `${path}.xhtml` });
+    let dialogUri = documentUri.with({ path: `${path}.f.json` });
+    try {
+      await workspace.fs.stat(dialogUri);
+    } catch (error) {
+      if (!(error instanceof FileSystemError) || error.code !== 'FileNotFound') {
+        throw error;
       }
+      dialogUri = documentUri.with({ path: `${path}.xhtml` });
     }
     await commands.executeCommand('vscode.open', dialogUri);
   } catch (error) {

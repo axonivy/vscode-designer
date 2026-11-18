@@ -147,10 +147,18 @@ test('reports archive access errors without falling back to XHTML', async () => 
 test.each([
   [true, '/project/dialog/Example.f.json'],
   [false, '/project/dialog/Example.xhtml']
-])('opens the local dialog with form existence %s', (formExists, expectedPath) => {
-  vi.spyOn(fs, 'existsSync').mockReturnValue(formExists);
+])('opens the local dialog with form existence %s', async (formExists, expectedPath) => {
+  const uri = {
+    scheme: 'file',
+    path: '/project/dialog/ExampleData.d.json',
+    with: vi.fn(({ path }: { path: string }) => ({ scheme: 'file', path }))
+  };
+  if (!formExists) {
+    mocks.stat.mockRejectedValue(FileSystemError.FileNotFound());
+  }
 
-  openForm({ scheme: 'file', path: '/project/dialog/ExampleData.d.json' }, false);
+  openForm(uri, false);
 
-  expect(mocks.executeCommand).toHaveBeenCalledWith('vscode.open', { scheme: 'file', path: expectedPath });
+  await vi.waitFor(() => expect(mocks.executeCommand).toHaveBeenCalledWith('vscode.open', { scheme: 'file', path: expectedPath }));
+  expect(mocks.stat).toHaveBeenCalledWith({ scheme: 'file', path: '/project/dialog/Example.f.json' });
 });
