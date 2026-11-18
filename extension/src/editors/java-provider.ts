@@ -3,10 +3,11 @@ import { executeCommand } from '../base/commands';
 import { logWarningMessage } from '../base/logging-util';
 import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { treeUriToProjectPath } from '../project-explorer/tree-selection';
-import { toJavaSourceContext } from './ivy-script-java-translation';
+import { IVY_IMPORT, toJavaSourceContext } from './ivy-script-java-translation';
 
 export class JavaProvider {
   readonly dummyJavaFile: Promise<Uri>;
+  private ivyEnvironmentCompletionDocs: Promise<{ case?: string; task?: string }> | undefined;
   readonly dummyHoverJavaFile: Promise<Uri>;
   readonly dummyContextJavaFile: Promise<Uri>;
   readonly dummyDefinitionJavaFile: Promise<Uri>;
@@ -63,6 +64,14 @@ export class JavaProvider {
       itemResolveCount
     );
     return completionList.items;
+  }
+
+  public ivyEnvironmentCompletionDocumentation() {
+    this.ivyEnvironmentCompletionDocs ??= (async () => ({
+      case: await this.hover('Ivy.wfCase()', new Position(0, 4), [IVY_IMPORT]),
+      task: await this.hover('Ivy.wfTask()', new Position(0, 4), [IVY_IMPORT])
+    }))().catch(() => ({}));
+    return this.ivyEnvironmentCompletionDocs;
   }
 
   public async hover(toBeHovered: string, position: Position, imports: string[] = []) {

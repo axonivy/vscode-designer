@@ -4,7 +4,7 @@ export type JavaSourceContext = {
   imports: string[];
 };
 
-const IVY_IMPORT = 'import ch.ivyteam.ivy.environment.Ivy;';
+export const IVY_IMPORT = 'import ch.ivyteam.ivy.environment.Ivy;';
 const CASE_MAP_SERVICE_IMPORT = 'import ch.ivyteam.ivy.casemap.runtime.ICaseMapService;';
 const IVY_MEMBERS: Record<string, string> = {
   cal: 'cal',

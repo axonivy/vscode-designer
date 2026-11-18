@@ -51,6 +51,21 @@ const DefinitionLinkActivationNotification: NotificationType<{ uri: string; posi
   method: 'definitionLinkActivation'
 };
 
+const withTimeout = <T>(promise: Promise<T>, fallback: T, timeoutMs: number) =>
+  new Promise<T>(resolve => {
+    const timeout = setTimeout(() => resolve(fallback), timeoutMs);
+    promise.then(
+      value => {
+        clearTimeout(timeout);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timeout);
+        resolve(fallback);
+      }
+    );
+  });
+
 const InscriptionWebSocketMessage: NotificationType<unknown> = { method: 'inscriptionWebSocketMessage' };
 const IvyScriptWebSocketMessage: NotificationType<unknown> = { method: 'ivyScriptWebSocketMessage' };
 
@@ -256,14 +271,24 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
       const { id, completionItems, contextualJavaCompletionItems, document, position, completionStartCharacter } = this.currentCompletion;
       const obj = JSON.parse(message);
       if (this.isCompletionResult(obj, id)) {
-        const [javaTypeItems, contextualJavaItems] = await Promise.all([completionItems, contextualJavaCompletionItems]);
+        const [javaTypeItems, contextualJavaItems] = await Promise.all([
+          withTimeout(completionItems, [], 1000),
+          withTimeout(contextualJavaCompletionItems, [], 1000)
+        ]);
+        const hasIvyEnvironmentAliases = obj.result.items.some(item => ['case', 'task'].includes(this.normalizeCompletionLabel(item.label)));
+        const ivyEnvironmentDocs = hasIvyEnvironmentAliases
+          ? await withTimeout(this.javaCompletion.ivyEnvironmentCompletionDocumentation(), { case: undefined, task: undefined }, 1000)
+          : {};
         const lspCompletionItems = javaTypeItems.map(item =>
           this.toLspCompletItem(item, document, { line: position.line, completionStartCharacter })
         );
         this.addJavaDocumentation(obj.result.items, contextualJavaItems);
+        this.addIvyEnvironmentCompletionDocumentation(obj.result.items, ivyEnvironmentDocs);
         obj.result.items.push(...lspCompletionItems);
         message = JSON.stringify(obj);
-        this.currentCompletion = undefined;
+        if (this.currentCompletion?.id === id) {
+          this.currentCompletion = undefined;
+        }
       }
     }
     super.handleServerMessage(message);
@@ -403,12 +428,14 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     const imports = lines.filter(sourceLine => /^\s*import\s+(?:static\s+)?[\w.$*]+\s*;\s*$/.test(sourceLine));
     const cursorCharacter = Math.min(params.position.character, currentLine.length);
     const javaPosition = new VSCodePosition(0, cursorCharacter);
-    const isMemberCompletion = /\.\s*[\w$]*$/.test(currentLine.slice(0, cursorCharacter));
+    const completionPrefix = currentLine.slice(0, cursorCharacter);
+    const isMemberCompletion = /\.\s*[\w$]*$/.test(completionPrefix);
+    const isIvyEnvironmentRootCompletion = /\bivy\.$/.test(completionPrefix);
     this.currentCompletion = {
       id,
-      completionItems: this.javaCompletion.completionItems(toBeCompleted, 50),
+      completionItems: isMemberCompletion ? Promise.resolve([]) : this.javaCompletion.completionItems(toBeCompleted, 50),
       // Empty/short member prefixes can have many candidates; resolve all JDT candidates so their docs aren't lost by ranking.
-      contextualJavaCompletionItems: isMemberCompletion
+      contextualJavaCompletionItems: isMemberCompletion && !isIvyEnvironmentRootCompletion
         ? this.javaCompletion.contextualCompletionItems(currentLine, javaPosition, imports, 1000)
         : Promise.resolve([]),
       document,
@@ -451,6 +478,24 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
       }
     }
     return '';
+  };
+
+  addIvyEnvironmentCompletionDocumentation = (
+    completionItems: CompletionItem[],
+    documentation: { case?: string; task?: string }
+  ) => {
+    for (const item of completionItems) {
+      const label = this.normalizeCompletionLabel(item.label);
+      const ivyDocumentation = label === 'case' ? documentation.case : label === 'task' ? documentation.task : undefined;
+      if (!ivyDocumentation) {
+        continue;
+      }
+      const existingDocumentation = this.toMarkdown(item.documentation);
+      item.documentation = {
+        kind: 'markdown',
+        value: [existingDocumentation, ivyDocumentation].filter(Boolean).join('\n\n')
+      };
+    }
   };
 
   addJavaDocumentation = (completionItems: CompletionItem[], javaItems: VSCodeCompletionItem[]) => {
