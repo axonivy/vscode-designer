@@ -15,13 +15,30 @@ pipeline {
   }
 
   parameters {
+    string(name: 'version', defaultValue: '', description: 'Version to release (e.g. \'14.0.2\').')
     booleanParam(name: 'publishToMarket', defaultValue: false, description: 'Publish to VS Code Marketplace?')
-    string(name: 'milestone',
-      description: "Optional milestone number (e.g. 31 for Milestone 31). Only enter positive integers. Unset or empty publishes as a normal non-milestone release with the date timestamp.",
-      defaultValue: '')
+    string(name: 'milestone', defaultValue: '', description: "Optional positive milestone number (e.g. \'31\' for Milestone 31). Unset or empty publishes as a normal non-milestone release with the date timestamp.")
   }
 
   stages {
+    stage('Validate preparations') {
+      steps {
+        script {
+          def version = params.version
+          if (!params.publishToMarket && !version) {
+            version = getExtensionVersion()
+          }
+          env.RELEASE_VERSION = version
+          if (params.publishToMarket) {
+            assertReleaseBranch(env.BRANCH_NAME)
+          }
+          assertReleaseVersionFormat(version)
+          assertReleaseVersionMatchesExtensionVersion(version)
+          currentBuild.description = !params.publishToMarket ? "Dry run (${version})" : version
+        }
+      }
+    }
+
     stage('Build') {
       steps {
         script {
@@ -46,11 +63,15 @@ pipeline {
       }
       steps {
         script {
-          def extVersion = sh(script: "node -p \"require('./extension/package.json').version\"", returnStdout: true).trim()
+          def extVersion = getExtensionVersion()
           input "Would you like to publish version ${extVersion} from branch ${env.BRANCH_NAME}?"
         }
         withCredentials([string(credentialsId: 'marketplace.visualstudio.com', variable: 'VSCE_PAT')]) {
           sh "MILESTONE='${params.milestone}' pnpm run publish:next"
+        }
+        script {
+          def majorVersion = env.RELEASE_VERSION.tokenize('.')[0]
+          currentBuild.description = "<a href='https://marketplace.visualstudio.com/items?itemName=axonivy.vscode-designer-${majorVersion}'>${env.RELEASE_VERSION}</a>"
         }
       }
     }
@@ -71,3 +92,26 @@ pipeline {
     }
   }
 } 
+
+def assertReleaseBranch(def branch) {
+  if (!isReleasingBranch(branchName: branch)) {
+    error 'Releasing is only possible from a release branch.'
+  }
+}
+
+def assertReleaseVersionFormat(def version) {
+  if (!(version ==~ /\d+\.\d+\.\d+/)) {
+    error "Expected a valid release version, got '${version}'."
+  }
+}
+
+def assertReleaseVersionMatchesExtensionVersion(def version) {
+  def expectedVersion = getExtensionVersion()
+  if (version != expectedVersion) {
+    error "Requested release ${version}, but extension/package.json resolves to ${expectedVersion}."
+  }
+}
+
+def getExtensionVersion() {
+  sh(script: "node -p \"require('./extension/package.json').version\"", returnStdout: true).trim()
+}
