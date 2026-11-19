@@ -3,6 +3,7 @@ import { expect, test } from '~/fixtures/baseTest';
 import { FileExplorer, ProjectExplorerView } from '~/page-objects/explorer-view';
 import { OutputView } from '~/page-objects/output-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
+import { WelcomePage } from '~/page-objects/welcome-page';
 
 test('Install product without maven-dependency from Market website', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
@@ -66,6 +67,19 @@ test('Install product with conflicting project folder', async ({ wsPage }) => {
   await wsPage.provideUserInput('14.0.0');
   const title = wsPage.page.locator('div.quick-input-title');
   await expect(title).toHaveText(/The following projects cannot be installed because a project folder with the same name already exists/);
+});
+
+test('Install product from market integrated browser', async ({ wsPage }) => {
+  const welcomePage = new WelcomePage(wsPage);
+  await welcomePage.open();
+  await welcomePage.marketButton.click();
+  await wsPage.isTabWithNameVisible('Axon Ivy Market');
+
+  const market = wsPage.page.locator('iframe.webview.ready').last().contentFrame().locator('iframe#active-frame').contentFrame().locator('iframe#market').contentFrame();
+
+  await market.locator('a[href*="/product/msgraph/"]').click();
+  await market.getByRole('button', { name: 'Install Now' }).click();
+  await expect(wsPage.quickInputBox.getByRole('textbox')).toHaveValue('Microsoft 365');
 });
 
 test('Install local product.json', async ({ wsPage, tmpWorkspace }) => {
