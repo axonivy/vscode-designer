@@ -13,7 +13,7 @@
       "type": "object",
       "properties": {
         "cid": {
-          "type": "string"
+          "$ref": "#/$defs/ComponentId"
         },
         "type": {
           "type": "string",
@@ -25,6 +25,11 @@
           "type": "object"
         }
       },
+      "required": [
+        "cid",
+        "type",
+        "config"
+      ],
       "additionalProperties": false,
       "if": {
         "properties": {
@@ -45,7 +50,8 @@
       "type": "object",
       "properties": {
         "action": {
-          "$ref": "#/$defs/FormExpression"
+          "$ref": "#/$defs/FormExpression",
+          "description": "What the button does: an expression such as #{logic.<name>} for BUTTON and SUBMIT. EDIT, DELETE, DIALOGCANCEL and DIALOGSAVE take the plain word editRow, deleteRow, cancelEdit or saveEdit instead."
         },
         "alignSelf": {
           "$ref": "#/$defs/LayoutAlignItems"
@@ -54,7 +60,8 @@
           "$ref": "#/$defs/FormExpression"
         },
         "confirmDialog": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Asks for confirmation before the action runs. Also set confirmHeader, confirmMessage, and confirmOkValue and confirmCancelValue, the labels of the dialog's two buttons."
         },
         "confirmHeader": {
           "$ref": "#/$defs/FormExpression"
@@ -72,19 +79,23 @@
           "$ref": "#/$defs/FormExpression"
         },
         "icon": {
-          "type": "string"
+          "type": "string",
+          "description": "Tabler icon class, e.g. ti ti-check. Buttons in a DataTable action column usually show only an icon: ti ti-pencil for edit, ti ti-trash for delete."
         },
         "id": {
           "type": "string"
         },
         "lgSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "6"
         },
         "mdSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "12"
         },
         "name": {
-          "$ref": "#/$defs/FormExpression"
+          "$ref": "#/$defs/FormExpression",
+          "description": "Text on the button. Leave it empty only when the icon alone makes the action clear, e.g. edit and delete in a table row."
         },
         "processOnlySelf": {
           "type": "boolean"
@@ -93,13 +104,15 @@
           "type": "boolean"
         },
         "style": {
-          "$ref": "#/$defs/ButtonStyle"
+          "$ref": "#/$defs/ButtonStyle",
+          "description": "Emphasis: SOLID (default) for the main action, OUTLINED or FLAT for less prominent ones such as Cancel or buttons repeated on every table row."
         },
         "type": {
           "$ref": "#/$defs/ButtonType"
         },
         "variant": {
-          "$ref": "#/$defs/ButtonVariant"
+          "$ref": "#/$defs/ButtonVariant",
+          "description": "Color by meaning: PRIMARY for the main action, SECONDARY for alternatives such as Cancel, DANGER for destructive actions such as delete."
         },
         "visible": {
           "$ref": "#/$defs/FormExpression"
@@ -125,7 +138,8 @@
         "DELETE",
         "DIALOGSAVE",
         "DIALOGCANCEL"
-      ]
+      ],
+      "description": "Editable DataTable: in its action column, use EDIT with action editRow and DELETE with action deleteRow and confirmDialog; in its edit Dialog buttons, use DIALOGCANCEL with action cancelEdit and DIALOGSAVE with action saveEdit."
     },
     "ButtonVariant": {
       "type": "string",
@@ -155,16 +169,19 @@
           "$ref": "#/$defs/FormExpression"
         },
         "lgSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "6"
         },
         "listener": {
           "$ref": "#/$defs/FormExpression"
         },
         "mdSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "12"
         },
         "updateOnChange": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Updates the form when the value changes. Set it on every field that another component's visible, required or disabled expression reads."
         },
         "value": {
           "$ref": "#/$defs/FormExpression"
@@ -182,7 +199,8 @@
           "$ref": "#/$defs/LayoutAlignItems"
         },
         "completeMethod": {
-          "$ref": "#/$defs/FormExpression"
+          "$ref": "#/$defs/FormExpression",
+          "description": "Dialog logic method that suggests entries while typing, e.g. #{logic.<name>}. Its HtmlDialogMethodStart takes the typed text as a String parameter and returns the matching entries as a List result."
         },
         "disabled": {
           "$ref": "#/$defs/FormExpression"
@@ -191,22 +209,26 @@
           "type": "string"
         },
         "itemLabel": {
-          "type": "string"
+          "type": "string",
+          "description": "Text shown for each suggestion. The suggestion is #{item}, e.g. #{item.<attr>}."
         },
         "itemValue": {
-          "type": "string"
+          "type": "string",
+          "description": "Value stored when the suggestion is chosen, e.g. #{item.<attr>}."
         },
         "label": {
           "$ref": "#/$defs/FormExpression"
         },
         "lgSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "6"
         },
         "listener": {
           "$ref": "#/$defs/FormExpression"
         },
         "mdSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "12"
         },
         "required": {
           "$ref": "#/$defs/FormExpression"
@@ -215,7 +237,8 @@
           "$ref": "#/$defs/FormExpression"
         },
         "updateOnChange": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Updates the form when the value changes. Set it on every field that another component's visible, required or disabled expression reads."
         },
         "value": {
           "$ref": "#/$defs/FormExpression"
@@ -233,7 +256,7 @@
       "type": "object",
       "properties": {
         "cid": {
-          "type": "string"
+          "$ref": "#/$defs/ComponentId"
         },
         "type": {
           "type": "string",
@@ -260,6 +283,11 @@
           "type": "object"
         }
       },
+      "required": [
+        "cid",
+        "type",
+        "config"
+      ],
       "additionalProperties": false,
       "allOf": [
         {
@@ -520,8 +548,19 @@
         }
       ]
     },
+    "ComponentId": {
+      "type": "string",
+      "pattern": "^[a-z]+[0-9]+$",
+      "description": "Lowercase component type + a number shared and incremented across all component types. Keep existing IDs; gaps and out-of-order numbers are valid.",
+      "examples": [
+        "input1",
+        "button2",
+        "datatablecolumn3"
+      ]
+    },
     "Composite": {
       "type": "object",
+      "description": "Embeds a Form Component or a JSF HTML Dialog Component. Take startMethod and parameters from an HtmlDialogStart in the component's process, dialog/<namespace path>/<Name>/<Name>Process.p.json.",
       "properties": {
         "alignSelf": {
           "$ref": "#/$defs/LayoutAlignItems"
@@ -530,19 +569,30 @@
           "type": "string"
         },
         "lgSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "6"
         },
         "mdSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "12"
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Dialog ID: the dialog folder path relative to dialog/, with / replaced by '.'; the view file name is not part of it.",
+          "examples": [
+            "example.project.ExampleDialog"
+          ]
         },
         "parameters": {
-          "$ref": "#/$defs/Map(String,FormExpression)"
+          "$ref": "#/$defs/Map(String,FormExpression)",
+          "description": "Values for the parameters of the startMethod, keyed by parameter name."
         },
         "startMethod": {
-          "type": "string"
+          "type": "string",
+          "description": "Signature name of the User Dialog Start in the component's process, without parameter list.",
+          "examples": [
+            "start"
+          ]
         }
       },
       "additionalProperties": false
@@ -560,7 +610,8 @@
       "type": "object",
       "properties": {
         "addButton": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Shows a button that opens the edit Dialog for a new row. Requires isEditable."
         },
         "alignSelf": {
           "$ref": "#/$defs/LayoutAlignItems"
@@ -575,16 +626,19 @@
           "$ref": "#/$defs/FormExpression"
         },
         "editDialogId": {
-          "type": "string"
+          "type": "string",
+          "description": "cid of the top-level Dialog that edits a row."
         },
         "id": {
           "type": "string"
         },
         "isEditable": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Users can add, edit and delete rows. editDialogId names the Dialog for adding and editing; an action column holds the EDIT and DELETE buttons."
         },
         "lgSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "6"
         },
         "listener": {
           "$ref": "#/$defs/FormExpression"
@@ -593,7 +647,8 @@
           "type": "string"
         },
         "mdSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "12"
         },
         "paginator": {
           "type": "boolean"
@@ -605,7 +660,8 @@
           "type": "boolean"
         },
         "value": {
-          "type": "string"
+          "type": "string",
+          "description": "Rows to show: a List or LazyRepositoryDataModel attribute, e.g. #{data.items}."
         },
         "visible": {
           "$ref": "#/$defs/FormExpression"
@@ -623,7 +679,8 @@
           "type": "boolean"
         },
         "asActionColumn": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "The column shows the Buttons in components, e.g. EDIT and DELETE, instead of a value."
         },
         "components": {
           "type": "array",
@@ -671,13 +728,15 @@
           "$ref": "#/$defs/FormExpression"
         },
         "lgSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "6"
         },
         "listener": {
           "$ref": "#/$defs/FormExpression"
         },
         "mdSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "12"
         },
         "required": {
           "$ref": "#/$defs/FormExpression"
@@ -692,7 +751,8 @@
           "type": "string"
         },
         "updateOnChange": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Updates the form when the value changes. Set it on every field that another component's visible, required or disabled expression reads."
         },
         "value": {
           "$ref": "#/$defs/FormExpression"
@@ -728,16 +788,20 @@
           "type": "string"
         },
         "lgSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "6"
         },
         "linkedComponent": {
-          "type": "string"
+          "type": "string",
+          "description": "cid of the DataTable whose rows this Dialog edits."
         },
         "mdSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "12"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Popup that adds or edits a row of a DataTable. Place it at the top level of the form, bind its fields to #{currentRow.<attr>}, and give it a DIALOGCANCEL and a DIALOGSAVE button."
     },
     "Fieldset": {
       "type": "object",
@@ -764,10 +828,12 @@
           "$ref": "#/$defs/FormExpression"
         },
         "lgSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "6"
         },
         "mdSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "12"
         },
         "visible": {
           "$ref": "#/$defs/FormExpression"
@@ -794,14 +860,16 @@
       "additionalProperties": false
     },
     "FormExpression": {
-      "type": "string"
+      "type": "string",
+      "description": "Text or EL expression. Bind dialog data as #{data.<attr>} and call dialog logic as #{logic.<name>}. Inside a DataTable column or its edit Dialog, the current row is #{currentRow}, e.g. #{currentRow.<attr>}."
     },
     "FormType": {
       "type": "string",
       "enum": [
         "FORM",
         "COMPONENT"
-      ]
+      ],
+      "description": "Form Type. FORM: the form is rendered as an HTML Dialog. COMPONENT: the form is a Form Component that can be used within other Forms via a Composite."
     },
     "Input": {
       "type": "object",
@@ -822,13 +890,15 @@
           "$ref": "#/$defs/FormExpression"
         },
         "lgSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "6"
         },
         "listener": {
           "$ref": "#/$defs/FormExpression"
         },
         "mdSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "12"
         },
         "required": {
           "$ref": "#/$defs/FormExpression"
@@ -846,7 +916,8 @@
           "$ref": "#/$defs/InputType"
         },
         "updateOnChange": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Updates the form when the value changes. Set it on every field that another component's visible, required or disabled expression reads."
         },
         "validationMessage": {
           "$ref": "#/$defs/FormExpression"
@@ -891,10 +962,12 @@
           "$ref": "#/$defs/LayoutJustifyContent"
         },
         "lgSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "6"
         },
         "mdSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "12"
         },
         "type": {
           "$ref": "#/$defs/LayoutType"
@@ -920,7 +993,9 @@
         "GRID2",
         "GRID4",
         "FREE"
-      ]
+      ],
+      "default": "GRID2",
+      "description": "Column count of a GRID. Children fill the cells in order, row by row. FREE: for unequal widths; each child sets its own with lgSpan/mdSpan."
     },
     "LayoutJustifyContent": {
       "type": "string",
@@ -929,6 +1004,18 @@
         "SPACE_BETWEEN",
         "END"
       ]
+    },
+    "LayoutSpan": {
+      "type": "string",
+      "enum": [
+        "2",
+        "4",
+        "6",
+        "8",
+        "10",
+        "12"
+      ],
+      "description": "Width of a child in a FREE grid: 12 is the full row, 6 half. The editor shows half the value (1-6)."
     },
     "LayoutType": {
       "type": "string",
@@ -950,10 +1037,12 @@
           "type": "string"
         },
         "lgSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "6"
         },
         "mdSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "12"
         },
         "name": {
           "$ref": "#/$defs/FormExpression"
@@ -1002,10 +1091,12 @@
           "$ref": "#/$defs/FormExpression"
         },
         "lgSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "6"
         },
         "mdSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "12"
         },
         "visible": {
           "$ref": "#/$defs/FormExpression"
@@ -1023,13 +1114,16 @@
           "$ref": "#/$defs/FormExpression"
         },
         "dynamicItemsLabel": {
-          "$ref": "#/$defs/FormExpression"
+          "$ref": "#/$defs/FormExpression",
+          "description": "Text shown for each entry. The entry is #{item}, e.g. #{item.<attr>}."
         },
         "dynamicItemsList": {
-          "$ref": "#/$defs/FormExpression"
+          "$ref": "#/$defs/FormExpression",
+          "description": "List of objects to choose from, e.g. #{data.<list>}."
         },
         "dynamicItemsValue": {
-          "$ref": "#/$defs/FormExpression"
+          "$ref": "#/$defs/FormExpression",
+          "description": "Value stored when the entry is chosen, e.g. #{item.<attr>}. Leave it empty to store the whole object."
         },
         "id": {
           "type": "string"
@@ -1038,13 +1132,15 @@
           "$ref": "#/$defs/FormExpression"
         },
         "lgSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "6"
         },
         "listener": {
           "$ref": "#/$defs/FormExpression"
         },
         "mdSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "12"
         },
         "orientation": {
           "$ref": "#/$defs/OrientationType"
@@ -1062,7 +1158,8 @@
           }
         },
         "updateOnChange": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Updates the form when the value changes. Set it on every field that another component's visible, required or disabled expression reads."
         },
         "value": {
           "$ref": "#/$defs/FormExpression"
@@ -1083,13 +1180,16 @@
           "$ref": "#/$defs/FormExpression"
         },
         "dynamicItemsLabel": {
-          "$ref": "#/$defs/FormExpression"
+          "$ref": "#/$defs/FormExpression",
+          "description": "Text shown for each entry. The entry is #{item}, e.g. #{item.<attr>}."
         },
         "dynamicItemsList": {
-          "$ref": "#/$defs/FormExpression"
+          "$ref": "#/$defs/FormExpression",
+          "description": "List of objects to choose from, e.g. #{data.<list>}."
         },
         "dynamicItemsValue": {
-          "$ref": "#/$defs/FormExpression"
+          "$ref": "#/$defs/FormExpression",
+          "description": "Value stored when the entry is chosen, e.g. #{item.<attr>}. Leave it empty to store the whole object."
         },
         "id": {
           "type": "string"
@@ -1098,13 +1198,15 @@
           "$ref": "#/$defs/FormExpression"
         },
         "lgSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "6"
         },
         "listener": {
           "$ref": "#/$defs/FormExpression"
         },
         "mdSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "12"
         },
         "required": {
           "$ref": "#/$defs/FormExpression"
@@ -1119,7 +1221,8 @@
           }
         },
         "updateOnChange": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Updates the form when the value changes. Set it on every field that another component's visible, required or disabled expression reads."
         },
         "value": {
           "$ref": "#/$defs/FormExpression"
@@ -1153,7 +1256,7 @@
       "type": "object",
       "properties": {
         "cid": {
-          "type": "string"
+          "$ref": "#/$defs/ComponentId"
         },
         "type": {
           "type": "string",
@@ -1165,6 +1268,11 @@
           "type": "object"
         }
       },
+      "required": [
+        "cid",
+        "type",
+        "config"
+      ],
       "additionalProperties": false,
       "if": {
         "properties": {
@@ -1200,10 +1308,12 @@
           "type": "string"
         },
         "lgSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "6"
         },
         "mdSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "12"
         },
         "type": {
           "$ref": "#/$defs/TextType"
@@ -1247,13 +1357,15 @@
           "$ref": "#/$defs/FormExpression"
         },
         "lgSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "6"
         },
         "listener": {
           "$ref": "#/$defs/FormExpression"
         },
         "mdSpan": {
-          "type": "string"
+          "$ref": "#/$defs/LayoutSpan",
+          "default": "12"
         },
         "required": {
           "$ref": "#/$defs/FormExpression"
@@ -1265,7 +1377,8 @@
           "type": "string"
         },
         "updateOnChange": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Updates the form when the value changes. Set it on every field that another component's visible, required or disabled expression reads."
         },
         "value": {
           "$ref": "#/$defs/FormExpression"
