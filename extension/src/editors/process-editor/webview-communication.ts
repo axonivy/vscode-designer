@@ -10,7 +10,9 @@ import {
   CompletionItemKind as VSCodeCompletionItemKind,
   Position as VSCodePosition,
   Range as VSCodeRange,
-  window
+  window,
+  type Location as VSCodeLocation,
+  type LocationLink as VSCodeLocationLink
 } from 'vscode';
 import {
   CompletionItem,
@@ -23,6 +25,7 @@ import {
   type DidChangeTextDocumentParams,
   DidOpenTextDocumentNotification,
   type DidOpenTextDocumentParams,
+  InsertTextFormat,
   type MarkupContent,
   Position,
   Range,
@@ -33,6 +36,11 @@ import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType, RequestType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../views/browser/ivy-browser-view-provider';
 import { JavaProvider } from '../java-provider';
+import {
+  isIvyEnvironmentRootCompletionPrefix,
+  toIvyEnvironmentCompletionLabel,
+  toJavaEnvironmentCompletionLabel
+} from '../ivy-script-java-translation';
 import { isAllTypesSearchRequest, isSearchResult } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 import { handleActionLocal, type SendInscriptionNotification } from './inscription-view/action-handlers';
@@ -44,9 +52,39 @@ const StartProcessRequest: RequestType<string, Promise<void>> = { method: 'start
 
 // Save document notification - allow webview to trigger save when Monaco captures Cmd+S
 const SaveDocumentNotification: NotificationType<void> = { method: 'document/save' };
+const DefinitionLinkActivationNotification: NotificationType<{ uri: string; position: Position }> = {
+  method: 'definitionLinkActivation'
+};
+
+const withTimeout = <T>(promise: Promise<T>, fallback: T, timeoutMs: number) =>
+  new Promise<T>(resolve => {
+    const timeout = setTimeout(() => resolve(fallback), timeoutMs);
+    promise.then(
+      value => {
+        clearTimeout(timeout);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timeout);
+        resolve(fallback);
+      }
+    );
+  });
 
 const InscriptionWebSocketMessage: NotificationType<unknown> = { method: 'inscriptionWebSocketMessage' };
 const IvyScriptWebSocketMessage: NotificationType<unknown> = { method: 'ivyScriptWebSocketMessage' };
+
+type PendingCompletion = {
+  id: number;
+  uri: string;
+  document: TextDocument;
+  position: Position;
+  completionStartCharacter: number;
+  completionItems: Promise<VSCodeCompletionItem[]>;
+  contextualJavaCompletionItems: Promise<VSCodeCompletionItem[]>;
+  isIvyEnvironmentRootCompletion: boolean;
+  timeout: ReturnType<typeof setTimeout>;
+};
 
 export const setupCommunication = (
   websocketUrl: URL,
@@ -58,9 +96,16 @@ export const setupCommunication = (
   if (messageParticipant === undefined) {
     return;
   }
+  const inscriptionForwarder = new InscriptionWebSocketForwarder(websocketUrl, messenger, messageParticipant, document);
+  const ivyScriptForwarder = new IvyScriptWebSocketForwarder(websocketUrl, messenger, messageParticipant, document);
   const toDispose = new DisposableCollection(
-    new InscriptionWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
-    new IvyScriptWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
+    inscriptionForwarder,
+    ivyScriptForwarder,
+    messenger.onNotification(
+      DefinitionLinkActivationNotification,
+      activation => void ivyScriptForwarder.openDefinitionAtPosition(activation.uri, activation.position).catch(() => undefined),
+      { sender: messageParticipant }
+    ),
     messenger.onNotification(WebviewConnectionReadyNotification, () => handleWebviewReadyNotification(messenger, messageParticipant), {
       sender: messageParticipant
     }),
@@ -130,17 +175,21 @@ class InscriptionWebSocketForwarder extends WebSocketForwarder {
 class IvyScriptWebSocketForwarder extends WebSocketForwarder {
   private readonly documents = new Map<string, TextDocument>();
 
-  private currentCompletion:
-    | {
-        id: number;
-        completionItems: Promise<VSCodeCompletionItem[]>;
-        contextualJavaCompletionItems: Promise<VSCodeCompletionItem[]>;
-        document: TextDocument;
-        position: Position;
-        completionStartCharacter: number;
-      }
-    | undefined;
+  private readonly pendingCompletions = new Map<number, PendingCompletion>();
+  private readonly latestCompletionByDocument = new Map<string, number>();
+  private readonly locallyAnsweredCompletions = new Set<number>();
+  private readonly fallbackCompletionsInProgress = new Set<number>();
   private currentHover: { id: number; documentation: Promise<string | undefined> } | undefined;
+  private readonly resolvedJavaDefinitions = new Map<string, VSCodeLocation | VSCodeLocationLink>();
+  private readonly currentDefinitions = new Map<
+    number,
+    {
+      location: Promise<VSCodeLocation | VSCodeLocationLink | undefined>;
+      textDocumentUri: string;
+      range: Range;
+    }
+  >();
+  private initializationRequestId: number | undefined;
   readonly javaCompletion: JavaProvider;
 
   constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: CustomDocument) {
@@ -151,6 +200,9 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
   protected override handleClientMessage(message: unknown) {
     if (this.hasMethodAndParams(message)) {
       switch (message.method) {
+        case 'initialize':
+          this.initializationRequestId = message.id;
+          break;
         case DidOpenTextDocumentNotification.method:
           this.handleDidOpen(message.params as DidOpenTextDocumentParams);
           break;
@@ -162,12 +214,51 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
           break;
         case 'textDocument/hover':
           this.handleHoverRequest(message.params as { textDocument: { uri: string }; position: Position }, message.id);
+          break;
+        case 'textDocument/definition':
+          this.handleDefinitionRequest(message.params as { textDocument: { uri: string }; position: Position }, message.id);
+          break;
       }
     }
     super.handleClientMessage(message);
   }
 
   protected override async handleServerMessage(message: string) {
+    const response = JSON.parse(message);
+    if (
+      typeof response === 'object' &&
+      response !== null &&
+      typeof this.initializationRequestId === 'number' &&
+      response.id === this.initializationRequestId
+    ) {
+      this.initializationRequestId = undefined;
+      if (typeof response.result === 'object' && response.result !== null) {
+        // This bridge handles Java definition requests locally through the VS Code Java provider.
+        response.result.capabilities = {
+          ...(response.result.capabilities ?? {}),
+          definitionProvider: true
+        };
+        message = JSON.stringify(response);
+      }
+    }
+    if (
+      typeof response === 'object' &&
+      response !== null &&
+      'id' in response &&
+      typeof response.id === 'number' &&
+      !('method' in response)
+    ) {
+      const definition = this.currentDefinitions.get(response.id);
+      if (definition) {
+        this.currentDefinitions.delete(response.id);
+        const location = await definition.location;
+        if (location) {
+          response.result = [{ uri: definition.textDocumentUri, range: definition.range }];
+          delete response.error;
+          message = JSON.stringify(response);
+        }
+      }
+    }
     if (this.currentHover) {
       const { id, documentation } = this.currentHover;
       const obj = JSON.parse(message);
@@ -187,18 +278,37 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
         this.currentHover = undefined;
       }
     }
-    if (this.currentCompletion) {
-      const { id, completionItems, contextualJavaCompletionItems, document, position, completionStartCharacter } = this.currentCompletion;
-      const obj = JSON.parse(message);
-      if (this.isCompletionResult(obj, id)) {
-        const [javaTypeItems, contextualJavaItems] = await Promise.all([completionItems, contextualJavaCompletionItems]);
-        const lspCompletionItems = javaTypeItems.map(item =>
-          this.toLspCompletItem(item, document, { line: position.line, completionStartCharacter })
-        );
-        this.addJavaDocumentation(obj.result.items, contextualJavaItems);
-        obj.result.items.push(...lspCompletionItems);
-        message = JSON.stringify(obj);
-        this.currentCompletion = undefined;
+    if (typeof response === 'object' && response !== null && 'id' in response && typeof response.id === 'number') {
+      if (this.locallyAnsweredCompletions.delete(response.id)) {
+        return;
+      }
+      const pending = this.pendingCompletions.get(response.id);
+      if (pending) {
+        clearTimeout(pending.timeout);
+        this.pendingCompletions.delete(response.id);
+        this.fallbackCompletionsInProgress.delete(response.id);
+        if (this.isCompletionResult(response, response.id)) {
+          const [javaTypeItems, contextualJavaItems] = await Promise.all([
+            withTimeout(pending.completionItems, [], 100),
+            withTimeout(pending.contextualJavaCompletionItems, [], 100)
+          ]);
+          const hasIvyEnvironmentAliases = response.result.items.some(item =>
+            ['case', 'task'].includes(this.normalizeCompletionLabel(item.label))
+          );
+          const ivyEnvironmentDocs = hasIvyEnvironmentAliases
+            ? await withTimeout(this.javaCompletion.ivyEnvironmentCompletionDocumentation(), { case: undefined, task: undefined }, 100)
+            : {};
+          const lspCompletionItems = javaTypeItems.map(item =>
+            this.toLspCompletItem(item, pending.document, {
+              line: pending.position.line,
+              completionStartCharacter: pending.completionStartCharacter
+            })
+          );
+          this.addJavaDocumentation(response.result.items, contextualJavaItems);
+          this.addIvyEnvironmentCompletionDocumentation(response.result.items, ivyEnvironmentDocs);
+          response.result.items.push(...lspCompletionItems);
+          message = JSON.stringify(response);
+        }
       }
     }
     super.handleServerMessage(message);
@@ -206,18 +316,95 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
 
   handleDidOpen = (params: DidOpenTextDocumentParams) => {
     const textDocument = params.textDocument;
+    this.clearResolvedJavaDefinitions(textDocument.uri);
     const doc = TextDocument.create(textDocument.uri, textDocument.languageId, textDocument.version, textDocument.text);
     this.documents.set(textDocument.uri, doc);
   };
 
   handleDidChange = (params: DidChangeTextDocumentParams) => {
     const textDocument = params.textDocument;
+    this.clearResolvedJavaDefinitions(textDocument.uri);
     const currentDoc = this.documents.get(textDocument.uri);
     if (!currentDoc) {
       return;
     }
     const newDoc = TextDocument.update(currentDoc, params.contentChanges, textDocument.version);
     this.documents.set(textDocument.uri, newDoc);
+  };
+
+  handleDefinitionRequest = (params: { textDocument: { uri: string }; position: Position }, id?: number) => {
+    if (id === undefined) {
+      return;
+    }
+    const document = this.documents.get(params.textDocument.uri);
+    if (!document) {
+      return;
+    }
+    const lines = document.getText().split(/\r\n|\n|\r/);
+    const line = lines[params.position.line] ?? '';
+    const imports = lines.filter(sourceLine => /^\s*import\s+(?:static\s+)?[\w.$*]+\s*;\s*$/.test(sourceLine));
+    const javaPosition = new VSCodePosition(0, Math.min(params.position.character, line.length));
+    const range = this.definitionWordRange(line, params.position);
+    const key = this.definitionKey(params.textDocument.uri, range);
+    this.currentDefinitions.set(id, {
+      location: this.javaCompletion
+        .definitionAt(line, javaPosition, imports)
+        .then(location => {
+          if (location) {
+            this.resolvedJavaDefinitions.set(key, location);
+          }
+          return location ?? this.resolvedJavaDefinitions.get(key);
+        })
+        .catch(() => this.resolvedJavaDefinitions.get(key)),
+      textDocumentUri: params.textDocument.uri,
+      range
+    });
+  };
+
+  openDefinitionAtPosition = async (uri: string, position: Position) => {
+    const document = this.documents.get(uri);
+    if (!document) {
+      return false;
+    }
+    const lines = document.getText().split(/\r\n|\n|\r/);
+    const line = lines[position.line] ?? '';
+    const imports = lines.filter(sourceLine => /^\s*import\s+(?:static\s+)?[\w.$*]+\s*;\s*$/.test(sourceLine));
+    const key = this.definitionKey(uri, this.definitionWordRange(line, position));
+    const location =
+      this.resolvedJavaDefinitions.get(key) ??
+      (await this.javaCompletion.definitionAt(line, new VSCodePosition(0, Math.min(position.character, line.length)), imports));
+    if (!location) {
+      return false;
+    }
+    this.resolvedJavaDefinitions.set(key, location);
+    await this.javaCompletion.openJavaLocation(location);
+    return true;
+  };
+
+  definitionKey = (uri: string, range: Range) => `${uri}:${range.start.line}:${range.start.character}:${range.end.character}`;
+
+  clearResolvedJavaDefinitions = (uri: string) => {
+    for (const key of this.resolvedJavaDefinitions.keys()) {
+      if (key.startsWith(`${uri}:`)) {
+        this.resolvedJavaDefinitions.delete(key);
+      }
+    }
+  };
+
+  definitionWordRange = (line: string, position: Position): Range => {
+    const isWordCharacter = (character: string | undefined) => character !== undefined && /[\w$]/.test(character);
+    let start = Math.max(0, Math.min(position.character, line.length));
+    if (!isWordCharacter(line[start]) && isWordCharacter(line[start - 1])) {
+      start--;
+    }
+    let end = start;
+    while (start > 0 && isWordCharacter(line[start - 1])) {
+      start--;
+    }
+    while (end < line.length && isWordCharacter(line[end])) {
+      end++;
+    }
+    return Range.create(Position.create(position.line, start), Position.create(position.line, end));
   };
 
   handleHoverRequest = (params: { textDocument: { uri: string }; position: Position }, id?: number) => {
@@ -260,19 +447,129 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     const currentLine = lines[params.position.line] ?? '';
     const imports = lines.filter(sourceLine => /^\s*import\s+(?:static\s+)?[\w.$*]+\s*;\s*$/.test(sourceLine));
     const cursorCharacter = Math.min(params.position.character, currentLine.length);
-    const javaPosition = new VSCodePosition(0, cursorCharacter);
-    const isMemberCompletion = /\.\s*[\w$]*$/.test(currentLine.slice(0, cursorCharacter));
-    this.currentCompletion = {
+    const completionPrefix = currentLine.slice(0, cursorCharacter);
+    const triggeredByDot = params.context?.triggerCharacter === '.';
+    const contextualSourcePrefix = triggeredByDot && !completionPrefix.endsWith('.') ? `${completionPrefix}.` : completionPrefix;
+    const contextualPrefix = contextualSourcePrefix.replace(/[\w$]*$/, '');
+    const isMemberCompletion = triggeredByDot || /\.\s*[\w$]*$/.test(completionPrefix);
+    const isIvyEnvironmentRootCompletion = isIvyEnvironmentRootCompletionPrefix(contextualSourcePrefix);
+    if (isIvyEnvironmentRootCompletion) {
+      void this.javaCompletion.ivyEnvironmentCompletionDocumentation();
+    }
+    const pending: Omit<PendingCompletion, 'timeout'> = {
       id,
-      completionItems: this.javaCompletion.completionItems(toBeCompleted, 50),
-      // Empty/short member prefixes can have many candidates; resolve all JDT candidates so their docs aren't lost by ranking.
+      uri: params.textDocument.uri,
+      completionItems: isMemberCompletion ? Promise.resolve([]) : this.javaCompletion.completionItems(toBeCompleted, 50),
+      // Start Java contextual completion alongside IvyScript LSP completion; it is also used if the LSP request stalls.
       contextualJavaCompletionItems: isMemberCompletion
-        ? this.javaCompletion.contextualCompletionItems(currentLine, javaPosition, imports, 1000)
+        ? this.javaCompletion.contextualCompletionItems(contextualPrefix, new VSCodePosition(0, contextualPrefix.length), imports, 50)
         : Promise.resolve([]),
       document,
       position: params.position,
-      completionStartCharacter
+      completionStartCharacter,
+      isIvyEnvironmentRootCompletion
     };
+    const timeout = setTimeout(() => void this.fallbackCompletion(pending), 750);
+    this.pendingCompletions.set(id, { ...pending, timeout });
+    this.latestCompletionByDocument.set(params.textDocument.uri, id);
+  };
+
+  fallbackCompletion = async (request: Omit<PendingCompletion, 'timeout'>) => {
+    const pending = this.pendingCompletions.get(request.id);
+    if (!pending || this.fallbackCompletionsInProgress.has(request.id)) {
+      return;
+    }
+    this.fallbackCompletionsInProgress.add(request.id);
+    const [javaTypeItems, contextualJavaItems] = await Promise.all([
+      withTimeout(pending.completionItems, [], 500),
+      withTimeout(pending.contextualJavaCompletionItems, [], 500)
+    ]);
+    if (!this.pendingCompletions.has(request.id)) {
+      this.fallbackCompletionsInProgress.delete(request.id);
+      return;
+    }
+
+    const resultItems: CompletionItem[] = [];
+    if (this.latestCompletionByDocument.get(pending.uri) === pending.id) {
+      if (pending.isIvyEnvironmentRootCompletion) {
+        resultItems.push(
+          ...contextualJavaItems.flatMap(item => {
+            const javaLabel = this.normalizeCompletionLabel(this.toLabel(item).label);
+            const ivyLabel = toIvyEnvironmentCompletionLabel(javaLabel);
+            return ivyLabel ? [this.toContextualLspCompletionItem(item, pending, ivyLabel, true)] : [];
+          })
+        );
+        resultItems.push(this.createCompletionItem('casemap', pending, 'ICaseMapService'));
+      } else {
+        resultItems.push(...contextualJavaItems.map(item => this.toContextualLspCompletionItem(item, pending)));
+        resultItems.push(
+          ...javaTypeItems.map(item => this.toLspCompletItem(item, pending.document, {
+            line: pending.position.line,
+            completionStartCharacter: pending.completionStartCharacter
+          }))
+        );
+      }
+    }
+
+    const uniqueItems = [...new Map(resultItems.map(item => [this.normalizeCompletionLabel(item.label), item])).values()];
+    this.pendingCompletions.delete(request.id);
+    this.fallbackCompletionsInProgress.delete(request.id);
+    this.locallyAnsweredCompletions.add(request.id);
+    setTimeout(() => this.locallyAnsweredCompletions.delete(request.id), 60_000);
+    this.messenger.sendNotification(
+      this.notificationType,
+      this.messageParticipant,
+      JSON.stringify({ jsonrpc: '2.0', id: request.id, result: { isIncomplete: false, items: uniqueItems } })
+    );
+  };
+
+  toContextualLspCompletionItem = (
+    item: VSCodeCompletionItem,
+    pending: PendingCompletion,
+    label = this.toLabel(item).label,
+    ivyEnvironmentAlias = false
+  ) => {
+    const completion = CompletionItem.create(label);
+    const labelDetails = this.toLabel(item);
+    const insertText = ivyEnvironmentAlias
+      ? label
+      : typeof item.insertText === 'string'
+        ? item.insertText
+        : item.insertText instanceof SnippetString
+          ? item.insertText.value
+          : labelDetails.label;
+    completion.kind = this.toKind(item.kind);
+    completion.detail = item.detail;
+    completion.sortText = item.sortText;
+    completion.filterText = ivyEnvironmentAlias ? label : item.filterText;
+    completion.documentation = this.toDocumentation(item.documentation);
+    completion.textEdit = TextEdit.replace(
+      Range.create(
+        Position.create(pending.position.line, pending.completionStartCharacter),
+        Position.create(pending.position.line, pending.position.character)
+      ),
+      insertText
+    );
+    completion.insertTextFormat = !ivyEnvironmentAlias && item.insertText instanceof SnippetString
+      ? InsertTextFormat.Snippet
+      : InsertTextFormat.PlainText;
+    return completion;
+  };
+
+  createCompletionItem = (label: string, pending: PendingCompletion, detail?: string) => {
+    const completion = CompletionItem.create(label);
+    completion.kind = CompletionItemKind.Variable;
+    completion.detail = detail;
+    completion.insertText = label;
+    completion.filterText = label;
+    completion.textEdit = TextEdit.replace(
+      Range.create(
+        Position.create(pending.position.line, pending.completionStartCharacter),
+        Position.create(pending.position.line, pending.position.character)
+      ),
+      label
+    );
+    return completion;
   };
 
   hasMethodAndParams = (message: unknown): message is { method: string; params: object; id?: number } => {
@@ -311,6 +608,24 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     return '';
   };
 
+  addIvyEnvironmentCompletionDocumentation = (
+    completionItems: CompletionItem[],
+    documentation: { case?: string; task?: string }
+  ) => {
+    for (const item of completionItems) {
+      const label = this.normalizeCompletionLabel(item.label);
+      const ivyDocumentation = label === 'case' ? documentation.case : label === 'task' ? documentation.task : undefined;
+      if (!ivyDocumentation) {
+        continue;
+      }
+      const existingDocumentation = this.toMarkdown(item.documentation);
+      item.documentation = {
+        kind: 'markdown',
+        value: [existingDocumentation, ivyDocumentation].filter(Boolean).join('\n\n')
+      };
+    }
+  };
+
   addJavaDocumentation = (completionItems: CompletionItem[], javaItems: VSCodeCompletionItem[]) => {
     const documentationByLabel = new Map<string, VSCodeCompletionItem['documentation']>();
     for (const javaItem of javaItems) {
@@ -324,7 +639,9 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     }
 
     for (const item of completionItems) {
-      const javaDocumentation = documentationByLabel.get(this.normalizeCompletionLabel(item.label));
+      const label = this.normalizeCompletionLabel(item.label);
+      const javaAlias = this.normalizeCompletionLabel(toJavaEnvironmentCompletionLabel(label));
+      const javaDocumentation = documentationByLabel.get(label) ?? documentationByLabel.get(javaAlias);
       const markdown = this.toDocumentation(javaDocumentation);
       if (!markdown) {
         continue;
@@ -447,6 +764,19 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
         return CompletionItemKind.Interface;
       case VSCodeCompletionItemKind.Enum:
         return CompletionItemKind.Enum;
+      case VSCodeCompletionItemKind.Method:
+        return CompletionItemKind.Method;
+      case VSCodeCompletionItemKind.Function:
+        return CompletionItemKind.Function;
+      case VSCodeCompletionItemKind.Field:
+      case VSCodeCompletionItemKind.Property:
+        return CompletionItemKind.Field;
+      case VSCodeCompletionItemKind.Variable:
+        return CompletionItemKind.Variable;
+      case VSCodeCompletionItemKind.Constant:
+        return CompletionItemKind.Constant;
+      case VSCodeCompletionItemKind.Module:
+        return CompletionItemKind.Module;
       default:
         return undefined;
     }
