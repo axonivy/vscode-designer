@@ -4,6 +4,7 @@ import fs from 'fs';
 import { DomUtils, parseDocument } from 'htmlparser2';
 import type { ExtensionContext, Webview } from 'vscode';
 import { env, Uri } from 'vscode';
+import { createNonce } from '../base/nonce-util';
 import { findEditorWorker, findRootEntry, findRootHtml, parseBuildManifest } from './build-manifest';
 
 export const createWebViewContent = (context: ExtensionContext, webview: Webview, webviewPath: string) => {
@@ -84,13 +85,4 @@ export const createWebViewContent = (context: ExtensionContext, webview: Webview
     DomUtils.appendChild(head, editorWorkerLocationScript);
   }
   return render(htmlDoc, { xmlMode: true, decodeEntities: false, selfClosingTags: false });
-};
-
-const createNonce = () => {
-  let text = '';
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
 };
