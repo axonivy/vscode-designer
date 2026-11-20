@@ -69,6 +69,7 @@ test('translates incomplete Ivy environment members to a Java completion receive
 
 test('recognizes Ivy environment completion prefixes without matching similar identifiers', () => {
   expect(isIvyEnvironmentRootCompletionPrefix('ivy.')).toBe(true);
+  expect(isIvyEnvironmentRootCompletionPrefix('ivy.ta')).toBe(true);
   expect(isIvyEnvironmentCompletionPrefix('ivy.')).toBe(true);
   expect(isIvyEnvironmentCompletionPrefix('ivy.t')).toBe(true);
   expect(isIvyEnvironmentCompletionPrefix('ivy.task.')).toBe(true);

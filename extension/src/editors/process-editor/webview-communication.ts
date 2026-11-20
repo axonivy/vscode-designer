@@ -323,7 +323,6 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
 
   handleDidChange = (params: DidChangeTextDocumentParams) => {
     const textDocument = params.textDocument;
-    this.cancelPendingCompletions(textDocument.uri);
     this.clearResolvedJavaDefinitions(textDocument.uri);
     const currentDoc = this.documents.get(textDocument.uri);
     if (!currentDoc) {
@@ -408,16 +407,6 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     return Range.create(Position.create(position.line, start), Position.create(position.line, end));
   };
 
-  cancelPendingCompletions = (uri: string) => {
-    for (const [id, pending] of this.pendingCompletions) {
-      if (pending.uri === uri) {
-        clearTimeout(pending.timeout);
-        this.pendingCompletions.delete(id);
-        this.fallbackCompletionsInProgress.delete(id);
-      }
-    }
-  };
-
   handleHoverRequest = (params: { textDocument: { uri: string }; position: Position }, id?: number) => {
     if (id === undefined) {
       return;
@@ -471,7 +460,7 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
       completionItems: isMemberCompletion ? Promise.resolve([]) : this.javaCompletion.completionItems(toBeCompleted, 50),
       // Start Java contextual completion alongside IvyScript LSP completion; it is also used if the LSP request stalls.
       contextualJavaCompletionItems: isMemberCompletion
-        ? this.javaCompletion.contextualCompletionItems(contextualPrefix, new VSCodePosition(0, contextualPrefix.length), imports, 1000)
+        ? this.javaCompletion.contextualCompletionItems(contextualPrefix, new VSCodePosition(0, contextualPrefix.length), imports, 50)
         : Promise.resolve([]),
       document,
       position: params.position,
