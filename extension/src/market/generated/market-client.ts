@@ -21,8 +21,8 @@ export interface ProductModel {
   type?: string;
   tags?: string[];
   marketDirectory?: string;
+  /** Only included when true; omitted means false. */
   deprecated?: boolean;
-  internal?: boolean;
 }
 
 export interface ErrorResponse {
@@ -61,6 +61,10 @@ export type FindProductsParams = {
   type?: FindProductsType;
   keyword?: string;
   language?: FindProductsLanguage;
+  /** When present, response omits meta targeting a visual client (logo, urls, ...) */
+  llm?: string;
+  /** Hide deprecated products whose final version is older than this Designer major.minor version. */
+  designerVersion?: string;
 };
 
 export type FindProductsType = (typeof FindProductsType)[keyof typeof FindProductsType];
@@ -82,16 +86,12 @@ export const FindProductsLanguage = {
 
 export type FindProductVersionsByIdParams = {
   isShowDevVersion?: boolean;
-  /**
-   * Accepted for compatibility; currently does not change the returned versions.
-   */
+  /** Accepted for compatibility; currently does not change the returned versions. */
   designerVersion?: string;
 };
 
 export type FindProductJsonContentParams = {
-  /**
-   * The version is required for a successful response; omitting it returns 404.
-   */
+  /** The version is required for a successful response; omitting it returns 404. */
   productVersion?: string;
 };
 

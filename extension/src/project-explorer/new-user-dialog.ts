@@ -4,6 +4,7 @@ import { l10n, Uri, type QuickPickItem } from 'vscode';
 import { localizeDialogLayout, localizeDialogType } from '../base/localized-labels';
 import { logErrorMessage } from '../base/logging-util';
 import type { CreateUserDialogParams } from '../engine/api/engine-api';
+import type { ViewLayoutOption } from '../engine/api/generated/client';
 import { IvyEngineManager } from '../engine/engine-manager';
 import { type AddCommandSelectionContext } from './ivy-project-explorer';
 import {
@@ -25,24 +26,30 @@ const fileExtensions = ['.xhtml', '.f.json'];
 
 const dialogDataClassSuffix = 'Data';
 
-const layouts = [
+const defaultLayoutOrder = [
   'Page Responsive Grid 2 Columns',
   'Page Responsive Grid 4 Columns',
   'Page Responsive Top Labels',
   'Page Panel Grid',
-  'Component',
-  'Page'
-] as const;
-export type Layout = (typeof layouts)[number];
+  'Component'
+];
+const defaultTemplateOrder = ['frame-10', 'frame-10-right', 'frame-10-full-width', 'basic-10'];
+
+const sortByDefaultOrder = <T>(items: T[], defaultOrder: string[], getName: (item: T) => string) => {
+  const rank = (item: T) => {
+    const index = defaultOrder.indexOf(getName(item));
+    return index === -1 ? defaultOrder.length : index;
+  };
+  return [...items].sort((a, b) => rank(a) - rank(b));
+};
+
 interface LayoutPick extends QuickPickItem {
-  label: Layout;
+  label: string;
   localizedLabel?: string;
 }
 
-const templates = ['frame-10', 'frame-10-right', 'frame-10-full-width', 'basic-10'] as const;
-export type Template = (typeof templates)[number];
 interface TemplatePick extends QuickPickItem {
-  label: Template;
+  label: string;
   localizedLabel?: string;
 }
 
@@ -50,6 +57,7 @@ interface NewUserDialogState extends MSStateBase {
   project?: ProjectSelection | undefined;
   name?: string | undefined;
   namespace?: string | undefined;
+  layoutOptions?: ViewLayoutOption[] | undefined;
   layout?: LayoutPick | undefined;
   template?: TemplatePick | undefined;
   projectFromSelection?: ProjectSelection | undefined;
@@ -200,6 +208,15 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
   };
 
   const stepLayout: InputStep<NewUserDialogState> = async (input: MultiStepInput<NewUserDialogState>, state: NewUserDialogState) => {
+    const engineApi = IvyEngineManager.instance.engineApi;
+    if (!engineApi) {
+      throw new Error('Engine API is not initialized');
+    }
+    const layoutOptions = await engineApi.getLayoutOptions({
+      projectDir: state.project?.path,
+      offline: type === 'JSFOffline'
+    });
+    state.layoutOptions = layoutOptions;
     state.layout = await input.showQuickPick<LayoutPick>({
       title: state.dialogTitle,
       titleSuffix: l10n.t('Choose layout'),
@@ -207,16 +224,12 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: state.layout ? state.layout.label : '',
-      items: layouts
-        .filter(layout => layout !== 'Page')
-        .map(layout => {
-          return {
-            label: layout,
-            localizedLabel: localizeDialogLayout(layout)
-          };
-        }),
+      items: sortByDefaultOrder(layoutOptions, defaultLayoutOrder, option => option.name).map(option => ({
+        label: option.name,
+        localizedLabel: localizeDialogLayout(option.name)
+      })),
       onBack: (typedValue: string) => {
-        state.layout = { label: typedValue as Layout };
+        state.layout = { label: typedValue };
       }
     });
   };
@@ -232,14 +245,16 @@ export const addNewUserDialog = async (selectionContext: AddCommandSelectionCont
         currentStep: state.currentStep,
         totalSteps: state.totalSteps,
         value: state.template ? state.template.label : '',
-        items: templates.map(template => {
-          return {
-            label: template,
-            localizedLabel: template
-          };
-        }),
+        items: sortByDefaultOrder(
+          state.layoutOptions?.find(option => option.name === state.layout?.label)?.availableHtmlLayouts ?? [],
+          defaultTemplateOrder,
+          template => template
+        ).map(template => ({
+          label: template,
+          localizedLabel: template
+        })),
         onBack: (typedValue: string) => {
-          state.template = { label: typedValue as Template };
+          state.template = { label: typedValue };
         }
       });
     }

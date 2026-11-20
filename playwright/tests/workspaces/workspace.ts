@@ -15,3 +15,4 @@ export const properMultiProjectPath = path.resolve(import.meta.dirname, './prope
 export const properMultiProjectJavaPath = path.resolve(import.meta.dirname, './properMultiProjectJava');
 export const dependencyClashWorkspacePath = path.resolve(import.meta.dirname, './dependencyClash');
 export const projectNameConflictPath = path.resolve(import.meta.dirname, './projectNameConflict');
+export const customLayoutProjectPath = path.resolve(import.meta.dirname, './customLayoutProject');

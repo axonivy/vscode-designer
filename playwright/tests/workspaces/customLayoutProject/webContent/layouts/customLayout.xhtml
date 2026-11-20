@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="jakarta.faces.core"
+  xmlns:h="jakarta.faces.html" xmlns:ui="jakarta.faces.facelets"
+  xmlns:pm="http://primefaces.org/freya-ivy" xmlns:p="primefaces">
+<h:head>
+  <f:attribute name="primefaces.THEME" value="#{ivyFreyaTheme.theme}" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Html Dialogs Template</title>
+  <link rel="shortcut icon" href="#{resource['ivy-branding:favicon']}" />
+
+  <h:outputStylesheet name="primeflex-3.min.css" library="primeflex" />
+  <h:outputStylesheet name="#{ivyFreyaTheme.layout}" library="#{ivyFreyaTheme.library}" />
+  <h:outputStylesheet name="custom.css" library="ivy-branding" />
+  <h:outputStylesheet name="form.css" library="ivy-form" />
+  <h:outputScript name="js/layout.js" library="#{ivyFreyaTheme.library}" />
+</h:head>
+<h:body class="body-hd #{ivyFreyaTheme.mode}">
+  <div class="layout-wrapper layout-topbar-#{ivyFreyaTheme.mode} layout-menu-#{ivyFreyaTheme.mode} layout-sidebar layout-static">
+    <ui:include src="./includes/topbar.xhtml" />
+
+    <div class="layout-main">
+      <div class="layout-content">
+        <div class="grid">
+          <div class="col-12">
+            <div class="card card-w-title">
+              <p:messages id="message" showDetail="true" closable="true" />
+              <h2>
+                <ui:insert name="centerHeader" />
+              </h2>
+              <ui:insert name="content">
+                <!-- The actual page content is inserted here -->
+              </ui:insert>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ui:insert name="exception">
+    <ui:include src="/layouts/includes/exception.xhtml" />
+  </ui:insert>
+
+  <style type="text/css">
+  body.body-hd.light {
+    background-color: #F3F3F3;
+  }
+  </style>
+
+</h:body>
+
+</html>
