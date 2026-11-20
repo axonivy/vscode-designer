@@ -19,7 +19,7 @@ public class MarkdownReporter implements Reporter {
 
   @Override
   public void init(String testUnit) {
-    lines.add("## AI test report");
+    lines.add("## " + testUnit);
     lines.add("");
     lines.add("Test file: `aitest/ai-dev-tests/test/ch/ivyteam/smart/core/copilot/" + testUnit + ".java`");
     lines.add("");
