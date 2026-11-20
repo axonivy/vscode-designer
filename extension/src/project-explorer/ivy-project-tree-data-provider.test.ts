@@ -4,7 +4,13 @@ import os from 'os';
 import path from 'path';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { FileType, ThemeColor, ThemeIcon, TreeItemCollapsibleState, Uri, type FileSystemProvider } from 'vscode';
-import { IarContentFileSystemProvider, iarContentUri } from './iar-content-provider';
+import {
+  IAR_CONTENT_SCHEME,
+  IarContentFileSystemProvider,
+  iarContentEngineFileName,
+  iarContentUri,
+  iarContentUriFromEngineUri
+} from './iar-content-provider';
 import { IvyProjectTreeDataProvider } from './ivy-project-tree-data-provider';
 
 const mocks = vi.hoisted(() => ({
@@ -65,9 +71,13 @@ vi.mock('vscode', () => {
     static NoPermissions = () => new FileSystemError('NoPermissions');
   }
   const parseUri = (value: string) => {
-    const parsed = new URL(value);
-    const uriPath = decodeURIComponent(parsed.pathname);
-    return { fsPath: uriPath, path: uriPath, query: parsed.search.slice(1) };
+    try {
+      const parsed = new URL(value);
+      const uriPath = decodeURIComponent(parsed.pathname);
+      return { fsPath: uriPath, path: uriPath, query: parsed.search.slice(1), scheme: parsed.protocol.slice(0, -1) };
+    } catch {
+      return { fsPath: value, path: value, query: '', scheme: '' };
+    }
   };
   return {
     Diagnostic,
@@ -94,6 +104,7 @@ vi.mock('vscode', () => {
 });
 
 vi.mock('../engine/diagnostics', () => ({ IvyDiagnostics: { instance: { projectFileUrisToBeConverted: () => [] } } }));
+vi.mock('../base/logging-util', () => ({ logInformationMessage: vi.fn() }));
 vi.mock('../base/java-class-path-reader', () => ({
   JavaClassPathReader: { instance: { getIarsPerProject: mocks.getIarsPerProject } }
 }));
@@ -227,7 +238,7 @@ test('does not show IAR dependencies below projects that do not declare them', a
   expect(roots.map(root => root.collapsibleState)).toEqual([TreeItemCollapsibleState.Collapsed, undefined]);
 });
 
-test('shows only the META-INF/ivy tree and opens files as read-only documents', async () => {
+test('shows only the META-INF/ivy tree and opens process files with their engine URI', async () => {
   const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
   const [workspaceProject] = await provider.getChildren();
   const [iarGroup] = await provider.getChildren(workspaceProject);
@@ -240,12 +251,12 @@ test('shows only the META-INF/ivy tree and opens files as read-only documents', 
 
   const [processFile] = await provider.getChildren(rootEntries[0]);
   expect(processFile?.label).toBe('hello.p.json');
-  expect(processFile?.command?.command).toBe('vscode.openWith');
-  expect(processFile?.command?.arguments).toContain('default');
+  expect(processFile?.command?.command).toBe('vscode.open');
   expect(provider.getTreeItem(processFile!).resourceUri).toBe(processFile?.uri);
   const fsProvider: FileSystemProvider = new IarContentFileSystemProvider();
-  const fileUri = processFile!.command!.arguments![0] as import('vscode').Uri;
-  expect(fileUri.path).toBe('/shared-project-2.1.0.iar/process/hello.p.json');
+  const openUri = processFile!.command!.arguments![0] as import('vscode').Uri;
+  const fileUri = iarContentUri(archivePath, 'META-INF/ivy/process/hello.p.json');
+  expect(openUri.fsPath).toBe(iarContentEngineFileName(fileUri));
   expect(Buffer.from((await fsProvider.readFile(fileUri)) as Uint8Array).toString('utf8')).toBe('{"name":"IAR process"}');
   expect(fsProvider.readDirectory(iarDependency!.uri)).toEqual([
     ['process', FileType.Directory],
@@ -253,6 +264,34 @@ test('shows only the META-INF/ivy tree and opens files as read-only documents', 
   ]);
   expect(() => fsProvider.writeFile(fileUri, new Uint8Array(), { create: true, overwrite: true })).toThrow();
   expect(workspaceProject?.kind).toBe('workspaceProject');
+});
+
+test('keeps variables.yaml on the IAR URI and derives its engine file name', async () => {
+  const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
+  const [workspaceProject] = await provider.getChildren();
+  const [iarGroup] = await provider.getChildren(workspaceProject);
+  const [iarDependency] = await provider.getChildren(iarGroup);
+  const rootEntries = await provider.getChildren(iarDependency);
+  const variablesEntry = rootEntries.find(entry => entry.label === 'variables.yaml');
+
+  expect(variablesEntry?.uri.scheme).toBe(IAR_CONTENT_SCHEME);
+  expect(iarContentEngineFileName(variablesEntry!.uri)).toBe(`${archivePath}!/META-INF/ivy/variables.yaml`);
+});
+
+test('normalizes Windows archive paths when deriving engine file names', () => {
+  const windowsArchivePath = path.win32.join('D:\\jenkins\\workspace', 'shared.iar');
+  const uri = iarContentUri(windowsArchivePath, 'META-INF/ivy/config/rest-clients.yaml');
+
+  expect(iarContentEngineFileName(uri)).toBe('D:/jenkins/workspace/shared.iar!/META-INF/ivy/config/rest-clients.yaml');
+});
+
+test('converts engine file URIs inside IARs to archive content URIs', () => {
+  const engineUri = Uri.parse(`file://${archivePath}!/META-INF/ivy/dataclasses/ExampleData.d.json`);
+  const contentUri = iarContentUriFromEngineUri(engineUri);
+
+  expect(contentUri?.scheme).toBe(IAR_CONTENT_SCHEME);
+  expect(iarContentEngineFileName(contentUri!)).toBe(`${archivePath}!/META-INF/ivy/dataclasses/ExampleData.d.json`);
+  expect(iarContentUriFromEngineUri(Uri.parse('file:///workspace/project/dataclasses/ExampleData.d.json'))).toBeUndefined();
 });
 
 test('supports implicit archive directories and reports uncompressed file sizes', () => {

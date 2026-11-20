@@ -5,6 +5,7 @@ import { commands, Uri } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { IvyEngineManager } from '../../engine/engine-manager';
+import { iarContentEngineFileUri } from '../../project-explorer/iar-content-provider';
 import { IvyBrowserViewProvider } from '../../views/browser/ivy-browser-view-provider';
 import { updateTextDocumentContent } from '../content-writer';
 import { EditorWebSocketForwarder } from '../editor-websocket-forwarder';
@@ -19,13 +20,20 @@ import {
 
 const FormWebSocketMessage: NotificationType<unknown> = { method: 'formWebSocketMessage' };
 
-export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webviewPanel: WebviewPanel, document: TextDocument) => {
+export const setupCommunication = (
+  websocketUrl: URL,
+  messenger: Messenger,
+  webviewPanel: WebviewPanel,
+  document: TextDocument,
+  engineFileName: string,
+  readOnly: boolean
+) => {
   const messageParticipant = messenger.registerWebviewPanel(webviewPanel);
   const toDispose = new DisposableCollection(
-    new FormEditorWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
+    new FormEditorWebSocketForwarder(websocketUrl, messenger, messageParticipant, document, engineFileName, readOnly),
     messenger.onNotification(
       WebviewReadyNotification,
-      () => messenger.sendNotification(InitializeConnectionRequest, messageParticipant, { file: document.fileName }),
+      () => messenger.sendNotification(InitializeConnectionRequest, messageParticipant, { file: engineFileName, readOnly }),
       { sender: messageParticipant }
     ),
     webviewPanel.onDidDispose(() => toDispose.dispose())
@@ -33,8 +41,15 @@ export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webv
 };
 
 class FormEditorWebSocketForwarder extends EditorWebSocketForwarder {
-  constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: TextDocument) {
-    super(websocketUrl, 'ivy-form-lsp', messenger, messageParticipant, FormWebSocketMessage, document);
+  constructor(
+    websocketUrl: URL,
+    messenger: Messenger,
+    messageParticipant: MessageParticipant,
+    document: TextDocument,
+    engineFileName: string,
+    private readonly readOnly: boolean
+  ) {
+    super(websocketUrl, 'ivy-form-lsp', messenger, messageParticipant, FormWebSocketMessage, document, engineFileName);
   }
 
   protected override handleClientMessage(message: unknown) {
@@ -49,10 +64,18 @@ class FormEditorWebSocketForwarder extends EditorWebSocketForwarder {
           IvyBrowserViewProvider.instance.openInBrowser(message.params.payload);
           break;
         case 'openProcess':
-          commands.executeCommand('vscode.open', Uri.parse(`${path}Process.p.json`));
+          commands.executeCommand(
+            'vscode.open',
+            this.readOnly
+              ? iarContentEngineFileUri(this.document.uri.with({ path: `${path}Process.p.json` }))
+              : Uri.parse(`${path}Process.p.json`)
+          );
           break;
         case 'openDataClass':
-          commands.executeCommand('vscode.open', Uri.parse(`${path}Data.d.json`));
+          commands.executeCommand(
+            'vscode.open',
+            this.readOnly ? this.document.uri.with({ path: `${path}Data.d.json` }) : Uri.parse(`${path}Data.d.json`)
+          );
           break;
         case 'openComponent':
           openComponent(message.params);
@@ -66,7 +89,7 @@ class FormEditorWebSocketForwarder extends EditorWebSocketForwarder {
 
   protected override handleServerMessage(message: string) {
     const obj = JSON.parse(message);
-    if (hasEditorFileContent(obj)) {
+    if (hasEditorFileContent(obj) && !this.readOnly) {
       updateTextDocumentContent(this.document, obj.result).then(() => super.handleServerMessage(message));
     } else {
       super.handleServerMessage(message);

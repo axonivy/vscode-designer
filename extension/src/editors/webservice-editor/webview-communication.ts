@@ -17,6 +17,7 @@ import { updateTextDocumentContent } from '../content-writer';
 import { EditorWebSocketForwarder } from '../editor-websocket-forwarder';
 import { pickFile } from '../file-picker';
 import {
+  createJsonRpcErrorResponse,
   createJsonRpcSuccessResponse,
   hasEditorFileContent,
   InitializeConnectionRequest,
@@ -31,13 +32,20 @@ import { runMavenCommand } from '../restclient-editor/maven-runner';
 
 const WebServiceClientWebSocketMessage: NotificationType<unknown> = { method: 'webServiceClientWebSocketMessage' };
 
-export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webviewPanel: WebviewPanel, document: TextDocument) => {
+export const setupCommunication = (
+  websocketUrl: URL,
+  messenger: Messenger,
+  webviewPanel: WebviewPanel,
+  document: TextDocument,
+  engineFileName: string,
+  readOnly: boolean
+) => {
   const messageParticipant = messenger.registerWebviewPanel(webviewPanel);
   const toDispose = new DisposableCollection(
-    new WebServiceClientWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
+    new WebServiceClientWebSocketForwarder(websocketUrl, messenger, messageParticipant, document, engineFileName, readOnly),
     messenger.onNotification(
       WebviewReadyNotification,
-      () => messenger.sendNotification(InitializeConnectionRequest, messageParticipant, { file: document.fileName }),
+      () => messenger.sendNotification(InitializeConnectionRequest, messageParticipant, { file: engineFileName, readOnly }),
       { sender: messageParticipant }
     ),
     webviewPanel.onDidDispose(() => toDispose.dispose())
@@ -45,12 +53,24 @@ export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webv
 };
 
 class WebServiceClientWebSocketForwarder extends EditorWebSocketForwarder {
-  constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: TextDocument) {
-    super(websocketUrl, 'ivy-webservice-lsp', messenger, messageParticipant, WebServiceClientWebSocketMessage, document);
+  constructor(
+    websocketUrl: URL,
+    messenger: Messenger,
+    messageParticipant: MessageParticipant,
+    document: TextDocument,
+    engineFileName: string,
+    private readonly readOnly: boolean
+  ) {
+    super(websocketUrl, 'ivy-webservice-lsp', messenger, messageParticipant, WebServiceClientWebSocketMessage, document, engineFileName);
   }
 
   protected override handleClientMessage(message: unknown) {
     if (isIntegrationRequest(message)) {
+      if (this.readOnly) {
+        logErrorMessage(l10n.t('Editor is read-only'));
+        super.handleServerMessage(createJsonRpcErrorResponse(message, -32000, l10n.t('Editor is read-only')));
+        return;
+      }
       switch (message.method) {
         case 'integration/generate':
           void generateClient(message.params as WsGeneratorConfig, this.document).then(result => {
@@ -86,7 +106,7 @@ class WebServiceClientWebSocketForwarder extends EditorWebSocketForwarder {
 
   protected override handleServerMessage(message: string) {
     const obj = JSON.parse(message);
-    if (hasEditorFileContent(obj)) {
+    if (hasEditorFileContent(obj) && !this.readOnly) {
       updateTextDocumentContent(this.document, obj.result).then(() => super.handleServerMessage(message));
     } else {
       super.handleServerMessage(message);
