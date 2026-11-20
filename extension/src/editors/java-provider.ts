@@ -3,11 +3,13 @@ import { executeCommand } from '../base/commands';
 import { logWarningMessage } from '../base/logging-util';
 import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { treeUriToProjectPath } from '../project-explorer/tree-selection';
-import { IVY_IMPORT, toJavaSourceContext } from './ivy-script-java-translation';
+import { IVY_IMPORT, toJavaCompletionSourceContext, toJavaSourceContext } from './ivy-script-java-translation';
 
 export class JavaProvider {
+  readonly javaProviderDirectory: Promise<Uri>;
   readonly dummyJavaFile: Promise<Uri>;
   private ivyEnvironmentCompletionDocs: Promise<{ case?: string; task?: string }> | undefined;
+  private readonly contextualCompletionCache = new Map<string, Promise<CompletionItem[]>>();
   readonly dummyHoverJavaFile: Promise<Uri>;
   readonly dummyContextJavaFile: Promise<Uri>;
   readonly dummyDefinitionJavaFile: Promise<Uri>;
@@ -18,22 +20,17 @@ export class JavaProvider {
 
   constructor(documentUri: Uri) {
     const projectPath = treeUriToProjectPath(documentUri, IvyProjectManager.instance.getIvyProjects());
-    this.dummyJavaFile = projectPath.then(project => Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider', 'java-provider.java'));
-    this.dummyHoverJavaFile = projectPath.then(project =>
-      Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider', 'java-provider-hover.java')
-    );
-    this.dummyContextJavaFile = projectPath.then(project =>
-      Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider', 'java-provider-context.java')
-    );
-    this.dummyDefinitionJavaFile = projectPath.then(project =>
-      Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider', 'java-provider-definition.java')
-    );
+    this.javaProviderDirectory = projectPath.then(project => Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider'));
+    this.dummyJavaFile = this.javaProviderDirectory.then(directory => Uri.joinPath(directory, 'java-provider.java'));
+    this.dummyHoverJavaFile = this.javaProviderDirectory.then(directory => Uri.joinPath(directory, 'java-provider-hover.java'));
+    this.dummyContextJavaFile = this.javaProviderDirectory.then(directory => Uri.joinPath(directory, 'java-provider-context.java'));
+    this.dummyDefinitionJavaFile = this.javaProviderDirectory.then(directory => Uri.joinPath(directory, 'java-provider-definition.java'));
   }
 
   public async completionItems(toBeCompleted: string, itemResolveCount?: number) {
     const javaFile = await this.dummyJavaFile;
     const javaFileContent = `${JavaProvider.DUMMY_CONTENT}${toBeCompleted}`;
-    await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
+    await this.writeJavaFile(javaFile, javaFileContent);
     const completionList = await executeCommand<CompletionList>(
       'vscode.executeCompletionItemProvider',
       javaFile,
@@ -49,13 +46,42 @@ export class JavaProvider {
       .filter(item => item.detail !== JavaProvider.DUMMY_CLASS_NAME);
   }
 
-  public async contextualCompletionItems(code: string, position: Position, imports: string[], itemResolveCount: number) {
+  public contextualCompletionItems(code: string, position: Position, imports: string[], itemResolveCount: number) {
+    const source = toJavaCompletionSourceContext(code, position.character, imports);
+    const cacheKey = `${source.code}:${source.character}:${source.imports.join('\n')}:${itemResolveCount}`;
+    const cached = this.contextualCompletionCache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+    const completion = this.loadContextualCompletionItems(source.code, source.character, source.imports, itemResolveCount);
+    this.contextualCompletionCache.set(cacheKey, completion);
+    void completion.then(
+      items => {
+        if (items.length === 0 && this.contextualCompletionCache.get(cacheKey) === completion) {
+          this.contextualCompletionCache.delete(cacheKey);
+        }
+      },
+      () => {
+        if (this.contextualCompletionCache.get(cacheKey) === completion) {
+          this.contextualCompletionCache.delete(cacheKey);
+        }
+      }
+    );
+    if (this.contextualCompletionCache.size > 64) {
+      const oldest = this.contextualCompletionCache.keys().next().value;
+      if (oldest) {
+        this.contextualCompletionCache.delete(oldest);
+      }
+    }
+    return completion;
+  }
+
+  private async loadContextualCompletionItems(code: string, character: number, imports: string[], itemResolveCount: number) {
     const javaFile = await this.dummyContextJavaFile;
-    const source = toJavaSourceContext(code, position.character, imports);
-    const importContent = source.imports.length > 0 ? `${source.imports.join('\n')}\n` : '';
-    const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${source.code}; } }`;
-    await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
-    const javaPosition = new Position(source.imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + source.character);
+    const importContent = imports.length > 0 ? `${imports.join('\n')}\n` : '';
+    const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${code}; } }`;
+    await this.writeJavaFile(javaFile, javaFileContent);
+    const javaPosition = new Position(imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + character);
     const completionList = await executeCommand<CompletionList>(
       'vscode.executeCompletionItemProvider',
       javaFile,
@@ -79,7 +105,7 @@ export class JavaProvider {
     const source = toJavaSourceContext(toBeHovered, position.character, imports);
     const importContent = source.imports.length > 0 ? `${source.imports.join('\n')}\n` : '';
     const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${source.code}; } }`;
-    await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
+    await this.writeJavaFile(javaFile, javaFileContent);
     const javaPosition = new Position(source.imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + source.character);
     const hovers = await executeCommand<Hover[] | undefined>('vscode.executeHoverProvider', javaFile, javaPosition);
     const documentation = hovers?.flatMap(hover => hover.contents).map(content => {
@@ -115,7 +141,7 @@ export class JavaProvider {
     }
     const declarationPrefix = `class ${JavaProvider.DUMMY_CLASS_NAME} { `;
     const javaFileContent = `${declarationPrefix}${typeName} definition; }`;
-    await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
+    await this.writeJavaFile(javaFile, javaFileContent);
     const locations = await executeCommand<Array<Location | LocationLink>>(
       'vscode.executeDefinitionProvider',
       javaFile,
@@ -145,7 +171,7 @@ export class JavaProvider {
     const javaFile = await this.dummyDefinitionJavaFile;
     const importContent = javaSource.imports.length > 0 ? `${javaSource.imports.join('\n')}\n` : '';
     const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${javaSource.code}; } }`;
-    await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
+    await this.writeJavaFile(javaFile, javaFileContent);
     const javaPosition = new Position(javaSource.imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + javaSource.character);
     const locations = await executeCommand<Array<Location | LocationLink> | undefined>(
       'vscode.executeDefinitionProvider',
@@ -162,6 +188,11 @@ export class JavaProvider {
     }
     await this.openJavaLocation(location);
     return true;
+  }
+
+  private async writeJavaFile(javaFile: Uri, content: string) {
+    await workspace.fs.createDirectory(await this.javaProviderDirectory);
+    await workspace.fs.writeFile(javaFile, Buffer.from(content));
   }
 
   public async openJavaLocation(location: Location | LocationLink) {

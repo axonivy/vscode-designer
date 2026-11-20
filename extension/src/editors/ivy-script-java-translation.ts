@@ -28,8 +28,22 @@ const IVY_MEMBERS: Record<string, string> = {
 };
 
 export const toJavaEnvironmentCompletionLabel = (label: string) => IVY_MEMBERS[label] ?? label;
+const JAVA_TO_IVY_MEMBERS = Object.fromEntries(Object.entries(IVY_MEMBERS).map(([ivyMember, javaMethod]) => [javaMethod, ivyMember]));
+export const toIvyEnvironmentCompletionLabel = (label: string) => JAVA_TO_IVY_MEMBERS[label];
 export const isIvyEnvironmentCompletionPrefix = (prefix: string) => /\bivy(?:\.[A-Za-z_$]*)*\.?$/.test(prefix);
-export const isIvyEnvironmentRootCompletionPrefix = (prefix: string) => /\bivy\.$/.test(prefix);
+export const isIvyEnvironmentRootCompletionPrefix = (prefix: string) => /\bivy\.[A-Za-z_$]*$/.test(prefix);
+
+const withIvyImport = (imports: string[]) =>
+  imports.some(statement => statement.trim() === IVY_IMPORT) ? imports : [...imports, IVY_IMPORT];
+
+export const toJavaCompletionSourceContext = (code: string, character: number, imports: string[] = []): JavaSourceContext => {
+  const openIvyMember = /\bivy\.[A-Za-z_$]*$/.exec(code);
+  if (!openIvyMember || openIvyMember.index === undefined) {
+    return toJavaSourceContext(code, character, imports);
+  }
+  const prefix = code.slice(0, openIvyMember.index);
+  return { code: `${prefix}Ivy.`, character: prefix.length + 4, imports: withIvyImport(imports) };
+};
 
 const ivyMemberMapping = (member: string) => {
   if (member === 'casemap') {

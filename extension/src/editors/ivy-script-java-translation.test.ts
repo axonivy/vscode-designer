@@ -2,6 +2,8 @@ import { expect, test } from 'vitest';
 import {
   isIvyEnvironmentCompletionPrefix,
   isIvyEnvironmentRootCompletionPrefix,
+  toIvyEnvironmentCompletionLabel,
+  toJavaCompletionSourceContext,
   toJavaEnvironmentCompletionLabel,
   toJavaSourceContext
 } from './ivy-script-java-translation';
@@ -52,6 +54,19 @@ test('translates the open Ivy environment prefix used for completions', () => {
   });
 });
 
+test('translates incomplete Ivy environment members to a Java completion receiver', () => {
+  expect(toJavaCompletionSourceContext('ivy.ta', 6)).toEqual({
+    code: 'Ivy.',
+    character: 4,
+    imports: [IVY_IMPORT]
+  });
+  expect(toJavaCompletionSourceContext('ivy.task.', 9)).toEqual({
+    code: 'Ivy.wfTask().',
+    character: 13,
+    imports: [IVY_IMPORT]
+  });
+});
+
 test('recognizes Ivy environment completion prefixes without matching similar identifiers', () => {
   expect(isIvyEnvironmentRootCompletionPrefix('ivy.')).toBe(true);
   expect(isIvyEnvironmentCompletionPrefix('ivy.')).toBe(true);
@@ -62,10 +77,13 @@ test('recognizes Ivy environment completion prefixes without matching similar id
   expect(isIvyEnvironmentRootCompletionPrefix('ivy.task.')).toBe(false);
 });
 
-test('maps IvyScript completion aliases to the Java API labels', () => {
+test('maps IvyScript completion aliases to the Java API labels and back', () => {
   expect(toJavaEnvironmentCompletionLabel('case')).toBe('wfCase');
   expect(toJavaEnvironmentCompletionLabel('task')).toBe('wfTask');
   expect(toJavaEnvironmentCompletionLabel('cal')).toBe('cal');
+  expect(toIvyEnvironmentCompletionLabel('wfCase')).toBe('case');
+  expect(toIvyEnvironmentCompletionLabel('wfTask')).toBe('task');
+  expect(toIvyEnvironmentCompletionLabel('cal')).toBe('cal');
 });
 
 test('supports all standard Ivy environment accessors', () => {
