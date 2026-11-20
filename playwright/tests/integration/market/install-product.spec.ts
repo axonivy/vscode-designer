@@ -4,9 +4,7 @@ import { FileExplorer, ProjectExplorerView } from '~/page-objects/explorer-view'
 import { OutputView } from '~/page-objects/output-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
 
-/* eslint-disable playwright/no-focused-test */
-
-test.only('Install product without maven-dependency from Market website', async ({ wsPage }) => {
+test('Install product without maven-dependency from Market website', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.installProduct('connectivity-demo');
   await wsPage.provideUserInput('14.0.0');
@@ -20,7 +18,7 @@ test.only('Install product without maven-dependency from Market website', async 
   await processEditor.open();
 });
 
-test.only('Install up-to-date product with maven-dependency from Market website', async ({ wsPage, tmpWorkspace }) => {
+test('Install up-to-date product with maven-dependency from Market website', async ({ wsPage, tmpWorkspace }) => {
   const prebuiltProjectName = path.basename(tmpWorkspace!.tmpWorkspacePath);
 
   await wsPage.activateExpensiveJavaStandardMode({ waitForReady: false });
@@ -63,7 +61,7 @@ test.only('Install up-to-date product with maven-dependency from Market website'
   await projectExplorer.expandNodeExact('config');
 });
 
-test.only('Install product with conflicting project folder', async ({ wsPage }) => {
+test('Install product with conflicting project folder', async ({ wsPage }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.installProduct('connectivity-demo');
   await wsPage.provideUserInput('14.0.0');
@@ -78,7 +76,7 @@ test.only('Install product with conflicting project folder', async ({ wsPage }) 
   await expect(title).toHaveText(/The following projects cannot be installed because a project folder with the same name already exists/);
 });
 
-test.only('Install local product.json', async ({ wsPage, tmpWorkspace }) => {
+test('Install local product.json', async ({ wsPage, tmpWorkspace }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.selectNode('resources');
   await explorer.selectNode('product.json');
@@ -90,7 +88,7 @@ test.only('Install local product.json', async ({ wsPage, tmpWorkspace }) => {
   await processEditor.open();
 });
 
-test.only('Install local product.json with dynamic version', async ({ wsPage, tmpWorkspace }) => {
+test('Install local product.json with dynamic version', async ({ wsPage, tmpWorkspace }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.selectNode('resources');
   await explorer.selectNode('product-dynamic.json');
@@ -110,7 +108,7 @@ test.only('Install local product.json with dynamic version', async ({ wsPage, tm
   await processEditor.open();
 });
 
-test.only('Install local product.json with conflicting project folder', async ({ wsPage, tmpWorkspace }) => {
+test('Install local product.json with conflicting project folder', async ({ wsPage, tmpWorkspace }) => {
   const explorer = new FileExplorer(wsPage);
   await explorer.selectNode('resources');
   await explorer.selectNode('product.json');
