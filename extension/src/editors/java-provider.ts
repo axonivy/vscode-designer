@@ -191,8 +191,14 @@ export class JavaProvider {
   }
 
   private async writeJavaFile(javaFile: Uri, content: string) {
-    await workspace.fs.createDirectory(await this.javaProviderDirectory);
-    await workspace.fs.writeFile(javaFile, Buffer.from(content));
+    try {
+      await workspace.fs.createDirectory(await this.javaProviderDirectory);
+      await workspace.fs.writeFile(javaFile, Buffer.from(content));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      logWarningMessage(`Failed to write Java provider source '${javaFile.fsPath}': ${message}`);
+      throw error;
+    }
   }
 
   public async openJavaLocation(location: Location | LocationLink) {

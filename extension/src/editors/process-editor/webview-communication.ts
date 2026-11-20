@@ -448,9 +448,11 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     const imports = lines.filter(sourceLine => /^\s*import\s+(?:static\s+)?[\w.$*]+\s*;\s*$/.test(sourceLine));
     const cursorCharacter = Math.min(params.position.character, currentLine.length);
     const completionPrefix = currentLine.slice(0, cursorCharacter);
-    const contextualPrefix = completionPrefix.replace(/[\w$]*$/, '');
-    const isMemberCompletion = /\.\s*[\w$]*$/.test(completionPrefix);
-    const isIvyEnvironmentRootCompletion = isIvyEnvironmentRootCompletionPrefix(completionPrefix);
+    const triggeredByDot = params.context?.triggerCharacter === '.';
+    const contextualSourcePrefix = triggeredByDot && !completionPrefix.endsWith('.') ? `${completionPrefix}.` : completionPrefix;
+    const contextualPrefix = contextualSourcePrefix.replace(/[\w$]*$/, '');
+    const isMemberCompletion = triggeredByDot || /\.\s*[\w$]*$/.test(completionPrefix);
+    const isIvyEnvironmentRootCompletion = isIvyEnvironmentRootCompletionPrefix(contextualSourcePrefix);
     if (isIvyEnvironmentRootCompletion) {
       void this.javaCompletion.ivyEnvironmentCompletionDocumentation();
     }
