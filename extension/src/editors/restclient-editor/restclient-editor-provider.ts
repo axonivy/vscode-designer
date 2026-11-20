@@ -11,6 +11,7 @@ import type { MessageParticipant } from 'vscode-messenger-common';
 import { messenger } from '../..';
 import { registerOpenConfigEditorCmd } from '../command-helper';
 import type { OpenActionMessage } from '../process-editor/inscription-view/open-action';
+import { resolveEditorDocument } from '../provider-helper';
 import { createWebViewContent } from '../webview-helper';
 import { RestClientWebSocketMessage, setupCommunication } from './webview-communication';
 
@@ -55,8 +56,15 @@ export class RestClientEditorProvider implements CustomTextEditorProvider {
   }
 
   resolveCustomTextEditor(document: TextDocument, webviewPanel: WebviewPanel) {
-    const messageParticipant = setupCommunication(this.websocketUrl, messenger, webviewPanel, document, () =>
-      this.handleEditorReady(webviewPanel)
+    const { engineFileName, readOnly } = resolveEditorDocument(document);
+    const messageParticipant = setupCommunication(
+      this.websocketUrl,
+      messenger,
+      webviewPanel,
+      document,
+      () => this.handleEditorReady(webviewPanel),
+      engineFileName,
+      readOnly
     );
     const editor: RestClientPanel = {
       uri: document.uri.toString(),
