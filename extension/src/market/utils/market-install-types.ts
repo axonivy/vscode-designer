@@ -4,6 +4,7 @@ import { type MSStateBase, type ProjectSelection } from '../../project-explorer/
 export interface ProductSelection extends QuickPickItem {
   id: string;
   label: string;
+  detailsUrl: string;
   description?: string;
   detail?: string;
   iconPath?: Uri;

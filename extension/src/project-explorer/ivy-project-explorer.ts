@@ -87,7 +87,7 @@ export class IvyProjectExplorer {
     registerCmd(`${VIEW_ID}.importIvyProject`, (s: TreeSelection) => this.importIvyProject(s));
     registerCmd(`${VIEW_ID}.exportIvyProject`, (s: TreeSelection) => this.exportIvyProject(s));
     registerCmd(`${VIEW_ID}.installLocalMarketProduct`, () => this.installLocalMarketProduct());
-    registerCmd(`${VIEW_ID}.installMarketProduct`, () => this.installMarketProduct());
+    registerCmd(`${VIEW_ID}.installMarketProduct`, (productName?: string) => this.installMarketProduct(productName));
 
     registerCmd(`${VIEW_ID}.addNewProject`, (s: TreeSelection) => this.addProject(s));
     registerCmd(`${VIEW_ID}.addNewTestProject`, (s: TreeSelection) => this.addTestProject(s));
@@ -235,12 +235,12 @@ export class IvyProjectExplorer {
     await installLocalMarketProduct(await IvyProjectManager.instance.getIvyProjects(), this.context);
   }
 
-  private async installMarketProduct() {
+  private async installMarketProduct(productName?: string) {
     if (isWorkspaceLocked({ warn: true })) {
       return;
     }
     const engineVersion = (await IvyEngineManager.instance.getEngineVersion()) ?? '';
-    await installMarketProduct(await IvyProjectManager.instance.getIvyProjects(), engineVersion);
+    await installMarketProduct(await IvyProjectManager.instance.getIvyProjects(), engineVersion, productName);
   }
 
   public async addUserDialog(selection: TreeSelection, type: DialogType, pid?: string) {

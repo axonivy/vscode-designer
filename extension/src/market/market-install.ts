@@ -1,12 +1,13 @@
-import { l10n, Uri } from 'vscode';
+import { l10n, ThemeIcon, Uri } from 'vscode';
 import { logErrorMessage } from '../base/logging-util';
 import { MultiStepCancelledError, MultiStepInput, type InputStep } from '../project-explorer/utils/multi-step-input';
+import { marketProductUrl, openMarketUrl } from './market-webview';
 import { fetchInstaller, getAvailableVersions, getBestVersion, searchMarketProduct } from './utils/market-client';
 import { createSteps, executeInstall } from './utils/market-install-flow';
 import type { InstallMarketProductState, ProductSelection } from './utils/market-install-types';
 import { initState, resetState } from './utils/market-install-types';
 
-export const installMarketProduct = async (existingProjects: string[], engineVersion: string) => {
+export const installMarketProduct = async (existingProjects: string[], engineVersion: string, productName?: string) => {
   const allProducts = await searchMarketProduct();
 
   const stepProduct: InputStep<InstallMarketProductState> = async (
@@ -20,7 +21,7 @@ export const installMarketProduct = async (existingProjects: string[], engineVer
       placeholder: l10n.t('Select a Market Product to install'),
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
-      value: state.product ? state.product.label : '',
+      value: state.product?.label ?? productName ?? '',
       matchOnDescription: true,
       matchOnDetail: true,
       items: allProducts.map(product => ({
@@ -28,8 +29,13 @@ export const installMarketProduct = async (existingProjects: string[], engineVer
         label: product.name,
         description: product.id,
         detail: product.description,
-        iconPath: Uri.parse(product.logoUrl)
-      }))
+        iconPath: Uri.parse(product.logoUrl),
+        detailsUrl: marketProductUrl(product.id),
+        buttons: [{ iconPath: new ThemeIcon('info'), tooltip: l10n.t('Details') }]
+      })),
+      onItemButton: async product => {
+        openMarketUrl(product.detailsUrl);
+      }
     });
     if (previousProduct?.id !== state.product?.id) {
       resetState(state);
