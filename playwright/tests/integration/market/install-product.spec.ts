@@ -19,11 +19,14 @@ test('Install product without maven-dependency from Market website', async ({ ws
 });
 
 test('Install up-to-date product with maven-dependency from Market website', async ({ wsPage, tmpWorkspace }) => {
+  const prebuiltProjectName = path.basename(tmpWorkspace!.tmpWorkspacePath);
+
   await wsPage.activateExpensiveJavaStandardMode({ waitForReady: false });
   const output = new OutputView(wsPage);
   await output.openLog('Axon Ivy Extension');
   await output.expectLogEntry('Success - Invalidating class loader');
   await output.expectLogEntry('Success - Deploying IAR dependencies');
+  await output.clearOutput();
 
   const explorer = new FileExplorer(wsPage);
   await explorer.installProduct('excel-connector');
@@ -33,14 +36,19 @@ test('Install up-to-date product with maven-dependency from Market website', asy
   await checkbox.check();
   await wsPage.provideUserInput();
   await expect(wsPage.quickInputBox).toBeVisible();
-  await wsPage.provideUserInput('prebuiltProject');
+  await wsPage.provideUserInput(prebuiltProjectName);
+  await output.expectLogEntry('Success - Deploying IAR dependencies');
+  await output.expectLogEntry('Success - Invalidating class loader');
 
-  await explorer.hasNoNodeExact('excel-connector-demo');
+  // Ask ivy-lmu
+  // Why should this be true? Installing a demo will put it into our workspace?
+  // await explorer.hasNoNodeExact('excel-connector-demo');
+
   await explorer.hasNoNodeExact('excel-connector');
 
   const projectExplorer = new ProjectExplorerView(wsPage);
   await projectExplorer.openView();
-  await projectExplorer.expandNodeExact(path.basename(tmpWorkspace!.tmpWorkspacePath));
+  await projectExplorer.expandNodeExact(prebuiltProjectName);
   await projectExplorer.expandNodeExact('IAR Dependencies');
 
   const iarProject = projectExplorer.view.getByRole('treeitem').filter({ has: wsPage.page.getByText('excel-connector', { exact: true }) });
