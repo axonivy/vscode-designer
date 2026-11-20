@@ -2,17 +2,23 @@ package ch.ivyteam.smart.core;
 
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
-public class AgentRuntimeExtension implements BeforeAllCallback, AfterAllCallback, ParameterResolver {
+public class AgentRuntimeExtension implements BeforeAllCallback, BeforeEachCallback, AfterAllCallback, ParameterResolver {
   private AgentRuntime runtime;
 
   @Override
   public void beforeAll(ExtensionContext context) {
     runtime = new AgentRuntime();
     runtime.start(context.getRequiredTestClass().getSimpleName());
+  }
+
+  @Override
+  public void beforeEach(ExtensionContext context) {
+    runtime.prepareTest(context.getRequiredTestMethod().getName());
   }
 
   @Override
@@ -27,7 +33,6 @@ public class AgentRuntimeExtension implements BeforeAllCallback, AfterAllCallbac
 
   @Override
   public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-    runtime.currentTest(extensionContext.getTestMethod().orElseThrow().getName());
     return runtime;
   }
 }

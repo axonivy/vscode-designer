@@ -41,6 +41,7 @@ public class AgentRuntime {
   private Copilot copilot;
   private AspireAPI aspireApi;
   private Path ivyWorkspace;
+  private IvyWorkspaceSetup workspaceSetup;
   private Path userData;
 
   private final AiTestReport reporter = new AiTestReport();
@@ -57,7 +58,8 @@ public class AgentRuntime {
 
     Path workspaceRoot = findWorkspaceRoot();
     Path extensionDir = workspaceRoot.resolve("extension");
-    ivyWorkspace = new IvyWorkspaceSetup(workspaceRoot).initialize(!reuseContainers);
+    workspaceSetup = new IvyWorkspaceSetup(workspaceRoot);
+    ivyWorkspace = workspaceSetup.initialize(reuseContainers);
     Path mcp = workspaceRoot.resolve("aitest/mcp.sh");
     userData = workspaceRoot.resolve("ci-user-data");
     Path vscodeCache = workspaceRoot.resolve(".vscode-test");
@@ -120,8 +122,9 @@ public class AgentRuntime {
     return copilot;
   }
 
-  void currentTest(String testName) {
+  void prepareTest(String testName) {
     currentTest = testName;
+    workspaceSetup.applyFixture(testUnit, testName);
   }
 
   public AspireSpans prompt(String prompt) {
