@@ -31,7 +31,8 @@ const resolveIarContentUri = (uri: Uri) => {
 
 export const iarContentEngineFileName = (uri: Uri) => {
   const { archivePath, entryPath } = resolveIarContentUri(uri);
-  return `${archivePath}!/${entryPath}`;
+  const normalizedArchivePath = path.win32.isAbsolute(archivePath) ? archivePath.replaceAll('\\', '/') : archivePath;
+  return `${normalizedArchivePath}!/${entryPath}`;
 };
 
 export const iarContentEngineFileUri = (uri: Uri) => Uri.file(iarContentEngineFileName(uri));

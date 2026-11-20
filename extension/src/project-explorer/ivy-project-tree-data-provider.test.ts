@@ -278,6 +278,13 @@ test('keeps variables.yaml on the IAR URI and derives its engine file name', asy
   expect(iarContentEngineFileName(variablesEntry!.uri)).toBe(`${archivePath}!/META-INF/ivy/variables.yaml`);
 });
 
+test('normalizes Windows archive paths when deriving engine file names', () => {
+  const windowsArchivePath = path.win32.join('D:\\jenkins\\workspace', 'shared.iar');
+  const uri = iarContentUri(windowsArchivePath, 'META-INF/ivy/config/rest-clients.yaml');
+
+  expect(iarContentEngineFileName(uri)).toBe('D:/jenkins/workspace/shared.iar!/META-INF/ivy/config/rest-clients.yaml');
+});
+
 test('converts engine file URIs inside IARs to archive content URIs', () => {
   const engineUri = Uri.parse(`file://${archivePath}!/META-INF/ivy/dataclasses/ExampleData.d.json`);
   const contentUri = iarContentUriFromEngineUri(engineUri);
