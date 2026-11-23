@@ -108,4 +108,25 @@ public class CopilotIntegrationTest {
         .findFirst().orElseThrow(() -> new IllegalStateException(type + " not found in " + process.toPrettyString()));
   }
 
+  @Test
+  @Order(Complexity.INDEPENDENT)
+  void configureCms(AgentRuntime rt) throws Exception {
+    var spans = rt.prompt("""
+        add a shared CMS entry /Labels/OrderSubmitted to purchase.
+        Its English text is 'Order submitted' and its German translation is 'Bestellung übermittelt'.
+        """);
+    var cms = rt.ivyWorkspace().path().resolve("purchase/cms");
+
+    assertThat(readYaml(cms.resolve("cms_en.yaml")).at("/Labels/OrderSubmitted").asString())
+        .isEqualTo("Order submitted");
+    assertThat(readYaml(cms.resolve("cms_de.yaml")).at("/Labels/OrderSubmitted").asString())
+        .isEqualTo("Bestellung übermittelt");
+
+    assertThat(spans)
+        .loadedSkill("ivy-cms")
+        .viewed("skills/ivy-cms/text-workflow.md")
+        .didNotUseTools("web_fetch", "web_search")
+        .usedTokensBelow(200_000, 2_500);
+  }
+
 }
