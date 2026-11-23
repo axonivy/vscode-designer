@@ -33,6 +33,7 @@ import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType, RequestType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../views/browser/ivy-browser-view-provider';
 import { JavaProvider } from '../java-provider';
+import { normalizeIvyCompletionLabel } from '../ivy-script-java-translation';
 import { isAllTypesSearchRequest, isSearchResult } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 import { handleActionLocal, type SendInscriptionNotification } from './inscription-view/action-handlers';
@@ -338,7 +339,7 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     }
   };
 
-  normalizeCompletionLabel = (label: string) => label.trim().replace(/\s+/g, ' ').replace(/\s*\(.*$/, '');
+  normalizeCompletionLabel = (label: string) => normalizeIvyCompletionLabel(label);
 
   isCompletionResult = (obj: unknown, id: number): obj is { result: CompletionList } => {
     return (
