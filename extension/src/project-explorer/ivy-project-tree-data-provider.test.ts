@@ -294,6 +294,15 @@ test('converts engine file URIs inside IARs to archive content URIs', () => {
   expect(iarContentUriFromEngineUri(Uri.parse('file:///workspace/project/dataclasses/ExampleData.d.json'))).toBeUndefined();
 });
 
+test('removes a leading slash from Windows drive paths when converting engine URIs', () => {
+  const windowsArchivePath = 'D:/jenkins/workspace/shared.iar';
+  const engineUri = Uri.parse(`file:///${windowsArchivePath}!/META-INF/ivy/dialog/Component.f.json`);
+  const contentUri = iarContentUriFromEngineUri(engineUri)!;
+
+  expect(new URLSearchParams(contentUri.query).get('archive')).toBe(windowsArchivePath);
+  expect(iarContentEngineFileName(contentUri)).toBe(`${windowsArchivePath}!/META-INF/ivy/dialog/Component.f.json`);
+});
+
 test('supports implicit archive directories and reports uncompressed file sizes', () => {
   const provider = new IarContentFileSystemProvider();
   const uri = iarContentUri(archivePath, 'META-INF/ivy/process');

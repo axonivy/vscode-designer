@@ -52,7 +52,8 @@ export const iarContentUriFromEngineUri = (uri: Uri) => {
   if (markerIndex < 0) {
     return undefined;
   }
-  const archivePath = uri.path.slice(0, markerIndex);
+  // Windows paths starting with a drive letter need to remove the leading slash
+  const archivePath = uri.path.slice(0, markerIndex).replace(/^\/([A-Za-z]:\/)/, '$1');
   const entryPath = uri.path.slice(markerIndex + 2);
   return iarContentUri(archivePath, entryPath);
 };
