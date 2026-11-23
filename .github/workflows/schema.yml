@@ -1,0 +1,35 @@
+name: Schema-sync
+on:
+  push:
+  schedule:
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26
+      - name: Generate hosted schemas
+        run: |
+          corepack enable
+          pnpm --dir extension generate:schemas
+      - name: Report out-of-sync schemas
+        shell: bash
+        run: |
+          report_schema_diff() {
+            file="$1"
+            message=$(cat "$2")
+            message="${message//'%'/'%25'}"
+            message="${message//$'\r'/'%0D'}"
+            message="${message//$'\n'/'%0A'}"
+            printf '::warning file=%s,title=Schema out of sync::%s\n' "$file" "$message"
+          }
+          source aitest/schema-check.sh
