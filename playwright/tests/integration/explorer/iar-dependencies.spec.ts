@@ -12,7 +12,8 @@ test.beforeAll(async () => {
   await installTestIar();
 });
 
-test.describe('IAR project dependencies', () => {
+// eslint-disable-next-line playwright/no-focused-test
+test.describe.only('IAR project dependencies', () => {
   test.use({ workspace: iarDependencyWorkspacePath });
 
   test('shows the IAR dependencies', async ({ wsPage, tmpWorkspace }) => {
@@ -61,7 +62,7 @@ test.describe('IAR project dependencies', () => {
 
   test('opens an IAR file in the process editor and keeps it read-only', async ({ wsPage, tmpWorkspace }) => {
     // Currently IAR open process is broken on Windows, so we skip the test there
-    test.skip(process.platform === 'win32');
+    // test.skip(process.platform === 'win32');
 
     const projectName = path.basename(tmpWorkspace!.tmpWorkspacePath);
     const projectExplorer = new ProjectExplorerView(wsPage);
