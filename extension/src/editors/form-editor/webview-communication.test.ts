@@ -134,14 +134,22 @@ test('opens the read-only process using the tree engine file URI', () => {
 });
 
 test.each([
-  ['openDataClass', '/project/dialog/ExampleData.d.json'],
-  ['openProcess', '/project/dialog/ExampleProcess.p.json']
-])('keeps local %s navigation unchanged', (actionId, path) => {
-  startEditor({ scheme: 'file', path: '/project/dialog/Example.f.json' }, '/project/dialog/Example.f.json', false);
+  ['openDataClass', { parsed: '/project/dialog/ExampleData.d.json' }],
+  ['openProcess', { scheme: 'file', path: '/project/dialog/ExampleProcess.p.json' }]
+])('keeps local %s navigation unchanged', (actionId, expectedUri) => {
+  startEditor(
+    {
+      scheme: 'file',
+      path: '/project/dialog/Example.f.json',
+      with: ({ path }: { path: string }) => ({ scheme: 'file', path })
+    },
+    '/project/dialog/Example.f.json',
+    false
+  );
 
   mocks.clientMessage({ method: 'action', params: { actionId } });
 
-  expect(mocks.executeCommand).toHaveBeenCalledWith('vscode.open', { parsed: path });
+  expect(mocks.executeCommand).toHaveBeenCalledWith('vscode.open', expectedUri);
 });
 
 test.each([true, false])('only writes server content for a writable document (read-only: %s)', async readOnly => {
