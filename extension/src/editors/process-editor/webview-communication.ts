@@ -30,11 +30,12 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType, RequestType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../views/browser/ivy-browser-view-provider';
-import { JavaProvider } from '../java-provider';
+import { JavaProvider } from '../ivy-script/java-provider';
 import { isAllTypesSearchRequest, isSearchResult } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 import { handleActionLocal, type SendInscriptionNotification } from './inscription-view/action-handlers';
-import { addJavaCompletionDocumentation, javaCompletionDocumentation } from './java-completion-documentation';
+import { registerDefinitionNavigation } from '../ivy-script/definition-navigation';
+import { addJavaCompletionDocumentation, javaCompletionDocumentation } from '../ivy-script/java-completion-documentation';
 
 const ColorThemeChangedNotification: NotificationType<'dark' | 'light'> = { method: 'colorThemeChanged' };
 const WebviewConnectionReadyNotification: NotificationType<void> = { method: 'connectionReady' };
@@ -64,6 +65,7 @@ export const setupCommunication = (
     messenger.onNotification(WebviewConnectionReadyNotification, () => handleWebviewReadyNotification(messenger, messageParticipant), {
       sender: messageParticipant
     }),
+    registerDefinitionNavigation(messenger, messageParticipant, document.uri),
     messenger.onRequest(StartProcessRequest, startUri => IvyBrowserViewProvider.instance.openEngineRelativeUrl(startUri), {
       sender: messageParticipant
     }),
@@ -305,7 +307,10 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
       return contents;
     }
     if (Array.isArray(contents)) {
-      return contents.map(content => this.toMarkdown(content)).filter(Boolean).join('\n\n');
+      return contents
+        .map(content => this.toMarkdown(content))
+        .filter(Boolean)
+        .join('\n\n');
     }
     if (typeof contents === 'object' && contents !== null) {
       if ('value' in contents && typeof contents.value === 'string') {

@@ -1,6 +1,6 @@
 import { l10n, type CompletionItem as JavaCompletionItem } from 'vscode';
 import type { CompletionItem, MarkupContent } from 'vscode-languageclient';
-import { normalizeIvyCompletionLabel } from '../ivy-script-java-translation';
+import { normalizeIvyCompletionLabel } from './ivy-script-java-translation';
 
 // A normal Markdown link survives LSP/Monaco's untrusted Markdown rendering. The webview
 // intercepts only this exact URL and sends a project-bound notification; no arbitrary commands run.

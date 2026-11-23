@@ -8,7 +8,7 @@ import { logErrorMessage } from '../../base/logging-util';
 import { iarContentEngineFileUri } from '../../project-explorer/iar-content-provider';
 import { updateTextDocumentContent } from '../content-writer';
 import { EditorWebSocketForwarder } from '../editor-websocket-forwarder';
-import { JavaProvider } from '../java-provider';
+import { JavaProvider } from '../ivy-script/java-provider';
 import {
   hasEditorFileContent,
   InitializeConnectionRequest,

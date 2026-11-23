@@ -61,7 +61,7 @@ vi.mock('../editor-websocket-forwarder', () => ({
   }
 }));
 
-vi.mock('../java-provider', () => ({
+vi.mock('../ivy-script/java-provider', () => ({
   JavaProvider: class {
     javaTypes = vi.fn();
   }

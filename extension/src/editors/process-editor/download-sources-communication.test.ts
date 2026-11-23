@@ -11,7 +11,7 @@ vi.mock('vscode', () => ({
 vi.mock('vscode-languageclient', () => import('vscode-languageserver-protocol'));
 vi.mock('@eclipse-glsp/vscode-integration', () => ({ DisposableCollection: class { dispose() {} } }));
 vi.mock('../websocket-forwarder', () => ({ WebSocketForwarder: class { dispose() {} } }));
-vi.mock('../java-provider', () => ({ JavaProvider: class { hover = vi.fn(); } }));
+vi.mock('../ivy-script/java-provider', () => ({ JavaProvider: class { hover = vi.fn(); } }));
 vi.mock('../../base/logging-util', () => ({ logErrorMessage: vi.fn(), logInformationMessage: vi.fn() }));
 vi.mock('./inscription-view/action-handlers', () => ({ handleActionLocal: vi.fn() }));
 vi.mock('../../views/browser/ivy-browser-view-provider', () => ({ IvyBrowserViewProvider: {} }));
