@@ -19,6 +19,7 @@
   "scripts": {
     "build": "node esbuild.mts",
     "build:production": "pnpm run generate:schemas && node esbuild.mts --production",
+    "check:schemas": "node ./scripts/generate-ivy-schemas.mts --check",
     "clean": "rimraf lib dist *.tsbuildinfo",
     "generate:schemas": "node ./scripts/generate-ivy-schemas.mts",
     "generate:market": "node ./scripts/marketSchemaCodegen.cjs",
