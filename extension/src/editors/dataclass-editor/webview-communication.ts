@@ -5,6 +5,7 @@ import { commands, FileSystemError, Uri, workspace } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { logErrorMessage } from '../../base/logging-util';
+import { iarContentEngineFileUri } from '../../project-explorer/iar-content-provider';
 import { updateTextDocumentContent } from '../content-writer';
 import { EditorWebSocketForwarder } from '../editor-websocket-forwarder';
 import { JavaProvider } from '../java-provider';
@@ -51,24 +52,26 @@ class DataClassEditorWebSocketForwarder extends EditorWebSocketForwarder {
     messenger: Messenger,
     messageParticipant: MessageParticipant,
     document: TextDocument,
-    private readonly resolvedEngineFileName: string,
+    engineFileName: string,
     private readonly readOnly: boolean
   ) {
-    super(websocketUrl, 'ivy-data-class-lsp', messenger, messageParticipant, DataClassWebSocketMessage, document, resolvedEngineFileName);
+    super(websocketUrl, 'ivy-data-class-lsp', messenger, messageParticipant, DataClassWebSocketMessage, document, engineFileName);
     this.javaCompletion = new JavaProvider(document.uri);
   }
 
   protected override handleClientMessage(message: unknown) {
     if (isAction<DataActionArgs>(message)) {
-      const file = this.readOnly ? this.resolvedEngineFileName : this.document.uri.path;
+      const file = this.document.uri.path;
       const path = file.substring(0, file.lastIndexOf('Data.d.json'));
       switch (message.params.actionId) {
         case 'openUrl':
           openUrlExternally(message.params.payload);
           break;
-        case 'openProcess':
-          commands.executeCommand('vscode.open', Uri.parse(`${path}Process.p.json`));
+        case 'openProcess': {
+          const processUri = this.document.uri.with({ path: `${path}Process.p.json` });
+          commands.executeCommand('vscode.open', this.readOnly ? iarContentEngineFileUri(processUri) : processUri);
           break;
+        }
         case 'openForm':
           openDialog(this.document.uri);
           break;

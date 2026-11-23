@@ -79,7 +79,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-const openForm = (uri: object, readOnly: boolean) => {
+const openAction = (uri: object, readOnly: boolean, actionId: string) => {
   const document = { uri, fileName: '/unused' };
   const messenger = { registerWebviewPanel: vi.fn(), onNotification: vi.fn() };
   const panel = { onDidDispose: vi.fn() };
@@ -91,8 +91,10 @@ const openForm = (uri: object, readOnly: boolean) => {
     '/archive.iar!/engine/Data.d.json',
     readOnly
   );
-  mocks.dispatch({ method: 'action', params: { actionId: 'openForm' } });
+  mocks.dispatch({ method: 'action', params: { actionId } });
 };
+
+const openForm = (uri: object, readOnly: boolean) => openAction(uri, readOnly, 'openForm');
 
 const archiveDocumentUri = () => {
   const uri = {
@@ -103,6 +105,34 @@ const archiveDocumentUri = () => {
   };
   return uri;
 };
+
+test('opens a writable process using a sibling file URI', () => {
+  const uri = {
+    scheme: 'file',
+    path: '/project/dialog/ExampleData.d.json',
+    with: ({ path }: { path: string }) => ({ scheme: 'file', path })
+  };
+
+  openAction(uri, false, 'openProcess');
+
+  expect(mocks.executeCommand).toHaveBeenCalledWith('vscode.open', {
+    scheme: 'file',
+    path: '/project/dialog/ExampleProcess.p.json'
+  });
+});
+
+test('opens a read-only process using the archive engine file URI on Windows', () => {
+  const uri = archiveDocumentUri();
+  uri.query = 'archive=C%3A%5Cdeps%5Cshared+lib.iar';
+
+  openAction(uri, true, 'openProcess');
+
+  expect(mocks.uriFile).toHaveBeenCalledWith('C:/deps/shared lib.iar!/META-INF/ivy/dialog/My DialogProcess.p.json');
+  expect(mocks.executeCommand).toHaveBeenCalledWith('vscode.open', {
+    scheme: 'file',
+    path: 'C:/deps/shared lib.iar!/META-INF/ivy/dialog/My DialogProcess.p.json'
+  });
+});
 
 test.each([
   [true, '.f.json'],

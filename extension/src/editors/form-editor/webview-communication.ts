@@ -63,14 +63,11 @@ class FormEditorWebSocketForwarder extends EditorWebSocketForwarder {
         case 'openPreview':
           IvyBrowserViewProvider.instance.openInBrowser(message.params.payload);
           break;
-        case 'openProcess':
-          commands.executeCommand(
-            'vscode.open',
-            this.readOnly
-              ? iarContentEngineFileUri(this.document.uri.with({ path: `${path}Process.p.json` }))
-              : Uri.parse(`${path}Process.p.json`)
-          );
+        case 'openProcess': {
+          const processUri = this.document.uri.with({ path: `${path}Process.p.json` });
+          commands.executeCommand('vscode.open', this.readOnly ? iarContentEngineFileUri(processUri) : processUri);
           break;
+        }
         case 'openDataClass':
           commands.executeCommand(
             'vscode.open',
