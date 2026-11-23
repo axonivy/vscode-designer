@@ -12,7 +12,9 @@ const mocks = vi.hoisted(() => ({
   },
   baseConstructor: vi.fn(),
   forwardServerMessage: vi.fn(),
-  executeCommand: vi.fn()
+  executeCommand: vi.fn(),
+  getComponentForm: vi.fn(),
+  iarContentUriFromEngineUri: vi.fn()
 }));
 
 vi.mock('vscode', () => ({
@@ -56,11 +58,21 @@ vi.mock('../editor-websocket-forwarder', () => ({
 }));
 
 vi.mock('../content-writer', () => ({ updateTextDocumentContent: vi.fn().mockResolvedValue(undefined) }));
-vi.mock('../../engine/engine-manager', () => ({ IvyEngineManager: {} }));
+vi.mock('../../engine/engine-manager', () => ({
+  IvyEngineManager: { instance: { engineApi: { getComponentForm: mocks.getComponentForm } } }
+}));
+vi.mock('../../project-explorer/iar-content-provider', async importOriginal => {
+  const actual = await importOriginal<typeof import('../../project-explorer/iar-content-provider')>();
+  return { ...actual, iarContentUriFromEngineUri: mocks.iarContentUriFromEngineUri };
+});
 vi.mock('../../views/browser/ivy-browser-view-provider', () => ({ IvyBrowserViewProvider: {} }));
 vi.mock('../../base/logging-util', () => ({ logErrorMessage: vi.fn(), logInformationMessage: vi.fn() }));
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  mocks.getComponentForm.mockReset();
+  mocks.iarContentUriFromEngineUri.mockReset();
+});
 
 const archiveUri = () => {
   const uri = {
@@ -131,6 +143,44 @@ test('opens the read-only process using the tree engine file URI', () => {
     scheme: 'file',
     path: '/deps/shared lib.iar!/META-INF/ivy/dialog/My DialogProcess.p.json'
   });
+});
+
+test('opens component forms from IAR archives in the archive content view', async () => {
+  const engineFormUri = 'jar:file:///deps/shared%20lib.iar!/META-INF/ivy/dialog/Component.f.json';
+  const parsedFormUri = 'file:///deps/shared%20lib.iar!/META-INF/ivy/dialog/Component.f.json';
+  const archiveContentUri = {
+    scheme: 'axonivy-iar-content',
+    path: '/shared.iar/dialog/Component.f.json',
+    query: 'archive=%2Fdeps%2Fshared+lib.iar'
+  };
+  mocks.getComponentForm.mockResolvedValue({ uri: engineFormUri });
+  mocks.iarContentUriFromEngineUri.mockReturnValue(archiveContentUri);
+  startEditor(archiveUri(), '/deps/shared lib.iar!/META-INF/ivy/dialog/Parent.f.json', false);
+
+  mocks.clientMessage({
+    method: 'action',
+    params: { actionId: 'openComponent', payload: 'component-id', context: { project: 'project' } }
+  });
+
+  await vi.waitFor(() =>
+    expect(mocks.executeCommand).toHaveBeenCalledWith('vscode.open', archiveContentUri)
+  );
+  expect(mocks.iarContentUriFromEngineUri).toHaveBeenCalledWith({ parsed: parsedFormUri });
+});
+
+test('opens component forms outside IAR archives using their parsed URI', async () => {
+  const formUri = 'file:///project/dialog/Component.f.json';
+  mocks.getComponentForm.mockResolvedValue({ uri: formUri });
+  mocks.iarContentUriFromEngineUri.mockReturnValue(undefined);
+  startEditor({ scheme: 'file', path: '/project/dialog/Parent.f.json' }, '/project/dialog/Parent.f.json', false);
+
+  mocks.clientMessage({
+    method: 'action',
+    params: { actionId: 'openComponent', payload: 'component-id', context: { project: 'project' } }
+  });
+
+  await vi.waitFor(() => expect(mocks.executeCommand).toHaveBeenCalledWith('vscode.open', { parsed: formUri }));
+  expect(mocks.iarContentUriFromEngineUri).toHaveBeenCalledWith({ parsed: formUri });
 });
 
 test.each([

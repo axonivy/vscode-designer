@@ -5,7 +5,7 @@ import { commands, Uri } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType } from 'vscode-messenger-common';
 import { IvyEngineManager } from '../../engine/engine-manager';
-import { iarContentEngineFileUri } from '../../project-explorer/iar-content-provider';
+import { iarContentEngineFileUri, iarContentUriFromEngineUri } from '../../project-explorer/iar-content-provider';
 import { IvyBrowserViewProvider } from '../../views/browser/ivy-browser-view-provider';
 import { updateTextDocumentContent } from '../content-writer';
 import { EditorWebSocketForwarder } from '../editor-websocket-forwarder';
@@ -95,7 +95,12 @@ class FormEditorWebSocketForwarder extends EditorWebSocketForwarder {
 }
 
 const openComponent = async (action: FormActionArgs) => {
-  IvyEngineManager.instance.engineApi?.getComponentForm({ componentId: action.payload, project: action.context.project }).then(form => {
-    commands.executeCommand('vscode.open', Uri.parse(form.uri ?? ''));
+  const form = await IvyEngineManager.instance.engineApi?.getComponentForm({
+    componentId: action.payload,
+    project: action.context.project
   });
+  if (form?.uri) {
+    const formUri = Uri.parse(form.uri.startsWith('jar:') ? form.uri.slice('jar:'.length) : form.uri);
+    commands.executeCommand('vscode.open', iarContentUriFromEngineUri(formUri) ?? formUri);
+  }
 };
