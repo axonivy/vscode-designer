@@ -12,8 +12,7 @@ test.beforeAll(async () => {
   await installTestIar();
 });
 
-// eslint-disable-next-line playwright/no-focused-test
-test.describe.only('IAR project dependencies', () => {
+test.describe('IAR project dependencies', () => {
   test.use({ workspace: iarDependencyWorkspacePath });
 
   test('shows the IAR dependencies', async ({ wsPage, tmpWorkspace }) => {

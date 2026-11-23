@@ -4,8 +4,7 @@ import { FormEditor } from '~/page-objects/form-editor';
 import { ProcessEditor } from '~/page-objects/process-editor';
 import { XhtmlEditor } from '~/page-objects/xhtml-editor';
 
-// eslint-disable-next-line playwright/no-focused-test
-test.only('Jump between editors', async ({ wsPage }) => {
+test('Jump between editors', async ({ wsPage }) => {
   // Form
   const processEditor = new ProcessEditor(wsPage, 'testFormProcess.p.json');
   const formEditor = new FormEditor(wsPage, 'testForm.f.json', 1);
