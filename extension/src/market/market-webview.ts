@@ -1,6 +1,6 @@
-import { randomBytes } from 'crypto';
 import { ColorThemeKind, commands, l10n, ViewColumn, window, type WebviewPanel } from 'vscode';
 import { logErrorMessage, logWarningMessage } from '../base/logging-util';
+import { createNonce } from '../base/nonce-util';
 import { openUrlExternally } from '../editors/notification-helper';
 
 const MARKET_ORIGIN = 'https://market.axonivy.com';
@@ -113,7 +113,7 @@ const createMarketUrl = (target?: URL) => {
 };
 
 const createMarketContent = (url: URL, title: string): string => {
-  const nonce = randomBytes(16).toString('hex');
+  const nonce = createNonce();
   return `<!DOCTYPE html>
     <html>
       <head>
