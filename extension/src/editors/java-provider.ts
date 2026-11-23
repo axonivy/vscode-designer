@@ -3,8 +3,19 @@ import { executeCommand } from '../base/commands';
 import { logWarningMessage } from '../base/logging-util';
 import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
 import { treeUriToProjectPath } from '../project-explorer/tree-selection';
+import { toJavaIvyContext } from './ivy-script-java-translation';
 
 export class JavaProvider {
+  private static completionQueue: Promise<unknown> = Promise.resolve();
+
+  private enqueueCompletion<T>(request: () => Promise<T>): Promise<T> {
+    // JDT completion resolution uses a shared proposal cache, even across different files.
+    // Keep each completion request and all of its documentation resolution together.
+    const result = JavaProvider.completionQueue.then(request);
+    JavaProvider.completionQueue = result.catch(() => undefined);
+    return result;
+  }
+
   readonly dummyJavaFile: Promise<Uri>;
   readonly dummyHoverJavaFile: Promise<Uri>;
   readonly dummyContextJavaFile: Promise<Uri>;
@@ -24,7 +35,11 @@ export class JavaProvider {
     );
   }
 
-  public async completionItems(toBeCompleted: string, itemResolveCount?: number) {
+  public completionItems(toBeCompleted: string, itemResolveCount?: number) {
+    return this.enqueueCompletion(() => this.provideCompletionItems(toBeCompleted, itemResolveCount));
+  }
+
+  private async provideCompletionItems(toBeCompleted: string, itemResolveCount?: number) {
     const javaFile = await this.dummyJavaFile;
     const javaFileContent = `${JavaProvider.DUMMY_CONTENT}${toBeCompleted}`;
     await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
@@ -43,12 +58,20 @@ export class JavaProvider {
       .filter(item => item.detail !== JavaProvider.DUMMY_CLASS_NAME);
   }
 
-  public async contextualCompletionItems(code: string, position: Position, imports: string[], itemResolveCount: number) {
+  public contextualCompletionItems(code: string, position: Position, imports: string[], itemResolveCount: number) {
+    return this.enqueueCompletion(() => this.provideContextualCompletionItems(code, position, imports, itemResolveCount));
+  }
+
+  private async provideContextualCompletionItems(code: string, position: Position, imports: string[], itemResolveCount: number) {
     const javaFile = await this.dummyContextJavaFile;
-    const importContent = imports.length > 0 ? `${imports.join('\n')}\n` : '';
-    const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${code}; } }`;
+    const translated = toJavaIvyContext(code, position, imports);
+    const importContent = translated.imports.length > 0 ? `${translated.imports.join('\n')}\n` : '';
+    const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${translated.code}; } }`;
     await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
-    const javaPosition = new Position(imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + position.character);
+    const javaPosition = new Position(
+      translated.imports.length + translated.position.line,
+      JavaProvider.DUMMY_HOVER_CONTENT.length + translated.position.character
+    );
     const completionList = await executeCommand<CompletionList>(
       'vscode.executeCompletionItemProvider',
       javaFile,
@@ -61,10 +84,14 @@ export class JavaProvider {
 
   public async hover(toBeHovered: string, position: Position, imports: string[] = []) {
     const javaFile = await this.dummyHoverJavaFile;
-    const importContent = imports.length > 0 ? `${imports.join('\n')}\n` : '';
-    const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${toBeHovered}; } }`;
+    const translated = toJavaIvyContext(toBeHovered, position, imports);
+    const importContent = translated.imports.length > 0 ? `${translated.imports.join('\n')}\n` : '';
+    const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${translated.code}; } }`;
     await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
-    const javaPosition = new Position(imports.length, JavaProvider.DUMMY_HOVER_CONTENT.length + position.character);
+    const javaPosition = new Position(
+      translated.imports.length + translated.position.line,
+      JavaProvider.DUMMY_HOVER_CONTENT.length + translated.position.character
+    );
     const hovers = await executeCommand<Hover[] | undefined>('vscode.executeHoverProvider', javaFile, javaPosition);
     const documentation = hovers?.flatMap(hover => hover.contents).map(content => {
       if (typeof content === 'string') {

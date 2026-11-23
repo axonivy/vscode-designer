@@ -174,6 +174,36 @@ test('Monaco Editor completion with JDT language server', async ({ wsPage }) => 
   await wsPage.page.keyboard.press('Escape');
 });
 
+test('Monaco Editor IvyScript completion includes Java documentation', async ({ wsPage }) => {
+  test.setTimeout(90_000); // slow test due to Java activation and documentation resolution
+  await wsPage.activateExpensiveJavaStandardMode();
+  const editor = new ProcessEditor(wsPage);
+  await editor.open();
+
+  const inscriptionView = await editor.openInscriptionView('15254DCE818AD7A2-f0');
+  await inscriptionView.openInscriptionTab('Start');
+  await inscriptionView.openCollapsible('Code');
+  const monacoEditor = inscriptionView.monacoEditor;
+  const contentAssist = inscriptionView.monacoContentAssist;
+  await monacoEditor.click();
+
+  const documentationByCompletion = {
+    task: 'Returns the currently executed task.',
+    case: 'Returns the currently executed case.',
+    session: 'Returns the currently active session.'
+  };
+  for (const [completion, documentation] of Object.entries(documentationByCompletion)) {
+    await wsPage.page.keyboard.type('ivy.', { delay: 50 });
+    await expect(contentAssist).toBeVisible();
+    await inscriptionView.expectMonacoCompletionDocumentation(completion, documentation);
+    await wsPage.page.keyboard.press('Escape');
+    await monacoEditor.click();
+    await wsPage.page.keyboard.press('ControlOrMeta+a');
+    await wsPage.page.keyboard.press('Backspace');
+    await expect(monacoEditor).toBeEmpty();
+  }
+});
+
 test('Monaco Editor shortcuts', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage);
   await editor.open();
