@@ -4,7 +4,6 @@ import type { ColorTheme, CustomDocument, WebviewPanel } from 'vscode';
 import {
   ColorThemeKind,
   commands,
-  MarkdownString,
   SnippetString,
   CompletionItem as VSCodeCompletionItem,
   CompletionItemKind as VSCodeCompletionItemKind,
@@ -23,7 +22,6 @@ import {
   type DidChangeTextDocumentParams,
   DidOpenTextDocumentNotification,
   type DidOpenTextDocumentParams,
-  type MarkupContent,
   Position,
   Range,
   TextEdit
@@ -33,10 +31,10 @@ import { Messenger } from 'vscode-messenger';
 import type { MessageParticipant, NotificationType, RequestType } from 'vscode-messenger-common';
 import { IvyBrowserViewProvider } from '../../views/browser/ivy-browser-view-provider';
 import { JavaProvider } from '../java-provider';
-import { normalizeIvyCompletionLabel } from '../ivy-script-java-translation';
 import { isAllTypesSearchRequest, isSearchResult } from '../notification-helper';
 import { WebSocketForwarder } from '../websocket-forwarder';
 import { handleActionLocal, type SendInscriptionNotification } from './inscription-view/action-handlers';
+import { addJavaCompletionDocumentation, javaCompletionDocumentation } from './java-completion-documentation';
 
 const ColorThemeChangedNotification: NotificationType<'dark' | 'light'> = { method: 'colorThemeChanged' };
 const WebviewConnectionReadyNotification: NotificationType<void> = { method: 'connectionReady' };
@@ -196,7 +194,7 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
         const lspCompletionItems = javaTypeItems.map(item =>
           this.toLspCompletItem(item, document, { line: position.line, completionStartCharacter })
         );
-        this.addJavaDocumentation(obj.result.items, contextualJavaItems);
+        addJavaCompletionDocumentation(obj.result.items, contextualJavaItems);
         obj.result.items.push(...lspCompletionItems);
         message = JSON.stringify(obj);
         this.currentCompletion = undefined;
@@ -312,35 +310,6 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     return '';
   };
 
-  addJavaDocumentation = (completionItems: CompletionItem[], javaItems: VSCodeCompletionItem[]) => {
-    const documentationByLabel = new Map<string, VSCodeCompletionItem['documentation']>();
-    for (const javaItem of javaItems) {
-      if (!javaItem.documentation) {
-        continue;
-      }
-      const label = this.normalizeCompletionLabel(this.toLabel(javaItem).label);
-      if (!documentationByLabel.has(label)) {
-        documentationByLabel.set(label, javaItem.documentation);
-      }
-    }
-
-    for (const item of completionItems) {
-      const javaDocumentation = documentationByLabel.get(this.normalizeCompletionLabel(item.label));
-      const markdown = this.toDocumentation(javaDocumentation);
-      if (!markdown) {
-        continue;
-      }
-      const existingDocumentation = this.toMarkdown(item.documentation);
-      const javaDocumentationMarkdown = this.toMarkdown(markdown);
-      item.documentation = {
-        kind: 'markdown',
-        value: [existingDocumentation, javaDocumentationMarkdown].filter(Boolean).join('\n\n')
-      };
-    }
-  };
-
-  normalizeCompletionLabel = (label: string) => normalizeIvyCompletionLabel(label);
-
   isCompletionResult = (obj: unknown, id: number): obj is { result: CompletionList } => {
     return (
       typeof obj === 'object' &&
@@ -369,7 +338,7 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
     lspItem.filterText = item.filterText;
     lspItem.tags = item.tags?.map(() => CompletionItemTag.Deprecated);
     lspItem.labelDetails = label;
-    lspItem.documentation = this.toDocumentation(item.documentation);
+    lspItem.documentation = javaCompletionDocumentation(item.documentation);
     const textEdit = this.toTextEdit(item, insertText, completionContext);
     if (textEdit) {
       lspItem.textEdit = textEdit;
@@ -452,16 +421,6 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
         return undefined;
     }
   }
-
-  toDocumentation = (documentation?: string | MarkdownString) => {
-    if (!documentation) {
-      return;
-    }
-    if (typeof documentation === 'string') {
-      return documentation;
-    }
-    return { value: documentation.value, kind: 'markdown' } satisfies MarkupContent;
-  };
 }
 
 // copy paste from ch.ivyteam.ivy.scripting.objects.util.StandardScriptingTypes;
