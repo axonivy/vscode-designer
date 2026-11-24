@@ -24,7 +24,8 @@ export default config.defineConfig(
       '**/market/generated/*',
       '**/browser/media/*',
       '**/monaco-workers/*',
-      '**/playwright/test-extension-dir/**/*'
+      '**/playwright/test-extension-dir/**/*',
+      'x18n.config.ts'
     ]
   },
   {

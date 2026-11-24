@@ -16,7 +16,6 @@
     "@tailwindcss/vite": "^4.3.3",
     "@typescript/native": "npm:typescript@^7.0.2",
     "@vanilla-extract/recipes": "^0.5.7",
-    "i18next-cli": "^1.67.3",
     "tailwindcss": "^4.3.3",
     "typescript": "npm:@typescript/typescript6@^6.0.2"
   },
@@ -26,8 +25,6 @@
     "clean": "rimraf dist lib",
     "type": "tsc --noEmit",
     "watch": "vite build --mode development --watch --emptyOutDir",
-    "i18n": "i18next-cli extract",
-    "i18n:ci": "i18next-cli extract --ci --dry-run",
     "dev": "vite"
   }
 }
