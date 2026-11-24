@@ -12,7 +12,7 @@ test('Check existing warning and error', async ({ wsPage }) => {
   const trigger = editor.elementByPID('18D9CDFA8F58DA2B-f3');
   await editor.hasWarning(trigger);
   const problemsView = await ProblemsView.initProblemsView(wsPage);
-  await problemsView.hasWarning('TriggerCall target is not defined.');
+  await problemsView.hasWarning('TriggerCall target is not defined');
 
   const script = editor.elementByPID('18D9CDFA8F58DA2B-f5');
   await editor.hasError(script);
