@@ -204,6 +204,32 @@ test('Monaco Editor IvyScript completion includes Java documentation', async ({ 
   }
 });
 
+test('Missing Javadoc hint downloads dependency sources and refreshes Java', { tag: '@serial' }, async ({ wsPage }) => {
+  test.setTimeout(180_000); // Java startup and optional Maven downloads can be slow on a cold repository.
+  await wsPage.activateExpensiveJavaStandardMode();
+  const outputView = new OutputView(wsPage);
+  await outputView.openLog('Axon Ivy Extension');
+  await outputView.clearOutput();
+
+  const editor = new ProcessEditor(wsPage);
+  await editor.open();
+  const inscriptionView = await editor.openInscriptionView('15254DCE818AD7A2-f0');
+  await inscriptionView.openInscriptionTab('Start');
+  await inscriptionView.openCollapsible('Code');
+  await inscriptionView.monacoEditor.click();
+  // TestClass is a local fixture without Javadoc: the hint is independent of cached dependency sources.
+  await wsPage.page.keyboard.type('TestCl', { delay: 50 });
+  await expect(inscriptionView.monacoContentAssist).toBeVisible();
+  await inscriptionView.expectMonacoCompletionDocumentation('TestClass', 'Javadoc is not available.');
+  const link = inscriptionView.monacoCompletionDetails.locator('a[data-href="https://axonivy.invalid/download-dependency-sources"]');
+  await expect(link).toBeVisible();
+  await link.click();
+
+  await outputView.openLog('Axon Ivy Extension');
+  await outputView.expectLogEntry('Source download requested for');
+  await outputView.expectLogEntry('Java project refresh requested for', 120_000);
+});
+
 test('Monaco Editor shortcuts', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage);
   await editor.open();
