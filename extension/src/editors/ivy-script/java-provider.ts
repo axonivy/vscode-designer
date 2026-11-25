@@ -1,8 +1,21 @@
-import { CompletionItem, CompletionItemKind, CompletionList, Hover, Location, MarkdownString, Position, Uri, workspace, type LocationLink } from 'vscode';
-import { executeCommand } from '../base/commands';
-import { logWarningMessage } from '../base/logging-util';
-import { IvyProjectManager } from '../project-explorer/ivy-project-manager';
-import { treeUriToProjectPath } from '../project-explorer/tree-selection';
+import {
+  CompletionItem,
+  CompletionItemKind,
+  CompletionList,
+  Hover,
+  Location,
+  MarkdownString,
+  Position,
+  Range,
+  Uri,
+  workspace,
+  WorkspaceEdit,
+  type LocationLink
+} from 'vscode';
+import { executeCommand } from '../../base/commands';
+import { logWarningMessage } from '../../base/logging-util';
+import { IvyProjectManager } from '../../project-explorer/ivy-project-manager';
+import { treeUriToProjectPath } from '../../project-explorer/tree-selection';
 import { toJavaIvyContext } from './ivy-script-java-translation';
 
 export class JavaProvider {
@@ -19,6 +32,7 @@ export class JavaProvider {
   readonly dummyJavaFile: Promise<Uri>;
   readonly dummyHoverJavaFile: Promise<Uri>;
   readonly dummyContextJavaFile: Promise<Uri>;
+  readonly dummyDefinitionJavaFile: Promise<Uri>;
 
   static readonly DUMMY_CLASS_NAME = 'Dummy';
   static readonly DUMMY_CONTENT = `private class ${JavaProvider.DUMMY_CLASS_NAME}{`;
@@ -26,12 +40,17 @@ export class JavaProvider {
 
   constructor(documentUri: Uri) {
     const projectPath = treeUriToProjectPath(documentUri, IvyProjectManager.instance.getIvyProjects());
-    this.dummyJavaFile = projectPath.then(project => Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider', 'java-provider.java'));
+    this.dummyJavaFile = projectPath.then(project =>
+      Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider', 'java-provider.java')
+    );
     this.dummyHoverJavaFile = projectPath.then(project =>
       Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider', 'java-provider-hover.java')
     );
     this.dummyContextJavaFile = projectPath.then(project =>
       Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider', 'java-provider-context.java')
+    );
+    this.dummyDefinitionJavaFile = projectPath.then(project =>
+      Uri.joinPath(Uri.file(project ?? ''), 'target', 'java-provider', 'java-provider-definition.java')
     );
   }
 
@@ -93,17 +112,64 @@ export class JavaProvider {
       JavaProvider.DUMMY_HOVER_CONTENT.length + translated.position.character
     );
     const hovers = await executeCommand<Hover[] | undefined>('vscode.executeHoverProvider', javaFile, javaPosition);
-    const documentation = hovers?.flatMap(hover => hover.contents).map(content => {
-      if (typeof content === 'string') {
-        return content;
-      }
-      if (content instanceof MarkdownString) {
-        return content.value;
-      }
-      return `\`\`\`${content.language}\n${content.value}\n\`\`\``;
-    });
+    const documentation = hovers
+      ?.flatMap(hover => hover.contents)
+      .map(content => {
+        if (typeof content === 'string') {
+          return content;
+        }
+        if (content instanceof MarkdownString) {
+          return content.value;
+        }
+        return `\`\`\`${content.language}\n${content.value}\n\`\`\``;
+      });
     const result = documentation?.filter(Boolean).join('\n\n');
     return result || undefined;
+  }
+
+  public definition(code: string, position: Position, imports: string[] = []) {
+    return this.enqueueCompletion(async () => {
+      const javaFile = await this.dummyDefinitionJavaFile;
+      const translated = toJavaIvyContext(code, position, imports);
+      const importContent = translated.imports.length > 0 ? `${translated.imports.join('\n')}\n` : '';
+      const javaFileContent = `${importContent}${JavaProvider.DUMMY_HOVER_CONTENT}${translated.code}; } }`;
+      // executeDefinitionProvider reuses an already-open text document. File watcher updates
+      // are asynchronous, so a disk write alone can leave JDT querying the previous script.
+      let document = workspace.textDocuments.find(doc => doc.uri.toString() === javaFile.toString());
+      if (!document) {
+        await workspace.fs.writeFile(javaFile, Buffer.from(javaFileContent));
+        document = await workspace.openTextDocument(javaFile);
+      }
+      const needsUpdate = document.getText() !== javaFileContent;
+      if (needsUpdate) {
+        const edit = new WorkspaceEdit();
+        edit.replace(javaFile, new Range(document.positionAt(0), document.positionAt(document.getText().length)), javaFileContent);
+        if (!(await workspace.applyEdit(edit))) {
+          throw new Error('Could not synchronize the Java definition document');
+        }
+      }
+      const javaPosition = new Position(
+        translated.imports.length + translated.position.line,
+        (translated.position.line === 0 ? JavaProvider.DUMMY_HOVER_CONTENT.length : 0) + translated.position.character
+      );
+      try {
+        const locations = await executeCommand<Array<Location | LocationLink> | undefined>(
+          'vscode.executeDefinitionProvider',
+          javaFile,
+          javaPosition
+        );
+        // Synthetic local variables are not useful navigation targets.
+        return (locations ?? []).filter(
+          location => (this.isLocation(location) ? location.uri : location.targetUri).toString() !== javaFile.toString()
+        );
+      } finally {
+        // Save only after querying: format-on-save and organize-imports can move the cursor.
+        // Persist the hidden document so it does not leave an unsaved editor behind.
+        if (needsUpdate) {
+          await document.save();
+        }
+      }
+    });
   }
 
   public async javaTypes(toBeCompleted: string) {

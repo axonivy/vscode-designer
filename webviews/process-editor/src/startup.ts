@@ -15,6 +15,7 @@ import { HOST_EXTENSION, type NotificationType, type RequestType } from 'vscode-
 import { Messenger } from 'vscode-messenger-webview';
 import './index.css';
 import { setupDownloadSourcesLink } from './download-sources-link';
+import { setupDefinitionNavigation } from './definition-navigation';
 import { setupCutShortcutHandler, setupPasteShortcutHandler, setupSaveShortcutHandler } from './monaco-fix';
 import { setupSelectAllShortcutHandler } from './select-all-shortcut';
 
@@ -45,6 +46,8 @@ export class StandaloneDiagramStartup implements IDiagramStartup {
     setupPasteShortcutHandler();
     setupCutShortcutHandler();
     setupSelectAllShortcutHandler(this.actionDispatcher);
+
+    void setupDefinitionNavigation(this.messenger);
 
     // Setup save shortcut handler for Monaco editors
     setupSaveShortcutHandler(() => this.messenger.sendNotification(SaveDocumentNotification, HOST_EXTENSION));
