@@ -17,6 +17,7 @@ import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/
 import { IvyDiagnostics } from './engine/diagnostics';
 import { IvyEngineManager } from './engine/engine-manager';
 import { showEngineLog } from './engine/engine-output-channel';
+import { openMarket } from './market/market-webview';
 import { registerAddDependencyHandler } from './maven/add-dependency';
 import { registerDownloadSourcesHandler } from './maven/download-sources';
 import { IvyProjectExplorer } from './project-explorer/ivy-project-explorer';
@@ -55,6 +56,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     registerCommand('ivyPanelView.openExtensionLog', context, () => showExtensionLog());
     registerCommand('ivyPanelView.openEngineLog', context, () => showEngineLog());
     registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
+    registerCommand('ivyPanelView.openMarket', context, () => openMarket());
     registerCommand('ivy.showStatusBarQuickPick', context, (visibleOptions?: QuickPickOptionId[]) =>
       StatusBar.showStatusBarQuickPick(visibleOptions)
     );
