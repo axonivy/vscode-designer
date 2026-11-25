@@ -179,7 +179,7 @@ test('lists IAR projects below each workspace project in a read-only section', a
   expect(provider.getTreeItem(dependencies[0]!).contextValue).toBeUndefined();
 });
 
-test('marks IAR dependencies red when the POM version differs', async () => {
+test('does not mark an IAR dependency when its engine version differs from the single classpath version', async () => {
   mocks.getIarsPerProject.mockReturnValue(
     new Map([['/workspace/local', new Map([['/maven/repository/com/example/shared-project', '2.0.0']])]])
   );
@@ -189,11 +189,48 @@ test('marks IAR dependencies red when the POM version differs', async () => {
 
   const [dependency] = await provider.getChildren(iarGroup);
 
-  expect((dependency?.iconPath as ThemeIcon).color).toEqual(new ThemeColor('problemsErrorIcon.foreground'));
-  expect(dependency?.tooltip).toBe('Dependency version error. There are conflicting versions specified. Check the Problems view.');
+  expect((dependency?.iconPath as ThemeIcon).color).toBeUndefined();
+  expect(dependency?.description).toBe('2.1.0');
+  expect(dependency?.tooltip).toBe('com.example:shared-project:2.1.0');
 });
 
-test('shows transitive IAR dependencies and checks their POM versions', async () => {
+test('marks every IAR dependency red when multiple classpath versions exist', async () => {
+  const [workspaceProject, iarProject] = await mocks.findEngineProjects();
+  const secondIarProject = {
+    ...iarProject,
+    version: '3.0.0',
+    id: { id: 'shared-project-3', isIar: true }
+  };
+  mocks.findEngineProjects.mockResolvedValue([
+    {
+      ...workspaceProject,
+      dependencies: [{ id: 'shared-project' }, { id: 'shared-project-3' }]
+    },
+    iarProject,
+    secondIarProject
+  ]);
+  mocks.getIarsPerProject.mockReturnValue(
+    new Map([
+      ['/workspace/local', new Map([['/maven/repository/com/example/shared-project', '2.1.0']])],
+      ['/workspace/other', new Map([['/maven/repository/com/example/shared-project', '3.0.0']])]
+    ])
+  );
+  const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
+  const [workspaceProjectEntry] = await provider.getChildren();
+  const [iarGroup] = await provider.getChildren(workspaceProjectEntry);
+  const dependencies = await provider.getChildren(iarGroup);
+
+  expect(dependencies).toHaveLength(2);
+  for (const dependency of dependencies) {
+    expect(dependency?.description).toBe('Version error');
+    expect((dependency?.iconPath as ThemeIcon).color).toEqual(new ThemeColor('list.errorForeground'));
+    expect(dependency?.tooltip).toBe(
+      'Dependency version error. There are conflicting versions specified. Check the Problems view.'
+    );
+  }
+});
+
+test('shows transitive IAR dependencies and marks conflicting classpath versions', async () => {
   const [workspaceProject, iarProject] = await mocks.findEngineProjects();
   mocks.findEngineProjects.mockResolvedValue([
     { ...workspaceProject, dependencies: [{ id: 'iar-a' }] },
@@ -220,7 +257,8 @@ test('shows transitive IAR dependencies and checks their POM versions', async ()
           ['/maven/repository/com/example/iar-a', '1.0.0'],
           ['/maven/repository/com/example/iar-b', '1.9.0']
         ])
-      ]
+      ],
+      ['/workspace/other', new Map([['/maven/repository/com/example/iar-b', '2.0.0']])]
     ])
   );
   const provider = new IvyProjectTreeDataProvider(mocks.findWorkspaceProjects, mocks.findEngineProjects);
@@ -232,7 +270,7 @@ test('shows transitive IAR dependencies and checks their POM versions', async ()
 
   expect(dependencies.map(dependency => dependency.label)).toEqual(['iar-a', 'iar-b']);
   expect(transitiveDependency?.description).toBe('Version error');
-  expect((transitiveDependency?.iconPath as ThemeIcon).color).toEqual(new ThemeColor('problemsErrorIcon.foreground'));
+  expect((transitiveDependency?.iconPath as ThemeIcon).color).toEqual(new ThemeColor('list.errorForeground'));
 });
 
 test('shows the same IAR dependency below every workspace project', async () => {

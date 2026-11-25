@@ -115,7 +115,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
       }
       const projectPath = element.parent.uri.fsPath;
       const dependencies = element.parent ? await this.getEngineIarDependenciesForWorkspaceProject(projectPath) : [];
-      return Promise.all(dependencies.map(depProject => this.getIarDependency(projectPath, element, depProject)));
+      return Promise.all(dependencies.map(depProject => this.getIarDependency(element, depProject)));
     }
     if (element?.kind === 'iarDependency' || element?.kind === 'iarContentDirectory') {
       return this.getIarContentChildren(element);
@@ -131,23 +131,26 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
     );
   }
 
-  private async getIarDependency(projectPath: string, parent: Entry, depProject: ProjectBean): Promise<Entry> {
-    const depVersionEngine = depProject.version;
+  private async getIarDependency(parent: Entry, depProject: ProjectBean): Promise<Entry> {
     const depRelPath = `${depProject.groupId.replaceAll('.', '/')}/${depProject.artifactId}`;
-    const depVersionPom = [...(JavaClassPathReader.instance.getIarsPerProject().get(projectPath) ?? [])].find(([iarPath]) =>
-      iarPath.endsWith(depRelPath)
-    )?.[1];
-    // If we cannot resolve the POM version, we do not assume we have an error
-    const versionsMatch = depVersionPom ? depVersionPom === depVersionEngine : true;
+    const dependencyVersions = new Set<string>();
+    for (const projectIars of JavaClassPathReader.instance.getIarsPerProject().values()) {
+      for (const [iarPath, version] of projectIars) {
+        if (iarPath.endsWith(depRelPath)) {
+          dependencyVersions.add(version);
+        }
+      }
+    }
+    const hasVersionError = dependencyVersions.size > 1;
     return {
       uri: iarContentUri(depProject.projectDirectory, 'META-INF/ivy'),
       type: FileType.Directory,
       label: depProject.artifactId,
-      description: versionsMatch ? depVersionEngine : l10n.t('Version error'),
-      tooltip: versionsMatch
-        ? `${depProject.groupId}:${depProject.artifactId}:${depVersionEngine}`
-        : l10n.t('Dependency version error. There are conflicting versions specified. Check the Problems view.'),
-      iconPath: new ThemeIcon('lock', versionsMatch ? undefined : new ThemeColor('problemsErrorIcon.foreground')),
+      description: hasVersionError ? l10n.t('Version error') : depProject.version,
+      tooltip: hasVersionError
+        ? l10n.t('Dependency version error. There are conflicting versions specified. Check the Problems view.')
+        : `${depProject.groupId}:${depProject.artifactId}:${depProject.version}`,
+      iconPath: new ThemeIcon('lock', hasVersionError ? new ThemeColor('list.errorForeground') : undefined),
       collapsibleState: TreeItemCollapsibleState.Collapsed,
       kind: 'iarDependency',
       parent
