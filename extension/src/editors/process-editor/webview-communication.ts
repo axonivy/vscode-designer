@@ -43,6 +43,7 @@ const StartProcessRequest: RequestType<string, Promise<void>> = { method: 'start
 
 // Save document notification - allow webview to trigger save when Monaco captures Cmd+S
 const SaveDocumentNotification: NotificationType<void> = { method: 'document/save' };
+const DownloadDependencySourcesNotification: NotificationType<void> = { method: 'java/downloadDependencySources' };
 
 const InscriptionWebSocketMessage: NotificationType<unknown> = { method: 'inscriptionWebSocketMessage' };
 const IvyScriptWebSocketMessage: NotificationType<unknown> = { method: 'ivyScriptWebSocketMessage' };
@@ -66,6 +67,15 @@ export const setupCommunication = (
     messenger.onRequest(StartProcessRequest, startUri => IvyBrowserViewProvider.instance.openEngineRelativeUrl(startUri), {
       sender: messageParticipant
     }),
+    // Resolve the project from this webview's document, never from a path supplied by the link
+    // or an unrelated active editor. This notification cannot execute arbitrary commands.
+    messenger.onNotification(
+      DownloadDependencySourcesNotification,
+      async () => {
+        await commands.executeCommand('ivyProjects.downloadDependencySources', document.uri);
+      },
+      { sender: messageParticipant }
+    ),
     // Save document handler - triggered when Monaco captures Cmd+S in webview
     messenger.onNotification(
       SaveDocumentNotification,

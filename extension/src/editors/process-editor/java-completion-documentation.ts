@@ -2,10 +2,15 @@ import { l10n, type CompletionItem as JavaCompletionItem } from 'vscode';
 import type { CompletionItem, MarkupContent } from 'vscode-languageclient';
 import { normalizeIvyCompletionLabel } from '../ivy-script-java-translation';
 
+// A normal Markdown link survives LSP/Monaco's untrusted Markdown rendering. The webview
+// intercepts only this exact URL and sends a project-bound notification; no arbitrary commands run.
+export const DOWNLOAD_SOURCES_LINK = 'https://axonivy.invalid/download-dependency-sources';
+
 const missingJavadocHint = (): MarkupContent => ({
   kind: 'markdown',
   value: l10n.t(
-    'Javadoc is not available yet. Hover the completed class or navigate to its definition to trigger source download, then reopen completion. Sources may not be available for every dependency.'
+    'Javadoc is not available. [Download dependency sources for this Ivy project]({0}), then reopen hover or completion after Java finishes updating. Some dependencies do not publish sources.',
+    DOWNLOAD_SOURCES_LINK
   )
 });
 

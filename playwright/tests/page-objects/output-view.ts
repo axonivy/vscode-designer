@@ -10,7 +10,8 @@ export class OutputView {
   constructor(readonly wsPage: WorkspacePage) {
     this.tab = wsPage.page.locator('li.action-item:has-text("Output")');
     this.view = wsPage.page.locator('div.output-view');
-    this.sourceSelection = wsPage.page.getByRole('toolbar', { name: 'Output actions', includeHidden: false }).locator('select');
+    // After switching from Terminal, Windows may retain the toolbar's "Terminal actions" label.
+    this.sourceSelection = wsPage.page.getByRole('combobox', { name: 'Switch Output', exact: true });
     this.logEntries = wsPage.page.locator('div.output-view').locator('.view-lines');
   }
 
@@ -32,7 +33,6 @@ export class OutputView {
 
   async openLog(name: string) {
     await this.open();
-    await this.sourceSelection.click();
     await this.sourceSelection.selectOption({ label: name });
   }
 

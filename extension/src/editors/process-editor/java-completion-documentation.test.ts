@@ -3,12 +3,17 @@ import type { CompletionItem as JavaCompletionItem, MarkdownString } from 'vscod
 import type { CompletionItem } from 'vscode-languageclient';
 import { addJavaCompletionDocumentation, javaCompletionDocumentation } from './java-completion-documentation';
 
-vi.mock('vscode', () => ({ l10n: { t: (message: string) => message } }));
+vi.mock('vscode', () => ({
+  l10n: {
+    t: (message: string, ...args: unknown[]) =>
+      args.reduce<string>((result, arg, index) => result.replace(`{${index}}`, String(arg)), message)
+  }
+}));
 
 const hint = {
   kind: 'markdown',
   value:
-    'Javadoc is not available yet. Hover the completed class or navigate to its definition to trigger source download, then reopen completion. Sources may not be available for every dependency.'
+    'Javadoc is not available. [Download dependency sources for this Ivy project](https://axonivy.invalid/download-dependency-sources), then reopen hover or completion after Java finishes updating. Some dependencies do not publish sources.'
 };
 
 const markdown = (value: string) => ({ value }) as MarkdownString;

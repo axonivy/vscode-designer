@@ -65,7 +65,8 @@ type ProjectViewCommand =
   | 'ivyProjects.convertAllProjects'
   | 'ivyProjects.migrateProgramConfigs'
   | 'ivyProjects.convertDialogFormToJsf'
-  | 'ivyProjects.addDependency';
+  | 'ivyProjects.addDependency'
+  | 'ivyProjects.downloadDependencySources';
 type ViewCommand =
   | 'ivyBrowserView.focus'
   | 'ivyBrowserView.openDevWfUi'
