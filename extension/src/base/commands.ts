@@ -75,6 +75,7 @@ type ViewCommand =
   | 'ivyBrowserView.openPreview'
   | 'ivyPanelView.openRuntimeLog'
   | 'ivyPanelView.openWelcomePage'
+  | 'ivyPanelView.openMarket'
   | 'ivyPanelView.openExtensionLog'
   | 'ivyPanelView.openEngineLog';
 export type ConfigEditorCommand =

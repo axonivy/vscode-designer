@@ -47,7 +47,7 @@ const externalLinkTarget = (message: unknown): URL | undefined => {
 
 let marketPanel: WebviewPanel | undefined;
 
-const openMarket = (target?: URL) => {
+export const openMarket = (target?: URL) => {
   const marketUrl = createMarketUrl(target);
   if (marketPanel) {
     marketPanel.reveal();

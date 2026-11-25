@@ -327,6 +327,11 @@
         "category": "%category.axonIvy%"
       },
       {
+        "command": "ivyPanelView.openMarket",
+        "title": "%command.openMarket%",
+        "category": "%category.axonIvy%"
+      },
+      {
         "command": "workflow.fit",
         "title": "%command.fitToScreen%",
         "category": "%category.axonIvy%",
@@ -1430,6 +1435,10 @@
         {
           "command": "ivyProjects.importBpmnProcess",
           "group": "1@3"
+        },
+        {
+          "command": "ivyPanelView.openMarket",
+          "group": "1@4"
         }
       ]
     },
