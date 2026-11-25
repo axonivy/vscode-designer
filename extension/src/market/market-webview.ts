@@ -1,4 +1,4 @@
-import { ColorThemeKind, commands, l10n, ViewColumn, window, type WebviewPanel } from 'vscode';
+import { ColorThemeKind, commands, env, l10n, ViewColumn, window, type WebviewPanel } from 'vscode';
 import { logErrorMessage, logWarningMessage } from '../base/logging-util';
 import { createNonce } from '../base/nonce-util';
 import { openUrlExternally } from '../editors/notification-helper';
@@ -45,6 +45,11 @@ const externalLinkTarget = (message: unknown): URL | undefined => {
   return url && EXTERNAL_PROTOCOLS.includes(url.protocol) ? url : undefined;
 };
 
+const clipboardText = (message: unknown): string | undefined =>
+  isObject(message) && message.source === MARKET_SOURCE && message.type === 'copy-to-clipboard' && typeof message.text === 'string'
+    ? message.text
+    : undefined;
+
 let marketPanel: WebviewPanel | undefined;
 
 export const openMarket = (target?: URL) => {
@@ -71,6 +76,11 @@ export const openMarket = (target?: URL) => {
     const externalLink = externalLinkTarget(message);
     if (externalLink) {
       openUrlExternally(externalLink.href);
+      return;
+    }
+    const textToCopy = clipboardText(message);
+    if (textToCopy !== undefined) {
+      await env.clipboard.writeText(textToCopy);
       return;
     }
     if (!isInstallMessage(message)) {
