@@ -180,8 +180,26 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
     if (!workspaceProject) {
       return [];
     }
-    const dependencyIds = new Set(workspaceProject.dependencies.map(dependency => dependency.id));
+    const projectsById = new Map(engineProjects.map(project => [project.id.id, project]));
+    const dependencyIds = this.getTransitiveDependencyIds(workspaceProject, projectsById);
     return engineIarProjects.filter(project => dependencyIds.has(project.id.id));
+  }
+
+  private getTransitiveDependencyIds(project: ProjectBean, projectsById: Map<string, ProjectBean>) {
+    const dependencyIds = new Set<string>();
+    const addDependencyAndTransitives = (dependencyId: string) => {
+      if (dependencyIds.has(dependencyId)) {
+        return;
+      }
+      dependencyIds.add(dependencyId);
+      projectsById.get(dependencyId)?.dependencies?.forEach(dependency => {
+        addDependencyAndTransitives(dependency.id);
+      });
+    };
+    project.dependencies.forEach(dependency => {
+      addDependencyAndTransitives(dependency.id);
+    });
+    return dependencyIds;
   }
 
   private getIarContentChildren(parent: Entry): Entry[] {
