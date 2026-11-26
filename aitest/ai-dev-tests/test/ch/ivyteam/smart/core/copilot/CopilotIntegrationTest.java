@@ -5,6 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static ch.ivyteam.smart.core.copilot.AiUtils.findFile;
 import static ch.ivyteam.smart.core.copilot.AiUtils.readJson;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -14,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import ch.ivyteam.smart.core.AgentRuntime;
 import ch.ivyteam.smart.core.AgentRuntimeExtension;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ExtendWith(AgentRuntimeExtension.class)
@@ -127,6 +132,10 @@ public class CopilotIntegrationTest {
         .viewed("skills/ivy-cms/text-workflow.md")
         .didNotUseTools("web_fetch", "web_search")
         .usedTokensBelow(200_000, 2_500);
+  }
+
+  private static JsonNode readYaml(Path file) throws IOException {
+    return YAMLMapper.shared().readTree(Files.readString(file));
   }
 
 }
