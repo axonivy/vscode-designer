@@ -47,7 +47,6 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
       withFileSystemBind(trustStoreDirectory.toString(), trustStoreDirectory.toString(), BindMode.READ_ONLY);
     }
     withEnv("JAVA_HOME", javaHomePath.toString());
-    withEnv("DONT_PROMPT_WSL_INSTALL", "1");
     withExposedPorts(MCP_PORT);
     System.out.println("Waiting for MCP health endpoint on port " + MCP_PORT + " in designer-mcp container...");
     waitingFor(Wait
@@ -61,7 +60,8 @@ public class DesignerMcpContainer extends GenericContainer<DesignerMcpContainer>
     withCreateContainerCmdModifier(command -> command.withAliases(DesignerMcpContainer.NETWORK_ALIAS));
     withCommand(
         "bash", "-lc", ""
-            + "bash /mcp.sh && exec tail -f /dev/null");
+            + "/mcp.sh\n"
+            + "exec tail -f /dev/null");
   }
 
   private static Path toRealPath(Path path) {
