@@ -4,7 +4,7 @@
 
 The PRO Designer combines intuitive visual modeling with the flexibility of advanced development tools, providing a unified environment for process orchestration and application development.
 
-The sections below provide setup and getting started instructions to help you get up and running quickly. For more detailed information, please refer to our [official documentation](https://dev.axonivy.com/doc/14.0/en/designer/index.html).
+The sections below provide setup and getting started instructions to help you get up and running quickly. For more detailed information, please refer to our [official documentation](https://developer.axonivy.com/doc/14.0/en/designer/index.html).
 
 ## Setup
 

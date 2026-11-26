@@ -14,7 +14,7 @@ export const ShortcutSection = () => {
       <div className='grid h-full grid-cols-2 gap-3'>
         <ShortcutCard
           title={t('shortcut.documentation')}
-          value={'https://dev.axonivy.com/doc'}
+          value={'https://developer.axonivy.com/doc'}
           description={t('shortcut.documentationDescription')}
           icon={IvyIcons.File}
           onClick={openUrl}
@@ -35,7 +35,7 @@ export const ShortcutSection = () => {
         />
         <ShortcutCard
           title={t('shortcut.news')}
-          value={'https://dev.axonivy.com/news'}
+          value={'https://developer.axonivy.com/news'}
           description={t('shortcut.newsDescription')}
           icon={IvyIcons.InfoCircle}
           onClick={openUrl}
