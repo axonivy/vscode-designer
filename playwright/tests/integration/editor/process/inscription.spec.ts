@@ -174,6 +174,139 @@ test('Monaco Editor completion with JDT language server', async ({ wsPage }) => 
   await wsPage.page.keyboard.press('Escape');
 });
 
+test('Monaco Editor IvyScript completion includes Java documentation', async ({ wsPage }) => {
+  test.setTimeout(90_000); // slow test due to Java activation and documentation resolution
+  await wsPage.activateExpensiveJavaStandardMode();
+  const editor = new ProcessEditor(wsPage);
+  await editor.open();
+
+  const inscriptionView = await editor.openInscriptionView('15254DCE818AD7A2-f0');
+  await inscriptionView.openInscriptionTab('Start');
+  await inscriptionView.openCollapsible('Code');
+  const monacoEditor = inscriptionView.monacoEditor;
+  const contentAssist = inscriptionView.monacoContentAssist;
+  await monacoEditor.click();
+
+  const documentationByCompletion = {
+    task: 'Returns the currently executed task.',
+    case: 'Returns the currently executed case.',
+    session: 'Returns the currently active session.'
+  };
+  for (const [completion, documentation] of Object.entries(documentationByCompletion)) {
+    await wsPage.page.keyboard.type('ivy.', { delay: 50 });
+    await expect(contentAssist).toBeVisible();
+    await inscriptionView.expectMonacoCompletionDocumentation(completion, documentation);
+    await wsPage.page.keyboard.press('Escape');
+    await monacoEditor.click();
+    await wsPage.page.keyboard.press('ControlOrMeta+a');
+    await wsPage.page.keyboard.press('Backspace');
+    await expect(monacoEditor).toBeEmpty();
+  }
+});
+
+test('Missing Javadoc hint downloads dependency sources and refreshes Java', { tag: '@serial' }, async ({ wsPage }) => {
+  test.setTimeout(180_000); // Java startup and optional Maven downloads can be slow on a cold repository.
+  await wsPage.activateExpensiveJavaStandardMode();
+  const outputView = new OutputView(wsPage);
+  await outputView.openLog('Axon Ivy Extension');
+  await outputView.clearOutput();
+
+  const editor = new ProcessEditor(wsPage);
+  await editor.open();
+  const inscriptionView = await editor.openInscriptionView('15254DCE818AD7A2-f0');
+  await inscriptionView.openInscriptionTab('Start');
+  await inscriptionView.openCollapsible('Code');
+  await inscriptionView.monacoEditor.click();
+  // TestClass is a local fixture without Javadoc: the hint is independent of cached dependency sources.
+  await wsPage.page.keyboard.type('TestCl', { delay: 50 });
+  await expect(inscriptionView.monacoContentAssist).toBeVisible();
+  await inscriptionView.expectMonacoCompletionDocumentation('TestClass', 'Javadoc is not available.');
+  const link = inscriptionView.monacoCompletionDetails.locator('a[data-href="https://axonivy.invalid/download-dependency-sources"]');
+  await expect(link).toBeVisible();
+  await link.click();
+
+  await outputView.openLog('Axon Ivy Extension');
+  await outputView.expectLogEntry('Source download requested for');
+  await outputView.expectLogEntry('Java project refresh requested for', 120_000);
+});
+
+test('Monaco definition navigation in scripts and macros', async ({ wsPage }) => {
+  test.setTimeout(90_000);
+  await wsPage.activateExpensiveJavaStandardMode();
+  const editor = new ProcessEditor(wsPage);
+  await editor.open();
+  const inscriptionView = await editor.openInscriptionView('15254DCE818AD7A2-f0');
+  await inscriptionView.openInscriptionTab('Start');
+  await inscriptionView.openCollapsible('Code');
+
+  await replaceCode(editor, 'import ch.ivyteam.ivy.security.ISecurityContext;\nISecurityContext.current()');
+  await goToDefinition(editor, 'current', 'ISecurityContext.java');
+  await replaceCode(editor, 'ivy.task');
+  await goToDefinition(editor, 'task', 'Ivy.java');
+  // Change the script and line count between lookups to detect stale JDT buffers.
+  await replaceCode(editor, 'import ch.ivyteam.ivy.security.ISecurityContext;\nISecurityContext.current();\n\nivy.task.customFields();');
+  await clickDefinition(editor, 'customFields', 'ITask.java');
+
+  await editor.openInscriptionView(userTaskPID);
+  await inscriptionView.openInscriptionTab('Task');
+  await inscriptionView.openCollapsible('Name / Description');
+  await inscriptionView.inputFieldFor('Name').focus();
+  await replaceCode(editor, 'Task: <%= ivy.task.name %> Case: <%= ivy.case.customFields() %>');
+  await goToDefinition(editor, 'customFields', 'ICase.java');
+  // Close the target so hover can prove that it does not open a Java editor.
+  const caseEditor = new TextEditor(wsPage, 'ICase.java');
+  await caseEditor.tab.click();
+  await caseEditor.close();
+  await editor.tab.click();
+  await inscriptionView.inputFieldFor('Name').focus();
+  await replaceCode(editor, '<%= ivy.case.customFields() %>');
+  await clickDefinition(editor, 'customFields', 'ICase.java');
+});
+
+async function replaceCode(editor: ProcessEditor, code: string) {
+  const monacoEditor = editor.inscriptionView().monacoEditor;
+  await monacoEditor.click();
+  await editor.wsPage.page.keyboard.press('ControlOrMeta+a');
+  await editor.wsPage.page.keyboard.insertText(code);
+  await editor.wsPage.page.keyboard.press('Escape');
+  await monacoEditor.click();
+}
+
+async function expectDefinition(editor: ProcessEditor, target: string) {
+  await editor.wsPage.isTabWithNameVisible(target);
+  await editor.expectTabInactive();
+  // Return to the same inscription for the next lookup.
+  await editor.tab.click();
+}
+
+async function goToDefinition(editor: ProcessEditor, word: string, target: string) {
+  // Clicking the symbol places the caret without depending on line length or delimiters.
+  await editor.inscriptionView().monacoEditor.getByText(word, { exact: false }).click();
+  await editor.wsPage.page.keyboard.press('F12');
+  await expectDefinition(editor, target);
+}
+
+async function clickDefinition(editor: ProcessEditor, word: string, target: string) {
+  const { wsPage } = editor;
+  const inscriptionView = editor.inscriptionView();
+  // Leave the caret elsewhere; navigation must use the symbol under the mouse.
+  await wsPage.page.keyboard.press('ControlOrMeta+a');
+  await wsPage.page.keyboard.press('ArrowLeft');
+  const symbol = inscriptionView.monacoEditor.getByText(word, { exact: false });
+  const modifier = process.platform === 'darwin' ? 'Meta' : 'Control';
+  await wsPage.page.keyboard.down(modifier);
+  try {
+    await symbol.hover();
+    await expect(inscriptionView.parent.locator('.goto-definition-link')).toHaveText(word);
+    await editor.expectTabActive();
+    await expect(wsPage.page.locator('div.tab').filter({ hasText: target })).toHaveCount(0);
+    await symbol.click();
+  } finally {
+    await wsPage.page.keyboard.up(modifier);
+  }
+  await expectDefinition(editor, target);
+}
+
 test('Monaco Editor shortcuts', async ({ wsPage }) => {
   const editor = new ProcessEditor(wsPage);
   await editor.open();

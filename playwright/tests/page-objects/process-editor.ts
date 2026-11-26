@@ -167,8 +167,12 @@ class InscriptionView {
   }
 
   async expectMonacoCompletionDocumentation(completionLabel: string, documentation: string) {
-    const completion = this.monacoContentAssist.getByText(completionLabel).first();
+    const completion = this.monacoContentAssist.locator('.monaco-list-row.focused').getByText(completionLabel, { exact: true }).first();
     const details = this.monacoCompletionDetails;
+    for (let index = 0; index < 50 && !(await completion.isVisible()); index++) {
+      await this.wsPage.page.keyboard.press('ArrowDown');
+    }
+    await expect(completion).toBeVisible();
     await completion.hover();
     if (!(await details.isVisible())) {
       await this.wsPage.page.keyboard.press('Control+Space');

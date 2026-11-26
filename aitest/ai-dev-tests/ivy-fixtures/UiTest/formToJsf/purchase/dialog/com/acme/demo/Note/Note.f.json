@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.axonivy.com/14.0/project/form.json",
+  "config": {
+    "title": "Note",
+    "type": "FORM"
+  },
+  "components": [
+    {
+      "cid": "textarea1",
+      "type": "Textarea",
+      "config": {
+        "id": "note",
+        "label": "Note",
+        "value": "#{data.note}",
+        "rows": "6",
+        "lgSpan": "12",
+        "mdSpan": "12"
+      }
+    }
+  ]
+}

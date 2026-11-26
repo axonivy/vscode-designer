@@ -17,7 +17,9 @@ import { conditionalWelcomePage, showWelcomePage } from './editors/welcome-page/
 import { IvyDiagnostics } from './engine/diagnostics';
 import { IvyEngineManager } from './engine/engine-manager';
 import { showEngineLog } from './engine/engine-output-channel';
+import { openMarket } from './market/market-webview';
 import { registerAddDependencyHandler } from './maven/add-dependency';
+import { registerDownloadSourcesHandler } from './maven/download-sources';
 import { IvyProjectExplorer } from './project-explorer/ivy-project-explorer';
 import { IvyProjectManager } from './project-explorer/ivy-project-manager';
 import { resolveExtensionVersion } from './version/extension-version';
@@ -54,6 +56,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     registerCommand('ivyPanelView.openExtensionLog', context, () => showExtensionLog());
     registerCommand('ivyPanelView.openEngineLog', context, () => showEngineLog());
     registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
+    registerCommand('ivyPanelView.openMarket', context, () => openMarket());
     registerCommand('ivy.showStatusBarQuickPick', context, (visibleOptions?: QuickPickOptionId[]) =>
       StatusBar.showStatusBarQuickPick(visibleOptions)
     );
@@ -67,6 +70,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     IvyProjectManager.init(context);
     IvyProjectExplorer.init(context);
     registerAddDependencyHandler(context);
+    registerDownloadSourcesHandler(context);
     StatusBar.refreshStatusBar();
     return messenger.diagnosticApi();
   } catch (error) {

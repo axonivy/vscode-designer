@@ -17,6 +17,7 @@ import type { StatusBarItem } from 'vscode';
 import { EventEmitter, Uri, commands, window } from 'vscode';
 import { logErrorMessage, logInformationMessage, logWarningMessage } from '../../base/logging-util';
 import type { SelectedElement } from '../../base/process-editor-connector';
+import { iarContentUriFromEngineUri } from '../../project-explorer/iar-content-provider';
 import { ProcessBreakpointHandler } from './process-breakpoint-handler';
 import ProcessEditorProvider from './process-editor-provider';
 
@@ -101,7 +102,14 @@ export class ProcessVscodeConnector extends GlspVscodeConnector {
       if (absolutePath.endsWith('.p.json')) {
         this.openWithProcessEditor(Uri.parse(absolutePath), NavigationTarget.getElementIds(message.action.target));
       } else {
-        commands.executeCommand('vscode.open', Uri.parse(absolutePath));
+        const isIar = args?.isIar === 'true';
+        if (isIar) {
+          const targetUri = absolutePath.startsWith('jar:') ? Uri.parse(absolutePath.slice('jar:'.length)) : Uri.parse(absolutePath);
+          commands.executeCommand('vscode.open', iarContentUriFromEngineUri(targetUri) ?? targetUri);
+        } else {
+          const targetUri = Uri.parse(absolutePath);
+          commands.executeCommand('vscode.open', targetUri);
+        }
       }
       return { processedMessage: undefined, messageChanged: true };
     }

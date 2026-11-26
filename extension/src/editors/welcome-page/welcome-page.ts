@@ -2,8 +2,8 @@ import type { ExtensionContext, WebviewPanel } from 'vscode';
 import { ViewColumn, commands, window } from 'vscode';
 import { Messenger } from 'vscode-messenger';
 import type { NotificationType, RequestType } from 'vscode-messenger-common';
+import { openMarketUrl } from '../../market/market-webview';
 import { extensionVersion } from '../../version/extension-version';
-import { openUrlExternally } from '../notification-helper';
 import { createWebViewContent } from '../webview-helper';
 import { getSystemInfo, type SystemInfo } from './system-info';
 
@@ -62,7 +62,7 @@ const initializeMessenger = (context: ExtensionContext) => {
     return messenger;
   }
   messenger = new Messenger();
-  messenger.onNotification(openUrlType, openUrlExternally);
+  messenger.onNotification(openUrlType, openMarketUrl);
   messenger.onNotification(commandType, command => {
     commands.executeCommand(command);
   });

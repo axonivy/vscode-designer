@@ -65,7 +65,8 @@ type ProjectViewCommand =
   | 'ivyProjects.convertAllProjects'
   | 'ivyProjects.migrateProgramConfigs'
   | 'ivyProjects.convertDialogFormToJsf'
-  | 'ivyProjects.addDependency';
+  | 'ivyProjects.addDependency'
+  | 'ivyProjects.downloadDependencySources';
 type ViewCommand =
   | 'ivyBrowserView.focus'
   | 'ivyBrowserView.openDevWfUi'
@@ -74,6 +75,7 @@ type ViewCommand =
   | 'ivyBrowserView.openPreview'
   | 'ivyPanelView.openRuntimeLog'
   | 'ivyPanelView.openWelcomePage'
+  | 'ivyPanelView.openMarket'
   | 'ivyPanelView.openExtensionLog'
   | 'ivyPanelView.openEngineLog';
 export type ConfigEditorCommand =

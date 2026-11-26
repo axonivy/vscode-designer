@@ -2,7 +2,7 @@ import type { InscriptionActionArgs } from '@axonivy/process-editor-inscription-
 import { Uri } from 'vscode';
 import { logWarningMessage } from '../../../base/logging-util';
 import { IvyEngineManager } from '../../../engine/engine-manager';
-import { JavaProvider } from '../../java-provider';
+import { JavaProvider } from '../../ivy-script/java-provider';
 
 export const handleOpenProgram = async (args: InscriptionActionArgs) => {
   const project = await IvyEngineManager.instance

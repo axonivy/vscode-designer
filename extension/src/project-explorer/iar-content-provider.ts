@@ -15,6 +15,28 @@ import {
 export const IAR_CONTENT_SCHEME = 'axonivy-iar-content';
 const IVY_CONTENT_PATH = 'META-INF/ivy';
 
+const resolveIarContentUri = (uri: Uri) => {
+  const archivePath = new URLSearchParams(uri.query).get('archive');
+  if (!archivePath) {
+    throw FileSystemError.FileNotFound(uri);
+  }
+  const segments = uri.path.split('/').filter(Boolean).slice(1);
+  if (segments.some(segment => segment === '..' || segment === '.' || segment.includes('\\') || segment.includes('\0'))) {
+    throw FileSystemError.NoPermissions(uri);
+  }
+  const relativePath = segments.join('/');
+  const entryPath = relativePath ? path.posix.join(IVY_CONTENT_PATH, relativePath) : IVY_CONTENT_PATH;
+  return { archivePath, entryPath };
+};
+
+export const iarContentEngineFileName = (uri: Uri) => {
+  const { archivePath, entryPath } = resolveIarContentUri(uri);
+  const normalizedArchivePath = path.win32.isAbsolute(archivePath) ? archivePath.replaceAll('\\', '/') : archivePath;
+  return `${normalizedArchivePath}!/${entryPath}`;
+};
+
+export const iarContentEngineFileUri = (uri: Uri) => Uri.file(iarContentEngineFileName(uri));
+
 export const iarContentUri = (archivePath: string, entryPath: string) => {
   const contentPath = entryPath.replace(/^META-INF\/ivy\/?/, '');
   const uriPath = [path.basename(archivePath), ...contentPath.split('/').filter(Boolean)]
@@ -22,6 +44,18 @@ export const iarContentUri = (archivePath: string, entryPath: string) => {
     .join('/');
   const query = new URLSearchParams({ archive: archivePath });
   return Uri.parse(`${IAR_CONTENT_SCHEME}:/${uriPath}?${query.toString()}`);
+};
+
+export const iarContentUriFromEngineUri = (uri: Uri) => {
+  const marker = `!/${IVY_CONTENT_PATH}/`;
+  const markerIndex = uri.path.indexOf(marker);
+  if (markerIndex < 0) {
+    return undefined;
+  }
+  // Windows paths starting with a drive letter need to remove the leading slash
+  const archivePath = uri.path.slice(0, markerIndex).replace(/^\/([A-Za-z]:\/)/, '$1');
+  const entryPath = uri.path.slice(markerIndex + 2);
+  return iarContentUri(archivePath, entryPath);
 };
 
 export class IarContentFileSystemProvider implements FileSystemProvider {
@@ -153,17 +187,7 @@ export class IarContentFileSystemProvider implements FileSystemProvider {
   }
 
   private resolveUri(uri: Uri) {
-    const archivePath = new URLSearchParams(uri.query).get('archive');
-    if (!archivePath) {
-      throw FileSystemError.FileNotFound(uri);
-    }
-    const segments = uri.path.split('/').filter(Boolean).slice(1);
-    if (segments.some(segment => segment === '..' || segment === '.' || segment.includes('\\') || segment.includes('\0'))) {
-      throw FileSystemError.NoPermissions(uri);
-    }
-    const relativePath = segments.join('/');
-    const entryPath = relativePath ? path.posix.join(IVY_CONTENT_PATH, relativePath) : IVY_CONTENT_PATH;
-    return { archivePath, entryPath };
+    return resolveIarContentUri(uri);
   }
 
   private localPath(archivePath: string, entryPath: string) {

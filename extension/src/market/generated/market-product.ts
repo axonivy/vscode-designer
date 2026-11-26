@@ -11,7 +11,7 @@
  * via the `definition` "Installer".
  */
 export type Installer = {
-id?: (("maven-import" | "maven-dependency") & string)
+id: (("maven-import" | "maven-dependency") & string)
 data: any |  {
 [k: string]: unknown
 }

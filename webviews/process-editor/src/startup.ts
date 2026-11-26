@@ -14,12 +14,15 @@ import { toConnection } from '@axonivy/vscode-webview-common';
 import { HOST_EXTENSION, type NotificationType, type RequestType } from 'vscode-messenger-common';
 import { Messenger } from 'vscode-messenger-webview';
 import './index.css';
+import { setupDownloadSourcesLink } from './download-sources-link';
+import { setupDefinitionNavigation } from './definition-navigation';
 import { setupCutShortcutHandler, setupPasteShortcutHandler, setupSaveShortcutHandler } from './monaco-fix';
 import { setupSelectAllShortcutHandler } from './select-all-shortcut';
 
 const WebviewConnectionReadyNotification: NotificationType<void> = { method: 'connectionReady' };
 const InitializeConnectionRequest: RequestType<void, void> = { method: 'initializeConnection' };
 const SaveDocumentNotification: NotificationType<void> = { method: 'document/save' };
+const DownloadDependencySourcesNotification: NotificationType<void> = { method: 'java/downloadDependencySources' };
 
 @injectable()
 export class StandaloneDiagramStartup implements IDiagramStartup {
@@ -44,8 +47,11 @@ export class StandaloneDiagramStartup implements IDiagramStartup {
     setupCutShortcutHandler();
     setupSelectAllShortcutHandler(this.actionDispatcher);
 
+    void setupDefinitionNavigation(this.messenger);
+
     // Setup save shortcut handler for Monaco editors
     setupSaveShortcutHandler(() => this.messenger.sendNotification(SaveDocumentNotification, HOST_EXTENSION));
+    setupDownloadSourcesLink(() => this.messenger.sendNotification(DownloadDependencySourcesNotification, HOST_EXTENSION));
   }
 
   private initConnection() {

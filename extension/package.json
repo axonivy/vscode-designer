@@ -27,8 +27,6 @@
     "publish:next": "node ../scripts/update-package-json.mts --publish && bash -c 'vsce publish --no-update-package-json --no-git-tag-version --no-dependencies ${npm_package_version/./}.${MILESTONE:-$(date \"+%Y%m%d%H\")}'",
     "test": "vitest",
     "test:ci": "vitest run",
-    "i18n": "vscode-l10n-dev export -o ./l10n ./src",
-    "i18n:ci": "pnpm run i18n && node ./scripts/check-i18n-catalogs.mjs",
     "type": "tsc --noEmit",
     "watch": "node esbuild.mts --watch"
   },
@@ -68,7 +66,6 @@
     "@axonivy/ui-icons": "next-14.0.2",
     "@types/vscode": "1.98.0",
     "@types/vscode-webview": "1.57.5",
-    "@vscode/l10n-dev": "0.0.35",
     "@vscode/vsce": "4.1.1",
     "esbuild": "0.28.2",
     "fonteditor-core": "2.6.3",
@@ -330,6 +327,11 @@
         "category": "%category.axonIvy%"
       },
       {
+        "command": "ivyPanelView.openMarket",
+        "title": "%command.openMarket%",
+        "category": "%category.axonIvy%"
+      },
+      {
         "command": "workflow.fit",
         "title": "%command.fitToScreen%",
         "category": "%category.axonIvy%",
@@ -506,6 +508,13 @@
         "enablement": "ivy:hasIvyProjects"
       },
       {
+        "command": "ivyProjects.downloadDependencySources",
+        "title": "%command.downloadDependencySources%",
+        "category": "%category.axonIvy%",
+        "icon": "$(cloud-download)",
+        "enablement": "ivy:hasIvyProjects && isWorkspaceTrusted"
+      },
+      {
         "command": "ivy.addDevContainer",
         "title": "%command.addDevContainer%",
         "category": "%category.axonIvy%"
@@ -654,7 +663,7 @@
               "database": true,
               "dataclass": true,
               "form": true,
-              "javaIndex": true,
+              "java-index": true,
               "process": true,
               "restclient": true,
               "role": true,
@@ -676,7 +685,7 @@
                 "type": "boolean",
                 "description": "%setting.validation.dialogs%"
               },
-              "javaIndex": {
+              "java-index": {
                 "type": "boolean",
                 "description": "%setting.validation.java%"
               },
@@ -1215,6 +1224,11 @@
           "command": "ivyProjects.stopBpmEngine",
           "when": "view == ivyProjects && viewItem =~ /ivyProject/",
           "group": "1@6"
+        },
+        {
+          "command": "ivyProjects.downloadDependencySources",
+          "when": "view == ivyProjects && viewItem =~ /ivyProject/",
+          "group": "1@7"
         }
       ],
       "view.item": [
@@ -1237,6 +1251,11 @@
           "command": "ivyProjects.stopBpmEngine",
           "when": "view == ivyProjects && viewItem =~ /ivyProject/",
           "group": "1@4"
+        },
+        {
+          "command": "ivyProjects.downloadDependencySources",
+          "when": "view == ivyProjects && viewItem =~ /ivyProject/",
+          "group": "1@5"
         }
       ],
       "commandPalette": [
@@ -1398,6 +1417,10 @@
           "command": "ivyProjects.convertProject",
           "group": "1@2",
           "when": "ivy:hasProjectsToConvert"
+        },
+        {
+          "command": "ivyProjects.downloadDependencySources",
+          "group": "1@3"
         }
       ],
       "explorer.ivy.importExport": [
@@ -1412,6 +1435,10 @@
         {
           "command": "ivyProjects.importBpmnProcess",
           "group": "1@3"
+        },
+        {
+          "command": "ivyPanelView.openMarket",
+          "group": "1@4"
         }
       ]
     },

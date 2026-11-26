@@ -3,6 +3,7 @@ import { UIKind, Uri, env, l10n, window } from 'vscode';
 import { executeCommand, registerCommand } from '../../base/commands';
 import { config } from '../../base/configurations';
 import { logErrorMessage } from '../../base/logging-util';
+import { createNonce } from '../../base/nonce-util';
 import { findRootEntry, parseBuildManifest } from '../../editors/build-manifest';
 import { IvyEngineManager } from '../../engine/engine-manager';
 import { dialogPreviewUrl, isDialogPreviewSupported } from './dialog-preview/dialog-preview-url';
@@ -122,7 +123,7 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
     const root = this.extensionResourceUrl(webview, 'dist', 'webviews', 'browser');
     const manifest = parseBuildManifest(root);
     const mainJs = Uri.joinPath(root, findRootEntry(manifest).chunk.file ?? '');
-    const nonce = getNonce();
+    const nonce = createNonce();
     return `<!DOCTYPE html>
     <html>
     <head>
@@ -190,13 +191,4 @@ export class IvyBrowserViewProvider implements WebviewViewProvider {
     }
     throw new Error('IvyBrowserViewProvider has not been initialized');
   }
-}
-
-function getNonce() {
-  let text = '';
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
 }

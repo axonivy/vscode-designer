@@ -25,6 +25,16 @@ In addition to our extension, make sure the [Dev Container extension](https://ma
 1. Run the **Axon Ivy: Add Dev Container** command to add the required Dev Container configuration file to your workspace.
 2. Run the **Dev Containers: Reopen in Container** command to open your workspace inside the Dev Container.
 
+## Dependency sources and Javadoc
+
+If Java hover or completion documentation is missing, run **Axon Ivy: Download Dependency Sources**, use an Ivy project's context menu, or click **Download dependency sources for this Ivy project** in the process editor's missing-Javadoc hint.
+
+The command runs Maven's `dependency:sources` goal for that project's `pom.xml`. It uses the Maven extension's executable, wrapper, settings and profiles, and does not force snapshot updates (`-U`). Automatic source downloading at startup remains unchanged.
+
+When Maven exits successfully, only the affected Java project's configuration is refreshed to attach the downloaded sources. No Java cache clean or window reload is needed. Wait for Java to finish updating, then reopen hover or completion. If terminal shell integration cannot report completion, select **Maven finished: Refresh Java** in the notification after Maven finishes. **Stop tracking** stops automatic refresh tracking, not the Maven process.
+
+Maven and Java must use the same local repository and compatible settings (`maven.settingsFile` and `java.configuration.maven.userSettings` / `java.configuration.maven.globalSettings`). Some dependencies do not publish sources; project configuration refresh requires Java's Standard mode.
+
 ## Getting started
 
 ### From scratch

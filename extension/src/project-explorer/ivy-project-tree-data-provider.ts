@@ -15,7 +15,7 @@ import type { KnownCommand } from '../base/commands';
 import { JavaClassPathReader } from '../base/java-class-path-reader';
 import type { ProjectBean } from '../engine/api/generated/client';
 import { IvyDiagnostics } from '../engine/diagnostics';
-import { IarContentFileSystemProvider, iarContentUri } from './iar-content-provider';
+import { iarContentEngineFileUri, IarContentFileSystemProvider, iarContentUri } from './iar-content-provider';
 
 const __dirname = import.meta.dirname;
 interface IvyCommand extends VSCodeCommand {
@@ -194,15 +194,27 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
         return aName.localeCompare(bName);
       })
       .map(([name, type]) => {
-        const uri = Uri.joinPath(parent.uri, name);
+        let customCommand: KnownCommand = 'vscode.open';
+        const additionalArgs: string[] = [];
+        let uri = Uri.joinPath(parent.uri, name);
         const isDirectory = type === FileType.Directory;
+        if (!isDirectory) {
+          if (name.endsWith('.p.json')) {
+            uri = iarContentEngineFileUri(uri);
+          }
+          // TODO: Remove this cms workaround as soon as the cms editor provider can handle IAR documents
+          if (name.startsWith('cms_') && name.endsWith('.yaml')) {
+            customCommand = 'vscode.openWith';
+            additionalArgs.push('default');
+          }
+        }
         return {
           uri,
           type,
           label: name,
           collapsibleState: isDirectory ? TreeItemCollapsibleState.Collapsed : undefined,
           kind: isDirectory ? 'iarContentDirectory' : 'iarContentFile',
-          command: isDirectory ? undefined : { command: 'vscode.openWith', title: 'Open', arguments: [uri, 'default'] },
+          command: isDirectory ? undefined : { command: customCommand, title: 'Open', arguments: [uri, ...additionalArgs] },
           parent
         };
       });

@@ -9,26 +9,41 @@ import java.util.Comparator;
 
 public class IvyWorkspaceSetup {
   private final Path template;
+  private final Path fixtures;
   private final Path workspace;
+  private boolean reuseWorkspace;
 
   public IvyWorkspaceSetup(Path workspaceRoot) {
-    template = workspaceRoot.resolve("aitest/ai-dev-tests/ivy-template");
+    template = workspaceRoot.resolve("aitest/ai-dev-tests/ivy-template/purchase");
+    fixtures = workspaceRoot.resolve("aitest/ai-dev-tests/ivy-fixtures");
     workspace = workspaceRoot.resolve("aitest/ai-dev-tests/ivy");
   }
 
-  public Path initialize() {
-    return initialize(true);
-  }
-
-  public Path initialize(boolean reset) {
+  public Path initialize(boolean reuse) {
     try {
-      if (reset || !Files.isDirectory(workspace.resolve("purchase"))) {
+      var purchase = workspace.resolve("purchase");
+      reuseWorkspace = reuse && Files.isDirectory(purchase);
+      if (!reuse) {
         deleteFirstLevel();
-        copyProjects();
+      }
+      if (!reuseWorkspace) {
+        copyFixture(template, purchase, true);
       }
       return workspace;
     } catch (IOException exception) {
       throw new UncheckedIOException("Failed to initialize Ivy workspace from: " + template, exception);
+    }
+  }
+
+  public void applyFixture(String testClassName, String testMethodName) {
+    var overlay = fixtures.resolve(testClassName).resolve(testMethodName);
+    if (!Files.isDirectory(overlay)) {
+      return;
+    }
+    try {
+      copyFixture(overlay, workspace, !reuseWorkspace);
+    } catch (IOException exception) {
+      throw new UncheckedIOException("Failed to apply Ivy fixture from: " + overlay, exception);
     }
   }
 
@@ -49,17 +64,20 @@ public class IvyWorkspaceSetup {
     }
   }
 
-  private void copyProjects() throws IOException {
-    try (var projects = Files.list(template)) {
-      projects.forEach(this::copyProject);
-    }
-  }
-
-  private void copyProject(Path project) {
-    try (var paths = Files.walk(project)) {
-      paths.forEach(this::copy);
-    } catch (IOException exception) {
-      throw new UncheckedIOException("Failed to copy project: " + project, exception);
+  private void copyFixture(Path sourceRoot, Path targetRoot, boolean overwrite) throws IOException {
+    try (var paths = Files.walk(sourceRoot)) {
+      var iterator = paths.iterator();
+      while (iterator.hasNext()) {
+        var source = iterator.next();
+        var target = targetRoot.resolve(sourceRoot.relativize(source));
+        if (Files.isDirectory(source)) {
+          Files.createDirectories(target);
+        } else if (overwrite) {
+          Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+        } else if (!Files.exists(target)) {
+          Files.copy(source, target);
+        }
+      }
     }
   }
 
@@ -68,19 +86,6 @@ public class IvyWorkspaceSetup {
       Files.delete(path);
     } catch (IOException exception) {
       throw new UncheckedIOException("Failed to delete workspace path: " + path, exception);
-    }
-  }
-
-  private void copy(Path source) {
-    Path target = workspace.resolve(template.relativize(source));
-    try {
-      if (Files.isDirectory(source)) {
-        Files.createDirectories(target);
-      } else {
-        Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
-      }
-    } catch (IOException exception) {
-      throw new UncheckedIOException("Failed to copy workspace path: " + source, exception);
     }
   }
 }

@@ -16,13 +16,20 @@ import {
 
 const UserWebSocketMessage: NotificationType<unknown> = { method: 'userWebSocketMessage' };
 
-export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webviewPanel: WebviewPanel, document: TextDocument) => {
+export const setupCommunication = (
+  websocketUrl: URL,
+  messenger: Messenger,
+  webviewPanel: WebviewPanel,
+  document: TextDocument,
+  engineFileName: string,
+  readOnly: boolean
+) => {
   const messageParticipant = messenger.registerWebviewPanel(webviewPanel);
   const toDispose = new DisposableCollection(
-    new UserEditorWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
+    new UserEditorWebSocketForwarder(websocketUrl, messenger, messageParticipant, document, engineFileName, readOnly),
     messenger.onNotification(
       WebviewReadyNotification,
-      () => messenger.sendNotification(InitializeConnectionRequest, messageParticipant, { file: document.fileName }),
+      () => messenger.sendNotification(InitializeConnectionRequest, messageParticipant, { file: engineFileName, readOnly }),
       { sender: messageParticipant }
     ),
     webviewPanel.onDidDispose(() => toDispose.dispose())
@@ -30,8 +37,15 @@ export const setupCommunication = (websocketUrl: URL, messenger: Messenger, webv
 };
 
 class UserEditorWebSocketForwarder extends EditorWebSocketForwarder {
-  constructor(websocketUrl: URL, messenger: Messenger, messageParticipant: MessageParticipant, document: TextDocument) {
-    super(websocketUrl, 'ivy-user-lsp', messenger, messageParticipant, UserWebSocketMessage, document);
+  constructor(
+    websocketUrl: URL,
+    messenger: Messenger,
+    messageParticipant: MessageParticipant,
+    document: TextDocument,
+    engineFileName: string,
+    private readonly readOnly: boolean
+  ) {
+    super(websocketUrl, 'ivy-user-lsp', messenger, messageParticipant, UserWebSocketMessage, document, engineFileName);
   }
 
   protected override handleClientMessage(message: unknown) {
@@ -49,7 +63,7 @@ class UserEditorWebSocketForwarder extends EditorWebSocketForwarder {
 
   protected override handleServerMessage(message: string) {
     const obj = JSON.parse(message);
-    if (hasEditorFileContent(obj)) {
+    if (hasEditorFileContent(obj) && !this.readOnly) {
       updateTextDocumentContent(this.document, obj.result).then(() => super.handleServerMessage(message));
     } else {
       super.handleServerMessage(message);

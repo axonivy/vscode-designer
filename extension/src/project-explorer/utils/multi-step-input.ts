@@ -136,6 +136,7 @@ interface BaseQuickPickParameters<P extends QuickPickItem> {
   matchOnDetail?: boolean;
   validationFunction?: (selectedItems: P[]) => string | undefined;
   onBack?: (typedValue: string, selectedItems: P[]) => void;
+  onItemButton?: (item: P) => void | Promise<void>;
 }
 
 interface SingleQuickPickParameters<P extends QuickPickItem> extends BaseQuickPickParameters<P> {
@@ -334,6 +335,17 @@ export class MultiStepInput<T extends MSStateBase> {
           if (item === QuickInputButtons.Back) {
             params.onBack?.(getOriginalValue(input.value), originalItems(input.selectedItems));
             reject(InputFlowAction.back);
+          }
+        }),
+        input.onDidTriggerItemButton(async ({ item }) => {
+          const original = originalItem(item);
+          if (!original) {
+            return;
+          }
+          try {
+            await params.onItemButton?.(original);
+          } catch (err) {
+            logErrorMessage(err instanceof Error ? err.message : String(err));
           }
         }),
         input.onDidAccept(() => {
