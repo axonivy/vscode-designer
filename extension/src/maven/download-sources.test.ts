@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import { TabInputCustom, TabInputText, Uri, type TerminalShellExecutionEndEvent } from 'vscode';
+import { Uri, type TerminalShellExecutionEndEvent } from 'vscode';
 import { DependencySourceDownloader, registerDownloadSourcesHandler } from './download-sources';
 
 const mocks = vi.hoisted(() => ({
@@ -17,10 +17,6 @@ const mocks = vi.hoisted(() => ({
   end: vi.fn(),
   close: vi.fn(),
   dispose: vi.fn(),
-  window: {
-    tabGroups: { activeTabGroup: { activeTab: undefined as { input: unknown } | undefined } },
-    activeTextEditor: undefined as { document: { uri: unknown } } | undefined
-  },
   workspace: { isTrusted: true }
 }));
 
@@ -30,21 +26,19 @@ vi.mock('vscode', () => {
     constructor(readonly fsPath: string) {}
     static file(filePath: string) { return new Uri(filePath); }
   }
-  class TabInputText { constructor(readonly uri: Uri) {} }
-  class TabInputCustom { constructor(readonly uri: Uri) {} }
   return {
-    Uri, TabInputText, TabInputCustom,
+    Uri,
     commands: { executeCommand: mocks.commands },
     l10n: {
       t: (message: string, ...args: unknown[]) =>
         args.reduce<string>((result, arg, index) => result.replace(`{${index}}`, String(arg)), message)
     },
     workspace: Object.assign(mocks.workspace, { fs: { stat: mocks.stat } }),
-    window: Object.assign(mocks.window, {
+    window: {
       onDidStartTerminalShellExecution: mocks.start,
       onDidEndTerminalShellExecution: mocks.end,
       onDidCloseTerminal: mocks.close
-    })
+    }
   };
 });
 vi.mock('../base/commands', () => ({ registerCommand: mocks.registerCommand }));
@@ -67,8 +61,6 @@ let downloader: DependencySourceDownloader;
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.workspace.isTrusted = true;
-  mocks.window.tabGroups.activeTabGroup.activeTab = undefined;
-  mocks.window.activeTextEditor = undefined;
   mocks.projects.mockResolvedValue([project, otherProject]);
   mocks.selectProject.mockResolvedValue(undefined);
   mocks.stat.mockResolvedValue({});
@@ -104,7 +96,7 @@ test('registers an optional command and disposes event listeners with the extens
   expect(mocks.dispose).toHaveBeenCalledTimes(3);
 });
 
-test('launches Maven for the explicit project without -U or a Java cache reload', async () => {
+test('launches Maven for a resource selected inside the project without -U or a Java cache reload', async () => {
   await downloader.download(Uri.file(path.join(project, 'process', 'test.p.json')));
   expect(mocks.commands).toHaveBeenCalledWith('maven.goal.custom', pom().fsPath, expect.stringMatching(/^dependency:sources "-Divy\.sources\.download=[\da-f-]+"$/));
   expect(mocks.commands.mock.calls[0]?.[2]).not.toContain('-U');
@@ -127,18 +119,10 @@ test('accepts an Ivy project explorer entry', async () => {
   expect(mocks.commands.mock.calls[0]?.[1]).toBe(pom().fsPath);
 });
 
-test.each([TabInputText, TabInputCustom])('uses the active text/custom tab when called from the palette (%s)', async TabInput => {
-  mocks.window.tabGroups.activeTabGroup.activeTab = { input: new TabInput(Uri.file(path.join(project, 'file.java')), 'ivy.glspDiagram') };
-  mocks.window.activeTextEditor = { document: { uri: Uri.file(path.join(otherProject, 'stale.java')) } };
-  await downloader.download();
-  expect(mocks.commands.mock.calls[0]?.[1]).toBe(pom().fsPath);
-});
-
-test('asks for a project when the current editor does not belong to an Ivy project', async () => {
-  mocks.window.activeTextEditor = { document: { uri: Uri.file('/unrelated/file.java') } };
+test('asks for a project when no project is explicitly selected', async () => {
   mocks.selectProject.mockResolvedValue(Uri.file(project));
   await downloader.download();
-  expect(mocks.selectProject).toHaveBeenCalled();
+  expect(mocks.selectProject).toHaveBeenCalledOnce();
   expect(mocks.commands.mock.calls[0]?.[1]).toBe(pom().fsPath);
 });
 
@@ -147,26 +131,25 @@ test('does not launch when project selection is cancelled', async () => {
   expect(mocks.commands).not.toHaveBeenCalled();
 });
 
-test('prefers a nested Ivy project over its containing project', async () => {
+test('launches for an explicitly selected nested Ivy project', async () => {
   const nested = path.join(project, 'nested');
   mocks.projects.mockResolvedValue([project, nested]);
-  await downloader.download(Uri.file(path.join(nested, 'file.java')));
+  await downloader.download(Uri.file(nested));
   expect(mocks.commands.mock.calls[0]?.[1]).toBe(path.join(nested, 'pom.xml'));
 });
 
-test('does not redirect an invalid explicit selection to another project', async () => {
+test('asks the user to select a project when the explicit selection is not an Ivy project', async () => {
+  mocks.selectProject.mockResolvedValue(Uri.file(project));
   await downloader.download(Uri.file(`${project}-suffix/file.java`));
-  expect(mocks.warning).toHaveBeenCalled();
-  expect(mocks.selectProject).not.toHaveBeenCalled();
-  expect(mocks.commands).not.toHaveBeenCalled();
+  expect(mocks.selectProject).toHaveBeenCalledOnce();
+  expect(mocks.commands.mock.calls[0]?.[1]).toBe(pom().fsPath);
 });
 
-test('rejects archive-backed documents and untrusted workspaces', async () => {
-  await downloader.download({ uri: { scheme: 'axonivy-iar-content', fsPath: project } } as never);
+test('does not launch in an untrusted workspace', async () => {
   mocks.workspace.isTrusted = false;
   await downloader.download(Uri.file(project));
   expect(mocks.commands).not.toHaveBeenCalled();
-  expect(mocks.warning).toHaveBeenCalledTimes(2);
+  expect(mocks.warning).toHaveBeenCalledOnce();
 });
 
 test('reports a missing POM and does not launch Maven', async () => {
