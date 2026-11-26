@@ -245,7 +245,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
     return {
       uri: Uri.parse('axonivy:iar-dependencies'),
       type: FileType.Directory,
-      label: l10n.t('IAR Dependencies'),
+      label: l10n.t('Ivy Archive Dependencies'),
       iconPath: new ThemeIcon('library'),
       collapsibleState: TreeItemCollapsibleState.Collapsed,
       kind: 'iarDependencyGroup',

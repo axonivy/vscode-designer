@@ -21,7 +21,7 @@ test.describe('IAR project dependencies', () => {
     await projectExplorer.openView();
     await projectExplorer.hasNodeExactCollapsible(projectName);
     await projectExplorer.expandNodeExact(projectName);
-    await projectExplorer.expandNodeExact('IAR Dependencies');
+    await projectExplorer.expandNodeExact('Ivy Archive Dependencies');
 
     const iarProject = projectExplorer.view.getByRole('treeitem').filter({ hasText: projectExplorerItem }).first();
     await expect(iarProject).toContainText(testIarCoordinates.version);
@@ -42,7 +42,7 @@ test.describe('IAR project dependencies', () => {
     await projectExplorer.openView();
     await projectExplorer.hasNodeExactCollapsible(projectName);
     await projectExplorer.expandNodeExact(projectName);
-    await projectExplorer.expandNodeExact('IAR Dependencies');
+    await projectExplorer.expandNodeExact('Ivy Archive Dependencies');
     await projectExplorer.expandNodeExact(projectExplorerItem);
     await projectExplorer.expandNodeExact('config');
     await projectExplorer.scrollToNodeExact(restClientFileName);
@@ -65,7 +65,7 @@ test.describe('IAR project dependencies', () => {
     await projectExplorer.openView();
     await projectExplorer.hasNodeExactCollapsible(projectName);
     await projectExplorer.expandNodeExact(projectName);
-    await projectExplorer.expandNodeExact('IAR Dependencies');
+    await projectExplorer.expandNodeExact('Ivy Archive Dependencies');
     await projectExplorer.expandNodeExact(projectExplorerItem);
     await projectExplorer.scrollToNodeExact('process');
     await projectExplorer.expandNodeExact('process');

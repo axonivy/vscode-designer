@@ -156,7 +156,7 @@ test('lists IAR projects below each workspace project in a read-only section', a
 
   const [iarGroup] = await provider.getChildren(roots[0]);
   expect(iarGroup).toMatchObject({
-    label: 'IAR Dependencies',
+    label: 'Ivy Archive Dependencies',
     kind: 'iarDependencyGroup',
     collapsibleState: TreeItemCollapsibleState.Collapsed,
     parent: roots[0]
@@ -288,7 +288,7 @@ test('shows the same IAR dependency below every workspace project', async () => 
   const dependencies = await Promise.all(groups.map(([group]) => provider.getChildren(group)));
 
   expect(roots.map(root => root.uri.fsPath)).toEqual(['/workspace/p1', '/workspace/p2']);
-  expect(groups.map(group => group[0]?.label)).toEqual(['IAR Dependencies', 'IAR Dependencies']);
+  expect(groups.map(group => group[0]?.label)).toEqual(['Ivy Archive Dependencies', 'Ivy Archive Dependencies']);
   expect(dependencies.map(projects => projects.map(project => project.label))).toEqual([['shared-project'], ['shared-project']]);
   expect(groups[0]?.[0]).not.toBe(groups[1]?.[0]);
   expect(dependencies[0]?.[0]?.parent).toBe(groups[0]?.[0]);
@@ -314,7 +314,7 @@ test('does not show IAR dependencies below projects that do not declare them', a
   const roots = await provider.getChildren();
   const children = await Promise.all(roots.map(root => provider.getChildren(root)));
 
-  expect(children.map(projectChildren => projectChildren.map(child => child.label))).toEqual([['IAR Dependencies'], []]);
+  expect(children.map(projectChildren => projectChildren.map(child => child.label))).toEqual([['Ivy Archive Dependencies'], []]);
   expect(roots.map(root => root.collapsibleState)).toEqual([TreeItemCollapsibleState.Collapsed, undefined]);
 });
 
