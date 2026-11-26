@@ -1,7 +1,7 @@
 ---
 name: ivy-cms
 description: 'Create, reuse, and update Axon Ivy CMS content, including UI labels, translations, email templates, and files. Use when adding or changing user-visible text in XHTML dialogs or managing multilingual CMS resources.'
-user-invocable: false
+user-invocable: true
 ---
 
 # Ivy CMS
