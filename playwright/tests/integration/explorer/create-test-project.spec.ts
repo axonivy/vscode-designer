@@ -19,17 +19,18 @@ test.describe('Add Test Project', () => {
     await wsPage.provideUserInput('test.ivy.project');
     await wsPage.provideUserInput();
     const ivyTestOption = wsPage.quickInputList.getByText('IvyTest', { exact: true });
-    const processTestOption = wsPage.quickInputList.getByText('ProcessTest', { exact: true });
-    const webITOption = wsPage.quickInputList.getByText('WebIT', { exact: true });
+    const processTestOption = wsPage.quickInputList.getByText('IvyProcessTest', { exact: true });
+    const webITOption = wsPage.quickInputList.getByText('IvyWebTest', { exact: true });
     await ivyTestOption.click();
     await processTestOption.click();
     await webITOption.click();
     await wsPage.quickInputBox.press('Enter', { delay: 100 });
+    await wsPage.quickInputBox.press('Enter', { delay: 100 });
 
-    const srcTest = path.join(tmpWorkspace!.tmpWorkspacePath, 'test-ivy-project-1', 'src_test');
+    const srcTest = path.join(tmpWorkspace!.tmpWorkspacePath, 'ivy-project-1Test', 'src_test');
     await expect(async () => {
       const files = await fs.promises.readdir(srcTest, { recursive: true });
-      expect(files.map(file => path.basename(file))).toEqual(expect.arrayContaining(['SampleIvyTest.java', 'SampleProcessTest.java', 'SampleWebIT.java']));
+      expect(files.map(file => path.basename(file))).toEqual(expect.arrayContaining(['SampleIvyTest.java', 'SampleIvyProcessTest.java', 'SampleIvyWebTestIT.java']));
     }).toPass({ intervals: [1_000] });
   });
 
@@ -46,7 +47,7 @@ test.describe('Add Test Project', () => {
     await wsPage.quickInputBox.press('Enter', { delay: 100 });
 
     // the sample test is written after all pom.xml edits: interacting earlier lets keyboard input land in the pom.xml editor
-    const srcTest = path.join(tmpWorkspace!.tmpWorkspacePath, 'test-ivy-project-1', 'src_test');
+    const srcTest = path.join(tmpWorkspace!.tmpWorkspacePath, 'ivy-project-1Test', 'src_test');
     await expect(async () => {
       const files = await fs.promises.readdir(srcTest, { recursive: true });
       expect(files.map(file => path.basename(file))).toContain('SampleIvyTest.java');
@@ -55,7 +56,7 @@ test.describe('Add Test Project', () => {
     await runTestsAndExpectPass(wsPage, 'SampleIvyTest.java');
   });
 
-  test('should create ProcessTests and tests should pass', async ({ wsPage, tmpWorkspace }) => {
+  test('should create IvyProcessTests and tests should pass', async ({ wsPage, tmpWorkspace }) => {
     await wsPage.hasReadyStatusMessage();
 
     await wsPage.executeCommand('Axon Ivy: New Test Project');
@@ -63,26 +64,26 @@ test.describe('Add Test Project', () => {
     await wsPage.provideUserInput();
     await wsPage.provideUserInput('test.ivy.project');
     await wsPage.provideUserInput('test.ivy.project.1');
-    const processTestOption = wsPage.quickInputList.getByText('ProcessTest', { exact: true });
+    const processTestOption = wsPage.quickInputList.getByText('IvyProcessTest', { exact: true });
     await processTestOption.click();
     await wsPage.quickInputBox.press('Enter', { delay: 100 });
 
     // the sample test is written after all pom.xml edits: interacting earlier lets keyboard input land in the pom.xml editor
-    const srcTest = path.join(tmpWorkspace!.tmpWorkspacePath, 'test-ivy-project-1', 'src_test');
+    const srcTest = path.join(tmpWorkspace!.tmpWorkspacePath, 'ivy-project-1Test', 'src_test');
     await expect(async () => {
       const files = await fs.promises.readdir(srcTest, { recursive: true });
-      expect(files.map(file => path.basename(file))).toContain('SampleProcessTest.java');
+      expect(files.map(file => path.basename(file))).toContain('SampleIvyProcessTest.java');
     }).toPass({ intervals: [1_000] });
 
-    await runTestsAndExpectPass(wsPage, 'SampleProcessTest.java');
+    await runTestsAndExpectPass(wsPage, 'SampleIvyProcessTest.java');
   });
 });
 
-test.describe('WebIT Test Project', () => {
+test.describe('IvyWebTest Test Project', () => {
   test.use({ workspace: properMultiProjectJavaPath });
   test.skip(process.env.RUN_IN_BROWSER === 'true');
 
-  test('should create WebIT and tests should pass', async ({ wsPage, tmpWorkspace }) => {
+  test('should create IvyWebTest and tests should pass', async ({ wsPage, tmpWorkspace }) => {
     await wsPage.hasReadyStatusMessage();
 
     await wsPage.executeCommand('Axon Ivy: New Test Project');
@@ -90,18 +91,18 @@ test.describe('WebIT Test Project', () => {
     await wsPage.provideUserInput();
     await wsPage.provideUserInput('test.ivy.project');
     await wsPage.provideUserInput('test.ivy.project.1');
-    const webITOption = wsPage.quickInputList.getByText('WebIT', { exact: true });
+    const webITOption = wsPage.quickInputList.getByText('IvyWebTest', { exact: true });
     await webITOption.click();
     await wsPage.quickInputBox.press('Enter', { delay: 100 });
 
     // the sample test is written after all pom.xml edits: interacting earlier lets keyboard input land in the pom.xml editor
-    const srcTest = path.join(tmpWorkspace!.tmpWorkspacePath, 'test-ivy-project-1', 'src_test');
+    const srcTest = path.join(tmpWorkspace!.tmpWorkspacePath, 'ivy-project-1Test', 'src_test');
     await expect(async () => {
       const files = await fs.promises.readdir(srcTest, { recursive: true });
-      expect(files.map(file => path.basename(file))).toContain('SampleWebIT.java');
+      expect(files.map(file => path.basename(file))).toContain('SampleIvyWebTestIT.java');
     }).toPass({ intervals: [1_000] });
 
-    await runTestsAndExpectPass(wsPage, 'SampleWebIT.java');
+    await runTestsAndExpectPass(wsPage, 'SampleIvyWebTestIT.java');
   });
 });
 
