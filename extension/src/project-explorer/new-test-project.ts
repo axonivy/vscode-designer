@@ -75,6 +75,9 @@ const confirmWarningInInputBox = async (input: MultiStepInput<NewTestProjectStat
       currentStep: state.currentStep,
       totalSteps: state.totalSteps,
       value: '',
+      onChange: (_, inputBox) => {
+        inputBox.value = '';
+      },
       validationFunction: () => ({ message, severity: InputBoxValidationSeverity.Warning })
     });
     return true;
