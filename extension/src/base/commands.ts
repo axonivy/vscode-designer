@@ -77,7 +77,8 @@ type ViewCommand =
   | 'ivyPanelView.openWelcomePage'
   | 'ivyPanelView.openMarket'
   | 'ivyPanelView.openExtensionLog'
-  | 'ivyPanelView.openEngineLog';
+  | 'ivyPanelView.openEngineLog'
+  | 'ivyPanelView.openValidationLog';
 export type ConfigEditorCommand =
   | 'ivyEditor.openVariableEditor'
   | 'ivyEditor.openRoleEditor'
