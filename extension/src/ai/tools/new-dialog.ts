@@ -15,6 +15,7 @@ import { localizeDialogLayout, localizeDialogType } from '../../base/localized-l
 import type { CreateUserDialogParams } from '../../engine/api/engine-api';
 import { IvyEngineManager } from '../../engine/engine-manager';
 import { resolveDefaultNamespace } from '../../project-explorer/utils/util';
+import { resolveToolProjectPath } from './tool-project-path';
 
 type NewDialogToolArgs = {
   name: string;
@@ -49,7 +50,7 @@ export class NewDialogTool implements LanguageModelTool<NewDialogToolArgs> {
     if (options.input.namespace) {
       confirmationLines.push(`- ${l10n.t('Namespace')}: ${options.input.namespace}`);
     }
-    confirmationLines.push(`- ${l10n.t('Project')}: ${path.basename(newDialogParams.projectDir)}`);
+    confirmationLines.push(`- ${l10n.t('Project')}: ${path.basename(options.input.projectPath)}`);
     if (dialogType === 'JSF') {
       confirmationLines.push(`- ${l10n.t('Layout')}: ${localizeDialogLayout(newDialogParams.layout ?? '')}`);
       if (newDialogParams.layout !== 'Component') {
@@ -68,9 +69,11 @@ export class NewDialogTool implements LanguageModelTool<NewDialogToolArgs> {
 }
 
 export const createNewDialog = async (input: NewDialogToolArgs): Promise<string> => {
+  const projectDir = await resolveToolProjectPath(input.projectPath);
   const newDialogParams: CreateUserDialogParams = {
     ...resolvedParams(input),
-    namespace: input.namespace || (await resolveDefaultNamespace(input.projectPath, 'dialog'))
+    projectDir,
+    namespace: input.namespace || (await resolveDefaultNamespace(projectDir, 'dialog'))
   };
   const dialogType = newDialogParams.type ?? 'Form';
   const hdBean = await IvyEngineManager.instance.createUserDialog(newDialogParams);
@@ -89,9 +92,8 @@ export const createNewDialog = async (input: NewDialogToolArgs): Promise<string>
 };
 
 const resolvedParams = (args: NewDialogToolArgs) => {
-  const params: Omit<CreateUserDialogParams, 'namespace'> = {
+  const params: Omit<CreateUserDialogParams, 'namespace' | 'projectDir'> = {
     name: args.name,
-    projectDir: args.projectPath,
     type: args.type ?? 'Form'
   };
   if (params.type === 'JSF') {

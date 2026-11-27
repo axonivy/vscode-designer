@@ -1,7 +1,9 @@
+import path from 'path';
 import { afterEach, expect, test, vi } from 'vitest';
 
-const { createUserDialog, readFile } = vi.hoisted(() => ({
+const { createUserDialog, getIvyProjects, readFile } = vi.hoisted(() => ({
   createUserDialog: vi.fn().mockResolvedValue(undefined),
+  getIvyProjects: vi.fn<() => Promise<string[]>>(),
   readFile: vi.fn()
 }));
 
@@ -12,6 +14,12 @@ vi.mock('../../engine/engine-manager', () => ({
     }
   }
 }));
+
+vi.mock('../../project-explorer/ivy-project-manager', () => ({
+  IvyProjectManager: { instance: { getIvyProjects } }
+}));
+
+const windowsDrive = /^[a-z]:[/\\]/i;
 
 vi.mock('vscode', () => ({
   l10n: {
@@ -29,8 +37,12 @@ vi.mock('vscode', () => ({
   },
   Uri: {
     parse: vi.fn(),
-    file: (fsPath: string) => ({ fsPath }),
-    joinPath: (base: { fsPath: string }, ...segments: string[]) => ({ fsPath: [base.fsPath, ...segments].join('/') })
+    file: (fsPath: string) => ({
+      fsPath: windowsDrive.test(fsPath) ? fsPath.replace(/^[A-Z]/, drive => drive.toLowerCase()).replaceAll('/', '\\') : fsPath
+    }),
+    joinPath: (base: { fsPath: string }, ...segments: string[]) => ({
+      fsPath: [base.fsPath, ...segments].join(windowsDrive.test(base.fsPath) ? '\\' : '/')
+    })
   },
   workspace: { fs: { readFile } }
 }));
@@ -38,13 +50,16 @@ vi.mock('vscode', () => ({
 import { createNewDialog } from './new-dialog';
 
 afterEach(() => {
+  vi.restoreAllMocks();
   createUserDialog.mockClear();
+  getIvyProjects.mockReset();
   readFile.mockReset();
 });
 
 const pomWithGroupId = (groupId: string) => Buffer.from(`<project><groupId>${groupId}</groupId></project>`);
 
 test('defaults an omitted namespace to the project namespace from pom.xml', async () => {
+  getIvyProjects.mockResolvedValue(['/workspace/purchase']);
   readFile.mockResolvedValue(pomWithGroupId('com.acme-corp'));
 
   await createNewDialog({ name: 'OrderForm', projectPath: '/workspace/purchase' });
@@ -59,10 +74,21 @@ test('defaults an omitted namespace to the project namespace from pom.xml', asyn
 });
 
 test('keeps an explicitly requested namespace', async () => {
+  getIvyProjects.mockResolvedValue(['/workspace/purchase']);
   readFile.mockResolvedValue(pomWithGroupId('com.acme'));
 
   await createNewDialog({ name: 'OrderForm', namespace: 'purchase.order', projectPath: '/workspace/purchase' });
 
   expect(readFile).not.toHaveBeenCalled();
   expect(createUserDialog).toHaveBeenCalledWith(expect.objectContaining({ namespace: 'purchase.order' }));
+});
+
+test('normalizes Windows project paths before sending them to the engine', async () => {
+  vi.spyOn(path, 'isAbsolute').mockImplementation(path.win32.isAbsolute);
+  const projectDir = 'c:\\work\\purchase';
+  getIvyProjects.mockResolvedValue([projectDir]);
+
+  await createNewDialog({ name: 'OrderForm', namespace: 'purchase.order', projectPath: 'C:/work/purchase' });
+
+  expect(createUserDialog).toHaveBeenCalledWith(expect.objectContaining({ projectDir }));
 });

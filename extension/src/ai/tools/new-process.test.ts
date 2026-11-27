@@ -10,6 +10,10 @@ vi.mock('../../engine/engine-manager', () => ({
   }
 }));
 
+vi.mock('../../project-explorer/ivy-project-manager', () => ({
+  IvyProjectManager: { instance: { getIvyProjects: async () => ['/workspace/purchase'] } }
+}));
+
 vi.mock('vscode', () => ({
   l10n: {
     t: (message: string, ...args: unknown[]) =>
@@ -25,7 +29,8 @@ vi.mock('vscode', () => ({
     constructor(public value: string) {}
   },
   Uri: {
-    parse: vi.fn()
+    parse: vi.fn(),
+    file: (fsPath: string) => ({ fsPath })
   }
 }));
 
