@@ -50,7 +50,7 @@ test('Install up-to-date product with maven-dependency from Market website', asy
   const projectExplorer = new ProjectExplorerView(wsPage);
   await projectExplorer.openView();
   await projectExplorer.expandNodeExact(prebuiltProjectName);
-  await projectExplorer.expandNodeExact('IAR Dependencies');
+  await projectExplorer.expandNodeExact('Ivy Archive Dependencies');
 
   const iarProject = projectExplorer.view.getByRole('treeitem').filter({ has: wsPage.page.getByText('excel-connector', { exact: true }) });
   await projectExplorer.expandNodeExact('excel-connector');
