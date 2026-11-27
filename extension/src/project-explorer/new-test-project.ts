@@ -1,5 +1,5 @@
 import path from 'path';
-import { l10n, Range, Uri, workspace, WorkspaceEdit, type QuickPickItem } from 'vscode';
+import { InputBoxValidationSeverity, l10n, Range, Uri, workspace, WorkspaceEdit, type QuickPickItem } from 'vscode';
 import { runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage } from '../base/logging-util';
 import type { CreateProjectParams } from '../engine/api/engine-api';
@@ -8,6 +8,7 @@ import { IvyEngineManager } from '../engine/engine-manager';
 import { addMavenProjectDependencyByPath, addMavenTestDependency } from '../maven/add-dependency';
 import type { AddCommandSelectionContext } from './ivy-project-explorer';
 import {
+  InputFlowAction,
   MultiStepCancelledError,
   MultiStepInput,
   MultiStepInvalidStateError,
@@ -37,16 +38,62 @@ interface NewTestProjectState extends MSStateBase {
 const processName = 'ProcessForTest';
 
 const testTemplates = [
-  { selection: 'IvyTest', template: 'ivy-test.java.template', output: 'SampleIvyTest.java' },
-  { selection: 'ProcessTest', template: 'process-test.java.template', output: 'SampleProcessTest.java' },
-  { selection: 'WebIT', template: 'web-it.java.template', output: 'SampleWebIT.java' }
+  {
+    selection: 'IvyTest',
+    detail: l10n.t('Write unit tests for Java classes that run in the Ivy environment.'),
+    template: 'ivy-test.java.template',
+    output: 'SampleIvyTest.java'
+  },
+  {
+    selection: 'IvyProcessTest',
+    detail: l10n.t('Write unit tests for your processes.'),
+    template: 'ivy-process-test.java.template',
+    output: 'SampleIvyProcessTest.java'
+  },
+  {
+    selection: 'IvyWebTest',
+    detail: l10n.t('Write browser-based UI tests for your HTML Dialogs.'),
+    template: 'ivy-web-test-it.java.template',
+    output: 'SampleIvyWebTestIT.java'
+  }
 ];
+
+const getWebTestWarning = (testSelections: QuickPickItem[]) => {
+  const selected = new Set(testSelections.map(test => test.label));
+  if (selected.has('IvyWebTest') && selected.size > 1) {
+    return l10n.t('Best practice: keep IvyWebTest in its own test project, because it changes the packaging to iar-integration-test.');
+  }
+};
+
+// QuickPick has no validationMessage, so an InputBox is used to show the warning.
+const confirmWarningInInputBox = async (input: MultiStepInput<NewTestProjectState>, state: NewTestProjectState, message: string) => {
+  try {
+    await input.showTextInput({
+      title: state.dialogTitle,
+      titleSuffix: l10n.t('Choose test types'),
+      placeholder: l10n.t('Press Enter to continue or go back to change the selection'),
+      currentStep: state.currentStep,
+      totalSteps: state.totalSteps,
+      value: '',
+      onChange: (_, inputBox) => {
+        inputBox.value = '';
+      },
+      validationFunction: () => ({ message, severity: InputBoxValidationSeverity.Warning })
+    });
+    return true;
+  } catch (err) {
+    if (err === InputFlowAction.back) {
+      return false;
+    }
+    throw err;
+  }
+};
 
 const configureTestProject = async (testProject: ProjectBean, testSelections: QuickPickItem[], extensionUri: Uri) => {
   const selected = new Set(testSelections.map(test => test.label));
 
-  const needsUnitTester = selected.has('IvyTest') || selected.has('ProcessTest');
-  const needsWebTester = selected.has('WebIT');
+  const needsUnitTester = selected.has('IvyTest') || selected.has('IvyProcessTest');
+  const needsWebTester = selected.has('IvyWebTest');
 
   if (needsUnitTester) {
     await addMavenTestDependency(testProject.projectDirectory, {
@@ -68,7 +115,7 @@ const configureTestProject = async (testProject: ProjectBean, testSelections: Qu
       continue;
     }
 
-    const packageName = `${testProject.defaultNamespace}.${item.selection === 'WebIT' ? 'webtest' : 'test'}`;
+    const packageName = `${testProject.defaultNamespace}.${item.selection === 'IvyWebTest' ? 'webtest' : 'test'}`;
     const processPath = `${testProject.groupId.split('.').join('/')}/${processName}`;
     const templateUri = Uri.joinPath(extensionUri, 'assets', 'test-project-templates', item.template);
     const templateBytes = await workspace.fs.readFile(templateUri);
@@ -146,7 +193,7 @@ export const addNewTestProject = async (selectionContext: AddCommandSelectionCon
   ) => {
     if (state.projectName === undefined) {
       if (state.projectReference !== undefined) {
-        const suggestedTestProjectName = `test-${state.projectReference.label}`;
+        const suggestedTestProjectName = `${state.projectReference.label}Test`;
         if (validateTestProjectNameSyntax(suggestedTestProjectName) === undefined) {
           state.projectName = suggestedTestProjectName;
         }
@@ -176,7 +223,7 @@ export const addNewTestProject = async (selectionContext: AddCommandSelectionCon
   const stepGroupId: InputStep<NewTestProjectState> = async (input: MultiStepInput<NewTestProjectState>, state: NewTestProjectState) => {
     if (state.groupId === undefined) {
       if (state.projectName !== undefined) {
-        const sanitizedTestProjectName = state.projectName?.replace(/-/g, '.');
+        const sanitizedTestProjectName = state.projectName.replace(/-/g, '.');
         if (validateDotSeparatedName(sanitizedTestProjectName, 'Group ID') === undefined) {
           state.groupId = sanitizedTestProjectName;
         }
@@ -204,7 +251,7 @@ export const addNewTestProject = async (selectionContext: AddCommandSelectionCon
   ) => {
     if (state.projectId === undefined) {
       if (state.projectName !== undefined) {
-        const sanitizedTestProjectName = state.projectName?.replace(/-/g, '.');
+        const sanitizedTestProjectName = state.projectName.replace(/-/g, '.');
         if (validateProjectArtifactId(sanitizedTestProjectName) === undefined) {
           state.projectId = sanitizedTestProjectName;
         }
@@ -230,19 +277,25 @@ export const addNewTestProject = async (selectionContext: AddCommandSelectionCon
     input: MultiStepInput<NewTestProjectState>,
     state: NewTestProjectState
   ) => {
-    state.testSelections = await input.showQuickPick<QuickPickItem, true>({
-      title: state.dialogTitle,
-      titleSuffix: l10n.t('Choose test types'),
-      placeholder: l10n.t('Select one or more of the available test types'),
-      currentStep: state.currentStep,
-      totalSteps: state.totalSteps,
-      canSelectMany: true,
-      selectedItems: state.testSelections,
-      items: testTemplates.map(({ selection }) => ({ label: selection })),
-      onBack: (_filterText, selectedItems) => {
-        state.testSelections = selectedItems;
+    while (true) {
+      state.testSelections = await input.showQuickPick<QuickPickItem, true>({
+        title: state.dialogTitle,
+        titleSuffix: l10n.t('Choose test types'),
+        placeholder: l10n.t('Select one or more of the available test types'),
+        currentStep: state.currentStep,
+        totalSteps: state.totalSteps,
+        canSelectMany: true,
+        selectedItems: state.testSelections,
+        items: testTemplates.map(({ selection, detail }) => ({ label: selection, detail: detail })),
+        onBack: (_filterText, selectedItems) => {
+          state.testSelections = selectedItems;
+        }
+      });
+      const warning = getWebTestWarning(state.testSelections);
+      if (!warning || (await confirmWarningInInputBox(input, state, warning))) {
+        return;
       }
-    });
+    }
   };
 
   const existingDeployedProjects = (await IvyEngineManager.instance.projects()) ?? [];
@@ -288,7 +341,7 @@ export const addNewTestProject = async (selectionContext: AddCommandSelectionCon
     }
     await addMavenProjectDependencyByPath(newTestProjectData.projectPath, referenceProject.path);
 
-    if (newTestProjectData.testSelections?.some(item => item.label === 'ProcessTest')) {
+    if (newTestProjectData.testSelections?.some(item => item.label === 'IvyProcessTest')) {
       await IvyEngineManager.instance.createProcess({
         name: processName,
         kind: 'Business Process',
