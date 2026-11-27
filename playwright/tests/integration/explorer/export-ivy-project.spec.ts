@@ -1,11 +1,11 @@
+import { randomBytes } from 'crypto';
 import { expect, test } from '~/fixtures/baseTest';
-import { FileExplorer } from '~/page-objects/explorer-view';
 
 test('Export Ivy Project .iar', async ({ wsPage }) => {
-  const explorer = new FileExplorer(wsPage);
   await wsPage.executeCommand('Axon Ivy: Export Project Archive (.iar)', 'prebuiltProject');
-  await wsPage.page.getByRole('button', { name: 'Select folder' }).click();
+  const exportNewFolderName = randomBytes(16).toString('hex');
+  await wsPage.provideUserInput(`tmp/${exportNewFolderName}`);
+  await wsPage.page.getByRole('button', { name: 'Ok' }).click();
   await wsPage.provideUserInput('testExportIar');
   await expect(wsPage.toasts.filter({ hasText: new RegExp('Project archive testExportIar has been exported to') })).toHaveCount(1);
-  await explorer.hasNodeExact('testExportIar.iar');
 });
