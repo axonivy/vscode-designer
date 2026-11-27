@@ -16,7 +16,7 @@ const buildPrebuiltProject = async () => {
   try {
     ({ stdout } = await execAsync(mvnCommand, {
       encoding: 'utf8',
-      windowsHide: false
+      windowsHide: true
     }));
   } catch (error) {
     console.error(`Error executing command: ${mvnCommand}`);
