@@ -55,6 +55,7 @@ export async function activate(context: ExtensionContext): Promise<MessengerDiag
     registerCommand('ivyPanelView.openRuntimeLog', context, () => showRuntimeLog());
     registerCommand('ivyPanelView.openExtensionLog', context, () => showExtensionLog());
     registerCommand('ivyPanelView.openEngineLog', context, () => showEngineLog());
+    registerCommand('ivyPanelView.openValidationLog', context, () => ivyEngineManager.showValidationLog());
     registerCommand('ivyPanelView.openWelcomePage', context, () => showWelcomePage(context));
     registerCommand('ivyPanelView.openMarket', context, () => openMarket());
     registerCommand('ivy.showStatusBarQuickPick', context, (visibleOptions?: QuickPickOptionId[]) =>

@@ -24,7 +24,7 @@ import { logErrorMessageWithActions } from './logging-util';
 
 const DEFAULT_PREFIX = 'Axon Ivy';
 const DEFAULT_PRIORITY = 1;
-const DEFAULT_SUCCESS_MESSAGE_DURATION = 3_000;
+export const DEFAULT_SUCCESS_MESSAGE_DURATION = 3_000;
 const DEFAULT_TOOLTIP_DIVIDER = '============================================================';
 const DEFAULT_TRUSTED_COMMANDS_MARKDOWN = [
   'ivyPanelView.openRuntimeLog',
@@ -84,6 +84,11 @@ const QUICK_PICK_OPTIONS = [
     id: 'openEngineLog',
     command: 'ivyPanelView.openEngineLog'
   },
+  {
+    label: `$(list-filter)  ${l10n.t('Open Axon Ivy Validation Log')}`,
+    id: 'openValidationLog',
+    command: 'ivyPanelView.openValidationLog'
+  },
 
   { label: l10n.t('Deployment'), kind: QuickPickItemKind.Separator },
   {
@@ -124,6 +129,7 @@ interface OverrideStatusBar {
   isError?: boolean;
   isClickable?: boolean;
   visibleOptions?: QuickPickOptionId[];
+  resetAfterMs?: number;
 }
 
 interface StatusBarProgressOptions {
@@ -204,10 +210,9 @@ export class StatusBar {
   }
 
   private async refreshStatusBar() {
-    if (this.temporaryTimeout) {
-      clearTimeout(this.temporaryTimeout);
-      this.temporaryTimeout = undefined;
-    }
+    ++this.refreshVersion;
+    clearTimeout(this.temporaryTimeout);
+    this.temporaryTimeout = undefined;
 
     let statusLabel: string = '';
     let statusIcon: StatusBarIcon = '';
@@ -215,7 +220,7 @@ export class StatusBar {
     let command: 'ivy.showStatusBarQuickPick' | Command = {
       title: l10n.t('Show Axon Ivy actions'),
       command: 'ivy.showStatusBarQuickPick',
-      arguments: [['reloadWindow', 'openRuntimeLog', 'openExtensionLog', 'openEngineLog', 'openSettings']]
+      arguments: [['reloadWindow', 'openRuntimeLog', 'openExtensionLog', 'openEngineLog', 'openValidationLog', 'openSettings']]
     };
 
     switch (this.readyState) {
@@ -230,7 +235,6 @@ export class StatusBar {
         statusLabel = l10n.t('Connected');
         statusIcon = '$(plug)';
         command = 'ivy.showStatusBarQuickPick';
-        await this.refreshTooltip();
         break;
       case WebSocket.CLOSING:
         statusLabel = l10n.t('Disconnecting ...');
@@ -241,7 +245,6 @@ export class StatusBar {
         statusLabel = l10n.t('Disconnected');
         statusIcon = '$(debug-disconnect)';
         statusBackgroundColor = new ThemeColor('statusBarItem.errorBackground');
-        await this.refreshTooltip();
         break;
       default:
         break;
@@ -252,6 +255,9 @@ export class StatusBar {
     item.backgroundColor = statusBackgroundColor;
     item.command = command;
     item.show();
+    if (this.readyState === WebSocket.OPEN || this.readyState === WebSocket.CLOSED) {
+      await this.refreshTooltip();
+    }
   }
 
   private async refreshTooltip() {
@@ -363,6 +369,9 @@ export class StatusBar {
     const isError = opt.isError ?? false;
     const isClickable = opt.isClickable ?? true;
 
+    clearTimeout(this.temporaryTimeout);
+    this.temporaryTimeout = undefined;
+    ++this.refreshVersion;
     item.text = `${opt.icon} ${DEFAULT_PREFIX}: ${opt.text}`;
     item.tooltip = opt.tooltip;
     item.backgroundColor = isError ? new ThemeColor('statusBarItem.errorBackground') : undefined;
@@ -370,6 +379,9 @@ export class StatusBar {
       ? { title: l10n.t('Show Axon Ivy actions'), command: 'ivy.showStatusBarQuickPick', arguments: [opt.visibleOptions] }
       : undefined;
     item.show();
+    if (opt.resetAfterMs !== undefined) {
+      this.temporaryTimeout = setTimeout(() => this.refreshStatusBar(), opt.resetAfterMs);
+    }
   }
 
   private showStatusBarQuickPick(visibleOptions?: QuickPickOptionId[]) {
@@ -393,10 +405,8 @@ export class StatusBar {
     const textError = options.textError ?? l10n.t('Error - {0}', textDuring);
     const successMsgDuration = options.successMsgDuration ?? DEFAULT_SUCCESS_MESSAGE_DURATION;
 
-    if (this.temporaryTimeout) {
-      clearTimeout(this.temporaryTimeout);
-      this.temporaryTimeout = undefined;
-    }
+    clearTimeout(this.temporaryTimeout);
+    this.temporaryTimeout = undefined;
 
     await this.refreshTooltip();
     const currentTooltip = this.statusBarItem.tooltip;
@@ -417,12 +427,9 @@ export class StatusBar {
         tooltip: previousTooltip.appendMarkdown(
           `\n\n${DEFAULT_TOOLTIP_DIVIDER}\n\n**${l10n.t('Success last operation: {0}', textDuring)}**`
         ),
-        icon: '$(check)'
+        icon: '$(check)',
+        resetAfterMs: successMsgDuration
       });
-      this.temporaryTimeout = setTimeout(async () => {
-        await this.refreshStatusBar();
-        this.temporaryTimeout = undefined;
-      }, successMsgDuration);
       return result;
     } catch (error) {
       const errorString = error instanceof Error ? error.message : String(error);

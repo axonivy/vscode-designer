@@ -1,4 +1,4 @@
-import { workspace } from 'vscode';
+import { workspace, type LogOutputChannel } from 'vscode';
 import {
   LanguageClient,
   RequestType,
@@ -11,7 +11,7 @@ import { onExecuteClientCommand } from '../xhtml-lsp/client-commands';
 
 const ExecuteClientCommandRequest: RequestType<ExecuteCommandParams, unknown, void> = new RequestType('xml/executeClientCommand');
 
-export const IvyLanguageServerClientProvider = async (webSocketUrl: URL) => {
+export const IvyLanguageServerClientProvider = (webSocketUrl: URL, outputChannel: LogOutputChannel) => {
   const serverOptions = (): Promise<StreamInfo> => {
     const webSocket = createWebSocket(new URL('ivy-language-server', webSocketUrl));
     return new Promise((resolve, reject) => {
@@ -24,6 +24,7 @@ export const IvyLanguageServerClientProvider = async (webSocketUrl: URL) => {
   };
 
   const clientOptions: LanguageClientOptions = {
+    outputChannel,
     synchronize: {
       fileEvents: [
         workspace.createFileSystemWatcher('**/*.{f,d,p}.json'),
@@ -34,8 +35,6 @@ export const IvyLanguageServerClientProvider = async (webSocketUrl: URL) => {
   };
 
   const languageClient = new LanguageClient('Axon Ivy Language Server', serverOptions, clientOptions);
-  languageClient.start();
-
   languageClient.onRequest(ExecuteClientCommandRequest, params => onExecuteClientCommand(languageClient, params));
   return languageClient;
 };

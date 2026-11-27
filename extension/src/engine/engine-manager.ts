@@ -50,11 +50,13 @@ import { engineDirFromGlobalState, engineReleaseTrain, switchEngineReleaseTrain,
 import { EngineRunner } from './engine-runner';
 import { ReleaseTrainValidator } from './release-train-validator';
 import { WebIdeWebSocketProvider } from './web-ide-ws/web-ide-websocket-provider';
+import { WorkspaceValidation } from './workspace-validation';
 
 export class IvyEngineManager {
   private static _instance: IvyEngineManager;
 
   private readonly engineRunner: EngineRunner;
+  private readonly workspaceValidation = new WorkspaceValidation();
   private ivyEngineApi?: IvyEngineApi;
   private started = false;
   private startPromise?: Promise<void>;
@@ -66,6 +68,7 @@ export class IvyEngineManager {
   private constructor(readonly context: ExtensionContext) {
     const engineDir = this.resolveEngineDir();
     this.engineRunner = new EngineRunner(engineDir);
+    context.subscriptions.push(this.workspaceValidation);
   }
 
   static init(context: ExtensionContext) {
@@ -224,19 +227,32 @@ export class IvyEngineManager {
     );
   }
 
-  private async registerLanguageClients(websocketUrl: URL) {
-    const ivyLanguageClient = await IvyLanguageServerClientProvider(websocketUrl);
-    const xhtmlLanguageClient = await XhtmlLanguageClientProvider(websocketUrl);
+  showValidationLog() {
+    this.workspaceValidation.outputChannel.show();
+  }
 
-    commands.registerCommand('ivyProjects.runWorkspaceValidation', async () => {
-      await ivyLanguageClient.sendNotification(DidChangeWatchedFilesNotification.type, {
-        changes: []
-      });
-      await xhtmlLanguageClient.sendNotification(DidChangeWatchedFilesNotification.type, {
-        changes: []
-      });
-      await IvyDiagnostics.instance.refresh();
-    });
+  private registerLanguageClients(websocketUrl: URL) {
+    const ivyLanguageClient = IvyLanguageServerClientProvider(websocketUrl, this.workspaceValidation.outputChannel);
+    const xhtmlLanguageClient = XhtmlLanguageClientProvider(websocketUrl, this.workspaceValidation.outputChannel);
+    this.workspaceValidation.watch('Ivy', ivyLanguageClient);
+    this.workspaceValidation.watch('XHTML', xhtmlLanguageClient);
+
+    this.context.subscriptions.push(
+      ivyLanguageClient,
+      xhtmlLanguageClient,
+      commands.registerCommand('ivyProjects.runWorkspaceValidation', async () => {
+        await ivyLanguageClient.sendNotification(DidChangeWatchedFilesNotification.type, {
+          changes: []
+        });
+        await xhtmlLanguageClient.sendNotification(DidChangeWatchedFilesNotification.type, {
+          changes: []
+        });
+        await IvyDiagnostics.instance.refresh();
+      })
+    );
+    for (const client of [ivyLanguageClient, xhtmlLanguageClient]) {
+      void client.start().catch(error => client.error(`Could not start ${client.name}.`, error, false));
+    }
   }
 
   public async deployProjects(ivyProjectDirectory?: string | string[]) {
