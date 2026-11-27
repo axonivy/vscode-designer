@@ -37,7 +37,7 @@ Maven and Java must use the same local repository and compatible settings (`mave
 
 ## Workspace validation
 
-The Axon Ivy status bar item shows when Ivy or XHTML workspace validation is running and briefly confirms success. Click the status bar item and select **Open Axon Ivy Validation Log** to see run durations, validator warnings, and logs from both language servers. You can also open **Axon Ivy Validation** from **View > Output** or from the notification shown when a run fails.
+The Axon Ivy status bar item shows when Ivy or XHTML workspace validation is running and briefly confirms success. Select **Open Axon Ivy Validation Log** from the status bar menu or the Command Palette to see run durations, validator warnings, and logs from both language servers. You can also open **Axon Ivy Validation** from **View > Output** or from the notification shown when a run fails.
 
 The **Problems** view still shows the issues found in your files. Background diagnostic checks that do not run a validator do not change the validation status.
 

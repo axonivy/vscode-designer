@@ -1,7 +1,7 @@
 import { l10n, window, type Disposable } from 'vscode';
 import { State, type LanguageClient } from 'vscode-languageclient/node';
 import { NotificationType } from 'vscode-languageserver-protocol';
-import { newMarkdownString, StatusBar } from '../base/status-bar';
+import { DEFAULT_SUCCESS_MESSAGE_DURATION, newMarkdownString, StatusBar } from '../base/status-bar';
 
 type ValidationEvent = { runId: string } & (
   | { phase: 'STARTED' }
@@ -79,7 +79,8 @@ export class WorkspaceValidation {
       return;
     }
     if (!this.failed) {
-      StatusBar.showTemporarySuccess(l10n.t('Validation successful'));
+      const text = l10n.t('Validation successful');
+      StatusBar.overrideStatusBar({ text, tooltip: newMarkdownString(text), icon: '$(check)', resetAfterMs: DEFAULT_SUCCESS_MESSAGE_DURATION });
       return;
     }
     StatusBar.refreshStatusBar();

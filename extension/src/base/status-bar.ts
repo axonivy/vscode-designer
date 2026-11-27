@@ -24,7 +24,7 @@ import { logErrorMessageWithActions } from './logging-util';
 
 const DEFAULT_PREFIX = 'Axon Ivy';
 const DEFAULT_PRIORITY = 1;
-const DEFAULT_SUCCESS_MESSAGE_DURATION = 3_000;
+export const DEFAULT_SUCCESS_MESSAGE_DURATION = 3_000;
 const DEFAULT_TOOLTIP_DIVIDER = '============================================================';
 const DEFAULT_TRUSTED_COMMANDS_MARKDOWN = [
   'ivyPanelView.openRuntimeLog',
@@ -129,6 +129,7 @@ interface OverrideStatusBar {
   isError?: boolean;
   isClickable?: boolean;
   visibleOptions?: QuickPickOptionId[];
+  resetAfterMs?: number;
 }
 
 interface StatusBarProgressOptions {
@@ -157,15 +158,15 @@ export class StatusBar {
   private listenersSubscribed = false;
   private readyState: WebSocketReadyState = WebSocket.CLOSED;
 
-  private constructor(subscriptions: ExtensionContext['subscriptions']) {
+  private constructor(context: ExtensionContext) {
     this.statusBarItem = window.createStatusBarItem('ivyStatusBarItem', StatusBarAlignment.Left, DEFAULT_PRIORITY);
     this.subscribeToReadyStatus();
-    subscriptions.push(this.statusBarItem, { dispose: () => this.clearTemporaryStatus() });
+    context.subscriptions.push(this.statusBarItem);
   }
 
-  public static init(context: Pick<ExtensionContext, 'subscriptions'>) {
+  public static init(context: ExtensionContext) {
     if (!StatusBar.instance) {
-      StatusBar.instance = new StatusBar(context.subscriptions);
+      StatusBar.instance = new StatusBar(context);
     }
   }
   public static async withStatusBarProgress<R>(options: StatusBarProgressOptions, action: () => Promise<R>): Promise<R | undefined> {
@@ -178,10 +179,6 @@ export class StatusBar {
 
   public static refreshStatusBar() {
     StatusBar.getInstance().refreshStatusBar();
-  }
-
-  public static showTemporarySuccess(text: string) {
-    StatusBar.getInstance().showTemporarySuccess(text, newMarkdownString(text));
   }
 
   public static showStatusBarQuickPick(visibleOptions?: QuickPickOptionId[]) {
@@ -214,12 +211,12 @@ export class StatusBar {
 
   private async refreshStatusBar() {
     ++this.refreshVersion;
-    this.clearTemporaryStatus();
+    clearTimeout(this.temporaryTimeout);
+    this.temporaryTimeout = undefined;
 
     let statusLabel: string = '';
     let statusIcon: StatusBarIcon = '';
     let statusBackgroundColor: ThemeColor | undefined;
-    let refreshTooltip = false;
     let command: 'ivy.showStatusBarQuickPick' | Command = {
       title: l10n.t('Show Axon Ivy actions'),
       command: 'ivy.showStatusBarQuickPick',
@@ -238,7 +235,6 @@ export class StatusBar {
         statusLabel = l10n.t('Connected');
         statusIcon = '$(plug)';
         command = 'ivy.showStatusBarQuickPick';
-        refreshTooltip = true;
         break;
       case WebSocket.CLOSING:
         statusLabel = l10n.t('Disconnecting ...');
@@ -249,7 +245,6 @@ export class StatusBar {
         statusLabel = l10n.t('Disconnected');
         statusIcon = '$(debug-disconnect)';
         statusBackgroundColor = new ThemeColor('statusBarItem.errorBackground');
-        refreshTooltip = true;
         break;
       default:
         break;
@@ -260,14 +255,9 @@ export class StatusBar {
     item.backgroundColor = statusBackgroundColor;
     item.command = command;
     item.show();
-    if (refreshTooltip) {
+    if (this.readyState === WebSocket.OPEN || this.readyState === WebSocket.CLOSED) {
       await this.refreshTooltip();
     }
-  }
-
-  private clearTemporaryStatus() {
-    clearTimeout(this.temporaryTimeout);
-    this.temporaryTimeout = undefined;
   }
 
   private async refreshTooltip() {
@@ -379,7 +369,8 @@ export class StatusBar {
     const isError = opt.isError ?? false;
     const isClickable = opt.isClickable ?? true;
 
-    this.clearTemporaryStatus();
+    clearTimeout(this.temporaryTimeout);
+    this.temporaryTimeout = undefined;
     ++this.refreshVersion;
     item.text = `${opt.icon} ${DEFAULT_PREFIX}: ${opt.text}`;
     item.tooltip = opt.tooltip;
@@ -388,11 +379,9 @@ export class StatusBar {
       ? { title: l10n.t('Show Axon Ivy actions'), command: 'ivy.showStatusBarQuickPick', arguments: [opt.visibleOptions] }
       : undefined;
     item.show();
-  }
-
-  private showTemporarySuccess(text: string, tooltip: MarkdownString, duration = DEFAULT_SUCCESS_MESSAGE_DURATION) {
-    this.overrideStatusBar({ text, tooltip, icon: '$(check)' });
-    this.temporaryTimeout = setTimeout(() => this.refreshStatusBar(), duration);
+    if (opt.resetAfterMs !== undefined) {
+      this.temporaryTimeout = setTimeout(() => this.refreshStatusBar(), opt.resetAfterMs);
+    }
   }
 
   private showStatusBarQuickPick(visibleOptions?: QuickPickOptionId[]) {
@@ -416,7 +405,8 @@ export class StatusBar {
     const textError = options.textError ?? l10n.t('Error - {0}', textDuring);
     const successMsgDuration = options.successMsgDuration ?? DEFAULT_SUCCESS_MESSAGE_DURATION;
 
-    this.clearTemporaryStatus();
+    clearTimeout(this.temporaryTimeout);
+    this.temporaryTimeout = undefined;
 
     await this.refreshTooltip();
     const currentTooltip = this.statusBarItem.tooltip;
@@ -432,13 +422,14 @@ export class StatusBar {
     try {
       const result = await action();
       extensionLogOutputChannel.info(textSuccess);
-      this.showTemporarySuccess(
-        textSuccess,
-        previousTooltip.appendMarkdown(
+      this.overrideStatusBar({
+        text: textSuccess,
+        tooltip: previousTooltip.appendMarkdown(
           `\n\n${DEFAULT_TOOLTIP_DIVIDER}\n\n**${l10n.t('Success last operation: {0}', textDuring)}**`
         ),
-        successMsgDuration
-      );
+        icon: '$(check)',
+        resetAfterMs: successMsgDuration
+      });
       return result;
     } catch (error) {
       const errorString = error instanceof Error ? error.message : String(error);
