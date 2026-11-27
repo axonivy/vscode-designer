@@ -249,6 +249,7 @@ export class IvyProjectTreeDataProvider implements TreeDataProvider<Entry> {
       iconPath: new ThemeIcon('library'),
       collapsibleState: TreeItemCollapsibleState.Collapsed,
       kind: 'iarDependencyGroup',
+      tooltip: l10n.t('Lists all deployed direct and transitive Ivy Archive dependencies of this project'),
       parent
     };
   }
