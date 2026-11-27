@@ -134,6 +134,27 @@ public class CopilotIntegrationTest {
         .usedTokensBelow(200_000, 2_500);
   }
 
+  @Test
+  @Order(Complexity.INDEPENDENT)
+  void configureCmsFile(AgentRuntime rt) throws Exception {
+    var spans = rt.prompt("""
+        add a shared, language-neutral CMS stylesheet to purchase at the CMS path /Styles/Print.
+        It must hide elements with the class no-print when printing. Store it as a file under cms/,
+        not as a CMS YAML entry.
+        """);
+    var stylesheet = rt.ivyWorkspace().path().resolve("purchase/cms/Styles/Print.css");
+
+    assertThat(stylesheet).exists();
+    assertThat(stylesheet).content()
+        .contains("@media print", ".no-print", "display: none");
+
+    assertThat(spans)
+        .loadedSkill("ivy-cms")
+        .viewed("skills/ivy-cms/file-workflow.md")
+        .didNotUseTools("web_fetch", "web_search")
+        .usedTokensBelow(200_000, 2_500);
+  }
+
   private static JsonNode readYaml(Path file) throws IOException {
     return YAMLMapper.shared().readTree(Files.readString(file));
   }

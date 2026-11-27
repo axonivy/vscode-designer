@@ -12,18 +12,8 @@ Identify:
 If no language files exist, create files for the configured languages.
 If no languages are configured, start with `cms_en.yaml`.
 
-## 2. Move hardcoded text to CMS
 
-When create or modify an XHTML dialog, replace hardcoded texts with CMS:
-
-- Titles, headers.
-- Labels, placeholders, and tooltips.
-- Validation, error, and confirmation messages.
-- Descriptions, and alternative text.
-
-Keep HTML structure, CSS classes, component IDs, technical attributes, icon names, and EL expressions unchanged.
-
-## 3. Reuse existing content
+## 2. Reuse existing content
 
 Reuse an entry when its text and context match:
 
@@ -44,19 +34,7 @@ Avoid creating CMS entry when there is existing CMS entry for the same purpose.
 
 Do not reuse text solely because the English wording matches; its meaning must also match.
 
-## 4. Choose a namespace
-
-Use these namespaces for new content:
-
-- `/Labels/<Key>`: Shared labels, such as Cancel, Submit, and Status.
-- `/Dialogs/<package/path>/<Dialog>/<Key>`: Dialog-specific text.
-- `/Processes/<package/path>/<Process>/<Key>`: Process names and descriptions.
-- `/Email/<Template>/<Key>`: Email subjects and body content.
-
-For dialog-specific content, convert the package dots to path separators:
-
-- Dialog: `hr.onboarding.StartOnboarding`
-- CMS path: `/Dialogs/hr/onboarding/StartOnboarding/Title`
+## 3. CMS path
 
 Represent the CMS path as nested YAML mappings:
 
@@ -70,7 +48,7 @@ Dialogs:
 
 Do not write the entire hierarchy as one colon-separated YAML key.
 
-## 5. Add or update translations
+## 4. Add or update translations
 
 Apply the same key structure to every configured language file.
 
