@@ -9,7 +9,7 @@ type SourcePosition = { line: number; character: number };
 type SourceRange = { start: SourcePosition; end: SourcePosition };
 type DefinitionTarget = { uri: string; range: SourceRange; selectionRange: SourceRange; text?: string };
 
-const ResolveDefinitionRequest: RequestType<{ code: string; position: SourcePosition; languageId?: string }, DefinitionTarget[]> = {
+const ResolveDefinitionRequest: RequestType<{ code: string; position: SourcePosition; languageId?: string; uri?: string }, DefinitionTarget[]> = {
   method: 'definition/resolve'
 };
 const OpenDefinitionRequest: RequestType<{ uri: string; range?: SourceRange }, void> = { method: 'definition/open' };
@@ -19,12 +19,26 @@ const toSourceRange = (range: Range): SourceRange => ({
   end: { line: range.end.line, character: range.end.character }
 });
 
-export const registerDefinitionNavigation = (messenger: Messenger, participant: MessageParticipant, documentUri: Uri) => {
+export const registerDefinitionNavigation = (
+  messenger: Messenger,
+  participant: MessageParticipant,
+  documentUri: Uri,
+  backendDefinition?: (uri: string, position: SourcePosition) => Promise<DefinitionTarget[]>
+) => {
   const java = new JavaProvider(documentUri);
   return new DisposableCollection(
     messenger.onRequest(
       ResolveDefinitionRequest,
-      async ({ code: script, position: cursor, languageId }) => {
+      async ({ code: script, position: cursor, languageId, uri }) => {
+        if (uri && backendDefinition) {
+          const targets = await backendDefinition(uri, cursor).catch(() => []);
+          if (targets.length > 0) {
+            return Promise.all(targets.map(async target => {
+              const source = await Promise.resolve(workspace.openTextDocument(Uri.parse(target.uri))).catch(() => undefined);
+              return { ...target, text: source?.getText() };
+            }));
+          }
+        }
         if (languageId === 'ivyMacro') {
           const expression = macroScriptAtPosition(script, cursor);
           if (!expression) {

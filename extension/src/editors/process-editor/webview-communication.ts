@@ -24,6 +24,8 @@ import {
   type DidOpenTextDocumentParams,
   Position,
   Range,
+  type Location,
+  type LocationLink,
   TextEdit
 } from 'vscode-languageclient';
 import { TextDocument } from 'vscode-languageserver-textdocument';
@@ -59,13 +61,14 @@ export const setupCommunication = (
   if (messageParticipant === undefined) {
     return;
   }
+  const scripting = new IvyScriptWebSocketForwarder(websocketUrl, messenger, messageParticipant, document);
   const toDispose = new DisposableCollection(
     new InscriptionWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
-    new IvyScriptWebSocketForwarder(websocketUrl, messenger, messageParticipant, document),
+    scripting,
     messenger.onNotification(WebviewConnectionReadyNotification, () => handleWebviewReadyNotification(messenger, messageParticipant), {
       sender: messageParticipant
     }),
-    registerDefinitionNavigation(messenger, messageParticipant, document.uri),
+    registerDefinitionNavigation(messenger, messageParticipant, document.uri, (uri, position) => scripting.definition(uri, position)),
     messenger.onRequest(StartProcessRequest, startUri => IvyBrowserViewProvider.instance.openEngineRelativeUrl(startUri), {
       sender: messageParticipant
     }),
@@ -139,6 +142,49 @@ class InscriptionWebSocketForwarder extends WebSocketForwarder {
 }
 
 class IvyScriptWebSocketForwarder extends WebSocketForwarder {
+  private definitionId = 0;
+  private readonly definitions = new Map<string, (locations: Array<Location | LocationLink>) => void>();
+
+  async definition(uri: string, position: Position) {
+    if (!this.documents.has(uri)) {
+      return [];
+    }
+    const id = `vscode-definition-${++this.definitionId}`;
+    const locations = await new Promise<Array<Location | LocationLink>>(resolve => {
+      const timeout = setTimeout(() => {
+        this.definitions.delete(id);
+        resolve([]);
+      }, 5000);
+      this.definitions.set(id, locations => {
+        clearTimeout(timeout);
+        resolve(locations);
+      });
+      try {
+        this.webSocket.send(JSON.stringify({
+          jsonrpc: '2.0', id, method: 'textDocument/definition', params: { textDocument: { uri }, position }
+        }));
+      } catch {
+        this.definitions.delete(id);
+        clearTimeout(timeout);
+        resolve([]);
+      }
+    });
+    return locations.map(location => {
+      const range = 'uri' in location ? location.range : location.targetRange;
+      return {
+        uri: 'uri' in location ? location.uri : location.targetUri,
+        range,
+        selectionRange: 'uri' in location ? location.range : location.targetSelectionRange
+      };
+    });
+  }
+
+  override dispose() {
+    this.definitions.forEach(resolve => resolve([]));
+    this.definitions.clear();
+    super.dispose();
+  }
+
   private readonly documents = new Map<string, TextDocument>();
 
   private currentCompletion:
@@ -179,6 +225,13 @@ class IvyScriptWebSocketForwarder extends WebSocketForwarder {
   }
 
   protected override async handleServerMessage(message: string) {
+    const response = JSON.parse(message);
+    if (typeof response.id === 'string' && response.id.startsWith('vscode-definition-')) {
+      const definition = this.definitions.get(response.id);
+      this.definitions.delete(response.id);
+      definition?.(Array.isArray(response.result) ? response.result : response.result ? [response.result] : []);
+      return;
+    }
     if (this.currentHover) {
       const { id, documentation } = this.currentHover;
       const obj = JSON.parse(message);
