@@ -12,6 +12,7 @@ import {
   type DeleteProjectParams,
   type DeployIarProjectsRequest,
   type DeployProjectsRequest,
+  type GetLayoutOptionsParams,
   type HdInit,
   type ImportProcessBody,
   type ImportProjectsBody,
@@ -37,6 +38,7 @@ import {
   deployPortal,
   deployProjects,
   findOrCreateProject,
+  getLayoutOptions,
   getVersion,
   importProcess,
   importProjects,
@@ -213,6 +215,12 @@ export class IvyEngineApi {
 
   public async getComponentForm(params: Omit<ComponentFormParams, 'workspaceId'>) {
     return componentForm({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })
+      .then(res => res.data)
+      .catch(handleAxiosError);
+  }
+
+  public async getLayoutOptions(params: Omit<GetLayoutOptionsParams, 'workspaceId'>) {
+    return getLayoutOptions({ workspaceId: this.workspace.id, ...params }, { baseURL: this.designerUrl, ...options })
       .then(res => res.data)
       .catch(handleAxiosError);
   }

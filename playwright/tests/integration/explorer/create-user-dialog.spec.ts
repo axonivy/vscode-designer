@@ -73,3 +73,25 @@ test('Dialog validation', async ({ wsPage }) => {
     `This dialogs dataclass '${path.join('conflict', 'formConflict', 'formConflictData.d.json')}' that would be created already exists in the project in the '/dataclass' directory.`
   );
 });
+
+test('custom template is listed', async ({ wsPage }) => {
+  const explorer = new FileExplorer(wsPage);
+  await explorer.selectNodeExact('webContent');
+  await wsPage.executeCommand('Axon Ivy: New Html Dialog (JSF)');
+  await wsPage.provideUserInput('prebuiltProject');
+  await wsPage.provideUserInput(userDialogName);
+  await wsPage.provideUserInput('ch.ivyteam.test.custom');
+
+  await expect(wsPage.quickInputList.getByRole('option').first()).toContainText('Page Responsive Grid 2 Columns');
+  await wsPage.provideUserInput();
+
+  const templates = wsPage.quickInputList.getByRole('option');
+  await expect(templates.first()).toContainText('frame-10');
+  await expect(templates.last()).toContainText('customLayout');
+  await wsPage.selectItemFromQuickPick('customLayout');
+
+  await explorer.hasNodeExact(`${userDialogName}.xhtml`);
+  await wsPage.isTabWithNameVisible(`${userDialogName}.xhtml`);
+  const xhtmlEditor = new TextEditor(wsPage, `${userDialogName}.xhtml`);
+  await expect(xhtmlEditor.content).toContainText('customLayout');
+});

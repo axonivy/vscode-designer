@@ -4,8 +4,8 @@
  * Axon Ivy OpenAPI
  * OpenAPI spec version: 0.1.0
  */
-import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
+import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 export interface CaseMapInit {
   name: string;
@@ -61,6 +61,11 @@ export interface HdInit {
   projectDir: string;
   pid?: string;
   dataClassName?: string;
+}
+
+export interface ViewLayoutOption {
+  name: string;
+  availableHtmlLayouts: string[];
 }
 
 export interface ProcessInit {
@@ -174,6 +179,12 @@ export type ComponentFormParams = {
   workspaceId?: string;
   project?: string;
   componentId?: string;
+};
+
+export type GetLayoutOptionsParams = {
+  workspaceId?: string;
+  projectDir?: string;
+  offline?: boolean;
 };
 
 export type ImportProcessBody = {
@@ -324,17 +335,45 @@ export const getCreateHdUrl = () => {
     });
 };
 
+export const getLayoutOptions = (
+  params?: GetLayoutOptionsParams,
+  options?: AxiosRequestConfig
+): Promise<AxiosResponse<ViewLayoutOption[]>> => {
+  return axios.get(`/web-ide/hd/layouts`, {
+    ...options,
+    params: { ...params, ...options?.params }
+  });
+};
+export const getGetLayoutOptionsUrl = (params?: GetLayoutOptionsParams) => {
+  return axios
+    .create({
+      baseURL: '',
+      params: null
+    })
+    .getUri({
+      url: `/web-ide/hd/layouts`,
+      baseURL: '',
+      params
+    });
+};
+
 export const importProcess = (importProcessBody?: ImportProcessBody, options?: AxiosRequestConfig): Promise<AxiosResponse<unknown>> => {
-  const formData = new FormData();
-  if (importProcessBody?.workspaceId !== undefined) {
-    formData.append(`workspaceId`, importProcessBody.workspaceId);
-  }
-  if (importProcessBody?.projectDir !== undefined) {
-    formData.append(`projectDir`, importProcessBody.projectDir);
-  }
-  if (importProcessBody?.file !== undefined) {
-    formData.append(`file`, importProcessBody.file);
-  }
+  const formData =
+    importProcessBody === undefined
+      ? undefined
+      : (() => {
+          const formData = new FormData();
+          if (importProcessBody?.workspaceId !== undefined) {
+            formData.append(`workspaceId`, importProcessBody.workspaceId);
+          }
+          if (importProcessBody?.projectDir !== undefined) {
+            formData.append(`projectDir`, importProcessBody.projectDir);
+          }
+          if (importProcessBody?.file !== undefined) {
+            formData.append(`file`, importProcessBody.file);
+          }
+          return formData;
+        })();
 
   return axios.post(`/web-ide/process/import/xml`, formData, options);
 };
@@ -585,13 +624,19 @@ export const importProjects = (
   importProjectsBody?: ImportProjectsBody,
   options?: AxiosRequestConfig
 ): Promise<AxiosResponse<unknown>> => {
-  const formData = new FormData();
-  if (importProjectsBody?.file !== undefined) {
-    formData.append(`file`, importProjectsBody.file);
-  }
-  if (importProjectsBody?.targetPath !== undefined) {
-    formData.append(`targetPath`, importProjectsBody.targetPath);
-  }
+  const formData =
+    importProjectsBody === undefined
+      ? undefined
+      : (() => {
+          const formData = new FormData();
+          if (importProjectsBody?.file !== undefined) {
+            formData.append(`file`, importProjectsBody.file);
+          }
+          if (importProjectsBody?.targetPath !== undefined) {
+            formData.append(`targetPath`, importProjectsBody.targetPath);
+          }
+          return formData;
+        })();
 
   return axios.post(`/web-ide/workspace/${id}`, formData, options);
 };
@@ -651,6 +696,7 @@ export type CreateEntityClassResult = AxiosResponse<DataClassBean>;
 export type GetVersionResult = AxiosResponse<EngineVersion>;
 export type ComponentFormResult = AxiosResponse<HdBean>;
 export type CreateHdResult = AxiosResponse<HdBean>;
+export type GetLayoutOptionsResult = AxiosResponse<ViewLayoutOption[]>;
 export type ImportProcessResult = AxiosResponse<unknown>;
 export type CreateProcessResult = AxiosResponse<ProcessBean>;
 export type DeployIarProjectsResult = AxiosResponse<unknown>;
