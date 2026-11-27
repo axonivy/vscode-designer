@@ -175,6 +175,8 @@ export class MultiStepInput<T extends MSStateBase> {
           state.currentStep = stepIndex + 1;
           this.currentStep = steps[stepIndex];
         } else if (err == InputFlowAction.cancel) {
+          this.current?.dispose();
+          this.current = undefined;
           throw new MultiStepCancelledError();
         } else if (err instanceof MultiStepForceBack) {
           stepIndex = Math.max(0, stepIndex - 1);

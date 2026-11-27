@@ -1,5 +1,5 @@
 import path from 'path';
-import { InputBoxValidationSeverity, l10n, Range, Uri, workspace, WorkspaceEdit, type QuickPickItem } from 'vscode';
+import { l10n, Range, Uri, window, workspace, WorkspaceEdit, type QuickPickItem } from 'vscode';
 import { runJavaProjectImport } from '../base/java-extension-api';
 import { logErrorMessage } from '../base/logging-util';
 import type { CreateProjectParams } from '../engine/api/engine-api';
@@ -65,25 +65,19 @@ const getWebTestWarning = (testSelections: QuickPickItem[]) => {
   }
 };
 
-// QuickPick has no validationMessage, so an InputBox is used to show the warning.
-const confirmWarningInInputBox = async (input: MultiStepInput<NewTestProjectState>, state: NewTestProjectState, message: string) => {
-  try {
-    await input.showTextInput({
-      title: state.dialogTitle,
-      titleSuffix: l10n.t('Choose test types'),
-      placeholder: l10n.t('Press Enter to continue or go back to change the selection'),
-      currentStep: state.currentStep,
-      totalSteps: state.totalSteps,
-      value: '',
-      validationFunction: () => ({ message, severity: InputBoxValidationSeverity.Warning })
-    });
+const confirmWarning = async (message: string): Promise<boolean> => {
+  const continueLabel = l10n.t('Continue');
+  const goBackLabel = l10n.t('Go Back');
+  const choice = await window.showWarningMessage(message, { modal: true }, continueLabel, goBackLabel);
+
+  if (choice === continueLabel) {
     return true;
-  } catch (err) {
-    if (err === InputFlowAction.back) {
-      return false;
-    }
-    throw err;
   }
+  if (choice === goBackLabel) {
+    return false;
+  }
+
+  throw InputFlowAction.cancel;
 };
 
 const configureTestProject = async (testProject: ProjectBean, testSelections: QuickPickItem[], extensionUri: Uri) => {
@@ -289,7 +283,7 @@ export const addNewTestProject = async (selectionContext: AddCommandSelectionCon
         }
       });
       const warning = getWebTestWarning(state.testSelections);
-      if (!warning || (await confirmWarningInInputBox(input, state, warning))) {
+      if (!warning || (await confirmWarning(warning))) {
         return;
       }
     }
