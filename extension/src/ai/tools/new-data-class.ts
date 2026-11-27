@@ -14,6 +14,7 @@ import { localizeDataClassType } from '../../base/localized-labels';
 import type { DataClassBean } from '../../engine/api/generated/client';
 import { IvyEngineManager } from '../../engine/engine-manager';
 import { resolveDefaultNamespace } from '../../project-explorer/utils/util';
+import { resolveToolProjectPath } from './tool-project-path';
 
 export type NewDataClassToolArgs = {
   name: string;
@@ -52,9 +53,11 @@ export class NewDataClassTool implements LanguageModelTool<NewDataClassToolArgs>
 
 export const createNewDataClass = async (input: NewDataClassToolArgs): Promise<string> => {
   const type = resolvedType(input.type);
+  const projectDir = await resolveToolProjectPath(input.projectPath);
+  const namespace = input.namespace || (await resolveDefaultNamespace(projectDir, 'dataclass'));
   const newDataClassParams = {
-    name: `${await resolvedNamespace(input)}.${input.name}`,
-    projectDir: input.projectPath
+    name: `${namespace}.${input.name}`,
+    projectDir
   };
 
   let dataClassBean: DataClassBean | undefined;
@@ -69,6 +72,3 @@ export const createNewDataClass = async (input: NewDataClassToolArgs): Promise<s
 };
 
 const resolvedType = (type?: DataClassType) => type ?? 'Data Class';
-
-const resolvedNamespace = async (input: NewDataClassToolArgs) =>
-  input.namespace || (await resolveDefaultNamespace(input.projectPath, 'dataclass'));

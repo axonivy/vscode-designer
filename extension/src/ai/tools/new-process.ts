@@ -13,6 +13,7 @@ import {
 } from 'vscode';
 import { localizeProcessKind } from '../../base/localized-labels';
 import { IvyEngineManager } from '../../engine/engine-manager';
+import { resolveToolProjectPath } from './tool-project-path';
 
 type NewProcessToolArgs = {
   name: string;
@@ -48,10 +49,11 @@ export class NewProcessTool implements LanguageModelTool<NewProcessToolArgs> {
 
 export const createNewProcess = async (input: NewProcessToolArgs): Promise<string> => {
   const type = resolvedType(input.type);
+  const projectPath = await resolveToolProjectPath(input.projectPath);
   const newProcessParams = {
     name: input.name,
     namespace: input.namespace ?? '',
-    path: input.projectPath,
+    path: projectPath,
     kind: type
   };
   const processBean = await IvyEngineManager.instance.createProcess(newProcessParams);
