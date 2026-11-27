@@ -6,7 +6,7 @@ type SourcePosition = { line: number; character: number };
 type SourceRange = { start: SourcePosition; end: SourcePosition };
 type DefinitionTarget = { uri: string; range: SourceRange; selectionRange: SourceRange; text?: string };
 
-const ResolveDefinitionRequest: RequestType<{ code: string; position: SourcePosition; languageId?: string }, DefinitionTarget[]> = {
+const ResolveDefinitionRequest: RequestType<{ code: string; position: SourcePosition; languageId?: string; uri?: string }, DefinitionTarget[]> = {
   method: 'definition/resolve'
 };
 const OpenDefinitionRequest: RequestType<{ uri: string; range?: SourceRange }, void> = { method: 'definition/open' };
@@ -23,6 +23,7 @@ export const setupDefinitionNavigation = async (messenger: Messenger) => {
       const version = model.getVersionId();
       const targets = await messenger.sendRequest(ResolveDefinitionRequest, HOST_EXTENSION, {
         code: model.getValue(),
+        uri: model.uri.toString(),
         languageId: model.getLanguageId(),
         position: { line: position.lineNumber - 1, character: position.column - 1 }
       });
@@ -41,7 +42,7 @@ export const setupDefinitionNavigation = async (messenger: Messenger) => {
               oldest[1].dispose();
               previews.delete(oldest[0]);
             }
-            previews.set(target.uri, monaco.editor.createModel(target.text, 'java', uri));
+            previews.set(target.uri, monaco.editor.createModel(target.text, target.uri.endsWith('.d.json') ? 'json' : 'java', uri));
           } else if (previews.has(target.uri) && preview.getValue() !== target.text) {
             preview.setValue(target.text);
           }

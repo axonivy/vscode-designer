@@ -1,7 +1,7 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 import { registerDefinitionNavigation } from './definition-navigation';
 
-const mocks = vi.hoisted(() => ({ definition: vi.fn(), executeCommand: vi.fn(), openTextDocument: vi.fn() }));
+const mocks = vi.hoisted(() => ({ definition: vi.fn(), backendDefinition: vi.fn(), executeCommand: vi.fn(), openTextDocument: vi.fn() }));
 vi.mock('vscode', () => ({
   commands: { executeCommand: mocks.executeCommand },
   Position: class {
@@ -33,12 +33,13 @@ vi.mock('./java-provider', () => ({
 const range = { start: { line: 4, character: 2 }, end: { line: 4, character: 8 } };
 const uri = { toString: () => 'jdt://contents/Ivy.java' };
 const script = 'import java.lang.String;\nivy.task.customFields()';
-let resolve: (request: { code: string; position: { line: number; character: number }; languageId?: string }) => Promise<unknown>;
+let resolve: (request: { code: string; position: { line: number; character: number }; languageId?: string; uri?: string }) => Promise<unknown>;
 let open: (target: { uri: string; range?: unknown }) => Promise<void>;
 
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.definition.mockResolvedValue([{ uri, range }]);
+  mocks.backendDefinition.mockResolvedValue([]);
   mocks.openTextDocument.mockResolvedValue({ getText: () => 'Java source preview' });
   registerDefinitionNavigation(
     {
@@ -53,7 +54,8 @@ beforeEach(() => {
       })
     } as never,
     {} as never,
-    {} as never
+    {} as never,
+    mocks.backendDefinition
   );
 });
 const request = () => resolve({ code: script, position: { line: 1, character: 6 } });
@@ -110,6 +112,22 @@ test('does not query Java or navigate for plain macro text', async () => {
   expect(await resolve({ code: 'Case: <%= ivy.case.name %>', languageId: 'ivyMacro', position: { line: 0, character: 2 } })).toEqual([]);
   expect(mocks.definition).not.toHaveBeenCalled();
   expect(mocks.executeCommand).not.toHaveBeenCalled();
+});
+
+test('uses backend locations with the original script URI and position before Java', async () => {
+  const backendUri = 'file:///project/dataclasses/Data.d.json';
+  mocks.backendDefinition.mockResolvedValue([{ uri: backendUri, range, selectionRange: range }]);
+  expect(await resolve({ code: 'in', uri: 'ivy:///context', position: { line: 0, character: 1 } })).toEqual([
+    { uri: backendUri, range, selectionRange: range, text: 'Java source preview' }
+  ]);
+  expect(mocks.backendDefinition).toHaveBeenCalledWith('ivy:///context', { line: 0, character: 1 });
+  expect(mocks.definition).not.toHaveBeenCalled();
+});
+
+test('falls back to Java when the backend has no definition', async () => {
+  expect(await resolve({ code: script, uri: 'ivy:///context', position: { line: 1, character: 6 } })).toEqual([target()]);
+  expect(mocks.backendDefinition).toHaveBeenCalled();
+  expect(mocks.definition).toHaveBeenCalled();
 });
 
 test('resolves a type in an import statement', async () => {

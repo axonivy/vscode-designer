@@ -2,6 +2,7 @@ import { expect, type Locator } from '@playwright/test';
 import { test } from '~/fixtures/baseTest';
 import { CmsEditor } from '~/page-objects/cms-editor';
 import { DatabaseEditor } from '~/page-objects/database-editor';
+import { DataClassEditor } from '~/page-objects/dataclass-editor';
 import { TextEditor } from '~/page-objects/editor';
 import { OutputView } from '~/page-objects/output-view';
 import { ProcessEditor } from '~/page-objects/process-editor';
@@ -246,6 +247,15 @@ test('Monaco definition navigation in scripts and macros', async ({ wsPage }) =>
   // Change the script and line count between lookups to detect stale JDT buffers.
   await replaceCode(editor, 'import ch.ivyteam.ivy.security.ISecurityContext;\nISecurityContext.current();\n\nivy.task.customFields();');
   await clickDefinition(editor, 'customFields', 'ITask.java');
+
+  await replaceCode(editor, 'in');
+  await goToDefinition(editor, 'in', 'Data.d.json');
+  const dataClassEditor = new DataClassEditor(wsPage, 'Data.d.json');
+  await dataClassEditor.tab.click();
+  await dataClassEditor.expectTabActive();
+  await dataClassEditor.expectWebViewVisible();
+  await dataClassEditor.close();
+  await editor.tab.click();
 
   await editor.openInscriptionView(userTaskPID);
   await inscriptionView.openInscriptionTab('Task');
